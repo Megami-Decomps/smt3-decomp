@@ -74,7 +74,7 @@ extern void fclRagTexCalcSizes();
 
 extern u8 ragHeartsTable[];
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -338,7 +338,7 @@ extern u8 ragListFlags[5];
 extern s32 ragBuildHeartsList(u8 type, ragListWork_t *work);
 extern s8 ragBuildList2(u8 type, u8 *work);
 extern s8 ragBuildList3(u8 type, u8 *work);
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 
 #ifdef NON_MATCHING
 extern s32 evtBitCheck(s32 no);
@@ -370,7 +370,7 @@ void ragCreateAllList(s32 onlyHearts, s32 type, ragListWork_t *work)
             ragListFlags[2] |= 2;
             work->cursor.unk_21++;
         }
-        cmpSetCursorFlag(&work->cursor, (s32)ragListFlags);
+        cmpSetCursorFlag(&work->cursor, EE_ADDR_S(ragListFlags));
         ragInitList3(work->list3Count, &work->window3);
     }
 }
@@ -473,7 +473,7 @@ extern char D_0053D1B0[];
 extern char D_0053D1C0[];
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
@@ -658,7 +658,7 @@ s32 ragFindItemSlot(ragItemReq_t *req)
     for (i = 0; i < 3; i++) {
         u32 item = req->item;
 
-        if (item != 0 && ((u8 *)item + EE_ADDR(base))[0x1920] < req->count) {
+        if (item != 0 && (EE_ADDR_AS(u8 *, item) + EE_ADDR(base))[0x1920] < req->count) {
             return 0;
         }
         req++;

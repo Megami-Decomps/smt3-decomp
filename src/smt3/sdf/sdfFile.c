@@ -67,7 +67,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -133,7 +133,7 @@ enum sdf_stream_playback {
 
 extern s32 DIntr();
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 #include "sdk_libkernl.h"
 
@@ -151,7 +151,7 @@ extern char * strchr(const char *, s32);
 
 extern char D_00551940[];
 
-extern s32 strncmp(const char *, const char *, u32);
+extern s32 strncmp(const char *, const char *, size_t);
 
 extern sdfFileDeviceCB_t sdfFileDeviceCB[];
 
@@ -163,7 +163,7 @@ extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
 extern s16 sdfFileCmdFreeCount;
 
-sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                         s32 callbackContext);
 
 s32 sdfFileCmdClearError(sdfFileCmd_t *aHandle);
@@ -282,7 +282,7 @@ sdfFileCmdHandle_t *sdfFileOpen(const char *aFileName) {
     if (sdfFileSemaId < 0) {
         sdfFileSemaId = sdfCreateSema(0, 0x80, 0);
     }
-    state = sdfFileCmdReadOpen(aFileName, (void (*)(sdfFileCmdHandle_t *, s32, s32, s32, s32))sdfFileCallback, 0);
+    state = sdfFileCmdReadOpen(aFileName, (void (*)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32))sdfFileCallback, 0);
     WaitSema(sdfFileSemaId);
     sdfFileCmdClearError((sdfFileCmd_t *)state);
     return state;

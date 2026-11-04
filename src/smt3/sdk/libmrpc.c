@@ -46,7 +46,7 @@ rpcPacket *_sceRpcGetPacket(rpcQueue *queue)
             } else {
                 seq = queue->seq;
             }
-            packet->w[5] = (u32)packet;
+            packet->w[5] = EE_ADDR(packet);
             packet->w[6] = seq;
             EIntr();
             return packet;
@@ -142,8 +142,8 @@ s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32
     packet->w[9] = arg0;
     packet->w[10] = arg1;
     packet->w[11] = arg2;
-    packet->w[5] = (u32)packet;
-    packet->w[7] = (u32)client;
+    packet->w[5] = EE_ADDR(packet);
+    packet->w[7] = EE_ADDR(client);
     param.maxCount = 1;
     param.initCount = 0;
     param.option = 0;

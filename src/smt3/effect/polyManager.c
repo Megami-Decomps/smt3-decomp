@@ -1,6 +1,7 @@
 #include "common.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -82,7 +83,7 @@ extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 extern void sdfMatSetTex(sdfMat_t *aMat, sdfTexHandle_t *aTex);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
@@ -285,8 +286,8 @@ typedef struct
     u8 oldLoop;
 } dds3SpPolyLoopWork_t;
 
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 extern dds3SpPolyEntry_t dds3SpPolyTable[];
 extern void (*D_003176A0[])(void *work);
 extern void (*D_003176B0[])(f32 scale, void *work);
@@ -384,7 +385,7 @@ dds3Polygon_t *dds3PolygonCreate(s32 face, s16 type, s16 attr) {
     if (type & 2) bytes += vertexCount * sizeof(u128);
     if (type & 4) bytes += vertexCount * sizeof(u32);
     allocation = sdfMemAllocDirect(bytes + sizeof(*record));
-    buffer = (u8 *)sdfMemLock(allocation);
+    buffer = EE_ADDR_AS(u8 *, sdfMemLock(allocation));
     record = (dds3Polygon_t *)(buffer + bytes);
     memset(record, 0, sizeof(*record));
     record->pVertex = (u128 *)buffer;
@@ -425,7 +426,7 @@ void dds3PolygonDraw(dds3Polygon_t *hPolygon) {
 }
 
 extern sdfGrOt_t sdfGrOtTable[85];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
+SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
 
 static inline void parAppendDrawSurfacePool(sdfGrOt_t *pool, sdfDrawTag_t *packet) {
     pool->regFunc(pool, packet);
@@ -442,7 +443,7 @@ void dds3PolygonLinkOt(void) {
         priorityPool = &sdfGrOtTable[43];
         do {
             if (record->drawCount != 0 && record->flags != 1) {
-                packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+                packet = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
                 sdfDrawTagInit(packet);
                 sdf3DPrimLinkResetTm(packet, 0);
                 sdf3DPrimLinkMat(packet, record->pMat, 0);
@@ -521,15 +522,15 @@ dds3TrackPoly_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type) {
     cellsSize = (total + number) * 0x14;
     allocation = sdfMemAllocDirect(cellsSize + 0x2C);
     base = sdfMemLock(allocation);
-    system = (dds3TrackPoly_t *)(base + cellsSize);
+    system = EE_ADDR_AS(dds3TrackPoly_t *, (base + cellsSize));
     memset(system, 0, 0x2C);
-    system->pVertex = (u128 *)base;
+    system->pVertex = EE_ADDR_AS(u128 *, base);
     base += total * 0x10;
-    system->pVC = (u32 *)base;
+    system->pVC = EE_ADDR_AS(u32 *, base);
     base += total * 4;
-    system->trackList = (dds3TrackPolyList_t *)base;
+    system->trackList = EE_ADDR_AS(dds3TrackPolyList_t *, base);
     for (i = 0; i < number; i++) {
-        dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)(i * sizeof(dds3TrackPolyList_t) + (s32)system->trackList);
+        dds3TrackPolyList_t *cell = (dds3TrackPolyList_t *)(i * sizeof(dds3TrackPolyList_t) + EE_ADDR_S(system->trackList));
         cell->pVertex = (u128 *)((u8 *)system->pVertex + i * face * 0x10);
         cell->pVC = system->pVC + i * face;
         dds3TrackPolyListInit(system, i);
@@ -579,7 +580,7 @@ void dds3TrackPolySet(dds3TrackPoly_t *hTrackPoly, s32 number, const u128 *pV) {
             vertex--;
             SDF_VU0_COPYVECTOR(vertex + 2, vertex);
         }
-        cell->rec = hTrackPoly->rec;
+        cell->rec = SDF_FRAMES(hTrackPoly->rec + 1) - 1;
         if (cell->count < shiftCount + 2) {
             cell->count += 2;
         }
@@ -622,7 +623,7 @@ void dds3TrackPolySet2(dds3TrackPoly_t *hTrackPoly, s32 number, const u128 *pV) 
             vertex--;
             SDF_VU0_COPYVECTOR(vertex + 3, vertex);
         }
-        cell->rec = hTrackPoly->rec;
+        cell->rec = SDF_FRAMES(hTrackPoly->rec + 1) - 1;
         if (cell->count < shiftCount + 3) {
             cell->count += 3;
         }
@@ -1392,7 +1393,7 @@ void dds3TrackPolyLinkOt(void) {
         slot = &lists[system->mode];
         list = *slot;
         if (list == 0) {
-            *slot = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            *slot = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTagInit(*slot);
             sdf3DPrimLinkResetTm(*slot, 0);
             list = *slot;
@@ -1502,9 +1503,9 @@ void dds3TrackPolyLinkOt(void) {
         }
     }
     if (lists[4] != 0) {
-        specialList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        specialList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(specialList);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -1513,7 +1514,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[5] = 0x42;
         sdfDrawTagLink(specialList, EE_ADDR(packet));
         D_002F64B8.regFunc(&D_002F64B8, specialList);
-        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
         packet[2] = 0x1000000000008001ULL;
@@ -1531,13 +1532,13 @@ dds3TrianglePoly_t *dds3TrianglePolyCreate(s32 number) {
     s32 colorBytes = points * 4;
     sdfMemHandle_t *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
     s32 base = sdfMemLock(allocation);
-    u8 *vertices = (u8 *)base + points * 16;
+    u8 *vertices = EE_ADDR_AS(u8 *, base) + points * 16;
     dds3TrianglePoly_t *block = (dds3TrianglePoly_t *)(vertices + colorBytes);
     block->abgr = 0x80808080;
     block->number = number;
     block->pVC = (u32 *)vertices;
     block->hMem = allocation;
-    block->pVertex = (u128 *)base;
+    block->pVertex = EE_ADDR_AS(u128 *, base);
     block->pMat = sdfMatNew();
     sdfMatSetConstant(block->pMat, 1.0f);
     return block;
@@ -1549,7 +1550,7 @@ void dds3TrianglePolyDelete(dds3TrianglePoly_t *hTriPoly) {
 }
 
 void dds3TrianglePolyLinkOt(sdfGrOt_t *pOt, dds3TrianglePoly_t *hTriPoly) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdf3DPrimPolyParm_t state;
     s32 remaining;
     sdfDrawTagInit(list);
@@ -1620,7 +1621,7 @@ void dds3SpPoly_Ring_Old_BuffInit(dds3SpPoly_Ring_Old_t3 *hData) {
             cells[i].color = 0x00808080;
             *ages = age;
             ages++;
-            age -= hData->spawnDelayStep;
+            age -= SDF_FRAMES(hData->spawnDelayStep);
             i++;
         } while (i < count);
     }
@@ -1642,7 +1643,7 @@ void dds3SpPoly_Ring_Old_Calc(dds3SpPoly_Ring_Old_t3 *pRing) {
     s32 *ages;
 
     if (pRing->active != 0) {
-        duration = pRing->duration;
+        duration = SDF_FRAMES(pRing->duration);
         completed = 0;
         count = pRing->entryCount;
         entry = pRing->hTrackPoly->trackList;
@@ -1738,7 +1739,7 @@ void dds3SpPoly_Ring_Old_Move(dds3SpPoly_Ring_Old_t3 *pRing, s32 number) {
 
     p = (f32 *)entry->pVertex;
     pairs = strip->point / 2;
-    scale[0] = scale[1] = scale[2] = pRing->pairDisplacement;
+    scale[0] = scale[1] = scale[2] = SDF_FRAME_STEP(pRing->pairDisplacement);
     SDF_VU0_LOADVECTOR_C(scale);
     for (i = 0; i < pairs; i++) {
         SDF_VU0_LOADVECTOR(p + 4);
@@ -1785,7 +1786,7 @@ dds3SpPoly_Ring_t3 *dds3SpPoly_RingCreate(dds3SpPoly_Basic_t *templateHead) {
     s32 tailSize = sizeof(dds3SpPoly_Ring_t3) - sizeof(dds3SpPoly_Basic_t);
     u32 size = templateHead->number * sizeof(dds3SpPoly_RingPhysics_t) + sizeof(dds3SpPoly_Ring_t3);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_Ring_t3 *band = (dds3SpPoly_Ring_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_Ring_t3 *band = EE_ADDR_AS(dds3SpPoly_Ring_t3 *, sdfMemLock(allocation));
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);
@@ -1813,7 +1814,7 @@ void dds3SpPoly_RingDelete(dds3SpPoly_Ring_t3 *hData) {
 void dds3SpPoly_RingAllBuffInit(dds3SpPoly_Ring_t3 *band) {
     u32 count = band->head.number;
     dds3SpPoly_RingPhysics_t *record = band->pPhysics;
-    u32 delayStep = band->spawnDelayStep;
+    u32 delayStep = SDF_FRAMES(band->spawnDelayStep);
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -1920,8 +1921,8 @@ void dds3SpPoly_RingMove(dds3SpPoly_Ring_t3 *pRing, s32 number) {
     entry->count = strip->point;
     pointCursor = (f32 *)entry->pVertex;
     pairs = strip->point >> 1;
-    radiusStepVector[2] = radiusStepVector[1] = radiusStepVector[0] = rec->spread_s;
-    liftVector[1] = pRing->liftStep;
+    radiusStepVector[2] = radiusStepVector[1] = radiusStepVector[0] = SDF_FRAME_STEP(rec->spread_s);
+    liftVector[1] = SDF_FRAME_STEP(pRing->liftStep);
     liftVector[2] = liftVector[0] = 0;
     angleStep = 3.14159265f * 2.0f / (f32)pRing->vertex;
     SDF_VU0_LOADMATRIX(pRing->head.matrix);
@@ -1974,7 +1975,7 @@ void dds3SpPoly_RingDraw(dds3SpPoly_Ring_t3 *hData) {
     strip = hData->hTrackPoly;
     count = hData->head.number;
     record = hData->pPhysics;
-    duration = hData->head.frame;
+    duration = SDF_FRAMES(hData->head.frame);
     loop = hData->head.loop;
     color = hData->head.abgr;
     entry = strip->trackList;
@@ -1990,11 +1991,11 @@ void dds3SpPoly_RingDraw(dds3SpPoly_Ring_t3 *hData) {
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < hData->head.alpha_s) {
-                    entry->color = dds3SpPoly_Color(age, hData->head.alpha_s, color);
+                if ((u32)age < SDF_FRAMES(hData->head.alpha_s)) {
+                    entry->color = dds3SpPoly_Color(age, SDF_FRAMES(hData->head.alpha_s), color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - hData->head.alpha_e) {
-                    entry->color = dds3SpPoly_Color(duration - age, hData->head.alpha_e, color);
+                           (u32)age >= duration - SDF_FRAMES(hData->head.alpha_e)) {
+                    entry->color = dds3SpPoly_Color(duration - age, SDF_FRAMES(hData->head.alpha_e), color);
                 }
 
                 if (entry->color & 0xFF000000) {
@@ -2031,7 +2032,7 @@ dds3SpPoly_SphereRing_t3 *dds3SpPoly_SphereRingCreate(dds3SpPoly_SphereRing_t3 *
     s32 tailBytes = sizeof(dds3SpPoly_SphereRing_t3) - sizeof(dds3SpPoly_Basic_t);
     s32 size = source->head.number * sizeof(dds3SpPoly_SphereRingPhysics_t) + sizeof(dds3SpPoly_Basic_t) + tailBytes;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_SphereRing_t3 *clone = (dds3SpPoly_SphereRing_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_SphereRing_t3 *clone = EE_ADDR_AS(dds3SpPoly_SphereRing_t3 *, sdfMemLock(allocation));
 
     memset(clone, 0, size);
     memcpy(clone, source, source->head.templateSize);
@@ -2059,7 +2060,7 @@ void dds3SpPoly_SphereRingDelete(dds3SpPoly_SphereRing_t3 *hData) {
 void dds3SpPoly_SphereRingAllBuffInit(dds3SpPoly_SphereRing_t3 *arc) {
     u32 count = arc->head.number;
     dds3SpPoly_SphereRingPhysics_t *record = arc->pPhysics;
-    u32 delayStep = arc->spawnDelayStep;
+    u32 delayStep = SDF_FRAMES(arc->spawnDelayStep);
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -2104,7 +2105,7 @@ void dds3SpPoly_SphereRingMove(dds3SpPoly_SphereRing_t3 *pSphereRing, s32 number
     pointCursor = (f32 *)stripEntry->pVertex;
     pairs = strip->point >> 1;
     recordRadius = record->radius;
-    angle = (f32)record->frame / (f32)pSphereRing->head.frame * 3.14159265f;
+    angle = (f32)record->frame / (f32)SDF_FRAMES(pSphereRing->head.frame) * 3.14159265f;
     projectedInnerRadius = recordRadius * sdfSin(angle);
     verticalOffset = recordRadius * sdfCos(angle) - recordRadius;
     angleStep = 3.14159265f * 2.0f / (f32)pSphereRing->vertex;
@@ -2157,7 +2158,7 @@ void dds3SpPoly_SphereRingDraw(dds3SpPoly_SphereRing_t3 *hData) {
     strip = hData->hTrackPoly;
     count = hData->head.number;
     record = hData->pPhysics;
-    duration = hData->head.frame;
+    duration = SDF_FRAMES(hData->head.frame);
     loop = hData->head.loop;
     color = hData->head.abgr;
     entry = strip->trackList;
@@ -2173,11 +2174,11 @@ void dds3SpPoly_SphereRingDraw(dds3SpPoly_SphereRing_t3 *hData) {
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < hData->head.alpha_s) {
-                    entry->color = dds3SpPoly_Color(age, hData->head.alpha_s, color);
+                if ((u32)age < SDF_FRAMES(hData->head.alpha_s)) {
+                    entry->color = dds3SpPoly_Color(age, SDF_FRAMES(hData->head.alpha_s), color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - hData->head.alpha_e) {
-                    entry->color = dds3SpPoly_Color(duration - age, hData->head.alpha_e, color);
+                           (u32)age >= duration - SDF_FRAMES(hData->head.alpha_e)) {
+                    entry->color = dds3SpPoly_Color(duration - age, SDF_FRAMES(hData->head.alpha_e), color);
                 }
 
                 if (entry->color & 0xFF000000) {
@@ -2214,7 +2215,7 @@ dds3SpPoly_RollRing_t3 *dds3SpPoly_RollRingCreate(dds3SpPoly_Basic_t *templateHe
     s32 tailSize = sizeof(dds3SpPoly_RollRing_t3) - sizeof(dds3SpPoly_Basic_t);
     u32 size = templateHead->number * sizeof(dds3SpPoly_RollRingPhysics_t) + sizeof(dds3SpPoly_RollRing_t3);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size);
-    dds3SpPoly_RollRing_t3 *band = (dds3SpPoly_RollRing_t3 *)sdfMemLock(allocation);
+    dds3SpPoly_RollRing_t3 *band = EE_ADDR_AS(dds3SpPoly_RollRing_t3 *, sdfMemLock(allocation));
 
     memset(band, 0, size);
     memcpy(band, templateHead, templateHead->templateSize);
@@ -2242,7 +2243,7 @@ void dds3SpPoly_RollRingDelete(dds3SpPoly_RollRing_t3 *hData) {
 void dds3SpPoly_RollRingAllBuffInit(dds3SpPoly_RollRing_t3 *rotatingBand) {
     u32 count = rotatingBand->head.number;
     dds3SpPoly_RollRingPhysics_t *record = rotatingBand->pPhysics;
-    u32 delayStep = rotatingBand->spawnDelayStep;
+    u32 delayStep = SDF_FRAMES(rotatingBand->spawnDelayStep);
     s32 age = POLY_INACTIVE_ENTRY_AGE;
     u32 index;
 
@@ -2295,9 +2296,9 @@ void dds3SpPoly_RollRingMove(dds3SpPoly_RollRing_t3 *pRollRing, s32 number)
     SetRotateMatrixX(rec->rot_x);
     SetRotateMatrixY_B(rec->rot_y);
     MultMatrixRevNoArg();
-    rec->rot_y += pRollRing->roll_s * (3.14159265f / 180.0f);
+    rec->rot_y += SDF_FRAME_STEP(pRollRing->roll_s * (3.14159265f / 180.0f));
     radius = rec->radius;
-    rec->radius = radius + rec->spread_s;
+    rec->radius = radius + SDF_FRAME_STEP(rec->spread_s);
     step = 3.14159265f * 2.0f / (f32)pRollRing->vertex;
     SDF_VU0_LOADMATRIX_B(pRollRing->head.matrix);
     MultMatrixRevNoArg();
@@ -2352,7 +2353,7 @@ void dds3SpPoly_RollRingDraw(dds3SpPoly_RollRing_t3 *hData) {
     strip = hData->hTrackPoly;
     count = hData->head.number;
     record = hData->pPhysics;
-    duration = hData->head.frame;
+    duration = SDF_FRAMES(hData->head.frame);
     loop = hData->head.loop;
     color = hData->head.abgr;
     entry = strip->trackList;
@@ -2368,11 +2369,11 @@ void dds3SpPoly_RollRingDraw(dds3SpPoly_RollRing_t3 *hData) {
             if (age < 0) {
                 age++;
             } else {
-                if ((u32)age < hData->head.alpha_s) {
-                    entry->color = dds3SpPoly_Color(age, hData->head.alpha_s, color);
+                if ((u32)age < SDF_FRAMES(hData->head.alpha_s)) {
+                    entry->color = dds3SpPoly_Color(age, SDF_FRAMES(hData->head.alpha_s), color);
                 } else if (age <= duration &&
-                           (u32)age >= duration - hData->head.alpha_e) {
-                    entry->color = dds3SpPoly_Color(duration - age, hData->head.alpha_e, color);
+                           (u32)age >= duration - SDF_FRAMES(hData->head.alpha_e)) {
+                    entry->color = dds3SpPoly_Color(duration - age, SDF_FRAMES(hData->head.alpha_e), color);
                 } else {
                     entry->color = color;
                 }
@@ -2422,7 +2423,7 @@ void dds3SpPoly_RollRingSetEndless(dds3SpPoly_RollRing_t3 *pRollRing) {
     if (count != 0) {
         do {
             if (entry->frame != POLY_INACTIVE_ENTRY_AGE) {
-                entry->frame = POLY_RESET_ENTRY_AGE;
+                entry->frame = SDF_FRAMES(POLY_RESET_DURATION) - SDF_FRAMES(POLY_RESET_DURATION - POLY_RESET_ENTRY_AGE);
             }
             i++;
             entry++;

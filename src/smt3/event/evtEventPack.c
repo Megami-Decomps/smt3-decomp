@@ -73,7 +73,7 @@ extern void mdlPackDecode(s32, s32, s32, void *, s32);
 extern s32 evtSetRegistUnit(s32 major, s32 minor);
 
 
-extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2,
+extern s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2,
                                             const sdfTextureOffsetListHeader_t *pTB, s32 pBF);
 
 extern void fldFileAddrResetMode(u32 mode);
@@ -164,7 +164,7 @@ dds3ProcessID_t *evtLoadEventPack(s32 eventno);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 void evtKillEventPack(s32 eventno);
 
@@ -374,7 +374,7 @@ s32 evtRegistBEField(s32 eventno, s32 rid) {
     }
 
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
-        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], (s32)resource0Data, (s32)resource1Data, textureOffsets, 0);
+        evtLoadArea_FromMemory(areaRoomIds[0], areaRoomIds[1], EE_ADDR_S(resource0Data), EE_ADDR_S(resource1Data), textureOffsets, 0);
         fldFileAddrResetMode(1);
         dds3DrawFlag |= 0x02000000;
         return 1;
@@ -481,7 +481,7 @@ void evtCheckEventScriptLoaded(evtPackProcessData_t *state) {
             state->resourceAllocation = fileGetMemHandle((struct FileRequest *)state->pendingRequest);
             fileHandleFree(state->pendingRequest);
             state->pendingRequest = NULL;
-            header = (evtPackHeader_t *)sdfMemLock(state->resourceAllocation);
+            header = EE_ADDR_AS(evtPackHeader_t *, sdfMemLock(state->resourceAllocation));
             state->payload = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
@@ -530,15 +530,15 @@ void evtWaitEventPackLoad(dds3ProcessID_t *task) {
         }
         if (packState->effect71 != 0) {
             Eve_PartialMultiBlurSetDefTex();
-            sdfTexFreeDelayed((struct sdfTexHandle_t *)packState->effect71);
+            sdfTexFreeDelayed(EE_ADDR_AS(struct sdfTexHandle_t *, packState->effect71));
         }
         if (packState->effect76 != 0) {
             Eve_RippleBlurSetDefTex();
-            sdfTexFreeDelayed((struct sdfTexHandle_t *)packState->effect76);
+            sdfTexFreeDelayed(EE_ADDR_AS(struct sdfTexHandle_t *, packState->effect76));
         }
         if (packState->effect75 != 0) {
             Eve_PartialMultiFilterSetDefTex();
-            sdfTexFreeDelayed((struct sdfTexHandle_t *)packState->effect75);
+            sdfTexFreeDelayed(EE_ADDR_AS(struct sdfTexHandle_t *, packState->effect75));
         }
         if (packState->pendingRequest != NULL) {
             fileHandleFree(packState->pendingRequest);
@@ -547,10 +547,10 @@ void evtWaitEventPackLoad(dds3ProcessID_t *task) {
             sdfMemFreeDelayedDirect(packState->resourceAllocation);
         }
         if (packState->sceneAllocation1 != 0) {
-            sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(packState->sceneAllocation1));
+            sdfMemFreeDirect(EE_ADDR_AS(struct sdfMemHandle_t *, (u32)(packState->sceneAllocation1)));
         }
         if (packState->sceneAllocation2 != 0) {
-            sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(packState->sceneAllocation2));
+            sdfMemFreeDirect(EE_ADDR_AS(struct sdfMemHandle_t *, (u32)(packState->sceneAllocation2)));
         }
     }
     sdfChipFreeDirect((void *)stateHandle);
@@ -607,11 +607,11 @@ typedef struct evtCmbWork_t {
 extern evtCmbWork_t *CMB_GBWK;
 extern u8 cmbMenuEntryTable[8];
 extern s32 evtBitCheck(s32 no);
-extern void cmpSetCursorFlag(void *cur, s32 flag);
+extern void cmpSetCursorFlag(void *cur, saddr_t flag);
 
 void cmbEnableMenuEntry2(void) {
     if (evtBitCheck(0x25) == 0) {
-        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, EE_ADDR_S(cmbMenuEntryTable));
         if ((cmbMenuEntryTable[2] & 2) == 0) {
             cmbMenuEntryTable[2] |= 2;
             CMB_GBWK->menuCursor.openCount++;
@@ -621,7 +621,7 @@ void cmbEnableMenuEntry2(void) {
 
 void cmbEnableMenuEntry6(void) {
     if (evtBitCheck(0xA3) != 0) {
-        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, EE_ADDR_S(cmbMenuEntryTable));
         if ((cmbMenuEntryTable[6] & 2) == 0) {
             cmbMenuEntryTable[6] |= 2;
             CMB_GBWK->menuCursor.openCount++;

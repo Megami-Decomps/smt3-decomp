@@ -9,7 +9,7 @@ struct pipeTextureFile_t;
 
 extern void (*D_00551828)(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 typedef struct tagMakaObject_t {
     s32 maka;

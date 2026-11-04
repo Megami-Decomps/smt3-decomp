@@ -49,7 +49,7 @@ extern f32 sdfFaceDivBias;
 extern const char D_00529428[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
-extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket);
+extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, addr_t aHeadPacket, addr_t aTailPacket);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
@@ -66,7 +66,7 @@ extern sdfModelRootNode_t *sdfModelRootNew(void);
 extern void sdfModelAllocNodeList(sdfModelRootNode_t *aRoot, s32 aLeng);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *aPkt);
@@ -380,7 +380,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
+    addr_t addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -422,7 +422,7 @@ s32 sdfModelGetDrawPacketSize(const u32 *aList, s32 *aShapeCount, s32 *aExtSize)
     tempQwc = 0;
     if (count != 0) {
         do {
-            packet = (const sdfShapePacket_t *)*aList;
+            packet = EE_ADDR_AS(const sdfShapePacket_t *, *aList);
             aList++;
             switch (packet->packetType) {
             case 1:
@@ -498,10 +498,10 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
         i++;
         tag->qwc = 7;
         tag->id = 0x30;
-        addr = (u32)sdfModelAllocTmPacket(node);
+        addr = EE_ADDR(sdfModelAllocTmPacket(node));
         tag->dat0 = 0;
         tag->dat1 = vuAddr | 0x6C07C000;
-        tag->addr = (void *)EE_PHYSICAL(addr + ofs);
+        tag->addr = EE_ADDR_AS(void *, EE_PHYSICAL(addr + ofs));
         vuAddr += 7;
         tag++;
     } while (i != count);
@@ -578,7 +578,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
 
         for (m = 0; m < used; m++) {
             sdfModelShapeEntry_t *entry =
-                (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + EE_ADDR(list));
+                (sdfModelShapeEntry_t *)(EE_ADDR_AS(u8 *, (out[m].targetId * 8)) + EE_ADDR(list));
 
             *(u64 *)&tag->dat0 = 0;
             *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(entry[1].dataPtr),
@@ -586,7 +586,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
             tag++;
         }
         *(u64 *)&tag->dat0 = 0;
-        *(u64 *)tag = SDF_DMA_TAG((u32)list->next, list->count | 0x30000000);
+        *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(list->next), list->count | 0x30000000);
         tag++;
         i++;
     } while (i != listCount);
@@ -655,7 +655,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s
         chunk->type = 1;
     }
     do {
-        packet = (sdfShapePacket_t *)*cursor++;
+        packet = EE_ADDR_AS(sdfShapePacket_t *, *cursor++);
         switch (packet->packetType) {
         case 1:
             tag = sdfModelSetNormalDrawPacket(aNode, packet, tag, aId);
@@ -939,8 +939,8 @@ extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
 extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfCoreDrawSetZBias(f32 z);
 extern void sdfCoreDrawSetLight(void *light);
 extern void sdfCoreDrawSetFog(void *fog);
@@ -1291,7 +1291,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void sdfModelMorphListCopyStat(sdfModelMorphList_t *aDst, sdfModelMorphList_t *aSrc)
@@ -1410,7 +1410,7 @@ void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 }
 
 #ifdef NON_MATCHING
-extern s32 memcmp(const void *first, const void *second, u32 size);
+extern s32 memcmp(const void *first, const void *second, size_t size);
 extern u32 strlen(const char *text);
 #endif
 
@@ -1429,7 +1429,7 @@ s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *aRoot, const char *aName)
     len = strlen(aName);
     do {
         u32 entryLen = strlen((char *)entry);
-        u8 *id = (u8 *)(((u32)(entry + entryLen + 4)) & ~3U);
+        u8 *id = EE_ADDR_AS(u8 *, ((EE_ADDR((entry + entryLen + 4))) & ~3U));
 
         if (entryLen == len && memcmp(entry, aName, len) == 0) {
             return *(s32 *)id;
@@ -1453,7 +1453,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex) {
         const s32 *id;
         while (*cursor++ != 0) {
         }
-        id = (const s32 *)(((u32)cursor + 3) & ~3U);
+        id = EE_ADDR_AS(const s32 *, ((EE_ADDR(cursor) + 3) & ~3U));
         if (*id == aIndex) {
             return (const char *)name;
         }

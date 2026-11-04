@@ -268,7 +268,7 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 
 
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
@@ -286,7 +286,7 @@ extern nbInnenRec_t D_003E3158[];
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, saddr_t uniqueid, s32 se);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -1037,16 +1037,16 @@ extern s32 nbPlayMotionSe(nbFormation_t *form);
 s32 nbSetNegoNoMotion(nbNegoProcessData_t *n, nbFormation_t *form)
 {
     nbClsNegoMessage(n);
-    nbAddMotionKoukaPacket(0, (s32)n->actdata, form, 0xF);
-    nbAddSePacket2(0, (s32)n->actdata, nbPlayMotionSe(form) + 1);
+    nbAddMotionKoukaPacket(0, EE_ADDR_S(n->actdata), form, 0xF);
+    nbAddSePacket2(0, EE_ADDR_S(n->actdata), nbPlayMotionSe(form) + 1);
     return 0xF;
 }
 
 s32 nbSetNegoYesMotion(nbNegoProcessData_t *n, nbFormation_t *form)
 {
     nbClsNegoMessage(n);
-    nbAddMotionKoukaPacket(0, (s32)n->actdata, form, 0xE);
-    nbAddSePacket2(0, (s32)n->actdata, nbPlayMotionSe(form));
+    nbAddMotionKoukaPacket(0, EE_ADDR_S(n->actdata), form, 0xE);
+    nbAddSePacket2(0, EE_ADDR_S(n->actdata), nbPlayMotionSe(form));
     return 0xF;
 }
 
@@ -1067,10 +1067,10 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
 
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char D_00544E98[];
 extern char D_00544EA8[];
 extern char D_00551148[];
@@ -1079,7 +1079,7 @@ extern char D_00551150[];
 void nbNegoDebugPrint(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    u32 packet;
+    addr_t packet;
     s32 index;
     s32 i;
     s32 message;
@@ -1090,10 +1090,10 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
 
-    packet = (u32)sdfDevPrintf(0x7100, 0x7B60, 0x00FFFF80, 0, D_00544E98,
-                               (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF));
+    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7B60, 0x00FFFF80, 0, D_00544E98,
+                               (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF)));
     sdfDrawTagLink(tag, packet);
-    packet = (u32)sdfDevPrintf(0x7100, 0x7C80, 0x00FFFF80, 5, D_00551148);
+    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7C80, 0x00FFFF80, 5, D_00551148));
     sdfDrawTagLink(tag, packet);
 
     index = (n->historyindex + 1) % 14;
@@ -1101,12 +1101,12 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
         historyMessageId = n->history[index];
         message = n->historymes[index];
         if (message != 0) {
-            packet = (u32)sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00544EA8,
-                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF), message);
+            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00544EA8,
+                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF), message));
             sdfDrawTagLink(tag, packet);
         } else {
-            packet = (u32)sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00551150,
-                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF));
+            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00551150,
+                                       (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF)));
             sdfDrawTagLink(tag, packet);
         }
         index = (index + 1) % 14;
@@ -1124,35 +1124,35 @@ extern char D_00551158[];
 void nbNegoDebugPrint2(nbNegoProcessData_t *n)
 {
     sdfDrawTag_t *tag;
-    u32 packet;
+    addr_t packet;
     s32 i;
     u32 id;
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     if (n->endid == 0) {
-        packet = (u32)sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544EB8,
-                                  (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF));
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544EB8,
+                                  (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF)));
         sdfDrawTagLink(tag, packet);
     } else {
-        packet = (u32)sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544ED8);
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544ED8));
         sdfDrawTagLink(tag, packet);
     }
     if (n->endid == 0) {
         for (i = 0; i < n->nextkouhocnt; i++) {
             id = n->nextkouho[i];
-            packet = (u32)sdfDevPrintf(0x7A00 + i * 0x480, 0x7D40, 0xFFFF80,
+            packet = EE_ADDR(sdfDevPrintf(0x7A00 + i * 0x480, 0x7D40, 0xFFFF80,
                                       i == n->selectcur ? 4 : 0, D_00551150,
-                                      (s32)(id >> 16), (s32)(id & 0xFFFF));
+                                      (s32)(id >> 16), (s32)(id & 0xFFFF)));
             sdfDrawTagLink(tag, packet);
         }
     } else {
-        packet = (u32)sdfDevPrintf(0x7A00, 0x7D40, 0xFFFF80, 4, D_00551158);
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7D40, 0xFFFF80, 4, D_00551158));
         sdfDrawTagLink(tag, packet);
     }
-    packet = (u32)sdfDevPrintf(0x7A00, 0x7E60, 0xFFFF80, 0, D_00544EF0);
+    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7E60, 0xFFFF80, 0, D_00544EF0));
     sdfDrawTagLink(tag, packet);
-    packet = (u32)sdfDevPrintf(0x7A00, 0x7EC0, 0xFFFF80, 0, D_00544F00);
+    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7EC0, 0xFFFF80, 0, D_00544F00));
     sdfDrawTagLink(tag, packet);
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
@@ -1169,12 +1169,12 @@ s32 NegoDebug(nbNegoProcessData_t *n)
     }
     if (dds3SelectMenu(0, n->nextkouhocnt, 0, n->nextkouhocnt, 0, NULL, NULL, &n->selectcur,
                        NULL) == 1) {
-        n->nextnegoid = *(u32 *)((u8 *)(n->selectcur * 4) + EE_ADDR(n) + 0x24);
+        n->nextnegoid = *(u32 *)(EE_ADDR_AS(u8 *, (n->selectcur * 4)) + EE_ADDR(n) + 0x24);
         return 1;
     }
     if ((s8)dds3PadButtonState[0x20] < 0) {
         sel = dds3GetRandIntA(0, n->nextkouhocnt);
-        n->nextnegoid = *(u32 *)((u8 *)(sel * 4) + EE_ADDR(n) + 0x24);
+        n->nextnegoid = *(u32 *)(EE_ADDR_AS(u8 *, (sel * 4)) + EE_ADDR(n) + 0x24);
         return 1;
     }
     return 0;
@@ -1226,7 +1226,7 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
     return -1;
 }
 
-extern s32 nbGetUniqueIdKoukaPacketCnt(s32 uniqueid);
+extern s32 nbGetUniqueIdKoukaPacketCnt(saddr_t uniqueid);
 extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
 
 void *nbNegoProcess1(dds3ProcessID_t *id)
@@ -1237,7 +1237,7 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
     s32 index;
     s32 waitFrames;
 
-    if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0) {
+    if (nbGetUniqueIdKoukaPacketCnt(EE_ADDR_S(n->actdata)) > 0) {
         return NULL;
     }
     if (n->waitframe > 0) {
@@ -1277,7 +1277,7 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
                 }
             }
         }
-        if (nbGetUniqueIdKoukaPacketCnt((s32)n->actdata) > 0) {
+        if (nbGetUniqueIdKoukaPacketCnt(EE_ADDR_S(n->actdata)) > 0) {
             return NULL;
         }
         waitFrames = n->waitframe;
@@ -1365,7 +1365,7 @@ extern nbNegoMsgEntry_t negoMsgTable[];
 extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
 extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
 extern void *sdfChipAllocDirect(s32 size);
-extern void *memset(void *dest, s32 value, u32 size);
+extern void *memset(void *dest, s32 value, size_t size);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
 extern nbParty_t *nbGetPartyFromFormindex(s32 index);
 typedef struct itfMesResource_t itfMesResource_t;

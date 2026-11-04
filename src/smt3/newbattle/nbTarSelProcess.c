@@ -2,6 +2,7 @@
 #include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
+#include "sdfFrame.h"
 
 
 
@@ -43,7 +44,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void sdfChipFreeDirect(void *ptr);
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 extern void *sdfChipAllocDirect(u32 size);
-extern void *memset(void *dest, s32 value, u32 size);
+extern void *memset(void *dest, s32 value, size_t size);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 mode,
                                          s32 flag, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *data);
@@ -69,7 +70,7 @@ void nbSetTarSelStat(s32 stat)
 
 void nbSetTarSelJyokyoTime(s32 time)
 {
-    GetTarSelProcessData()->statusTime = time;
+    GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
 #ifdef NON_MATCHING

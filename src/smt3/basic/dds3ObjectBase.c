@@ -76,6 +76,9 @@ extern char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex);
 extern s32 strcmp(const char *a, const char *b);
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
+
 typedef struct
 {
     dds3ObjectBaseControlWorkData_t *control;
@@ -695,7 +698,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
             dds3ObjectBaseModelLinkOtSvs(pModelOt, pObjectBasic);
             return;
         }
-        light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->hUnit->value;
+        light = EE_ADDR_AS(void *, ((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->hUnit->value);
         if (light != NULL) {
             *(void **)&((mdlObj_t *)control->pModel)->inner->light = light;
         } else {

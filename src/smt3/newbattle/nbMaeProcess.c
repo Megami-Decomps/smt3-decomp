@@ -9,9 +9,9 @@ extern void nbSetMaeFlag(s32 flag);
 nbMainProcessData_t *nbGetMainProcessData(void);
 extern void nbSetStageParam(s16 major, s16 minor);
 extern void effBTLEncountStart(void);
-extern s32 nbMaeProcess01(void);
-extern s32 nbMaeProcess02(void);
-extern s32 nbMaeProcess02Step(void);
+extern saddr_t nbMaeProcess01(void);
+extern saddr_t nbMaeProcess02(void);
+extern saddr_t nbMaeProcess02Step(void);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer,
                                          dds3ProcessFunc_t processFunc,
@@ -32,21 +32,21 @@ s32 nbMaeProcess02Wait(void)
     return -1;
 }
 
-s32 nbMaeProcess02Loop(void)
+saddr_t nbMaeProcess02Loop(void)
 {
     if (nbMaeCheckDone() == 1) {
-        return (s32)nbMaeProcess02Wait;
+        return EE_ADDR_S(nbMaeProcess02Wait);
     }
     return 0;
 }
 
-s32 nbMaeProcess02Step(void)
+saddr_t nbMaeProcess02Step(void)
 {
     nbSetMaeFlag(0);
-    return (s32)nbMaeProcess02Loop;
+    return EE_ADDR_S(nbMaeProcess02Loop);
 }
 
-s32 nbMaeProcess02(void)
+saddr_t nbMaeProcess02(void)
 {
     nbMainProcessData_t *data;
 
@@ -54,13 +54,13 @@ s32 nbMaeProcess02(void)
     if (nbCheckEventEntries(data) != 0) {
         if (nbCheckEventPackLoaded(data) != 0) {
             dds3ResetProcessFlag(data->StageProcessID, 0x20, 0);
-            return (s32)nbMaeProcess02Step;
+            return EE_ADDR_S(nbMaeProcess02Step);
         }
     }
     return 0;
 }
 
-s32 nbMaeProcess01(void)
+saddr_t nbMaeProcess01(void)
 {
     nbMainProcessData_t *data;
 
@@ -68,17 +68,17 @@ s32 nbMaeProcess01(void)
     nbStartEventPacks(data);
     nbLoadDefaultModelPack(data);
     dds3SetProcessFlag(data->StageProcessID, 0x20, 0);
-    return (s32)nbMaeProcess02;
+    return EE_ADDR_S(nbMaeProcess02);
 }
 
-s32 nbMaeProcess0(void)
+saddr_t nbMaeProcess0(void)
 {
     nbMainProcessData_t *data;
 
     data = nbGetMainProcessData();
     nbSetStageParam(data->StageMajor, data->StageMinor);
     effBTLEncountStart();
-    return (s32)nbMaeProcess01;
+    return EE_ADDR_S(nbMaeProcess01);
 }
 
 void nbMaeShutdown(void)

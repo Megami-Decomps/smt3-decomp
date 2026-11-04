@@ -8,13 +8,13 @@
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
 
-extern u32 corePktCurrLight;
+extern addr_t corePktCurrLight;
 extern f32 corePktZBias;
-extern u32 corePktCurrFog;
+extern addr_t corePktCurrFog;
 extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
-extern s32 corePktPointBuff;
+extern saddr_t corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
 extern void *sceDmaGetChan(s32);
@@ -105,9 +105,9 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         vu[0xDD] = ((const u128 *)&sdf3DScreenTm)[1];
         vu[0xDE] = ((const u128 *)&sdf3DScreenTm)[2];
         vu[0xDF] = ((const u128 *)&sdf3DScreenTm)[3];
-        vu[0xE0] = ((const u128 *)corePktCurrLight)[1];
-        vu[0xE1] = ((const u128 *)corePktCurrLight)[2];
-        vu[0xE2] = ((const u128 *)corePktCurrLight)[3];
+        vu[0xE0] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[1];
+        vu[0xE1] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[2];
+        vu[0xE2] = (EE_ADDR_AS(const u128 *, corePktCurrLight))[3];
         PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);

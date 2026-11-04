@@ -82,7 +82,7 @@ s32 PowerOffCB(void);
 
 /* The reply word is read back through the uncached mirror, since the IOP
  * wrote it behind the data cache. */
-#define UNCACHED(a) ((s32 *)((u32)(a) | 0x20000000))
+#define UNCACHED(a) ((s32 *)(EE_ADDR(a) | 0x20000000))
 
 extern s32 DIntr(void);
 extern s32 SignalSema(s32 sema);
@@ -96,7 +96,7 @@ extern void sceCdDelayThread(u16 ticks);
 extern s32 EIntr(void);
 extern s32 sceCdSync(s32 mode);
 extern s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg);
-extern s32 sceCdLayerSearchFile(u32 file, const char *name, s32 layer);
+extern s32 sceCdLayerSearchFile(addr_t file, const char *name, s32 layer);
 
 void gcc2_compiled__6(s32 cause, s32 address, s32 argument)
 {
@@ -113,7 +113,7 @@ void sceCdDelayThread(u16 ticks)
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    SetAlarm(ticks, gcc2_compiled__6, (void *)sema);
+    SetAlarm(ticks, gcc2_compiled__6, EE_ADDR_AS(void *, sema));
     WaitSema(sema);
     DeleteSema(sema);
 }
@@ -162,7 +162,7 @@ s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
 
 void _sceCd_cd_read_intr(void *argument)
 {
-    cdvdReadReplyPrefix_t *reply = (cdvdReadReplyPrefix_t *)((u32)argument | 0x20000000);
+    cdvdReadReplyPrefix_t *reply = EE_ADDR_AS(cdvdReadReplyPrefix_t *, (EE_ADDR(argument) | 0x20000000));
     u8 *destination;
     s32 i;
 
@@ -229,7 +229,7 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdLayerSearchFile);
 
 s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
 {
-    return sceCdLayerSearchFile((u32)file, (char *)name, 0);
+    return sceCdLayerSearchFile(EE_ADDR(file), (char *)name, 0);
 }
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_ncmd_prechk);

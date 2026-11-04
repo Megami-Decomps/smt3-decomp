@@ -182,7 +182,7 @@ struct fldInfTable_t {
     fldInfSet_t sets[40];
 };
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, size_t);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -226,7 +226,7 @@ s32 dds3ExistProcess(dds3ProcessID_t *id);
 
 s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
+saddr_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s8 fldDoorExitMode[];
 
@@ -277,7 +277,7 @@ void fldKaifukuTest(void) {
     for (i = 0; i < 16; i++) {
         datAddHp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
         datAddMp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
-        *(u16 *)((u8 *)ofs + (u32)DDS3_GBWK + 0xA62) = 0;
+        *(u16 *)(EE_ADDR_AS(u8 *, ofs) + EE_ADDR(DDS3_GBWK) + 0xA62) = 0;
         ofs += 0xEC;
     }
     p2sdPlaySE(0x10, 0x7F, 0x3F);
@@ -1142,8 +1142,8 @@ s32 fldEveHit_ScriptEnd(char *pScriptName, u32 idx) {
 u32 fldEveHit_ScriptEnd2(u32 idx) {
     u32 *task = &gEvnRngPid[idx];
 
-    if (dds3ExistProcess((dds3ProcessID_t *)*task) != 0) {
-        dds3KillProcess((dds3ProcessID_t *)*task, 0);
+    if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, *task)) != 0) {
+        dds3KillProcess(EE_ADDR_AS(dds3ProcessID_t *, *task), 0);
     }
     *task = 0;
     return 0;
@@ -1411,7 +1411,7 @@ void fldPurgeEveRngProcesses(void) {
     if (count > 0) {
         u32 *taskSlot = gEvnRngPid;
         do {
-            if (dds3ExistProcess((dds3ProcessID_t *)*taskSlot) == 0) {
+            if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, *taskSlot)) == 0) {
                 *taskSlot = 0;
             }
             slotIndex++;
@@ -1420,7 +1420,7 @@ void fldPurgeEveRngProcesses(void) {
     }
 }
 
-s32 fldEveHitResID_Find(u32 pid) {
+s32 fldEveHitResID_Find(addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {
@@ -1430,7 +1430,7 @@ s32 fldEveHitResID_Find(u32 pid) {
     return -1;
 }
 
-s32 fldFindEveRngIndex(u32 task) {
+s32 fldFindEveRngIndex(addr_t task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
@@ -1441,7 +1441,7 @@ s32 fldFindEveRngIndex(u32 task) {
     return -1;
 }
 
-const char *fldEveHitResName_Find(u32 pid) {
+const char *fldEveHitResName_Find(addr_t pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (gEvnRngPid[slotIndex] == pid) {

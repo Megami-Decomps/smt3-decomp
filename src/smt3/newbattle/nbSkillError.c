@@ -247,7 +247,7 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 extern s32 pacCheckEnd(nbPacHandle_t *pacHandle);
 
@@ -255,7 +255,7 @@ extern void nbAddFormEntry(void *buf, s32 group, s32 id);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern s32 nbLoadMidiFile(s32 no);
 
@@ -666,7 +666,7 @@ s32 cmpClearButtonGuide(s32 skill, u32 select)
 void nbLoadDefaultModelPack(nbMainProcessData_t *data)
 {
     if (data->encno == 0x14D && data->modelpack == NULL) {
-        data->modelpack = (void *)nbMakeModelPackName(0xFF);
+        data->modelpack = EE_ADDR_AS(void *, nbMakeModelPackName(0xFF));
     }
 }
 
@@ -722,7 +722,7 @@ void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
 {
     if (form->packh == NULL) {
         if (evtBitCheck(0xC0F)) {
-            form->packh = (nbPacHandle_t *)nbMakeModelPackName(no);
+            form->packh = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(no));
         } else {
             mdlPrepare(group, no, 0);
             nbLoadMidiFile(no);

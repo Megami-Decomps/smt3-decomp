@@ -608,7 +608,7 @@ extern void nmeMoveCursor2(void);
 extern s32 nmeMoveCursor(void);
 extern void nmeFindNextChar(void);
 extern void nmeInitNameRows(s8 mode, nmeWork_t *work);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 void nmeUpdateInput(void)

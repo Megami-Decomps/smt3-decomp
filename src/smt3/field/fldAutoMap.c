@@ -32,7 +32,7 @@ extern fldAmAreaData_t *fldAutoMapHeader;
 
 extern s32 fldAutoMapData;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void sdfModelMakeLocalTm(sdfModelNode_t *aNode);
 
@@ -473,7 +473,7 @@ void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
                 u32 mapData = info[2];
 
                 fldAutoMapData = mapData;
-                fldAutoMapHeader = (fldAmAreaData_t *)mapHeader;
+                fldAutoMapHeader = EE_ADDR_AS(fldAmAreaData_t *, mapHeader);
             }
         }
     }
@@ -1998,7 +1998,7 @@ void fldAutoMapClear(void) {
 
     gb = (u8 *)DDS3_GBWK;
     for (i = 0; i < 30; i++) {
-        u64 *row = (u64 *)((u8 *)(i * 256) + (u32)gb);
+        u64 *row = (u64 *)(EE_ADDR_AS(u8 *, (i * 256)) + EE_ADDR(gb));
 
         row = (u64 *)((u8 *)row + 0xFC58);
         for (j = 0; j < 32; j++) {

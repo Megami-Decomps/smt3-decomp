@@ -4,6 +4,7 @@
 #include "libsdf.h"
 #include "newdata.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "event.h"
 #include "sdf_movie_types.h"
 
@@ -57,7 +58,7 @@ extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descrip
 
 extern u16 dds3VblanksPerFrame;
 
-extern s32 PlayingNo;
+extern saddr_t PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 
@@ -83,7 +84,7 @@ void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor)
     {
         movieOpenStream(&D_00343E40, descriptor, path);
         PlayingNo =
-            (s32)dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL);
+            EE_ADDR_S(dds3StartProcess(D_0053F3C8, 0x2AFB, 1, 1, movieDrawProc, NULL, NULL));
     }
 }
 
@@ -115,7 +116,7 @@ u8 func_0022B7F8(void)
 
 s32 movieMan_Process(void)
 {
-    sdfIpuRunDecode(60 / dds3VblanksPerFrame);
+    sdfIpuRunDecode(SDF_FRAMES(60) / dds3VblanksPerFrame);
     return 0;
 }
 
@@ -226,7 +227,7 @@ extern s32 strcasecmp(const char *first, const char *second);
 
 extern void *sdfChipAllocDirect(s32 aSize);
 
-extern void *memcpy(void *destination, const void *source, u32 bytes);
+extern void *memcpy(void *destination, const void *source, size_t bytes);
 
 void movieViewerScanDir(void)
 {

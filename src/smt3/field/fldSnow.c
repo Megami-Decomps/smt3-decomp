@@ -79,7 +79,7 @@ extern u32 sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
 extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
 
-extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, addr_t aData, s32 aLeng);
 
 extern void sdfDrawTagLinkRef(void *aTag, void *aPacket);
 
@@ -261,7 +261,7 @@ void func_00151018(s32 index) {
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern void dds3GetPosPoseSet(dds3Basic_t *basic);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 
 void fldSnowSeedReset(void)
 {

@@ -6,6 +6,9 @@
 #include "ps2asm.h"
 #include "motion.h"
 
+/* Declared here because no header carries these. */
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
 
 typedef struct mdlBillboard_t mdlBillboard_t;
 
@@ -171,7 +174,7 @@ typedef struct { u8 hasAudio, stereo, loopMode, playbackCadenceStep; } mdlIpuPar
 
 struct mdlEffectResrc_IPU_t
 {
-    u32 data; /* EE byte address handed to the IPU stream initializer. */
+    addr_t data; /* EE byte address handed to the IPU stream initializer. */
     sdfMemHandle_t *dataMemHandle;
     u8 inUse, playing;
     u8 unk0A[6];
@@ -240,7 +243,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void *dds3BillboardCreate(s32, u32);
+extern void *dds3BillboardCreate(s32, addr_t);
 
 extern void dds3BillboardDelete(mdlBillboard_t *);
 
@@ -292,7 +295,7 @@ extern void dds3EffectSetScale(mdlEffect_t *, f32);
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, addr_t);
 
 extern void *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
@@ -407,7 +410,7 @@ pibHeaderChunk_t *mdlPibGetChunk(mdlObj_t *handle, s32 group) {
     remainingRecords = mdlPibGetChunkCount(recordCursor);
     do {
         remainingRecords--;
-        recordCursor = (pibHeaderChunk_t *)((s32)recordCursor + recordCursor->nextOffset);
+        recordCursor = EE_ADDR_AS(pibHeaderChunk_t *, (EE_ADDR_S(recordCursor) + recordCursor->nextOffset));
         if (remainingRecords == -1) {
             return NULL;
         }
@@ -427,7 +430,7 @@ pibHeaderChunk_t *mdlPibGetFirstChunkItem(pibHeaderChunk_t *data) {
 
 /* A terminal kind returns NULL; the link is a byte offset, not a pointer. */
 pibHeaderChunk_t *mdlPibGetNextChunkItem(pibHeaderChunk_t *data) {
-    pibHeaderChunk_t *nextRecord = (pibHeaderChunk_t *)((s32)data + data->nextOffset);
+    pibHeaderChunk_t *nextRecord = EE_ADDR_AS(pibHeaderChunk_t *, (EE_ADDR_S(data) + data->nextOffset));
 
     if (nextRecord->group == MDL_RECORD_END_KIND) {
         nextRecord = NULL;
@@ -596,7 +599,7 @@ void mdlCreateEffectResrc_P2A(sdfItemArray_t *partList, void *descriptor) {
 
     partEntry->count = 0;
     partEntry->type = MDL_PART_BILLBOARD;
-    partEntry->handle = dds3BillboardCreate(1, (u32)descriptor);
+    partEntry->handle = dds3BillboardCreate(1, EE_ADDR(descriptor));
     partList->count += 1;
 }
 
@@ -615,7 +618,7 @@ void mdlCreateEffectResrc_IPU(sdfItemArray_t *list, u8 *sourceAddress, sdfMemHan
     mdlEffectResrcItem_t *entry = &((mdlEffectResrcItem_t *)list->items)[list->count];
 
     node->dataSize = sourceSize;
-    node->data = (u32)sourceAddress;
+    node->data = EE_ADDR(sourceAddress);
     node->dataMemHandle = backingAllocation;
     entry->type = MDL_PART_OBJECT;
     entry->count = 0;
@@ -634,7 +637,7 @@ void mdlDeleteEffectResrc_IPU(mdlEffectResrc_IPU_t *ipu) {
 void mdlStartEffectResrc_IPU(mdlEffectResrc_IPU_t *ipu, sdfTexHandle_t *tex, mdlIpuParams_t *parm) {
     if (ipu->playing == 0) {
         ipu->playing = 1;
-        sdfIpuSetOutputTex(&ipu->ipuState, parm, (u8 *)ipu->data, ipu->dataSize, tex);
+        sdfIpuSetOutputTex(&ipu->ipuState, parm, EE_ADDR_AS(u8 *, ipu->data), ipu->dataSize, tex);
     }
 }
 
@@ -991,10 +994,10 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     s32 directionY;
     f32 *color;
 
-    if ((u32)state == 0) {
+    if (EE_ADDR(state) == 0) {
         state = &D_0032C530;
         state->pad = (mdlDebugPad_t *)(dds3PadButtonState + 0x10);
-    } else if ((u32)state == 1) {
+    } else if (EE_ADDR(state) == 1) {
         state = &D_0032C530;
         state->pad = (mdlDebugPad_t *)dds3PadButtonState;
     }

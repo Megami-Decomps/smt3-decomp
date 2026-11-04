@@ -1,6 +1,7 @@
 #include "common.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* The native end message is padded to a 0x20-byte rodata block. */
 extern s8 dds3CrossfadeRunFlag;
@@ -8,8 +9,8 @@ extern u32 dds3CrossfadeFrame;
 extern u32 dds3CrossfadeFrameMax;
 extern sdfGrOt_t sdfGrOtTable[];
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, addr_t aEnv, void *aPkt);
 extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 extern void *sdf2DAllocSprite(s32 aNumOfSpr);
 extern void *sdf2DGetPrimPtr(void *aPacketPtr);
@@ -27,7 +28,7 @@ extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 extern void dds3RenderTextureOFF(void);
 extern void dds3FreeRenderTexture(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #include "sdk_libc.h"
 
 void *effPkt2DGetPrimPtr(void *pPkt) {
@@ -175,7 +176,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
         cursor += vertexCount;
     }
     *cursor = 0x1400000C;
-    while ((u32)++cursor & 15) {
+    while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
     return packet;
@@ -241,7 +242,7 @@ void dds3CrossfadeStart(s32 frame)
         dds3DrawEnv[i].clearXyzA = 0x80008000;
         dds3DrawEnv[i].clearXyzB = 0x80008000;
     }
-    dds3CrossfadeFrameMax = frame;
+    dds3CrossfadeFrameMax = SDF_FRAMES(frame);
     dds3CrossfadeRunFlag = 1;
     dds3CrossfadeFrame = 0;
     printf("dds3CrossfadeStart\n");
@@ -270,7 +271,7 @@ void dds3CrossfadeRun(void)
         sdfDrawTagInit(list);
         reference = (void *)sdfGrAllocPacketBuff(0x20);
         frame = dds3GetFrameID();
-        sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+        sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
 

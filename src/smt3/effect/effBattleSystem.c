@@ -11,6 +11,7 @@
 #include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -465,7 +466,7 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {
@@ -1509,7 +1510,7 @@ void effBTLSys_Stone_Dead_Draw(effBattleSystem_effBTLSystem_Stone_Dead_tag *hDat
     dds3EffectPartSetPosition(hData->hPart, &position);
     dds3EffectPartDraw(hData->hPart3);
     dds3EffectPartDraw(hData->hPart2);
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         dds3EffectPartDraw(hData->hPart);
     }
     hData->frame++;
@@ -1606,8 +1607,8 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
     initial.lights[1] = NULL;
     initial.lights[2] = NULL;
     lights = initial;
-    if (frame >= 3) {
-        if (frame == 3) {
+    if (frame >= SDF_FRAMES(3)) {
+        if (frame == SDF_FRAMES(3)) {
             s32 skill = effBTLSkillGetID();
             if (datSkillTable.normal[skill].koukatype == 0) {
                 pointLight.ambient = 0x80231E1E;
@@ -1794,7 +1795,7 @@ void effBTLSys_Kyusyuu_Draw(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData) {
     dds3EffectPartDraw(hData->hPart);
 
     frame = hData->frame;
-    if (frame >= 4) {
+    if (frame >= SDF_FRAMES(4)) {
         aim.scaleKind = 0;
         aim.aimMode = 4;
         aim.directionMode = 9;
@@ -1807,7 +1808,7 @@ void effBTLSys_Kyusyuu_Draw(effBattleSystem_effBTLSystem_Kyusyuu_tag *hData) {
         dds3EffectPartDraw(hData->hPart2);
         frame = hData->frame;
     }
-    if (frame >= 8) {
+    if (frame >= SDF_FRAMES(8)) {
         aim.scaleKind = 0;
         aim.aimMode = 4;
         aim.directionMode = 9;
@@ -2071,7 +2072,7 @@ void effBTLSys_Attack_Draw(effBattleSystem_effBTLSystem_Attack_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart5, &direction);
     dds3EffectPartDraw(hData->hPart5);
 
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 8;
@@ -2282,7 +2283,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart5, &direction);
     dds3EffectPartDraw(hData->hPart5);
 
-    if (hData->frame >= 2) {
+    if (hData->frame >= SDF_FRAMES(2)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 8;
@@ -2327,7 +2328,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
     dds3EffectPartSetDirection(hData->hPart9, &direction);
     dds3EffectPartDraw(hData->hPart9);
 
-    if (hData->frame >= 3) {
+    if (hData->frame >= SDF_FRAMES(3)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 9;
@@ -2340,7 +2341,7 @@ void effBTLSys_AttackC_Draw(effBattleSystem_effBTLSystem_AttackC_tag *hData) {
         dds3EffectPartDraw(hData->hPart10);
     }
 
-    if (hData->frame >= 3) {
+    if (hData->frame >= SDF_FRAMES(3)) {
         aim.scaleKind = 0;
         aim.aimMode = 1;
         aim.directionMode = 9;
@@ -3056,7 +3057,7 @@ typedef struct
 extern void mdlSetColor(mdlObj_t *model, u32 color);
 extern u32 effColorBlend(u32 color1, u32 color2, f32 ratio);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
 {
@@ -3096,8 +3097,8 @@ void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
     }
     if (work->params.hModel != NULL) {
         color = D_0031BF00[work->id].rgba;
-        if (work->frame < 8) {
-            color = effColorBlend(0x80808080, color, work->frame * 0.125f);
+        if (work->frame < SDF_FRAMES(8)) {
+            color = effColorBlend(0x80808080, color, work->frame * SDF_FRAME_STEP(0.125f));
         }
         mdlSetColor(work->params.hModel, color);
     }
@@ -3441,7 +3442,7 @@ typedef struct {
 } dds3LightState_t;
 
 extern dds3LightState_t dds3LightParam;
-PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern sdfVector4_t D_0056AC40;
 extern sdfVector4_t D_0056AC50;
 extern u8 D_0054F18A;

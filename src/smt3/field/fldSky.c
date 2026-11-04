@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "billboard.h"
 #include "draw.h"
@@ -69,7 +70,7 @@ enum {
 
 typedef struct devState_t devState_t;
 
-extern void *memset(void *, int, unsigned int);
+extern void *memset(void *, int, size_t);
 
 f32 sdfSin(f32 aRadius);
 
@@ -177,13 +178,13 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern u32 fldItemBoxObjBuf;
+extern addr_t fldItemBoxObjBuf;
 
-extern u32 fldMatterTable;
+extern addr_t fldMatterTable;
 
-extern u32 D_0054EDA8;
+extern addr_t D_0054EDA8;
 
-extern u32 D_0054EDAC;
+extern addr_t D_0054EDAC;
 
 void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
@@ -199,7 +200,7 @@ void sdfFileClose(devState_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 s32 evtBitCheck(s32 no);
 
@@ -227,13 +228,13 @@ void fldSkyDefaultLoad(void) {
     devState_t *fd;
 
     if (fldSkyDefault == NULL) {
-        fldSkyDefault = (void *)sdfMemLock(sdfMemAllocDirect(0xE000));
+        fldSkyDefault = EE_ADDR_AS(void *, sdfMemLock(sdfMemAllocDirect(0xE000)));
     }
     if (fldSkyDefaultData == NULL) {
-        fldSkyDefaultData = (void *)sdfMemLock(sdfMemAllocDirect(0xE000));
+        fldSkyDefaultData = EE_ADDR_AS(void *, sdfMemLock(sdfMemAllocDirect(0xE000)));
     }
     if (fldSkyDataTable == NULL) {
-        fldSkyDataTable = (fldSkyData_t *)sdfMemLock(sdfMemAllocDirect(0x12400));
+        fldSkyDataTable = EE_ADDR_AS(fldSkyData_t *, sdfMemLock(sdfMemAllocDirect(0x12400)));
     }
     fd = sdfFileOpen("/fld/f/bin/FILTER.FLD");
     sdfFileRead(fd, fldSkyDataTable, 0xE000);
@@ -275,27 +276,27 @@ void fldSkyCalcFilter(void) {
     gFilterAnimeOfsA = 0;
     switch (gFilterAnime) {
     case 1:
-        gFilterAnimeCntF += 0.1f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.1f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 2:
-        gFilterAnimeCntF += 0.2f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.2f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 3:
-        gFilterAnimeCntF += 0.05f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.05f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 4:
-        gFilterAnimeCntF += 0.1f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.1f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     case 5:
-        gFilterAnimeCntF += 0.2f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.2f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     case 6:
-        gFilterAnimeCntF += 0.05f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.05f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     }
@@ -554,36 +555,36 @@ void fldSkyCalcTable(void) {
 
 anime1:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 30.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 30);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(30.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(30));
         return;
     }
-    if (gSkyTblAnimeCntI == 60.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 30);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(60.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(30));
         gSkyTblAnimeCntI = 0.0f;
     }
     return;
 
 anime2:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 15.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 1);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(15.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(1));
         return;
     }
-    if (gSkyTblAnimeCntI == 30.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 1);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(30.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(1));
         gSkyTblAnimeCntI = 0.0f;
     }
     return;
 
 anime3:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 60.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 60);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(60.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(60));
         return;
     }
-    if (gSkyTblAnimeCntI == 120.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 60);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(120.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(60));
         gSkyTblAnimeCntI = 0.0f;
     }
 }
@@ -595,7 +596,7 @@ void fld_136800(s32 duration, f32 lightR, f32 lightG, f32 lightB,
     u32 lightColor, ambientColor;
 
     if (D_0054EAF0 != 0) {
-        unit = evtGetUnitHandle2((dds3Basic_t *)D_0054EAF0);
+        unit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, D_0054EAF0));
         r = (s32)(lightR * 128.0f);
         g = (s32)(lightG * 128.0f);
         b = (s32)(lightB * 128.0f);
@@ -619,11 +620,11 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     s32 r, g, b;
 
     if (fldPlayerUnit != 0) {
-        playerUnit = evtGetUnitHandle2((dds3Basic_t *)fldPlayerUnit);
+        playerUnit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, fldPlayerUnit));
         evtUnitLightOn(playerUnit);
     }
     if (D_0054EAF0 != 0) {
-        secondUnit = evtGetUnitHandle2((dds3Basic_t *)D_0054EAF0);
+        secondUnit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, D_0054EAF0));
         evtUnitLightOn(secondUnit);
     }
     mainUnit = evtGetUnitHandle2(D_0054EAE8);
@@ -982,8 +983,8 @@ void fld_1374F0(void) {
     u32 *displayPointers = D_002FCAC0;
 
     memset(displayPointers, 0, 0x14);
-    displayPointers[0] = (u32)D_002FCAA0;
-    displayPointers[1] = (u32)fldSkyPlayerIdx;
+    displayPointers[0] = EE_ADDR(D_002FCAA0);
+    displayPointers[1] = EE_ADDR(fldSkyPlayerIdx);
 }
 
 void fldSkyRefreshTbl(void) {
@@ -1129,23 +1130,23 @@ void fldAllocPlaneTable(void) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
-    D_0054EDAC = (u32)allocation;
-    storage = (void *)sdfMemLock(allocation);
-    fldMatterTable = (u32)storage;
+    D_0054EDAC = EE_ADDR(allocation);
+    storage = EE_ADDR_AS(void *, sdfMemLock(allocation));
+    fldMatterTable = EE_ADDR(storage);
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
-    D_0054EDA8 = (u32)allocation;
-    storage = (void *)sdfMemLock(allocation);
-    fldItemBoxObjBuf = (u32)storage;
+    D_0054EDA8 = EE_ADDR(allocation);
+    storage = EE_ADDR_AS(void *, sdfMemLock(allocation));
+    fldItemBoxObjBuf = EE_ADDR(storage);
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
 
 void fldFreeMatterTable(void) {
-    sdfMemUnlock((sdfMemHandle_t *)D_0054EDAC);
-    sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EDAC);
+    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDAC));
+    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDAC));
     fldMatterTable = 0;
-    sdfMemUnlock((sdfMemHandle_t *)D_0054EDA8);
-    sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EDA8);
+    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDA8));
+    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDA8));
     fldItemBoxObjBuf = 0;
 }
 

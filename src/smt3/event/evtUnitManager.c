@@ -2,9 +2,10 @@
 #include "event.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 #endif
 
 
@@ -163,7 +164,7 @@ s32 evtCheckMoveEnd(evtUnit_t *h) {
         }
         break;
     case 3:
-        value = dds3PathBasicControlGetRatio((void *)h->pathHandle);
+        value = dds3PathBasicControlGetRatio(EE_ADDR_AS(void *, h->pathHandle));
         if (h->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
@@ -187,7 +188,7 @@ s32 evtGetNextMovePos(evtUnit_t *h) {
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = dds3PathBasicControlGetRatio((void *)h->pathHandle);
+        t = dds3PathBasicControlGetRatio(EE_ADDR_AS(void *, h->pathHandle));
         if (h->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
@@ -204,8 +205,8 @@ s32 evtGetNextMovePos(evtUnit_t *h) {
         if (1.0f < t) {
             t = 1.0f;
         }
-        dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)h->pathHandle, t);
-        dds3PathBasicControlGetPos((dds3PathBasicControl_t *)h->pathHandle);
+        dds3PathBasicControlSetRatio(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle), t);
+        dds3PathBasicControlGetPos(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
         SDF_VU0_STOREVECTOR(h->targetVector);
         return 1;
     }
@@ -331,7 +332,7 @@ void UnitAnime(evtUnit_t *unit) {
         if (unit->currentTransitionValue == 0) {
             unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         } else if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                                   (dds3Basic_t *)unit->currentTransitionValue) == 0) {
+                                                   EE_ADDR_AS(dds3Basic_t *, unit->currentTransitionValue)) == 0) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
@@ -339,7 +340,7 @@ void UnitAnime(evtUnit_t *unit) {
     }
     if (unit->previousTransitionValue &&
         dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                         (dds3Basic_t *)unit->previousTransitionValue) == 0) {
+                                         EE_ADDR_AS(dds3Basic_t *, unit->previousTransitionValue)) == 0) {
         unit->previousTransitionValue = 0;
     }
     transition = 0.0f;
@@ -351,15 +352,15 @@ void UnitAnime(evtUnit_t *unit) {
         flags = unit->flags;
         if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = ((dds3Basic_t *)unit->currentTransitionValue)->workdata;
+            target = (EE_ADDR_AS(dds3Basic_t *, unit->currentTransitionValue))->workdata;
             if (unit->previousTransitionValue) {
-                previous = ((dds3Basic_t *)unit->previousTransitionValue)->workdata;
+                previous = (EE_ADDR_AS(dds3Basic_t *, unit->previousTransitionValue))->workdata;
             }
             if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
                 mdlGetPosition(unit->owner);
             }
             SDF_VU0_STOREVECTOR_NOMEM(position);
-            SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->currentTransitionValue)->poseset->pos);
+            SDF_VU0_LOADVECTOR_B(&EE_ADDR_AS(dds3Basic_t *, unit->currentTransitionValue)->poseset->pos);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(targetDirection);
             SDF_VU0_GETLENGTH(distance);
@@ -374,7 +375,7 @@ void UnitAnime(evtUnit_t *unit) {
             if (previous) {
                 f32 previousDistance;
                 SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(&((dds3Basic_t *)unit->previousTransitionValue)->poseset->pos);
+                SDF_VU0_LOADVECTOR_B(&EE_ADDR_AS(dds3Basic_t *, unit->previousTransitionValue)->poseset->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(previousDirection);
                 SDF_VU0_GETLENGTH(previousDistance);
@@ -676,7 +677,7 @@ void GetBaseLightRGB(evtUnit_t *h) {
     f32 scale;
 
     if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)h->currentTransitionValue)->workdata;
+        info = (EE_ADDR_AS(dds3Basic_t *, h->currentTransitionValue))->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -700,7 +701,7 @@ void GetBaseAmbientRGB(evtUnit_t *h) {
     f32 scale;
 
     if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)h->currentTransitionValue)->workdata;
+        info = (EE_ADDR_AS(dds3Basic_t *, h->currentTransitionValue))->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -721,7 +722,7 @@ void GetBaseLightDir(evtUnit_t *h) {
     s32 ownVector = 0;
 
     if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((evtTargetInfo_t *)((dds3Basic_t *)h->currentTransitionValue)->workdata)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+        if (((evtTargetInfo_t *)(EE_ADDR_AS(dds3Basic_t *, h->currentTransitionValue))->workdata)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -785,7 +786,7 @@ void MakeLightPacket(evtUnit_t *h) {
 void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame) {
     h->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     h->previousTransitionValue = h->currentTransitionValue;
-    h->currentTransitionValue = (s32)light;
+    h->currentTransitionValue = EE_ADDR_S(light);
     if (frame == 0) {
         h->previousTransitionValue = 0;
         h->transitionElapsed = 0;
@@ -794,7 +795,7 @@ void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame) {
     } else {
         h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
         h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
-        h->transitionDuration = frame;
+        h->transitionDuration = SDF_FRAMES(frame);
         h->transitionElapsed = 0;
     }
 }
@@ -807,7 +808,7 @@ void evtUnlinkLightObjectBasic(evtUnit_t *h, s32 frame) {
             h->currentTransitionValue = 0;
         } else {
             h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
-            h->transitionDuration = frame;
+            h->transitionDuration = SDF_FRAMES(frame);
             h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
             h->transitionElapsed = 0;
         }
@@ -835,7 +836,7 @@ void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
     u32 light;
     u32 ambient;
 
-    h->colorDuration = frame;
+    h->colorDuration = SDF_FRAMES(frame);
     h->color08 = lrgb;
     h->color58 = argb;
     scale.value = 128.0f;
@@ -853,7 +854,7 @@ void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
 
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {
-    h->directionDuration = frame;
+    h->directionDuration = SDF_FRAMES(frame);
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(h->vec30);
@@ -863,7 +864,7 @@ void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {
 }
 
 void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb) {
-    h->rgbDuration = frame;
+    h->rgbDuration = SDF_FRAMES(frame);
     h->rgbElapsed = 0;
     if (frame == 0) {
         mdlSetColor((mdlObj_t *)h->owner,
@@ -880,7 +881,7 @@ void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb) {
 }
 
 void evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a) {
-    h->alphaDuration = frame;
+    h->alphaDuration = SDF_FRAMES(frame);
     h->alphaElapsed = 0;
     if (frame == 0) {
         mdlSetColor((mdlObj_t *)h->owner,
@@ -982,7 +983,7 @@ s32 evtDeleteUnitHandle(evtUnit_t *h) {
         h->endpointWork = NULL;
     }
     if (h->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)h->pathHandle);
+        dds3DeletePathControl(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
         h->pathHandle = 0;
     }
     sdfChipFreeDirect(h);
@@ -1178,12 +1179,12 @@ s32 evtUnitMoveType0(evtUnit_t *h) {
 s32 evtUnitMoveTypePathTrace(evtUnit_t *h) {
     f32 v[4];
 
-    dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)h->pathHandle);
-    dds3PathBasicControlGetPos((dds3PathBasicControl_t *)h->pathHandle);
+    dds3PathBasicControlIsFinished(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
+    dds3PathBasicControlGetPos(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
     SDF_VU0_STOREVECTOR(v);
     dds3SetPosPoseSet(h->effObj, (u128 *)v);
     if (h->flags & 0x10) {
-        dds3PathBasicControlGetRot((dds3PathBasicControl_t *)h->pathHandle);
+        dds3PathBasicControlGetRot(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
@@ -1255,10 +1256,10 @@ void evtSetUnitMove3(evtUnit_t *h, s32 pathID, s32 para1, s32 para2, s32 movesys
         return;
     }
     if (h->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)h->pathHandle);
+        dds3DeletePathControl(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
     }
     path = dds3AllocPathBasicWorkData(pathSource);
-    h->pathHandle = (s32)path;
+    h->pathHandle = EE_ADDR_S(path);
     h->pathSpeed = 40.0f / GetSplineLength(path);
     if (movedir == 0) {
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, 0.0f);
@@ -1504,7 +1505,7 @@ s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
         if (unit->idleTicks < 0x7FFF) {
             unit->idleTicks++;
         }
-        if (unit->idleTicks >= 6) {
+        if (unit->idleTicks >= SDF_FRAMES(6)) {
             unit->movingTicks = 0;
         }
     }

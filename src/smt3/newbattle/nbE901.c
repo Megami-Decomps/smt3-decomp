@@ -243,7 +243,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -261,7 +261,7 @@ extern void func_0024D938(void *e);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern void effBTLSkillEnd(void);
@@ -296,7 +296,7 @@ extern s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *aRoot, s32 aId);
 
 extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
 
-extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 type);
 
 extern void dds3SetQuake(s32 frame, s32 range);
@@ -369,7 +369,7 @@ extern s32 D_005515C0;
 extern char *text1[];
 extern void nbPanelAllShow(void);
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 s32 RunUgou(nbEventProcessData_t *e)
 {
@@ -413,7 +413,7 @@ s32 RunUgou(nbEventProcessData_t *e)
     nbCameraBoss_Sp_DOUTYO_TP_Set(pNbCamera);
     nbDispText(text1[0xE8], NULL, 0, 0x5A, 0x89FEFF80);
     if (evtBitCheck(0xC0F) != 0) {
-        e->pfile = (nbPacHandle_t *)nbMakeModelPackName(D_005515C0);
+        e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(D_005515C0));
     } else {
         mdlPrepare(1, D_005515C0, 0);
     }
@@ -511,7 +511,7 @@ s32 SyuGo2(nbEventProcessData_t *ed)
         if (ed->seqtime == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
-                form = (nbFormation_t *)((u8 *)ofs + EE_ADDR(ed->data->form));
+                form = (nbFormation_t *)(EE_ADDR_AS(u8 *, ofs) + EE_ADDR(ed->data->form));
                 ofs += 0xF0;
                 if (form->stat & 1) {
                     nbAddMotionKoukaPacket(0, 0, form, 4);

@@ -84,7 +84,7 @@ extern void effBTLModelGetSphereCenter(nbFormation_t *pFormation);
 extern void effBTLModelAllShow(void);
 
 extern u8 D_0056B270[];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 
 extern dds3Bezier4PPart_t nbCameraStartTable[2];
 extern f32 effBTLModelGetRadius(nbFormation_t *pFormation);

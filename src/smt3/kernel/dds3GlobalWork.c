@@ -7,6 +7,10 @@
 #include "field.h"
 #include "fpu.h"
 
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
+
 extern s32 evtBitCheck(s32 no);
 
 extern void dds3GlobalWorkUserInit2(s32 mode);
@@ -447,13 +451,13 @@ void NewGame2Pop(void)
 
 void dds3GlobalWorkUserInit2(s32 mode)
 {
-    s32 saved;
+    saddr_t saved;
 
     if (mode == 1) {
         NewGame2Push();
-        saved = DDS3_GBWK->memHandle;
+        saved = EE_ADDR(DDS3_GBWK->memHandle);
         memset(DDS3_GBWK, 0, 0x1A510);
-        DDS3_GBWK->memHandle = saved;
+        DDS3_GBWK->memHandle = EE_ADDR_PTR(saved);
     }
     DDS3_GBWK->unk38 = 0;
     DDS3_GBWK->playtime = 0;

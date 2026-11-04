@@ -1,6 +1,7 @@
 #include "common.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 
 /* One needle instance: position plus the colour the draw loop stamps. */
@@ -56,7 +57,7 @@ extern effDrawSurface_t *D_0031F550[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(void *a);
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkMat(void *aTag, void *aMat, s32 aAllocator);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPrimParam_t *aParm);
@@ -122,7 +123,7 @@ extern void *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 extern u32 dds3GetRandA(effRandState_t *name);
 extern f32 dds3GetRandFloatA(effRandState_t *name);
 extern u32 effBTLSkillCheckRun(void);
@@ -137,10 +138,10 @@ extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern trackPolySystem_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
 extern void dds3TrackPolyDelete(trackPolySystem_t *hTrackPoly);
 extern void dds3TrackPolySetMode(trackPolySystem_t *hTrackPoly, u16 mode);
-extern void dds3TrackPolyVCSet(u32 hTrackPoly, s32 type, s32 abgr_in, s32 abgr_out);
+extern void dds3TrackPolyVCSet(addr_t hTrackPoly, s32 type, s32 abgr_in, s32 abgr_out);
 extern void dds3TrackPolySet(trackPolySystem_t *hTrackPoly, s32 number, const u128 *pV);
 extern void dds3TrackPolyVCRefresh_ParType1(trackPolySystem_t *hTrackPoly, s32 index);
-extern void dds3TrackPolyColorSet(u32 hTrackPoly, s32 number, u32 color);
+extern void dds3TrackPolyColorSet(addr_t hTrackPoly, s32 number, u32 color);
 extern void dds3TrackPolyListInit(trackPolySystem_t *hTrackPoly, s32 number);
 extern void dds3TrackPolyDraw(trackPolySystem_t *system);
 effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pParam);
@@ -178,7 +179,7 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pPar
     dds3TrackPolyVCSet(EE_ADDR(work->hTrackPoly), 1, work->param.t_abgr, work->param.t_abgr);
     dds3TrackPolySetMode(work->hTrackPoly, (u16)work->param.mode);
     count = work->number;
-    delayRange = pParam->timing;
+    delayRange = SDF_FRAMES(pParam->timing);
     slot = work->pPart;
     if (delayRange == 0) delayRange = 1;
     radiusBase = work->param.radius;
@@ -247,7 +248,7 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     viewOffset[2] = value;
 
     if (effBTLSkillCheckRun() != 0) {
-        effBTLModelGetSphereCenter((struct BtlUnit *)effBTLSkillGetInvokeFormation());
+        effBTLModelGetSphereCenter(EE_ADDR_AS(struct BtlUnit *, effBTLSkillGetInvokeFormation()));
         SDF_VU0_STOREVECTOR_NOMEM(position);
         LookAtMatrix(hData->param.position, position, D_0031F450);
         ReverseMatrix();
@@ -271,10 +272,10 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     slot = hData->pPart;
     speed = hData->param.speed;
     acceleration = hData->param.accele;
-    duration = hData->param.life;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    angleStep = hData->param.roll_s;
+    duration = SDF_FRAMES(hData->param.life);
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    angleStep = SDF_FRAME_STEP(hData->param.roll_s);
     baseColor = hData->abgr;
     if (count != 0) {
         do {
@@ -311,11 +312,11 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                 SDF_VU0_STOREVECTOR_NOMEM(position);
 
                 {
-                    f32 elapsed = (f32)slot->frame;
+                    f32 elapsed = SDF_FRAME_STEP((f32)slot->frame);
                     f32 halfAcceleration = acceleration * 0.5f;
                     f32 distance = speed * elapsed + halfAcceleration * elapsed * elapsed;
 
-                    elapsed = (f32)duration;
+                    elapsed = SDF_FRAME_STEP((f32)duration);
                     distance -= speed * elapsed + halfAcceleration * elapsed * elapsed;
                     position[0] += axis[0] * distance;
                     position[1] += axis[1] * distance;
@@ -566,7 +567,7 @@ void dds3NeedleModelVNCListDelete(dds3NeedleModel_tag *hNModel)
 
 void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     dst[0] = pPos[0];
     dst[1] = pPos[1];
@@ -575,7 +576,7 @@ void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pP
 
 void dds3NeedleModelGetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     pPos[0] = src[0];
     pPos[1] = src[1];

@@ -64,9 +64,9 @@ typedef struct {
 extern u8 D_00599C40[0xC0] __attribute__((section(".data")));
 extern u8 D_00599D00[0x400] __attribute__((section(".data")));
 
-extern s32 D_00599768 __attribute__((section(".data")));
-extern s32 D_0059976C __attribute__((section(".data")));
-extern s32 D_00599770 __attribute__((section(".data")));
+extern saddr_t D_00599768 __attribute__((section(".data")));
+extern saddr_t D_0059976C __attribute__((section(".data")));
+extern saddr_t D_00599770 __attribute__((section(".data")));
 /* The shared reply begins with result/version words. The client accessor
  * also publishes the command semaphore at the end of its 0x40-byte buffer. */
 typedef struct mcReply {
@@ -89,7 +89,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
 extern s32 sceMcOpen(s32 a, s32 b, char *c, s32 d);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void mcDelayThread(u16 ticks);
-extern char *strncpy(char *dst, const char *src, u32 n);
+extern char *strncpy(char *dst, const char *src, size_t n);
 extern int scePrintf(const char *fmt, ...);
 
 /* The chunk this string opens also carries the float constants the next
@@ -309,7 +309,7 @@ s32 sceMcSeek(s32 fd, s32 offset, s32 origin)
 
 void mceIntrReadFixAlign(void *argument)
 {
-    mcReadReplyPrefix_t *reply = (mcReadReplyPrefix_t *)((u32)argument | 0x20000000);
+    mcReadReplyPrefix_t *reply = EE_ADDR_AS(mcReadReplyPrefix_t *, (EE_ADDR(argument) | 0x20000000));
     u8 *destination;
     s32 i;
 
@@ -339,8 +339,8 @@ s32 sceMcRead(s32 a, void *b, s32 c)
         return -100;
     }
     D_005997C0.w[0] = a;
-    D_005997C0.w[7] = (s32)D_00599C40;
-    D_005997C0.w[6] = (s32)b;
+    D_005997C0.w[7] = EE_ADDR_S(D_00599C40);
+    D_005997C0.w[6] = EE_ADDR_S(b);
     D_005997C0.w[3] = c;
     sceSifWriteBackDCache(b, c);
     sceSifWriteBackDCache(D_00599C40, 0xC0);
@@ -377,8 +377,8 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
-        u32 top = ((u32)b - 1) & ~15;
-        u32 bot = (u32)b - 16;
+        addr_t top = (EE_ADDR(b) - 1) & ~15;
+        addr_t bot = EE_ADDR(b) - 16;
         s32 head = top - bot;
 
         D_005997C0.write.bulkBuffer = (const u8 *)b + head;
@@ -415,7 +415,7 @@ void mcHearAlarm(s32 cause, s32 address, s32 thread)
 
 void mcDelayThread(u16 ticks)
 {
-    SetAlarm(ticks, mcHearAlarm, (void *)GetThreadId());
+    SetAlarm(ticks, mcHearAlarm, EE_ADDR_AS(void *, GetThreadId()));
     SleepThread();
 }
 
@@ -459,16 +459,16 @@ INCLUDE_ASM(const s32, "sdk/libmc", sceMcSync);
 
 void mceGetInfoApdx(void *response)
 {
-    s32 *reply = (s32 *)((u32)response | 0x20000000);
+    s32 *reply = EE_ADDR_AS(s32 *, (EE_ADDR(response) | 0x20000000));
 
     if (D_00599768) {
-        *(s32 *)D_00599768 = reply[0];
+        *EE_ADDR_AS(s32 *, D_00599768) = reply[0];
     }
     if (D_0059976C) {
-        *(s32 *)D_0059976C = reply[1];
+        *EE_ADDR_AS(s32 *, D_0059976C) = reply[1];
     }
     if (D_00599770) {
-        *(s32 *)D_00599770 = reply[0x90 / sizeof(s32)];
+        *EE_ADDR_AS(s32 *, D_00599770) = reply[0x90 / sizeof(s32)];
     }
 }
 
@@ -485,7 +485,7 @@ s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e)
     }
     D_005997C0.w[1] = a;
     D_005997C0.w[2] = b;
-    D_005997C0.w[7] = (s32)D_00599C40;
+    D_005997C0.w[7] = EE_ADDR_S(D_00599C40);
     if (c != NULL) {
         D_005997C0.w[5] = 1;
     } else {
@@ -501,9 +501,9 @@ s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e)
     } else {
         D_005997C0.w[3] = 0;
     }
-    D_00599768 = (s32)c;
-    D_0059976C = (s32)d;
-    D_00599770 = (s32)e;
+    D_00599768 = EE_ADDR_S(c);
+    D_0059976C = EE_ADDR_S(d);
+    D_00599770 = EE_ADDR_S(e);
     sceSifWriteBackDCache(D_00599C40, 0xC0);
     ret = sceSifCallRpc(&D_00599740, 1, 1, &D_005997C0, 48, &D_0059AD00, 4,
                         mceGetInfoApdx, D_00599C40);
@@ -559,12 +559,12 @@ s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
 }
 
 extern u32 strlen(const char *str);
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, size_t size);
 
 void mceStorePwd(char *dest)
 {
     if (dest != NULL) {
-        const char *source = (const char *)((u32)D_00599D00 | 0x20000000);
+        const char *source = (const char *)(EE_ADDR(D_00599D00) | 0x20000000);
         u32 count;
 
         /* Native evaluates the length again on the short-string path. */
@@ -573,7 +573,7 @@ void mceStorePwd(char *dest)
         } else {
             count = 0x3FF;
         }
-        memcpy(dest, (const char *)((u32)D_00599D00 | 0x20000000), count);
+        memcpy(dest, (const char *)(EE_ADDR(D_00599D00) | 0x20000000), count);
         dest[count] = 0;
     }
 }

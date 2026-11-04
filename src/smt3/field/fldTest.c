@@ -10,6 +10,7 @@
 #include "event.h"
 #include "model.h"
 #include "motion.h"
+#include "sdfFrame.h"
 
 extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
@@ -642,7 +643,7 @@ extern s32 fldShadowWork, D_0054EA8C, D_0054EA90;
 extern sdfMat_t *fldDrawEnv;
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 rsetFrameMaskOtOffset;
-extern void *memset(void *destination, int value, unsigned int size);
+extern void *memset(void *destination, int value, size_t size);
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type);
 extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
@@ -651,7 +652,7 @@ extern void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY,
                                f32 *normalZ, f32 *planeConstant);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, s32 (*allocator)(s32));
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 (*allocator)(s32));
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *parameters);
@@ -1079,7 +1080,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             }
         }
         for (pass = 0; pass < 2; pass++) {
-            sdfDrawTag_t *quadTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTag_t *quadTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTag_t *triTag;
             sdf3DPrimPolyParm_t quadParams, triParams;
             sdfGrOt_t *ot;
@@ -1092,7 +1093,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             quadParams.faceCount = 0;
             quadParams.pointCount = 0;
             quadParams.color = pass == 0 ? 0x8080F080 : 0x408080F0;
-            triTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            triTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTagInit(triTag);
             sdf3DPrimLinkResetTm(triTag, NULL);
             sdf3DPrimLinkMat(triTag, fldDrawEnv, NULL);
@@ -1227,7 +1228,7 @@ void fldRunDanteClear(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fldRunTamaInit(void)
@@ -1633,7 +1634,7 @@ void fldMakeFroFileName(void) {
     char directory[0x20];
     char path[0x40];
     fldRunMapHeader_t *resource;
-    u32 base;
+    addr_t base;
     u32 first;
     u32 second;
     u32 third;
@@ -1641,14 +1642,14 @@ void fldMakeFroFileName(void) {
     fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     sprintf(path, "%sF%03d_%03d.FRO", directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
     fldRunMapData = sdfDevLoadFileEx(path, (u32 *)&resource, 0);
-    base = (u32)resource;
+    base = EE_ADDR(resource);
     first = base + resource->firstOffset;
     second = base + resource->secondOffset;
-    third = base + ((fldRunMapGrid_t *)second)->cellsOffset;
-    fldRunMapHeader = (fldRunMapHeader_t *)base;
-    fldRunMapCellData = (fldMapCell_t *)first;
-    pFroMapHead = (fldRunMapGrid_t *)second;
-    fldRunMapScale = (void *)third;
+    third = base + (EE_ADDR_AS(fldRunMapGrid_t *, second))->cellsOffset;
+    fldRunMapHeader = EE_ADDR_AS(fldRunMapHeader_t *, base);
+    fldRunMapCellData = EE_ADDR_AS(fldMapCell_t *, first);
+    pFroMapHead = EE_ADDR_AS(fldRunMapGrid_t *, second);
+    fldRunMapScale = EE_ADDR_AS(void *, third);
 }
 
 void fldFreeRunMapData(void)
@@ -2444,7 +2445,7 @@ void fldRunDanteGun1(void)
                 s32 offset;
 
                 fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = 8;
+                fldPlayerStepDist = SDF_FRAMES(8);
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;
@@ -2530,7 +2531,7 @@ void fldRunDanteGun2(void)
                 s32 offset;
 
                 fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = 8;
+                fldPlayerStepDist = SDF_FRAMES(8);
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;
@@ -2985,7 +2986,7 @@ void fldRunDanteFacePlayer(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *dst, int value, unsigned int size);
+extern void *memset(void *dst, int value, size_t size);
 extern void FromRotation(f32 angle);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);

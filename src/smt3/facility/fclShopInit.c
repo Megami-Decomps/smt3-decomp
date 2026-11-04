@@ -7,6 +7,12 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "interface.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
+extern void evtDisableMoonDraw(void);
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work);
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -91,7 +97,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -180,7 +186,7 @@ void fclShopGetTexPath(void *work, s32 mode)
     } else {
         path = "/facility/scr/shop/message.bf";
     }
-    *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u32 *)((u8 *)work + 0x238C), 0);
+    *(s32 *)((u8 *)work + 0x2388) = EE_ADDR_S(sdfDevLoadFileEx(path, (u32 *)((u8 *)work + 0x238C), 0));
 }
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
@@ -233,7 +239,7 @@ void shop_update_Shutdown(void)
         return;
     }
     fclShopTexFree((shpUpdateWork_t *)D_0054FB20);
-    fclScriptForcedEnd((u8 *)((shpUpdateWork_t *)D_0054FB20)->scriptArg);
+    fclScriptForcedEnd(EE_ADDR_AS(u8 *, ((shpUpdateWork_t *)D_0054FB20)->scriptArg));
     sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->unk_2388);
     fclShopEventEnd();
     sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->allocation);

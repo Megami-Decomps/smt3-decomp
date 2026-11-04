@@ -33,7 +33,7 @@ extern void evtBitOn(s32 no);
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
-extern void *memset(void *ptr, s32 value, u32 size);
+extern void *memset(void *ptr, s32 value, size_t size);
 extern void *sdfChipAllocZeroDirect(s32 size);
 extern void sdfChipFreeDirect(void *ptr);
 extern u32 dds3GetRandIntA(void *state, u32 limit);
@@ -267,7 +267,7 @@ void mselFreeResources(s32 arg)
 
 const char D_0053DF08[] = "mselProc";
 
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, size_t size);
 extern s8 dds3PadButtonState[];
 extern void rsetOtOfs(s32 offset);
 extern void rsetAlpha(s32 alpha);
@@ -603,7 +603,7 @@ s32 mselMain(dds3ProcessID_t *id)
         }
         if (fadeCounter >= 330) opacity = 0;
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    ((u32)opacity << 24) | 0x808080, (sdfTexHandle_t *)gGlobal->unk_44);
+                    ((u32)opacity << 24) | 0x808080, EE_ADDR_AS(sdfTexHandle_t *, gGlobal->unk_44));
         if (gGlobal->unk_50 == 330) dds3FadeOut(255, 255, 255, 60);
         work = gGlobal;
         nextCounter = work->unk_50;

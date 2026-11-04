@@ -19,6 +19,30 @@ more differing stores or change register allocation and grow to 292 bytes.
 The unresolved question is the source shape that gives the native white-store
 schedule without changing the surrounding allocation and control flow.
 
+A fresh unchanged full-owner diagnostic localizes the ordering to prereload
+scheduling. Before that pass, the three white stores remain in offsets 2, 1, 0
+order and the real white-value byte pseudo dies at the offset-0 store. All
+three have equal priority, but the offset-0 store has register weight -1 while
+the others have 0. Qualified live comparator decisions choose offset 0 first
+on register weight, then offset 2 before offset 1 on LUID. Postreload scheduling
+preserves 0, 2, 1 through LUID comparisons; register weight is not the deciding
+tier there. Final output retains offset 1 in the branch delay slot. This is a
+case-specific measured cause, not a general source-order or reorg rule.
+
+The unchanged case has byte-identical complete assembly and objects from the
+ordinary wrapper, direct plain and direct dump paths. Fresh observer baseline
+and observed outputs agree across all 28 artifacts; 5,565 frozen inputs remain
+unchanged. Target and four pass gates, normal completion, verified loopback
+listener ownership and cleanup pass. The owner comparison preserves 20 exact
+C peers and reports the three existing guarded nonmatches honestly; the target
+remains 69/71 at 284 bytes. This qualifies the baseline observation only, not an
+untested source variant or blanket observer neutrality.
+
+No new truthful source/lifetime control follows from this measurement alone.
+The ordinary permutations above remain closed. Do not add a dummy consumer or
+artificial lifetime extension merely to change the last-use scheduling weight;
+a further control needs a real consumer and preserved native memory accesses.
+
 ## nmeInitNameRow (nme/Nme_Init, 0x144)
 
 52 of 81 words match at the native 324-byte size, improved from

@@ -263,7 +263,7 @@ s32 trmEndEvent(s32 BgmMode)
     if (BgmMode != 0) {
         trmEndBGM();
     }
-    fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+    fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
     GBWK_3->ScriptPID = 0;
     fclSetTerminalMode(0);
     if (trmCreateEventProcessName(0, name) != 0) {
@@ -299,7 +299,7 @@ s32 trmChkEventWait(void)
 void trmSetProcessTerm(void)
 {
     if (gCallMode != 0) {
-        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+        fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
         fclSetTerminalMode(5);
         gProcessStat_3 = 2;
         gCallMode = 0;
@@ -345,7 +345,7 @@ void fclTerminalScanCommands(trmTerminalWork_t *work)
 
 extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, void *work);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
-extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 void fclTerminalInitList(void *list, s8 count, s32 handle)
@@ -402,7 +402,7 @@ s32 fclTerminalDumpJump(trmTerminalWork_t *work)
     return 0;
 }
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 extern void cmpSetCursorFlag(void *cursor, u8 *flags);
 extern void fclTerminalInitMenu(s32 id, void *commands, void *work);
 
@@ -471,7 +471,7 @@ void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *dst, s32 value, size_t size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void fclTerminalLoadTextures(void *work);
 extern void fclClearTerminalState(void);
@@ -510,7 +510,7 @@ void fclDestroyTerminal(dds3ProcessID_t *id)
         gProcessStat_3 = 0;
         fclTerminalFreeTextures(GBWK_3);
         fldProcSetTerminal(GBWK_3->terminalType, GBWK_3->terminalNo);
-        fclScriptForcedEnd((u8 *)GBWK_3->ScriptPID);
+        fclScriptForcedEnd(EE_ADDR_AS(u8 *, GBWK_3->ScriptPID));
         sdfMemFreeDirect(GBWK_3->scriptAllocationHandle);
         sdfMemFreeDirect(GBWK_3->allocation);
         GBWK_3 = NULL;

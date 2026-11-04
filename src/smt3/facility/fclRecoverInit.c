@@ -33,6 +33,11 @@ extern char D_0053D390[];
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern void p2sdPlayBGM(s32 MidiNo);
+extern void evtDisableMoonCalc(void);
+
 extern void sdfTexFree(s32 aHandle);
 
 extern char D_0054FBD8[];
@@ -63,7 +68,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void cmpInitSeqInfo(void *work, s32 seq);
 
@@ -123,7 +128,7 @@ void fclRecoverLoadTextures(void *workp)
     s8 i;
 
     for (i = 0; i < 3; i++) {
-        work->texHandle[i] = (s32)fclLoadTexture(D_003306C0[i]);
+        work->texHandle[i] = EE_ADDR_S(fclLoadTexture(D_003306C0[i]));
     }
     fclSetPanelTex(work->panel, 0, 0, 0x100, 0x80, work->texHandle[2]);
     printf("RECOVER : Tex load.\n");

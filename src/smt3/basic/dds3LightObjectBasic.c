@@ -1,6 +1,7 @@
 #include "common.h"
 #include "basic.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -9,7 +10,7 @@ typedef struct
 } dds3SceneLightParam_t;
 
 extern dds3SceneLightParam_t dds3LightParam;
-PS2_SYMBOL_AT(sdfVector4_t, dds3LightObjectAmbient, dds3LightParam, 0x10);
+SYMBOL_AT(sdfVector4_t, dds3LightObjectAmbient, dds3LightParam, 0x10);
 extern void evtLinkLightObjectBasic(void *h, dds3Basic_t *light, s32 frame);
 extern void evtUnlinkLightObjectBasic(void *h, s32 frame);
 
@@ -58,7 +59,7 @@ typedef struct fldResourceLight_t
 } fldResourceLight_t;
 
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);
@@ -212,7 +213,7 @@ void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame)
         data->Flag &= ~2;
     } else {
         data->Flag |= 2;
-        data->SwitchFrame = frame;
+        data->SwitchFrame = SDF_FRAMES(frame);
         SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
         MMI_RGBA_PACK_UNIT(lightColor, 128.0f);
         work[0].word = lightColor;

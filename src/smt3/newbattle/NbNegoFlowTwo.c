@@ -213,13 +213,13 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 struct nbKoukaPacket_t;
-extern s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoBackPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                 nbFormation_t *target);
-extern s32 nbMakeNegoWorkPosPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoWorkPosPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                    nbFormation_t *target);
-extern s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern s32 nbMakeNegoForwardPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                   nbFormation_t *target);
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 col,
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, u32 col,
                                  s32 delay, s32 aframe, s32 colframe);
 extern struct nbKoukaPacket_t *nbAddHomeMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno,
                                                 f32 speed);
@@ -1649,15 +1649,15 @@ s32 Flow6_53(nbNegoProcessData_t *n)
     case 1:
         nbClsNegoMessage(n);
         nbCameraSetTaizi(n->pform, n->eform);
-        nbMakeNegoBackPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbMakeNegoBackPacket(0, EE_ADDR_S(n->actdata), n->pform, n->eform);
         nbFormDispOff2(form);
-        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, form, n->eform);
+        nbMakeNegoWorkPosPacket(0, EE_ADDR_S(n->actdata), form, n->eform);
         n->waitframe = 10;
         break;
     case 2:
         nbFormDispOff2(n->pform);
-        nbMakeUnitFadeInPacket(1, (s32)n->actdata, n->pform, 0, 0, 0, 0);
-        nbMakeNegoForwardPacket(0, (s32)n->actdata, form, n->eform);
+        nbMakeUnitFadeInPacket(1, EE_ADDR_S(n->actdata), n->pform, 0, 0, 0, 0);
+        nbMakeNegoForwardPacket(0, EE_ADDR_S(n->actdata), form, n->eform);
         n->stat |= 8;
         nbFormDispOn2(form);
         nbCameraSetTaizi(form, n->eform);
@@ -1687,18 +1687,18 @@ s32 Flow6_74(nbNegoProcessData_t *n)
     form = &n->data->form[n->data->party[n->hojopartyindex].formindex];
     switch (n->nownegophase) {
     case 0:
-        nbMakeNegoBackPacket(0, (s32)n->actdata, form, n->eform);
+        nbMakeNegoBackPacket(0, EE_ADDR_S(n->actdata), form, n->eform);
         nbFormDispOff2(n->pform);
-        nbMakeNegoWorkPosPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbMakeNegoWorkPosPacket(0, EE_ADDR_S(n->actdata), n->pform, n->eform);
         nbCameraSetTaizi(n->pform, n->eform);
         n->waitframe = 10;
         break;
     case 1:
         nbFormDispOff2(form);
-        nbMakeUnitFadeInPacket(1, (s32)n->actdata, form, 0, 0, 0, 0);
+        nbMakeUnitFadeInPacket(1, EE_ADDR_S(n->actdata), form, 0, 0, 0, 0);
         nbAddHomeMoveKoukaPacket(0, 0, n->hojopartyindex, 1.0f);
         nbFormDispOn2(n->pform);
-        nbMakeNegoForwardPacket(0, (s32)n->actdata, n->pform, n->eform);
+        nbMakeNegoForwardPacket(0, EE_ADDR_S(n->actdata), n->pform, n->eform);
         n->waitframe = 10;
         break;
     case 2:

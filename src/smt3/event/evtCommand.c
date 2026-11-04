@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "scr.h"
 #include "field.h"
+#include "sdfFrame.h"
 
 struct effPCPAgiraoFirePartList_t;
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 type, const struct effPCPAgiraoFirePartList_t *effdata);
@@ -42,11 +43,11 @@ f32 scrGetFloatPara(s32 n);
 
 struct dds3Basic_t *dds3GetActiveScene(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
-extern u32 D_0054F754;
+extern addr_t D_0054F754;
 
-extern void evtRunUnitKutiMotion(u32 h);
+extern void evtRunUnitKutiMotion(addr_t h);
 
 void itfMesMngSetKutiCallback(s32 id, void (*func)(void));
 
@@ -69,6 +70,15 @@ extern const char D_0053A948[];
 void *evtGetResorceData(u32 eventno, s32 rid);
 
 #include "sdk_libc.h"
+
+/* Declared here because no header carries these. */
+extern s32 datGetKotowariLank(s32 lank);
+extern s32 p2sdBgmVolDown(void);
+extern s32 p2sdBgmVolUp(void);
+extern void Eve_DistortionBlurSetDefTex(void);
+extern void dds3AdminiExitSequence(void);
+extern void evtSetBokasi(s32 sw);
+extern void nbBgmStop(void);
 
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 
@@ -105,7 +115,7 @@ typedef struct evtModelHeader_t {
 } evtModelHeader_t;
 
 
-void dds3AdminiCallSequence(s32 sequence, s32 data, s32 datasize, s32 restore);
+void dds3AdminiCallSequence(s32 sequence, saddr_t data, s32 datasize, s32 restore);
 
 enum {
     EVT_SCALAR_REQUEST_SIZE = 4,
@@ -126,11 +136,11 @@ char *scrGetStrPara(s32 n);
 
 void fldBgmFadeOut(void);
 
-void fldSetSceneParam2(s32 pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam2(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 extern s32 fldGb[];
 
-void fldSetSceneParam3(s32 pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam3(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
 
 
@@ -715,7 +725,7 @@ u32 evtCommand_KUTISET(void) {
         s32 firstSlot = scrGetIntPara(1);
         s32 secondSlot = scrGetIntPara(2);
         evtSetUnitKutiMotion(unit, firstSlot, secondSlot);
-        D_0054F754 = (u32)unit;
+        D_0054F754 = EE_ADDR(unit);
     }
     {
         s32 window = scrGetMessageHandle();
@@ -738,8 +748,8 @@ u32 evtCommand_KUTI(void) {
         s32 firstSlot = scrGetIntPara(1);
         s32 secondSlot = scrGetIntPara(2);
         evtSetUnitKutiMotion(unit, firstSlot, secondSlot);
-        evtRunUnitKutiMotion((u32)unit);
-        D_0054F754 = (u32)unit;
+        evtRunUnitKutiMotion(EE_ADDR(unit));
+        D_0054F754 = EE_ADDR(unit);
     }
     {
         s32 window = scrGetMessageHandle();
@@ -1726,7 +1736,7 @@ s32 evtCommand_CALL_SAVE(void)
 
     payload[0] = scrGetIntPara(0);
     payload[1] = scrGetIntPara(1);
-    dds3AdminiCallSequence(0x1F, (s32)payload, EVT_PAIRED_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(0x1F, EE_ADDR_S(payload), EVT_PAIRED_REQUEST_SIZE, 0);
     scrSetIntReturnValue(0);
     return 1;
 }
@@ -1740,7 +1750,7 @@ u32 evtCommand_CALL_PUZZLEBOY(void)
     stage = scrGetIntPara(0);
     request[0] = stage;
     fldSetNextField(fldGb[0], stage + 1000);
-    dds3AdminiCallSequence(0x26, (s32)request, 4, 0);
+    dds3AdminiCallSequence(0x26, EE_ADDR_S(request), 4, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1769,7 +1779,7 @@ s32 evtCommand_CALL_EVENT(void)
 
     eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
-    dds3AdminiCallSequence(7, (s32)&eventId, EVT_SCALAR_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(7, EE_ADDR_S(&eventId), EVT_SCALAR_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1789,7 +1799,7 @@ void CallBattleSub(s32 encno, s32 eventno)
     request[0] = 0;
     request[1] = encno;
     evtNextEventNo = eventno;
-    dds3AdminiCallSequence(0x13, (s32)request, 8, eventno > 0);
+    dds3AdminiCallSequence(0x13, EE_ADDR_S(request), 8, eventno > 0);
     scrAllReleaseScript();
 }
 
@@ -1812,7 +1822,7 @@ void CallBattleSub2(s32 encno)
     request[0] = 0;
     request[1] = encno;
     evtNextEventNo = 0;
-    dds3AdminiCallSequence(0x13, (s32)request, 8, 1);
+    dds3AdminiCallSequence(0x13, EE_ADDR_S(request), 8, 1);
     scrAllReleaseScript();
 }
 
@@ -1848,8 +1858,8 @@ s32 evtCommand_CALL_FIELD(void)
     stage = scrGetIntPara(0);
     kind = scrGetIntPara(1);
     sequenceName = scrGetStrPara(2);
-    fldSetSceneParam2((s32)requestBuffer, stage, kind, sequenceName);
-    dds3AdminiCallSequence(6, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(EE_ADDR_S(requestBuffer), stage, kind, sequenceName);
+    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1863,8 +1873,8 @@ s32 evtCommand_CALL_FIELD2(void)
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam2((s32)requestBuffer, fldGb[0], kind, sequenceName);
-    dds3AdminiCallSequence(6, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(EE_ADDR_S(requestBuffer), fldGb[0], kind, sequenceName);
+    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1878,8 +1888,8 @@ s32 evtCommand_CALL_FIELD3(void)
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam3((s32)requestBuffer, fldGb[0], kind, sequenceName);
-    dds3AdminiCallSequence(6, (s32)requestBuffer, EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam3(EE_ADDR_S(requestBuffer), fldGb[0], kind, sequenceName);
+    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -2368,7 +2378,7 @@ u32 evtCommand_PMV_LOAD(void)
     datDebugPrintf(D_0053AE70, scrGetIntPara(0), scrGetIntPara(1));
     dds3LinkProcess(work->ProcessID, movieTask);
     evtSetPolygonMovieFlag(movieTask, 1);
-    scrSetIntReturnValue((s32)movieTask);
+    scrSetIntReturnValue(EE_ADDR_S(movieTask));
     printf(D_0053AE88);
     return 1;
 }
@@ -2378,16 +2388,16 @@ u32 evtCommand_PMV_RUN2(void)
     void *id;
 
     printf(D_0053AE98);
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     evtResetPolygonMovieFlag(id, 1);
-    scrSetIntReturnValue((s32)id);
+    scrSetIntReturnValue(EE_ADDR_S(id));
     printf(D_0053AEA8);
     return 1;
 }
 
 u32 evtCommand_PMV_LOAD_END_WAIT(void)
 {
-    return evtCheckPolygonMovieFlag((void *)scrGetIntPara(0), 8) != 0;
+    return evtCheckPolygonMovieFlag(EE_ADDR_AS(void *, scrGetIntPara(0)), 8) != 0;
 }
 
 /* Create and return an event/scene movie task without setting bit 0.
@@ -2409,7 +2419,7 @@ s32 evtCommand_PMV_RUN(void) {
     sceneId = scrGetIntPara(1);
     movieTask = evtStartPolygonMovie2(commandWork->ProcessID->priority, eventId, sceneId);
     dds3LinkProcess(commandWork->ProcessID, movieTask);
-    scrSetIntReturnValue((s32)(u32)movieTask);
+    scrSetIntReturnValue((s32)EE_ADDR(movieTask));
     return 1;
 }
 
@@ -2653,7 +2663,7 @@ u32 evtCommand_TEX_BE(void) {
     }
     task = evtStartPictureProcess(0x2AFE, entry);
     dds3LinkProcess(work->ProcessID, task);
-    scrSetIntReturnValue((s32)task);
+    scrSetIntReturnValue(EE_ADDR_S(task));
     return 1;
 }
 
@@ -2672,7 +2682,7 @@ u32 evtCommand_TEX_LOAD(void)
     }
     process = evtStartPictureProcess2(0x2AFE, scrGetStrPara(0));
     dds3LinkProcess(*(void **)((u8 *)pw + 0xE4), process);
-    scrSetIntReturnValue((s32)process);
+    scrSetIntReturnValue(EE_ADDR_S(process));
     return 1;
 }
 
@@ -2680,7 +2690,7 @@ u32 evtCommand_TEX_ON(void)
 {
     void *id;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     if (dds3ExistProcess(id) != 0) {
         evtPictureDrawOn(id);
     }
@@ -2691,7 +2701,7 @@ u32 evtCommand_TEX_OFF(void)
 {
     void *id;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     if (dds3ExistProcess(id) != 0) {
         evtPictureDrawOff(id);
     }
@@ -2702,7 +2712,7 @@ u32 evtCommand_TEX_CLS(void)
 {
     void *id;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     if (dds3ExistProcess(id) != 0) {
         evtKillPictureProcess(id);
     }
@@ -2716,8 +2726,8 @@ u32 evtCommand_TEX_SWAP(void)
     s32 pat;
     s32 prm;
 
-    id1 = (void *)scrGetIntPara(0);
-    id2 = (void *)scrGetIntPara(1);
+    id1 = EE_ADDR_AS(void *, scrGetIntPara(0));
+    id2 = EE_ADDR_AS(void *, scrGetIntPara(1));
     pat = scrGetIntPara(2);
     prm = scrGetIntPara(3);
     if (dds3ExistProcess(id1) != 0) {
@@ -2735,7 +2745,7 @@ u32 evtCommand_TEX_OT(void) {
     dds3ProcessID_t *id;
     s32 fade;
 
-    id = (dds3ProcessID_t *)scrGetIntPara(0);
+    id = EE_ADDR_AS(dds3ProcessID_t *, scrGetIntPara(0));
     fade = scrGetIntPara(1);
     evtPictureSetOt(id, fade);
     return 1;
@@ -2745,7 +2755,7 @@ u32 evtCommand_TEX_PRI(void) {
     dds3ProcessID_t *task;
     s32 value;
 
-    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    task = EE_ADDR_AS(dds3ProcessID_t *, scrGetIntPara(0));
     value = scrGetIntPara(1);
     evtPictureSetPri(task, value);
     return 1;
@@ -2758,7 +2768,7 @@ u32 evtCommand_TEX_SIZE(void)
     s32 sh;
     s32 tw;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     sw = scrGetIntPara(1);
     sh = scrGetIntPara(2);
     tw = scrGetIntPara(3);
@@ -2774,7 +2784,7 @@ u32 evtCommand_TEX_POS(void)
     s32 x1;
     s32 y1;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     x0 = scrGetIntPara(1);
     y0 = scrGetIntPara(2);
     x1 = scrGetIntPara(3);
@@ -2789,7 +2799,7 @@ u32 evtCommand_TEX_ALP(void)
     s32 alp0;
     s32 alp1;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     alp0 = scrGetIntPara(1);
     alp1 = scrGetIntPara(2);
     evtPictureSetAlpha(id, alp0, alp1, scrGetIntPara(3));
@@ -2802,7 +2812,7 @@ u32 evtCommand_TEX_ZOOM(void)
     s32 zoom0;
     s32 zoom1;
 
-    id = (void *)scrGetIntPara(0);
+    id = EE_ADDR_AS(void *, scrGetIntPara(0));
     zoom0 = scrGetIntPara(1);
     zoom1 = scrGetIntPara(2);
     evtPictureSetZoom(id, zoom0, zoom1, scrGetIntPara(3));
@@ -2815,7 +2825,7 @@ u32 evtCommand_TEX_STAT(void)
     s32 mode;
     s32 ret;
 
-    stat = evtPictureStat((void *)scrGetIntPara(0));
+    stat = evtPictureStat(EE_ADDR_AS(void *, scrGetIntPara(0)));
     mode = scrGetIntPara(1);
     ret = 0;
     if (mode == 0) {
@@ -2967,7 +2977,7 @@ u32 evt_1E91E8(void)
     u8 *gb;
 
     gb = DDS3_GBWK;
-    scrSetIntReturnValue(((u8 *)scrGetIntPara(0) + EE_ADDR(gb))[0x1CEC]);
+    scrSetIntReturnValue((EE_ADDR_AS(u8 *, scrGetIntPara(0)) + EE_ADDR(gb))[0x1CEC]);
     return 1;
 }
 
@@ -3010,7 +3020,7 @@ u32 evt_1E92F8(void)
         dds3DrawFlag |= 0x2000000;
         return 1;
     }
-    if (scrGetCommandTimer() < scrGetIntPara(0)) {
+    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0))) {
         dds3DrawFlag |= 0x2000000;
         return 0;
     }
@@ -3053,7 +3063,7 @@ void nbLoadDeadMoonTex(void) {
     u32 resource;
     sdfMemHandle_t *fileAllocation = sdfDevLoadFileEx("/fld/f/bin/moon_07.tmx", &resource, 0);
 
-    DeadMoonTmx = sdfTexSet((TMX_HEADER_t *)(resource));
+    DeadMoonTmx = sdfTexSet(EE_ADDR_AS(TMX_HEADER_t *, (resource)));
     sdfMemFreeDirect(fileAllocation);
 }
 

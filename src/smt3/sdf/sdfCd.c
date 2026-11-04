@@ -84,7 +84,7 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 extern void sdfDelayThread(s32 delay);
 
@@ -110,9 +110,9 @@ extern u8 D_0058F7C0[0x800];
 
 extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 
-extern void *malloc(u32 size);
+extern void *malloc(size_t size);
 
-extern s32 sceRead(s32 fileHandle, s32 buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, saddr_t buffer, s32 byteCount);
 
 extern const char *dds3ImgPath;
 
@@ -291,7 +291,7 @@ sdfCdImageDirEntry_t *sdfCdImageSearchFileDirect(const char *filename, s32 *lsn,
 }
 
 extern char D_00551910[]; /* "cdrom" */
-extern s32 memcmp(const void *left, const void *right, u32 size);
+extern s32 memcmp(const void *left, const void *right, size_t size);
 extern s32 strcmp(const char *left, const char *right);
 
 sdfCdImageDirEntry_t *sdfCdImageSearchFile(const char *path, s32 *lsn, u8 *mode)
@@ -403,7 +403,7 @@ s32 sdfCdImageRead(void *buff, s32 length) {
     }
     if (bytes > 0) {
         transferBytes = bytes;
-        if (((u32)destination & 15) == 0) {
+        if ((EE_ADDR(destination) & 15) == 0) {
             t = transferBytes >> 11;
             t = transferBytes - t * 0x800;
             transferBytes -= t;
@@ -488,7 +488,7 @@ void sdfCdImageLoadDir(const char *dirFile) {
     sceLseek(fileHandle, 0, 0);
     buffer = malloc(fileBytes);
     sdfCdImageDirData = buffer;
-    sceRead(fileHandle, (s32)buffer, fileBytes);
+    sceRead(fileHandle, EE_ADDR_S(buffer), fileBytes);
     sceClose(fileHandle);
 }
 

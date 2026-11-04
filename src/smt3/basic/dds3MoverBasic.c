@@ -34,7 +34,7 @@ typedef struct dds3MoverBasicWorkData_t
 extern s32 dds3MoverCount;
 extern char D_002FA670[10][16]; /* "MOVER00".."MOVER09" */
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);

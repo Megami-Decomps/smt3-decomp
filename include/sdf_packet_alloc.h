@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void sdfGrClosePacketBuff(s32 cursorAddress);
+void sdfGrClosePacketBuff(saddr_t cursorAddress);
 
 #endif /* SDF_PACKET_ALLOC_H */

@@ -58,7 +58,7 @@ typedef struct sdfImageSetCB
     s32 semaId;
     sdfImageSetPacket_tag *packetHead;
     sdfImageSetPacket_tag *packetTail;
-    u32 tagHead;
+    addr_t tagHead;
     sdfImageSetTag_t *tagTail;
 } sdfImageSetCb_t;
 
@@ -162,7 +162,7 @@ void sdfImageSetReq(sdfImageSetReqParam_t *parm)
     s32 remaining;
     s32 widthUnits;
     s32 last;
-    u32 src;
+    addr_t src;
     u64 formatAndAddr;
     u64 coords;
     u64 size;
@@ -264,19 +264,19 @@ void sdfImageSetChainTag(u32 head, sdfImageSetTag_t *tail)
     SignalSema(cb->semaId);
 }
 
-void sdfImageSetChainReleaseMem(s32 p)
+void sdfImageSetChainReleaseMem(saddr_t p)
 {
     sdfImageSetCb_t *cb = &sdfImageSetCb;
     sdfImageSetPacket_tag *release;
 
     if (p != 0) {
         release = sdfChipAllocZeroDirect(0xA0);
-        if (sdfChipCheck((void *)p) != 0) {
-            release->chip = (void *)p;
+        if (sdfChipCheck(EE_ADDR_AS(void *, p)) != 0) {
+            release->chip = EE_ADDR_AS(void *, p);
             release->freeMode = SDF_IMAGESET_MEM_CHIP;
         } else {
             release->freeMode = SDF_IMAGESET_MEM_HANDLE;
-            release->memHandle = sdfMemGetHandleByPtr((void *)p);
+            release->memHandle = sdfMemGetHandleByPtr(EE_ADDR_AS(void *, p));
         }
         WaitSema(cb->semaId);
         if (cb->packetTail != NULL) {
@@ -320,7 +320,7 @@ void sdfImageSetTrans(void)
 
     if (dmaAddr != 0) {
         s32 threadId = GetThreadId();
-        s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, (void *)threadId);
+        s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, EE_ADDR_AS(void *, threadId));
         u64 tag = SDF_DMA_TAG(EE_ADDR(D_005293A0), 0x20000000);
         u32 *chan;
 
@@ -329,7 +329,7 @@ void sdfImageSetTrans(void)
         chan = sceDmaGetChan(1);
         HW_WRITE(chan, HW_READ(chan) | 0x40);
         FlushCache(0);
-        sceDmaSend(chan, (void *)dmaAddr);
+        sceDmaSend(chan, EE_ADDR_AS(void *, dmaAddr));
         SleepThread();
         RemoveDmacHandler(1, handlerId);
     }

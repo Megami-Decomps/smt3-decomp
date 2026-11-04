@@ -87,15 +87,15 @@ extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void *sceDmaGetChan(s32 channel);
 extern u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle);
 extern void *sdfGrOpenPacketBuff(void);
-extern void sdfGrClosePacketBuff(s32 aBuffPtr);
+extern void sdfGrClosePacketBuff(saddr_t aBuffPtr);
 void sdfDevConsDrawBG(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aCB);
 
 extern void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize);
 extern void sdfDevConsDraw(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aBuf);
 extern void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB);
 
-extern void *memset(void *a, s32 b, u32 c);
-extern void *memmove(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
+extern void *memmove(void *a, const void *b, size_t c);
 extern s32 vsprintf(char *buf, const char *fmt, void *args);
 
 extern void *sdfChipAllocDirect(s32 aSize);
@@ -443,14 +443,14 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
 }
 
 void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize) {
-    u32 ringAddress;
+    addr_t ringAddress;
     u8 *ring;
     vu64 *packet;
     u64 textureState;
     s32 halfBufferBytes = aBufferSize >> 1;
 
     ringAddress = EE_UNCACHED_RING(EE_PHYSICAL(EE_ADDR(aPacketBuffer)));
-    ring = (u8 *)ringAddress;
+    ring = EE_ADDR_AS(u8 *, ringAddress);
     aCB->buffSize = halfBufferBytes;
     aCB->buf[0] = ring;
     aCB->buf[1] = ring + halfBufferBytes;
@@ -554,7 +554,7 @@ void *sdfDevVprintf(u32 *aCB, const char *aStr, void *LegacyParamArray) {
         header->glyphTag = 0x5400000000008000ULL | glyphCount;
         header->glyphRegisters = 0x53531;
     }
-    sdfGrClosePacketBuff((s32)cursor);
+    sdfGrClosePacketBuff(EE_ADDR_S(cursor));
     return start;
 }
 

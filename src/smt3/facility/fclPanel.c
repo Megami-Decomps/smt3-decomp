@@ -365,7 +365,7 @@ extern void fclDrawPanelType1(fclPanel_t *panel, s32 ot);
 extern void fclDrawPanelType3(fclPanel_t *panel, s32 ot);
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,

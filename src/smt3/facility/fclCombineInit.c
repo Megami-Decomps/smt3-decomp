@@ -10,6 +10,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -161,7 +162,7 @@ extern void sortSkillList(cmbUnit_t *unit);
 
 extern s32 p2sdStopBGM(s32 id);
 
-extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
+extern saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -203,7 +204,7 @@ extern void cmpModelInitCore2(void);
 
 extern s8 dds3PadButtonState[];
 
-extern void *dds3GetProcessData(s32 id);
+extern void *dds3GetProcessData(saddr_t id);
 
 typedef struct
 {
@@ -355,7 +356,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(cmpCursorInfo_t *cur, u8 count, u8 visible, saddr_t layout);
 
 extern void cmpInitCursorLayout(cmpCursorInfo_t *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
@@ -372,7 +373,7 @@ extern void fclEncycSetExplainData(void *pbmd);
 extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
 extern u8 D_00551F18[4];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 
 void fclCombineDisableCmdZensyo(void)
 {
@@ -381,7 +382,7 @@ void fclCombineDisableCmdZensyo(void)
 
     enabled = (allow != 0) ? enabled : 0;
     if (enabled != 0) {
-        cmpSetCursorFlag(&CMB_GBWK->combineCursor, (s32)D_00551F18);
+        cmpSetCursorFlag(&CMB_GBWK->combineCursor, EE_ADDR_S(D_00551F18));
         if ((D_00551F18[1] & 2) == 0) {
             D_00551F18[1] |= 2;
             CMB_GBWK->combineCursor.unk_21++;
@@ -390,7 +391,7 @@ void fclCombineDisableCmdZensyo(void)
 }
 
 extern u8 cmbMenuEntryTable[8];
-extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 
 void cmbEnableMenuEntry5(void)
 {
@@ -399,7 +400,7 @@ void cmbEnableMenuEntry5(void)
 
     enabled = (allow != 0) ? enabled : 0;
     if (enabled != 0) {
-        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, EE_ADDR_S(cmbMenuEntryTable));
         if ((cmbMenuEntryTable[5] & 2) == 0) {
             cmbMenuEntryTable[5] |= 2;
             CMB_GBWK->menuCursor.unk_21++;
@@ -567,7 +568,7 @@ extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fclUpdateInit(void)
@@ -1074,7 +1075,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
 
 extern void cmbSetupBirthPanel(s32 index);
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 extern s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
                             cmbUnit_t *third, datUnitWork_t *result,
                             s32 available, s8 mode, s8 flag, cmpSkillList_t *skills);
@@ -1217,7 +1218,7 @@ s32 cmbCalcIntroduce(void)
         cmbRunActionSe(0, 1);
         CMB_GBWK->birthVariant = 0;
     }
-    if (CMB_GBWK->actionFrame < 150) {
+    if (CMB_GBWK->actionFrame < SDF_FRAMES(150)) {
         return 0;
     }
     if (CMB_GBWK->unk_00004 != 0) {
@@ -2319,7 +2320,7 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src)
@@ -4206,11 +4207,11 @@ void cmbUpdateIntroduce(void)
         return;
     }
     frame = CMB_GBWK->actionFrame;
-    if (frame < 150) {
+    if (frame < SDF_FRAMES(150)) {
         CMB_GBWK->actionFrame = frame + 1;
         return;
     }
-    if (frame < 1000) {
+    if (frame < SDF_FRAMES(1000)) {
         CMB_GBWK->actionFrame = frame + 1;
     }
     processStat = dds3GetProcessStat(CMB_GBWK->scriptArg);
@@ -4571,14 +4572,14 @@ extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 
 extern char D_0053CD68[];
 
-s32 cmbMakeModelPath(u16 id, s32 *size)
+saddr_t cmbMakeModelPath(u16 id, s32 *size)
 {
     char path[0x80];
     char base[0x10];
 
     mdlGetFilebase(6, id, base, 0x10);
     sprintf(path, D_0053CD68, base);
-    return (s32)sdfDevLoadFileEx(path, NULL, size);
+    return EE_ADDR_S(sdfDevLoadFileEx(path, NULL, size));
 }
 
 void cmbInitActionData(s32 id, cmbActionData_t *data)
@@ -4598,7 +4599,7 @@ void cmbLoadActionModel(s32 id, cmbActionData_t *data)
     cmbInitActionData(id, data);
     handle = cmbMakeModelPath(id, &data->size);
     data->handle = handle;
-    data->lock = sdfMemLock((sdfMemHandle_t *)handle);
+    data->lock = sdfMemLock(EE_ADDR_AS(sdfMemHandle_t *, handle));
     printf(D_0053CD80, (u16)data->id);
 }
 
@@ -4611,7 +4612,7 @@ void cmbFreeActionModel(void *model)
     cmbActionData_t *data = model;
 
     if (data->handle != 0) {
-        sdfMemFreeDirect((void *)data->handle);
+        sdfMemFreeDirect(EE_ADDR_AS(void *, data->handle));
         data->handle = 0;
         printf(D_0053CDA8, (u16)data->id);
     } else if (data->model != NULL) {
@@ -4640,13 +4641,13 @@ struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
         }
     } else {
         if (model != NULL) {
-            sdfMemFreeDirect((void *)data->handle);
+            sdfMemFreeDirect(EE_ADDR_AS(void *, data->handle));
             data->handle = 0;
         } else {
             mdlPackDecode(6, (u16)data->id, 0x101, (const u8 *)data->lock,
                           data->size);
             data->model = mdlLoad(6, (u16)data->id);
-            sdfMemFreeDirect((void *)data->handle);
+            sdfMemFreeDirect(EE_ADDR_AS(void *, data->handle));
             data->handle = 0;
             printf(D_0053CE10, (u16)data->id);
         }
@@ -4812,8 +4813,8 @@ void cmbDrawModelAt(u8 index, f32 *position, f32 firstOffset, f32 secondOffset)
 
     SDF_VU0_COPYVECTOR(&smokePosition, position);
     smokePosition.y += -firstOffset * 2.5f + secondOffset * 2.5f - 40.0f + 20.0f;
-    effEVECombParSmokeSetPosition((void *)CMB_GBWK->smoke[index], &smokePosition);
-    effEVECombParSmokeDraw((effEVECombParSmoke_t *)CMB_GBWK->smoke[index]);
+    effEVECombParSmokeSetPosition(EE_ADDR_AS(void *, CMB_GBWK->smoke[index]), &smokePosition);
+    effEVECombParSmokeDraw(EE_ADDR_AS(effEVECombParSmoke_t *, CMB_GBWK->smoke[index]));
 
     if (dds3PadButtonState[0x20] != 0) {
         for (i = 5; i >= 0; i--) {
@@ -5151,10 +5152,10 @@ void cmbUpdateCameraZoom(void)
     f32 zoom = CMB_GBWK->actionZoom;
     s32 target;
 
-    if (cmbActionStep != 0 || CMB_GBWK->actionFrame < 80) {
+    if (cmbActionStep != 0 || CMB_GBWK->actionFrame < SDF_FRAMES(80)) {
         return;
     }
-    if (CMB_GBWK->actionFrame < 220) {
+    if (CMB_GBWK->actionFrame < SDF_FRAMES(220)) {
         zoom = 0.0f;
     }
     target = CMB_GBWK->actionTargetIndex;
@@ -5215,7 +5216,7 @@ void cmbUpdateTimeTable(void)
     void (*action)(void);
 
     if (index < table->count - 1 &&
-        (u32)work->actionFrame >= table->entries[index + 1].frame) {
+        (u32)work->actionFrame >= SDF_FRAMES(table->entries[index + 1].frame)) {
         printf("Updating time table : %d -> %d\n", index, index + 1);
         work = CMB_GBWK;
         work->actionTargetIndex = (s32)((u32)work->actionTargetIndex + 1);
@@ -5225,7 +5226,7 @@ void cmbUpdateTimeTable(void)
     entry = &D_0032F628[mode].entries[index];
     action = entry->action;
     if (action != NULL &&
-        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == entry->frame))) {
+        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == SDF_FRAMES(entry->frame)))) {
         action();
         work = CMB_GBWK;
     }
@@ -5298,7 +5299,7 @@ typedef struct effEVECombParSmokeParam_t {
 typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
 extern effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *params);
 
-s32 cmbStartSmokeEffect(u16 devilId)
+saddr_t cmbStartSmokeEffect(u16 devilId)
 {
     effEVECombParSmokeParam_t params;
     f32 modelSize = datModelParamTable[devilId].formsize / 50.0f;
@@ -5308,7 +5309,7 @@ s32 cmbStartSmokeEffect(u16 devilId)
     params.number = cmbGetSmokeColor(devilId);
     params.number = (u32)((f32)params.number * modelSize);
     params.spawnRadius *= modelSize * 0x1.333332p+0f;
-    return (s32)effEVECombParSmokeCreate(&params);
+    return EE_ADDR_S(effEVECombParSmokeCreate(&params));
 }
 
 void cmbSetActionWorkValues(void)
@@ -5533,7 +5534,7 @@ s32 cmbChkPolygonMovie(void)
     {
         return 0;
     }
-    if ((*(s32 *)dds3GetProcessData((s32)proc) & 8) == 0)
+    if ((*(s32 *)dds3GetProcessData(EE_ADDR_S(proc)) & 8) == 0)
     {
         return 1;
     }
@@ -5598,7 +5599,7 @@ void cmbUpdateAction(void)
         if (fclCombineChkEventStat() != 0 || event == NULL || movie == NULL) {
             return;
         }
-        if ((*(u32 *)dds3GetProcessData((s32)movie) & 8) == 0) {
+        if ((*(u32 *)dds3GetProcessData(EE_ADDR_S(movie)) & 8) == 0) {
             return;
         }
         if (fclGetFlag(4) == 0) {
@@ -5613,11 +5614,11 @@ void cmbUpdateAction(void)
         cmbActionStep = 1;
     } else {
         if (fclGetWorkValue(2) != 0) {
-            if (CMB_GBWK->actionFrame < 780) {
+            if (CMB_GBWK->actionFrame < SDF_FRAMES(780)) {
                 allowSkip = 1;
             }
         } else {
-            allowSkip = CMB_GBWK->actionFrame < 580;
+            allowSkip = CMB_GBWK->actionFrame < SDF_FRAMES(580);
         }
         if (allowSkip != 0) {
             if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {

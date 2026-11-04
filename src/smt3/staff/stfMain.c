@@ -11,7 +11,7 @@ extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-extern s32 stfShutDown(void);
+extern saddr_t stfShutDown(void);
 
 extern char D_0053F100[];
 
@@ -240,9 +240,9 @@ void ObjDispOff(void)
         alpha = oStaff_UI->unk_0104;
         rsetAlpha(0);
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    ((u32)alpha << 24) | 0xA0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_000C);
+                    ((u32)alpha << 24) | 0xA0A0A0, EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_000C));
         DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                    0x80A0A0A0, (sdfTexHandle_t *)oStaff_UI->unk_0008);
+                    0x80A0A0A0, EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0008));
     }
     rsetAlpha(1);
     if (oStaff_UI->unk_010C < 0) {
@@ -259,15 +259,15 @@ void ObjDispOff(void)
             DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
                          ((u32)fade << 24) | 0xFFFFFF, 0x80FFFFFF, 0x80FFFFFF,
                          ((u32)fade << 24) | 0xFFFFFF,
-                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                         EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
             if ((s32)((u32)x + (u32)width) < 0x200) {
                 DrwSprite2D((s32)((u32)x + (u32)width), 0, (s32)(0x200u - ((u32)x + (u32)width)), 0x1C0,
                             (s32)((u32)x + (u32)width), 0, (s32)(0x200u - ((u32)x + (u32)width)), 0x1C0,
-                            0x80FFFFFF, (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                            0x80FFFFFF, EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
             }
         } else {
             DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80FFFFFF,
-                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                        EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
         }
     } else {
         fade = 0;
@@ -280,7 +280,7 @@ void ObjDispOff(void)
             DrwSprite2DC(0, 0, width, 0x1C0, 0, 0, width, 0x1C0,
                          ((u32)fade << 24) | 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
                          ((u32)fade << 24) | 0xFFFFFF,
-                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                         EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
         } else if (width < 0x300) {
             x = width - 0x100;
             if (width >= 0x201) {
@@ -294,12 +294,12 @@ void ObjDispOff(void)
             DrwSprite2DC(x, 0, width, 0x1C0, x, 0, width, 0x1C0,
                          0x80FFFFFF, ((u32)fade << 24) | 0xFFFFFF,
                          ((u32)fade << 24) | 0xFFFFFF, 0x80FFFFFF,
-                         (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                         EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
             DrwSprite2D(0, 0, x, 0x1C0, 0, 0, x, 0x1C0, 0x80FFFFFF,
-                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                        EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
         } else {
             DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80FFFFFF,
-                        (sdfTexHandle_t *)oStaff_UI->unk_0004);
+                        EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
         }
     }
     rsetAlpha(0);
@@ -352,7 +352,7 @@ extern s32 stfMain2(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 drawTimer,
                               dds3ProcessFunc_t drawExit, dds3ProcessFunc_t deleteExit, void *work);
 
-s32 stfShutDown(void) {
+saddr_t stfShutDown(void) {
     sdfMemHandle_t *handle;
     stfUiWork_t *work;
 
@@ -367,8 +367,8 @@ s32 stfShutDown(void) {
     stfFreeFiles();
     p2sdLoadPcmFile("STAFF.ADB", 0x7F);
     dds3VblanksPerFrame = 1;
-    return (s32)dds3StartProcess(D_0053F100, 0x2B19, 0, 0,
-                                 stfMain2, (dds3ProcessFunc_t)stfDestroy, NULL);
+    return EE_ADDR_S(dds3StartProcess(D_0053F100, 0x2B19, 0, 0,
+                                 stfMain2, (dds3ProcessFunc_t)stfDestroy, NULL));
 }
 
 s32 stfExit(void)

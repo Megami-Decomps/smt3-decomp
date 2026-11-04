@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "sdfFrame.h"
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
@@ -305,7 +306,7 @@ void fldFirstInit(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 #endif
 
 void fldInitAllValue(void)
@@ -629,7 +630,7 @@ void fldPlayerAFree(void)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void fldJDataLoad(void)
@@ -749,12 +750,12 @@ void fldRegistUnitPad(void)
         fldEncountSetFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(ctrl->handle, fldUnitPad);
     }
-    fldGlobalBase.word5C = 4;
-    if (fldGlobalBase.menuOpenFlag < 4) {
-        fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.word5C = SDF_FRAMES(4);
+    if (fldGlobalBase.menuOpenFlag < SDF_FRAMES(4)) {
+        fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
     }
-    if (fldGlobalBase.encountState < 5) {
-        fldGlobalBase.encountState = 5;
+    if (fldGlobalBase.encountState < SDF_FRAMES(5)) {
+        fldGlobalBase.encountState = SDF_FRAMES(5);
     }
     fldStatusSet();
     fldGlobalBase.hitMatterIndex = -1;
@@ -1101,7 +1102,7 @@ void fldWaveTask(void)
         if (p->use == 0) {
             continue;
         }
-        if (++p->cnt >= 0x47) {
+        if (++p->cnt >= SDF_FRAMES(0x47)) {
             dds3ObjectBaseOnFlag(p->pBasic, 1);
             p->use = 0;
         }

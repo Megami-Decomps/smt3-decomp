@@ -21,7 +21,7 @@ extern char D_0053BC98[];
 extern char D_0054F910[];
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern void *dds3FontReqAllocDrawTag(void);
 
@@ -29,7 +29,7 @@ extern void dds3ConsPanelTagLink(void *aTag, s32 aX, s32 aY, s32 aSx, s32 aSy);
 
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
 
 extern void sdfPrimLinkRect(void *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1,
                             s32 aY1, s32 aZ, s32 (*aAllocator)(s32));

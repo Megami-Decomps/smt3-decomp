@@ -216,7 +216,7 @@ extern f32 nbFormEnemyInterval;
 
 extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void nbAllFormDispOn(void);
 

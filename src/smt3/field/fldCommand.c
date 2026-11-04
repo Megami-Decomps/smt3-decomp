@@ -95,7 +95,7 @@ extern u32 gSlNowCardCheck;
 
 extern u32 gslDrawFlagBg;
 
-extern u32 baseIconFileHandle;
+extern addr_t baseIconFileHandle;
 
 extern u32 gslErrorKeyFlag;
 
@@ -214,7 +214,7 @@ u32 fldGetRestoreMode(void);
 
 scrProcessWork_s *scrGetScriptHandle(void);
 
-extern s32 fldFindEveRngIndex(u32);
+extern s32 fldFindEveRngIndex(addr_t);
 
 extern s32 fldDoor_GetHasigoTbl(s32);
 
@@ -246,7 +246,7 @@ extern void fldMotionSePlay(s32 seid, s32 subid);
 
 extern s32 fldEncountRate[];
 
-extern const char *fldEveHitResName_Find(u32 pid);
+extern const char *fldEveHitResName_Find(addr_t pid);
 
 extern void fldDoor_ExitCamera(const char *evename);
 
@@ -290,7 +290,7 @@ extern void fldElvSetFloor(s32 first, s32 second);
 
 extern void fldElvReset(void);
 
-extern s32 fldEveHitResID_Find(u32 pid);
+extern s32 fldEveHitResID_Find(addr_t pid);
 
 extern void fldDoorRun_FindStart(s32 resid);
 

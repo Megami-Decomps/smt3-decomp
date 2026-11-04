@@ -277,7 +277,7 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
 extern u8 datModelParamTable[];
@@ -355,7 +355,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2, nbFormation_t *form3);
+nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, saddr_t uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2, nbFormation_t *form3);
 
 void nbMoveFormation(void *data, s32 sindex, s32 dindex);
 
@@ -447,7 +447,7 @@ s32 Bunshin1(nbEventProcessData_t *ed)
     nbFormation_t *form;
 
     form = ed->data->form;
-    nbAddOngBunshin2Packet(0, (s32)ed, &form[5], &form[6], &form[4], &form[7]);
+    nbAddOngBunshin2Packet(0, EE_ADDR_S(ed), &form[5], &form[6], &form[4], &form[7]);
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
     nbFreeEffectSlot(ed);
     return 0;

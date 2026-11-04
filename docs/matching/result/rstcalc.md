@@ -2,25 +2,49 @@
 
 ## cmpFindKugatatiMsgEntry (rstcalc, 0x60)
 
-12 of 24 words differ, at the exact 96-byte size. Scans a devil's 24 level-up
-records for kind 5 and returns that record's value, or -1.
+14 of 24 words differ in the current complete-owner check, at the exact
+96-byte native size (0x002231F8 through 0x00223258). The earlier 12/24 figure
+was historical, not a newly measured current score. The function scans a
+unit's 24 level-up entries for kind 5 and returns the signed level byte,
+or -1. The current typed-index draft uses an advancing entry address after
+optimization; the earlier one-record-biased walk describes a historical form.
 
-Every instruction matches; the twelve differing words are two register pairs
-exchanged. Retail loads the id into `$5` and reuses the parameter register
-`$4` for the loop index; this loads the id into `$2` and puts the index in
-`$5`, which shifts the multiply chain's temporaries with it. Nothing in the
-source reaches that choice: the parameter is dead after the single `lhu`
-either way.
+Retail loads the ID into `$5` and uses `$4` for the loop index. The current
+baseline instead loads the ID into `$2` and assigns the index to `$5`.
+A qualified historical allocation trace distinguishes actual coalescing from
+independent register reuse: address-arithmetic pseudos 90/91/93/94 combine
+into one local quantity assigned `$3`; ID pseudo88 independently receives
+`$2`, and intermediate92 independently receives `$4`. Loop index96 is not
+locally allocated and receives `$5` in global allocation. This does not
+establish parameter/index or ID/index coalescing.
 
-The record walk itself is settled. The induction pointer is based one record
-early and the fields are read at `entry[1]`, which is what puts 0x6 and 0x7
-in the load displacements against a pointer stepping by 4.
+That exact historical case verified 279 events, 34 exercised guarded hooks,
+28 equal baseline/observed artifacts and 5,565 stable inputs, with pass and
+completion gates plus owned listener/process cleanup. After the subsequent
+shared-header changes, a fresh current-context baseline has the same complete
+allocated sections, non-file symbols, ordered relocations and assembly apart
+from randomized file metadata. Input hashes have changed: this output identity
+does not turn the historical live observation into a freshly traced case.
 
-Ruled out: a `u16` and a `u32` local for the id, declared before and after
-the entry pointer; `unit->id * 0x66` against `0x66 * unit->id`; biasing the
-base by 4 and reading `entry->kind` with no `[1]`; `entry[i + 1]` indexing
-instead of a walking pointer; and a typed `datLevelUpTable` array with an
-`asm` alias, which costs one more word.
+One bounded current-context control binds the initialized real signed loop
+index to `$4`. The function has no calls, and the index is used only by its
+actual bounded loop. It remains 96 bytes but worsens to 20/24 differing words:
+the ID does not move to native `$5`, the address intermediate moves there,
+and the compiler replaces the advancing pointer with scaled-index address
+recomputation. The candidate is rejected. Only this target's text changes;
+all 88 exact C peers and allocated data remain unchanged. Both controls have
+complete ordinary/plain/dump parity and independently stable 5,565-input maps.
+
+Strict implicit-declaration checks pass in NON_MATCHING and combined
+NON_MATCHING/SKIP_ASM contexts for both forms. Production fails identically
+on inherited undeclared rstSetSkillActFlag, datGetPlayerLNDList and
+cmpGetEncycWork; this is not a new control regression or a three-context pass.
+No declaration repair or source change is retained by this investigation.
+
+Historical negatives remain closed: ID type/declaration order, commuted
+multiply-by-102, byte-address and one-record-biased walks, indexed forms, and
+typed-table alias controls. Do not repeat register/placement permutations
+without a new concrete source or compiler premise.
 
 ## cmbChkDevilEvo (rstcalc, 0x74)
 
@@ -319,3 +343,52 @@ with normal owned-data checks.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+### Production list-provider declaration
+
+The exact `s32 datGetPlayerLNDList(u8 *list)` declaration is now visible in
+production as well as guarded builds. Its same-owner provider conditionally
+writes one byte through the actual list pointer and returns an `s32`
+classification; `datGetPlayerLNDLevel` passes its real byte local and consumes
+that classification. Only the declaration guard is removed. Provider and caller
+bodies, call targets, memory accesses and ABI are unchanged.
+
+Independent complete-owner verification gives 89 match, 0 differ. Across
+production, NON_MATCHING and NON_MATCHING plus SKIP_ASM contexts, complete
+allocated sections, non-file symbols, ordered relocations and normalized
+assembly are identical before and after the change; plain/dump parity also
+passes. No matching credit is added. The production implicit-declaration
+diagnostic now has two inherited failures, `rstSetSkillActFlag` and
+`cmpGetEncycWork`, rather than three. Both guarded contexts pass. This is not
+a complete production strict-declaration repair. A paired setter declaration
+control changes an exact caller and was rejected; the pointer-return chain
+was unchanged in that earlier landing; the following repair addresses it.
+
+Canonical qualification passes owner 89/0 with unchanged allocated data, fresh
+139-owner / 479-draft compilation, 459 tests and 817 layout assertions, seven
+IRX modules, inline/shell checks, retail checksum/byte comparison and build/report
+no-ops. The 21,252 runtime inputs remain stable during these gates. Game
+coverage remains 8595 functions and 1485932 bytes.
+
+### Encyclopedia model pointer contract
+
+The real `cmpGetEncycWork` provider returns `mdlObj_t *`. Its declaration is
+now visible in every build, and the local in `rstGetEncycPanel` and parameter
+of `rstFindUnitScene` carry that pointer type rather than an `s32` address.
+The three consumers use ordinary byte-pointer views for the actual model
+subobject pointer at offset 0x18 and preserve the native access at offset 0x80.
+Calls, ordering, widths and values are unchanged. This fixes the local pointer
+contract; it does not establish general host portability or new model layouts.
+
+Independent provider/caller review and three-context complete-output checks
+verify unchanged allocated sections, non-file symbols, ordered relocations and
+normalized assembly. Six plain/dump pairs agree. Production owner remains
+89/0; guarded comparison retains its existing 88/17 result. The production
+implicit-declaration diagnostic now retains only `rstSetSkillActFlag`; both
+guarded contexts pass. The rejected setter-declaration control is not included.
+No matching credit is added.
+
+Fresh canonical gates pass 459 tests, 817 layout assertions, 139 guarded owners /
+479 drafts, seven IRX modules, inline/shell checks and exact retail checksum/byte
+comparison. Complete owner data and output parity remain unchanged; build and
+report are true no-ops after qualification, with stable runtime inputs.

@@ -1,7 +1,11 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
 
 struct sdfPadCb_t;
 
@@ -121,7 +125,7 @@ extern s32 scePadInit(s32);
 
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 void sdfPadControl(sdfPadCb_t *entry);
 
@@ -304,7 +308,7 @@ void sdfPadWork(void) {
         pressed = changed & current;
         entry->lastPadData = current;
         if (current != previous) {
-            entry->repeatDeadline = vblank + 15;
+            entry->repeatDeadline = vblank + SDF_FRAMES(15);
             repeat = pressed;
         } else {
             repeat = 0;
@@ -313,7 +317,7 @@ void sdfPadWork(void) {
 
                 if (elapsed >= 0) {
                     repeat = current;
-                    entry->repeatDeadline = vblank + elapsed + 4;
+                    entry->repeatDeadline = vblank + elapsed + SDF_FRAMES(4);
                 }
             }
         }

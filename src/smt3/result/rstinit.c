@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -28,6 +29,10 @@ extern rstData_t *GBWK_1;
 
 #include "sdk_libc.h"
 
+/* Declared here because no header carries these. */
+extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
+extern void *memset(void *a, s32 b, size_t c);
+
 extern char D_0053DA28[];
 
 extern s8 gProcessStat_4;
@@ -43,7 +48,7 @@ extern void fclClearFlag(s8 index);
 extern s32 fclSetWorkValue(s8 index, s32 value);
 extern void rstGetEvoModelParam(u16 id, f32 *out);
 extern datUnitVisual_t datModelParamTable[];
-extern s32 cmpGetEncycWork(void);
+extern mdlObj_t *cmpGetEncycWork(void);
 extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 extern void mdlSmoothLoopMotion(mdlObj_t *model, s32 group, s32 motion, f32 before, f32 smooth);
 
@@ -172,7 +177,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void cmpInitSeqInfo(void *work, void *parent);
 extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
-extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 extern void cmpModelInit(void);
 extern void rstClearHeartsMasterPhase(void);
 extern void fclInitMessage(void *message);
@@ -191,7 +196,7 @@ rstData_t *rstInit(s32 parent)
 
     memset(work, 0, 0x2318);
     work->allocation = allocation;
-    cmpInitSeqInfo(work, (void *)parent);
+    cmpInitSeqInfo(work, EE_ADDR_AS(void *, parent));
     work->unk_0001 = 0;
     work->unk_22E5 = -1;
     work->unk_22E4 = -0x80;
@@ -214,7 +219,7 @@ rstData_t *rstInit(s32 parent)
     work->texture = fclLoadTexture(D_0053DA70);
     rstSetResultWork(work->texture);
     rstCreateTargetList(work);
-    work->unk_2310 = 0x2B3;
+    work->unk_2310 = SDF_FRAMES(0x2B3);
     dds3FadeIn(0, 0, 0, 0xF);
     p2sdPlayBGM(0x2B0000);
     return work;
@@ -347,7 +352,7 @@ void rstDrawEvoModel(void)
     if (EventStart->unk_22E5 < 0 || EventStart->unit->id == 0) {
         return;
     }
-    model = (mdlObj_t *)cmpGetEncycWork();
+    model = cmpGetEncycWork();
     if (model == NULL) {
         return;
     }

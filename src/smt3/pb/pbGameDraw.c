@@ -116,7 +116,7 @@ extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
 

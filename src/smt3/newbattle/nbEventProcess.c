@@ -205,7 +205,7 @@ typedef struct nbNegoProcessData_t
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -259,7 +259,7 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 extern void *nbEventProcess3(dds3ProcessID_t *id);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
-extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 extern void nbGetEventEntry(nbMainProcessData_t *data);
 
 extern char D_00545DB0[];
@@ -456,7 +456,7 @@ void *nbEventProcess3(dds3ProcessID_t *id)
     if (nbEventEntryTable[data->eventno].unk_04 != 0) {
         event->unk_18 = NULL;
         nbGetEventEntry(data);
-        return (void *)nbEventEntryTable[data->eventno].unk_04;
+        return EE_ADDR_AS(void *, nbEventEntryTable[data->eventno].unk_04);
     }
     return (void *)-1;
 }

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 extern u32 dds3FrameCount;
 extern u32 dds3FrameID;
@@ -150,7 +151,7 @@ void dds3PauseOff(void)
 
 void dds3Stop(u32 frame)
 {
-    dds3PauseTime = frame;
+    dds3PauseTime = SDF_FRAMES(frame);
     dds3PauseSign = 1;
     dds3SlowSign = 0;
 }

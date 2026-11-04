@@ -6,6 +6,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "font.h"
+#include "sdfFrame.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -231,7 +232,7 @@ extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
 extern datDevilFormat_t datDevilTable[];
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -367,7 +368,7 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
         }
         break;
     }
-    w->time = time;
+    w->time = SDF_FRAMES(time);
     w->type = type;
     w->text3 = 0;
 }

@@ -3,6 +3,9 @@
 #include "sdf_types.h"
 #include "eeregs.h"
 
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
+
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
     SDF_DECOMP_STAT_IDLE = 1,
@@ -62,11 +65,11 @@ typedef struct sdfDecompCb_t {
 /* Read the active packet cursor or restore it at a quadword boundary. */
 s32 sdfGrOpenPacketBuff(void);
 
-void sdfGrClosePacketBuff(s32 aBuffPtr);
+void sdfGrClosePacketBuff(saddr_t aBuffPtr);
 
 extern s32 D_00552170;
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
 
@@ -82,7 +85,7 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
     s32 count;
     s32 offset;
     u8 *output;
-    u32 sourceAddress;
+    addr_t sourceAddress;
 
     if (cb->stat == 0) {
         return 1;
@@ -179,11 +182,11 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
                 case SDF_DECOMP_STAT_DEC_SD_STEP0:
-                    sourceAddress = (u32)(output - *src++);
+                    sourceAddress = EE_ADDR((output - *src++));
                     count = cb->direcLeng;
                     length--;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -202,10 +205,10 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     sourceAddress = cb->sdOfs;
                     length--;
                     combinedOffset = sourceAddress | offset;
-                    sourceAddress = (u32)(output - combinedOffset);
+                    sourceAddress = EE_ADDR((output - combinedOffset));
                     count = cb->direcLeng;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -252,7 +255,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     u32 secondClip;
     u32 quadwordCount;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrOpenPacketBuff();
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
     viewport = sdfDrawFaceListParam;
     VU0_LOAD_VF14(viewport);
@@ -342,7 +345,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
         cursor += 4;
         emitted += 2;
     }
-    sdfGrClosePacketBuff(EE_PHYSICAL((s32)cursor));
+    sdfGrClosePacketBuff(EE_PHYSICAL(EE_ADDR_S(cursor)));
     quadwordCount = emitted * 2 + 1;
     packet->dmaWords.tag = (quadwordCount & 0xFFFF) | 0x20000000;
     packet->dmaWords.vif = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;

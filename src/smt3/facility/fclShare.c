@@ -150,7 +150,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfTexSetFilter(sdfTexHandle_t *aHandle, s32 aMagMode, s32 aMinMode);
 
 void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite, u8 FlipFlag,
@@ -173,7 +173,7 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     } else {
         sdfTexSetFilter(pSprite->tex, 1, 1);
     }
-    packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x43431, 1);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
     uv[0] = pSprite->unk_08 + 8;
@@ -219,10 +219,10 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
         fclDrawPanelSprite2(0x44, OtNo);
         break;
     }
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, pSprite->tex, 0);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);
@@ -284,7 +284,7 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
     } else {
         sdfTexSetFilter(pSprite->tex, 1, 1);
     }
-    packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
+    packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4)));
     sdf2DMakePrimPacketHeader(packet, 0x15C, 3, 0x531, 4);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
     x0 = X + 0x7000;
@@ -368,10 +368,10 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
         fclDrawPanelSprite2(0x44, OtNo);
         break;
     }
-    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, pSprite->tex, 0);
-    sdfDrawTagLink(tag, packet);
+    sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);

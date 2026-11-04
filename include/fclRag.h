@@ -81,8 +81,8 @@ typedef struct {
     u32 offersCaption;
 } ragOfferTable_t;
 
-typedef char ragCustomUnitSizeCheck[(sizeof(ragCustomUnit_t) == 0x1C) ? 1 : -1];
-typedef char ragOfferSizeCheck[(sizeof(ragOffer_t) == 0x2C) ? 1 : -1];
+SIZE_CHECK(ragCustomUnitSizeCheck, ragCustomUnit_t, 0x1C);
+SIZE_CHECK(ragOfferSizeCheck, ragOffer_t, 0x2C);
 
 void ragSetSeqPhase2(ragOffer_t *offer, datUnitWork_t *unit);
 

@@ -24,8 +24,8 @@ extern void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData);
 extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
 
 extern u32 strlen(const char *text);
-extern void *memcpy(void *a, const void *b, u32 c);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
 
 void frInitNameData(void)
 {

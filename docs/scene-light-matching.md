@@ -43,7 +43,7 @@ The unpack helper, separately, has a real read-only memory operand.
 
 The final fog-color store uses the existing `dds3FogState.color` view, just as
 the four scalar fog stores below use that record. The pre-existing
-`PS2_SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20)` allocates
+`SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20)` allocates
 nothing: `dds3SetFog` copies the actual 20-byte fog record into that same
 subobject. The primary light-state type and all aliases/layouts are unchanged.
 

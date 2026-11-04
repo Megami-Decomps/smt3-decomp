@@ -108,7 +108,7 @@ extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
 
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
@@ -126,7 +126,7 @@ extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
 extern pbProcHandle_t *pbGetMoveChar(void);
 
-extern void dds3AdminiCallSequence(s32, s32, s32, s32);
+extern void dds3AdminiCallSequence(s32, saddr_t, s32, s32);
 
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
@@ -357,7 +357,7 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     D_0054F5C4->menuState = 0;
 }
 
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 typedef struct { u16 cells[20][20]; } pbMapBlock_t;
 extern pbMapBlock_t D_00327458;
 

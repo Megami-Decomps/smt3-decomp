@@ -85,7 +85,7 @@ extern u16 D_00551F96;
 extern s32 movieViewerPhase;
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
+SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 extern void *movieViewerStep(void);
 
@@ -216,12 +216,12 @@ void movieViewerSetFlags(void)
 
 void movieViewerInitRegs(void)
 {
-    movieViewerDebugFlag.regAddr = (u32)IPU_CTRL;
+    movieViewerDebugFlag.regAddr = EE_ADDR(IPU_CTRL);
     movieViewerDebugFlag.buffer = (u8 *)&D_00343E40;
     movieViewerSetFlags();
 }
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 #ifdef NON_MATCHING
 static s32 movieViewerIsRegister(u32 address)
@@ -237,16 +237,16 @@ void movieViewerDrawInfo(void)
     if (movieViewerDebugFlag.wordPending != 0) {
 #ifdef NON_MATCHING
         if (movieViewerIsRegister(movieViewerDebugFlag.regAddr)) {
-            movieViewerDebugFlag.word = HW_READ((volatile s32 *)movieViewerDebugFlag.regAddr);
+            movieViewerDebugFlag.word = HW_READ(EE_ADDR_AS(volatile s32 *, movieViewerDebugFlag.regAddr));
         } else
 #endif
         {
-            movieViewerDebugFlag.word = *(s32 *)movieViewerDebugFlag.regAddr;
+            movieViewerDebugFlag.word = *EE_ADDR_AS(s32 *, movieViewerDebugFlag.regAddr);
         }
     }
     if (movieViewerDebugFlag.blockPending != 0) {
 #ifdef NON_MATCHING
-        u32 base = (u32)movieViewerDebugFlag.buffer;
+        addr_t base = EE_ADDR(movieViewerDebugFlag.buffer);
         u64 end = (u64)base + sizeof(movieViewerDebugFlag.block);
         if (((u64)base < EE_REG_RANGE_END && end > EE_REG_RANGE_BASE) ||
             ((u64)base < GS_PRIV_REG_RANGE_END && end > GS_PRIV_REG_RANGE_BASE)) {
@@ -258,12 +258,12 @@ void movieViewerDrawInfo(void)
                 if (movieViewerIsRegister(address)) {
                     u32 aligned = address & ~3U;
                     if (aligned != lastRegister) {
-                        value = HW_READ((volatile u32 *)aligned);
+                        value = HW_READ(EE_ADDR_AS(volatile u32 *, aligned));
                         lastRegister = aligned;
                     }
                     movieViewerDebugFlag.block[i] = value >> ((address & 3) * 8);
                 } else {
-                    movieViewerDebugFlag.block[i] = *(u8 *)address;
+                    movieViewerDebugFlag.block[i] = *EE_ADDR_AS(u8 *, address);
                 }
             }
         } else
@@ -281,7 +281,7 @@ extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0,
                             s32 aX1, s32 aY1, s32 aZ, s32 (*aAllocator)(s32));
 
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
+SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 
 /* "%08X", "%02X" and "**", in .sdata where a literal cannot go. */
 extern char D_0054FDB8[];

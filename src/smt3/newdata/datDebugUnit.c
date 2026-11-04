@@ -2,12 +2,15 @@
 #include "nb.h"
 #include "effBattle.h"
 
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, size_t c);
+
 const char D_005431A8[] = "STOCKCNT :%d";
 const char D_005431B8[] = "STOCKLIST:";
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
 extern const char D_00550EB0[];
 
@@ -109,18 +112,18 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy);
 extern void DispList(s32 x, s32 y, sdfDrawTag_t *tag);
 extern void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag);
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
+SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 const char D_005431C8[] = "     ID     LV  HP       MP     STAT";
 
 s32 datDebugUnitProcess(dds3ProcessID_t *id)
 {
-    sdfDrawTag_t *unitList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *unitList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTag_t *panelList;
     s32 i;
     s32 entry;
@@ -134,7 +137,7 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
     }
 
     entry++;
-    panelList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    panelList = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(panelList);
     dds3ConsPanelTagLink(panelList, 0x18, 0x72, 0x25, entry - 9);
     D_002F6938.regFunc(&D_002F6938, panelList);
@@ -162,7 +165,7 @@ s32 datDebugDrawSelectMenu(void)
     s32 y;
 
     memcpy(labels, D_005431F0, sizeof(labels));
-    listTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    listTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(listTag);
     sdfDrawTagLink(listTag, EE_ADDR(sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, D_00543200)));
 
@@ -177,7 +180,7 @@ s32 datDebugDrawSelectMenu(void)
                                          name, DDS3_GBWK->kotowari[i])));
     }
 
-    panelTag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    panelTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(panelTag);
     dds3ConsPanelTagLink(panelTag, 0x12C, 0x36, 0xF, 5);
     D_002F6938.regFunc(&D_002F6938, panelTag);

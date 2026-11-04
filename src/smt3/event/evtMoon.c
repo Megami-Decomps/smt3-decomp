@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "fileManager.h"
+#include "sdfFrame.h"
 
 extern f32 gMoonCnt;
 
@@ -32,7 +33,7 @@ typedef struct
 } evtMoonProcessData_t;
 
 
-s32 evtMoonProcess1(dds3ProcessID_t *id);
+saddr_t evtMoonProcess1(dds3ProcessID_t *id);
 extern s32 evtMoonProcess2(dds3ProcessID_t *id);
 void evtMoonShutdown(dds3ProcessID_t *id);
 
@@ -666,62 +667,62 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 1:
                 case 15:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 2:
                 case 14:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 3:
                 case 13:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 4:
                 case 12:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 35.0f;
                     moveScale = 110.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 5:
                 case 11:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 60.0f;
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 6:
                 case 10:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 7:
                 case 9:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 case 8:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 100.0f;
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / 30.0f;
+                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
                     break;
                 }
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C, 0xFFFFFF, data->MoonTmx1, offsetX, offsetY, 0.0f, moveAlpha, moveAlpha, moveScale, moveScale);
@@ -772,7 +773,7 @@ void evtMoonAddMove(f32 delta)
         u8 age = DDS3_GBWK->moonPhase + 1;
         DDS3_GBWK->moonTimer = 0.0f;
         evtSetAgeOfMoon(age & 0xF);
-        evtMoonMove = 30;
+        evtMoonMove = SDF_FRAMES(30);
         if (evtGetAgeOfMoon() == 0) {
             fldEsutoMaClearMsg();
             fldRiberaMaClearMsg();
@@ -811,7 +812,7 @@ void evtMoonAddMove(f32 delta)
 
 INCLUDE_RODATA(const s32, "event/evtMoon", D_0053B1F8);
 
-s32 evtMoonProcess1(dds3ProcessID_t *id)
+saddr_t evtMoonProcess1(dds3ProcessID_t *id)
 {
     evtMoonProcessData_t *work = sdfChipAllocDirect(sizeof(*work));
     fileRequest_t *request;
@@ -855,7 +856,7 @@ s32 evtMoonProcess1(dds3ProcessID_t *id)
     }
     pacFileHandleFree_(request);
     dds3SetProcessData(id, work);
-    return (s32)evtMoonProcess2;
+    return EE_ADDR_S(evtMoonProcess2);
 }
 
 void evtMoonShutdown(dds3ProcessID_t *id)

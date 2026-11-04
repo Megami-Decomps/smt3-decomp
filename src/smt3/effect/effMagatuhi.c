@@ -6,6 +6,7 @@
 
 #include "effect.h"
 #include "effDebug.h"
+#include "sdfFrame.h"
 
 
 extern sdfGrOt_t *D_00320030[4];
@@ -175,6 +176,10 @@ typedef struct effMagatuhiHistoryParams_t {
 } effMagatuhiHistoryParams_t;
 
 /* History arrays precede this 0x38-byte owner in one retained allocation. */
+/* One row of the position and angle tables, so an address can be cast to a
+ * row pointer through a type name. */
+typedef f32 effMagatuhiRow_t[4];
+
 typedef struct dds3MagatuhiBill_tag {
     s32 count;
     u16 historyCount;
@@ -455,7 +460,7 @@ extern s8 dds3PadStickStatusState[2][2];
 extern effDebugMenu_t *D_0054F224;
 
 extern sdfGrOt_t sdfGrOtTable[];
-PS2_SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
 
 extern struct sdfDrawTag_t *effDebugDrawTag;
 
@@ -468,7 +473,7 @@ extern s32 effDebugPosX;
 
 extern u32 effDebugPosY;
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 PackMagatuhiTrailColor(void) {
@@ -491,9 +496,9 @@ s32 sdfGrAllocPacketBuff(s32 aSize);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
-void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* Build XYZ and attribute VIF streams; return the packet address.
  * vertexCount must be positive; n retains its native count/byte-size reuse. */
@@ -501,7 +506,7 @@ void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
 u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
 
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, u32 aData, s32 aLeng);
+void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *aPacket, addr_t aData, s32 aLeng);
 
 f32 sdfCos(f32 aRadius);
 
@@ -762,20 +767,20 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     writeIndices = values + (count << 2);
     validCounts = writeIndices + (count << 1);
     angleValues = validCounts + (count << 1);
-    resource = (dds3MagatuhiBill_tag *)(angleValues + (count << 4));
+    resource = EE_ADDR_AS(dds3MagatuhiBill_tag *, (angleValues + (count << 4)));
 
     resource->count = count;
     resource->historyCount = historyCount;
     resource->historyAngleStep = historyAngleStep;
     resource->historyDistanceScale = historyDistanceScale;
     resource->drawBucket = param;
-    resource->positions = (f32 (*)[4])positions;
-    resource->colorTable = (u32 *)colorTable;
-    resource->historyScalars = (f32 *)historyScalars;
-    resource->slotColors = (u32 *)values;
-    resource->writeIndices = (u16 *)writeIndices;
-    resource->validCounts = (u16 *)validCounts;
-    resource->angleRows = (f32 (*)[4])angleValues;
+    resource->positions = EE_ADDR_AS(effMagatuhiRow_t *, positions);
+    resource->colorTable = EE_ADDR_AS(u32 *, colorTable);
+    resource->historyScalars = EE_ADDR_AS(f32 *, historyScalars);
+    resource->slotColors = EE_ADDR_AS(u32 *, values);
+    resource->writeIndices = EE_ADDR_AS(u16 *, writeIndices);
+    resource->validCounts = EE_ADDR_AS(u16 *, validCounts);
+    resource->angleRows = EE_ADDR_AS(effMagatuhiRow_t *, angleValues);
     resource->allocationHandle = allocation;
     resource->texture = dds3BillboardGetGeneralTex(0);
 
@@ -836,17 +841,17 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     f32 size, widthScale;
     u32 packed;
 
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     packet = sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket((dmaPacketHeader_t *)packet,
-        (u32)sdfTexGetPacket(work->texture),
+    sdf3DMakeDirectRefPacket(EE_ADDR_AS(dmaPacketHeader_t *, packet),
+        EE_ADDR(sdfTexGetPacket(work->texture)),
         sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
     sdfDrawTagLinkRef(list, packet);
     SDF_VU0_STOREIDENTITY(matrix);
     historyOffset = 0;
     packet = sdfGrAllocPacketBuff(0x38);
-    sdfBillBoardMakeTMPacket((u8 *)packet, matrix);
+    sdfBillBoardMakeTMPacket(EE_ADDR_AS(u8 *, packet), matrix);
     sdfDrawTagLink(list, packet);
     pendingCount = 0;
     particleCount = work->count;
@@ -1038,7 +1043,7 @@ effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
     u32 count = src->reserve;
     u32 size = count * sizeof(effMagaSmokePart_tag);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmokeConv_tag));
-    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmokePart_tag *particle = EE_ADDR_AS(effMagaSmokePart_tag *, sdfMemLock(allocation));
     effMagaSmokeConv_tag *work = (effMagaSmokeConv_tag *)((u8 *)particle + size);
     s32 spread;
     u32 particleIndex;
@@ -1053,7 +1058,7 @@ effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
     work->pBezier4P = dds3Bezier4PCreate(count);
     spread = work->head.timing;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
-        particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1144,18 +1149,18 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     particle = pData->pPart;
     count = pData->head.reserve;
     respawn = pData->head.respawn;
-    life = pData->head.life;
+    life = SDF_FRAMES(pData->head.life);
     spread = pData->head.timing;
-    angleStep = pData->head.s_angle_s;
-    scaleStep = pData->head.s_ampli_s;
-    fadeIn = pData->head.fade_in;
-    fadeOut = pData->head.fade_out;
+    angleStep = SDF_FRAME_STEP(pData->head.s_angle_s);
+    scaleStep = SDF_FRAME_STEP(pData->head.s_ampli_s);
+    fadeIn = SDF_FRAMES(pData->head.fade_in);
+    fadeOut = SDF_FRAMES(pData->head.fade_out);
     slot = dds3Bezier4PGetPart(mathResource, 0);
     SDF_VU0_COPYVECTOR(origin, &pData->head.originX);
     captureDistance = pData->head.captureDistance;
     pathJitter = pData->head.c_ampli;
-    pathStep = pData->head.c_step;
-    pathAcceleration = pData->head.c_step_a;
+    pathStep = SDF_FRAME_STEP(pData->head.c_step);
+    pathAcceleration = SDF_FRAME_DECAY(pData->head.c_step_a);
     SDF_VU0_COPYVECTOR(target, &pData->head.targetX);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
@@ -1166,7 +1171,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
             if (slot->step == 0.0f) {
                 SDF_VU0_COPYVECTOR(basePosition, particle->pos);
                 radial = particle->amplitude * sdfSin(particle->angle);
-                particle->dirUp[1] += particle->up_s;
+                particle->dirUp[1] += SDF_FRAME_STEP(particle->up_s);
                 point[0] = origin[0] + particle->pos[0] + particle->dirUp[0] * radial;
                 point[1] = origin[1] + particle->pos[1] + particle->dirUp[1];
                 point[2] = origin[2] + particle->pos[2] + particle->dirUp[2] * radial;
@@ -1219,10 +1224,12 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
-            effMagaCylinderSetPartPos(valueWork, i, point);
+            if (SDF_FRAME_DUE(age)) {
+                effMagaCylinderSetPartPos(valueWork, i, point);
+            }
         }
         if (age >= life && respawn) {
-            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
             particle->age++;
         }
@@ -1248,7 +1255,7 @@ void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *
 effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
     u32 count = src->reserve;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(effMagaPoint4_tag));
-    effMagaPoint4_tag *work = (effMagaPoint4_tag *)sdfMemLock(allocation);
+    effMagaPoint4_tag *work = EE_ADDR_AS(effMagaPoint4_tag *, sdfMemLock(allocation));
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
@@ -1263,7 +1270,7 @@ effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
     work->pBezier4P = dds3Bezier4PCreate(count);
     spread = work->param.timing;
     for (i = 0; i < count; i++) {
-        *delays++ = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        *delays++ = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
     }
     return work;
 }
@@ -1289,7 +1296,7 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
-    step = 1.0f / (f32)pMagaPoint4->param.life;
+    step = 1.0f / (f32)SDF_FRAMES(pMagaPoint4->param.life);
     slot = dds3Bezier4PGetPart(pMagaPoint4->pBezier4P, index);
     slot->t = 0;
     slot->step = step;
@@ -1378,10 +1385,10 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     s32 *delays = pData->pPart;
     u8 respawn = pData->param.loop;
     u32 count = pData->param.reserve;
-    s32 life = pData->param.life;
+    s32 life = SDF_FRAMES(pData->param.life);
     s32 spread = pData->param.timing;
-    s32 fadeIn = pData->param.fade_in;
-    s32 fadeOut = pData->param.fade_out;
+    s32 fadeIn = SDF_FRAMES(pData->param.fade_in);
+    s32 fadeOut = SDF_FRAMES(pData->param.fade_out);
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 fade;
     s32 frame;
@@ -1404,10 +1411,12 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, particleIndex, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            effMagaCylinderSetPartPos(valueWork, particleIndex, out);
+            if (SDF_FRAME_DUE(frame)) {
+                effMagaCylinderSetPartPos(valueWork, particleIndex, out);
+            }
         }
         if (frame >= life && respawn) {
-            *delays = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            *delays = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
             (*delays)++;
         }
@@ -1453,7 +1462,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
         *ages = dds3GetRandA((u8 *)dds3EffectBase) % lifetimeFrames;
         slot = dds3Bezier4PGetPart(work->pBezier4P, particleIndex);
         if (historyFrames < *ages) {
-            slot->t = slot->step * (f32)(*ages - historyFrames);
+            slot->t = slot->step * SDF_FRAMES_F((f32)(*ages - historyFrames));
             sampleSpan = historyFrames;
         } else {
             slot->t = 0.0f;
@@ -1461,7 +1470,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
         }
         blendFraction = 0.0f;
         dds3Bezier4PPartRun(work->pBezier4P, particleIndex, startPosition);
-        slot->t = slot->step * (f32)*ages;
+        slot->t = slot->step * SDF_FRAMES_F((f32)*ages);
         dds3Bezier4PPartRun(work->pBezier4P, particleIndex, endPosition);
         blendStep = 1.0f / (f32)sampleSpan;
         for (sampleIndex = 0; sampleIndex < sampleSpan; sampleIndex++) {
@@ -1472,7 +1481,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
             effMagaCylinderSetPartPos(valueWork, particleIndex, samplePosition);
             blendFraction += blendStep;
         }
-        (*ages)++;
+        *ages = SDF_FRAMES(*ages) + 1;
         ages += EFF_MAGATUHI_BEZIER_GROUP_STRIDE;
     }
 }
@@ -1481,7 +1490,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
 effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     u32 count = src->particleCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaCylinderPart_tag) + sizeof(effMagaCylinder_tag));
-    effMagaCylinder_tag *work = (effMagaCylinder_tag *)sdfMemLock(allocation);
+    effMagaCylinder_tag *work = EE_ADDR_AS(effMagaCylinder_tag *, sdfMemLock(allocation));
     effMagaCylinderPart_tag *particle = (effMagaCylinderPart_tag *)(work + 1);
     s32 spread;
     u32 i;
@@ -1497,7 +1506,7 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
     spread = work->param.timing;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1545,10 +1554,10 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     particle = pData->pPart;
     count = pData->param.particleCount;
     respawn = pData->param.loop;
-    life = pData->param.life;
+    life = SDF_FRAMES(pData->param.life);
     spread = pData->param.timing;
-    fadeIn = pData->param.fade_in;
-    fadeOut = pData->param.fade_out;
+    fadeIn = SDF_FRAMES(pData->param.fade_in);
+    fadeOut = SDF_FRAMES(pData->param.fade_out);
     tintColor = pData->abgr;
     valueWork = pData->pMagatuhi->valueWork;
     SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
@@ -1569,8 +1578,8 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->rotate += particle->rotate_s;
-            particle->radius += particle->radius_s;
+            particle->rotate += SDF_FRAME_STEP(particle->rotate_s);
+            particle->radius += SDF_FRAME_STEP(particle->radius_s);
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
             } else if (life - age <= fadeOut) {
@@ -1580,10 +1589,12 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) {
+                effMagaCylinderSetPartPos(valueWork, i, out);
+            }
         }
         if (age >= life && respawn) {
-            particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
             particle->frame++;
         }
@@ -1639,7 +1650,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
-                particle->frame = frameOffset;
+                particle->frame = SDF_FRAMES(frameOffset);
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -1679,7 +1690,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
 effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     u32 count = src->particleCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaSpiralPart_tag) + sizeof(effMagaSpiral_tag));
-    effMagaSpiral_tag *work = (effMagaSpiral_tag *)sdfMemLock(allocation);
+    effMagaSpiral_tag *work = EE_ADDR_AS(effMagaSpiral_tag *, sdfMemLock(allocation));
     effMagaSpiralPart_tag *particle = (effMagaSpiralPart_tag *)(work + 1);
     s32 spread;
     u32 i;
@@ -1695,7 +1706,7 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
     spread = work->param.timing;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1745,10 +1756,10 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     particle = pData->pPart;
     count = pData->param.particleCount;
     respawn = pData->param.loop;
-    life = pData->param.life;
+    life = SDF_FRAMES(pData->param.life);
     spread = pData->param.timing;
-    fadeIn = pData->param.fade_in;
-    fadeOut = pData->param.fade_out;
+    fadeIn = SDF_FRAMES(pData->param.fade_in);
+    fadeOut = SDF_FRAMES(pData->param.fade_out);
     tintColor = pData->abgr;
     valueWork = pData->pMagatuhi->valueWork;
     SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
@@ -1769,9 +1780,9 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->up += particle->up_s;
-            particle->rotate += particle->rotate_s;
-            particle->radius += particle->radius_s;
+            particle->up += SDF_FRAME_STEP(particle->up_s);
+            particle->rotate += SDF_FRAME_STEP(particle->rotate_s);
+            particle->radius += SDF_FRAME_STEP(particle->radius_s);
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
             } else if (life - age <= fadeOut) {
@@ -1781,10 +1792,12 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) {
+                effMagaCylinderSetPartPos(valueWork, i, out);
+            }
         }
         if (age >= life && respawn) {
-            particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
             particle->frame++;
         }
@@ -1841,7 +1854,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
-                particle->frame = frameOffset;
+                particle->frame = SDF_FRAMES(frameOffset);
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -1885,7 +1898,7 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(effMagaSmokePart_tag);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmoke_tag));
-    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmokePart_tag *particle = EE_ADDR_AS(effMagaSmokePart_tag *, sdfMemLock(allocation));
     effMagaSmoke_tag *work = (effMagaSmoke_tag *)((u8 *)particle + size);
     s32 spread;
     u32 i;
@@ -1901,7 +1914,7 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
     spread = work->param.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1970,12 +1983,12 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     tintColor = pData->abgr;
     count = pData->param.particleCount;
     respawn = pData->param.loop;
-    life = pData->param.lifetimeFrames;
+    life = SDF_FRAMES(pData->param.lifetimeFrames);
     spread = pData->param.delaySpread;
-    angleStep = pData->param.angleStep;
-    scaleStep = pData->param.scaleStep;
-    fadeIn = pData->param.fadeIn;
-    fadeOut = pData->param.fadeOut;
+    angleStep = SDF_FRAME_STEP(pData->param.angleStep);
+    scaleStep = SDF_FRAME_STEP(pData->param.scaleStep);
+    fadeIn = SDF_FRAMES(pData->param.fadeIn);
+    fadeOut = SDF_FRAMES(pData->param.fadeOut);
     valueWork = pData->pMagatuhi->valueWork;
     SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
@@ -1986,7 +1999,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
         }
         if (age > 0 && age <= life) {
             radial = particle->amplitude * sdfSin(particle->angle);
-            particle->dirUp[1] += particle->up_s;
+            particle->dirUp[1] += SDF_FRAME_STEP(particle->up_s);
             out[0] = particle->pos[0] + particle->dirUp[0] * radial;
             out[1] = particle->pos[1] + particle->dirUp[1];
             out[2] = particle->pos[2] + particle->dirUp[2] * radial;
@@ -2006,10 +2019,12 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) {
+                effMagaCylinderSetPartPos(valueWork, i, out);
+            }
         }
         if (age >= life && respawn) {
-            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
             particle->age++;
         }
@@ -2066,7 +2081,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
-                particle->age = frameOffset;
+                particle->age = SDF_FRAMES(frameOffset);
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -2282,7 +2297,7 @@ void InitMagatuhiEditorProcess(void) {
 
 #ifdef NON_MATCHING
 extern u8 D_005518E2[];
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
 {
@@ -2815,7 +2830,7 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
 }
 
 void effDebugAllocDrawTag(void) {
-    effDebugDrawTag = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    effDebugDrawTag = EE_ADDR_AS(struct sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(effDebugDrawTag);
 }
 
@@ -2963,7 +2978,7 @@ s32 func_001AA5A0(void) {
     return 0;
 }
 
-/* NON_MATCHING: emits 1564/native 1576 bytes; input-address lifetime and frame differ. */
+/* NON_MATCHING: native size/frame; 17 words still differ. */
 #ifdef NON_MATCHING
 extern u8 D_005518E0[8];
 extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
@@ -2975,11 +2990,15 @@ void func_001AA6D0(void)
     /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
     volatile f32 scale[4];
     /* Right stick pair; the left pair precedes it in the same pad buffer. */
-    const u8 *stick = &D_005518E0[2];
-    s32 y = stick[1];
-    s32 x = stick[0];
+    s32 y;
+    s32 x;
     f32 angle;
     f32 step;
+    const u8 *stick = &D_005518E0[2];
+    /* Keep this real across-call address live; target-specific CSE constraint, not original spelling. */
+    FAKEMATCH_ASM_LIVE(stick);
+    y = stick[1];
+    x = stick[0];
 
     if ((u8)(y + 0xC0) > 0x80) {
         step = (128 - y) * (1.0f / 128.0f) * 22.5f;

@@ -61,7 +61,7 @@ void nmeDrawSymbolRow(s32 x, s32 y, s32 unused)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *dest, const void *src, u32 size);
+extern void *memcpy(void *dest, const void *src, size_t size);
 extern const s8 D_00551698[];
 extern s32 nmeGetCursorPos(nmeWork_t *work);
 extern void cmpSetSkillListRows(s32 rows);

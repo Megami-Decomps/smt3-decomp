@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "billboard.h"
@@ -639,7 +640,7 @@ s32 fldPlayerCalcHasigo(void) {
     if (gfldPlayerDamegeCnt > 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(pos);
-        pos[1] -= 2.0f;
+        pos[1] -= SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
@@ -652,7 +653,7 @@ s32 fldPlayerCalcHasigo(void) {
     } else if (gfldPlayerDamegeCnt < 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(pos);
-        pos[1] += 2.0f;
+        pos[1] += SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
@@ -997,9 +998,9 @@ s32 fldPlayerCalc_Nml(void)
             }
             moveAngle = (-moveAngle * D_0054C3E0) / 180.0f;
         }
-        position.x = fldGlobalBase.x - sdfSin(moveAngle) * speed;
+        position.x = fldGlobalBase.x - sdfSin(moveAngle) * SDF_FRAME_STEP(speed);
         position.y = fldGlobalBase.y;
-        position.z = fldGlobalBase.z - sdfCos(moveAngle) * speed;
+        position.z = fldGlobalBase.z - sdfCos(moveAngle) * SDF_FRAME_STEP(speed);
     } else {
         position.x = fldGlobalBase.x;
         position.y = fldGlobalBase.y;

@@ -451,7 +451,7 @@ extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 
 
 extern void frDrawFontEx(void *pFRQ, s32 Mode);
 
-void mselDrawMenuText(s32 x, s32 y, s32 text, s32 arg)
+void mselDrawMenuText(s32 x, s32 y, s32 text, saddr_t arg)
 {
     void *frq = frwGetSmallFontFRQ(x * 16, y * 16, 0, text, arg, 0);
 
@@ -461,7 +461,7 @@ void mselDrawMenuText(s32 x, s32 y, s32 text, s32 arg)
 
 extern void *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 pFRQ);
 
-void mselDrawSaveNum(s32 x, s32 y, s32 text, s32 arg)
+void mselDrawSaveNum(s32 x, s32 y, s32 text, saddr_t arg)
 {
     void *frq = frwGetSmallNumFontFRQ(x * 16, y * 16, 0, text, arg, 0);
 
@@ -524,14 +524,14 @@ void mselDrawTitleAnim(void)
     }
     switch (gGlobal->cursor) {
     case 0:
-        mselDrawMenuText(239, 82, 0x64618780, (s32)D_00342FF8[0]);
-        mselDrawMenuText(239, 94, 0x64618780, (s32)D_00342FF8[1]);
-        mselDrawMenuText(239, 106, 0x64618780, (s32)D_00342FF8[2]);
+        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(D_00342FF8[0]));
+        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(D_00342FF8[1]));
+        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(D_00342FF8[2]));
         return;
     case 1:
-        mselDrawMenuText(239, 82, 0x64618780, (s32)D_00343008[0]);
-        mselDrawMenuText(239, 94, 0x64618780, (s32)D_00343008[1]);
-        mselDrawMenuText(239, 106, 0x64618780, (s32)D_00343008[2]);
+        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(D_00343008[0]));
+        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(D_00343008[1]));
+        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(D_00343008[2]));
         break;
     }
 }
@@ -612,16 +612,16 @@ void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
         y = 0x32 + index * 0x10;
         if (devilId != -1) {
             fclencyceelem_t *record = &saveData->records[devilId];
-            mselDrawMenuText(0x64, y, color, (s32)datExplainTable[datDevilTable[record->id].race]);
-            mselDrawMenuText(0xA4, y, nameColor, (s32)text2[record->id]);
+            mselDrawMenuText(0x64, y, color, EE_ADDR_S(datExplainTable[datDevilTable[record->id].race]));
+            mselDrawMenuText(0xA4, y, nameColor, EE_ADDR_S(text2[record->id]));
             sprintf(text, D_0054FD50);
-            mselDrawMenuText(0x140, y, color, (s32)text);
+            mselDrawMenuText(0x140, y, color, EE_ADDR_S(text));
             level = record->level;
             if (level >= 0x64) {
                 level = 0x63;
             }
             sprintf(text, D_0054FD58, level);
-            mselDrawSaveNum(0x15A, y + 2, color, (s32)text);
+            mselDrawSaveNum(0x15A, y + 2, color, EE_ADDR_S(text));
         }
     }
 }

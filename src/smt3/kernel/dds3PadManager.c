@@ -2,6 +2,10 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
 
 extern u8 dds3PadVibrationState[2];
 
@@ -255,7 +259,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
         dds3PadVibrationMode[motor] = level;
         dds3GetVibrationLevel();
     }
-    dds3PadVibrationTable[motor] = duration;
+    dds3PadVibrationTable[motor] = SDF_FRAMES(duration);
     if (motor == 0) {
         sdfPadSetAct0(0, level);
     } else {

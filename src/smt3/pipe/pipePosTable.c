@@ -36,7 +36,7 @@ extern s32 fileHandleFree(fileRequest_t *fileHandle);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *dst, const void *src, size_t size);
 extern s32 LoadLinkData(tagPipeLinkInfo *table, pipeLinkSource_t *source, s32 mode);
 
 s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
@@ -114,14 +114,14 @@ tagPipePartsInfo *getPartsInfo(s16 partsID)
 }
 
 
-s32 getPartsType(s32 id)
+saddr_t getPartsType(s32 id)
 {
     s32 shiftedId = id >> 6;
     tagPipePartsInfo *pInfo = getPartsInfo((s16)id);
     s32 base = (s8)(shiftedId * 2);
 
     if (pInfo == NULL) {
-        return (s32)pInfo;
+        return EE_ADDR_S(pInfo);
     }
     return base + ((pInfo->goWay + pInfo->inWay == 7) ? 1 : 2);
 }

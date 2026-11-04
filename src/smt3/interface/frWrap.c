@@ -40,7 +40,7 @@ extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *, frFontHandle_t *
 
 extern u32 strlen(const char *text);
 
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 
@@ -374,7 +374,7 @@ u32 fr_1CA9B8(void) {
     return frFontRowBuf;
 }
 
-u32 frGetFontHeader(u32 resourceBase) {
+u32 frGetFontHeader(addr_t resourceBase) {
     return resourceBase;
 }
 
@@ -391,7 +391,7 @@ void frGetFontImagePtrs(frRelativeImage_t *block, frImagePtrs_t *out) {
 
 /* Read the opaque header word at 0x10; its role is not established. */
 u32 fr_1CA9F8(u32 resourceBase) {
-    return ((frPackedHeader_t *)frGetFontHeader(resourceBase))->headerWord;
+    return (EE_ADDR_AS(frPackedHeader_t *, frGetFontHeader(resourceBase)))->headerWord;
 }
 
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
@@ -412,7 +412,7 @@ s32 frDecodeFontRow(u8 *decodedBytes, s32 entryIndex, void *resourceBase, frImag
     memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
     memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
     produced = 0;
-    frGetFontHeader((u32)resourceBase);
+    frGetFontHeader(EE_ADDR(resourceBase));
     start = range.start;
     bitWords = segments->packedBitstream;
     wordIndex = start >> 4;

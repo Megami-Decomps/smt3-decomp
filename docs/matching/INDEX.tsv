@@ -11,8 +11,8 @@ nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the firs
 nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/matching/code_001B0858.md	23
 nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matching/code_001C55F8.md	3
 moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/matching/code_001D1470.md	3
-pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/matching/code_001D1470.md	26
-func_001D4C08	pb/pbMain	0x94		docs/matching/code_001D1470.md	57
+pbStartErrorDraw	pb/pbErrorDraw	0xBC	47 of 47 words match	docs/matching/code_001D1470.md	26
+func_001D4C08	pb/pbMain	0x94		docs/matching/code_001D1470.md	101
 cmp_241A10	code_0022C578	0x74	19 of 28 words match	docs/matching/code_0022C578.md	3
 cmpClearCursorSlots	code_0022C578	0x54	18 of 21 words differ	docs/matching/code_0022C578.md	28
 cmpSetCursorSlot	code_0022C578	0x3C	8 of 15 words differ	docs/matching/code_0022C578.md	49
@@ -65,8 +65,8 @@ effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/mat
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3
-func_001AA6D0	effect/effMagatuhi	0x628		docs/matching/effect/effMagatuhi.md	37
-effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	74
+func_001AA6D0	effect/effMagatuhi	0x628	377 of 394 words match	docs/matching/effect/effMagatuhi.md	37
+effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	102
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
 effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/matching/effect/effPCPBoss.md	20
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/matching/effect/effPCPBoss.md	53
@@ -89,6 +89,7 @@ evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/even
 evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/event/evtEventViewer.md	100
 evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	138
 EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/evtEventViewer.md	182
+evtAddFrameInfo	event/evtEventViewer	0x540	305 of 336 words match	docs/matching/event/evtEventViewer.md	206
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/matching/event/evtEventViewerMenu.md	22
@@ -140,10 +141,10 @@ fclTerminalLoadTextures	fclTerminalInit	0x70	28 of 28 words match	docs/matching/
 trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 trmUpdateSeqRoot	facility/fclTerminalUpdate	0x290	164 of 164 words match	docs/matching/facility/fclTerminalUpdate.md	37
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
-fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	30
-fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	77
-fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/matching/field/fldAutoMap.md	117
-fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	164
+fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	50
+fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	97
+fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/matching/field/fldAutoMap.md	137
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	184
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/matching/field/fldDraw.md	3
@@ -171,8 +172,8 @@ fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
 fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	135
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
-frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	47
-frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	99
+frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	79
+frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	131
 frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/interface/frName.md	3
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93
@@ -297,9 +298,10 @@ datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
+nmeMoveCursorBy	nme/Nme_Draw	0x10C	2 of 67 words match	docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
-nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	22
-nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	141
+nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46
+nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	165
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
@@ -327,18 +329,18 @@ EmTask	pipe/pipeSection	0x34C	211 of 211 words match	docs/matching/pipe/pipeSect
 MyAction	pipe/pipeSection	0x21C		docs/matching/pipe/pipeSection.md	72
 ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeSection.md	97
 pipeOffset	pipe/pipeSection	0x108	23 of 66 words match	docs/matching/pipe/pipeSection.md	147
-cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/matching/result/rstcalc.md	3
-cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	25
-datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	47
-cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	70
-cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	92
-cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	113
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	137
-cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	157
-rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	186
-rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	219
-cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	255
-cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	296
+cmpFindKugatatiMsgEntry	rstcalc	0x60	14 of 24 words differ	docs/matching/result/rstcalc.md	3
+cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/matching/result/rstcalc.md	49
+datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/matching/result/rstcalc.md	71
+cmbGetHeartsParamByIndex	rstcalc	0x58	22 of 22 words match	docs/matching/result/rstcalc.md	94
+cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	116
+cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	137
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/matching/result/rstcalc.md	161
+cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	181
+rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	210
+rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	243
+cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	279
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	320
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

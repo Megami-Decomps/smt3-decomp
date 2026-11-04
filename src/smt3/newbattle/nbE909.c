@@ -6,6 +6,9 @@
 #include "ps2asm.h"
 #include "newdata.h"
 
+/* Declared here because no header carries these. */
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];

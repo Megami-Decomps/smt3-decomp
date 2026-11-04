@@ -34,7 +34,7 @@ typedef struct
 extern const dds3EffectEventParameters_t D_00530E20;
 extern const effMagaSCArea_t D_00530E50;
 extern const effMagaP4Point_t D_00530E78;
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
 extern void dds3EffectSetPosition(void *pData, const void *pPos);
@@ -104,9 +104,9 @@ typedef struct
 
 
 struct billHandle_t *dds3BillboardCopy(struct billHandle_t *hBillboard);
-struct billHandle_t *dds3BillboardCreate(s32 kind, u32 id);
+struct billHandle_t *dds3BillboardCreate(s32 kind, addr_t id);
 void effMagaP4Randomize(void *hEffect);
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, size_t c);
 
 
 struct dds3BillResource_tag;
@@ -515,7 +515,7 @@ dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot)
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
-    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, (void *)rot);
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, EE_ADDR_AS(void *, rot));
     if (basic == NULL) {
         return NULL;
     }
@@ -539,7 +539,7 @@ dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot)
     return basic;
 }
 
-dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, s32 rot) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, saddr_t rot) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
@@ -553,7 +553,7 @@ void dds3AddP2AEffectObjectBasic2(u32 effdata, void *pos, s32 rot) {
     AddP2AEffect(bill, pos, rot);
 }
 
-dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, s32 secondVectorAddress) {
+dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, saddr_t secondVectorAddress) {
     void *bill;
 
     bill = dds3BillboardFileLoad(1, path);
@@ -574,7 +574,7 @@ dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot)
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
-    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, (void *)rot);
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), pos, EE_ADDR_AS(void *, rot));
     if (basic == NULL) {
         return NULL;
     }
@@ -598,7 +598,7 @@ dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot)
     return basic;
 }
 
-dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, s32 rot) {
+dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, saddr_t rot) {
     struct billHandle_t *bill;
 
     bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
@@ -613,7 +613,7 @@ void dds3AddTMXEffectObjectBasic2(u32 effdata, void *pos, s32 rot)
     AddTMXEffect(bill, pos, rot);
 }
 
-dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, s32 secondVectorAddress)
+dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, saddr_t secondVectorAddress)
 {
     void *bill;
 
@@ -722,7 +722,7 @@ void *dds3AddBEDEffectObjectBasic(void *file, void *pos, void *rot) {
 
     resolvedId = 0;
     resourceHandle = sdfDevLoadFileEx(file, &resolvedId, 0);
-    created = AddBEDEffect((effBTL_t *)resolvedId, pos, rot);
+    created = AddBEDEffect(EE_ADDR_AS(effBTL_t *, resolvedId), pos, rot);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }

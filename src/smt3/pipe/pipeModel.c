@@ -14,7 +14,7 @@ extern u32 dds3GetRandA(void *name);
 
 extern void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 
 extern s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize);
