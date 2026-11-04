@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "effect.h"
 #include "billboard.h"
+#include "sdfFrame.h"
 
 /* Particle emitters, history ribbons and billboard dispatch, reconstructed from
  * the shared DDS engine and checked against SLUS_209.11. All emitter views
@@ -884,7 +885,7 @@ void dds3Particle_BasicCreate(void *effect) {
             Eff_ModelTrackPolyListCreate(&params, owner->particleCount);
         break;
     }
-    owner->pendingRestartSteps = owner->restartStepCount;
+    owner->pendingRestartSteps = SDF_FRAMES(owner->restartStepCount);
     SDF_VU0_LOADMATRIX(owner->matrix);
     SDF_VU0_STOREMATRIX(owner->backupMatrix);
     owner->active = 1;
@@ -930,7 +931,7 @@ void dds3Particle_SpiralAllBuffInit(effTemplatePacketList_t *hData) {
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % hData->tailWords[0] == 0) {
-                packetTag = packetTag - hData->decayStep;
+                packetTag = packetTag - SDF_FRAMES(hData->decayStep);
             }
             packetIndex = nextPacketIndex;
         } while (packetIndex < hData->head.particleCount);
@@ -1027,11 +1028,11 @@ void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX(hData->head.matrix);
-    phaseStep = hData->rotationStepDegrees * (3.14159265f / 180.0f);
-    verticalScale = hData->verticalAccelerationPct / 100.0f + 1.0f;
+    phaseStep = SDF_FRAME_STEP(hData->rotationStepDegrees * (3.14159265f / 180.0f));
+    verticalScale = SDF_FRAME_DECAY(hData->verticalAccelerationPct / 100.0f + 1.0f);
     completedCount = 0;
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
     SDF_VU0_COPYVECTOR(origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -1056,7 +1057,7 @@ void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
             if (packet->radialDistance < 0) {
                 packet->radialDistance = 0;
             }
-            packet->verticalOffset += packet->verticalSpeed;
+            packet->verticalOffset += SDF_FRAME_STEP(packet->verticalSpeed);
             theta = packet->phase;
             radius = packet->radialDistance;
             offset[0] = sdfCos(theta) * radius;
@@ -1169,7 +1170,7 @@ void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSmoke->verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * pSmoke->verticalSpeedJitter + (1.0f - pSmoke->verticalSpeedJitter));
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSmoke->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSmoke->spread) + 1));
     packet->color = 0;
     jitter = pSmoke->head.speedJitter;
     packet->billboardScale = pSmoke->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -1198,12 +1199,12 @@ void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX(hData->head.matrix);
-    phaseStep = hData->phaseStepDegrees * (3.14159265f / 180.0f);
-    verticalScale = hData->verticalAccelerationPct / 100.0f + 1.0f;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    phaseStep = SDF_FRAME_STEP(hData->phaseStepDegrees * (3.14159265f / 180.0f));
+    verticalScale = SDF_FRAME_DECAY(hData->verticalAccelerationPct / 100.0f + 1.0f);
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     packetCount = hData->head.particleCount;
     repeatEnabled = hData->loop;
-    waveRate = hData->waveGrowth;
+    waveRate = SDF_FRAME_STEP(hData->waveGrowth);
     completedCount = 0;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
@@ -1230,7 +1231,7 @@ void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionDelta[0] = packet->vel[0] * factor;
-            positionDelta[1] = verticalStep;
+            positionDelta[1] = SDF_FRAME_STEP(verticalStep);
             positionDelta[2] = packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(positionDelta);
             SDF_VU0_APPLYMATRIX();
@@ -1445,7 +1446,7 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
         }
         break;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSpark->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSpark->spread) + 1));
     packet->color = 0;
     jitter = pSpark->head.speedJitter;
     packet->billboardScale = pSpark->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -1482,9 +1483,9 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
     if (mode == 0) {
         SDF_VU0_LOADMATRIX(hData->head.matrix);
     }
-    velocityScale = hData->decayPct / 100.0f + 1.0f;
+    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
     completedCount = 0;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     packetCount = hData->head.particleCount;
     repeatEnabled = hData->loop;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -1500,7 +1501,7 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
-            packet->vel[1] = packet->vel[1] * velocityScale + packet->verticalAcceleration;
+            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->verticalAcceleration);
             packet->vel[0] *= velocityScale;
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
@@ -1508,9 +1509,9 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
                 SDF_VU0_APPLYMATRIX();
             }
             SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += positionDelta[0];
-            packet->pos[1] += positionDelta[1];
-            packet->pos[2] += positionDelta[2];
+            packet->pos[0] += SDF_FRAME_STEP(positionDelta[0]);
+            packet->pos[1] += SDF_FRAME_STEP(positionDelta[1]);
+            packet->pos[2] += SDF_FRAME_STEP(positionDelta[2]);
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
                 dds3Particle_EffectSet(&hData->head.sub, packetIndex, packet->color, packet->billboardScale);
@@ -1549,7 +1550,7 @@ void dds3Particle_RadiateAllBuffInit(effTemplatePacketList_t *hData) {
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % hData->tailWords[0] == 0) {
-                packetTag = packetTag - hData->decayStep;
+                packetTag = packetTag - SDF_FRAMES(hData->decayStep);
             }
             packetIndex = nextPacketIndex;
         } while (packetIndex < hData->head.particleCount);
@@ -1650,11 +1651,11 @@ void dds3Particle_RadiateDraw(dds3Particle_Radiate_t3 *hData) {
     dds3Particle_EffectInit(&hData->head.sub);
     LookAtMatrix(aViewTarget, aViewEye, aViewDown);
     ReverseMatrix();
-    lifetimeFrames = hData->head.lifetimeFrames;
-    phaseStep = hData->rotationStepDegrees * (3.14159265f / 180.0f);
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
+    phaseStep = SDF_FRAME_STEP(hData->rotationStepDegrees * (3.14159265f / 180.0f));
     packetCount = hData->head.particleCount;
     repeatEnabled = hData->loop;
-    stepScale = hData->stepLength;
+    stepScale = SDF_FRAME_STEP(hData->stepLength);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
         f32 angle;
@@ -1751,7 +1752,7 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
 
     packet += number;
     packet->color = 0;
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSpiral->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral->spread) + 1));
     speed = pSphereSpiral->speed;
     jitter = pSphereSpiral->jitterA;
     directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
@@ -1818,9 +1819,9 @@ void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX_B(hData->head.matrix);
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     completedCount = 0;
-    rotationStep = hData->spinRate * (3.14159265f / 180.0f);
+    rotationStep = SDF_FRAME_STEP(hData->spinRate * (3.14159265f / 180.0f));
     repeatEnabled = hData->loop;
     SDF_VU0_COPYVECTOR(origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -1838,7 +1839,7 @@ void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
             }
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_GETLENGTH(velocityLength);
-            velocityLength += packet->radiusStep;
+            velocityLength += SDF_FRAME_STEP(packet->radiusStep);
             scaleVector[0] = velocityLength;
             scaleVector[1] = velocityLength;
             scaleVector[2] = velocityLength;
@@ -1963,7 +1964,7 @@ void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke,
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSphereSmoke->up_s * (dds3GetRandFloatA(dds3EffectBase) * pSphereSmoke->up_s_r + (1.0f - pSphereSmoke->up_s_r));
-    packet->age = ~(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSmoke->spread + 1));
+    packet->age = ~(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSmoke->spread) + 1));
     packet->color = 0;
     jitter = pSphereSmoke->head.speedJitter;
     packet->billboardScale = pSphereSmoke->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -1992,12 +1993,12 @@ void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX(hData->head.matrix);
-    phaseStep = hData->phaseStepDegrees * (3.14159265f / 180.0f);
-    verticalScale = hData->verticalAccelerationPct / 100.0f + 1.0f;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    phaseStep = SDF_FRAME_STEP(hData->phaseStepDegrees * (3.14159265f / 180.0f));
+    verticalScale = SDF_FRAME_DECAY(hData->verticalAccelerationPct / 100.0f + 1.0f);
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     packetCount = hData->head.particleCount;
     repeatEnabled = hData->loop;
-    waveRate = hData->waveGrowth;
+    waveRate = SDF_FRAME_STEP(hData->waveGrowth);
     completedCount = 0;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
@@ -2024,7 +2025,7 @@ void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionDelta[0] = packet->vel[0] * factor;
-            positionDelta[1] = verticalStep;
+            positionDelta[1] = SDF_FRAME_STEP(verticalStep);
             positionDelta[2] = packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(positionDelta);
             SDF_VU0_APPLYMATRIX();
@@ -2070,7 +2071,7 @@ void dds3Particle_SphereRingAllBuffInit(effTemplatePacketList_t *hData) {
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % hData->tailWords[1] == 0) {
-                packetTag = packetTag - hData->decayStep;
+                packetTag = packetTag - SDF_FRAMES(hData->decayStep);
             }
             packetIndex = nextPacketIndex;
         } while (packetIndex < hData->head.particleCount);
@@ -2159,10 +2160,10 @@ void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX(hData->head.matrix);
-    rotationStep = hData->roll_s * (3.14159265f / 180.0f);
+    rotationStep = SDF_FRAME_STEP(hData->roll_s * (3.14159265f / 180.0f));
     completedCount = 0;
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
     rotationCos = sdfCos(rotationStep);
     rotationSin = sdfSin(rotationStep);
@@ -2304,7 +2305,7 @@ void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number) {
         packet->vel[2] = angleSin * cone * speed;
         packet->verticalAcceleration = gravity;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSpark2->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSpark2->spread) + 1));
     packet->color = 0;
     jitter = pSpark2->basic.speedJitter;
     packet->billboardScale = pSpark2->basic.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -2331,9 +2332,9 @@ void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->basic.sub);
     SDF_VU0_LOADMATRIX(hData->basic.matrix);
-    velocityScale = hData->decayPct / 100.0f + 1.0f;
+    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
     completedCount = 0;
-    lifetimeFrames = hData->basic.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->basic.lifetimeFrames);
     packetCount = hData->basic.particleCount;
     repeatEnabled = hData->loop;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -2350,14 +2351,14 @@ void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
             packet->vel[0] *= velocityScale;
-            packet->vel[1] = packet->vel[1] * velocityScale + packet->verticalAcceleration;
+            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->verticalAcceleration);
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += positionDelta[0];
-            packet->pos[1] += positionDelta[1];
-            packet->pos[2] += positionDelta[2];
+            packet->pos[0] += SDF_FRAME_STEP(positionDelta[0]);
+            packet->pos[1] += SDF_FRAME_STEP(positionDelta[1]);
+            packet->pos[2] += SDF_FRAME_STEP(positionDelta[2]);
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
                 dds3Particle_EffectSet(&hData->basic.sub, packetIndex, packet->color, packet->billboardScale);
@@ -2453,7 +2454,7 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
         SDF_VU0_LOADVECTOR(direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
-        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSphereAtom->delayRange + 1));
+        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
     } else {
         SDF_VU0_COPYVECTOR(packet->position, pSphereAtom->head.origin);
         value = (3.14159265f * 2.0f) / pSphereAtom->head.particleCount * number;
@@ -2463,7 +2464,7 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
         SDF_VU0_LOADVECTOR(direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
-        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSphereAtom->delayRange + 1));
+        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
     }
     packet->motionMagnitude = pSphereAtom->motionMagnitude;
     packet->color = 0;
@@ -2501,10 +2502,10 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
     f32 velocityScale;
 
     dds3Particle_EffectInit(&hData->head.sub);
-    lifetimeFrames = (s32)hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES((s32)hData->head.lifetimeFrames);
     targetRadius = hData->targetRadius;
     radiusStep = (targetRadius - hData->recordScale) / lifetimeFrames;
-    velocityScale = hData->accelerationPct / 100.0f + 1.0f;
+    velocityScale = SDF_FRAME_DECAY(hData->accelerationPct / 100.0f + 1.0f);
     packetCount = (s32)hData->head.particleCount;
     repeatEnabled = hData->restart;
     radius = packet->boundaryRadius;
@@ -2545,9 +2546,9 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             dx = packet->vel[0] * magnitude;
             dy = packet->vel[1] * magnitude;
             dz = packet->vel[2] * magnitude;
-            packet->pos[0] += dx;
-            packet->pos[1] += dy;
-            packet->pos[2] += dz;
+            packet->pos[0] += SDF_FRAME_STEP(dx);
+            packet->pos[1] += SDF_FRAME_STEP(dy);
+            packet->pos[2] += SDF_FRAME_STEP(dz);
             magnitude *= velocityScale;
             packet->motionMagnitude = magnitude;
             SDF_VU0_LOADVECTOR(packet->pos);
@@ -2864,7 +2865,7 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
         }
         break;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSparkOffset->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSparkOffset->spread) + 1));
     packet->color = 0;
     jitter = pSparkOffset->head.speedJitter;
     packet->billboardScale = pSparkOffset->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -2901,10 +2902,10 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
     if (mode == 0) {
         SDF_VU0_LOADMATRIX(hData->head.matrix);
     }
-    velocityScale = hData->decayPct / 100.0f + 1.0f;
+    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
     completedCount = 0;
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
     SDF_VU0_COPYVECTOR(origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -2920,7 +2921,7 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
-            packet->vel[1] = packet->vel[1] * velocityScale + packet->offsetAcceleration;
+            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->offsetAcceleration);
             packet->vel[0] *= velocityScale;
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
@@ -2928,9 +2929,9 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
                 SDF_VU0_APPLYMATRIX();
             }
             SDF_VU0_STOREVECTOR(positionDelta);
-            packet->offsetX += positionDelta[0];
-            packet->offsetY += positionDelta[1];
-            packet->offsetZ += positionDelta[2];
+            packet->offsetX += SDF_FRAME_STEP(positionDelta[0]);
+            packet->offsetY += SDF_FRAME_STEP(positionDelta[1]);
+            packet->offsetZ += SDF_FRAME_STEP(positionDelta[2]);
             SDF_VU0_LOADVECTOR(&packet->offsetX);
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_ADDVECTOR();
@@ -3039,7 +3040,7 @@ void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset,
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSmokeOffset->verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * pSmokeOffset->verticalSpeedJitter + (1.0f - pSmokeOffset->verticalSpeedJitter));
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSmokeOffset->spread + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSmokeOffset->spread) + 1));
     packet->color = 0;
     SDF_VU0_COPYVECTOR(packet, pSmokeOffset->head.origin);
     jitter = pSmokeOffset->head.speedJitter;
@@ -3072,13 +3073,13 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->head.sub);
     SDF_VU0_LOADMATRIX(hData->head.matrix);
-    phaseStep = hData->phaseStepDegrees * (3.14159265f / 180.0f);
-    verticalScale = hData->verticalAccelerationPct / 100.0f + 1.0f;
+    phaseStep = SDF_FRAME_STEP(hData->phaseStepDegrees * (3.14159265f / 180.0f));
+    verticalScale = SDF_FRAME_DECAY(hData->verticalAccelerationPct / 100.0f + 1.0f);
     completedCount = 0;
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
-    waveRate = hData->waveGrowth;
+    waveRate = SDF_FRAME_STEP(hData->waveGrowth);
     SDF_VU0_COPYVECTOR(origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, auxiliaryCursor++) {
         s32 age = packet->age;
@@ -3105,7 +3106,7 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionVector[0] = (*auxiliaryCursor)[0] + packet->vel[0] * factor;
-            positionVector[1] = (*auxiliaryCursor)[1] + verticalStep;
+            positionVector[1] = (*auxiliaryCursor)[1] + SDF_FRAME_STEP(verticalStep);
             positionVector[2] = (*auxiliaryCursor)[2] + packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(positionVector);
             SDF_VU0_STOREVECTOR(*auxiliaryCursor);
@@ -3244,7 +3245,7 @@ void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSp
 
     packet += number;
     packet->color = 0;
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSpiral2->spawnDelayFrames + 1));
+    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral2->spawnDelayFrames) + 1));
     initialRadius = pSphereSpiral2->initialRadius;
     jitterFactor = pSphereSpiral2->initialRadiusJitter;
     direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
@@ -3322,9 +3323,9 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
     dds3Particle_EffectInit(&hData->head.kindState);
     SDF_VU0_LOADMATRIX_B(hData->head.rot);
     packetCount = hData->head.particleCount;
-    lifetimeFrames = hData->head.lifetimeFrames;
+    lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     completedCount = 0;
-    rotationStep = hData->rotationStepDegrees * (3.14159265f / 180.0f);
+    rotationStep = SDF_FRAME_STEP(hData->rotationStepDegrees * (3.14159265f / 180.0f));
     repeatEnabled = hData->loop;
     SDF_VU0_COPYVECTOR(origin, hData->head.origin);
     previousOrigin[0] = hData->previousOrigin[0];
@@ -3346,7 +3347,7 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
             }
             SDF_VU0_LOADVECTOR(packet->radialOffset);
             SDF_VU0_GETLENGTH(radius);
-            radius += packet->radiusStep;
+            radius += SDF_FRAME_STEP(packet->radiusStep);
             scaleVector[0] = radius;
             scaleVector[1] = radius;
             scaleVector[2] = radius;
@@ -3474,14 +3475,14 @@ u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 
     u32 sum;
     f32 t;
 
-    if (frame >= pColAnim->frame_end - pColAnim->alpha_e) {
-        if (pColAnim->frame_end < frame) {
+    if (frame >= SDF_FRAMES(pColAnim->frame_end - pColAnim->alpha_e)) {
+        if (SDF_FRAMES(pColAnim->frame_end) < frame) {
             return 0;
         }
-        alpha = pColAnim->alpha_e_sub * (pColAnim->frame_end - frame);
+        alpha = pColAnim->alpha_e_sub * SDF_FRAME_STEP(SDF_FRAMES(pColAnim->frame_end) - frame);
         alpha &= 0xFF000000;
-    } else if (frame <= pColAnim->alpha_s) {
-        alpha = pColAnim->alpha_s_add * frame;
+    } else if (frame <= SDF_FRAMES(pColAnim->alpha_s)) {
+        alpha = pColAnim->alpha_s_add * SDF_FRAME_STEP(frame);
         alpha &= 0xFF000000;
     } else {
         alpha = pColAnim->alpha << 24;
@@ -3489,8 +3490,8 @@ u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 
     if (pColAnim->type == 1) {
         return pColAnim->color0 | alpha;
     }
-    t = frame;
-    if (frame < pColAnim->frame_h) {
+    t = SDF_FRAME_STEP(frame);
+    if (frame < SDF_FRAMES(pColAnim->frame_h)) {
         s32 red = pColAnim->r01 * t;
         s32 green = pColAnim->g01 * t;
         s32 blue = pColAnim->b01 * t;
@@ -3825,7 +3826,7 @@ void dds3ParticleDraw(dds3Particle_Basic_t *hData) {
     billboard = hData->hBillboard;
     record = hData->buffer->pPhysics;
     particleCount = hData->particleCount;
-    lifetime = hData->lifetimeFrames;
+    lifetime = SDF_FRAMES(hData->lifetimeFrames);
     dds3BillboardSetScale(billboard, hData->billboardScale, hData->billboardScaleY);
     if (particleCount > 0) {
         step = particleCount;
@@ -3856,7 +3857,7 @@ dds3Particle_Basic_t *dds3ParticleCopy(dds3Particle_Basic_t *obj) {
 /* Reissue the callback, reload the native updater's repeat count, and arm restart. */
 void dds3ParticleReset(dds3Particle_Basic_t *hData) {
     dds3ParticleAllBuffInitTable[hData->type](hData);
-    hData->pendingRestartSteps = hData->d_frame;
+    hData->pendingRestartSteps = SDF_FRAMES(hData->d_frame);
     hData->state = 1;
 }
 
@@ -4003,8 +4004,8 @@ void dds3ParticleExpDraw(dds3Particle_Basic_t *hData) {
             dds3ParticleFuncTable[hData->type].update(hData);
         }
         particleCount = hData->particleCount;
-        scaleStep = (hData->scaleEnd - hData->billboardScale) / hData->lifetimeFrames;
-        spinStep = hData->spinDegrees * (3.14159265f / 180.0f);
+        scaleStep = (hData->scaleEnd - hData->billboardScale) / SDF_FRAMES(hData->lifetimeFrames);
+        spinStep = SDF_FRAME_STEP(hData->spinDegrees * (3.14159265f / 180.0f));
         alternate = hData->alternateSpin ? -1.0f : 1.0f;
         for (step = 0; step < hData->pendingRestartSteps; step++) {
             s32 recordIndex;
@@ -4025,9 +4026,9 @@ void dds3ParticleExpDraw(dds3Particle_Basic_t *hData) {
     record = hData->buffer->pPhysics;
     billboard = hData->hBillboard;
     particleCount = hData->particleCount;
-    scaleStep = (hData->scaleEnd - hData->billboardScale) / hData->lifetimeFrames;
-    lifetime = hData->lifetimeFrames;
-    spinStep = hData->spinDegrees * (3.14159265f / 180.0f);
+    scaleStep = (hData->scaleEnd - hData->billboardScale) / SDF_FRAMES(hData->lifetimeFrames);
+    lifetime = SDF_FRAMES(hData->lifetimeFrames);
+    spinStep = SDF_FRAME_STEP(hData->spinDegrees * (3.14159265f / 180.0f));
     alternate = hData->alternateSpin ? -1.0f : 1.0f;
     spinDirection = 1.0f;
     if (particleCount > 0) {
@@ -4045,7 +4046,7 @@ void dds3ParticleExpDraw(dds3Particle_Basic_t *hData) {
                     record->scale = 0;
                 }
                 record->spin += spinStep * spinDirection;
-                dds3BillboardSetAnimKey(billboard, age);
+                dds3BillboardSetAnimKey(billboard, SDF_FRAME_STEP(age));
                 dds3BillboardDraw(billboard);
             }
             spinDirection *= alternate;
