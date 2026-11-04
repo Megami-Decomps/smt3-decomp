@@ -27,7 +27,7 @@ typedef struct
 
 typedef struct
 {
-    sdfVector4_t position[4];
+    sdfVector4Unaligned_t position[4];
     f32 radius[4];
 } effMagaP4Point_t;
 

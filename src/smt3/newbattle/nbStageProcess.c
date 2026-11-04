@@ -83,9 +83,9 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern sdfVector4_t D_00543628;
+extern sdfVector4Unaligned_t D_00543628;
 
-extern sdfVector4_t D_00543648;
+extern sdfVector4Unaligned_t D_00543648;
 
 extern char *D_00551110;
 

@@ -79,9 +79,9 @@ extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, f32 *scl);
 
 extern f32 fldWmapPlayerState;
 
-extern sdfVector4_t D_00531D08;
+extern sdfVector4Unaligned_t D_00531D08;
 
-extern sdfVector4_t D_00531D18;
+extern sdfVector4Unaligned_t D_00531D18;
 
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
@@ -1373,7 +1373,7 @@ extern s32 fldHitChkMatter;
 extern s32 D_0054ED00, D_0054ED04;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, D_002FCA30, D_002FCA40;
-extern sdfVector4_t D_00531D28, D_00531D38;
+extern sdfVector4Unaligned_t D_00531D28, D_00531D38;
 extern sdfMatrix4_t D_002FA240;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);

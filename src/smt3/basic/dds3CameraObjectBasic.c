@@ -23,8 +23,8 @@ extern void LookAtMatrix(const sdfVector4_t *aTarget, const sdfVector4_t *aEye,
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewTarget;
 extern sdfVector4_t aViewDown;
-extern sdfVector4_t D_00530D38;
-extern sdfVector4_t D_00530D48;
+extern sdfVector4Unaligned_t D_00530D38;
+extern sdfVector4Unaligned_t D_00530D48;
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
