@@ -1622,7 +1622,12 @@ const char *fldCheckNpcTalk(const char *eventName) {
                 if (fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
                     strcmp(eventName, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     s32 candidateSet = fldInfTable.packs[packOrSetIndex].setIndex;
+#ifdef FIX_BUGS
+                    /* gFldInfIdx starts at -1, which reads the tail of extraActions. */
+                    if (gFldInfIdx >= 0 && fldInfTable.sets[gFldInfIdx].kindArea.packed == 1) {
+#else
                     if (fldInfTable.sets[gFldInfIdx].kindArea.packed == 1) {
+#endif
                         gFldInfIdx = candidateSet;
                         return fldNpcTalkLabel;
                     }

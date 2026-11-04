@@ -3705,7 +3705,12 @@ void nbPanelPartyDraw(void)
             yy = yb + dds3GetRandIntA(NULL, 6) - 3;
         }
         if (partyindex[i] != -1) {
+#ifdef FIX_BUGS
+            /* orderindex -1 reads order[-1], the top byte of endtype, which is 0. */
+            if ((data->orderindex < 0 ? 0 : data->order[data->orderindex]) == partyindex[i] && jun[i] != -1) {
+#else
             if (data->order[data->orderindex] == partyindex[i] && jun[i] != -1) {
+#endif
                 nbPnlWork[i].ActiveMode = 1;
                 ofs = (16 - nbPnlWork[i].OfsX) / 3;
                 if (ofs < 1) {
