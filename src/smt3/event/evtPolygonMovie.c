@@ -5,6 +5,9 @@
 #include "event.h"
 #include "evtPolygonMovie.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 
 
 void *dds3GetProcessData(dds3ProcessID_t *id);
@@ -1053,7 +1056,9 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
 
     work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
     FrameRun(work);
-    work->nowFrame++;
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        work->nowFrame++;
+    }
     ret = 0;
     if (work->nowFrame >= work->cutInfo->LastFrame) {
         printf("end polygon movie! frame:%d\n", work->nowFrame);
