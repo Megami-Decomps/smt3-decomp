@@ -91,7 +91,7 @@ extern s32 sdfFileRead(void *handle, void *dst, s32 size);
 extern void sdfFileClose(void *handle);
 #include "sdk_libc.h"
 
-extern char D_00533300[];
+extern char effBTLFileFmt[];
 
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
@@ -242,7 +242,7 @@ void dds3EffectFileListWindowDelete(void *a);
 
 void dds3EffectFileListDelete(void *a);
 
-extern char D_0054F100[];
+extern char effBedDirName[];
 
 extern char effBedNameBuf[];
 
@@ -492,7 +492,7 @@ void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList
             pPartList->hMem = sdfDevLoadFileEx(pPartList->fileName, (u32 *)&pPartList->pData, NULL);
         }
         pPartList->refCount = 0;
-        printf(D_00533300, pPartList->fileName);
+        printf(effBTLFileFmt, pPartList->fileName);
         pPartList++;
     }
 }
@@ -2710,7 +2710,7 @@ void effBTLSystemCut1DataFree(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533300);
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLFileFmt);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533318);
 
@@ -2902,7 +2902,7 @@ void effBTLEncountEnd(void)
 
 
 
-extern const char D_00533990[], D_005339A0[];
+extern const char effBTLSysLogFmt[], effBTLSysPath[];
 void effBTLSystemInit(void)
 {
     dds3EffectPCPData_t *archiveData;
@@ -2915,8 +2915,8 @@ void effBTLSystemInit(void)
     effBattleSystem_effBTLSystem_Part_tag *part;
     effBattleSystem_effBTLSystem_Cut1_tag *cut;
 
-    printf(D_00533990, D_005339A0);
-    archiveHandle = sdfDevLoadFileEx(D_005339A0, (u32 *)&archiveData, NULL);
+    printf(effBTLSysLogFmt, effBTLSysPath);
+    archiveHandle = sdfDevLoadFileEx(effBTLSysPath, (u32 *)&archiveData, NULL);
     archiveIndex = 0;
     i = 0;
     while (i < 0x1E) {
@@ -2991,9 +2991,9 @@ void effBTLSystemInit(void)
     sdfMemFreeDirect(archiveHandle);
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533990);
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLSysLogFmt);
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005339A0);
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLSysPath);
 
 void effBTLSystemEnd(void)
 {
@@ -3159,11 +3159,11 @@ s32 eff_174898(void)
 char *effMakeBedFileName(u32 id)
 {
     if (id < 0x10) {
-        sprintf(effBedNameBuf, "%s00%X.BED", D_0054F100, id);
+        sprintf(effBedNameBuf, "%s00%X.BED", effBedDirName, id);
     } else if (id < 0x100) {
-        sprintf(effBedNameBuf, "%s0%X.BED", D_0054F100, id);
+        sprintf(effBedNameBuf, "%s0%X.BED", effBedDirName, id);
     } else {
-        sprintf(effBedNameBuf, "%s%X.BED", D_0054F100, id);
+        sprintf(effBedNameBuf, "%s%X.BED", effBedDirName, id);
     }
     return effBedNameBuf;
 }
@@ -3193,10 +3193,10 @@ void effBTLCutSetMax(u8 cut, u32 max)
 
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
 extern char *D_0054F0F8;
-extern char D_0054F110[];
-extern char D_0054F118[];
-extern char D_0054F120[];
-extern char D_0054F128[];
+extern char effBTLCutAllFmt[];
+extern char effBTLCut1Fmt[];
+extern char effBTLCut2Fmt[];
+extern char effBTLCut3Fmt[];
 
 void effBTLCutDebugPrint(void)
 {
@@ -3208,13 +3208,13 @@ void effBTLCutDebugPrint(void)
     }
     mainData = nbGetMainProcessData();
     if (mainData->debug != 0) {
-        sprintf(text, D_0054F110, effBTLCutCount);
+        sprintf(text, effBTLCutAllFmt, effBTLCutCount);
         effDebugStringDraw(0x20, 0x166, 0, text);
-        sprintf(text, D_0054F118, effBTLCutMaxTable[0]);
+        sprintf(text, effBTLCut1Fmt, effBTLCutMaxTable[0]);
         effDebugStringDraw(0x20, 0x172, 0, text);
-        sprintf(text, D_0054F120, effBTLCutMaxTable[1]);
+        sprintf(text, effBTLCut2Fmt, effBTLCutMaxTable[1]);
         effDebugStringDraw(0x20, 0x17E, 0, text);
-        sprintf(text, D_0054F128, effBTLCutMaxTable[2]);
+        sprintf(text, effBTLCut3Fmt, effBTLCutMaxTable[2]);
         effDebugStringDraw(0x20, 0x18A, 0, text);
         effDebugStringDraw(0x20, 0x1A2, 0,
             effBTLFieldColorIsOn() ? D_0054F0F8 : effBedNameBuf);

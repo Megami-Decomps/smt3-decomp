@@ -20,7 +20,7 @@ typedef struct frFontRequest_t frFontRequest_t;
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 prim, s32 count, s64 registers, s32 loops);
 
 
-extern char D_0054FB00[];
+extern char fclCombineCalcName[];
 
 extern s8 gProcessStat_0;
 

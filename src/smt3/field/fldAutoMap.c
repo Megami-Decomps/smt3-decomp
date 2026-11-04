@@ -895,7 +895,7 @@ extern void frSetPriority(struct frFontHandle_t *font, u32 priority);
 extern s32 frDrawFont(struct frFontHandle_t *font);
 extern s32 frDrawFontEx(struct frFontHandle_t *font, s8 mode);
 extern struct frFontHandle_t *fldAutoMapFontReq;
-extern const char D_005321C0[];
+extern const char fldAutoMapFullOpenMsg[];
 extern s32 gFldNowDZone;
 extern s32 fldAutoMapDrawState, fldAutoMapDrawY;
 extern f32 fldAutoMapDrawX, fldCamPitch;
@@ -983,7 +983,7 @@ void fldAutoMapDrawOneArea(void)
         fldAutoMapBBox = showAll & 1;
     }
     if (fldAutoMapBBox != 0) {
-        fldDbgPrint2D(0x640, -0x280, D_005321C0);
+        fldDbgPrint2D(0x640, -0x280, fldAutoMapFullOpenMsg);
     }
     maxFloor = fldAutoMapGetFloorMax();
     frSetFontDrawOT(0x51);

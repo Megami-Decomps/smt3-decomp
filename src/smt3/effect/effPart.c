@@ -117,7 +117,7 @@ extern s32 D_0054F130;
 
 extern s8 D_0054F134;
 
-extern char D_0054F100[];
+extern char effBedDirName[];
 
 void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 

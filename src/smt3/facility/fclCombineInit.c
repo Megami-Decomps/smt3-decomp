@@ -27,9 +27,9 @@ typedef struct
 } cmbEvoTableEntry_t;
 
 
-extern char D_0053C938[];
+extern char fclCombineUpdateName[];
 
-extern char D_0054FB00[];
+extern char fclCombineCalcName[];
 
 extern cmbUnlockEntry_t D_0032DCC0[];
 
@@ -156,7 +156,7 @@ extern cmbSmokeParam_t D_0032DE20[];
 
 extern rcvWork_t *shutdownfunc;
 
-extern char D_0053CF10[];
+extern char fclE807MainName[];
 
 extern void sortSkillList(cmbUnit_t *unit);
 
@@ -561,8 +561,8 @@ extern void fclSetCursorList(void *work, s32 mode);
 extern void evtDisableMoonCalc(void);
 extern void cmpModelInit(void);
 extern fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s8 type, s8 speed);
-extern char D_0053C890[];
-extern char D_0053C8B8[];
+extern char fclCombineScriptPath[];
+extern char fclCombineExplainPath[];
 extern u8 D_0032D1A8[];
 extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
@@ -582,9 +582,9 @@ void fclUpdateInit(void)
     cmpInitSeqInfo(CMB_GBWK, NULL);
 
     CMB_GBWK->resourceHandle_1650C =
-        sdfDevLoadFileEx(D_0053C890, (u32 *)&CMB_GBWK->script, NULL);
+        sdfDevLoadFileEx(fclCombineScriptPath, (u32 *)&CMB_GBWK->script, NULL);
     CMB_GBWK->resourceHandle_16518 =
-        sdfDevLoadFileEx(D_0053C8B8, (u32 *)&CMB_GBWK->explainData, NULL);
+        sdfDevLoadFileEx(fclCombineExplainPath, (u32 *)&CMB_GBWK->explainData, NULL);
     CMB_GBWK->unk_00001 = 0;
     CMB_GBWK->unk_00003 = 0;
     CMB_GBWK->unk_00004 = 1;
@@ -650,9 +650,9 @@ extern void evtEnableMoonDraw(void);
 extern s32 fclEncycWork(void);
 extern s32 cmbCalcSequence(void);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C890);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineScriptPath);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C8B8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineExplainPath);
 
 s32 fclCombineCalc(void)
 {
@@ -749,17 +749,17 @@ s32 fclCombineUpdate(void)
 void fclCombineProcessStart(void)
 {
     fclUpdateInit();
-    dds3StartProcess(D_0054FB00, 0x400, 1, 1, fclCombineCalc, NULL, NULL);
+    dds3StartProcess(fclCombineCalcName, 0x400, 1, 1, fclCombineCalc, NULL, NULL);
     dds3StartProcess("combine_draw", 0x2B10, 1, 1, fclCombineDraw, NULL, NULL);
-    dds3StartProcess(D_0053C938, 0x520C, 1, 1, fclCombineUpdate, fclCombineDestroy, NULL);
+    dds3StartProcess(fclCombineUpdateName, 0x520C, 1, 1, fclCombineUpdate, fclCombineDestroy, NULL);
     gProcessStat_0 = 1;
 }
 
 void fclCombineProcessEnd(void)
 {
-    dds3KillProcessName(D_0054FB00, 1);
+    dds3KillProcessName(fclCombineCalcName, 1);
     dds3KillProcessName("combine_draw", 1);
-    dds3KillProcessName(D_0053C938, 1);
+    dds3KillProcessName(fclCombineUpdateName, 1);
 }
 
 s32 cmbCheckProcessStat(void)
@@ -1271,7 +1271,7 @@ extern u16 cmpGetStatusModelId(void);
 extern void cmpSetModelReloadFlag(void);
 extern void campFreeStatusModel(void);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C938);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineUpdateName);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C950);
 
@@ -2710,7 +2710,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 #endif
 
 
-extern char D_0054FB10[];
+extern char fclCombineNum2dFmt[];
 extern char *datExplainTable[];
 extern char *text2[];
 
@@ -2745,7 +2745,7 @@ void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
     if (unit->level == datDevilTable[unit->id].level) {
         levelColor = color;
     }
-    sprintf(text, D_0054FB10, datGetLevelForDraw(unit));
+    sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(unit));
     request = frwGetSmallNumFontFRQ(x + 0xB40, y + 0x18, z, levelColor, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
@@ -3018,8 +3018,8 @@ void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
     cmbDrawStockBg(x + 0x120, y + 0x70, z, mode, ot);
 }
 
-extern char D_0054FB18[];
-extern char D_0054FB10[];
+extern char fclCombineStrFmt[];
+extern char fclCombineNum2dFmt[];
 extern char *datExplainTable[];
 extern char *text2[];
 
@@ -3034,24 +3034,24 @@ void cmbDrawDevilStats(s32 x, s32 y, s32 z, datUnitWork_t *unit, s32 unused, u32
     void *request;
     u32 color = fclBlendColor(0x89FEFF80, 0, alpha);
 
-    sprintf(text, D_0054FB18, datExplainTable[datDevilTable[unit->id].race]);
+    sprintf(text, fclCombineStrFmt, datExplainTable[datDevilTable[unit->id].race]);
     request = frwGetSmallFontFRQ2(x + 0x300, y + 0x148, z, color, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
-    sprintf(text, D_0054FB18, text2[unit->id]);
+    sprintf(text, fclCombineStrFmt, text2[unit->id]);
     request = frwGetSmallFontFRQ2(x + 0x780, y + 0x148, z, color, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
-    sprintf(text, D_0054FB10, datGetLevelForDraw(unit));
+    sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(unit));
     request = frwGetSmallNumFontFRQ(x + 0xFC0, y + 0x168, z, color, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
 
-extern char D_0054FB10[];
+extern char fclCombineNum2dFmt[];
 
 extern void *frGetCNameFRQ(s8 targetNo, s8 style, void *previous, s32 firstOption);
 extern void frSetDrawPosition(void *request, u32 x, u32 y);
@@ -3074,7 +3074,7 @@ void cmbDrawDevilNameLevel(s32 x, s32 y, s32 priority, datUnitWork_t *work, s32 
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
-    sprintf(text, D_0054FB10, datGetLevelForDraw(work));
+    sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(work));
     request = frwGetNumFontFRQ(0x1D30, 0x1C0, priority, 0xA09DC380, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
@@ -3759,7 +3759,7 @@ void cmbUpdateStockCursor(void)
                                             button, 0x30));
 }
 
-extern char D_0053CC60[];
+extern char fclCombineSeqChangeMsg[];
 void cmbChangeSequence(void)
 {
     s32 button = cmpGetPressedButton(0x237) & 0xFFFF;
@@ -3785,7 +3785,7 @@ void cmbChangeSequence(void)
         CMB_GBWK->displayFlags[0] = 0;
         CMB_GBWK->unk_00001 = 0xA;
         CMB_GBWK->unk_00004 = button;
-        printf(D_0053CC60);
+        printf(fclCombineSeqChangeMsg);
         break;
     }
     case 2:
@@ -4360,7 +4360,7 @@ s32 cmbHandleDebugExit(void)
 
 extern void fclSetPanelAnimState(void *anim, u8 state);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CC60);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineSeqChangeMsg);
 
 s32 cmbUpdatePanelAnim(void)
 {
@@ -4570,7 +4570,7 @@ s32 cmbActionExists(void *work)
 
 extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 
-extern char D_0053CD68[];
+extern char fclCombineDevilModelFmt[];
 
 saddr_t cmbMakeModelPath(u16 id, s32 *size)
 {
@@ -4578,7 +4578,7 @@ saddr_t cmbMakeModelPath(u16 id, s32 *size)
     char base[0x10];
 
     mdlGetFilebase(6, id, base, 0x10);
-    sprintf(path, D_0053CD68, base);
+    sprintf(path, fclCombineDevilModelFmt, base);
     return EE_ADDR_S(sdfDevLoadFileEx(path, NULL, size));
 }
 
@@ -4588,7 +4588,7 @@ void cmbInitActionData(s32 id, cmbActionData_t *data)
     data->id = id;
 }
 
-extern char D_0053CD80[];
+extern char fclCombineLoadModelFmt[];
 
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 
@@ -4600,12 +4600,12 @@ void cmbLoadActionModel(s32 id, cmbActionData_t *data)
     handle = cmbMakeModelPath(id, &data->size);
     data->handle = handle;
     data->lock = sdfMemLock(EE_ADDR_AS(sdfMemHandle_t *, handle));
-    printf(D_0053CD80, (u16)data->id);
+    printf(fclCombineLoadModelFmt, (u16)data->id);
 }
 
 extern void mdlFree(struct mdlObj_t *model);
-extern char D_0053CDA8[];
-extern char D_0053CDC8[];
+extern char fclCombineFreePackFmt[];
+extern char fclCombineFreeHandleFmt[];
 
 void cmbFreeActionModel(void *model)
 {
@@ -4614,20 +4614,20 @@ void cmbFreeActionModel(void *model)
     if (data->handle != 0) {
         sdfMemFreeDirect(EE_ADDR_AS(void *, data->handle));
         data->handle = 0;
-        printf(D_0053CDA8, (u16)data->id);
+        printf(fclCombineFreePackFmt, (u16)data->id);
     } else if (data->model != NULL) {
         mdlFree(data->model);
         data->model = NULL;
         while (sdfDelayedResrcCheck() != 0) {
         }
-        printf(D_0053CDC8, (u16)data->id);
+        printf(fclCombineFreeHandleFmt, (u16)data->id);
     }
 }
 
 extern struct mdlObj_t *mdlLoad(u32 major, u32 minor);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
-extern char D_0053CDE8[];
-extern char D_0053CE10[];
+extern char fclCombineHandleMdlLoadFmt[];
+extern char fclCombineHandleMemFmt[];
 
 struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
 {
@@ -4636,7 +4636,7 @@ struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
     if (data->handle == 0) {
         if (model == NULL) {
             data->model = mdlLoad(6, (u16)data->id);
-            printf(D_0053CDE8, (u16)data->id);
+            printf(fclCombineHandleMdlLoadFmt, (u16)data->id);
             model = data->model;
         }
     } else {
@@ -4649,7 +4649,7 @@ struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
             data->model = mdlLoad(6, (u16)data->id);
             sdfMemFreeDirect(EE_ADDR_AS(void *, data->handle));
             data->handle = 0;
-            printf(D_0053CE10, (u16)data->id);
+            printf(fclCombineHandleMemFmt, (u16)data->id);
         }
         model = data->model;
     }
@@ -5038,7 +5038,7 @@ extern void mdlSetColorWithEffect(struct mdlObj_t *model, u32 color);
 extern f32 cmbActionTargetModel[3];
 extern f32 cmbTargetModelId;
 extern s8 cmbActionMode;
-extern char D_0053CE48[];
+extern char fclCombineTargetModelName[];
 
 void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
 {
@@ -5065,7 +5065,7 @@ void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
                 }
                 color = fclBlendColor(0x80000000, 0x80808080, (s32)cmbActionTargetModel[i]);
                 mdlSetColorWithEffect(CMB_GBWK->actionData[i].model, color);
-                cmbGetSceneModel(CMB_GBWK->actionData[i].model, D_0053CE48);
+                cmbGetSceneModel(CMB_GBWK->actionData[i].model, fclCombineTargetModelName);
                 cmbInitModelOt((u16)CMB_GBWK->actionData[i].id, modelOt);
                 cmbDrawActionModel(CMB_GBWK->actionData[i].model,
                     (u16)CMB_GBWK->actionData[i].id, CMB_GBWK->modelMark[i], 0x80808080, modelOt);
@@ -5245,21 +5245,21 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD68);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineDevilModelFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD80);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineLoadModelFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDA8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineFreePackFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDC8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineFreeHandleFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CDE8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMdlLoadFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE10);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMemFmt);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE48);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineTargetModelName);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 #endif
@@ -5521,7 +5521,7 @@ void cmbFreeActionModels(void)
 
 s32 cmbChkActScript(void)
 {
-    return dds3SearchProcessName(D_0053CF10) != NULL;
+    return dds3SearchProcessName(fclE807MainName) != NULL;
 }
 
 extern char D_0053CF20[];
@@ -5593,7 +5593,7 @@ void cmbUpdateAction(void)
         CMB_GBWK->unk_00004 = 1;
         return;
     }
-    event = dds3SearchProcessName(D_0053CF10);
+    event = dds3SearchProcessName(fclE807MainName);
     movie = dds3SearchProcessName(D_0053CF20);
     if (CMB_GBWK->actionFrame == 0) {
         if (fclCombineChkEventStat() != 0 || event == NULL || movie == NULL) {
@@ -5781,7 +5781,7 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEE0);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEF8);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF10);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclE807MainName);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF20);
 
@@ -5803,15 +5803,15 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAF0);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAF8);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB00);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmpSkillCursor);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB0C);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB10);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineNum2dFmt);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB18);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineStrFmt);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbActionMode);
 

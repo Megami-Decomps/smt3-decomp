@@ -121,7 +121,7 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 cmpLoadStatusModel(void);
 extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
-extern char D_0053D768[];
+extern char fclEncycBookName[];
 
 extern sdfVector4_t cmpStatusModelPos;
 
@@ -193,8 +193,8 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 start,
     s32 shutdown, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy, void *data);
 extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
     dds3ProcessFunc_t destroy, void *data);
-extern char D_0053D718[], D_0053D738[], D_0053D748[], D_0053D758[];
-extern char D_0053D778[], D_0053D798[], D_0054FCB8[];
+extern char fclEncycRecordFmt[], fclEncycCalcName[], fclEncycDrawName[], fclEncycUpdtName[];
+extern char fclEncycStartFmt[], fclEncycRegistrationName[], fclEncycReadingName[];
 
 #ifdef NON_MATCHING
 extern s32 fclEncycGetRatio(void);
@@ -212,19 +212,19 @@ void fclEncycStartProcess(s32 mode)
     if (pinst->stat & 0x200) {
         s32 count = fclEncycGetNum();
         s32 ratio = fclEncycGetRatio();
-        printf(D_0053D718, count, 0xB8, ratio);
+        printf(fclEncycRecordFmt, count, 0xB8, ratio);
         CreateSortIndexByRace(pinst->entries.read.sorted[0]);
         CreateSortIndexByLevel(pinst->entries.read.sorted[1]);
     }
-    pinst->procid[0] = dds3StartProcess(D_0053D738, 0x407, 0, 0,
+    pinst->procid[0] = dds3StartProcess(fclEncycCalcName, 0x407, 0, 0,
         (dds3ProcessFunc_t)CALC_ENCYC_Process, NULL, NULL);
-    pinst->procid[1] = dds3StartProcess(D_0053D748, 0x2B17, 0, 0,
+    pinst->procid[1] = dds3StartProcess(fclEncycDrawName, 0x2B17, 0, 0,
         (dds3ProcessFunc_t)DRAW_ENCYC_Process, NULL, NULL);
-    pinst->procid[2] = dds3StartProcess(D_0053D758, 0x5213, 0, 0,
+    pinst->procid[2] = dds3StartProcess(fclEncycUpdtName, 0x5213, 0, 0,
         (dds3ProcessFunc_t)UPDT_ENCYC_Process, NULL, NULL);
-    fclEncycAllocEntry(D_0053D768, (dds3ProcessFunc_t)fclEncycDebugProc,
+    fclEncycAllocEntry(fclEncycBookName, (dds3ProcessFunc_t)fclEncycDebugProc,
         (dds3ProcessFunc_t)fclEncycDebugShutdown, NULL);
-    printf(D_0053D778, mode != 0 ? D_0054FCB8 : D_0053D798);
+    printf(fclEncycStartFmt, mode != 0 ? fclEncycReadingName : fclEncycRegistrationName);
     g_pinst = pinst;
 }
 
@@ -232,19 +232,19 @@ void fclEncycStartProcess(s32 mode)
 extern void ReleaseWork(fclEncyc_instance_tag *pinst);
 #endif
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D718);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRecordFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D738);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycCalcName);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D748);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycDrawName);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D758);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycUpdtName);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D768);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBookName);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D778);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycStartFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D798);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRegistrationName);
 
 s32 fclEncycKillProcess(void)
 {
@@ -258,7 +258,7 @@ s32 fclEncycKillProcess(void)
     dds3KillProcess(pinst->procid[0], 0);
     dds3KillProcess(pinst->procid[1], 0);
     dds3KillProcess(pinst->procid[2], 0);
-    fclEncycFreeEntries(D_0053D768);
+    fclEncycFreeEntries(fclEncycBookName);
     cmpModelFreeResource();
     ReleaseWork(pinst);
     sdfMemFreeDirect(pinst->memhandle);
@@ -2219,7 +2219,7 @@ void ExecSummon(s32 recindex)
 
 extern u8 *datExplainTable[];
 extern u8 *text2[];
-extern char D_0054FCC0[];
+extern char fclEncycNum3Fmt[];
 
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
@@ -2246,20 +2246,20 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
             (char *)datExplainTable[datDevilTable[id].race], NULL);
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
             (char *)text2[id], font);
-        sprintf(text, D_0054FCC0, unit->maxhp);
+        sprintf(text, fclEncycNum3Fmt, unit->maxhp);
         font = frwGetSmallNumFontFRQ(0x1220, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
-        sprintf(text, D_0054FCC0, unit->maxmp);
+        sprintf(text, fclEncycNum3Fmt, unit->maxmp);
         font = frwGetSmallNumFontFRQ(0x1670, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
-        sprintf(text, D_0054FCC0, datGetLevelForDraw(unit));
+        sprintf(text, fclEncycNum3Fmt, datGetLevelForDraw(unit));
         font = frwGetSmallNumFontFRQ(0x19F0, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
         *fonts++ = font;
     }
 }
 
 extern u8 *datExplainTable[];
-extern char D_0054FCC0[];
-extern char D_0054FCC8[];
-extern char D_0054FCD0[];
+extern char fclEncycNum3Fmt[];
+extern char fclEncycBlank[];
+extern char fclEncycNum6Fmt[];
 extern s32 GetDevilParam(fclencyceelem_t *record, s32 type);
 
 #ifdef NON_MATCHING
@@ -2305,7 +2305,7 @@ void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
                                     (char *)text2[id], font);
         level = record->level;
-        sprintf(text, D_0054FCC0, level < 100 ? level : 99);
+        sprintf(text, fclEncycNum3Fmt, level < 100 ? level : 99);
         font = frwGetSmallNumFontFRQ(0x11E0, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
         id = record->id;
         level = record->level;
@@ -2320,9 +2320,9 @@ void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
             price >>= 1;
         }
         if (record->id == 0xC0) {
-            sprintf(text, D_0054FCC8);
+            sprintf(text, fclEncycBlank);
         } else {
-            sprintf(text, D_0054FCD0, price);
+            sprintf(text, fclEncycNum6Fmt, price);
         }
         font = frwGetSmallNumFontFRQ(0x1680, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
         work->fontList[row] = font;
@@ -2533,7 +2533,7 @@ s32 PrepSummon(fclEncyc_readmainwork_tag *phase)
 
 extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                               const char *text, void *previous);
-extern char D_0054FCD8[];
+extern char fclEncycNum7Fmt[];
 
 void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious)
 {
@@ -2545,14 +2545,14 @@ void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious)
         }
         *font = NULL;
     }
-    sprintf(text, D_0054FCD8, DDS3_GBWK->maka);
+    sprintf(text, fclEncycNum7Fmt, DDS3_GBWK->maka);
     {
         void *previous = *font;
         *font = frwGetNumFontFRQ(x, y, 0x00FFFFF0, 0xA09DC380, text, previous);
     }
 }
 
-extern char D_0054FCC0[];
+extern char fclEncycNum3Fmt[];
 
 void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious)
 {
@@ -2568,7 +2568,7 @@ void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious)
     }
 
     ratio = fclEncycGetRatio();
-    sprintf(text, D_0054FCC0, ratio);
+    sprintf(text, fclEncycNum3Fmt, ratio);
     color = ratio >= 100 ? 0xD7D78080 : 0xA09DC380;
     *font = frwGetNumFontFRQ(0x1A40, 0x0BD0, 0x00FFFFF0, color, text, *font);
 }
@@ -2671,7 +2671,7 @@ void SetCameraLightParam(fclEncyc_instance_tag *pinst)
 extern dds3DrawBank_t dds3DrawEnv[];
 extern sdfMatrix4_t D_002FA240;
 extern sdfVector4_t aViewEye, aViewTarget, aViewDown;
-extern sdfVector4_t D_003322D0, D_003322E0, D_003322F0, D_00332300;
+extern sdfVector4_t fclEncycLightColor, fclEncycLightDir, fclEncycAmbientColor, fclEncycFogColor;
 extern sdfVector4_t D_00345F60;
 extern f32 dds3QuakeOffset[4];
 extern u32 dds3GetFrameID(void);
@@ -2695,10 +2695,10 @@ void func_0021B480(fclEncyc_instance_tag *pinst)
 
     frame = dds3GetFrameID();
     dds3SetSoftenBias(0, 5.0f, 0.0f);
-    dds3SetLightColor(0, 0, &D_003322D0.x);
-    dds3SetLightDir(0, 0, &D_003322E0.x);
-    dds3SetAmbientColor(0, &D_003322F0.x);
-    dds3SetFogColor(0, &D_00332300.x);
+    dds3SetLightColor(0, 0, &fclEncycLightColor.x);
+    dds3SetLightDir(0, 0, &fclEncycLightDir.x);
+    dds3SetAmbientColor(0, &fclEncycAmbientColor.x);
+    dds3SetFogColor(0, &fclEncycFogColor.x);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     dds3ScreenParam.fovy = 0.7551905f;
 
@@ -3892,7 +3892,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern const char *D_003323D8[4];
-extern char D_0054FCE0[];
+extern char fclEncycMarkerOn[];
 
 #ifdef NON_MATCHING
 /* 103 of 106 words match; three argument-setup instructions reorder.
@@ -3941,7 +3941,7 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
         y += 0x60;
     }
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + work->selection * 0x60,
-                                         0xFFFFF0, 0, D_0054FCE0)));
+                                         0xFFFFF0, 0, fclEncycMarkerOn)));
     return 0;
 }
 #else
@@ -4029,7 +4029,7 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 0x12);
     for (i = 0; i < 16; i++) {
         const char *status = fclEncycSearch(work->firstId + i) < 0 ? D_0053D868 : D_0053D878;
-        const char *marker = work->row == i ? D_0054FCE0 : D_0054FCC8;
+        const char *marker = work->row == i ? fclEncycMarkerOn : fclEncycBlank;
 
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
                                                0, D_0053D888, marker, work->firstId + i, status)));
@@ -4189,15 +4189,15 @@ INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pdebug);
 
 INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCB0);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCB8);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycReadingName);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCC0);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum3Fmt);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCC8);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycBlank);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCD0);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum6Fmt);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCD8);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum7Fmt);
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCE0);
+INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycMarkerOn);
 

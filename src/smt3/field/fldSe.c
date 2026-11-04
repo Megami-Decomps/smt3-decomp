@@ -1111,7 +1111,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", slFileSelWork);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054F07C);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F080);
+INCLUDE_SDATA(const s32, "field/fldSe", slNum2dFmt);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054F088);
 
