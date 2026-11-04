@@ -10,6 +10,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -1217,7 +1218,7 @@ s32 cmbCalcIntroduce(void)
         cmbRunActionSe(0, 1);
         CMB_GBWK->birthVariant = 0;
     }
-    if (CMB_GBWK->actionFrame < 150) {
+    if (CMB_GBWK->actionFrame < SDF_FRAMES(150)) {
         return 0;
     }
     if (CMB_GBWK->unk_00004 != 0) {
@@ -4206,11 +4207,11 @@ void cmbUpdateIntroduce(void)
         return;
     }
     frame = CMB_GBWK->actionFrame;
-    if (frame < 150) {
+    if (frame < SDF_FRAMES(150)) {
         CMB_GBWK->actionFrame = frame + 1;
         return;
     }
-    if (frame < 1000) {
+    if (frame < SDF_FRAMES(1000)) {
         CMB_GBWK->actionFrame = frame + 1;
     }
     processStat = dds3GetProcessStat(CMB_GBWK->scriptArg);
@@ -5151,10 +5152,10 @@ void cmbUpdateCameraZoom(void)
     f32 zoom = CMB_GBWK->actionZoom;
     s32 target;
 
-    if (cmbActionStep != 0 || CMB_GBWK->actionFrame < 80) {
+    if (cmbActionStep != 0 || CMB_GBWK->actionFrame < SDF_FRAMES(80)) {
         return;
     }
-    if (CMB_GBWK->actionFrame < 220) {
+    if (CMB_GBWK->actionFrame < SDF_FRAMES(220)) {
         zoom = 0.0f;
     }
     target = CMB_GBWK->actionTargetIndex;
@@ -5215,7 +5216,7 @@ void cmbUpdateTimeTable(void)
     void (*action)(void);
 
     if (index < table->count - 1 &&
-        (u32)work->actionFrame >= table->entries[index + 1].frame) {
+        (u32)work->actionFrame >= SDF_FRAMES(table->entries[index + 1].frame)) {
         printf("Updating time table : %d -> %d\n", index, index + 1);
         work = CMB_GBWK;
         work->actionTargetIndex = (s32)((u32)work->actionTargetIndex + 1);
@@ -5225,7 +5226,7 @@ void cmbUpdateTimeTable(void)
     entry = &D_0032F628[mode].entries[index];
     action = entry->action;
     if (action != NULL &&
-        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == entry->frame))) {
+        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == SDF_FRAMES(entry->frame)))) {
         action();
         work = CMB_GBWK;
     }
@@ -5613,11 +5614,11 @@ void cmbUpdateAction(void)
         cmbActionStep = 1;
     } else {
         if (fclGetWorkValue(2) != 0) {
-            if (CMB_GBWK->actionFrame < 780) {
+            if (CMB_GBWK->actionFrame < SDF_FRAMES(780)) {
                 allowSkip = 1;
             }
         } else {
-            allowSkip = CMB_GBWK->actionFrame < 580;
+            allowSkip = CMB_GBWK->actionFrame < SDF_FRAMES(580);
         }
         if (allowSkip != 0) {
             if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
