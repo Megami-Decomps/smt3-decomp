@@ -1,6 +1,7 @@
 #include "common.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* The native end message is padded to a 0x20-byte rodata block. */
 extern s8 dds3CrossfadeRunFlag;
@@ -241,7 +242,7 @@ void dds3CrossfadeStart(s32 frame)
         dds3DrawEnv[i].clearXyzA = 0x80008000;
         dds3DrawEnv[i].clearXyzB = 0x80008000;
     }
-    dds3CrossfadeFrameMax = frame;
+    dds3CrossfadeFrameMax = SDF_FRAMES(frame);
     dds3CrossfadeRunFlag = 1;
     dds3CrossfadeFrame = 0;
     printf("dds3CrossfadeStart\n");
