@@ -627,6 +627,10 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s
     sdfShapePacket_t *packet;
     sdfModelPacketHeader_tag *header;
 
+    /* BUG: the callee adds to numOfSkin and the caller never clears it, so retail reads stack garbage. */
+#ifdef FIX_BUGS
+    numOfSkin = 0;
+#endif
     bytes = sdfModelGetDrawPacketSize(aShape, &numOfSkin, &tempQwc);
     cursor = aShape;
     if (bytes == 0 && numOfSkin == 0 && tempQwc == 0) {

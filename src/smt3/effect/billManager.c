@@ -745,6 +745,12 @@ billHandle_t *dds3Billboard_P2ACreate(void *resourceData) {
     if (resourceData != NULL) {
         data = dds3BillAnimLoadP2A(resourceData);
     }
+    /* BUG: a NULL resourceData leaves data NULL and retail reads AnimNum through it. */
+#ifdef FIX_BUGS
+    if (data == NULL) {
+        return NULL;
+    }
+#endif
     n = data->AnimNum;
     newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->u.animationData = data;
