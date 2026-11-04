@@ -2723,6 +2723,9 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
 extern u32 frGetStrWidth2(frFontHandle_t *font);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawText(s32 id, s32 *colors)
 {
@@ -6765,6 +6768,9 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListRow);
 #endif
 
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 cmpCursorBlinkColor(s32 timer);
 extern s32 cmpCursorFadeChannel(s32 color, s32 timer, s32 rate);
@@ -7373,6 +7379,9 @@ void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     cmpDrawBoxSolid(a, b, c, d, e, f, 0, g);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
                  s32 *colors, s32 mode, s32 ot)
@@ -8189,6 +8198,9 @@ extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot
 extern s32 cmpAllocEffectSlot(s32 color, s8 selected, s8 disabled,
                               cmpCursorSlot_t *slot);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                        s32 mode, s32 alpha)
@@ -8234,6 +8246,9 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemBox);
 extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                               s32 mode, s32 alpha);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
                          cmpCursorInfo_t *cursor, s32 mode, s32 alpha, s32 ot)
@@ -8364,6 +8379,9 @@ void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1
 }
 
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                     s8 row, s32 scale, s8 phase, s8 layout,
@@ -8411,6 +8429,9 @@ extern void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 colo
                            s8 mode, s32 scale, s8 phase, s8 layout,
                            cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawListColumn(s32 x, s32 y, s32 z, s32 width, s32 height, s8 mode,
                        s32 intensity, cmpCursorInfo_t *cursor, cmpListRowDraw_t draw)
@@ -8497,6 +8518,9 @@ void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 
 /* Exact size; 76 of 87 words match. Remaining differences schedule independent
  * argument setup and entry instructions in a different order. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight, s8 rows,
                              s32 alpha, s32 ot);
@@ -8641,6 +8665,9 @@ extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *font, u32 priority);
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawStatusRow1(s32 x, s32 y, u32 color, datUnitWork_t *unit)
 {
@@ -8694,6 +8721,9 @@ extern char D_0054FED8[];
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
 /* NON_MATCHING: 8 of 77 words differ at the exact 308-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawStatusRow2(s32 x, s32 y, u32 color, datUnitWork_t *unit)
 {
@@ -8798,6 +8828,9 @@ s32 campDrawStockCell(s32 color, s8 index, s8 row)
 
 extern s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
                          s8 cursorMode, s8 detailMode, datUnitWork_t *unit,
@@ -8930,6 +8963,9 @@ s32 campDrawStockIcon(s8 a, s8 b, s8 *rows, s8 *cols, s8 force)
     return 0;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawStockRow1(s32 x, s32 y, s32 z, s8 *rows, s8 *columns,
                        s8 force, cmpStockWork_t *stock, s32 unused_ot)
@@ -8986,6 +9022,9 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
 #endif
 
 /* NON_MATCHING: 27 of 152 words differ at the exact 608-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
                                cmpCursorSlot_t *cursor, s32 mode, s32 alpha);
@@ -9159,6 +9198,9 @@ s32 campCheckStockFree(s32 x, s32 y, s8 index, s8 room, s8 known, s32 f, s8 g)
 
 /* NON_MATCHING: 14 of 39 words differ at the exact size: retail keeps a second
  * register holding work + ofs that the C coalesces away. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 campCheckStockRoom(s8 index, s8 listIndex, s8 *pRoom, u8 *pFlag, cmpStockWork_t *work, s8 skip)
 {
@@ -9180,6 +9222,9 @@ s32 campCheckStockRoom(s8 index, s8 listIndex, s8 *pRoom, u8 *pFlag, cmpStockWor
 INCLUDE_ASM(const s32, "code_0022C578", campCheckStockRoom);
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void campDrawStockSlots(s8 *indices, s8 active, s8 *flags,
                         cmpLocalStock_t *stock)
@@ -10728,6 +10773,9 @@ void cmpPlayCursorSE(u32 button)
     func_002413B8(button, 0);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void func_002413B8(u32 button, s8 mode)
 {
@@ -11149,6 +11197,9 @@ s32 cmpCursorAtLastEnabled(cmpCursorInfo_t *cursor)
     return 0;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode)
 {
@@ -11395,6 +11446,9 @@ void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor)
 extern f32 D_0054E474;
 
 /* NON_MATCHING: 15 of 32 words differ (first at +0x10). */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * menu main savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
 {

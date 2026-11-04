@@ -274,6 +274,9 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 extern s32 evtGetAgeOfMoon(void);
 extern s32 evtBitCheck(s32 no);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * field underground facility savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 nbGetEncountJoken(s32 id)
 {

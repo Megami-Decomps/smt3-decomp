@@ -26,6 +26,9 @@ extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 
 /* NON_MATCHING: 2 of 61 words differ, at the exact 244-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * battle unknown realm savestate, covering only the paths those calls took.
+ * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void nbCameraPressProcessRun(void)
 {
