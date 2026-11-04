@@ -962,6 +962,18 @@ char *strstr(const char *haystack, const char *needle)
 
 extern const u8 _ctype_[];
 
+/* BUG: the limits are written as 64-bit literals because long is 64 bits on
+ * the EE. Where long is 32 bits they truncate to 0 and 0xFFFFFFFF, so every
+ * negative number overflows to 0. Same values on the EE, derived from the
+ * width of long. */
+#ifdef FIX_BUGS
+#define STRTOL_MAX (~0UL >> 1)
+#define STRTOL_MIN (~(~0UL >> 1))
+#else
+#define STRTOL_MAX 0x7fffffffffffffffUL
+#define STRTOL_MIN 0x8000000000000000UL
+#endif
+
 long _strtol_r(_reent *r, const char *input, char **end, s32 base)
 {
     const char *s = input;
@@ -989,7 +1001,7 @@ long _strtol_r(_reent *r, const char *input, char **end, s32 base)
     }
     if (base == 0)
         base = c == '0' ? 8 : 10;
-    cutoff = negative ? 0x8000000000000000UL : 0x7fffffffffffffffUL;
+    cutoff = negative ? STRTOL_MIN : STRTOL_MAX;
     cutlim = cutoff % (unsigned long)base;
     cutoff /= (unsigned long)base;
     for (acc = 0, any = 0;; c = *s++) {
@@ -1011,7 +1023,7 @@ long _strtol_r(_reent *r, const char *input, char **end, s32 base)
     }
 done:
     if (any < 0) {
-        acc = negative ? 0x8000000000000000UL : 0x7fffffffffffffffUL;
+        acc = negative ? STRTOL_MIN : STRTOL_MAX;
         r->_errno = 34;
     } else if (negative) {
         acc = -acc;
