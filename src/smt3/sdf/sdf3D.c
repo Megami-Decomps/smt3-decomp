@@ -125,8 +125,6 @@ extern addr_t sdf3DFogDefault;
 
 extern f32 sdf3DEyeOffset[4];
 
-extern u8 sdf3DScreenParam[];
-
 #define SDF_DMA_QWORD_SHIFT 4
 
 #define SDF_GS_FOGCOL_REGISTER 0x3D
@@ -196,6 +194,8 @@ typedef struct sdf3DScreenParam_t {
     f32 trans[4];  /* 0x80 */
     f32 cameraPos[4]; /* 0x90 */
 } sdf3DScreenParam_t;
+
+extern sdf3DScreenParam_t sdf3DScreenParam;
 
 void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
@@ -292,7 +292,7 @@ void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera) {
     SDF_VU0_STOREMATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_STOREVECTOR(sdf3DEyeOffset);
-    memcpy(sdf3DScreenParam, aParam, sizeof(*aParam));
+    memcpy(&sdf3DScreenParam, aParam, sizeof(*aParam));
 }
 
 void sdf3DSetDefaultLight(u8 *aLight) {
