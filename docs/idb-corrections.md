@@ -1303,3 +1303,94 @@ dds3 effect and particle types (17):
 ### Outcome of the name candidates
 
 Renamed in the decomp, where retail code proves the name: `dds3GlobalWork_t.unk657C` to `nameCode` (`nmeBuildNameFont` fills it with the entered name's glyph codes) and `fldResHead_t.word14` to `areaName` (`fldFileResolver.c` reads it as the area reference). Not renamed, no retail access proves them: `fldResHead_t` `word04`, `word0C`, `word1C`; `reserved19D10` (`amapEX`); `reserved1C` (`dmy`). `corePktCb_t.dataPtr` keeps its name over the IDB's `payload`.
+
+## Check of the 39 unverified effect structs against SLUS_209.11
+
+Method: the IDB applies none of these types to a retail function except `Eff_ModelTrackPolyABGR_t`, `dds3EffectWork_t` and `dds3Particle_SphereAtom_t3`, so each struct was matched to its creator or accessor by name, read in Hex-Rays, and sized from allocation sizes, strides and the largest offset. The `Eff_*` types are an older naming of the `effPCP*` types retail uses, with different sizes in five cases. main.elf (port 13339) did not answer `server_health` and was not used; a cross-check there is still owed, and field names on every verified entry need it.
+
+### Verified from retail
+
+- `Eff_ModelTrackPolyABGR_t` 16: `dds3HermitianTrackPolySetVC` reads `s0,s1,e0,e1` at +0,+4,+8,+12 as u32, so 16 from the largest offset. Field names need main.elf.
+- `dds3Effect_t` 16: `dds3EffectCreate` allocates 16 and writes major +0, minor +4, a work pointer +8 and the float 1.03 at +12. `dds3EffectLoad` reads the file header the same way and the payload starts at +16. Field names need main.elf.
+- `dds3EffMajorFunc_t` 48: `dds3EffectCreate` indexes `EffMajorTable` at 12 words per entry and calls the entry at +0, so 48. Slot names beyond create need main.elf.
+- `dds3EffectTable_t` 12: `dds3ParticleExpCreate` indexes `dds3ParticleFuncTable` at 3 words per entry and calls +0, so 12. Slots +4 and +8 are not read in the functions checked; their names need main.elf.
+- `dds3Particle_Exp_t` 16: `dds3ParticleExpCreate` reads type at +0 (compared with 3) and size at +4, and the payload starts at `pData + 16`. `reserve1`/`reserve2` are unread; names need main.elf.
+- `Eff_ThunderPolyPart_t` 12: Part stride is 12 in `effPCP_ThunderPolyCreate` (alloc `12*n + 104`). Verified as the size of the effPCP sibling, which retail uses; no retail code names the Eff_ type.
+- `Eff_ThunderRadiatePolyPart_t` 20: Part stride is 20 in `effPCP_ThunderRadiatePolyCreate` (alloc `20*n + 88`). Same caveat: the effPCP sibling is what retail uses.
+- `Eff_ThunderSpherePolyPart_t` 44: Part stride is 44 in `effPCPThunderSpherePolyCreate` (alloc `44*n + 100`). Same caveat: the effPCP sibling is what retail uses.
+
+### Contradicted by retail
+
+- `dds3EffectWork_t` 48: Retail allocates the object's work as 80 bytes (`dds3EffectObjectBasicConstructor`: `sdfChipAllocDirect(80)`, memset 0x50), IDB says 48. Only `control` at +0 is read by `dds3EffectObjectBasicDestructor`; other fields unverified.
+- `dds3Effect_DistortionBlur_t` 16: `dds3EffectDistortionBlurCreate` allocates 4856: the 44-byte param is copied inline at +0, texture at +44, memory handle at +48, parts pointer at +52, then 100 parts of 48 bytes from +56. IDB has a 16-byte pointer layout.
+- `dds3Particle_SphereAtom_t3` 28: `dds3Particle_SphereAtomCreate` copies 0x20 bytes after the 336-byte `dds3Particle_Basic_t` (alloc 368), IDB says 28. `SphereAtomBuffInit` tests a byte at ext+0 as the type and reads timing at ext+8, so the IDB's leading `basic` pointer is not there.
+- `Eff_ThunderSpherePolyParam_t` 72: `effPCPThunderSpherePolyCreate` copies 76 bytes of param (the effPCP sibling is 76), IDB Eff_ type says 72.
+
+### Still unverified
+
+- `EffBTL_BillFireball_Part_t` 44: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillFireball_t` 80: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillTrack_Part_t` 64: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffBTL_BillTrack_t` 116: No retail function found by name or by type reference (`effBTL*Bill*` does not exist in SLUS_209.11).
+- `EffTable_t` 4: No retail accessor found.
+- `Eff_FlashPolyParam_t` 48: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_FlashPolyPart_t` 12: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_FlashPoly_t` 28: Only effPCPFlashPoly* siblings exist in retail, with other sizes; no retail code names this type.
+- `Eff_RippleSprite_t` 20: Retail has only `effPCPRippleBlurExp` and `dds3EffectRippleBlur`, which are other types.
+- `Eff_Ripple_t` 40: Retail has only `effPCPRippleBlurExp` and `dds3EffectRippleBlur`, which are other types.
+- `Eff_SparkleSphereBillParam_t` 28: `effPCPSparkleSphereCreate` allocates 32 with a billboard handle; no retail object matches the 8-byte bill.
+- `Eff_SparkleSphereBill_t` 8: `effPCPSparkleSphereCreate` allocates 32 with a billboard handle; no retail object matches the 8-byte bill.
+- `Eff_ThunderPolyParam_t` 80: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderPoly_t` 32: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderRadiatePolyParam_t` 68: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderRadiatePoly_t` 32: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `Eff_ThunderSpherePoly_t` 60: Retail uses the effPCP sibling, whose size differs or was not checked; no retail code names this type.
+- `dds3EffectTable_Reset_t` 4: Single delegate slot; the slot is called through the particle/effect tables but the wrapper struct has no retail footprint.
+- `dds3EffectTable_Scale_t` 4: Single delegate slot; the slot is called through the particle/effect tables but the wrapper struct has no retail footprint.
+- `dds3Effect_PartialBlur_t` 8: `dds3EffectPartialMultiBlurCreate` allocates 48 with the blur inline and a texture at +44, a different type from this 8-byte pointer pair.
+- `dds3Particle_Blur_t` 8: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_EffItem_t` 16: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Expansion_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Nop_t3` 4: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track2_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track3_t` 20: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+- `dds3Particle_Track_t` 16: Reached only through VU0 inline code and untyped offsets (`dds3Particle_TrackSetExp`, `BlurCreate` use buffers of other types); no access pins this struct's size.
+
+### Size fixes applied to the IDB
+
+Replaced in place (ordinals kept), each from the retail evidence above:
+
+- `dds3EffectWork_t` 48 to 80: the existing fields are unchanged and `reserved30[32]` is added.
+- `dds3Effect_DistortionBlur_t` 16 to 4856: `param[44]` inline, `hAlphaTex` +44, `hMem` +48, `pwork` +52, `parts[4800]` +56 (100 parts of 48 bytes, element type not recovered).
+- `dds3Particle_SphereAtom_t3` 28 to 32: `type` moved to +0 (retail tests the byte there) and the `basic` pointer dropped. `loop` kept at +5 and `timing` at +8 (retail reads +8); `loop` is not proven by retail.
+
+Data names absorbed into the symbol that code indexes past (retail reads them through the owner's base, so they are fields, not objects): NM_PrimPolyParm, RPE_PrimPolyParm, SPL_PrimPolyParm, cmpSkillDrawWork, dds3BezierWork, dds3FlashPolyTag, dds3HermitianTag, fldAutoMapTexHandle, fldCamPhokanEyeW, fldCamPhokanSelZ, fldCamPhokanTgtW, g_debug, gencScale, sdfSndMapIop, and the unnamed D_002FA244, D_00529758, D_005519BE. Owners: the preceding symbol at each address.
+
+## Data symbol renames
+
+Names given to `D_xxxxxxxx` data, each from a use that shows what the data holds.
+The IDB carries the same names. Types, sizes and `can_be_referenced` are untouched:
+the host data generator's output for the tree before and after is identical once the
+new names are mapped back.
+
+| Old | New | Evidence |
+| --- | --- | --- |
+| `D_0054AF60` | `two_over_pi` | 198 ints from `0xA2, 0xF9, 0x83, 0x6E`, passed as `twoOverPi` to `__kernel_rem_pio2f` |
+| `D_0054B278` | `npio2_hw` | `(ix & 0xFFFFFF00) != D[n - 1]` in `__ieee754_rem_pio2f`; words `0x3FC90F00`, `0x40490F00` |
+| `D_00551928`, `D_00551930`, `D_00551938`, `D_00551940` | `sdfFileCdromPrefix`, `sdfFileHostPrefix`, `sdfFileHddPrefix`, `sdfFileCdromName` | bytes `cdrom0:`, `host0:`, `pfs0:`, `cdrom`; copied by the `sdfFileSet*Filename` functions |
+| `D_00526530`, `D_00526540` | `test_devilIds`, `test_devilSkills` | the `devilList` and `skillList` arguments of `nbSetBattleDummy` (ids until a negative word; 30 skills per devil) |
+| `D_005267D0`, `D_005267E0` | `test2_devilIds`, `test2_devilSkills` | the same two arguments in the second call |
+| `D_0032D270` | `cmbRaceCombineTable` | `cmbLookupCombine` indexes `[flag][race - 1][race - 1]` with the two devils' races |
+| `D_0052F850` to `D_00530A98` (14 tables, `0x168` apart) | `dds3HijriParts`, `dds3HijBParts`, `dds3PlayerAParts`, `dds3PlayerBParts`, `dds3TiakiParts`, `dds3YuukoParts`, `dds3IsamuParts`, `dds3IsamuFParts`, `dds3IsamuFzParts`, `dds3HikawaParts`, `dds3Model113Parts`, `dds3TiakiBParts`, `dds3MajyoParts`, `dds3HutomimiParts` | each is a `dds3UnitPartTable_t` whose first field is that name (`hijri`, `hij_b`, `player_a`, ... `0x113`, ... `hutomimi`) |
+| `D_00529030` | `pipePartsInfoTable` | `getPartsInfo` scans 60 `tagPipePartsInfo` for a `partsID` |
+| `D_003202C8`, `D_00320770` | `evtUnityCalcArea`, `dblurParam2` | returned by `evtGetUnityCalcArea` and `dblurGetParam2`, written by their setters |
+| `D_00325B10`, `D_00325E50` | `frTagCodeTable`, `frTagCodeTable2` | `frFindTagCode` and `frFindTagCode2` search 0x1A0 `u16` codes |
+| `D_003278D4` | `pbMCardErrorRows` | `pbMCard` takes `text` from `0x84`-byte rows by error code |
+| `D_00551F80` | `fclFlags` | `fclClearFlag` and `fclGetFlag` index it by `s8` |
+| `D_0054F4D0` | `itfMesSelectionMarkers` | two string pointers (`"* "`, `"> "`) picked by `mode != 0` into `selectionMarker` |
+| `D_0054F200`, `D_0054F208`, `D_0054F210`, `D_0054F218` | `effPadVibeFrames`, `effPadVibeRemain`, `effPadVibePower`, `effPadVibeFadeIn` | `effPadVibeFadeIN/OUT` store frame, frame, power, flag; `effPadVibeFadeUpdate` scales power by remain / frames |
+| `D_0056AD58` | `effDebugPoly` | an `effDebugPolyParams_t`, zeroed with `primitive = 0x4000` |
+| `D_005311D0` | `fldTamaSeVol` | an `fldTamaSeVol_t` copied by value |
+| `D_00551EC4`, `D_00551EC6` | `pbMyCharPosX`, `pbMyCharPosY` | out parameters of `pbGetMyCharcterPos2`, then added to `pbKeyTable` offsets and bounded by 20 |
+| `D_0030FBD4`, `D_0030AB54` | `fldAutoMapFloorTable`, `fldAutoMapAreaTable` | 28-byte rows indexed by `fldAutoMapFindFloor` and `fldAutoMapFindArea`, `strlen`'d and drawn |
+| `D_0052D2F0` | `TLBFunctionsImage` | 0x330 bytes of MIPS code that `InitTLBFunctions` copies to `0x80075000` |

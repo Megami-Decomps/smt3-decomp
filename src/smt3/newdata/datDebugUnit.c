@@ -375,8 +375,6 @@ INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510F8);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbTobiwarpLabelIdx);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551100);
-
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTex1);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTex2);

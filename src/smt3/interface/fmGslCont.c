@@ -19,8 +19,8 @@ extern u32 D_0054F414;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
-extern u16 D_00325B10[];
-extern u16 D_00325E50[];
+extern u16 frTagCodeTable[];
+extern u16 frTagCodeTable2[];
 extern s8 D_00326061[];
 extern u16 frMessageCode;
 extern s32 frDefaultFontHandle;
@@ -135,7 +135,7 @@ s32 frFindTagCode(u16 code) {
     s32 i = 0;
 
     do {
-        if (D_00325B10[i] == code) {
+        if (frTagCodeTable[i] == code) {
             return i;
         }
         i++;
@@ -147,7 +147,7 @@ s32 frFindTagCode2(u16 code) {
     s32 i = 0;
 
     do {
-        if (D_00325E50[i] == code) {
+        if (frTagCodeTable2[i] == code) {
             return i;
         }
         i++;

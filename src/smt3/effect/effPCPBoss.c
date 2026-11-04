@@ -643,8 +643,8 @@ extern void effPCP_ThunderPolyDraw(void *hData);
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, u32 uw, u32 vh, u32 rgba,
                         void *th);
 
-extern s32 D_0054F200[2], D_0054F208[2];
-extern u8 D_0054F210[2], D_0054F218[2];
+extern s32 effPadVibeFrames[2], effPadVibeRemain[2];
+extern u8 effPadVibePower[2], effPadVibeFadeIn[2];
 extern effPCPBossBael_t *effPCPBossBaelCreate(void *pParam, void *pPB, void *pPCF);
 extern effPCPBossDengeki_t *effPCPBossDengekiCreate(effPCPBossDengeki_t *pParam, void *pBEDData);
 extern effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCreate(effPCPBossKAGUAttack_t *pParam,
@@ -4896,17 +4896,17 @@ void effPadVibeFadeUpdate(void)
     s32 port;
 
     for (port = 0; port < 2; port++) {
-        if (D_0054F200[port] != 0) {
-            if (D_0054F208[port] > 0) {
-                ratio = (f32)D_0054F208[port] / (f32)D_0054F200[port];
-                if (D_0054F218[port] != 0) {
+        if (effPadVibeFrames[port] != 0) {
+            if (effPadVibeRemain[port] > 0) {
+                ratio = (f32)effPadVibeRemain[port] / (f32)effPadVibeFrames[port];
+                if (effPadVibeFadeIn[port] != 0) {
                     ratio = full - ratio;
                 }
-                dds3PadVibrationSet(port, (u32)(D_0054F210[port] * ratio), 0x64);
-                D_0054F208[port]--;
+                dds3PadVibrationSet(port, (u32)(effPadVibePower[port] * ratio), 0x64);
+                effPadVibeRemain[port]--;
             } else {
                 dds3PadVibrationSet(port, 0, 0);
-                D_0054F200[port] = 0;
+                effPadVibeFrames[port] = 0;
             }
         }
     }
@@ -4915,20 +4915,20 @@ void effPadVibeFadeUpdate(void)
 void effPadVibeFadeOUT(u32 mode, u8 power, s32 frame)
 {
     if (mode < 2) {
-        D_0054F200[mode] = frame;
-        D_0054F210[mode] = power;
-        D_0054F218[mode] = 0;
-        D_0054F208[mode] = frame;
+        effPadVibeFrames[mode] = frame;
+        effPadVibePower[mode] = power;
+        effPadVibeFadeIn[mode] = 0;
+        effPadVibeRemain[mode] = frame;
     }
 }
 
 void effPadVibeFadeIN(u32 mode, u8 power, s32 frame)
 {
     if (mode < 2) {
-        D_0054F200[mode] = frame;
-        D_0054F210[mode] = power;
-        D_0054F218[mode] = 1;
-        D_0054F208[mode] = frame;
+        effPadVibeFrames[mode] = frame;
+        effPadVibePower[mode] = power;
+        effPadVibeFadeIn[mode] = 1;
+        effPadVibeRemain[mode] = frame;
     }
 }
 
@@ -5032,11 +5032,11 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGY_RFrame);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1FC);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F200);
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeFrames);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F208);
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeRemain);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibePower);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeFadeIn);
 
