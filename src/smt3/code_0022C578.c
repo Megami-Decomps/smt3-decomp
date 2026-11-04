@@ -1174,6 +1174,9 @@ extern void fclSetMessageVar_20743088(s8 index, saddr_t value);
 
 #ifdef NON_MATCHING
 extern void *memcpy(void *a, const void *b, size_t c);
+#ifdef FIX_BUGS
+extern void *memmove(void *a, const void *b, size_t c);
+#endif
 #endif
 
 void cmpSetItSkMessageVar(datUnitWork_t *unit)
@@ -8118,7 +8121,12 @@ void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32
 {
     u8 *work = panel;
     if (*(void **)(work + 0x44) != data) {
+#ifdef FIX_BUGS
+        /* BUG: the ranges overlap, so memcpy is undefined; retail's copies forward */
+        memmove(work, work + 0x2C, 0x58);
+#else
         memcpy(work, work + 0x2C, 0x58);
+#endif
         work[0x24] = -1;
         fclInitPanelPos(x, y, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 0x30));
         *(void **)(work + 0x2C) = func;

@@ -231,7 +231,7 @@ extern char D_00529BE8[];
 
 extern s32 sifRpcServerSema;
 
-extern char D_00551A20[];
+extern char sdfDumpAddrFmt[];
 
 extern char D_00551A28[];
 
@@ -239,30 +239,30 @@ extern char D_00551A30[];
 
 extern char D_00551A38[];
 
-extern char D_00551A40[];
+extern char sdfDumpByteFmt[];
 
 extern char sdfDumpLineBuf[];
 
 extern char D_00551A50[];
 
-extern char D_00549B50[];
+extern char sdfDmaDumpStartFmt[];
 
-extern char D_00549B70[];
+extern char sdfDmaNotQwordFmt[];
 
-extern char D_00549B88[];
+extern char sdfDmaTagLineFmt[];
 
-extern char D_00549BB0[];
+extern char sdfDmaNestOverflowMsg[];
 
 
 extern char *sdfDmaTagNameTable[];
 
 sdfGsMemSlice_t *sdfGsMemGetLinkHead(void);
 
-extern char D_0054A088[];
+extern char sdfGsMemInfoTitle[];
 
-extern char D_0054A100[];
+extern char sdfGsMemNodeFmt[];
 
-extern char D_00551B40[];
+extern char sdfGsMemTypeFmt[];
 
 extern char *D_00529CC8[];
 
@@ -510,8 +510,8 @@ void sdfSndLoadIRXModules(void) {
     SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
-extern char D_00549A48[]; /* "SDF_SND_IOP_SIZE\n" */
-extern char D_00549A60[]; /* "sdfSndSeqMapInit\n" */
+extern char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
+extern char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 39 of 45 words match at the exact 180-byte size. */
@@ -530,7 +530,7 @@ void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount)
         sdfSndWork.channels[i].unk4 = 0;
         sdfSndWork.channels[i].unkC = 0;
     }
-    printf(D_00549A48);
+    printf(sdfSndIopSizeMsg);
     address = sdfSndIopAlloc(0x24E00);
     sdfSndWork.opaque1D0 = 0;
     sdfSndWork.opaque1D4 = 0;
@@ -570,7 +570,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
         sdfSndWork.buffers[i].iopAddress = 0;
         i++;
     }
-    printf(D_00549A60);
+    printf(sdfSndSeqMapInitMsg);
     iopAddress = sdfSndIopAlloc(total);
     i = 0;
     do {
@@ -587,7 +587,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 extern s32 sceSifInitIopHeap(void);
 extern s32 D_0055213C;
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_00549A60);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndSeqMapInitMsg);
 
 void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSequenceCount)
 {
@@ -1256,7 +1256,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     s32 i;
     while (size > 0) {
         if (column == 0) {
-            sdfPrintf(D_00551A20, data);
+            sdfPrintf(sdfDumpAddrFmt, data);
             column = EE_ADDR(data) & 0xF;
             for (i = column; i > 0; i--) {
                 sdfPrintf(D_00551A28);
@@ -1266,7 +1266,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
         } else {
             sdfPrintf(D_00551A38);
         }
-        sdfPrintf(D_00551A40, *data++);
+        sdfPrintf(sdfDumpByteFmt, *data++);
         column++;
         if (column == 0x10) {
             column = 0;
@@ -1281,13 +1281,13 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_00549B50);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaDumpStartFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_00549B70);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNotQwordFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_00549B88);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaTagLineFmt);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_00549BB0);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNestOverflowMsg);
 
 void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     sdfDmaDumpTag_t *callStack[2];
@@ -1298,18 +1298,18 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     s32 tagCount;
     s32 depth = 0;
     s32 done = 0;
-    sdfPrintf(D_00549B50, source);
+    sdfPrintf(sdfDmaDumpStartFmt, source);
     cursor = source;
     for (;;) {
         if (EE_ADDR(cursor) & 0xF) {
-            sdfPrintf(D_00549B70, cursor);
+            sdfPrintf(sdfDmaNotQwordFmt, cursor);
             return;
         }
         tag = cursor->control;
         tagAddress = cursor->address;
         tagType = (tag >> 28) & 7;
         tagCount = tag & 0xFFFF;
-        sdfPrintf(D_00549B88, cursor, sdfDmaTagNameTable[tagType], tag, tagAddress, cursor->vifCode0, cursor->vifCode1);
+        sdfPrintf(sdfDmaTagLineFmt, cursor, sdfDmaTagNameTable[tagType], tag, tagAddress, cursor->vifCode0, cursor->vifCode1);
         cursor++;
         switch (tagType) {
         case 0:
@@ -1326,7 +1326,7 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
             break;
         case 5:
             if (depth == 2) {
-                sdfPrintf(D_00549BB0);
+                sdfPrintf(sdfDmaNestOverflowMsg);
                 return;
             }
             callStack[depth++] = cursor;
@@ -1353,8 +1353,8 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
 
 extern char *D_00529C68[];
 extern s32 D_00529C88[];
-extern char D_00551A58[];
-extern char D_00551A60[];
+extern char sdfVifMaskedName[];
+extern char sdfVifXferOkName[];
 extern char D_00551B10[];
 extern char D_00551B18[];
 
@@ -1388,7 +1388,7 @@ void sdfGrFlushOtChain(u32 *source) {
             case 0: {
                 u32 tag;
                 if (EE_ADDR(cursor) & 0xF) {
-                    sdfPrintf(D_00549B70, cursor);
+                    sdfPrintf(sdfDmaNotQwordFmt, cursor);
                     return;
                 }
                 tag = cursor[0];
@@ -1489,7 +1489,7 @@ void sdfGrFlushOtChain(u32 *source) {
                     break;
                 case 0x06:
                     sdfPrintf("VIF MSKPATH3 (%s)\n",
-                                    (immediate & 0x8000) ? D_00551A58 : D_00551A60);
+                                    (immediate & 0x8000) ? sdfVifMaskedName : sdfVifXferOkName);
                     break;
                 case 0x07:
                     sdfPrintf("VIF MARK   (%04X)\n", immediate);
@@ -1642,17 +1642,17 @@ void sdfDumpGsMemory(void) {
     sdfGsMemSlice_t *node;
     sdfGsMemSlice_t *walk;
     char *name;
-    sdfPrintf(D_0054A088);
+    sdfPrintf(sdfGsMemInfoTitle);
     head = sdfGsMemGetLinkHead();
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00529CC8[node->type];
         } else {
-            sdfPrintf(buf, D_00551B40, node->type);
+            sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;
         }
-        sdfPrintf(D_0054A100, node, node->prev, node->next, name, node->addr, node->size);
+        sdfPrintf(sdfGsMemNodeFmt, node, node->prev, node->next, name, node->addr, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->next;
@@ -1667,17 +1667,17 @@ void sdfDumpGsMemory2(void) {
     sdfGsMemSlice_t *node;
     sdfGsMemSlice_t *walk;
     char *name;
-    sdfPrintf(D_0054A088);
+    sdfPrintf(sdfGsMemInfoTitle);
     head = sdfGsMemGetLinkTail();
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00529CD8[node->type];
         } else {
-            sdfPrintf(buf, D_00551B40, node->type);
+            sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;
         }
-        sdfPrintf(D_0054A100, node, node->prev, node->next, name, node->addr, node->size);
+        sdfPrintf(sdfGsMemNodeFmt, node, node->prev, node->next, name, node->addr, node->size);
         walk = head;
         while (walk != node) {
             walk = walk->prev;
@@ -1686,9 +1686,9 @@ void sdfDumpGsMemory2(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_0054A088);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemInfoTitle);
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", D_0054A100);
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemNodeFmt);
 
 void sdfDumpMemory(void) {
     sdfMemInfo_t info;
