@@ -5,6 +5,7 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -258,7 +259,7 @@ void effBTLPointLightMain(void)
                 if (start < secondStart) {
                     unit = formation->hunit;
                     if (unit != NULL) {
-                        if (frame == start) {
+                        if (frame == SDF_FRAMES(start)) {
                             evtUnitLightOn(unit);
                             evtSetUnitLightAndAmbient(unit, first, light->param.diffuse,
                                                       light->param.ambient);
@@ -267,7 +268,7 @@ void effBTLPointLightMain(void)
                             SDF_VU0_LOADVECTOR(&direction);
                             evtSetUnitLightDir(unit, first);
                         }
-                        if (frame == secondStart) {
+                        if (frame == SDF_FRAMES(secondStart)) {
                             evtSetUnitLightAndAmbient(unit, second, base->unknown10, base->unknown14);
                             SDF_VU0_LOADVECTOR(&base->position);
                             evtSetUnitLightDir(unit, second);
@@ -308,7 +309,7 @@ void effBTLModelColorMain(void)
             if (start < end && end >= second) {
                 secondStart = end - second;
                 if (start < secondStart && formation->hunit != NULL) {
-                    if (frame == start) {
+                    if (frame == SDF_FRAMES(start)) {
                         if ((formation->modelcol & 0xFFFFFF) != 0x808080) {
                             color = effColorBlend(light->model.unknown00, formation->modelcol, 0.5f);
                             evtSetUnitColorRGB(formation->hunit, first, color);
@@ -316,7 +317,7 @@ void effBTLModelColorMain(void)
                             evtSetUnitColorRGB(formation->hunit, first, light->model.unknown00);
                         }
                     }
-                    if (frame == secondStart) {
+                    if (frame == SDF_FRAMES(secondStart)) {
                         evtSetUnitColorRGB(formation->hunit, second, formation->modelcol);
                     }
                     light->model_frame++;
