@@ -44,7 +44,8 @@ void MultMatrixRev(const void *aMatrix);
 
 extern const u8 *D_00594780[16];
 
-extern f32 sdfDrawFaceListParam[][4];
+/* sdf3DScreenParam + 0x70: the scale and trans rows. */
+extern u8 sdf3DScreenParam[];
 
 extern u8 sdf3DScreenTm[];
 
@@ -257,7 +258,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
 
     packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
-    viewport = sdfDrawFaceListParam;
+    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);
     VU0_LOAD_VF14(viewport);
     VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
