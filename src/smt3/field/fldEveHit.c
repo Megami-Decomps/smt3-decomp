@@ -1623,8 +1623,8 @@ const char *fldCheckNpcTalk(const char *eventName) {
                     strcmp(eventName, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     s32 candidateSet = fldInfTable.packs[packOrSetIndex].setIndex;
 #ifdef FIX_BUGS
-                    /* gFldInfIdx starts at -1, which reads the tail of extraActions. */
-                    if (gFldInfIdx >= 0 && fldInfTable.sets[gFldInfIdx].kindArea.packed == 1) {
+                    /* sets[-1] is the tail of extraActions; its first s16 is the low half of [24].parameter1. */
+                    if ((gFldInfIdx < 0 ? (s16)fldInfTable.extraActions[24].parameter1 : fldInfTable.sets[gFldInfIdx].kindArea.packed) == 1) {
 #else
                     if (fldInfTable.sets[gFldInfIdx].kindArea.packed == 1) {
 #endif
