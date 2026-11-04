@@ -1283,6 +1283,12 @@ void fldAutoMapDrawOneArea(void)
     DrwSprite2D(0xE3, 9, 0xFC, 0x51, 2, 0x2F, 0xFC, 0x51, 0x80808080, D_00551CC0[1]);
     DrwSprite2D(0x1DF, 9, 0x22, 0x51, 0xFD, 0x2F, 1, 0x51, 0x80808080, D_00551CC0[1]);
     text = D_0030A670[fldGlobalBase.area % 100];
+    /* BUG: retail passes this volatile local's stack slot unset as the colour
+     * of the request that only measures the title width and is destroyed
+     * undrawn, so the value never shows. A port reads indeterminate memory. */
+#ifdef FIX_BUGS
+    firstColor = 0;
+#endif
     request = frwGetSmallFontFRQ(0, 0, 0, firstColor, text, NULL);
     font = (struct frFontHandle_t *)request;
     textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
