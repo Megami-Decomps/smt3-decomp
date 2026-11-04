@@ -24,6 +24,12 @@
 #define SDF_FRAME_STEP(d) (d)
 #endif
 
+/* A factor applied once per tick, such as a velocity's decay. A host raises
+ * it to the power it scales a step by, so the decay over a second holds. */
+#ifndef SDF_FRAME_DECAY
+#define SDF_FRAME_DECAY(k) (k)
+#endif
+
 /* Storage for a tick count. A host may widen one only where C defines the
  * storage: a symbol the data sections define keeps its retail width. */
 #ifndef SDF_FRAME_U8
