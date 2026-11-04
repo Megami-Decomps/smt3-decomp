@@ -15,6 +15,7 @@ Classes:
   CSIZE    sizeof in C differs from the splat extent (or C views disagree)
   WORDS    narrow (1/2 byte) accesses to a symbol splat emits as words, with address-like words
   JTBL     a data symbol's extent runs over the start of a jump table (jtbl_ label)
+  COVER    a sized symbol's extent runs over the start of another named symbol
   TAIL     gap after a sized symbol that no code or data pointer references
 Usage: check_data_sizes.py [--symbols FILE] [--elf FILE] [--csizes JSON] [--only A,B]
 """
@@ -165,14 +166,53 @@ def load_jtbls(asm_root):
 WORD_LINE = re.compile(r"^\s*/\* \w+ ([0-9A-F]{8}) [0-9A-F]{8} \*/ \.word ", re.M)
 
 
-def load_word_addrs(asm_root):
-    """Addresses splat emits as `.word` under asm_root; only those can be relocated. Exits if none."""
+def scan_word_addrs(asm_root):
+    """Addresses splat emits as `.word` under asm_root; only those can be relocated."""
     found = set()
     for f in Path(asm_root).rglob("*.s"):
         found.update(int(m, 16) for m in WORD_LINE.findall(f.read_text(errors="replace")))
+    return found
+
+
+def load_word_addrs(asm_root):
+    """scan_word_addrs, but exits when there is none."""
+    found = scan_word_addrs(asm_root)
     if not found:
         sys.exit("no .word lines under %s, so byte and short data cannot be told from words (configure first)" % asm_root)
     return found
+
+
+def count_address_like(base, n, word_addrs, word_at, sec_of):
+    """Words in [base, base+4n) that splat emits as `.word` and that read as an in-image address."""
+    return sum(1 for k in range(n) if base + 4 * k in word_addrs
+               and (word_at(base + 4 * k) or 0) >= 0x100000 and sec_of(word_at(base + 4 * k)))
+
+
+def run_controls():
+    """Refuse to report if the checks cannot tell a halfword pair from an address word, or miss a cover.
+
+    Runs on a synthesised asm fixture in a temp dir, so it needs no configured tree."""
+    import tempfile
+    word_at = lambda a: {0x1000: 0x00330000}.get(a)
+    sec_of = lambda v: v if 0x100000 <= v <= 0x5A0330 else None
+    shorts = "    /* 1 00001000 */ .short 0x0000\n    /* 2 00001002 */ .short 0x0033\n"
+    word = "    /* 1 00001000 00003300 */ .word 0x00330000\n"
+    problems = []
+    with tempfile.TemporaryDirectory() as d:
+        (Path(d) / "a.s").write_text(shorts)
+        got = count_address_like(0x1000, 1, scan_word_addrs(d), word_at, sec_of)
+        if got != 0:
+            problems.append("a .short pair was counted as %d address word(s)" % got)
+        (Path(d) / "a.s").write_text(word)
+        got = count_address_like(0x1000, 1, scan_word_addrs(d), word_at, sec_of)
+        if got != 1:
+            problems.append("an address-like .word was counted as %d, not 1" % got)
+    if cover_crossings([(0x1000, 0x20)], [0x1000, 0x1010]) != [(0x1000, 0x1020, 0x1010)]:
+        problems.append("a symbol over another symbol's start was not reported")
+    if cover_crossings([(0x1000, 0x10)], [0x1000, 0x1010]):
+        problems.append("a symbol ending at the next start was reported")
+    if problems:
+        sys.exit("check_data_sizes controls failed, so no result can be trusted: " + "; ".join(problems))
 
 
 def jtbl_crossings(extents, jtbls):
@@ -185,6 +225,11 @@ def jtbl_crossings(extents, jtbls):
     return out
 
 
+def cover_crossings(extents, starts):
+    """(addr, end, other) for each extent (addr, size) that covers the start of another symbol."""
+    return [(addr, addr + size, o) for addr, size in extents for o in starts if addr < o < addr + size]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", default=str(ROOT / "config/smt3/symbol_addrs.txt"))
@@ -195,6 +240,7 @@ def main():
     ap.add_argument("--dump-universe", default=None, help="write the symbol universe and reference sets as JSON")
     a = ap.parse_args()
 
+    run_controls()
     word_addrs = load_word_addrs(ROOT / "asm")
     b, secs = load_elf(a.elf)
     dsecs = [s for s in secs if s["name"] in DATA_SECS and s["size"]]
@@ -301,7 +347,7 @@ def main():
             continue
         ext = extent(s)
         n = ext // 4
-        like = sum(1 for k in range(n) if base + 4 * k in word_addrs and (word_at(base + 4 * k) or 0) >= 0x100000 and sec_of(word_at(base + 4 * k)))
+        like = count_address_like(base, n, word_addrs, word_at, sec_of)
         if like:
             add("WORDS", s, "type %s, %d narrow accesses (min width %d), %d of %d words look like addresses" %
                 (s["type"], len(ws), min(ws), like, n))
@@ -399,6 +445,14 @@ def main():
         if crossed:
             add("JTBL", u, "extent ends 0x%X, over %d jtbl_ label(s) from jtbl_%08X" %
                 (crossed[0][1], len(crossed), crossed[0][2]))
+    named = sorted(u["addr"] for u in uni.values() if not u["auto"])
+    for u in uni.values():
+        if u.get("size") is None:
+            continue
+        covered = cover_crossings([(u["addr"], extent(u))], named)
+        if covered:
+            add("COVER", u, "extent ends 0x%X, over %d symbol(s) from %s" %
+                (covered[0][1], len(covered), owner(covered[0][2])["name"]))
     # dedupe
     seen, out = set(), []
     for f in findings:

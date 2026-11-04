@@ -25,6 +25,15 @@ class JtblCrossings(unittest.TestCase):
             cds.load_jtbls(d)
 
 
+class CoverCrossings(unittest.TestCase):
+    def test_extent_over_another_symbol_is_reported(self):
+        self.assertEqual(cds.cover_crossings([(0x1000, 0x7620)], [0x1000, 0x100C, 0x1090]),
+                         [(0x1000, 0x8620, 0x100C), (0x1000, 0x8620, 0x1090)])
+
+    def test_extent_ending_at_the_next_symbol_is_not(self):
+        self.assertEqual(cds.cover_crossings([(0x1000, 0xC)], [0x1000, 0x100C]), [])
+
+
 class WordAddrs(unittest.TestCase):
     def test_only_word_lines_count(self):
         import tempfile
@@ -40,6 +49,27 @@ class WordAddrs(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as d, self.assertRaises(SystemExit):
             cds.load_word_addrs(d)
+
+
+class Controls(unittest.TestCase):
+    def test_controls_pass_on_the_real_checks(self):
+        cds.run_controls()
+
+    def test_controls_fail_when_a_check_is_muted(self):
+        real = cds.count_address_like
+        cds.count_address_like = lambda *a: 0
+        try:
+            with self.assertRaises(SystemExit):
+                cds.run_controls()
+        finally:
+            cds.count_address_like = real
+        real = cds.cover_crossings
+        cds.cover_crossings = lambda *a: []
+        try:
+            with self.assertRaises(SystemExit):
+                cds.run_controls()
+        finally:
+            cds.cover_crossings = real
 
 
 if __name__ == "__main__":
