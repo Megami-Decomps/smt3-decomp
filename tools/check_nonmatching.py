@@ -78,7 +78,7 @@ def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
     return drafts
 
 
-def compile_unit(path: Path, fix_bugs: bool = False) -> str:
+def compile_unit(path: Path, fix_bugs: bool = False, asm_out: str = "/dev/null") -> str:
     """Return cc1's diagnostics, empty when the draft compiles.
 
     fix_bugs adds -DFIX_BUGS, which selects the corrections the matching build
@@ -99,7 +99,7 @@ def compile_unit(path: Path, fix_bugs: bool = False) -> str:
          *(["-DFIX_BUGS"] if fix_bugs else []),
          # Old GCC needs this spelling; -Werror=... is silently ignored.
          "-Werror-implicit-function-declaration",
-         "-quiet", "-O2", str(path), "-o", "/dev/null"],
+         "-quiet", "-O2", str(path), "-o", asm_out],
         capture_output=True, text=True, cwd=ROOT)
     # cc1 brackets its diagnostics with context lines that carry no line
     # number ("file: In function `x':", "file: At top level:"). Keeping those
@@ -112,6 +112,43 @@ def compile_unit(path: Path, fix_bugs: bool = False) -> str:
         if detail:
             diagnostics += "\n" + detail
     return diagnostics
+
+
+SKIP_ASM_WORDS = re.compile(r"^\s*\.(?:file|section|align|ent|end|frame|mask|fmask|set|size|type|ident)\b")
+
+
+def symbol_extents() -> list[tuple[int, int]]:
+    """(address, size) for every sized symbol in symbol_addrs.txt."""
+    extents = []
+    for line in (ROOT / "config/smt3/symbol_addrs.txt").read_text().splitlines():
+        m = re.match(r"\w+\s*=\s*0x([0-9A-Fa-f]+);.*\bsize:0x([0-9A-Fa-f]+)", line)
+        if m:
+            extents.append((int(m.group(1), 16), int(m.group(2), 16)))
+    if not extents:
+        sys.exit("config/smt3/symbol_addrs.txt has no sized symbols, so extents cannot be read")
+    return extents
+
+
+ALIASED = re.compile(r"(?:SYMBOL_AT\(\s*[\w ]+?\s*,|INCLUDE_\w+\([^)]*,|#\s*define)\s*(D_[0-9A-F]{8})\b")
+
+
+def undefined_data(asm: str, extents: list[tuple[int, int]], source: str = "") -> list[str]:
+    """D_ names the unit references that no symbol starts at but a sized one covers.
+
+    A consumer defines a label at every address symbol_addrs leaves uncovered.
+    A label inside a sized symbol is swallowed, so the extern has no definition.
+    Compiling to assembly never notices, because an extern is a promise.
+    """
+    used = set()
+    for line in asm.splitlines():
+        if SKIP_ASM_WORDS.match(line) or line.lstrip().startswith("#"):
+            continue
+        used.update(re.findall(r"\bD_[0-9A-F]{8}\b", line))
+    starts = {a for a, _ in extents}
+    used -= set(ALIASED.findall(source))
+    return sorted(n for n in used
+                  if (a := int(n[2:], 16)) not in starts
+                  and any(s < a < s + z for s, z in extents))
 
 
 def control() -> None:
@@ -127,6 +164,13 @@ def control() -> None:
                 sys.exit(f"control {name}: expected "
                          f"{'failure' if must_fail else 'success'} from cc1, "
                          f"so this check cannot be trusted")
+        unit = Path(tmp) / "dropped_symbol.c"
+        unit.write_text("extern int D_0FFFFFF0[];\nint f(void)\n{\n    return D_0FFFFFF0[0];\n}\n")
+        asm = Path(tmp) / "dropped_symbol.s"
+        if compile_unit(unit, False, str(asm)) or \
+                undefined_data(asm.read_text(), [(0x0FFFFFE0, 0x40)]) != ["D_0FFFFFF0"]:
+            sys.exit("control dropped_symbol.c: an undefined D_ name was not "
+                     "reported, so the symbol check cannot be trusted")
 
 
 if __name__ == "__main__":
@@ -135,6 +179,7 @@ if __name__ == "__main__":
         print("no NON_MATCHING drafts")
         sys.exit(0)
     control()
+    known = symbol_extents()
     bad = 0
     for path in todo:
         text = path.read_text()
@@ -144,8 +189,15 @@ if __name__ == "__main__":
             if fix_bugs and "FIX_BUGS" not in text:
                 continue
             label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
-            err = compile_unit(path, fix_bugs)
-            if err:
+            asm = tempfile.NamedTemporaryFile(suffix=".s", delete=False)
+            asm.close()
+            err = compile_unit(path, fix_bugs, asm.name)
+            missing = [] if err else undefined_data(Path(asm.name).read_text(), known, text)
+            Path(asm.name).unlink()
+            if missing:
+                bad += 1
+                print(f"{rel}: undefined with {label}: {' '.join(missing)}")
+            elif err:
                 bad += 1
                 print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE with {label}")
                 print("\n".join("    " + l for l in err.split("\n")[:12]))

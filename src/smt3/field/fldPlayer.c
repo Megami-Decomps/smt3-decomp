@@ -681,7 +681,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
 #ifdef NON_MATCHING
 extern const volatile sdfVector4_t D_00531C60;
 extern const char D_00531C70[], D_00531C80[];
-extern u8 D_0054E90A[2];
+#define D_0054E90A ((u8 *)dds3PadStickState + 2)
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, D_0054ECD8;

@@ -227,7 +227,7 @@ extern const evtSceneDispRows_t D_0053B348;
 extern s32 evtSceneDispTimer, evtSceneDispState;
 extern s8 dds3PadBitTable[];
 extern const char D_0054F810[], D_0054F818[];
-extern sdfGrOt_t D_002F6938;
+SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 extern saddr_t dds3DebugBasic(dds3ProcessID_t *id);
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 

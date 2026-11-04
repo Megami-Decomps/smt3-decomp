@@ -3504,7 +3504,6 @@ void nbPanelAutoInit(void)
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern f32 sdfSin(f32 angle);
-extern nbPanelProcess_nbPanelXYZ_t D_004F05D8[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F0600[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE60[];
 extern void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *geometry,
