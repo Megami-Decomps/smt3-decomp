@@ -1045,29 +1045,14 @@ effBTLSystem_Kyusyuu_PartList = 0x0031BCD8; // size:0x38
 D_002FA240 = 0x002FA240; // size:0x40
 sdfCameraTm = 0x00529750; // size:0x40
 sdfSndMap = 0x00593880; // type:u32 size:0x5A0
-D_003989E0 = 0x003989E0; // size:0xC
+D_003989E0 = 0x003989E0; // size:0x7620
 D_003989EC = 0x003989EC; // size:0x1C
-D_00398A08 = 0x00398A08; // size:0x78
 D_00398A80 = 0x00398A80; // size:0x7580
-D_002F69B8 = 0x002F69B8; // size:0x60
-D_002F6A18 = 0x002F6A18; // size:0x30
-D_004F0268 = 0x004F0268; // size:0x3C
-D_004F02A4 = 0x004F02A4; // size:0x3C
-D_004F02E0 = 0x004F02E0; // size:0xC8
-D_004F03A8 = 0x004F03A8; // size:0x78
-D_004F0420 = 0x004F0420; // size:0x3C
-D_004F045C = 0x004F045C; // size:0x28
-D_004F0484 = 0x004F0484; // size:0x14
-D_004F0498 = 0x004F0498; // size:0x50
-D_004F04E8 = 0x004F04E8; // size:0x28
-D_004F0510 = 0x004F0510; // size:0x64
-D_004F0574 = 0x004F0574; // size:0x14
-D_004F0588 = 0x004F0588; // size:0x50
-D_004F05D8 = 0x004F05D8; // size:0x28
+D_002F69B8 = 0x002F69B8; // size:0x90
+D_004F0268 = 0x004F0268; // size:0x398
 
 // BEYOND struct sizes, second pass
-D_00345D88 = 0x00345D88; // size:0x14
-D_00345D9C = 0x00345D9C; // size:0x4
+D_00345D88 = 0x00345D88; // size:0x18
 
 // BEYOND struct sizes, third pass
 

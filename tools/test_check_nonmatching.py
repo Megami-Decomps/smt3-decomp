@@ -15,6 +15,21 @@ import check_nonmatching as cn
 import check_irx_nonmatching as irx
 
 
+class SwallowedLabels(unittest.TestCase):
+    asm = "\tlw\t$2,%lo(D_00000010)($3)\n"
+
+    def test_label_inside_a_sized_symbol_is_reported(self):
+        self.assertEqual(cn.undefined_data(self.asm, [(0x8, 0x20)]), ["D_00000010"])
+
+    def test_label_that_starts_a_symbol_or_a_gap_is_not(self):
+        self.assertEqual(cn.undefined_data(self.asm, [(0x10, 4)]), [])
+        self.assertEqual(cn.undefined_data(self.asm, [(0x8, 0x8)]), [])
+
+    def test_symbol_at_alias_is_not(self):
+        src = "SYMBOL_AT(sdfGrOt_t, D_00000010, owner, 0x8);"
+        self.assertEqual(cn.undefined_data(self.asm, [(0x8, 0x20)], src), [])
+
+
 class CompilerFailures(unittest.TestCase):
     def ee_result(self, status, stderr="", stdout=""):
         result = subprocess.CompletedProcess([], status, stdout, stderr)
