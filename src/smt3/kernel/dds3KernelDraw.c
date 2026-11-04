@@ -3,6 +3,7 @@
 #include "draw3d.h"
 #include "kernel_draw.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* One A+D register command with its standard DMA/GIF header. */
 typedef struct
@@ -56,8 +57,8 @@ typedef struct
 } dds3FadePacket_t;
 
 extern dds3FadePacket_t dds3FadePacket[2];
-extern u16 fadenow;
-extern u16 fademax;
+extern sdfFrameU16_t fadenow;
+extern sdfFrameU16_t fademax;
 
 typedef struct dds3Filter2Param {
     /* 0x00 */ union { u8 rgba[4]; u32 color; };
@@ -654,8 +655,8 @@ void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame)
         dds3FadeClear();
         return;
     }
-    fademax = frame;
-    fadenow = frame;
+    fademax = SDF_FRAMES(frame);
+    fadenow = SDF_FRAMES(frame);
     dds3DrawFlag = (dds3DrawFlag | 1) & ~2;
 }
 
@@ -668,8 +669,8 @@ void dds3FadeIn2(s32 frame)
         fadenow = 0;
         fademax = 0;
     } else {
-        fademax = frame;
-        fadenow = frame;
+        fademax = SDF_FRAMES(frame);
+        fadenow = SDF_FRAMES(frame);
         dds3DrawFlag = (dds3DrawFlag | 1) & ~2;
     }
 }
@@ -687,7 +688,7 @@ void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame)
         dds3DrawFlag &= ~3;
         return;
     }
-    fademax = frame;
+    fademax = SDF_FRAMES(frame);
     fadenow = 0;
     dds3DrawFlag = (dds3DrawFlag & ~1) | 2;
 }
@@ -701,7 +702,7 @@ void dds3FadeOut2(s32 frame)
         dds3DrawFlag &= ~3;
         fademax = 0;
     } else {
-        fademax = frame;
+        fademax = SDF_FRAMES(frame);
         fadenow = 0;
         dds3DrawFlag = (dds3DrawFlag & ~1) | 2;
     }

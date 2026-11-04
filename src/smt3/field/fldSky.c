@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "billboard.h"
 #include "draw.h"
@@ -275,27 +276,27 @@ void fldSkyCalcFilter(void) {
     gFilterAnimeOfsA = 0;
     switch (gFilterAnime) {
     case 1:
-        gFilterAnimeCntF += 0.1f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.1f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 2:
-        gFilterAnimeCntF += 0.2f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.2f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 3:
-        gFilterAnimeCntF += 0.05f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.05f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 32.0f;
         break;
     case 4:
-        gFilterAnimeCntF += 0.1f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.1f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     case 5:
-        gFilterAnimeCntF += 0.2f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.2f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     case 6:
-        gFilterAnimeCntF += 0.05f;
+        gFilterAnimeCntF += SDF_FRAME_STEP(0.05f);
         gFilterAnimeOfsA = sdfSin(gFilterAnimeCntF) * 48.0f;
         break;
     }
@@ -554,36 +555,36 @@ void fldSkyCalcTable(void) {
 
 anime1:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 30.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 30);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(30.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(30));
         return;
     }
-    if (gSkyTblAnimeCntI == 60.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 30);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(60.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(30));
         gSkyTblAnimeCntI = 0.0f;
     }
     return;
 
 anime2:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 15.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 1);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(15.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(1));
         return;
     }
-    if (gSkyTblAnimeCntI == 30.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 1);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(30.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(1));
         gSkyTblAnimeCntI = 0.0f;
     }
     return;
 
 anime3:
     gSkyTblAnimeCntI += 1.0f;
-    if (gSkyTblAnimeCntI == 60.0f) {
-        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 60);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(60.0f)) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, SDF_FRAMES(60));
         return;
     }
-    if (gSkyTblAnimeCntI == 120.0f) {
-        fldSkySetTbl(gSkyTblBaseIdx, 60);
+    if (gSkyTblAnimeCntI == SDF_FRAMES_F(120.0f)) {
+        fldSkySetTbl(gSkyTblBaseIdx, SDF_FRAMES(60));
         gSkyTblAnimeCntI = 0.0f;
     }
 }

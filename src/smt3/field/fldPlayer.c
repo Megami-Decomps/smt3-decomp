@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "billboard.h"
@@ -997,9 +998,9 @@ s32 fldPlayerCalc_Nml(void)
             }
             moveAngle = (-moveAngle * D_0054C3E0) / 180.0f;
         }
-        position.x = fldGlobalBase.x - sdfSin(moveAngle) * speed;
+        position.x = fldGlobalBase.x - sdfSin(moveAngle) * SDF_FRAME_STEP(speed);
         position.y = fldGlobalBase.y;
-        position.z = fldGlobalBase.z - sdfCos(moveAngle) * speed;
+        position.z = fldGlobalBase.z - sdfCos(moveAngle) * SDF_FRAME_STEP(speed);
     } else {
         position.x = fldGlobalBase.x;
         position.y = fldGlobalBase.y;

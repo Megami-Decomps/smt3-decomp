@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "scr.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 
 static inline f32 scrFabsf(f32 x)
@@ -162,7 +163,7 @@ s32 scrCommand_WAIT(void)
     {
         return 1;
     }
-    if (scrGetCommandTimer() < scrGetIntPara(0))
+    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0)))
     {
         return 0;
     }

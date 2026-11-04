@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "libsdf.h"
 #include "model.h"
 #include "motion.h"
@@ -274,7 +275,7 @@ s32 sdfMotionNext(sdfMotionCtrlr_t *aCtrlr) {
         sdfMotionSeek(aCtrlr, aCtrlr->blendPreLength);
         break;
     case SDF_MOTION_STAT_SEEK:
-        frame = aCtrlr->frame + aCtrlr->speed;
+        frame = aCtrlr->frame + SDF_FRAME_STEP(aCtrlr->speed);
         frameLength = aCtrlr->frameLength;
         if (aCtrlr->playType == 0) {
             if (frameLength <= frame) {

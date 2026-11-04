@@ -4,6 +4,7 @@
 #include "libsdf.h"
 #include "newdata.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "event.h"
 #include "sdf_movie_types.h"
 
@@ -115,7 +116,7 @@ u8 func_0022B7F8(void)
 
 s32 movieMan_Process(void)
 {
-    sdfIpuRunDecode(60 / dds3VblanksPerFrame);
+    sdfIpuRunDecode(SDF_FRAMES(60) / dds3VblanksPerFrame);
     return 0;
 }
 
