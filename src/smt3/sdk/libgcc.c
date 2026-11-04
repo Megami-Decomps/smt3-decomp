@@ -347,7 +347,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern f64 __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -431,7 +431,7 @@ f64 fptodp(f32 x) {
     fp_number_type u;
 
     sdfUnpackFloat(&x, &u);
-    return __make_dp(u.class, u.sign, u.normal_exp, (long)u.fraction << 30);
+    return __make_dp(u.class, u.sign, u.normal_exp, (s64)u.fraction << 30);
 }
 
 const fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b,
@@ -713,11 +713,11 @@ s32 dptoli(f64 value) {
     if (number.normal_exp > 30) {
         return number.sign ? (s32)0x80000000 : 0x7FFFFFFF;
     }
-    result = (unsigned long)number.fraction >> (60 - number.normal_exp);
+    result = (u64)number.fraction >> (60 - number.normal_exp);
     return number.sign ? -result : result;
 }
 
-f64 __make_dp(s32 kind, s32 sign, s32 exp, long mant) {
+f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant) {
     fp_number_type_df u;
 
     u.class = kind;
@@ -770,9 +770,9 @@ u32 dptoul(f64 value) {
         return 0xFFFFFFFFU;
     }
     if (number.normal_exp > 60) {
-        return (unsigned long)number.fraction << (number.normal_exp - 60);
+        return (u64)number.fraction << (number.normal_exp - 60);
     }
-    return (unsigned long)number.fraction >> (60 - number.normal_exp);
+    return (u64)number.fraction >> (60 - number.normal_exp);
 }
 
 u8 *libc_2D1E08(u8 *p, u32 *out) {
