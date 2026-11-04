@@ -170,7 +170,7 @@ typedef struct sdf3DPrimPolyParm_t {
 
 /* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
-s32 sdfGrAllocPacketBuff(s32 aSize);
+void *sdfGrAllocPacketBuff(s32 aSize);
 
 extern void *memcpy(void *, const void *, size_t);
 

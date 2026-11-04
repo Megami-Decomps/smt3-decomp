@@ -2870,7 +2870,7 @@ void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
 
 effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {
     void (*destroy)(void *);
-    s32 (*create)(void *);
+    void *(*create)(void *);
 
     destroy = viewer->destroy;
     if (destroy != NULL) {
