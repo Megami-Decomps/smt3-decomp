@@ -33,6 +33,7 @@ def strip_attr(text):
         text = text[:i] + text[k + 1:]
 
 
+DEFN = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w*)\s*((?:\[[^\]]*\]\s*)*)\s*=")
 DECL = re.compile(r"^extern\s+(.*?)\b([A-Za-z_]\w*)\s*((?:\[[^\]]*\]\s*)*)$")
 
 
@@ -40,16 +41,20 @@ def externs(unit):
     cmd = ["gcc", "-E", "-P", "-undef", "-nostdinc"] + DEFS + [ASM_ROOT, unit]
     out = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True).stdout
     found = {}
-    for line in out.splitlines():
-        line = line.strip()
-        if not line.startswith("extern ") or not line.endswith(";"):
-            continue
-        body = strip_attr(line[:-1]).strip()
-        if "(" in body or "," in body:
-            continue
-        m = DECL.match(body)
-        if m:
-            found[m.group(2)] = (body, m.group(3).strip())
+    for raw in out.splitlines():
+        line = raw.strip()
+        local = raw[:1] in " \t"
+        if line.startswith("extern ") and line.endswith(";"):
+            body = strip_attr(line[:-1]).strip()
+            if "(" in body or "," in body:
+                continue
+            m = DECL.match(body)
+            if m:
+                found[m.group(2)] = (body, m.group(3).strip(), local)
+        elif not local and not line.startswith(("typedef", "static", "extern", "struct", "union", "enum", "}", "#")):
+            m = DEFN.match(strip_attr(line))
+            if m and m.group(1) not in found:
+                found[m.group(1)] = ("definition " + line.split("=")[0].strip(), m.group(2).strip(), False)
     return found
 
 
@@ -57,6 +62,9 @@ def compile_probe(unit, names, decls, tmp):
     for _ in range(4):
         src = (ROOT / unit).read_text(errors="replace")
         lines = []
+        for n in names:
+            if decls[n][2]:
+                lines.append(decls[n][0] + ";")
         for n in names:
             if decls[n][1].startswith("[]"):
                 continue
@@ -74,7 +82,9 @@ def compile_probe(unit, names, decls, tmp):
         for m in re.finditer(r"probe\.c:(\d+):", r.stderr):
             ln = int(m.group(1)) - base
             if 0 <= ln < len(lines):
-                bad.add(re.search(r"__e?sz_(\w+)", lines[ln]).group(1))
+                mm = re.search(r"__e?sz_(\w+)", lines[ln]) or re.search(r"(\w+)\s*(?:\[[^\]]*\]\s*)*;$", lines[ln])
+                if mm:
+                    bad.add(mm.group(1))
         if r.returncode == 0 and not bad:
             return (Path(tmp) / "probe.s").read_text()
         if not bad:
@@ -94,7 +104,7 @@ def one(unit):
         return unit, {"__failed__": 1}
     for m in re.finditer(r"^__(e?sz)_(\w+):\n\s*\.word\s+(\d+)", asm, re.M):
         kind, name, val = m.groups()
-        out.setdefault(name, {"unit": unit, "decl": decls[name][0]})[
+        out.setdefault(name, {"unit": unit, "decl": decls[name][0], "local": decls[name][2]})[
             "elem" if kind == "esz" else "size"] = int(val)
     return unit, out
 
