@@ -54,12 +54,9 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern s32 dds3WaitMovieEnd(void);
 
-/* Unsized so the reference is absolute, as retail's is. */
-extern sdfDrawTag_t *movieViewerFrame[];
-
 extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
 
-/* The viewer process' own state; the draw tag at 0x10 is movieViewerFrame[0]. */
+/* The viewer process' own state; the draw tag is at 0x10. */
 typedef struct
 {
     /* 0x00 */ void *proc;
@@ -110,7 +107,7 @@ void MovieViewerDrawFrameInfo(void)
     sdfDrawTag_t *tag;
 
     if (dds3WaitMovieEnd() == 0) {
-        tag = movieViewerFrame[0];
+        tag = movieViewerWork.tag;
         sdfDrawTagLink(tag, dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90,
                                               0x30000000, 0x60404040));
         sdfDrawTagLink(tag, sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d",
