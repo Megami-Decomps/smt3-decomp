@@ -19,6 +19,13 @@
 #define SDF_FRAMES_F(n) (n)
 #endif
 
+/* A countdown decremented at the end of each tick and acted on at 0, set
+ * mid-tick. Its value less one counts the ticks still run, so a host scales
+ * that part and keeps 1 meaning "ends with this tick". */
+#ifndef SDF_FRAMES_COUNTDOWN
+#define SDF_FRAMES_COUNTDOWN(n) (n)
+#endif
+
 /* An advance per tick, in whatever unit the counter moves. */
 #ifndef SDF_FRAME_STEP
 #define SDF_FRAME_STEP(d) (d)

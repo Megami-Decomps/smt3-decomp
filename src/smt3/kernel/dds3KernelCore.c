@@ -638,7 +638,7 @@ dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s
     setp->priority = dDS3_PRIORITY_DRAW_PB;
     setp->flag = 1;
     setp->starttimer = SDF_FRAMES(v2);
-    setp->shutdowntimer = SDF_FRAMES(v3);
+    setp->shutdowntimer = SDF_FRAMES_COUNTDOWN(v3);
     setp->processfunc = drawExit;
     setp->shutdownfunc = deleteExit;
     setp->workdata = p;
@@ -675,11 +675,11 @@ s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer)
     switch (id->flag & 0xF) {
     case 1:
     case 2:
-        id->shutdowntimer = SDF_FRAMES(shutdowntimer);
+        id->shutdowntimer = SDF_FRAMES_COUNTDOWN(shutdowntimer);
         EndProcess(id);
         return 1;
     case 3:
-        id->shutdowntimer = SDF_FRAMES(shutdowntimer);
+        id->shutdowntimer = SDF_FRAMES_COUNTDOWN(shutdowntimer);
         if (id->shutdowntimer == 0) {
             KillProcess(id);
             return 1;
@@ -707,7 +707,7 @@ void dds3SetShutdownTimer(dds3ProcessID_t *id, s32 newtimer)
 
     if (stat != 0) {
         if (stat < 4) {
-            id->shutdowntimer = SDF_FRAMES(newtimer);
+            id->shutdowntimer = SDF_FRAMES_COUNTDOWN(newtimer);
         }
     }
 }
