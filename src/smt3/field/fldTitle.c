@@ -505,7 +505,6 @@ void fldTitleMini_Shutdown(void) {
     }
 }
 
-extern s32 fldArea[];
 extern s32 D_0054EFB0;
 extern s32 evtBitCheck(s32 no);
 
@@ -552,12 +551,12 @@ void fldTitleMiniStart(s32 fld)
     if (fld == 0x2C && evtBitCheck(0x7C0) == 0) return;
     if (fld == 0x2D && evtBitCheck(0x7E0) == 0) return;
 
-    if (fld == 0xC && fldArea[0] == 1) return;
+    if (fld == 0xC && fldGlobalBase.floor == 1) return;
     if (fld == 0xF) {
-        if (fldArea[0] == 0x14) return;
-        if (fldArea[0] == 0x13) return;
+        if (fldGlobalBase.floor == 0x14) return;
+        if (fldGlobalBase.floor == 0x13) return;
     }
-    if (fld == 0x22 && fldArea[0] == 2) return;
+    if (fld == 0x22 && fldGlobalBase.floor == 2) return;
     if (fld == 0x24) {
         fld = 0x20;
     }

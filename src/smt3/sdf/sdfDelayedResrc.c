@@ -15,7 +15,7 @@ typedef struct sdfDelayedResrcChunk_t sdfDelayedResrcChunk_t;
 
 /* Deferred handlers share one address-word argument at the native dispatch
  * boundary, while their C consumers interpret that word as different owners. */
-typedef void (*SdfPendingCallback)();
+typedef void (*SdfPendingCallback)(void *);
 
 void sdfChipFreeDirect(void *aPtr);
 

@@ -36,7 +36,6 @@ extern f32 R360_LR(f32 a, f32 b);
 
 extern sdfVector4_t fldCamTarget;
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern f32 sdfAtan2(f32 aY, f32 aX);
 
@@ -56,7 +55,6 @@ extern s16 fldRun_MAP_BX;
 
 extern s16 fldRun_MAP_BZ;
 
-extern s32 fldRunAiTimer __attribute__((section(".bss")));
 extern u32 dds3GetKernelCount(void);
 
 extern s32 evtBitCheck(s32 no);
@@ -72,6 +70,8 @@ typedef struct {
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 #include "sdk_libc.h"
+
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
@@ -113,7 +113,6 @@ extern void fldSkyDrawFilter(void);
 
 extern void fldDrawFrameSprite(void);
 
-extern u32 fldDbg_BlurOn[];
 
 extern u32 dds3AllocObjectId(void);
 
@@ -131,7 +130,6 @@ extern void fldFindDoorEvent(void *event);
 
 extern void evtBitOn(s32 no);
 
-extern s32 fldJDataHandle __attribute__((section(".data")));
 
 extern void fldRunTamaFree(void);
 
@@ -308,7 +306,6 @@ extern char D_00530F30[];
 
 extern fldTest_FLDRUN_DANTE_t fldRun_Dante;
 
-extern s32 fldRunDanteHandle __attribute__((section(".bss")));
 
 extern s32 fldRunDanteSe_asise;
 
@@ -364,7 +361,7 @@ s32 ooyTestDrawProc(dds3ProcessID_t *aProcId)
     rsetTest(1, 0, 0x81, 3, 0, 0, 1, 1);
     rsetAlpha(0);
     fldSkyDrawFilter();
-    if (fldDbg_BlurOn[0] != 0) {
+    if (fldRunDanteGunFlag.word24 != 0) {
         if (fldAutoMapChkMode() == 0) {
             rsetOtOfs(0x47);
         } else {
@@ -596,7 +593,7 @@ void drawSceneBasicList(void) {
         }
         dds3FreeBasicArrayHandle(objectChain);
     }
-    if (fldGb == 1) {
+    if (fldGlobalBase.area == 1) {
         hasEligibleBackground = 0;
     }
     if (hasEligibleBackground != 0) {
@@ -1228,7 +1225,7 @@ INCLUDE_ASM(const s32, "field/fldTest", fldSdwDraw);
 
 void fldRunDanteClear(void)
 {
-    fldRunDanteHandle = -1;
+    fldRun_Dante.old_status = -1;
 }
 
 #ifdef NON_MATCHING
@@ -2382,7 +2379,6 @@ void fldRunDantePatr(void)
     }
 }
 
-extern fldDanteGunState_t fldRunDanteGunFlag;
 extern dds3Basic_t *D_0054EAF0;
 extern s32 fldPlayerStepDist;
 extern u32 dds3GetRandA(void *name);
@@ -2919,10 +2915,10 @@ void fldRunDanteShutdown(void)
 {
     fldFreeRunMapData();
     fldRunTamaFree();
-    if (fldJDataHandle != 0) {
+    if (fldGlobalBase.reuseAreaResources != 0) {
         fldRun_Dante.old_status = fldRun_Dante.status;
     } else {
-        fldRunDanteHandle = -1;
+        fldRun_Dante.old_status = -1;
     }
 }
 
@@ -3252,7 +3248,7 @@ s32 fldRunEncountChk(void)
     if (evtBitCheck(0xAF3) == 0) {
         return 0;
     }
-    if (fldRunAiTimer & 1) {
+    if (fldRun_Dante.flag & 1) {
         return 0;
     }
     fldRunDanteGetDistAngle(&dist, &angle);

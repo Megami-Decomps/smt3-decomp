@@ -149,7 +149,6 @@ void fldBgmFadeOut(void);
 
 void fldSetSceneParam2(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
-extern s32 fldGb[];
 
 void fldSetSceneParam3(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
 
@@ -1766,7 +1765,7 @@ u32 evtCommand_CALL_PUZZLEBOY(void)
     fldBgmFadeOut();
     stage = scrGetIntPara(0);
     request[0] = stage;
-    fldSetNextField(fldGb[0], stage + 1000);
+    fldSetNextField(fldGlobalBase.area, stage + 1000);
     dds3AdminiCallSequence(0x26, EE_ADDR_S(request), 4, 0);
     scrAllReleaseScript();
     return 1;
@@ -1890,7 +1889,7 @@ s32 evtCommand_CALL_FIELD2(void)
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam2(EE_ADDR_S(requestBuffer), fldGb[0], kind, sequenceName);
+    fldSetSceneParam2(EE_ADDR_S(requestBuffer), fldGlobalBase.area, kind, sequenceName);
     dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
@@ -1905,7 +1904,7 @@ s32 evtCommand_CALL_FIELD3(void)
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam3(EE_ADDR_S(requestBuffer), fldGb[0], kind, sequenceName);
+    fldSetSceneParam3(EE_ADDR_S(requestBuffer), fldGlobalBase.area, kind, sequenceName);
     dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;

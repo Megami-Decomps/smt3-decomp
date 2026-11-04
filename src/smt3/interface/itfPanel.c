@@ -295,7 +295,12 @@ void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
     handle->blue = b;
     handle->alpha = a;
     if (CreateColorTable[handle->kind] != 0) {
+#ifdef FIX_BUGS
+        /* BUG: the callees take r, g, b, a; retail relied on the argument registers surviving. */
+        CreateColorTable[handle->kind](handle->pwork, r, g, b, a);
+#else
         CreateColorTable[handle->kind](handle->pwork);
+#endif
     }
 }
 

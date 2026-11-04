@@ -33,7 +33,6 @@ typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
 #define CORE_ALIGN16(p) ((u8 *)((EE_ADDR(p) + 15) & ~15))
 extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
 extern sdfMatrix4_t sdf3DScreenTm;
-extern u128 coreLightConst1, coreLightConst2;
 void MultMatrixRev(void *matrix);
 void corePktInitCb(corePktCb_t *cb, u16 *header, u32 attrMask);
 void corePktSetFaceDivParm(sdfCorePacketFaceDivParm_t *, sdfMatPacket_t *, u32, f32, f32);
@@ -141,8 +140,8 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
         vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
-        vu[0xE4] = coreLightConst1;
-        vu[0xE5] = coreLightConst2;
+        vu[0xE4] = ((const u128 *)&corePktFaceDivParm)[1];
+        vu[0xE5] = ((const u128 *)&corePktFaceDivParm)[2];
         cursor = corePktVu0Run(points, cursor, pointCount, 0x1C, 0x20);
     } else {
         goto ordinaryGeometry;

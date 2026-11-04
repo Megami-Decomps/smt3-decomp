@@ -25,7 +25,7 @@ extern s32 dds3AdminiCallSequence(s32 sequence, s32 *data, s32 datasize, s32 res
 
 extern void dds3FreeConfigTexture(void *texture);
 
-extern s32 dds3ConfigBackup;
+extern s32 dds3ConfigValue[2];
 
 extern void dds3DrawConfigPanel(s32 id);
 
@@ -68,7 +68,7 @@ void dds3DestroyConfig(void *PID)
     s32 seq = 1;
 
     if (GBWK != NULL) {
-        dds3ConfigBackup = *(s32 *)(DDS3_GBWK + 0x11AB8);
+        dds3ConfigValue[1] = *(s32 *)(DDS3_GBWK + 0x11AB8);
         if (GBWK[0x18] == 1) {
             dds3AdminiCallSequence(2, &seq, 4, 0);
         }

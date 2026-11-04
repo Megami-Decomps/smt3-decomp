@@ -33,7 +33,6 @@ extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
 extern s32 fldAutoMapChkMode(void);
 
-extern s32 fldGb __attribute__((section(".data")));
 
 s32 evtBitCheck(s32 no);
 
@@ -270,7 +269,6 @@ s32 fldPlayerMirChk(void) {
     return 0;
 }
 
-extern s32 fldPlayerStatus[];
 
 extern s32 fldChkVortex(void);
 
@@ -294,7 +292,7 @@ void fldPlayerMotion(s32 hisMotion, s32 upMotion, f32 motHokan) {
     }
     model->first->speed = 1.0f;
     if (fldChkVortex() != 0) {
-        if (fldPlayerStatus[0] & 2) {
+        if (fldRunDanteGunFlag.word50 & 2) {
             mdlLoopMotion(model, 3, 1);
         } else {
             mdlLoopMotion(model, 3, 0);
@@ -763,7 +761,7 @@ s32 fldPlayerCalc_Nml(void)
     }
     if (fldGlobalBase.word78 == 0) {
         if (fldPlayerStepDist > 0) {
-            if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) {
+            if (fldGlobalBase.wordB0 == 0 && (fldRunDanteGunFlag.word50 & 1)) {
                 fldSePlay(0x22);
                 dds3FadeIn(0x80, 0x20, 0x20, 6);
                 dds3PadVibrationSet(0, 1, 6);
@@ -1371,7 +1369,6 @@ void fldPlayerCalc_Wm4(void) {
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern s8 dds3PadButtonState[];
-extern s32 fldWmapMode;
 extern s32 fldHitChkMatter;
 extern s32 D_0054ED00, D_0054ED04;
 extern collision_s *fldMatterTable;
@@ -1502,7 +1499,7 @@ s32 fldPlayerCalc_Wm2(void)
             position.z = fldGlobalBase.z;
             dds3SetPosPoseSet(control->handle, &position);
         }
-        if (l_UseCollision == 0 && fldWmapMode != 0 &&
+        if (l_UseCollision == 0 && fldRunDanteGunFlag.counter != 0 &&
             (dds3PadButtonState[0x29] != 0 || dds3PadButtonState[0x2B] != 0)) {
             position.x = fldGlobalBase.x;
             position.y = fldGlobalBase.y;
@@ -1761,7 +1758,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     step = fldPlayerStepDist;
     if (fldGlobalBase.word78 == 0) {
         if (step > 0) {
-            if (fldGlobalBase.wordB0 == 0 && (fldPlayerStatus[0] & 1)) {
+            if (fldGlobalBase.wordB0 == 0 && (fldRunDanteGunFlag.word50 & 1)) {
                 fldSePlay(0x22);
                 dds3FadeIn(0x80, 0x20, 0x20, 6);
                 dds3PadVibrationSet(0, 1, 6);
@@ -2444,7 +2441,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerFastSet);
 void fldPlayerMotReset(void) {
     dds3Basic_t *unit;
 
-    if (fldGb < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
     unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());
@@ -2458,7 +2455,7 @@ void fldPlayerMotReset(void) {
 void fldPlayerMotReset2(void) {
     dds3Basic_t *unit;
 
-    if (fldGb < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
     unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());

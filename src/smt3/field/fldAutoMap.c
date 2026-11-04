@@ -44,9 +44,7 @@ extern void sdfModelLinkOt(sdfModelOt_t *aOt, sdfModelRootNode_t *aRoot);
 
 extern u32 AutoMapSeq;
 
-extern s32 fldAreaNameUpper[];
 
-extern s32 fldAreaNameLower[];
 
 extern s32 fldAutoMapField;
 
@@ -58,7 +56,6 @@ extern s32 fldTakaraCount;
 
 extern fldTakaraSlot_t fldTakaraSlotTable[32];
 
-extern s32 fldGb[];
 
 extern void rsetOtOfs(u32);
 
@@ -120,6 +117,8 @@ extern s32 fldNpcCamTarget;
 
 #include "sdk_libc.h"
 
+extern fldDanteGunState_t fldRunDanteGunFlag;
+
 /* BUG: retail prints a u64 with %lx, which is right where long is 64 bits and
  * reads half of it where long is 32. %llx is right on both. */
 #ifdef FIX_BUGS
@@ -144,7 +143,6 @@ extern void fldAutoMapSeqClearFlag(s32 flag);
 
 extern void evtEnableMoonDraw(void);
 
-extern s32 fldMenuOpenFlag[];
 
 extern void frSetFontDrawOT(u32 OtType);
 
@@ -254,13 +252,12 @@ extern fldAmXYZ_t fldAutoMapModelPos[32];
 
 extern sdfTexHandle_t *D_00551CC0[2];
 
-extern sdfTexHandle_t *fldAutoMapWindowTex[];
+extern sdfTexHandle_t *fldAutoMapWindowTex[3];
 
 extern void sdfModelRootFree(void *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern s32 fldDrawFlag[];
 
 extern s8 dds3PadButtonState[64];
 
@@ -418,8 +415,8 @@ void fldAutoMapFontInit(s32 bank) {
         D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(bank, i)]);
     }
     i = 0;
-    if (fldGb[0] < 50) {
-        i = fldGb[0];
+    if (fldGlobalBase.area < 50) {
+        i = fldGlobalBase.area;
     }
     D_00551CC8 = strlen(D_0030A670[i]);
 }
@@ -468,7 +465,7 @@ void fldAmModelLoadFile(void) {
 
 
 void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
-    s32 field = fldGb[0];
+    s32 field = fldGlobalBase.area;
     u32 *info;
 
     if (field < 200) {
@@ -656,7 +653,6 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
 extern f32 sdfSin(f32 aRadius);
 extern void SetRotateMatrixY(f32 aAngle);
 extern f32 D_0054EE70;
-extern sdfTexHandle_t *fldAutoMapBgTex[];
 
 /* NON_MATCHING: 187 of 207 words, exact size; the four texture-coordinate
  * locals hold the other register of each pair ($16 with $17, $18 with $19). */
@@ -763,7 +759,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, fldAutoMapBgTex[0], 0);
+    sdf2DLinkTexPacket(tag, fldAutoMapWindowTex[2], 0);
     v0.x = -4800.0f;
     v0.y = 0.0f;
     v0.z = -4800.0f;
@@ -900,7 +896,7 @@ extern s32 frDrawFont(struct frFontHandle_t *font);
 extern s32 frDrawFontEx(struct frFontHandle_t *font, s8 mode);
 extern struct frFontHandle_t *D_00551CA0;
 extern const char D_005321C0[];
-extern s32 fldWmapMode, gFldNowDZone;
+extern s32 gFldNowDZone;
 extern s32 fldAutoMapDrawState, fldAutoMapDrawY;
 extern f32 fldAutoMapDrawX, fldCamPitch;
 extern s32 D_0054EE78, D_0054EE7C, D_0054EE90;
@@ -978,7 +974,7 @@ void fldAutoMapDrawOneArea(void)
     s32 textX;
     const char *text;
 
-    if (fldWmapMode != 0) {
+    if (fldRunDanteGunFlag.counter != 0) {
         s32 showAll = fldAutoMapBBox;
         if ((dds3PadButtonState[0x29] != 0 && dds3PadButtonState[0x2B] < 0) ||
             (dds3PadButtonState[0x2B] != 0 && dds3PadButtonState[0x29] < 0)) {
@@ -1497,7 +1493,7 @@ void fldAutoMapSeqEnd(void) {
     fldAutoMapSeqClearFlag(1);
     fldRegistUnitPad();
     evtEnableMoonDraw();
-    fldMenuOpenFlag[0] = 4;
+    fldGlobalBase.menuOpenFlag = 4;
     frSetFontDrawOT(0x48);
     dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
 }
@@ -1507,7 +1503,6 @@ u32 fldAutoMapChkMode(void) {
 }
 
 /* These are the existing native .data flag and camera/vector records. */
-extern s32 fldAutoMapEnable __attribute__((section(".data")));
 extern u8 dds3PadStickStatusState[2][2];
 extern sdfVector4_t D_00532240;
 extern sdfVector4_t aViewEye;
@@ -1528,7 +1523,7 @@ void fldAutoMapCalc(void) {
     if (fldAutoMapChkMode() == 0) {
         return;
     }
-    if (fldAutoMapEnable != 0) {
+    if (fldRunDanteGunFlag.unk58 != 0) {
         if ((s8)dds3PadButtonState[0x22] != 0) {
             closeRequested = 1;
         }
@@ -1821,17 +1816,17 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
 
 void fldAutoMapNameU(s32 nameID) {
     if (nameID >= 0x40) {
-        fldAreaNameUpper[0] = -1;
+        fldGlobalBase.nameU = -1;
     } else {
-        fldAreaNameUpper[0] = nameID;
+        fldGlobalBase.nameU = nameID;
     }
 }
 
 void fldAutoMapNameD(s32 nameID) {
     if (nameID >= 0x40) {
-        fldAreaNameLower[0] = -1;
+        fldGlobalBase.nameD = -1;
     } else {
-        fldAreaNameLower[0] = nameID;
+        fldGlobalBase.nameD = nameID;
     }
 }
 
@@ -1956,10 +1951,10 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
 }
 
 void fldAutoMapProc(void) {
-    if (fldGb[0] < 10) {
+    if (fldGlobalBase.area < 10) {
         return;
     }
-    if (fldGb[0] >= 200) {
+    if (fldGlobalBase.area >= 200) {
         return;
     }
     if (AutoMapSeq == 1) {
@@ -1980,7 +1975,7 @@ void fldAutoMapDraw(void) {
     }
     fldAutoMapDrawWindow();
     fldAutoMapDrawOneArea();
-    if (fldDrawFlag[0] == 0) {
+    if (fldRunDanteGunFlag.word20 == 0) {
         return;
     }
     if (dds3PadButtonState[0x2B] == 0) {

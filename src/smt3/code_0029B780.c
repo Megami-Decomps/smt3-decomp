@@ -34,15 +34,13 @@ SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 extern void dds3FreeConfigTexture(void *texture);
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 
 extern void fclSetSprite(saddr_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
 extern void fclDrawBG(void *pSprite, s32 OtNo);
-
-extern s32 dds3ConfigBackup;
 
 extern char D_00548870[];
 
@@ -56,7 +54,6 @@ extern char D_005488B8[];
 
 extern void *D_005516C4;
 
-/* [1] is dds3ConfigBackup; both are written through one base register. */
 extern s32 dds3ConfigValue[2];
 
 extern s8 slLoadKillFlag;
@@ -128,7 +125,7 @@ void dds3ConfigSaveBackup(void)
 void dds3ConfigRestoreBackup(void)
 {
     printf(D_00548870);
-    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigBackup;
+    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigValue[1];
 }
 
 void dds3InitConfigItems(u8 *gbwk)
@@ -613,6 +610,4 @@ INCLUDE_SDATA(const s32, "code_0029B780", D_005516E8);
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516F0);
 
 INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigValue);
-
-INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigBackup);
 

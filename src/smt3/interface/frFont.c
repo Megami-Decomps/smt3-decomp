@@ -297,7 +297,6 @@ s32 frGetTextHandleNum(void);
 
 u32 frGetFontHandleNum(void);
 
-extern u32 frFontHandleNum[];
 
 s32 frGetYShiftLev(s8 Style, s32 FontNo);
 
@@ -580,7 +579,6 @@ typedef union {
     u32 words[36];
 } frFontSpritePacketView_t;
 
-extern u32 frFontEntryTable[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
@@ -617,7 +615,7 @@ void frCreateDrawFontPacket_20550848(s32 x, s32 y, s32 width, s32 height, u8 sty
     texBase = atlas->bufferBase | 0x8000000000000000ULL;
     texWidth = ((u64)atlas->widthExponent << 26) | 0x400000000ULL;
     texBuffer = ((u64)atlas->bufferWidth << 14) | 0x1400000;
-    texHeight = ((u64)atlas->heightExponent << 30) | ((u64)frFontEntryTable[style] << 37);
+    texHeight = ((u64)atlas->heightExponent << 30) | ((u64)gFT.imageBuffers[style] << 37);
     texBase |= texWidth;
     texBuffer |= texHeight;
     packet->sprite.tex0.reg = 6;
@@ -951,7 +949,7 @@ s32 frGetTextHandleNum(void) {
 }
 
 u32 frGetFontHandleNum(void) {
-    return frFontHandleNum[0];
+    return gFT.glyphCount;
 }
 
 s32 frGetYShiftLev(s8 Style, s32 FontNo) {

@@ -74,7 +74,7 @@ extern void *memset(void *, int, size_t);
 
 f32 sdfSin(f32 aRadius);
 
-extern u32 fldRunDanteGunFlag[];
+extern fldDanteGunState_t fldRunDanteGunFlag;
 
 extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
@@ -160,9 +160,7 @@ extern f32 fldSkyFilterRate;
 
 extern f32 fldSkyFilterTime;
 
-extern s32 fldLightMaState __attribute__((section(".data")));
 
-extern s32 fldGb __attribute__((section(".data")));
 
 extern void dds3SetFogColor(s32, f32 *);
 
@@ -210,7 +208,6 @@ extern f32 gSkyTblAnimeCntI;
 
 extern s32 gSkyTblBaseIdx;
 
-extern s32 D_002FC0EC __attribute__((section(".data")));
 
 extern void fldSkySetTbl(s32 idx, s32 hokan);
 
@@ -222,7 +219,6 @@ extern f32 gFilterAnimeCntF;
 
 extern s32 gFilterAnimeOfsA;
 
-extern s32 fldSkyAlphaOfs __attribute__((section(".data")));
 
 void fldSkyDefaultLoad(void) {
     devState_t *fd;
@@ -383,10 +379,10 @@ void fldSkyDrawFilter(void) {
             a1 += gFilterAnimeOfsA;
             a2 += gFilterAnimeOfsA;
             a3 += gFilterAnimeOfsA;
-            a0 += (s32)fldRunDanteGunFlag[14];
-            a1 += (s32)fldRunDanteGunFlag[14];
-            a2 += (s32)fldRunDanteGunFlag[14];
-            a3 += (s32)fldRunDanteGunFlag[14];
+            a0 += (s32)fldRunDanteGunFlag.word38;
+            a1 += (s32)fldRunDanteGunFlag.word38;
+            a2 += (s32)fldRunDanteGunFlag.word38;
+            a3 += (s32)fldRunDanteGunFlag.word38;
             if (a0 < 0) a0 = 0;
             if (a0 > 255) a0 = 255;
             if (a1 < 0) a1 = 0;
@@ -421,10 +417,10 @@ void fldSkyDrawFilter(void) {
                 oldA1 += gFilterAnimeOfsA;
                 oldA2 += gFilterAnimeOfsA;
                 oldA3 += gFilterAnimeOfsA;
-                oldA0 += (s32)fldRunDanteGunFlag[14];
-                oldA1 += (s32)fldRunDanteGunFlag[14];
-                oldA2 += (s32)fldRunDanteGunFlag[14];
-                oldA3 += (s32)fldRunDanteGunFlag[14];
+                oldA0 += (s32)fldRunDanteGunFlag.word38;
+                oldA1 += (s32)fldRunDanteGunFlag.word38;
+                oldA2 += (s32)fldRunDanteGunFlag.word38;
+                oldA3 += (s32)fldRunDanteGunFlag.word38;
                 if (oldA0 < 0) oldA0 = 0;
                 if (oldA0 > 255) oldA0 = 255;
                 if (oldA1 < 0) oldA1 = 0;
@@ -481,7 +477,7 @@ INCLUDE_ASM(const s32, "field/fldSky", fldSkyDrawFilter);
 #endif
 
 void fldSkySetFilter(s32 idx, s32 mode, s32 hokan) {
-    if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
         hokan = 0;
     }
     if (hokan == 0) {
@@ -516,17 +512,17 @@ s32 fldSkyGetAlpha(void)
 
 void fldSkySetAlphaOfs(s32 alp)
 {
-    fldSkyAlphaOfs = alp;
+    fldRunDanteGunFlag.word38 = alp;
 }
 
 s32 fldSkyGetAlphaOfs(void)
 {
-    return fldSkyAlphaOfs;
+    return fldRunDanteGunFlag.word38;
 }
 
 void fldSkySetTableAnime(s32 type)
 {
-    s32 idx = D_002FC0EC;
+    s32 idx = fldRunDanteGunFlag.skyTable;
 
     gSkyTblAnime = type;
     gSkyTblAnimeCntI = 0;
@@ -706,13 +702,13 @@ void fldSkySetTbl(s32 idx, s32 hokan) {
         if (state->lightMaIdx == 0) {
             light = &((fldLightSet_t *)fldSkyDefault)[idx];
             area = light->fadeArea;
-            fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag.filter = area;
+            fldRunDanteGunFlag.word38 = light->displayStateSlot14;
             value = light->fadeMode;
-            fldRunDanteGunFlag[15] = value;
-            fldRunDanteGunFlag[16] = light->swayMode;
+            fldRunDanteGunFlag.word3C = value;
+            fldRunDanteGunFlag.word40 = light->swayMode;
             fldSkySetFilter(area, value, duration);
-            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            fldSetFilterAnime(fldRunDanteGunFlag.word40);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -763,12 +759,12 @@ void fldSkySetTbl(s32 idx, s32 hokan) {
 }
 
 void fldSkySetTblModosu(s32 hokan) {
-    if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
         hokan = 0;
     }
     if (fldSkyTableIdx != 0 && fldSkyTable != fldSkyTableIdx) {
-        if (fldLightMaState == 0) {
-            D_002FC0EC = fldSkyTableIdx;
+        if (fldGlobalBase.lightMaIdx == 0) {
+            fldRunDanteGunFlag.skyTable = fldSkyTableIdx;
         }
         fldSkySetTbl(fldSkyTableIdx, hokan);
     }
@@ -817,15 +813,15 @@ void fldSkySetTblUpper(s32 idx, s32 hokan) {
             fldSkyTable = idx;
             if (state->lightMaIdx == 0) {
                 light = &((fldLightSet_t *)fldSkyDefault)[idx];
-                fldRunDanteGunFlag[11] = idx;
+                fldRunDanteGunFlag.skyTable = idx;
             area = light->fadeArea;
-            fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag.filter = area;
+            fldRunDanteGunFlag.word38 = light->displayStateSlot14;
             value = light->fadeMode;
-            fldRunDanteGunFlag[15] = value;
-            fldRunDanteGunFlag[16] = light->swayMode;
+            fldRunDanteGunFlag.word3C = value;
+            fldRunDanteGunFlag.word40 = light->swayMode;
             fldSkySetFilter(area, value, duration);
-            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            fldSetFilterAnime(fldRunDanteGunFlag.word40);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -894,8 +890,8 @@ void fldSkySetTblLightMa(s32 idx, s32 hokan) {
     s32 area;
     s32 value;
 
-    if (fldGb < 200) {
-        if (fldSkyEnable == 0 && fldGb < 0x32) {
+    if (fldGlobalBase.area < 200) {
+        if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {
             hokan = 0;
         }
         defaultDuration = 15;
@@ -911,17 +907,17 @@ void fldSkySetTblLightMa(s32 idx, s32 hokan) {
                 idx = fldSkyTable;
             }
             light = &((fldLightSet_t *)fldSkyDefault)[idx];
-            D_0054ED8C = fldRunDanteGunFlag[11];
-            fldRunDanteGunFlag[11] = idx;
+            D_0054ED8C = fldRunDanteGunFlag.skyTable;
+            fldRunDanteGunFlag.skyTable = idx;
             fldSkyLightMaTbl = idx;
             area = light->fadeArea;
-            fldRunDanteGunFlag[13] = area;
-            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            fldRunDanteGunFlag.filter = area;
+            fldRunDanteGunFlag.word38 = light->displayStateSlot14;
             value = light->fadeMode;
-            fldRunDanteGunFlag[15] = value;
-            fldRunDanteGunFlag[16] = light->swayMode;
+            fldRunDanteGunFlag.word3C = value;
+            fldRunDanteGunFlag.word40 = light->swayMode;
             fldSkySetFilter(area, value, duration);
-            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            fldSetFilterAnime(fldRunDanteGunFlag.word40);
             vec[0] = light->drawColorFixedR * 0.00390625f;
             vec[1] = light->drawColorFixedG * 0.00390625f;
             vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -974,8 +970,8 @@ void fldSkySetTblLightMa(s32 idx, s32 hokan) {
 void fldSetFileResolverIdx(u32 state) {
     fldSkyTable = state;
     fldSkyTableIdx = 0;
-    fldRunDanteGunFlag[12] = 0;
-    fldRunDanteGunFlag[11] = state;
+    fldRunDanteGunFlag.word30 = 0;
+    fldRunDanteGunFlag.skyTable = state;
     fldSkyLightMaTbl = 0;
 }
 
@@ -996,14 +992,14 @@ void fldSkyRefreshTbl(void) {
     s32 r, g, b;
     u32 lightColor, ambientColor;
 
-    if (fldGb < 200) {
+    if (fldGlobalBase.area < 200) {
         if (fldSkyLightMaTbl != 0) {
             light = &((fldLightSet_t *)fldSkyDefault)[fldSkyLightMaTbl];
         } else {
             light = &((fldLightSet_t *)fldSkyDefault)[fldSkyTable];
         }
-        fldSkySetFilter(fldRunDanteGunFlag[13], fldRunDanteGunFlag[15], 0);
-        fldSetFilterAnime(fldRunDanteGunFlag[16]);
+        fldSkySetFilter(fldRunDanteGunFlag.filter, fldRunDanteGunFlag.word3C, 0);
+        fldSetFilterAnime(fldRunDanteGunFlag.word40);
         vec[0] = light->drawColorFixedR * 0.00390625f;
         vec[1] = light->drawColorFixedG * 0.00390625f;
         vec[2] = light->drawColorFixedB * 0.00390625f;
@@ -1076,13 +1072,13 @@ void fldSkyBattle(void) {
     s32 value;
 
     area = light->fadeArea;
-    fldRunDanteGunFlag[13] = area;
-    fldRunDanteGunFlag[14] = light->displayStateSlot14;
+    fldRunDanteGunFlag.filter = area;
+    fldRunDanteGunFlag.word38 = light->displayStateSlot14;
     value = light->fadeMode;
-    fldRunDanteGunFlag[15] = value;
-    fldRunDanteGunFlag[16] = light->swayMode;
+    fldRunDanteGunFlag.word3C = value;
+    fldRunDanteGunFlag.word40 = light->swayMode;
     fldSkySetFilter(area, value, 0);
-    fldSetFilterAnime(fldRunDanteGunFlag[16]);
+    fldSetFilterAnime(fldRunDanteGunFlag.word40);
     vec[0] = light->drawColorFixedR * 0.00390625f;
     vec[1] = light->drawColorFixedG * 0.00390625f;
     vec[2] = light->drawColorFixedB * 0.00390625f;
