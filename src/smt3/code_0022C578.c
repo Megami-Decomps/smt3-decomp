@@ -5783,14 +5783,12 @@ void rstDrawNumber(s32 x, s32 y, s8 number)
 
     fclDrawSpriteFilter(x << 4, spriteY, 0, 0, NULL, 6, 0,
                         D_00345D88, fclSpriteTable, 0x47);
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-        if (number > 0) {
-            if (cmpStatTimer < 0x18) {
-                cmpStatTimer++;
-            }
-        } else if (cmpStatTimer > 0) {
-            cmpStatTimer--;
+    if (number > 0) {
+        if (cmpStatTimer < 0x18) {
+            cmpStatTimer += SDF_FRAME_DUE(dds3GetKernelCount());
         }
+    } else if (cmpStatTimer > 0) {
+        cmpStatTimer -= SDF_FRAME_DUE(dds3GetKernelCount());
     }
     cmpGetGaugeBlinkAlpha(cmpStatTimer, 2, colors);
     fclDrawSpriteRes((x + 0x7E) << 4, (yBase + 0x92) << 3, 0, (s32 *)colors,
@@ -6633,9 +6631,7 @@ extern s32 cmpStatusAnimCount[];
 
 void cmpAdvanceStatusAnim(void)
 {
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) {
-        return;
-    }
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     if (cmpStatusAnimCount[0] < 0x30) {
         cmpStatusAnimCount[0]++;
     } else {

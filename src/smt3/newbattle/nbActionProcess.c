@@ -4146,9 +4146,7 @@ s32 CheckAction_CHECK1(nbActionProcessData_t *a)
         return 0;
     }
     if (a->packettime >= 16) {
-        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-            a->packettime--;
-        }
+        a->packettime -= SDF_FRAME_DUE(dds3GetKernelCount());
         return 0;
     }
     nbUpdateOrder();

@@ -1063,9 +1063,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     if (frame < (f32)hSwordTrack->param_dante.startFrame) {
         return;
     }
-    if (SDF_FRAME_DUE(hSwordTrack->frame)) {
-        effSwordTrackRecord(hSwordTrack);
-    }
+    if (SDF_FRAME_DUE(hSwordTrack->frame)) effSwordTrackRecord(hSwordTrack);
     hSwordTrack->otIndex = 0x2E;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);

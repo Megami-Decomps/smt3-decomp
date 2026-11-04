@@ -1437,9 +1437,7 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                     form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
                 }
             }
-            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-                form->time++;
-            }
+            form->time += SDF_FRAME_DUE(dds3GetKernelCount());
         }
     }
     return NULL;

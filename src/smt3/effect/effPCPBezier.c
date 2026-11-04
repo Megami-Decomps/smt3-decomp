@@ -584,11 +584,8 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *group)
             slot->pos[2] = point[2];
             slot->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayRange);
             dds3BezierTrackPolyReset(slot->hBztp);
-        } else if (slot->frame++ >= 0) {
-            /* The ribbon records subdivisions + 1 segments a step into a fixed
-               ring, so the curve and its fade step once per retail tick. */
-            if (!SDF_FRAME_DUE(slot->frame - 1)) {
-            } else if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
+        } else if (slot->frame++ >= 0 && SDF_FRAME_DUE(slot->frame - 1)) {
+            if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
                 if (slot->alpha > fadeStep) {
                     slot->alpha -= fadeStep;
                     slot->hBztp->abgr = ((u32)(slot->alpha * 128.0f) << 24) | 0x808080;

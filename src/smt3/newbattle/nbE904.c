@@ -416,9 +416,7 @@ s32 nbE904Process_1(dds3ProcessID_t *id)
     s32 serial;
 
     e = dds3GetProcessData(id);
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) {
-        return 0;
-    }
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
     if (D_005274A0[e->seq](e) != 0) {
         D_005515D4 = NULL;
         if (D_005515D8 != NULL) {
