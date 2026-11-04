@@ -217,7 +217,7 @@ extern f32 fldCamParamTable2;
 
 extern f32 D_0054ECA0;
 
-extern f32 D_0054ECDC;
+extern f32 fldCamPitchTarget;
 
 
 extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
@@ -261,7 +261,7 @@ void resetCamNormal(void) {
     gb->y = pos.y;
     gb->z = pos.z;
     fldCamPitch = -gb->camAngle;
-    D_0054ECDC = fldCamPitch;
+    fldCamPitchTarget = fldCamPitch;
     eye.x = gb->x - sdfSin(fldCamPitch * 3.14f / 180.0f) * 80.0f;
     eye.y = gb->y +
         fldCamParamTable[gb->cameraParamIndex].eyeHeight;
@@ -466,7 +466,7 @@ void calcCamNormal(void) {
     nearPoint.x = fldGlobalBase.x - sdfSin(fldCamPitch * 3.14f / 180.0f) * 80.0f;
     nearPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
     nearPoint.z = fldGlobalBase.z - sdfCos(fldCamPitch * 3.14f / 180.0f) * 80.0f;
-    R360_LR(fldCamPitch, D_0054ECDC);
+    R360_LR(fldCamPitch, fldCamPitchTarget);
     if (fldEncountTestFlag(0x40)) {
         if (dds3PadButtonState[0x23]) {
             D_0054ECB0 = 1;
@@ -1589,5 +1589,5 @@ INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPHokanMode);
 
 INCLUDE_SDATA(const s32, "field/fldCamera", D_0054ECD8);
 
-INCLUDE_SDATA(const s32, "field/fldCamera", D_0054ECDC);
+INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPitchTarget);
 

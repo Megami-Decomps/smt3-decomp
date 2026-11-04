@@ -685,8 +685,8 @@ extern u8 D_0054E90A[2];
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, D_0054ECD8;
-extern u32 D_0054ECFC;
-extern f32 fldCamPitch, fldCamLength, D_0054ECDC;
+extern u32 fldPlayerMoveStateSaved;
+extern f32 fldCamPitch, fldCamLength, fldCamPitchTarget;
 extern f32 D_0054C3D4, D_0054C3D8, D_0054C3DC, D_0054C3E0;
 extern f32 D_0054C3E4, D_0054C3E8, D_0054C3EC, D_0054C3F0;
 extern sdfMatrix4_t D_002FA240;
@@ -1106,7 +1106,7 @@ s32 fldPlayerCalc_Nml(void)
     if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
         if (aiming) {
             fldCamPitch = -fldGlobalBase.camAngle2;
-            D_0054ECDC = fldCamPitch;
+            fldCamPitchTarget = fldCamPitch;
         } else if (fldPlayerSyukanState >= 4 &&
                    (fldPlayerMoveState == 1 || fldPlayerMoveState == 3 ||
                     fldPlayerMoveState == 5 || fldPlayerMoveState == 7)) {
@@ -1132,7 +1132,7 @@ s32 fldPlayerCalc_Nml(void)
                     fldCamPitch += amount;
                 }
             }
-            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+            fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         } else if (fldPlayerSyukanState >= 3 && (fldPlayerMoveState == 2 || fldPlayerMoveState == 6)) {
             f32 target = -fldGlobalBase.camAngle;
             delta = R360_LR(fldCamPitch, target);
@@ -1150,16 +1150,16 @@ s32 fldPlayerCalc_Nml(void)
             } else {
                 fldCamPitch += amount;
             }
-            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+            fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         }
-        if ((left || right || forward || back) && (s32)fldCamPitch != (s32)D_0054ECDC) {
+        if ((left || right || forward || back) && (s32)fldCamPitch != (s32)fldCamPitchTarget) {
             amount = D_0054C3E8;
-            delta = R360_LR(fldCamPitch, D_0054ECDC);
+            delta = R360_LR(fldCamPitch, fldCamPitchTarget);
             if (fldPlayerMoveState == 0) {
                 amount = 0.5f;
             }
             if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
-                fldCamPitch = D_0054ECDC;
+                fldCamPitch = fldCamPitchTarget;
             } else if (delta < 0.0f) {
                 fldCamPitch -= amount;
             } else {
@@ -1169,15 +1169,15 @@ s32 fldPlayerCalc_Nml(void)
         if (aiming) {
             s32 turn = 0;
             if (dds3PadButtonState[0x28] < 0 && dds3PadButtonState[0x2A] == 0) {
-                D_0054ECDC -= 88.0f;
+                fldCamPitchTarget -= 88.0f;
                 turn = 1;
             } else if (dds3PadButtonState[0x2A] < 0 && dds3PadButtonState[0x28] == 0) {
-                D_0054ECDC += 88.0f;
+                fldCamPitchTarget += 88.0f;
                 turn = 1;
             }
             if (turn) {
-                f32 target = fldPlayerCalc360_4(D_0054ECDC);
-                D_0054ECDC = target;
+                f32 target = fldPlayerCalc360_4(fldCamPitchTarget);
+                fldCamPitchTarget = target;
                 fldGlobalBase.camAngle2 = -target;
             }
         } else if (dds3PadButtonState[0x28] != 0 && dds3PadButtonState[0x2A] == 0) {
@@ -1189,7 +1189,7 @@ s32 fldPlayerCalc_Nml(void)
                 SDF_VU0_STOREVECTOR(&rotation);
                 dds3SetRotPoseSet(control->handle, &rotation);
             }
-            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+            fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         } else if (dds3PadButtonState[0x2A] != 0 && dds3PadButtonState[0x28] == 0) {
             fldCamPitch += 4.0f;
             if (modifier) {
@@ -1199,10 +1199,10 @@ s32 fldPlayerCalc_Nml(void)
                 SDF_VU0_STOREVECTOR(&rotation);
                 dds3SetRotPoseSet(control->handle, &rotation);
             }
-            D_0054ECDC = fldPlayerCalc360_8(fldCamPitch);
+            fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         }
-        D_0054ECDC = fldPlayerCalc360_8(D_0054ECDC);
-        D_0054ECFC = fldPlayerMoveState;
+        fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitchTarget);
+        fldPlayerMoveStateSaved = fldPlayerMoveState;
     }
     D_0054ECD8 = 0;
     dds3ObjectBaseSetControlBasicSvs(control->handle, 0);
@@ -1370,9 +1370,9 @@ void fldPlayerCalc_Wm4(void) {
 extern f32 fldCamPitch;
 extern s8 dds3PadButtonState[];
 extern s32 fldHitChkMatter;
-extern s32 D_0054ED00, D_0054ED04;
+extern s32 fldWmapMatterLast, fldWmapBlendStep;
 extern collision_s *fldMatterTable;
-extern sdfVector4_t fldWmapPlayerPos, D_002FCA30, D_002FCA40;
+extern sdfVector4_t fldWmapPlayerPos, fldWmapPosFrom, fldWmapPosTo;
 extern sdfVector4Unaligned_t D_00531D28, D_00531D38;
 extern sdfMatrix4_t D_002FA240;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
@@ -1617,26 +1617,26 @@ s32 fldPlayerCalc_Wm2(void)
     fldGlobalBase.z = position.z;
     fldGlobalBase.x = position.x;
     fldGlobalBase.y = position.y;
-    if (fldHitChkMatter >= 0 && D_0054ED00 != fldHitChkMatter) {
-        D_002FCA30.z = fldWmapPlayerPos.z;
-        D_002FCA30.x = fldWmapPlayerPos.x;
-        D_002FCA30.y = fldWmapPlayerPos.y;
-        D_002FCA40.x = fldMatterTable[fldHitChkMatter].normal[0];
-        D_002FCA40.y = fldMatterTable[fldHitChkMatter].normal[1];
-        D_0054ED00 = fldHitChkMatter;
-        D_002FCA40.z = fldMatterTable[fldHitChkMatter].normal[2];
-        D_0054ED04 = 0;
+    if (fldHitChkMatter >= 0 && fldWmapMatterLast != fldHitChkMatter) {
+        fldWmapPosFrom.z = fldWmapPlayerPos.z;
+        fldWmapPosFrom.x = fldWmapPlayerPos.x;
+        fldWmapPosFrom.y = fldWmapPlayerPos.y;
+        fldWmapPosTo.x = fldMatterTable[fldHitChkMatter].normal[0];
+        fldWmapPosTo.y = fldMatterTable[fldHitChkMatter].normal[1];
+        fldWmapMatterLast = fldHitChkMatter;
+        fldWmapPosTo.z = fldMatterTable[fldHitChkMatter].normal[2];
+        fldWmapBlendStep = 0;
     }
-    if (D_0054ED04 < 8) {
-        f32 fraction = (f32)D_0054ED04;
-        D_0054ED04++;
-        fldWmapPlayerPos.z = D_002FCA30.z + (D_002FCA40.z - D_002FCA30.z) * fraction * 0.125f;
-        fldWmapPlayerPos.x = D_002FCA30.x + (D_002FCA40.x - D_002FCA30.x) * fraction * 0.125f;
-        fldWmapPlayerPos.y = D_002FCA30.y + (D_002FCA40.y - D_002FCA30.y) * fraction * 0.125f;
+    if (fldWmapBlendStep < 8) {
+        f32 fraction = (f32)fldWmapBlendStep;
+        fldWmapBlendStep++;
+        fldWmapPlayerPos.z = fldWmapPosFrom.z + (fldWmapPosTo.z - fldWmapPosFrom.z) * fraction * 0.125f;
+        fldWmapPlayerPos.x = fldWmapPosFrom.x + (fldWmapPosTo.x - fldWmapPosFrom.x) * fraction * 0.125f;
+        fldWmapPlayerPos.y = fldWmapPosFrom.y + (fldWmapPosTo.y - fldWmapPosFrom.y) * fraction * 0.125f;
     } else {
-        fldWmapPlayerPos.z = D_002FCA40.z;
-        fldWmapPlayerPos.x = D_002FCA40.x;
-        fldWmapPlayerPos.y = D_002FCA40.y;
+        fldWmapPlayerPos.z = fldWmapPosTo.z;
+        fldWmapPlayerPos.x = fldWmapPosTo.x;
+        fldWmapPlayerPos.y = fldWmapPosTo.y;
     }
     if (fldGlobalBase.area == 1) {
         FromEuler(-1.046666503f, 0.0f, 0.0f);
@@ -1695,7 +1695,7 @@ extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;
 extern s32 D_0054ECD8;
-extern f32 D_0054ECDC, D_0054C414, D_0054C418, D_0054C41C, D_0054C420;
+extern f32 fldCamPitchTarget, D_0054C414, D_0054C418, D_0054C41C, D_0054C420;
 extern f32 fldCamPitch;
 extern sdfMatrix4_t D_002FA240;
 extern s32 fldCamMiwatasiChk(void);
@@ -2046,7 +2046,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     FromRotation(fldGlobalBase.camAngle * D_0054C41C / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
-    target = D_0054ECDC;
+    target = fldCamPitchTarget;
     delta = target - fldCamPitch;
     if (delta < 0.0f) {
         delta = -delta;
@@ -2056,15 +2056,15 @@ s32 fldPlayerCalc_Nml_syukan(void)
         if (lookLeft || quickLeft) {
             target = fldPlayerCalc360_4(target - 50.0f);
             fldSyukanState = 2;
-            D_0054ECDC = target;
+            fldCamPitchTarget = target;
         } else if (lookRight || quickRight) {
             target = fldPlayerCalc360_4(target + 50.0f);
             fldSyukanState = 2;
-            D_0054ECDC = target;
+            fldCamPitchTarget = target;
         } else if (turnAround) {
             target = fldPlayerCalc360_4(target + 140.0f);
             fldSyukanState = 2;
-            D_0054ECDC = target;
+            fldCamPitchTarget = target;
             delta = R360_LR(fldCamPitch, target);
             if ((s32)delta == -180) {
                 delta = 180.0f;
@@ -2083,7 +2083,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
                 }
                 fldCamPitch = result;
             }
-            target = D_0054ECDC;
+            target = fldCamPitchTarget;
         }
     }
     delta = target - fldCamPitch;
@@ -2108,10 +2108,10 @@ s32 fldPlayerCalc_Nml_syukan(void)
             result = fldCamPitch + amount;
         }
         fldCamPitch = result;
-        target = D_0054ECDC;
+        target = fldCamPitchTarget;
     }
-    D_0054ECDC = fldPlayerCalc360_8(target);
-    fldGlobalBase.camAngle2 = -D_0054ECDC;
+    fldCamPitchTarget = fldPlayerCalc360_8(target);
+    fldGlobalBase.camAngle2 = -fldCamPitchTarget;
     fldGlobalBase.camAngle = -fldCamPitch;
     SDF_VU0_LOADVECTOR(&axis);
     FromRotation(fldGlobalBase.camAngle * D_0054C420 / 180.0f);
@@ -2585,11 +2585,11 @@ INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerMoveState);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerSyukanState);
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ECFC);
+INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerMoveStateSaved);
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ED00);
+INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmapMatterLast);
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", D_0054ED04);
+INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmapBlendStep);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmWarpMode);
 

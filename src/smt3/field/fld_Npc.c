@@ -95,9 +95,9 @@ extern void dds3EffectDelete(void *pData);
 
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-extern char D_00532790[];
+extern char fldNpcPlFormatB[];
 
-extern char D_005327A0[];
+extern char fldNpcPlFormat[];
 
 extern s32 sdfFileOpen(const char *aFileName);
 
@@ -200,7 +200,7 @@ extern const u8 *D_00568E90[];
 
 extern s32 D_00568F90[];
 
-extern const char D_00532780[];
+extern const char fldNpcUnitName[];
 
 extern const sdfVector4_t D_00532770;
 
@@ -315,12 +315,12 @@ typedef union {
     char names[36][24];
 } fldNpcPaths_t;
 
-extern fldNpcTable_t D_003121D0[];
-extern fldNpcOverride_t D_00314100[];
+extern fldNpcTable_t fldNpcDefaults[];
+extern fldNpcOverride_t fldNpcOverrides[];
 extern const fldNpcPathGroup1_t D_00532358;
 extern const fldNpcPathGroup2_t D_00532478;
 extern const volatile sdfVector4Unaligned_t D_00532338, D_00532348;
-extern const char D_005326B8[];
+extern const char fldGenNpcPath[];
 extern sdfMemHandle_t *fldBlurEffectTable[];
 extern struct effNode_t *fldNpcLoadIdx;
 extern struct effResourceHeader_t *fldNpcPacData;
@@ -376,7 +376,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     slot->itemBoxIdx = 0;
     slot->object = NULL;
     strcpy(slot->name, name);
-    defaults = &D_003121D0[npcId];
+    defaults = &fldNpcDefaults[npcId];
     kind = defaults->type;
     size = defaults->hitSize;
     major = defaults->modelMajor;
@@ -384,7 +384,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     motion = defaults->motion;
     camera = defaults->camera;
     for (i = 0; i < 448; i++) {
-        fldNpcOverride_t *override = &D_00314100[i];
+        fldNpcOverride_t *override = &fldNpcOverrides[i];
         if (override->field != fldGlobalBase.area || override->floor != fldGlobalBase.floor + 1 ||
             strcmp(override->name, name) != 0) {
             continue;
@@ -437,7 +437,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
         if (fldGlobalBase.area == 1) {
             dds3Basic_t *object;
             if (fldNpcModelCount == NULL) {
-                fldNpcModelCount = sdfDevLoadFileEx(D_005326B8, (u32 *)&fldGenNpcData, &fldGenNpcSize);
+                fldNpcModelCount = sdfDevLoadFileEx(fldGenNpcPath, (u32 *)&fldGenNpcData, &fldGenNpcSize);
                 mdlPackDecode(2, 31, 0x101, fldGenNpcData, fldGenNpcSize);
             }
             position.x = x;
@@ -1295,7 +1295,7 @@ void fldNpcModelStart(s32 id, f32 x, f32 y, f32 z, const sdfVector4_t *rot) {
     }
     fldNpcFreeCount = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rotation);
     dds3UnitObjectBasicSetOt(fldNpcFreeCount, 8);
-    dds3SetUnitObjectId(fldNpcFreeCount, D_00532780);
+    dds3SetUnitObjectId(fldNpcFreeCount, fldNpcUnitName);
     dds3ObjectBaseOnFlag(fldNpcFreeCount, 0x100);
     dds3ObjectBaseMakeUnit(fldNpcFreeCount, major, minor);
     model = dds3ObjectBaseGetModelHandle(fldNpcFreeCount);
@@ -1789,9 +1789,9 @@ void fldNpcLightLoad(s32 field) {
     if (field < 100) {
         fldMakeFilePath(directory, field, 1);
         if (field == 0x18 && evtBitCheck(0x4F) != 0) {
-            sprintf(path, D_00532790, directory, 0x18);
+            sprintf(path, fldNpcPlFormatB, directory, 0x18);
         } else {
-            sprintf(path, D_005327A0, directory, field);
+            sprintf(path, fldNpcPlFormat, directory, field);
         }
         fd = sdfFileOpen(path);
         sdfFileRead(fd, D_003129D0, 0x100);
@@ -1805,9 +1805,9 @@ void fldGetEAEntry(const fldNpcPalette_t *src) {
 
 INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532770);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532780);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcUnitName);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532790);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcPlFormatB);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_005327A0);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcPlFormat);
 

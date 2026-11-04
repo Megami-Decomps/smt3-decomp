@@ -1433,3 +1433,9 @@ The guarded file-manager declaration of `EIntr` now agrees with its `s32` provid
 | `D_002FF3E0`, `D_00531860`, `D_00531950` | `fldNpcTalkLabel`, `fldKiretaLabel`, `fldProcDrawName` | bytes `npctalk_label`, `kireta_label`, `fldProcDraw`; script labels and the draw process name |
 | `D_00531C70`, `D_00531C80`, `D_00531D58`, `D_00531D70` | `fldDamageOnMsg`, `fldDamageOffMsg`, `fldNoroiDamageOnMsg`, `fldNoroiDamageOffMsg` | debug `printf` strings in `fldPlayer.c` |
 | `D_00531E98` | `fldInfPathFormat` | bytes `%sF%03d.INF`, the format `fldInf.c` builds INF paths with |
+| `D_0054ECDC`, `D_0054ECFC` | `fldCamPitchTarget`, `fldPlayerMoveStateSaved` | camera pitch eased toward in `fldPlayer.c`; move state stored at the end of the same pass |
+| `D_0054ED00`, `D_0054ED04`, `D_002FCA30`, `D_002FCA40` | `fldWmapMatterLast`, `fldWmapBlendStep`, `fldWmapPosFrom`, `fldWmapPosTo` | last hit matter, 0 to 8 step counter, and the two positions `fldWmapPlayerPos` is interpolated between in eighths |
+| `D_00531F18`, `D_00531F28` | `fldElevatorPosName`, `fldElevatorStartLabel` | bytes `01pos_01` and `elvstart_label`, passed to `fldSetSceneParam5` |
+| `D_0054EC80` | `fldEncDrawName` | bytes `encProc`, the process name `fldEnc.c` starts `encDrawProc` under |
+| `D_00532780`, `D_00532790`, `D_005327A0`, `D_005326B8` | `fldNpcUnitName`, `fldNpcPlFormatB`, `fldNpcPlFormat`, `fldGenNpcPath` | bytes `NPC_UNIT`, `%sF%03db.NPL`, `%sF%03d.NPL`, `/fld/f/bin/gen_npc.PB` |
+| `D_003121D0`, `D_00314100` | `fldNpcDefaults`, `fldNpcOverrides` | `fldNpcTable_t` defaults indexed by NPC id; override records read from file (0x2A00 bytes) in `fldGlobal.c` |
