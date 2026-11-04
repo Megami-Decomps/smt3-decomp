@@ -1590,12 +1590,31 @@ s32 sdfSndIsBankLoaded(s32 kind)
 {
     s32 i;
 
+#ifdef FIX_BUGS
+    for (i = 0; i < 7; i++) {
+        s32 id;
+
+        /* Past stat[6] retail reads eeAddr, then size and unk1D0 as ids. */
+        if (kind + i < 7) {
+            id = sdfSndWorkArea->stat[kind + i].id;
+        } else if (kind + i == 7) {
+            id = (s32)sdfSndWorkArea->eeAddr;
+        } else {
+            id = (s32)sdfSndWorkArea->unk1D0;
+        }
+        if (id >= 0) {
+            return 1;
+        }
+    }
+    return 0;
+#else
     for (i = 0; i < 7; i++) {
         if (sdfSndWorkArea->stat[kind + i].id >= 0) {
             return 1;
         }
     }
     return 0;
+#endif
 }
 /* ENDF sdfSndIsBankLoaded */
 
