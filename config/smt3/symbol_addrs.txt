@@ -452,7 +452,6 @@ itfMesEmbedded_528D68 = 0x00528D68; // type:u8 size:0x1BF can_be_referenced:Fals
 nbPanelPTPartList = 0x004F00A0; // type:u32 size:0xDC
 // Packed halfword data that read as addresses.
 D_003100F4 = 0x003100F4; // type:u16 size:0x135C
-D_00312054 = 0x00312054; // type:u16 size:0xFC
 D_00320018 = 0x00320018; // type:u16 size:0x4
 D_0032001C = 0x0032001C; // type:u16 size:0x4
 D_0032A868 = 0x0032A868; // type:u16 size:0xB50
@@ -744,7 +743,7 @@ D_0030A468 = 0x0030A468; // type:u16 size:4
 D_0030BCD4 = 0x0030BCD4; // type:u16 size:4
 D_0030BCF0 = 0x0030BCF0; // type:u16 size:4
 D_0030BD7C = 0x0030BD7C; // type:u16 size:4
-fldAutoMapIconOfsTable = 0x00312050; // type:u16 size:4
+fldAutoMapIconOfsTable = 0x00312050; // type:u16 size:0x100
 D_00317704 = 0x00317704; // type:u16 size:4
 D_00317708 = 0x00317708; // type:u16 size:4
 D_0031770C = 0x0031770C; // type:u16 size:4
