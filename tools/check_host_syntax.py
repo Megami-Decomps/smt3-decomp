@@ -44,6 +44,8 @@ def control(host: Path) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--host-include", default=os.environ.get("HOST_INCLUDE"))
+    ap.add_argument("--exclude", action="append", default=[], metavar="UNIT=REASON",
+                    help="skip a unit (path relative to src/smt3) and print why")
     ap.add_argument("units", nargs="*")
     args = ap.parse_args()
     if not args.host_include or not (Path(args.host_include) / "host").is_dir():
@@ -53,6 +55,15 @@ def main() -> int:
     units = [Path(u) for u in args.units] or sorted(
         p for p in (ROOT / "src/smt3").rglob("*.c")
         if "NON_MATCHING" in (t := p.read_text()) or "FIX_BUGS" in t)
+    excluded = {}
+    for item in args.exclude:
+        name, _, reason = item.partition("=")
+        if not reason or not (ROOT / "src/smt3" / name).is_file():
+            sys.exit(f"--exclude {item!r}: needs UNIT=REASON naming a unit under src/smt3")
+        excluded[ROOT / "src/smt3" / name] = reason
+    for unit, reason in excluded.items():
+        print(f"{unit.relative_to(ROOT)}: excluded, {reason}")
+    units = [u for u in units if u.resolve() not in {e.resolve() for e in excluded}]
     bad = 0
     for unit in units:
         for fix_bugs in (True, False):
