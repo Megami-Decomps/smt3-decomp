@@ -2,6 +2,7 @@
 #include "effPCPData.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
+#include "sdfFrame.h"
 
 struct effDebugPolyParams_t;
 struct effRandState_t;
@@ -842,7 +843,7 @@ effPCPHamaCardSpiral_tag *effPCPHamaCardSpiralCreate(params, resource, particleP
     }
     segments = work->param.simu_num;
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = ageOffset - dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread;
+        particle->frame = SDF_FRAMES(ageOffset - dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }
@@ -956,8 +957,8 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
     f32 angleDamping;
 
     i = 0;
-    duration = hData->param.life;
-    endAge = hData->param.wait + duration;
+    duration = SDF_FRAMES(hData->param.life);
+    endAge = SDF_FRAMES(hData->param.wait) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
     VEC3_SPLAT(halfWidth, hData->param.tex_w * 0.5f);
@@ -966,11 +967,11 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
     respawn = hData->param.loop;
     pulse = hData->param.vibrate;
     pulseAngle = hData->param.vib_power;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    heightDamping = hData->param.up_a;
-    angleDamping = hData->param.roll_a;
-    duplicateStart = hData->param.attach_f;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    heightDamping = SDF_FRAME_DECAY(hData->param.up_a);
+    angleDamping = SDF_FRAME_DECAY(hData->param.roll_a);
+    duplicateStart = SDF_FRAMES(hData->param.attach_f);
     perGroup = hData->param.attach_i;
     baseColor = hData->abgr;
 
@@ -1007,10 +1008,10 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
             angleStep = particle->roll_s;
             heightStep = particle->up_s;
             if (!moving && pulse) {
-                if (age == duration) {
+                if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration)) {
                     angle += pulseAngle;
                     height += heightStep * pulseAngle / angleStep;
-                } else if (age == duration + 1) {
+                } else if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration) + 1) {
                     angle -= pulseAngle;
                     height -= heightStep * pulseAngle / angleStep;
                 }
@@ -1059,9 +1060,9 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
                 SDF_VU0_COPYVECTOR(position, next);
             }
             if (moving) {
-                particle->radius += particle->radius_s;
-                particle->radian += angleStep;
-                particle->height += heightStep;
+                particle->radius += SDF_FRAME_STEP(particle->radius_s);
+                particle->radian += SDF_FRAME_STEP(angleStep);
+                particle->height += SDF_FRAME_STEP(heightStep);
                 particle->roll_s = angleStep * angleDamping;
                 particle->up_s = heightStep * heightDamping;
             }
@@ -1163,7 +1164,7 @@ effPCPHamaCardSphere_tag *effPCPHamaCardSphereCreate(params, resource, particleP
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
@@ -1273,8 +1274,8 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
     f32 angleDamping;
 
     i = 0;
-    duration = hData->param.life;
-    endAge = hData->param.wait + duration;
+    duration = SDF_FRAMES(hData->param.life);
+    endAge = SDF_FRAMES(hData->param.wait) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
     VEC3_SPLAT(halfWidth, hData->param.tex_w * 0.5f);
@@ -1283,10 +1284,10 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
     respawn = hData->param.loop;
     pulse = hData->param.vibrate;
     pulseAngle = hData->param.vib_power;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    angleDamping = hData->param.roll_a;
-    duplicateStart = hData->param.attach_f;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    angleDamping = SDF_FRAME_DECAY(hData->param.roll_a);
+    duplicateStart = SDF_FRAMES(hData->param.attach_f);
     perGroup = hData->param.attach_i;
     baseColor = hData->abgr;
 
@@ -1319,9 +1320,9 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
             radius = particle->radius;
             angleStep = particle->roll_s;
             if (!moving && pulse) {
-                if (age == duration) {
+                if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration)) {
                     angle += pulseAngle;
-                } else if (age == duration + 1) {
+                } else if (SDF_FRAME_TICK(age) == SDF_FRAME_TICK(duration) + 1) {
                     angle -= pulseAngle;
                 }
             }
@@ -1379,8 +1380,8 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
                 SDF_VU0_COPYVECTOR(position, next);
             }
             if (moving) {
-                particle->radius += particle->radius_s;
-                particle->radian += angleStep;
+                particle->radius += SDF_FRAME_STEP(particle->radius_s);
+                particle->radian += SDF_FRAME_STEP(angleStep);
                 particle->roll_s = angleStep * angleDamping;
             }
         } else {
@@ -1480,7 +1481,7 @@ effPCPHamaCardScatter_tag *effPCPHamaCardScatterCreate(params, resource, particl
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
@@ -1593,17 +1594,17 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
     effPCPHamaCardScatterPart_tag *particle;
 
     i = 0;
-    duration = hData->param.duration;
-    endAge = hData->param.fadeDuration + duration;
+    duration = SDF_FRAMES(hData->param.duration);
+    endAge = SDF_FRAMES(hData->param.fadeDuration) + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.particleCount;
     VEC3_SPLAT(halfWidth, hData->param.width * 0.5f);
     VEC3_SPLAT(halfHeight, hData->param.height * 0.5f);
     particle = hData->pPart;
     respawn = hData->param.respawn;
-    fadeIn = hData->param.fadeIn;
-    fadeOut = hData->param.fadeOut;
-    duplicateStart = hData->param.duplicateStartAge;
+    fadeIn = SDF_FRAMES(hData->param.fadeIn);
+    fadeOut = SDF_FRAMES(hData->param.fadeOut);
+    duplicateStart = SDF_FRAMES(hData->param.duplicateStartAge);
     perGroup = hData->param.particlesPerGroup;
     baseColor = hData->abgr;
 
@@ -1681,14 +1682,14 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
             }
             if (age < duration) {
                 f32 limit = particle->radian_w * 0.5f;
-                f32 tilt = particle->radian + tiltStep;
+                f32 tilt = particle->radian + SDF_FRAME_STEP(tiltStep);
                 f32 magnitude;
 
                 particle->radian = tilt;
-                particle->height = particle->height + heightStep;
+                particle->height = particle->height + SDF_FRAME_STEP(heightStep);
                 magnitude = sdfFabs(tilt);
                 if (limit < magnitude) {
-                    particle->radian = tilt - tiltStep;
+                    particle->radian = tilt - SDF_FRAME_STEP(tiltStep);
                     particle->radian_s = -particle->radian_s;
                 }
             }
@@ -1900,7 +1901,7 @@ effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2009,7 +2010,7 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
 
     dds3WhirlwindPolyListGetUV(pWhirlwindPoly->hPoly, index);
     ring = &pWhirlwindPoly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwindPoly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2017,18 +2018,18 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwindPoly->param.tiltDamping;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwindPoly->param.tiltDamping);
     ring->radius = radius;
-    ring->up_s = rise * pWhirlwindPoly->param.riseDecay;
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwindPoly->param.riseDecay);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2047,13 +2048,13 @@ void effPCPWhirlwindPolyDraw(effPCPWhirlwindPoly_tag *hData) {
     u32 count = hData->param.particleCount;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
-    s32 duration = hData->param.duration;
+    s32 duration = SDF_FRAMES(hData->param.duration);
     s32 fadeIn;
     s32 fadeRange;
     s32 color;
     loop = hData->param.loop;
-    fadeIn = hData->param.fadeIn;
-    fadeRange = hData->param.fadeRange;
+    fadeIn = SDF_FRAMES(hData->param.fadeIn);
+    fadeRange = SDF_FRAMES(hData->param.fadeRange);
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.baseColor);
 
     for (i = 0; i < count; i++) {
@@ -2151,7 +2152,7 @@ effPCPWhirlwind2Poly_tag *effPCPWhirlwind2PolyCreate(src, resource)
     delayModulus = delayLimit;
     count = inst->param.number;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2261,7 +2262,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind2Poly->hPoly, index);
     ring = &pWhirlwind2Poly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwind2Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2269,19 +2270,19 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwind2Poly->param.roll_a;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.roll_a);
     ring->radius = radius;
-    ring->radius_s *= pWhirlwind2Poly->param.radius_a;
-    ring->up_s = rise * pWhirlwind2Poly->param.up_a;
+    ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.radius_a);
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwind2Poly->param.up_a);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2296,7 +2297,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
 void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
     s32 loop;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2311,8 +2312,8 @@ void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
     u32 i;
 
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     delayModulus = hData->param.timing;
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.abgr);
     instanceAge = hData->frame_all;
@@ -2343,7 +2344,7 @@ void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
                 effPCPWhirlwind2PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             } else {
                 particle->frame++;
             }
@@ -2422,7 +2423,7 @@ effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(src, resource)
     delayModulus = delayLimit;
     count = inst->param.number;
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2530,7 +2531,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind3Poly->hPoly, index);
     ring = &pWhirlwind3Poly->pPart[index];
-    radius = ring->radius + ring->radius_s;
+    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
     count = pWhirlwind3Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2538,19 +2539,19 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += ring->radian_s;
-    ring->radian_s *= pWhirlwind3Poly->param.roll_a;
+    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.roll_a);
     ring->radius = radius;
-    ring->radius_s *= pWhirlwind3Poly->param.radius_a;
-    ring->up_s = rise * pWhirlwind3Poly->param.up_a;
+    ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.radius_a);
+    ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwind3Poly->param.up_a);
     for (i = 0; i < count; i++) {
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += rise;
+        vertex[1] += SDF_FRAME_STEP(rise);
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += rise;
+        vertex[5] += SDF_FRAME_STEP(rise);
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2565,7 +2566,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
 void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
     s32 loop;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2585,8 +2586,8 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
 
     instanceAge = hData->frame_all;
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     delayModulus = hData->param.timing;
     startColor = hData->param.abgr_s;
     endColor = hData->param.abgr_e;
@@ -2621,7 +2622,7 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
                 effPCPWhirlwind3PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             } else {
                 particle->frame++;
             }
@@ -2696,7 +2697,7 @@ effPCPWwSpherePoly_tag *effPCPWwSpherePolyCreate(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         particle++;
     }
     return inst;
@@ -2783,17 +2784,17 @@ void effPCPWwSpherePolyPartMove(effPCPWwSpherePoly_tag *pWwSpherePoly, s32 index
     dds3WhirlwindPolyListGetUV(pWwSpherePoly->hPoly, index);
     ring = &pWwSpherePoly->pPart[index];
     count = pWwSpherePoly->hPoly->vectorsPerParticle >> 1;
-    angle = ring->radian + ring->radian_s;
+    angle = ring->radian + SDF_FRAME_STEP(ring->radian_s);
     radius = ring->radius;
     step = ring->radian_add;
-    radius += ring->radius_s;
-    if (ring->frame >= pWwSpherePoly->param.radius_aw) {
-        ring->radius_s *= pWwSpherePoly->param.radius_a;
+    radius += SDF_FRAME_STEP(ring->radius_s);
+    if (ring->frame >= SDF_FRAMES(pWwSpherePoly->param.radius_aw)) {
+        ring->radius_s *= SDF_FRAME_DECAY(pWwSpherePoly->param.radius_a);
     }
     SetRotateMatrixXYZ(ring->rot);
     ring->radius = radius;
     ring->radian = angle;
-    ring->radian_s *= pWwSpherePoly->param.roll_a;
+    ring->radian_s *= SDF_FRAME_DECAY(pWwSpherePoly->param.roll_a);
     height = ring->width;
     for (i = 0; i < count; i++) {
         vertex[0] = sdfCos(angle) * radius;
@@ -2819,13 +2820,13 @@ void effPCPWwSpherePolyDraw(effPCPWwSpherePoly_tag *hData) {
     u32 count = hData->param.number;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWwSpherePolyPart_tag *particle = hData->pPart;
-    s32 duration = hData->param.life;
+    s32 duration = SDF_FRAMES(hData->param.life);
     s32 fadeIn;
     s32 fadeRange;
     s32 color;
     loop = hData->param.loop;
-    fadeIn = hData->param.fade_in;
-    fadeRange = hData->param.fade_out;
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeRange = SDF_FRAMES(hData->param.fade_out);
     color = effMagaCylinderCalcColor(hData->abgr, hData->param.abgr);
 
     for (i = 0; i < count; i++) {
