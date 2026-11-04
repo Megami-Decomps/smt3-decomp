@@ -10331,6 +10331,7 @@ nbPanelPTPartList = 0x004F00A0; // type:u32 size:0x4
 nbPressTurnTable2 = 0x004F00B0; // type:u32 size:0x4
 nbBadStatusNames = 0x004F0758; // type:u32 size:0x30
 scrEmbedded_4F0800 = 0x004F0800; // size:0x10
+D_005004D8 = 0x005004D8; // size:0xFB28 can_reference:False
 itfMesEmbedded_522AF0 = 0x00522AF0; // size:0x10
 test_pskill = 0x005266A8; // type:u16 size:0x38
 test2_dvllist = 0x005269C0; // type:u16 size:0x10
