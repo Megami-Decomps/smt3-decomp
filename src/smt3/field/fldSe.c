@@ -6,6 +6,7 @@
 #include "scr.h"
 #include "field.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* Field-only views, with offsets taken from the SMT3 retail accesses. */
 typedef struct
@@ -188,7 +189,7 @@ void fldPlaySe3D(void) {
             nearby = 1;
         }
     }
-    if (nearby != 0 && (tick & 1)) {
+    if (nearby != 0 && (SDF_FRAME_TICK(tick) & 1) && SDF_FRAME_DUE(tick)) {
         p2sdSetStandPos(listenerX, listenerY, listenerZ,
             D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
     }

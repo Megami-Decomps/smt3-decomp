@@ -8,6 +8,8 @@
 #include "effect.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 extern s32 D_0054EB54;
 extern u32 fldEncountTimer;
 
@@ -917,11 +919,19 @@ s32 ProcSequence(dds3ProcessID_t *id)
         break;
     case 2:
     case 6:
-        if (fldGlobalBase.word94 > 0) fldGlobalBase.word94--;
+        if (fldGlobalBase.word94 > 0) {
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                fldGlobalBase.word94--;
+            }
+        }
         break;
     case 3:
     case 7:
-        if (fldGlobalBase.word94 < 15) fldGlobalBase.word94++;
+        if (fldGlobalBase.word94 < 15) {
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                fldGlobalBase.word94++;
+            }
+        }
         break;
     }
     if (fldProcCampChk() != 1) {
