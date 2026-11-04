@@ -40,5 +40,48 @@ class UnitStepTests(unittest.TestCase):
                 self.assertEqual(self.scan(statement), [])
 
 
+class DueGateTests(unittest.TestCase):
+    def done(self, source):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "fixture.c"
+            path.write_text(source)
+            return {name: done for _, name, done, _ in SURVEY.scan(path)}
+
+    def test_gated_counter_converted_and_ungated_open(self):
+        marks = self.done(
+            "void f(void)\n{\n"
+            "    work->gated++;\n"
+            "    if (SDF_FRAME_DUE(work->age)) {\n"
+            "        if (work->a) {\n            work->inner++;\n        }\n"
+            "        work->gated2--;\n"
+            "    }\n"
+            "    work->ungated++;\n}\n")
+        self.assertEqual(marks, {"gated": False, "inner": True, "gated2": True, "ungated": False})
+
+    def test_compound_condition(self):
+        marks = self.done("if (work->on && SDF_FRAME_DUE(work->age)) {\n    work->t++;\n}\nwork->u++;\n")
+        self.assertEqual(marks, {"t": True, "u": False})
+
+    def test_negated_form_gates_the_else(self):
+        marks = self.done(
+            "if (!SDF_FRAME_DUE(work->age)) {\n    work->skipped++;\n"
+            "} else if (work->x) {\n    work->a++;\n} else {\n    work->b++;\n}\n"
+            "work->after++;\n")
+        self.assertEqual(marks, {"skipped": False, "a": True, "b": True, "after": False})
+
+    def test_else_of_a_later_if_is_not_gated(self):
+        marks = self.done(
+            "if (!SDF_FRAME_DUE(work->age)) {\n} else {\n    work->a++;\n}\n"
+            "if (work->y) {\n    work->p++;\n} else {\n    work->q++;\n}\n")
+        self.assertEqual(marks, {"a": True, "p": False, "q": False})
+
+    def test_uses_count_tick_and_due(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "fixture.c"
+            path.write_text("a = SDF_FRAME_TICK(x);\nif (SDF_FRAME_DUE(x)) {}\n/* SDF_FRAME_DUE(y) */\n")
+            counts = SURVEY.uses(path)
+        self.assertEqual((counts["tick"], counts["due"]), (1, 1))
+
+
 if __name__ == "__main__":
     unittest.main()
