@@ -290,7 +290,7 @@ extern void *memcpy(void *a, const void *b, size_t c);
 extern void *memset(void *a, s32 b, size_t c);
 extern dds3SpPolyEntry_t dds3SpPolyTable[];
 extern void (*D_003176A0[])(void *work);
-extern void (*D_003176B0[])(f32 scale, void *work);
+extern void (*D_003176B0[])(void *work, f32 scale);
 extern f32 D_00317650[4];
 extern f32 D_00317660[4];
 extern f32 dds3PolygonTriangleParam[4];
@@ -2461,7 +2461,7 @@ void dds3SpPolyReset(dds3SpPoly_Basic_t *hData) {
 }
 
 void dds3SpPolySetScale(dds3SpPoly_Basic_t *hData, f32 scale) {
-    D_003176B0[hData->type](scale, hData);
+    D_003176B0[hData->type](hData, scale);
     dds3SpPolyReset(hData);
 }
 

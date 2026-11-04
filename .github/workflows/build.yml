@@ -112,6 +112,12 @@ jobs:
         if: steps.orig.outputs.available == 'true'
         run: python3 configure.py
 
+      # configure rewrites INCLUDE_RODATA/INCLUDE_SDATA lines in src/; they must
+      # be committed. Includes a stale-line control.
+      - name: Check configure leaves src unchanged
+        if: steps.orig.outputs.available == 'true'
+        run: python3 tools/check_generated_sources.py
+
       # ninja's checksum step fails unless the linked ELF is byte-identical to
       # retail.
       - name: Build and verify

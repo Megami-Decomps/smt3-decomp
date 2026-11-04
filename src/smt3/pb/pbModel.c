@@ -182,7 +182,7 @@ extern void pb_draw_mycharacter_Shutdown(dds3ProcessID_t *id);
 extern mdlObj_t *mdlLoad(u32 major, u32 minor);
 extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 number);
 extern void mdlSetScale(mdlObj_t *model);
-extern const sdfVector4_t D_00535C58;
+extern const sdfVector4Unaligned_t D_00535C58;
 extern char D_00535C68[];
 
 /* The USA constructor ignores the color and motion arguments supplied by its caller. */

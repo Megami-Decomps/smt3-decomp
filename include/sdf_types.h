@@ -36,6 +36,14 @@ typedef struct QWORD_ALIGNED
     f32 m[16];
 } sdfMatrix4_t;
 
+/* A vector or matrix at a retail address that is not 16-aligned. Same type, so
+ * copies to and from sdfVector4_t compile as before; a host build lowers the
+ * alignment the typedef above raised, so the access is not a movaps. */
+#ifndef UNALIGNED_QWORD
+#define UNALIGNED_QWORD
+#endif
+typedef sdfVector4_t sdfVector4Unaligned_t UNALIGNED_QWORD;
+
 /* DMAC source-chain tag. id 0x20 is `ref`, written by sdfDrawTagLink. */
 typedef struct QWORD_ALIGNED
 {

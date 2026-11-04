@@ -727,13 +727,13 @@ f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant) {
     return __pack_df(&u);
 }
 
-#ifdef FIX_BUGS
 f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
-#else
-/* The retail call has no prototype in scope, so it takes the int return. */
-extern s32 sdfPackQuadInt() FAKEMATCH_ASM_NAME("sdfPackQuad");
-#endif
 
+/* Retail reads an implicit-int result from v0 although sdfPackQuad returns
+ * f32 in f0. Truthful C retains the existing FIX_BUGS behavior; default builds
+ * use retail assembly until its original erroneous ABI can be represented
+ * without a conflicting declaration. */
+#ifdef FIX_BUGS
 u32 dptofp(double x) {
     fp_number_type_df u;
     u32 m;
@@ -743,17 +743,11 @@ u32 dptofp(double x) {
     if (u.fraction & 0x3FFFFFFF) {
         m |= 1;
     }
-    /* BUG: sdfPackQuad returns f32, which this target returns in $f0, but
-     * with nothing in scope ee-gcc assumes int and the result is read from
-     * $v0. So what comes back is not the packed value at all. Retail does
-     * this, and declaring the function moves the image, so the behaviour is
-     * kept and the declaration sits behind FIX_BUGS. */
-#ifdef FIX_BUGS
     return sdfPackQuad(u.class, u.sign, u.normal_exp, m);
-#else
-    return sdfPackQuadInt(u.class, u.sign, u.normal_exp, m);
-#endif
 }
+#else
+INCLUDE_ASM(const s32, "sdk/libgcc", dptofp);
+#endif
 
 u32 dptoul(f64 value) {
     fp_number_type_df number;

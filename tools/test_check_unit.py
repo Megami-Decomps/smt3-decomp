@@ -1270,5 +1270,40 @@ class NestedFunctionCheckerTests(unittest.TestCase):
         self.assertIn("DIFF helper.0 @ 0x00001008", report)
 
 
+class DefaultGuardScan(unittest.TestCase):
+    def test_fix_bugs_c_is_excluded_but_retail_fallback_is_kept(self):
+        text = "#ifdef FIX_BUGS\nvoid f(void) {}\n#else\nINCLUDE_ASM(x, \"u\", f);\n#endif"
+        result = check_unit.drop_nonmatching(text)
+        self.assertNotIn("void f", result)
+        self.assertIn("INCLUDE_ASM", result)
+
+    def test_nested_else_does_not_end_disabled_outer_branch(self):
+        text = "#ifdef NON_MATCHING\n#if INNER\nfirst\n#else\nsecond\n#endif\nlast\n#else\nretail\n#endif"
+        self.assertEqual(check_unit.drop_nonmatching(text), "retail")
+
+    def test_known_ifndef_keeps_default_and_discards_else(self):
+        text = "#ifndef FIX_BUGS\nretail\n#else\ncorrected\n#endif"
+        self.assertEqual(check_unit.drop_nonmatching(text), "retail")
+
+    def test_unknown_conditions_do_not_hide_duplicate_definitions(self):
+        text = "#if UNKNOWN\nvoid f(void) {}\n#else\nvoid f(void) {}\n#endif"
+        self.assertEqual(check_unit.drop_nonmatching(text).count("void f"), 2)
+
+    def test_commented_directive_cannot_hide_live_fallback(self):
+        text = '/*\n#ifdef FIX_BUGS\n*/\nINCLUDE_ASM(x, "u", f);'
+        self.assertIn("INCLUDE_ASM", check_unit.drop_nonmatching(text))
+
+    def test_commented_endif_cannot_expose_disabled_c(self):
+        text = "#ifdef FIX_BUGS\n/*\n#endif\n*/\nvoid f(void) {}\n#else\nretail\n#endif"
+        self.assertEqual(check_unit.drop_nonmatching(text), "retail")
+
+    def test_nested_guard_preserves_line_numbers(self):
+        text = "first\n#ifdef FIX_BUGS\n#if INNER\nhidden\n#endif\n#else\nretail\n#endif\nlast"
+        result = check_unit.drop_nonmatching(text, preserve_lines=True)
+        self.assertEqual(len(result.splitlines()), len(text.splitlines()))
+        self.assertEqual(result.splitlines()[6], "retail")
+        self.assertNotIn("hidden", result)
+
+
 if __name__ == "__main__":
     unittest.main()
