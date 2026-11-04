@@ -180,7 +180,6 @@ extern PIPE_EFF_t *pipe_CELL01_D3P, *pipe_BREAK01_D3P, *pipe_BREAK02_D3P;
 
 extern PIPE_EFF_t *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P, *pipe_ATTACK01_D3P;
 
-extern s32 dds3ConfigBackup;
 
 extern s32 sdfChipCheck(void *aPtr);
 
@@ -210,7 +209,6 @@ extern char D_00551700[];
 
 extern char D_00551808[];
 
-/* [1] is dds3ConfigBackup; both are written through one base register. */
 extern s32 dds3ConfigValue[2];
 
 extern s32 playerDAMAGE;

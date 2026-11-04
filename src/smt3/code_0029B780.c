@@ -42,8 +42,6 @@ extern void fclSetSprite(saddr_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s
 
 extern void fclDrawBG(void *pSprite, s32 OtNo);
 
-extern s32 dds3ConfigBackup;
-
 extern char D_00548870[];
 
 
@@ -56,7 +54,6 @@ extern char D_005488B8[];
 
 extern void *D_005516C4;
 
-/* [1] is dds3ConfigBackup; both are written through one base register. */
 extern s32 dds3ConfigValue[2];
 
 extern s8 slLoadKillFlag;
@@ -128,7 +125,7 @@ void dds3ConfigSaveBackup(void)
 void dds3ConfigRestoreBackup(void)
 {
     printf(D_00548870);
-    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigBackup;
+    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigValue[1];
 }
 
 void dds3InitConfigItems(u8 *gbwk)
@@ -607,6 +604,4 @@ INCLUDE_SDATA(const s32, "code_0029B780", D_005516E8);
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516F0);
 
 INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigValue);
-
-INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigBackup);
 
