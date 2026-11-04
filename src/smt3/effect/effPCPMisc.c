@@ -5174,7 +5174,7 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
     f32 muzzle[4] __attribute__((aligned(16)));
     effPCPAgiFireball_tag *source = work->source;
     s32 count;
-    s32 frame = work->frame;
+    s32 frame = SDF_FRAME_TICK(work->frame);
     u32 color;
     dds3ModelHandle_t *model;
     u32 i;
@@ -5280,9 +5280,12 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
     dds3EffectPartSetRotateMatrix(work->headHandle, matrix);
     dds3EffectPartSetColor(work->headHandle, color);
     mdlLink(model, D_002F69B8);
-    SDF_VU0_COPYVECTOR(work->pos_old, work->pos);
-    sdfModelGetMarkPos(model->modelRoot, 1);
-    SDF_VU0_STOREVECTOR(work->pos);
+    /* pos and pos_old hold the last two retail ticks' marks, so the trail segment spans one tick. */
+    if (SDF_FRAME_DUE(work->frame)) {
+        SDF_VU0_COPYVECTOR(work->pos_old, work->pos);
+        sdfModelGetMarkPos(model->modelRoot, 1);
+        SDF_VU0_STOREVECTOR(work->pos);
+    }
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
             if (i == 4) {
@@ -5322,46 +5325,48 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
         for (j = 0; j < 3; j++) {
             if (work->param.TrackCount[j] > 0) {
                 if (frame < count) {
-                    base = (work->frame - 1) * work->param.TrackCount[j];
-                    SDF_VU0_LOADVECTOR(work->pos);
-                    SDF_VU0_LOADVECTOR_B(work->pos_old);
-                    SDF_VU0_SUBVECTOR();
-                    SDF_VU0_COPYVECTOR_A_TO_C();
-                    VEC3_SPLAT(step, 1.0f / work->param.TrackCount[j]);
-                    SDF_VU0_LOADVECTOR_B(step);
-                    SDF_VU0_MULVECTOR();
-                    SDF_VU0_STOREVECTOR(step);
-                    SDF_VU0_COPYVECTOR(pos, work->pos_old);
-                    SDF_VU0_LOADVECTOR(aViewEye);
-                    SDF_VU0_LOADVECTOR_B(aViewTarget);
-                    SDF_VU0_SUBVECTOR();
-                    SDF_VU0_COPYVECTOR_C_TO_B();
-                    SDF_VU0_OUTERPRODUCT();
-                    SDF_VU0_NORMALIZE();
-                    SDF_VU0_STOREVECTOR(side);
-                    for (i = 0; i < work->param.TrackCount[j]; i++) {
-                        if (work->list[j][base + i] == 0) {
-                            work->list[j][base + i] = dds3EffectPartCopy(work->list[j][0]);
-                            scale = work->param.scale * work->param.TrackScale[j];
-                            randomScale = work->param.TrackScale_r[j];
-                            dds3EffectPartSetScale(work->list[j][base + i], scale *
-                                (dds3GetRandFloatA(dds3EffectBase) * randomScale + (1.0f - randomScale)));
-                        }
-                        SDF_VU0_LOADVECTOR(pos);
-                        SDF_VU0_LOADVECTOR_B(step);
-                        SDF_VU0_ADDVECTOR();
+                    base = (SDF_FRAME_TICK(work->frame) - 1) * work->param.TrackCount[j];
+                    if (SDF_FRAME_DUE(work->frame)) {
+                        SDF_VU0_LOADVECTOR(work->pos);
+                        SDF_VU0_LOADVECTOR_B(work->pos_old);
+                        SDF_VU0_SUBVECTOR();
                         SDF_VU0_COPYVECTOR_A_TO_C();
-                        randomOffset = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
-                        randomOffset = randomOffset + randomOffset;
-                        VEC3_SPLAT(scatter, work->param.TrackArea[j] * randomOffset);
-                        SDF_VU0_LOADVECTOR(side);
-                        SDF_VU0_LOADVECTOR_B(scatter);
+                        VEC3_SPLAT(step, 1.0f / work->param.TrackCount[j]);
+                        SDF_VU0_LOADVECTOR_B(step);
                         SDF_VU0_MULVECTOR();
-                        SDF_VU0_ADDVECTOR_A_C();
-                        /* Fully written here, then consumed by VU loads and callbacks. */
-                        SDF_VU0_STOREVECTOR_NOMEM(pos);
-                        dds3EffectPartSetPosition(work->list[j][base + i], pos);
-                        dds3EffectPartSetColor(work->list[j][base + i], work->color);
+                        SDF_VU0_STOREVECTOR(step);
+                        SDF_VU0_COPYVECTOR(pos, work->pos_old);
+                        SDF_VU0_LOADVECTOR(aViewEye);
+                        SDF_VU0_LOADVECTOR_B(aViewTarget);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_COPYVECTOR_C_TO_B();
+                        SDF_VU0_OUTERPRODUCT();
+                        SDF_VU0_NORMALIZE();
+                        SDF_VU0_STOREVECTOR(side);
+                        for (i = 0; i < work->param.TrackCount[j]; i++) {
+                            if (work->list[j][base + i] == 0) {
+                                work->list[j][base + i] = dds3EffectPartCopy(work->list[j][0]);
+                                scale = work->param.scale * work->param.TrackScale[j];
+                                randomScale = work->param.TrackScale_r[j];
+                                dds3EffectPartSetScale(work->list[j][base + i], scale *
+                                    (dds3GetRandFloatA(dds3EffectBase) * randomScale + (1.0f - randomScale)));
+                            }
+                            SDF_VU0_LOADVECTOR(pos);
+                            SDF_VU0_LOADVECTOR_B(step);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_COPYVECTOR_A_TO_C();
+                            randomOffset = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
+                            randomOffset = randomOffset + randomOffset;
+                            VEC3_SPLAT(scatter, work->param.TrackArea[j] * randomOffset);
+                            SDF_VU0_LOADVECTOR(side);
+                            SDF_VU0_LOADVECTOR_B(scatter);
+                            SDF_VU0_MULVECTOR();
+                            SDF_VU0_ADDVECTOR_A_C();
+                            /* Fully written here, then consumed by VU loads and callbacks. */
+                            SDF_VU0_STOREVECTOR_NOMEM(pos);
+                            dds3EffectPartSetPosition(work->list[j][base + i], pos);
+                            dds3EffectPartSetColor(work->list[j][base + i], work->color);
+                        }
                     }
                 } else {
                     base = (count - 1) * work->param.TrackCount[j];
@@ -5527,7 +5532,7 @@ void effPCPAgiFireball2Draw(effPCPAgiFireball2_tag *hData) {
     i = 0;
     frame = hData->frame;
     do {
-        if (hData->params.startFrame[i] <= frame) {
+        if (SDF_FRAMES(hData->params.startFrame[i]) <= frame) {
             effPCPAgiFireballDraw(hData->blockSets[i]);
             frame = hData->frame;
         }
