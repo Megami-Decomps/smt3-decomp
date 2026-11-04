@@ -62,6 +62,7 @@ extern void sdfDevSetPrintCB(pbPrintState_t *, s32, s32, s32, s32);
 extern void *sdfDevPrintfEx(void *, const char *, ...);
 
 #include "sdk_libc.h"
+#include "sdfBuildHook.h"
 
 extern f32 sdfSin(f32 aRadius);
 
@@ -583,7 +584,7 @@ u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color
     packet[10] = (u64)(((x + width) & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
     packet[12] = (u64)((x & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
     packet[13] = packet[14] = packet[15] = 0;
-    return packet;
+    SDF_BUILD_RETURN("pbAllocPrimPacket", "Primitive2D", packet);
 }
 
 void *pbMakeSpritePacket(u64 data, s32 context)
@@ -593,7 +594,7 @@ void *pbMakeSpritePacket(u64 data, s32 context)
     packet = sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
     packet->reg[1].data = data;
     packet->reg[1].reg = context ? 0x48 : 0x47;
-    return packet;
+    SDF_BUILD_RETURN("pbMakeSpritePacket", "Sprite", packet);
 }
 
 void *pbMakePrimPacket(u64 data, s32 context)
@@ -603,7 +604,7 @@ void *pbMakePrimPacket(u64 data, s32 context)
     packet = sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
     packet->reg[1].data = data;
     packet->reg[1].reg = context ? 0x43 : 0x42;
-    return packet;
+    SDF_BUILD_RETURN("pbMakePrimPacket", "Primitive2D", packet);
 }
 
 void pbDrawRotatedPrim(s32 surfaceIndex) {

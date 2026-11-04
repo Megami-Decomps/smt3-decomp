@@ -30,8 +30,10 @@ extern void dds3RenderTextureOFF(void);
 extern void dds3FreeRenderTexture(void);
 extern void *memcpy(void *a, const void *b, size_t c);
 #include "sdk_libc.h"
+#include "sdfBuildHook.h"
 
 void *effPkt2DGetPrimPtr(void *pPkt) {
+    SDF_BUILD_PACKET("effPkt2DGetPrimPtr", "Packet2D", pPkt);
     return (void *)((u8 *)pPkt + 0x20);
 }
 
@@ -39,7 +41,7 @@ sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim) {
     sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(9, num));
 
     sdf2DMakePrimPacketHeader(packet, prim | 0x54, 9, 0x525252521, num);
-    return packet;
+    SDF_BUILD_RETURN("effPkt2DAllocTriStrip", "Primitive2D", packet);
 }
 
 u64 *effPkt2DAllocF4(u32 prim) {
@@ -53,7 +55,7 @@ u64 *effPkt2DAllocF4(u32 prim) {
     packet[15] = 0;
     packet[14] = 0;
     packet[13] = 0;
-    return packet;
+    SDF_BUILD_RETURN("effPkt2DAllocF4", "Primitive2D", packet);
 }
 
 void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
@@ -179,7 +181,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
-    return packet;
+    SDF_BUILD_RETURN("effPkt3DPrimMakePoly", "PolyStream", packet);
 }
 
 /* The render draw env's clear sprite, 0x1800 into each 0x1BE0 draw bank: both

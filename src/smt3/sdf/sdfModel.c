@@ -4,6 +4,11 @@
 #include "draw.h"
 #include "ps2asm.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
+
+#ifdef NON_MATCHING
+sdfBuildHook_t sdfBuildHook;
+#endif
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
  * vector transfers or the implicit VU matrix-register convention in C. */
@@ -157,7 +162,7 @@ u8 *sdfModelAllocTmPacket(sdfModelNode_t *aNode)
         packet = sdfChipAllocDirect(0x100);
         aNode->tmPacket = packet;
     }
-    return packet;
+    SDF_BUILD_RETURN("sdfModelAllocTmPacket", "Transform", packet);
 }
 
 void sdfModelPacketFree(sdfModelNode_t *aNode)
@@ -382,6 +387,8 @@ sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer,
 {
     addr_t addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
 
+    SDF_BUILD_PACKET("sdfModelSetTmRefPacket", "TransformRef", aBuffer);
+    SDF_BUILD_PACKET("sdfModelSetTmRefPacket", "DrawParams", (u32)aBuffer + 0x10);
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
     aBuffer->dat0 = 0;
@@ -390,6 +397,7 @@ sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer,
 
 sdfDmaTag_t *sdfModelSetTermPacket(sdfDmaTag_t *aBuffer)
 {
+    SDF_BUILD_PACKET("sdfModelSetTermPacket", "Terminator", aBuffer);
     *(u64 *)&aBuffer->dat0 = 0;
     *(u64 *)aBuffer = 0x60000000;
     return aBuffer + 1;
@@ -398,6 +406,7 @@ sdfDmaTag_t *sdfModelSetTermPacket(sdfDmaTag_t *aBuffer)
 sdfDmaTag_t *sdfModelSetMatRefPacket(sdfModelRootNode_t *aRoot, s32 aMatIndex, sdfDmaTag_t *aBuffer,
                                      s32 aId)
 {
+    SDF_BUILD_PACKET("sdfModelSetMatRefPacket", "MaterialRef", aBuffer);
     return sdfMatMakePacket(aRoot->matList->items[aMatIndex], aBuffer, aId);
 }
 
@@ -460,6 +469,7 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
     u16 qwc = packed;
     sdfDmaTag_t *body;
 
+    SDF_BUILD_PACKET("sdfModelSetNormalDrawPacket", "MeshNormal", aBuffer);
     body = sdfModelSetMatRefPacket(aNode->root, matIndex, aBuffer, aId);
     body->id = 0x30;
     body->qwc = qwc;
@@ -488,6 +498,7 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
     u16 *boneId;
     u32 *words;
 
+    SDF_BUILD_PACKET("sdfModelSetOneSkinDrawPacket", "MeshSkinned", aBuffer);
     packed &= 0xFFFF;
     tag = sdfModelSetMatRefPacket(aNode->root, matIndex, aBuffer, aId);
     ofs = aId << 7;
@@ -551,6 +562,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
     sdfDmaTag_t *tag;
     sdfModelShapeList_t **cursor;
 
+    SDF_BUILD_OPEN("sdfModelLinkShapedDrawPacket", (u32)aNode, (u32)aDataPtr, (u32)aDrawTag, (u32)aId);
     packed = *(u32 *)&aDataPtr->morphIndex;
     matIndex = packed >> 16;
     packed &= 0xFFFF;
@@ -598,6 +610,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
     } while (i != listCount);
     QUAD_ZERO(*(u128 *)tag);
     sdfDrawTagLink2(aDrawTag, EE_ADDR(buf), EE_ADDR(tag));
+    SDF_BUILD_CLOSE();
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
@@ -616,7 +629,7 @@ sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOt
     packet->size = 1;
     packet->memHandle = NULL;
     packet->next = next;
-    return packet;
+    SDF_BUILD_RETURN("sdfModelNewPacketHeader", "PacketHeader", packet);
 }
 
 /* NON_MATCHING: 104 of 122 words differ (first at +0x14).
@@ -992,6 +1005,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
     f32 soften;
     f32 bias;
 
+    SDF_BUILD_OPEN("sdfModelTempPacketLinkOt", (u32)ot, (u32)root);
     frame = (s8)sdfFrameId;
     sdfMatListUpdatePacket(root->matList, frame);
     rootColor = root->color;
@@ -1130,6 +1144,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
     if (drew != 0) {
         root->flags |= SDF_MODEL_FLAG_DREW;
     }
+    SDF_BUILD_CLOSE();
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
@@ -1158,6 +1173,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
     s32 reverseFace;
     s32 reverse;
 
+    SDF_BUILD_LINK_OT(aOt, aRoot);
     aRoot->flags &= ~SDF_MODEL_FLAG_DREW;
     if (aRoot->flags & SDF_MODEL_FLAG_EARLY_SETUP) {
         sdfModelTempPacketLinkOt(aOt, aRoot);
@@ -1372,6 +1388,7 @@ void sdfModelSetDrawEnv(sdfModelDrawEnv_t *aEnv)
     sdfModelDrawEnvSet_t *set = aEnv->set;
     s32 i;
 
+    SDF_BUILD_PACKET("sdfModelSetDrawEnv", "Terminator", (u32)aEnv + 0x1a0);
     sdfPrimSetOpaquePacket(&aEnv->set[0].transPacket);
     sdfPrimSetSemiTransPacket(&aEnv->set[1].transPacket);
     sdfPrimSetAddTransPacket(&aEnv->set[2].transPacket);

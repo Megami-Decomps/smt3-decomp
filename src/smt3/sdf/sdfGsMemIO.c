@@ -2,6 +2,7 @@
 #include "sdf_types.h"
 #include "sdf_resource.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
 
 struct sdfPreDrawHook_t;
 
@@ -162,6 +163,7 @@ void sdfSetStoreImage(sdfStoreImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle
     s32 aSrcX, s32 aSrcY, s32 aWidth, s32 aHeight, u32 aBuffer, u32 aCallback, u32 aCallbackParam) {
     s32 quadwordCount;
 
+    SDF_BUILD_PACKET("sdfSetStoreImage", "ImageStore", aPacket);
     aPacket->header[0] = 0x90000001ULL;
     aPacket->header[1] = 0x10000000ULL;
     aPacket->header[2] = 0;
@@ -235,6 +237,7 @@ void sdfSetLoadImage(sdfLoadImagePacket_t *aPacket, sdfGsMemSlice_t *aGsHandle,
                    s32 aHeight, u32 aBuffer) {
     s32 qwc;
 
+    SDF_BUILD_PACKET("sdfSetLoadImage", "ImageLoad", aPacket);
     aPacket->header[0] = 0x10000006;
     aPacket->header[1] = 0x5000000611000000;
     aPacket->header[2] = 0x1000000000000004;

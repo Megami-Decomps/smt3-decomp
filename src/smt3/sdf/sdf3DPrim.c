@@ -3,6 +3,7 @@
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
 
 /* Declared here because no header carries these. */
 extern sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId);
@@ -202,6 +203,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
 void sdf3DPrimSetTmPacket(sdf3DTmPacketData_t *aPacket) {
+    SDF_BUILD_PACKET("sdf3DPrimSetTmPacket", "Transform", aPacket);
     VU0_STORE_MATRIX_AND_UNIT_ROWS(aPacket);
     aPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
     aPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
@@ -252,6 +254,7 @@ u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     s32 i;
     u32 countCode;
 
+    SDF_BUILD_OPEN("sdf3DPrimMakePoly", (u32)aParm);
     if (aParm->normal != NULL) {
         format = 0xE0;
         headerWords = 19;
@@ -353,5 +356,5 @@ u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
-    return packet;
+    SDF_BUILD_RETURN_CLOSE("sdf3DPrimMakePoly", "PolyStream", packet);
 }

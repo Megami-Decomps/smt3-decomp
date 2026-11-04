@@ -1,6 +1,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
 
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);
@@ -451,6 +452,7 @@ void sdfMatFreeDelayed(sdfMat_t *aMat)
 
 sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId)
 {
+    SDF_BUILD_PACKET("sdfMatMakePacket", "Material", aBuffer);
     aBuffer->id = 0x30;
     aBuffer->addr = (void *)EE_PHYSICAL(EE_ADDR(aMat->packet[aId]));
     aBuffer->qwc = 0xA;

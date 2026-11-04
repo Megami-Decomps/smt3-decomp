@@ -1,5 +1,6 @@
 #include "font.h"
 #include "kernel.h"
+#include "sdfBuildHook.h"
 
 typedef struct frFontHeader_t frFontHeader_t;
 
@@ -535,6 +536,7 @@ s32 frConvertVal2N(u32 Val) {
 }
 
 void frCreateDrawEnvPacket(frFontGsPacket_t *pDrawEnvPkt) {
+    SDF_BUILD_PACKET("frCreateDrawEnvPacket", "DrawEnv", pDrawEnvPkt);
     QUAD_ZERO(pDrawEnvPkt->dma.value);
     pDrawEnvPkt->dma.words[0] = 0x70000007;
     pDrawEnvPkt->dma.words[2] = 0;

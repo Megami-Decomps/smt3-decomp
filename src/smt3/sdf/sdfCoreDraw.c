@@ -4,6 +4,7 @@
 #include "ps2asm.h"
 #include "model.h"
 #include "draw3d.h"
+#include "sdfBuildHook.h"
 
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
@@ -71,6 +72,7 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
     u32 savedAttrBits;
     sdfMatPacket_t *matPacket2;
 
+    SDF_BUILD_OPEN("sdfCorePacketGen", (u32)node, (u32)packetData, (u32)attrMask, (u32)color, (u32)frame, (u32)reverse);
     VU0_VF1_ONES_XYZ_ZERO_W();
     corePktInitCb(&cb, (u16 *)&packet->prim, attrMask);
     if (reverse == 0) {
@@ -153,7 +155,7 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
     }
     cb.vertColPtr = cursor;
     corePktOpenAndEmit(&cb);
-    return corePktClosePacket(&cb);
+    SDF_BUILD_RETURN_CLOSE("sdfCorePacketGen", "MeshGenerated", corePktClosePacket(&cb));
 
 ordinaryGeometry:
     if (packetBits & SDF_PACKETBIT_BLENDVERT) {
@@ -265,7 +267,7 @@ ordinaryGeometry:
         corePktXfmLightClipPB(points, pointCount);
     }
     corePktOpenAndEmit(&cb);
-    return corePktClosePacket(&cb);
+    SDF_BUILD_RETURN_CLOSE("sdfCorePacketGen", "MeshGenerated", corePktClosePacket(&cb));
 
 plainGeometry:
     cursor = CORE_ALIGN16(cb.dataPtr);
@@ -298,7 +300,7 @@ plainGeometry:
         corePktXfmLightClip(points, pointCount, (const u32 *)vertices, cb.normalPtr);
     }
     corePktOpenAndEmit(&cb);
-    return corePktClosePacket(&cb);
+    SDF_BUILD_RETURN_CLOSE("sdfCorePacketGen", "MeshGenerated", corePktClosePacket(&cb));
 }
 #undef CORE_ALIGN16
 #else

@@ -4,6 +4,7 @@
 #include "sdfGsMemIO.h"
 #include "sdf_types.h"
 #include "sdf_resource.h"
+#include "sdfBuildHook.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -701,6 +702,7 @@ void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords) {
 }
 
 void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, addr_t aRegs, s32 aNumRegs) {
+    SDF_BUILD_PACKET("sdfGrSetRefGifPacket", "RefGif", aPacket);
     aPacket->dmatag.data = SDF_DMA_CNT_ONE_WORD;
     aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
     aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
@@ -722,6 +724,7 @@ void sdfGrSetDrawFramePacket(sdfGrDrawFramePacket_t *aFrame, s32 aFrameAddr, s32
     s32 xOffset;
     s32 yOffset;
 
+    SDF_BUILD_PACKET("sdfGrSetDrawFramePacket", "DrawFrame", aFrame);
     if (aContext == 0) {
         frameRegisterId = SDF_GS_FRAME_1;
         depthRegisterId = SDF_GS_ZBUF_1;
@@ -752,6 +755,7 @@ void sdfGrSetClearPacket(sdfGrClearPacket_t *aClear, s32 aW, s32 aH, s32 aPixelF
     u32 lowerBounds = ((SDF_GS_CENTER_BIAS - aH) << 19) | ((SDF_GS_CENTER_BIAS - aW) << 3);
     u32 upperBounds = ((aH + SDF_GS_CENTER_BIAS) << 19) | ((aW + SDF_GS_CENTER_BIAS) << 3);
 
+    SDF_BUILD_PACKET("sdfGrSetClearPacket", "Clear", aClear);
     aClear->primitive.reg = SDF_GS_PRIM;
     aClear->xyz2[0].reg = SDF_GS_XYZ2;
     aClear->test.data = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
@@ -777,6 +781,7 @@ void sdfGrSetDrawDefParmPacket(sdfGrRefGifPacketHeader_t *aDef) {
 
 void sdfGrSetDrawFrame(sdfGrDrawFrame_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
                            s32 aPixelFormat, s32 aZBuffAddr, s32 aZBuffFormat, s32 aContext) {
+    SDF_BUILD_PACKET("sdfGrSetDrawFrame", "DrawFrame", aFrame);
     sdfGrSetRegsPacketHeader(&aFrame->header, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
     sdfGrSetDrawFramePacket(&aFrame->packet, aFrameAddr, aW, aH, aPixelFormat, aZBuffAddr, aZBuffFormat, 0, aContext);
 }
@@ -789,6 +794,7 @@ void sdfGrSetDrawEnv(sdfGrDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet, s32 aEven
     s32 frameFormat;
     s32 depthFormat;
 
+    SDF_BUILD_PACKET("sdfGrSetDrawEnv", "DrawEnv", aEnv);
     sdfGrSetRegsPacketHeader(&aEnv->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     frameAddress = aFrameSet->buffers[aEvenOdd]->addr;
     depthAddress = aFrameSet->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->addr;
@@ -850,6 +856,7 @@ INCLUDE_ASM(const s32, "sdf/sdfDraw", sdfGrStdDrawEnvPredraw);
 #endif
 
 void sdfGrSetStdDrawEnv(sdfGrStdDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet) {
+    SDF_BUILD_PACKET("sdfGrSetStdDrawEnv", "DrawEnv", (u32)aEnv + 0x10);
     sdfGrSetRegsPacketHeader(&aEnv->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     aEnv->view = aFrameSet;
     aEnv->link.predrawFunc = sdfGrStdDrawEnvPredraw;
@@ -871,6 +878,7 @@ void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPr
 }
 
 void sdfGrSetFrameMaskRGB(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
+    SDF_BUILD_PACKET("sdfGrSetFrameMaskRGB", "FrameMask", aHdr);
     if (aContext == 0) {
         sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0x180)), 1);
         return;
@@ -879,6 +887,7 @@ void sdfGrSetFrameMaskRGB(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 a
 }
 
 void sdfGrSetFrameMaskReset(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
+    SDF_BUILD_PACKET("sdfGrSetFrameMaskReset", "FrameMask", aHdr);
     if (aContext == 0) {
         sdfGrSetRefGifPacket(aHdr, EE_ADDR((aEnv + 0x70)), 1);
         return;
@@ -894,6 +903,7 @@ void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, addr_t aEnv, sdfGrRefPacketHeader
 }
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
+    SDF_BUILD_PACKET("sdfGrLinkDrawFrameTex", "FrameTex", aPkt);
     aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     aPkt->dmaTag = SDF_DMA_TAG(aEnv + 0x1e0, 0x30000004);
     QUAD_ZERO(aPkt->nextTag);
@@ -924,6 +934,7 @@ void sdfGrFramePacketPredraw(sdfGrFramePacket_t *aPre, s32 aEvenOdd) {
 }
 
 void sdfGrSetFramePacket(sdfGrFramePacket_t *aFrame, sdfGrFrameSet_t *aFrameSet, u32 aFrameMask, s32 aZBuffMask, s32 aContext) {
+    SDF_BUILD_PACKET("sdfGrSetFramePacket", "FrameBuffer", (u32)aFrame + 0x10);
     sdfGrSetRegsPacketHeader(&aFrame->packetHeader, 2);
     aFrame->context = aContext;
     aFrame->frameSet = aFrameSet;

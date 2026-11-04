@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "billboard.h"
 #include "sdf_lighting.h"
+#include "sdfBuildHook.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -52,6 +53,7 @@ addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void
 void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM) {
     sdfBillBoardTMPacket_t *p = (sdfBillBoardTMPacket_t *)aPacket;
 
+    SDF_BUILD_PACKET("sdfBillBoardMakeTMPacket", "BillboardTransform", aPacket);
     p->dma_qwc = 2;
     p->vif_unpack = 0x6403C000;
     p->tm[0] = aTM[0];
@@ -69,6 +71,7 @@ void sdfBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor, const void *
                                    const f32 *aXYOffsetList) {
     sdfBillBoard1Packet_t *p = (sdfBillBoard1Packet_t *)aPacket;
 
+    SDF_BUILD_PACKET("sdfBillBoardMake1", "BillboardBatch", aPacket);
     p->dma_qwc = 7;
     p->vif_unpack1 = 0x6C01C000;
     p->count = 1;
@@ -116,6 +119,7 @@ u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVL
     s32 n;
     s32 vertexIndex;
 
+    SDF_BUILD_OPEN("sdfBillBoardMakeN", (u32)aCenter, (u32)aColor, (u32)aUVList, (u32)aXYOffsetList, (u32)aNum, (u32)aAllocator);
     packetBytes = sdfBillBoardGetPacketSize(aNum);
     if (aAllocator == NULL) {
         cursor = EE_ADDR_AS(u32 *, sdfGrAllocPacketBuff(packetBytes));
@@ -165,7 +169,7 @@ u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVL
     while ((EE_ADDR(cursor) & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return packet;
+    SDF_BUILD_RETURN_CLOSE("sdfBillBoardMakeN", "BillboardBatch", packet);
 }
 
 void sdfMultiBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor0, u32 aColor1,
@@ -268,13 +272,14 @@ u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aX
     while ((EE_ADDR(cursor) & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return packet;
+    SDF_BUILD_RETURN("sdfMultiBillBoardMakeN", "BillboardBatch", packet);
 }
 
 void sdfBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const u32 *aColor, const void *aUVList,
                    const f32 *aXYOffsetList) {
     sdfBillBoardVc1Packet_t *p = (sdfBillBoardVc1Packet_t *)aPacket;
 
+    SDF_BUILD_PACKET("sdfBillBoardVcMake1", "BillboardBatch", aPacket);
     p->dma_qwc = 8;
     p->vif_unpack1 = 0x6C01C000;
     p->count = 1;
@@ -374,7 +379,7 @@ addr_t sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
     while ((EE_ADDR(cursor) & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return EE_ADDR(packet);
+    SDF_BUILD_RETURN("sdfBillBoardVcMakeN", "BillboardBatch", EE_ADDR(packet));
 }
 
 void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColor, const void *aUVList0,
@@ -472,5 +477,5 @@ addr_t sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void
     while ((EE_ADDR(cursor) & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return EE_ADDR(packet);
+    SDF_BUILD_RETURN("sdfMultiBillBoardVcMakeN", "BillboardBatch", EE_ADDR(packet));
 }

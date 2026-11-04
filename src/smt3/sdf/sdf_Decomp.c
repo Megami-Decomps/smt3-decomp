@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "sdf_types.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -353,7 +354,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     packet->dmaWords.vif = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
     packet->giftag.parm = emitted | ((u64)(primitiveFlags | 9) << 47) | 0x2000400000008000ULL;
     packet->giftag.regs = 0x41;
-    return packet;
+    SDF_BUILD_RETURN("sdfDrawModelWithMatrix", "Primitive3D", packet);
 }
 
 sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {

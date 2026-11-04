@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
+#include "sdfBuildHook.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -129,6 +130,7 @@ u32 sdf2DGetTexPacketSize(sdfTexHandle_t *aTexHndl) {
 }
 
 sdf2DTexPacket_t *sdf2DMakeTexPacket(sdf2DTexPacket_t *aPacket, sdfTexHandle_t *aTexHndl, s32 aCtx) {
+    SDF_BUILD_PACKET("sdf2DMakeTexPacket", "TexBind", aPacket);
     aPacket->header.dmatag.qwc = 4;
     aPacket->header.giftag.parm = 0x1000000000008003ULL;
     aPacket->header.dmatag.dat1 = 0x50000004;
@@ -152,6 +154,7 @@ s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx) {
 }
 
 u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng) {
+    SDF_BUILD_PACKET("sdf2DMakeStdPacket", "Packet2D", aPacket);
     sdfGrSetRegsPacketHeader(EE_ADDR_AS(sdfGrPacketHeader_t *, aPacket), (aLeng >> SDF_DMA_QWORD_SHIFT) - 2);
     return aPacket;
 }
@@ -161,6 +164,7 @@ s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim) {
 }
 
 void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr) {
+    SDF_BUILD_PACKET("sdf2DGetPrimPtr", "Packet2D", aPacketPtr);
     return aPacketPtr + 1;
 }
 
@@ -168,6 +172,7 @@ sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, 
     s32 packetQuadwords = aNumOfRegs * aNumOfPrim + 1;
     s64 gifTag = aNumOfPrim | ((s64)aNumOfRegs << SDF_GIF_NREG_SHIFT);
 
+    SDF_BUILD_PACKET("sdf2DMakePrimPacketHeader", "Packet2D", aPacketPtr);
     gifTag |= (s64)aPrimReg << SDF_GIF_PRIM_SHIFT;
     gifTag |= SDF_GIF_PRE_EOP_FLAGS;
     aPacketPtr->giftag.parm = gifTag;
@@ -181,5 +186,5 @@ sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, 
 sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr) {
     sdfGrPacketHeader_t *packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, aNumOfSpr)));
     sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x53531, aNumOfSpr);
-    return packet;
+    SDF_BUILD_RETURN("sdf2DAllocSprite", "Packet2D", packet);
 }

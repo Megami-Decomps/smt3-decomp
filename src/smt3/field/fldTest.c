@@ -606,6 +606,7 @@ void drawSceneBasicList(void) {
 
 #ifdef NON_MATCHING
 #include "draw3d.h"
+#include "sdfBuildHook.h"
 
 typedef struct {
     s32 vertex[3];
@@ -826,6 +827,7 @@ void fldSdwDraw(dds3Basic_t *basic)
     sdfModelRootNode_t *root;
     f32 length = 300.0f;
     s32 part, i, j;
+    SDF_BUILD_OPEN("fldSdwDraw", (u32)basic);
 
     memset(&v0, 0, 16);
     v0.w = 1.0f;
@@ -1218,6 +1220,7 @@ void fldSdwDraw(dds3Basic_t *basic)
     }
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(0);
+    SDF_BUILD_CLOSE();
 }
 #else
 INCLUDE_ASM(const s32, "field/fldTest", fldSdwDraw);

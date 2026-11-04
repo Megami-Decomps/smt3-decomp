@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_types.h"
 #include "sdf_resource.h"
+#include "sdfBuildHook.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -636,6 +637,7 @@ void sdfPrimSetOpaque2Elem(sdfPrimTransElem_t *aElem) {
 }
 
 void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt) {
+    SDF_BUILD_PACKET("sdfPrimSetOpaquePacket", "AlphaState", aPkt);
     sdfPrimSetOpaqueElem(&aPkt->elem);
     aPkt->header.dmaWords.tag = SDF_ALPHA_DMA_QWORDS;
     aPkt->header.dmaWords.vif = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
@@ -777,6 +779,7 @@ void sdfPrimSetBitBltPacket(sdfPrimBitBltPacket_t *aPacket, u32 aDstGsAddr, s32 
                                     s64 aDstPixelFormat, s64 aDstX, s64 aDstY,
                                     u32 aSrcGsAddr, s32 aSrcBuffWidth, s32 aSrcPixelFormat,
                                     s32 aSrcX, s32 aSrcY, s32 aWidth, s32 aHeight, s32 aDirMode) {
+    SDF_BUILD_PACKET("sdfPrimSetBitBltPacket", "BitBlt", aPacket);
     aPacket->header.dmaWords.tag = 5;
     aPacket->header.dmaWords.vif = (((u64)0x50000005 << 16 | 0x1000) << 16);
     aPacket->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8004);
@@ -836,6 +839,7 @@ void sdfPrimLinkFrameMovePacket(sdfDrawTag_t *aDrawTag, sdfPreDrawTag_t *aPreDra
 void sdfPrimSetSpriteElem(sdfPrimSpriteElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetSpriteElem", "Sprite", aElem);
     aElem->gifTag = 0x6400000000008001ULL;
     aElem->gifRegisters = 0x535310;
     aElem->primitive = (u32)(aPrim | 0x116);
@@ -865,6 +869,7 @@ void sdfPrimSetF3Elem(sdfPrimF3Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s3
     u32 second = ((u32)aX1 & 0xFFFF) | ((u32)aY1 << 16);
     u32 third = ((u32)aX2 & 0xFFFF) | ((u32)aY2 << 16);
 
+    SDF_BUILD_PACKET("sdfPrimSetF3Elem", "Primitive2D", aElem);
     aElem->gifTag = 0x6400000000008001ULL;
     aElem->gifRegisterList = 0xF55510;
     aElem->primitive = (u32)aPrim | 0x104;
@@ -890,6 +895,7 @@ void sdfPrimLinkF3(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, 
 void sdfPrimSetF4Elem(sdfPrimF4Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1, s32 aY1, s32 aX2, s32 aY2, s32 aX3, s32 aY3, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetF4Elem", "Primitive2D", aElem);
     aElem->gifTag = 0x6400000000008001ULL;
     aElem->gifRegisterList = 0x555510;
     aElem->primitive = (u32)(aPrim | 0x104);
@@ -916,6 +922,7 @@ void sdfPrimLinkF4(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, 
 void sdfPrimSetG3Elem(sdfPrimG3Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1, s32 aY1, s32 aColor1, s32 aX2, s32 aY2, s32 aColor2, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetG3Elem", "Primitive2D", aElem);
     aElem->gifTag = 0x8400000000008001ULL;
     aElem->gifRegisters = 0xFFFFFFFFF5151510ULL;
     aElem->primitive = (u32)(aPrim | 0x10C);
@@ -943,6 +950,7 @@ void sdfPrimLinkG3(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0,
 void sdfPrimSetG4Elem(sdfPrimG4Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1, s32 aY1, s32 aColor1, s32 aX2, s32 aY2, s32 aColor2, s32 aX3, s32 aY3, s32 aColor3, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetG4Elem", "Primitive2D", aElem);
     aElem->giftag = 0xA400000000008001ULL;
     aElem->gifRegisters = 0xF515151510ULL;
     aElem->prim = (u32)(aPrim | 0x10C);
@@ -973,6 +981,7 @@ void sdfPrimLinkG4(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1,
 void sdfPrimSetFt3Elem(sdfPrimFt3Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2, s32 aV2, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetFt3Elem", "Primitive2D", aElem);
     aElem->giftag = 0x8400000000008001ULL;
     aElem->gifRegisters = 0x53535310;
     aElem->prim = (u32)(aPrim | 0x114);
@@ -1004,6 +1013,7 @@ void sdfPrimSetFt4Elem(sdfPrimFt4Elem_t *aElem, s32 aColor, s32 aPrim, s32 aX0, 
                    s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetFt4Elem", "Primitive2D", aElem);
     aElem->giftag = 0xA400000000008001ULL;
     aElem->gifRegisters = 0x5353535310ULL;
     aElem->prim = (u32)(aPrim | 0x114);
@@ -1038,6 +1048,7 @@ void sdfPrimSetGt3Elem(sdfPrimGt3Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32
                    s32 aU2, s32 aV2, s32 aColor2, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetGt3Elem", "Primitive2D", aElem);
     aElem->giftag = 0xA400000000008001ULL;
     aElem->gifRegisters = 0x5135135130ULL;
     aElem->prim = (u32)(aPrim | 0x11C);
@@ -1072,6 +1083,7 @@ void sdfPrimSetGt4Elem(sdfPrimGt4Elem_t *aElem, s32 aPrim, s32 aX0, s32 aY0, s32
                    s32 aV2, s32 aColor2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aColor3, s32 aZ) {
     u64 depthHigh = (u64)aZ << 32;
 
+    SDF_BUILD_PACKET("sdfPrimSetGt4Elem", "Primitive2D", aElem);
     aElem->giftag = 0xE400000000008001ULL;
     aElem->gifRegisters = 0xF5135135135130ULL;
     aElem->prim = (u32)(aPrim | 0x11C);
@@ -1109,6 +1121,7 @@ void sdfPrimSetRectElem(sdfPrimRectElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0
     u32 first = ((u32)aX0 & 0xFFFF) | ((u32)aY0 << 16);
     u32 second = ((u32)aX1 & 0xFFFF) | ((u32)aY1 << 16);
 
+    SDF_BUILD_PACKET("sdfPrimSetRectElem", "Primitive2D", aElem);
     aElem->gifTag = 0x4400000000008001ULL;
     aElem->gifRegisters = 0x5510;
     aElem->primitive = (u32)aPrim | 0x106;
@@ -1135,6 +1148,7 @@ void sdfPrimSetLineElem(sdfPrimRectElem_t *aElem, s32 aColor, s32 aPrim, s32 aX0
     u32 first = ((u32)aX0 & 0xFFFF) | ((u32)aY0 << 16);
     u32 second = ((u32)aX1 & 0xFFFF) | ((u32)aY1 << 16);
 
+    SDF_BUILD_PACKET("sdfPrimSetLineElem", "Primitive2D", aElem);
     aElem->gifTag = 0x4400000000008001ULL;
     aElem->gifRegisters = 0x5510;
     aElem->primitive = (u32)aPrim | 0x101;
@@ -1163,6 +1177,7 @@ void sdfPrimSetBoxLineElem(sdfPrimBoxLineElem_t *aElem, s32 aColor, s32 aPrim, s
     u32 y0 = (u32)aY0 << 16;
     u32 y1 = (u32)aY1 << 16;
 
+    SDF_BUILD_PACKET("sdfPrimSetBoxLineElem", "Primitive2D", aElem);
     aElem->giftag = 0x8400000000008001ULL;
     aElem->gifRegisterList = (s32)0xF5555510;
     aElem->prim = (u32)aPrim | 0x102;

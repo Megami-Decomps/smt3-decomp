@@ -6,6 +6,7 @@
 #include "libsdf.h"
 #include "sdf_resource.h"
 #include "eeregs.h"
+#include "sdfBuildHook.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -263,6 +264,7 @@ void sdf3DInitSpecularTex2(void);
 void sdf3DInit(void);
 
 void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t *aParam, void *aCamera) {
+    SDF_BUILD_PACKET("sdf3DMakeViewportPacket", "Viewport", aPacket);
     aPacket->quadwords = 0xC;
     aPacket->command = 0x6C0BC000;
     aPacket->reservedWord = 0;
@@ -301,6 +303,7 @@ void sdf3DSetDefaultLight(u8 *aLight) {
 }
 
 void sdf3DSetDefaultFog(u8 *aFog) {
+    SDF_BUILD_PACKET("sdf3DSetDefaultFog", "Fog", aFog);
     sdf3DFogDefault = EE_ADDR(aFog);
 }
 
@@ -367,6 +370,7 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLigh
     sdf3DLight_t *first;
     s32 i;
 
+    SDF_BUILD_PACKET("sdf3DMakeLightParallelPacket", "LightParallel", aPacket);
     aPacket->dmatag.qwc = 13;
     aPacket->dmatag.dat0 = 0x10000000;
     aPacket->dmatag.dat1 = 0x6C0D4398;
@@ -448,6 +452,7 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
     f32 farZ = aParam->fogFar;
     f32 depthRange = farZ - nearZ;
     s32 fogColor = aParam->color;
+    SDF_BUILD_PACKET("sdf3DMakeFogPacket", "Fog", aPacket);
     aPacket->dmaTag = 0x20000004;
     aPacket->vifUnpackCode = 0x6C03C00013000000ULL;
     aPacket->gifTag = 0x1000000000008001ULL;
@@ -466,6 +471,7 @@ void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
 
 void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, addr_t aData, s32 aLeng) {
     s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
+    SDF_BUILD_PACKET("sdf3DMakeDirectRefPacket", "DirectRef", aPacket);
     aPacket->quadwords = quadwordCount;
     aPacket->address = EE_PHYSICAL(aData);
     aPacket->tag = SDF_VIF_FLUSHA_COMMAND;
@@ -476,6 +482,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, addr_t aData, s32 aLeng)
 }
 
 void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
+    SDF_BUILD_PACKET("sdf3DLinkInitPacket", "VuMicrocode", aPacket);
     aPacket->address = EE_PHYSICAL(EE_ADDR(vu1MicroPacket));
     aPacket->quadwords = (vu1MicroPacketEnd - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     aPacket->tag = 0;

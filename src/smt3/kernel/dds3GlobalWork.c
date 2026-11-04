@@ -7,6 +7,7 @@
 #include "field.h"
 #include "fpu.h"
 #include "sdfFrame.h"
+#include "sdfBuildHook.h"
 
 /* Declared here because no header carries these. */
 extern void *memcpy(void *a, const void *b, size_t c);
@@ -664,7 +665,7 @@ u64 *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 a
     packet[12] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
     packet[13] = (u32)(((u32)(aX - 0x10) & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
     packet[15] = 0;
-    return packet;
+    SDF_BUILD_RETURN("dds3PrimFrameRect", "Primitive2D", packet);
 }
 
 u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 aZ1, s32 aColor1, s32 aMode) {
@@ -680,7 +681,7 @@ u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 
     packet[7] = (u32)aColor1 | ((u64)0xFE00 << 46);
     packet[8] = (u32)((aX1 & 0xFFFF) | (aY1 << 16)) | ((u64)((u32)aZ1 >> 4) << 32);
     packet[9] = 0;
-    return packet;
+    SDF_BUILD_RETURN("dds3PrimLine", "Primitive2D", packet);
 }
 
 extern f32 D_00529630[4];
@@ -766,7 +767,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
         endColor[i * 4] = color[index];
         endXyz[i * 4] = xyz[index];
     }
-    return packet;
+    SDF_BUILD_RETURN("dds3PrimLine3D", "Primitive3D", packet);
 }
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA08);
 

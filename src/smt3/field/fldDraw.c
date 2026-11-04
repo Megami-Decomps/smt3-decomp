@@ -15,6 +15,7 @@
 #include "event.h"
 #include "effect.h"
 #include "font.h"
+#include "sdfBuildHook.h"
 
 /* Declared here because no header carries these. */
 extern frFontHandle_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char *pStr, frFontHandle_t *pFRQ);
@@ -866,6 +867,7 @@ void drawSprite3D(sdfTexHandle_t *th, Sprite3D_t *spr3d) {
     f32 mat[16];
     sdfGrOt_t *descriptor;
 
+    SDF_BUILD_OPEN("drawSprite3D", (u32)th, (u32)spr3d);
     sdfDrawTagInit(command);
     header = EE_ADDR_AS(dmaPacketHeader_t *, sdfGrAllocPacketBuff(0x20));
     sdf3DMakeDirectRefPacket(header, EE_ADDR(sdfTexGetPacket(th)), sdfTexGetPacketLength(th));
@@ -880,6 +882,7 @@ void drawSprite3D(sdfTexHandle_t *th, Sprite3D_t *spr3d) {
     sdfDrawTagLink(command, EE_ADDR(packet));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+    SDF_BUILD_CLOSE();
 }
 
 void rsetFrameMaskRgbOn(void) {
@@ -938,6 +941,7 @@ void fldDrawPoly3(s32 x0, s32 y0, s32 z0,
     sdfDrawTag_t *command;
     sdfGrOt_t *descriptor;
 
+    SDF_BUILD_OPEN("fldDrawPoly3", (u32)x0, (u32)y0, (u32)z0);
     command = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(command);
     sdf3DPrimLinkResetTm(command, 0);
@@ -963,6 +967,7 @@ void fldDrawPoly3(s32 x0, s32 y0, s32 z0,
     sdfDrawTagLink(command, EE_ADDR(sdf3DPrimMakePoly(&desc)));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+    SDF_BUILD_CLOSE();
 }
 
 extern u64 D_002FC750[];

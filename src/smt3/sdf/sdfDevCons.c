@@ -5,6 +5,7 @@
 #include "libsdf.h"
 
 #include "ps2asm.h"
+#include "sdfBuildHook.h"
 typedef struct sdfDevConsCB_tag
 {
     struct sdfDevConsCB_tag *prev;
@@ -555,7 +556,7 @@ void *sdfDevVprintf(u32 *aCB, const char *aStr, void *LegacyParamArray) {
         header->glyphRegisters = 0x53531;
     }
     sdfGrClosePacketBuff(EE_ADDR_S(cursor));
-    return start;
+    SDF_BUILD_RETURN("sdfDevVprintf", "DebugText", start);
 }
 
 void *sdfDevPrintfEx(u32 *aCB, const char *aStr, ...)
