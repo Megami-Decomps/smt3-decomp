@@ -139,15 +139,15 @@ extern void EIntr(void);
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-extern sdfFileCmdHandle_t *D_00551948;
+extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
 extern s16 sdfFileCmdCount;
 
-extern sdfFileCmdHandle_t *D_00551954;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
 
-extern sdfFileCmdHandle_t *D_00551958;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
 
 extern s16 sdfFileCmdFreeCount;
 
@@ -214,12 +214,12 @@ void sdfFileCmdUnlink(void *aHandle)
     previous = state->prev;
     next = state->next;
     if (previous == NULL) {
-        D_00551954 = next;
+        sdfFileCmdCacheHead = next;
     } else {
         previous->next = next;
     }
     if (next == NULL) {
-        D_00551958 = previous;
+        sdfFileCmdCacheTail = previous;
     } else {
         next->prev = previous;
     }
@@ -244,7 +244,7 @@ void sdfFileCmdDequeue(void *aCmd)
     previous = state->prev;
     next = state->next;
     if (previous == NULL) {
-        D_00551948 = next;
+        sdfFileCmdActiveHead = next;
     } else {
         previous->next = next;
     }
@@ -266,13 +266,13 @@ void sdfFileCmdDequeue(void *aCmd)
     } else {
         next->devicePrev = previous;
     }
-    state->prev = D_00551958;
-    if (D_00551958 == NULL) {
-        D_00551954 = state;
+    state->prev = sdfFileCmdCacheTail;
+    if (sdfFileCmdCacheTail == NULL) {
+        sdfFileCmdCacheHead = state;
     } else {
-        D_00551958->next = state;
+        sdfFileCmdCacheTail->next = state;
     }
-    D_00551958 = state;
+    sdfFileCmdCacheTail = state;
     state->next = NULL;
     sdfFileCmdCount++;
     sdfFileCmdFreeCount--;
@@ -280,7 +280,7 @@ void sdfFileCmdDequeue(void *aCmd)
         EIntr();
     }
     if (sdfFileCmdCount >= 9) {
-        sdfFileCmdUnlink(D_00551954);
+        sdfFileCmdUnlink(sdfFileCmdCacheHead);
     }
     if (worker->first != NULL) {
         SignalSema(worker->semaId);

@@ -225,7 +225,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileHddPrefix);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCdromName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551948);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdActiveHead);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdFreeList);
 
@@ -233,9 +233,9 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551952);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551954);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCacheHead);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551958);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCacheTail);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdFreeCount);
 
@@ -274,8 +274,6 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfCdClock);
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519B1);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519B8);
-
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519B9);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", p2sdSmgHandle);
 

@@ -161,7 +161,7 @@ extern char sdfFileCdromName[];
 
 extern void EIntr(void);
 
-extern sdfFileCmdHandle_t *D_00551948;
+extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
@@ -169,9 +169,9 @@ extern s16 sdfFileCmdFreeCount;
 
 extern s16 sdfFileCmdCount;
 
-extern sdfFileCmdHandle_t *D_00551954;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
 
-extern sdfFileCmdHandle_t *D_00551958;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
 
 extern char D_00551968[];
 

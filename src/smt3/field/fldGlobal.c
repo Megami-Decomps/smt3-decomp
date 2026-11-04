@@ -35,7 +35,7 @@ extern void sdfFileClose(s32 aHandle);
 
 extern char D_005315D0[];
 
-extern u8 D_0030A670[], D_00311450[], D_00311850[], D_00314100[], D_002FC1A0[];
+extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], D_00314100[], D_002FC1A0[];
 
 extern u8 fldAllCnt[];
 
@@ -55,7 +55,7 @@ void fldAllTblLoad(void)
 {
     s32 fd = sdfFileOpen(D_005315D0);
 
-    sdfFileRead(fd, D_0030A670, 0x4E0);
+    sdfFileRead(fd, fldAutoMapTitleTable, 0x4E0);
     sdfFileRead(fd, fldAreaNameTable, 0x2BC0);
     sdfFileRead(fd, fldPlaceNameTable, 0x24C0);
     sdfFileRead(fd, fldFloorNameTable, 0x1880);

@@ -157,7 +157,7 @@ extern sdfFileDeviceCB_t sdfFileDeviceCB[];
 
 extern void EIntr(void);
 
-extern sdfFileCmdHandle_t *D_00551948;
+extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
 
 extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
@@ -374,7 +374,7 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
     if (sdfFileCmdFreeList != NULL) {
         sdfFileCmdFreeList->next = state;
     } else {
-        D_00551948 = state;
+        sdfFileCmdActiveHead = state;
     }
     last = worker->last;
     sdfFileCmdFreeList = state;

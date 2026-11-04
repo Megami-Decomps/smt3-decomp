@@ -849,7 +849,9 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBuf);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBBox);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE7C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorCur);
+
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorOld);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE80);
 
