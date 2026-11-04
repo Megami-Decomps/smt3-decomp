@@ -6,6 +6,7 @@
 #include "newdata.h"
 #include "field.h"
 #include "fpu.h"
+#include "sdfFrame.h"
 
 /* Declared here because no header carries these. */
 extern void *memcpy(void *a, const void *b, size_t c);
@@ -187,10 +188,14 @@ void dds3GlobalWorkDestroy(void)
     DDS3_GBWK = NULL;
 }
 
+extern u32 dds3GetKernelCount(void);
+
 s32 dds3GlobalWorkMainProc(dds3ProcessID_t *id)
 {
     DDS3_GBWK->unk38++;
-    DDS3_GBWK->playtime++;
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        DDS3_GBWK->playtime++;
+    }
     return 0;
 }
 
