@@ -1375,6 +1375,8 @@ typedef struct itfMesResource_t itfMesResource_t;
 extern s32 itfMesMngInitialize(itfMesResource_t *message);
 extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
 
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E38);
+
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);

@@ -60,7 +60,7 @@ extern void evtDisableMoonDraw(void);
 
 extern char *D_003306C0[];
 
-extern u8 rcv_data[];
+extern char *rcv_data[];
 
 extern u8 D_00551F51[2];
 
