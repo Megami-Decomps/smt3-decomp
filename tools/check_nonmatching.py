@@ -114,27 +114,6 @@ def compile_unit(path: Path, fix_bugs: bool = False) -> str:
     return diagnostics
 
 
-KNOWN_FILE = ROOT / "config" / "nonmatching_known_fail.txt"
-
-
-def known_failures() -> dict[str, list[str]]:
-    """Diagnostics the matching build tolerates: `unit` then a TAB and a substring."""
-    known: dict[str, list[str]] = {}
-    if KNOWN_FILE.exists():
-        for line in KNOWN_FILE.read_text().splitlines():
-            line = line.split("#", 1)[0].rstrip()
-            if "\t" in line:
-                unit, text = line.split("\t", 1)
-                known.setdefault(unit, []).append(text)
-    return known
-
-
-def unexplained(rel, err: str, known) -> list[str]:
-    """The diagnostic lines of err that the known list does not cover."""
-    return [l for l in err.split("\n")
-            if not any(t in l for t in known.get(str(rel), []))]
-
-
 def control() -> None:
     """A dropped brace inside a FIX_BUGS block must fail, a whole one must pass."""
     body = "int f(int a)\n{\n#ifdef FIX_BUGS\n    if (a) {\n        a++;\n%s#endif\n    return a;\n}\n"
@@ -156,7 +135,6 @@ if __name__ == "__main__":
         print("no NON_MATCHING drafts")
         sys.exit(0)
     control()
-    known = known_failures()
     bad = 0
     for path in todo:
         text = path.read_text()
@@ -167,8 +145,6 @@ if __name__ == "__main__":
                 continue
             label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
             err = compile_unit(path, fix_bugs)
-            if err:
-                err = "\n".join(unexplained(rel, err, known))
             if err:
                 bad += 1
                 print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE with {label}")
