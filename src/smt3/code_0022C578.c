@@ -5482,7 +5482,7 @@ void campDhRollRatio(campDhEntry_t *entry)
         }
         entry->unk_00 = 0;
         entry->unk_20 = entry->unk_1C - entry->unk_18;
-        frames = dds3GetRandA(NULL) % 5 + 1;
+        frames = SDF_FRAMES(dds3GetRandA(NULL) % 5 + 1);
         entry->unk_24 = frames;
         entry->unk_28 = frames;
         entry->unk_20 /= (f32)frames;
@@ -5492,18 +5492,18 @@ void campDhRollRatio(campDhEntry_t *entry)
         case 2: delay = dds3GetRandA(NULL) & 7; break;
         default: return;
         }
-        entry->unk_14 = delay;
+        entry->unk_14 = SDF_FRAMES(delay);
         entry->unk_00 = 1;
         entry->unk_1C = entry->unk_18;
         entry->unk_20 = (f32)(dds3GetRandA(NULL) % 40) - 20.0f;
-        frames = dds3GetRandA(NULL) % 5 + 1;
+        frames = SDF_FRAMES(dds3GetRandA(NULL) % 5 + 1);
         entry->unk_24 = frames;
         entry->unk_28 = frames;
         entry->unk_20 /= (f32)frames;
         if (entry->mode == 2) {
             if (entry->directionTimer <= 0) {
                 entry->direction = dds3GetRandA(NULL) % 3;
-                entry->directionTimer = dds3GetRandA(NULL) % 10;
+                entry->directionTimer = SDF_FRAMES(dds3GetRandA(NULL) % 10);
             }
         } else {
             entry->directionTimer = -1;
