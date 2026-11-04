@@ -181,7 +181,9 @@ void nbResultInitLabels(void)
     for (i = 0; i < 64; i++) {
         caption = &D_00574F50[i];
         if (caption->flag != 0) {
-            caption->life--;
+            if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                caption->life--;
+            }
             if (caption->life <= 0) {
                 caption->flag = 0;
             } else {

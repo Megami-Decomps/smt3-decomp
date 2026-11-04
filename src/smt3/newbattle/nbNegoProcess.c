@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -1241,7 +1244,9 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
         return NULL;
     }
     if (n->waitframe > 0) {
-        n->waitframe--;
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            n->waitframe--;
+        }
         return NULL;
     }
     if (n->data->stat & 0x400000) {
