@@ -6,6 +6,8 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+/* Unused: shifts the compiler's declaration count; nbGetHojoCounterMin only matches with it. */
+extern s32 nbCalcDeclPad;
 
 typedef struct evtUnitHandle_t
 {
@@ -1355,6 +1357,9 @@ void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
 
 extern const char D_00544C10[];
 
+/* NON_MATCHING. Behaviour checked against retail: 9 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type)
 {

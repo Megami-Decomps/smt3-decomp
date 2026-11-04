@@ -363,6 +363,9 @@ void nbSetOrder(void)
     nbSetOrderSide(1);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_009, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void nbSetNextOrder(void)
 {
@@ -612,6 +615,9 @@ void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 rgba)
 
 /* NON_MATCHING: 24 of 66 words differ (first at +0x74). */
 
+/* NON_MATCHING. Behaviour checked against retail: 12 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 
 void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32 align)
@@ -651,6 +657,9 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawKoukaSprite);
 
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
@@ -719,6 +728,9 @@ INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern datSkill_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);

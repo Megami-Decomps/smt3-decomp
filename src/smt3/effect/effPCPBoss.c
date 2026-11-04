@@ -1898,13 +1898,11 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
             }
             sdfModelGetMarkPos(map, i);
             if (frame < work->cellCount) {
-                if (SDF_FRAME_DUE(work->frame)) {
-                    historyCount = historyCell->vertexCount;
-                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount);
-                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1);
-                    SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2);
-                    historyCell->vertexCount += 3;
-                }
+                historyCount = historyCell->vertexCount;
+                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount));
+                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1));
+                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2));
+                historyCell->vertexCount += 3 * SDF_FRAME_DUE(work->frame);
                 taperStep = taperRange / frame;
                 blend = 1.0f;
                 SDF_VU0_LOADVECTOR_C(D_0031FF70);

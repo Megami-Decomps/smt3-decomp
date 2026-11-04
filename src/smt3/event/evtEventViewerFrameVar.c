@@ -43,6 +43,9 @@ s32 FrameVarProcess(dds3ProcessID_t *id);
 /* NON_MATCHING: 956 of retail's 980 bytes; the body matches instruction for
  * instruction but three loop-invariant constants stay immediates here instead
  * of taking three more saved registers. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq23, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 FrameVarProcess(dds3ProcessID_t *id)
 {

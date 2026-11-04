@@ -119,6 +119,9 @@ extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 extern void fclClearFlag(s8 index);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * seq28, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 /* NON_MATCHING: 37 of 64 words match at the exact 256-byte size. */
 extern void cmpUpdateTerminate(void *work);

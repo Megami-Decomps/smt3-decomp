@@ -889,6 +889,9 @@ s32 datCheckPlayerDead(void)
 }
 
 /* NON_MATCHING: 7 of 20 words differ (first at +0x4). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq18, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 datGetPlayerParam(s32 id)
 {
@@ -1427,6 +1430,12 @@ s32 datAddHearts(s32 id)
             return 0;
         }
     }
+#ifdef FIX_BUGS
+    /* BUG: hearts[] overlaps heartsPrefix[0x40] and the index is unchecked */
+    if (DDS3_GBWK->heartscnt >= 0x40 || id >= 0x40) {
+        return 0;
+    }
+#endif
     ((u8 *)EE_ADDR_PTR(DDS3_GBWK->heartscnt) + EE_ADDR(DDS3_GBWK))[0x1CFB] = id;
     DDS3_GBWK->heartscnt++;
     (EE_ADDR_AS(u8 *, id) + EE_ADDR(DDS3_GBWK))[0x1D3B] = 0;
@@ -1695,6 +1704,9 @@ s32 datGetSkillCost(datUnitWork_t *w, s32 nskill)
 }
 
 /* NON_MATCHING: 7 of 75 words differ (first at +0xE4). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq41, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void datInitPlayer(void)
 {

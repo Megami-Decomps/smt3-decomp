@@ -40,7 +40,6 @@ typedef struct
 } nbCameraHelper_effFLWinHandle_t;
 
 extern s8 dds3PadBitTable[];
-extern s8 dds3PadBitTable[0x20];
 extern char D_0054F268[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfChipAllocDirect(u32 aSize);

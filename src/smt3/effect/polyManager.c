@@ -311,7 +311,7 @@ extern void func_00168A50(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius);
 dds3SpPolyOldDesc_t *dds3SpPoly_Ring_Old_Create(dds3SpPolyOldDesc_t *src);
 void dds3SpPoly_Ring_Old_Delete(dds3SpPoly_Ring_Old_t3 *hData);
 void dds3SpPoly_Ring_Old_BuffInit(dds3SpPoly_Ring_Old_t3 *hData);
-void dds3SpPoly_Ring_Old_SetScale(f32 hData, dds3SpPoly_Ring_Old_t3 *scale);
+void dds3SpPoly_Ring_Old_SetScale(dds3SpPoly_Ring_Old_t3 *hData, f32 scale);
 void dds3SpPoly_Ring_Old_Calc(dds3SpPoly_Ring_Old_t3 *pRing);
 void dds3SpPoly_Ring_Old_Draw(dds3SpPoly_Ring_Old_t3 *hData);
 void dds3SpPoly_Ring_Old_New(dds3SpPoly_Ring_Old_t3 *pRing, s32 number);
@@ -321,21 +321,21 @@ dds3SpPoly_Ring_t3 *dds3SpPoly_RingCreate(dds3SpPoly_Basic_t *templateHead);
 void dds3SpPoly_RingDelete(dds3SpPoly_Ring_t3 *hData);
 void dds3SpPoly_RingAllBuffInit(dds3SpPoly_Ring_t3 *band);
 void dds3SpPoly_RingMove(dds3SpPoly_Ring_t3 *pRing, s32 number);
-void dds3SpPoly_RingSetScale(f32 hData, dds3SpPoly_Ring_t3 *scale);
+void dds3SpPoly_RingSetScale(dds3SpPoly_Ring_t3 *hData, f32 scale);
 void dds3SpPoly_RingDraw(dds3SpPoly_Ring_t3 *hData);
 dds3SpPoly_SphereRing_t3 *dds3SpPoly_SphereRingCreate(dds3SpPoly_SphereRing_t3 *source);
 void dds3SpPoly_SphereRingDelete(dds3SpPoly_SphereRing_t3 *hData);
 void dds3SpPoly_SphereRingAllBuffInit(dds3SpPoly_SphereRing_t3 *arc);
 void dds3SpPoly_SphereRingBuffInit(dds3SpPoly_SphereRing_t3 *pSphereRing, s32 number);
 void dds3SpPoly_SphereRingMove(dds3SpPoly_SphereRing_t3 *pSphereRing, s32 number);
-void dds3SpPoly_SphereRingSetScale(f32 hData, dds3SpPoly_SphereRing_t3 *scale);
+void dds3SpPoly_SphereRingSetScale(dds3SpPoly_SphereRing_t3 *hData, f32 scale);
 void dds3SpPoly_SphereRingDraw(dds3SpPoly_SphereRing_t3 *hData);
 dds3SpPoly_RollRing_t3 *dds3SpPoly_RollRingCreate(dds3SpPoly_Basic_t *templateHead);
 void dds3SpPoly_RollRingDelete(dds3SpPoly_RollRing_t3 *hData);
 void dds3SpPoly_RollRingAllBuffInit(dds3SpPoly_RollRing_t3 *rotatingBand);
 void dds3SpPoly_RollRingBuffInit(dds3SpPoly_RollRing_t3 *pRollRing, u32 number);
 void dds3SpPoly_RollRingMove(dds3SpPoly_RollRing_t3 *pRollRing, s32 number);
-void dds3SpPoly_RollRingSetScale(f32 hData, dds3SpPoly_RollRing_t3 *scale);
+void dds3SpPoly_RollRingSetScale(dds3SpPoly_RollRing_t3 *hData, f32 scale);
 void dds3SpPoly_RollRingSetEndless(dds3SpPoly_RollRing_t3 *pRollRing);
 void *dds3SpPolyCreate(s32 index, void *arg);
 void *dds3SpPolyCopy(dds3SpPoly_Basic_t *effect);
@@ -1627,9 +1627,9 @@ void dds3SpPoly_Ring_Old_BuffInit(dds3SpPoly_Ring_Old_t3 *hData) {
     }
 }
 
-void dds3SpPoly_Ring_Old_SetScale(f32 hData, dds3SpPoly_Ring_Old_t3 *scale) {
-    scale->radius = scale->radius * hData;
-    scale->pairDisplacement = scale->pairDisplacement * hData;
+void dds3SpPoly_Ring_Old_SetScale(dds3SpPoly_Ring_Old_t3 *hData, f32 scale) {
+    hData->radius = hData->radius * scale;
+    hData->pairDisplacement = hData->pairDisplacement * scale;
 }
 
 void dds3SpPoly_Ring_Old_Calc(dds3SpPoly_Ring_Old_t3 *pRing) {
@@ -1954,11 +1954,11 @@ void dds3SpPoly_RingMove(dds3SpPoly_Ring_t3 *pRing, s32 number) {
     SDF_VU0_COPYVECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
-void dds3SpPoly_RingSetScale(f32 hData, dds3SpPoly_Ring_t3 *scale) {
-    scale->radialWidth = scale->radialWidth * hData;
-    scale->liftStep = scale->liftStep * hData;
-    scale->initialRadius = scale->initialRadius * hData;
-    scale->targetRadius = scale->targetRadius * hData;
+void dds3SpPoly_RingSetScale(dds3SpPoly_Ring_t3 *hData, f32 scale) {
+    hData->radialWidth = hData->radialWidth * scale;
+    hData->liftStep = hData->liftStep * scale;
+    hData->initialRadius = hData->initialRadius * scale;
+    hData->targetRadius = hData->targetRadius * scale;
 }
 
 void dds3SpPoly_RingDraw(dds3SpPoly_Ring_t3 *hData) {
@@ -2140,8 +2140,8 @@ void dds3SpPoly_SphereRingMove(dds3SpPoly_SphereRing_t3 *pSphereRing, s32 number
     SDF_VU0_COPYVECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
-void dds3SpPoly_SphereRingSetScale(f32 hData, dds3SpPoly_SphereRing_t3 *scale) {
-    scale->radius = scale->radius * hData;
+void dds3SpPoly_SphereRingSetScale(dds3SpPoly_SphereRing_t3 *hData, f32 scale) {
+    hData->radius = hData->radius * scale;
 }
 
 void dds3SpPoly_SphereRingDraw(dds3SpPoly_SphereRing_t3 *hData) {
@@ -2334,9 +2334,9 @@ void dds3SpPoly_RollRingMove(dds3SpPoly_RollRing_t3 *pRollRing, s32 number)
     SDF_VU0_COPYVECTOR(out + 4, first + 4);
 }
 
-void dds3SpPoly_RollRingSetScale(f32 hData, dds3SpPoly_RollRing_t3 *scale) {
-    scale->radius_s = scale->radius_s * hData;
-    scale->radius_e = scale->radius_e * hData;
+void dds3SpPoly_RollRingSetScale(dds3SpPoly_RollRing_t3 *hData, f32 scale) {
+    hData->radius_s = hData->radius_s * scale;
+    hData->radius_e = hData->radius_e * scale;
 }
 
 void dds3SpPoly_RollRingDraw(dds3SpPoly_RollRing_t3 *hData) {

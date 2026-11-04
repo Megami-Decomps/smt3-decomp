@@ -387,29 +387,26 @@ void fldSnowTask(void)
     if (gFldSeedBuff == NULL) {
         return;
     }
-    /* Spawns are per retail tick; the fall below steps per host tick. */
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-        if (gFldSnowMode == 0) {
-            for (i = 0; i < 2; i++) {
-                if ((dds3GetRandA(NULL) & 3) == 0) {
-                    u32 random = dds3GetRandA(NULL) & 0xFF;
-                    f32 x = gFldSnowX + (f32)random * gFldSnowW;
-                    f32 z;
-                    random = dds3GetRandA(NULL) & 0xFF;
-                    z = gFldSnowZ + (f32)random * gFldSnowW;
-                    fldInitSnowSeed(x, gFldSnowY, z);
-                }
+    if (gFldSnowMode == 0) {
+        for (i = 0; i < 2 * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+            if ((dds3GetRandA(NULL) & 3) == 0) {
+                u32 random = dds3GetRandA(NULL) & 0xFF;
+                f32 x = gFldSnowX + (f32)random * gFldSnowW;
+                f32 z;
+                random = dds3GetRandA(NULL) & 0xFF;
+                z = gFldSnowZ + (f32)random * gFldSnowW;
+                fldInitSnowSeed(x, gFldSnowY, z);
             }
-        } else {
-            for (i = 0; i < 12; i++) {
-                if ((dds3GetRandA(NULL) & 3) == 0) {
-                    u32 random = dds3GetRandA(NULL) & 0xFF;
-                    f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
-                    f32 z;
-                    random = dds3GetRandA(NULL) & 0xFF;
-                    z = fldGlobalBase.z + gFldSnowZ + (f32)random * gFldSnowW;
-                    fldInitSnowSeed(x, gFldSnowY, z);
-                }
+        }
+    } else {
+        for (i = 0; i < 12 * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+            if ((dds3GetRandA(NULL) & 3) == 0) {
+                u32 random = dds3GetRandA(NULL) & 0xFF;
+                f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
+                f32 z;
+                random = dds3GetRandA(NULL) & 0xFF;
+                z = fldGlobalBase.z + gFldSnowZ + (f32)random * gFldSnowW;
+                fldInitSnowSeed(x, gFldSnowY, z);
             }
         }
     }

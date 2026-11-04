@@ -48,9 +48,9 @@ extern s32 fldCamMiwatasiChk(void);
 extern s32 fldProcKiretaChk(void);
 extern s32 fldProcHirakenaiChk(void);
 extern void dds3FadeIn2(s32 frame);
-extern fldDanteGunState_t fldRunDanteGunFlag;
+extern s32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
-extern s8 dds3PadBitTable[0x20];
+extern s8 dds3PadBitTable[];
 extern s32 D_003095B0[];
 extern char D_003094F0[][16];
 extern void fldDrawInputPanel(void);
@@ -158,7 +158,7 @@ s32 fldInputPanelCheckKey(void)
     if (fldProcAmChk() != 0) {
         return 0;
     }
-    if (fldRunDanteGunFlag.gunFlag != 0) {
+    if (fldRunDanteGunFlag[0] != 0) {
         return 0;
     }
     if (fmProcessChk() != 0) {

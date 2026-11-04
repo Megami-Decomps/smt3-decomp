@@ -85,6 +85,12 @@ s32 LoadLinkData(tagPipeLinkInfo *info, pipeLinkSource_t *source, s32 mode)
         pipeConnectLink(previous, last);
         previous = last;
     }
+    /* BUG: with a single node the loop never runs and last is still NULL. */
+#ifdef FIX_BUGS
+    if (last == NULL) {
+        last = previous;
+    }
+#endif
     last->id = 0xFFFF;
     return 1;
 }

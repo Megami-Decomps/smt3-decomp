@@ -93,7 +93,7 @@ typedef struct
 
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 

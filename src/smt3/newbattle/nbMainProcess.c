@@ -1000,7 +1000,14 @@ void nbSetActionPhase(nbMainProcessData_t *data)
 {
     nbActionStack_t act;
 
+#ifdef FIX_BUGS
+    /* BUG: a failed pop leaves act uninitialised and it is then dispatched */
+    if (nbPopAction(&act) == 0) {
+        return;
+    }
+#else
     nbPopAction(&act);
+#endif
     nbUpdateFormation(data);
     nbInitActionProcess(data, act.type, act.from, act.to, act.data);
     nbCameraCRSetPlayerFormRequest();

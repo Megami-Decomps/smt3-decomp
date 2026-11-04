@@ -1362,6 +1362,9 @@ void fldRunTamaInit(void)
 }
 
 /* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_008, event602, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void fldRunTamaFree(void)
 {

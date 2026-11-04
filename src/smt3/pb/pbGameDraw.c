@@ -216,6 +216,9 @@ extern u8 pbGetBlockAt(s16 x, s16 y, s16 group);
 
 /* NON_MATCHING: 96 of 98 words match at 392 native/emitted bytes. Only the
  * two block-address additions commute their operands (+0x4C and +0xDC). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq38, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void pbRebuildOutline(pbGroupData_t *group)
 {

@@ -55,7 +55,50 @@ class CompilerFailures(unittest.TestCase):
         self.assertEqual(self.irx_result(0, "unit.c:3: warning: unused variable\n"), 0)
 
 
+class FixBugsControl(unittest.TestCase):
+    def test_control_passes_with_the_real_compiler(self):
+        cn.control()
+
+
 class DraftNames(unittest.TestCase):
+    def test_nested_fix_bugs_does_not_hide_outer_fallback(self) -> None:
+        text = ('#ifdef NON_MATCHING\nvoid a(void) {\n'
+                '#ifdef FIX_BUGS\nfixed();\n#else\nretail();\n#endif\n}\n'
+                '#else\nINCLUDE_ASM(const s32, "u", a);\n#endif\n')
+        self.assertEqual(cn.draft_names(text), ["a"])
+
+    def test_nested_conditionals_and_elif_keep_the_outer_depth(self) -> None:
+        text = ('#if PLATFORM\n#ifdef NON_MATCHING\n'
+                '#if FIRST\n#ifndef SECOND\nint value;\n#endif\n'
+                '#elif THIRD\nint other;\n#else\nint last;\n#endif\n'
+                '#else\nINCLUDE_ASM(const s32, "u", a);\n#endif\n#endif\n')
+        self.assertEqual(cn.draft_names(text), ["a"])
+
+    def test_nested_fallback_keeps_all_names_once(self) -> None:
+        text = ('#ifdef NON_MATCHING\nvoid a(void) {}\n#else\n'
+                '#if FIRST\nINCLUDE_ASM(const s32, "u", a);\n#else\n'
+                'INCLUDE_ASM(const s32, "u", b);\n#endif\n'
+                '#ifdef NON_MATCHING\nvoid helper(void) {}\n#else\n'
+                'INCLUDE_ASM(const s32, "u", c);\n#endif\n#endif\n')
+        self.assertEqual(cn.draft_names(text), ["a", "b", "c"])
+
+    def test_comments_do_not_add_names_or_change_nesting(self) -> None:
+        text = ('/* #ifdef NON_MATCHING\n#else\n'
+                'INCLUDE_ASM(const s32, "u", fake);\n#endif */\n'
+                '#ifdef NON_MATCHING /* draft */\n'
+                'const char *url = "https://example.test/#endif";\n'
+                '/*\n#endif\n*/\n#else\n'
+                '// INCLUDE_ASM(const s32, "u", fake);\n'
+                'INCLUDE_ASM(const s32, "u", real);\n#endif\n')
+        self.assertEqual(cn.draft_names(text), ["real"])
+
+    def test_multiline_fallback_and_non_draft_else_are_distinct(self) -> None:
+        text = ('#ifdef NON_MATCHING\n'
+                '#if FIX_BUGS\nint a;\n#else\nint b;\n#endif\n#endif\n'
+                '#ifdef NON_MATCHING\nvoid real(void) {}\n#else\n'
+                'INCLUDE_ASM(\nconst s32,\n"u",\nreal\n);\n#endif\n')
+        self.assertEqual(cn.draft_names(text), ["real"])
+
     def test_one_block_can_hold_several_drafts(self) -> None:
         """Reading only the first name hid four drafted functions in sdfVu1."""
         text = ('#ifdef NON_MATCHING\n'

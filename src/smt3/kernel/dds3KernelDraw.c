@@ -2208,8 +2208,6 @@ void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
 }
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_0054E942);
-
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackColor);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTex);

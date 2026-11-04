@@ -357,6 +357,9 @@ s32 nbGetMotionTable(s32 unitid, s32 index)
     return *(s8 *)(p + index * 28 + 0x31);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * capture_006, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern u16 D_003E7028[];
 extern s32 evtBitCheck(s32 no);

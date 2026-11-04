@@ -29,7 +29,6 @@ typedef struct
     f32 w;
 } scrVec4_t;
 
-extern s8 dds3PadBitTable[0x20];
 extern s8 dds3PadBitTable[];
 extern char D_0052F5E8[];
 

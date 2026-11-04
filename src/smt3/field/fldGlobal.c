@@ -69,6 +69,9 @@ void fldAllTblLoad(void)
 }
 
 /* NON_MATCHING: 23 of 73 words differ (first at +0xC). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq41, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void fldAutoMapClear(void);
 

@@ -68,7 +68,7 @@ extern void fclScriptForcedEnd(u8 *PID);
 
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 
@@ -253,6 +253,9 @@ extern u8 D_0032FC50[];
 
 /* NON_MATCHING: 22 of 93 words differ, a real divide where retail folded the
  * VLA size into an andi, and the register cascade that follows. */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq29, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s8 ragBuildList2(u8 index, u8 *work)
 {
@@ -290,6 +293,9 @@ INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList2);
 #endif
 
 /* NON_MATCHING: 22 of 93 words differ, the same residual as ragBuildList2. */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq29, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s8 ragBuildList3(u8 index, u8 *work)
 {

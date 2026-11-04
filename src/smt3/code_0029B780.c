@@ -34,7 +34,7 @@ SIZE_CHECK(dds3ConfigWork_size_must_be_0x10A8, dds3ConfigWork_t, 0x10A8);
 extern void dds3FreeConfigTexture(void *texture);
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)());
+                          void (*calc)(void *));
 
 extern void fclRagTexCalcSizes();
 
@@ -372,6 +372,9 @@ extern void *memcpy(void *destination, const void *source, size_t size);
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 
 /* NON_MATCHING: 4 of 113 words differ; exact 452-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq17, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
 {
@@ -449,6 +452,9 @@ void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
 }
 
 /* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq17, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot)
 {

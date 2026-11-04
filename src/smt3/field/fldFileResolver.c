@@ -1843,5 +1843,3 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC30);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", rsetFrameMaskOtOffset);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC42);
-

@@ -770,6 +770,12 @@ void frAddFontStyle(
             pFontData = EE_ADDR_AS(u8 *, sdfMemLock(DataMh));
         }
     }
+#ifdef FIX_BUGS
+    /* BUG: no data and no handle (or a failed lock) dereferences NULL below */
+    if (pFontData == NULL) {
+        return;
+    }
+#endif
     entry = &gFT.entries[StyleNo];
     entry->allocation = DataMh;
     entry->resourceHeader = (frFontHeader_t *)pFontData;

@@ -330,6 +330,9 @@ s32 __ieee754_rem_pio2f(f32 x, f32 *y)
 }
 
 /* NON_MATCHING: 34 of 51 words differ (first at +0x4). */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * capture_006, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 f32 __ieee754_sqrtf(f32 x)
 {

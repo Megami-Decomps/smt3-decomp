@@ -149,6 +149,7 @@ def main():
     ap.add_argument("--csizes", default=None)
     ap.add_argument("--only", default=None, help="comma list of symbol names to report")
     ap.add_argument("--classes", default=None)
+    ap.add_argument("--dump-universe", default=None, help="write the symbol universe and reference sets as JSON")
     a = ap.parse_args()
 
     b, secs = load_elf(a.elf)
@@ -213,6 +214,10 @@ def main():
             if v >= 0x100000 and sec_of(v):
                 data_refs.add(v)
     # also anything between sections: data pointing into text is irrelevant here
+
+    if a.dump_universe:
+        json.dump(dict(uni=[dict(u, end=next_start(u["addr"])) for u in uni.values()],
+                       code_refs=sorted(code_refs), data_refs=sorted(data_refs)), open(a.dump_universe, "w"))
 
     findings = []
     only_dbg = set(a.only.split(',')) if a.only else None

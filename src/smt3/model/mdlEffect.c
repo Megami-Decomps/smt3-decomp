@@ -209,7 +209,7 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern s8 dds3PadButtonState[];
 
-extern s8 dds3PadBitTable[0x20];
+extern s8 dds3PadBitTable[];
 
 extern f32 D_002FA240[16];
 
@@ -1214,7 +1214,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     s32 i;
 
     if (dds3GetProcessData(task) == 0) {
-        pad = &dds3PadBitTable[0x10];
+        pad = dds3PadBitTable + 16;
     } else {
         pad = dds3PadButtonState;
     }
@@ -1307,7 +1307,7 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     const char *format;
 
     if (dds3GetProcessData(task) == 0) {
-        pad = &dds3PadBitTable[0x10];
+        pad = dds3PadBitTable + 16;
     } else {
         pad = dds3PadButtonState;
     }

@@ -1648,6 +1648,9 @@ void SetPrevCursor(nbCommSelProcessData_t *s, s32 type, s32 ind)
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
+/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
+ * battle_0_1, capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void SetCommCursor2(nbCommSelProcessData_t *s)
 {

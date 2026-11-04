@@ -24,7 +24,7 @@ typedef struct fclRagTex_t {
     s32 unk_14;
     s32 unk_18;
     s32 unk_1C;
-    void (*calcSizes)();
+    void (*calcSizes)(void *);
 } fclRagTex_t;
 
 typedef struct cmbStockSlot_t {
@@ -190,7 +190,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ fclPanelAnimState_t state;
-    /* 0x20 */ void (*calcSizes)();
+    /* 0x20 */ void (*calcSizes)(void *);
 } fclPanelAnim_t;
 
 SIZE_CHECK(fclPanelAnimStateSizeCheck, fclPanelAnimState_t, 0x20);

@@ -3368,7 +3368,7 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 #endif
 
 extern s32 func_00174DC0(s32 unused);
-extern s8 dds3PadBitTable[0x20];
+extern s8 dds3PadBitTable[] __attribute__((section(".data")));
 extern u8 D_0054F135;
 extern sdfVector4_t D_0056AC30;
 extern void evtUnitLightOn(evtUnit_t *unit);

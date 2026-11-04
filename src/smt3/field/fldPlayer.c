@@ -446,6 +446,9 @@ void fldPlayerCalc_Hit(void) {
     SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, pos);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * capture_008, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
@@ -2463,9 +2466,9 @@ void fldPlayerMotReset2(void) {
                     9, 0.0f);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
- * field underground facility savestate, covering only the paths those calls took. 2 more refused at an unlinked callee.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 12 match and 3 differ in a byte, capture_008.
+ * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
+ * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
 extern f32 EulerAngleAxisY(void);

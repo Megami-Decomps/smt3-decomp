@@ -59,6 +59,7 @@ jobs:
 
       # The build never defines NON_MATCHING, so a draft behind that guard is
       # not compiled by it: a struct rename elsewhere breaks drafts silently.
+      # FIX_BUGS bodies are compiled too, with a dropped-brace control first.
       # Needs cc1 but not the retail executable.
       - name: Compile the non-matching drafts
         run: python3 tools/check_nonmatching.py

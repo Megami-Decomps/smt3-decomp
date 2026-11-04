@@ -95,7 +95,7 @@ extern effDebugMenu_t D_003203E0;
 extern void *memcpy(void *, const void *, size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
-extern s8 dds3PadBitTable[0x20];
+extern s8 dds3PadBitTable[];
 extern effScreenDrawParams_t D_003202C8;
 extern s8 mblurDone;
 extern effDebugMenu_t mblurDebugMenu;
