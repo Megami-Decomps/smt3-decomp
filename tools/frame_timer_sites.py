@@ -14,7 +14,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent / "src" / "smt3"
 NAME = r"[A-Za-z_]\w*(?:\[[^\]]*\])?(?:(?:->|\.)[A-Za-z_]\w*(?:\[[^\]]*\])?)*"
 STEP = re.compile(
-    r"(?P<a>" + NAME + r")\s*(?:\+\+|--|[+-]=\s*1(?:\.0f?)?\b)"
+    r"(?P<a>" + NAME + r")\s*(?:\+\+|--|[+-]=\s*1(?:\.0f?)?(?![\w.]))"
     r"|(?:\+\+|--)\s*(?P<b>" + NAME + r")"
 )
 MACRO = re.compile(r"SDF_FRAME")
