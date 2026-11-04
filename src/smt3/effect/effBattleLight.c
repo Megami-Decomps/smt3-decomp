@@ -360,6 +360,8 @@ INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F4);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F8);
 
+INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0FC);
+
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F100);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutCount);

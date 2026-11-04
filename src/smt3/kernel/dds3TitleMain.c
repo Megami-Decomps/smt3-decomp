@@ -636,6 +636,8 @@ INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DEA8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD38);
 
+INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD3C);
+
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD40);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", gGlobal);

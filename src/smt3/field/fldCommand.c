@@ -258,7 +258,7 @@ void fldAnahoriSelectNext(void);
 
 void fldAnahoriSelectDel(void);
 
-extern fldDanteParam_t *D_0054EAF0;
+extern fldDanteParam_t *fldDanteUnit;
 
 extern void fldRunDanteStanceSet(s32);
 
@@ -1779,11 +1779,11 @@ s32 fldCommand_FLD_GET_ITEMBOX_RND(void) {
 }
 
 s32 fldCommand_FLD_MODEL_DANTE(void) {
-    if (D_0054EAF0 == NULL) {
+    if (fldDanteUnit == NULL) {
         scrSetIntReturnValue(-1);
         return 1;
     }
-    scrSetIntReturnValue(D_0054EAF0->value);
+    scrSetIntReturnValue(fldDanteUnit->value);
     return 1;
 }
 

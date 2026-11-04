@@ -662,6 +662,8 @@ INCLUDE_RODATA(const s32, "newbattle/nbTest", D_00545B90);
 
 INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551500);
 
+INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551504);
+
 INCLUDE_SDATA(const s32, "newbattle/nbTest", pack);
 
 INCLUDE_SDATA(const s32, "newbattle/nbTest", f);

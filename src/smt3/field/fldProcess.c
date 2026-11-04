@@ -87,7 +87,7 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char D_00531690[], D_00531950[];
+extern char fldProcSequenceName[], D_00531950[];
 
 extern s32 fldProcShutDownFlg;
 
@@ -158,7 +158,7 @@ extern void evtEnableMoonDraw(void);
 
 extern void fldSkyRefreshTbl(void);
 
-extern char D_0054EB40[];
+extern char fldCameraUnitName[];
 
 extern void fldStatusSet(void);
 
@@ -494,7 +494,7 @@ s32 fldProcHirakenaiChk(void)
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *param);
 extern dds3ProcessID_t *dds3SearchProcessPriority(s32 priority);
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 extern u32 dds3BackColor;
 extern s32 gFldStart, fldSkyEnable, gfldPlayerHasiCnt;
 extern s32 fldWmWarpMode;
@@ -894,7 +894,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
         if (fldEncountTestFlag(0x40) == 0) break;
         if (fldGlobalBase.area < 10 && fldWmWarpMode == 3) break;
     check_hit:
-        fldEveHit_ChkEveHit(D_0054EAE8);
+        fldEveHit_ChkEveHit(fldUnitControlHandle);
         break;
     case 5:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);

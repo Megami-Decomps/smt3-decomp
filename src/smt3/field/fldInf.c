@@ -257,7 +257,7 @@ s32 fldInfChkFastPanel(s32 aline) {
 }
 
 /* INF actions consume the existing field, scene and event-unit contracts. */
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 void evtBitOff(s32 no);
 void evtBitOn(s32 no);
 void fldKaifukuTest(void);
@@ -326,7 +326,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
         viewIndex = (s8)fldInfTable.sets[gFldInfIdx].messages[target - 10].view;
     }
     if (viewIndex != 0) {
-        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        unit = ((dds3UnitObjectBasicWorkData_t *)fldUnitControlHandle->workdata)->hUnit;
         if (unit != NULL) {
             if (fldInfTable.views[viewIndex].player != 0) {
                 fldPlayerOn();
@@ -337,7 +337,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
         if (fldInfTable.views[viewIndex].positionName[0] != 0) {
             node = dds3SceneBasicSearchName(world, (const char *)fldInfTable.views[viewIndex].positionName);
             if (node != NULL) {
-                evtSetUnitPos(D_0054EAE8->serialID, node->serialID);
+                evtSetUnitPos(fldUnitControlHandle->serialID, node->serialID);
             }
         }
         if (fldInfTable.views[viewIndex].cameraName[0] != 0) {
@@ -382,7 +382,7 @@ s32 fldInfNext(s32 messageId, s32 slot) {
             }
         }
         /* The action callbacks can replace the player's transition work. */
-        unit = ((dds3UnitObjectBasicWorkData_t *)D_0054EAE8->workdata)->hUnit;
+        unit = ((dds3UnitObjectBasicWorkData_t *)fldUnitControlHandle->workdata)->hUnit;
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }

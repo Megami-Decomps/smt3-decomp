@@ -2379,7 +2379,7 @@ void fldRunDantePatr(void)
     }
 }
 
-extern dds3Basic_t *D_0054EAF0;
+extern dds3Basic_t *fldDanteUnit;
 extern s32 fldPlayerStepDist;
 extern u32 dds3GetRandA(void *name);
 extern void datPartyDamageFld(s32 mode);
@@ -2462,7 +2462,7 @@ void fldRunDanteGun1(void)
             if (mark == 20) {
                 fldRun_Dante.flag |= 0x10;
             }
-            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(D_0054EAF0)->owner->inner, mark) != 0) {
+            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(fldDanteUnit)->owner->inner, mark) != 0) {
                 SDF_VU0_STOREVECTOR(&pos);
                 fldRunEffSet(1, pos.x, pos.y, pos.z, fldRun_Dante.turn);
             }
@@ -2548,7 +2548,7 @@ void fldRunDanteGun2(void)
             if (mark == 20) {
                 fldRun_Dante.flag |= 0x10;
             }
-            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(D_0054EAF0)->owner->inner, mark) != 0) {
+            if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(fldDanteUnit)->owner->inner, mark) != 0) {
                 SDF_VU0_STOREVECTOR(&pos);
                 fldRunEffSet(1, pos.x, pos.y, pos.z, fldRun_Dante.turn);
             }
@@ -3001,7 +3001,7 @@ extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
 
 void fldRunDanteSetModel(void)
 {
-    mdlObj_t *model = dds3ObjectBaseGetModelHandle(D_0054EAF0);
+    mdlObj_t *model = dds3ObjectBaseGetModelHandle(fldDanteUnit);
     sdfVector4_t pos __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
@@ -3020,17 +3020,17 @@ void fldRunDanteSetModel(void)
         pos.x = fldRun_Dante.x;
         pos.y = 0.0f;
         pos.z = fldRun_Dante.z;
-        dds3SetPosPoseSet(D_0054EAF0, &pos);
+        dds3SetPosPoseSet(fldDanteUnit, &pos);
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(fldRun_Dante.turn * 3.1399999f / 180.0f);
         SDF_VU0_STOREVECTOR(&rotation);
     }
-    dds3SetRotPoseSet(D_0054EAF0, &rotation);
+    dds3SetRotPoseSet(fldDanteUnit, &rotation);
     if (fldRun_Dante.flag & 0x40) {
         dds3PoseSet_t *pose;
 
-        dds3OnPoseSetFlag(D_0054EAF0->poseset, 8);
-        pose = D_0054EAF0->poseset;
+        dds3OnPoseSetFlag(fldDanteUnit->poseset, 8);
+        pose = fldDanteUnit->poseset;
         SDF_VU0_COPYVECTOR(&previous, &pose->pos2);
         if (sdfFabs(previous.x - pos.x) < 1.0f) {
             pose->pos2.x = pos.x;
@@ -3038,18 +3038,18 @@ void fldRunDanteSetModel(void)
             pose->pos2.x = previous.x + (pos.x - previous.x) / 3.0f;
         }
         if (sdfFabs(previous.y - pos.y) < 1.0f) {
-            D_0054EAF0->poseset->pos2.y = pos.y;
+            fldDanteUnit->poseset->pos2.y = pos.y;
         } else {
-            D_0054EAF0->poseset->pos2.y = previous.y + (pos.y - previous.y) / 3.0f;
+            fldDanteUnit->poseset->pos2.y = previous.y + (pos.y - previous.y) / 3.0f;
         }
         if (sdfFabs(previous.z - pos.z) < 1.0f) {
-            D_0054EAF0->poseset->pos2.z = pos.z;
+            fldDanteUnit->poseset->pos2.z = pos.z;
         } else {
-            D_0054EAF0->poseset->pos2.z = previous.z + (pos.z - previous.z) / 3.0f;
+            fldDanteUnit->poseset->pos2.z = previous.z + (pos.z - previous.z) / 3.0f;
         }
-        D_0054EAF0->poseset->pos2.w = 1.0f;
+        fldDanteUnit->poseset->pos2.w = 1.0f;
     } else {
-        dds3OffPoseSetFlag(D_0054EAF0->poseset, 8);
+        dds3OffPoseSetFlag(fldDanteUnit->poseset, 8);
     }
     if (fldRun_Dante.flag & 0x20) {
         mdlLoopMotion(model, 0, fldRun_Dante.update_flag);
@@ -3084,7 +3084,7 @@ void fldRunDanteSetModel(void)
             fldRun_Dante.oldframe = frame;
         }
     }
-    if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(D_0054EAF0)->owner->inner, 0) != 0) {
+    if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(fldDanteUnit)->owner->inner, 0) != 0) {
         SDF_VU0_STOREVECTOR(&pos);
         dds3DrawUnitObjectShadow(0x80, pos.x, fldRun_Dante.y, pos.z, 70.0f);
     }
@@ -3309,7 +3309,7 @@ void fldRunDanteStanceSet(s32 stance)
     case 5:
     case 7:
     case 104:
-        dds3GetPosPoseSet(D_0054EAF0);
+        dds3GetPosPoseSet(fldDanteUnit);
         SDF_VU0_STOREVECTOR(&position);
         fldRun_Dante.x = position.x;
         fldRun_Dante.z = position.z;
@@ -3376,7 +3376,7 @@ void fldRunDanteStanceSet(s32 stance)
             fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &fldRun_Dante.x, &fldRun_Dante.z);
             fldRunAiCng(6);
         } else {
-            dds3GetPosPoseSet(D_0054EAF0);
+            dds3GetPosPoseSet(fldDanteUnit);
             SDF_VU0_STOREVECTOR(&position);
             fldRun_Dante.z = position.z;
             fldRun_Dante.x = position.x;
@@ -3469,9 +3469,9 @@ INCLUDE_SDATA(const s32, "field/fldTest", D_0054EADC);
 
 INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAE0);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAE8);
+INCLUDE_SDATA(const s32, "field/fldTest", fldUnitControlHandle);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldPlayerUnit);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EAF0);
+INCLUDE_SDATA(const s32, "field/fldTest", fldDanteUnit);
 

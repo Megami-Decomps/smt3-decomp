@@ -382,6 +382,8 @@ void func_001B1488(dds3SplineWalk_t *pWalk, f32 step)
 }
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F370);
 
+INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F371);
+
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F374);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F378);

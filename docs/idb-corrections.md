@@ -1425,3 +1425,7 @@ The IDB screen type and pinned 0xA0 layout remain valid. The three C owners use 
 The guarded file-manager declaration of `EIntr` now agrees with its `s32` provider result. Callers still ignore that result. The correction neither changes the peer's interrupt-masking behavior nor certifies its host scheduling assumptions.
 
 `mdlHddFileListHandle` (`D_0054F638`) stays unnamed in the IDB: it is the second word of the 12-byte struct at `0x54F634` (`mdlHddFileIndexHandle`), which is proven, so the word is recorded here as that struct's field name.
+| `D_0054ED5C` to `D_0054ED8C` (11 words) | `fldSkyFilterAnimeSaved` ... `fldSkyTableSaved` | `fldSky.c` stores the previous filter, filter animation and table index of each global before it overwrites it |
+| `D_0054EAF0`, `D_0054EAE8` | `fldDanteUnit`, `fldUnitControlHandle` | `D_0054EAF0` is the unit `fldMain` creates with id `DANTE_UNIT`; `D_0054EAE8` is copied from `fldUnitControl.handle` |
+| `D_00531690`, `D_005316B0` to `D_00531758` (7 strings) | `fldProcSequenceName`, `fldPlayerAPath` ... `fldWave02Path` | bytes are `fldProcSequence` and the `/model/field/*.PB` and `/fld/f/bin/*.PB` paths passed to `sdfDevLoadFileEx` |
+| `D_00531820`, `D_0054EB38`, `D_0054EB40` | `fldWaveUnitName`, `fldPlayerPosName`, `fldCameraUnitName` | bytes `WAVE_UNIT`, `ppos01`, `P_Cam`, passed to `dds3SetUnitObjectId` and `dds3AddPointBasic` |

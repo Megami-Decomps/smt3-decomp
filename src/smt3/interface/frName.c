@@ -249,6 +249,8 @@ INCLUDE_SDATA(const s32, "interface/frName", D_0054F464);
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F468);
 
+INCLUDE_SDATA(const s32, "interface/frName", D_0054F469);
+
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F46C);
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F470);

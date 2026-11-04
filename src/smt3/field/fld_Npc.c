@@ -1358,7 +1358,7 @@ extern s32 fldCamNpcCamChk(void *name);
 
 extern void fldSePlay(s32 no);
 
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 
 extern sdfVector4_t fldNpcWorkVec;
 
@@ -1411,7 +1411,7 @@ void fldNpcCalc(void)
                 vec.x = control->handle->poseset->pos.x;
                 vec.y = y;
                 vec.z = control->handle->poseset->pos.z;
-                dds3GetPosPoseSet(D_0054EAE8);
+                dds3GetPosPoseSet(fldUnitControlHandle);
                 SDF_VU0_LOADVECTOR_B(&fldNpcWorkVec);
                 SDF_VU0_STOREVECTOR(&fldNpcWorkVec);
                 SDF_VU0_SUBVECTOR();

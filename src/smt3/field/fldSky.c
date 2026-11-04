@@ -80,7 +80,7 @@ extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
-extern u32 D_0054EAF0;
+extern u32 fldDanteUnit;
 
 extern u32 fldPlayerUnit;
 
@@ -94,7 +94,7 @@ extern void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 arg
 
 extern void evtSetUnitLightDir(evtUnit_t *h, s32 frame);
 
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 
 extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic);
 
@@ -124,27 +124,27 @@ extern void *fldSkyDefault;
 
 extern s32 fldSkyTblUpperIdx;
 
-extern s32 D_0054ED5C;
+extern s32 fldSkyFilterAnimeSaved;
 
-extern f32 D_0054ED60;
+extern f32 fldSkyFilterAnimeCntFSaved;
 
-extern s32 D_0054ED64;
+extern s32 fldSkyFilterAnimeOfsASaved;
 
-extern s32 D_0054ED68;
+extern s32 fldSkyFilterPrevSaved;
 
-extern s32 D_0054ED6C;
+extern s32 fldSkyFilterSaved;
 
-extern f32 D_0054ED70;
+extern f32 fldSkyFilterRateSaved;
 
-extern f32 D_0054ED74;
+extern f32 fldSkyFilterTimeSaved;
 
-extern s32 D_0054ED7C;
+extern s32 fldSkyTblAnimeSaved;
 
-extern f32 D_0054ED80;
+extern f32 fldSkyTblAnimeCntISaved;
 
-extern s32 D_0054ED84;
+extern s32 fldSkyTblBaseIdxSaved;
 
-extern s32 D_0054ED8C;
+extern s32 fldSkyTableSaved;
 
 extern void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
                             f32 r3, f32 g3, f32 b3,
@@ -591,8 +591,8 @@ void fld_136800(s32 duration, f32 lightR, f32 lightG, f32 lightB,
     s32 r, g, b;
     u32 lightColor, ambientColor;
 
-    if (D_0054EAF0 != 0) {
-        unit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, D_0054EAF0));
+    if (fldDanteUnit != 0) {
+        unit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, fldDanteUnit));
         r = (s32)(lightR * 128.0f);
         g = (s32)(lightG * 128.0f);
         b = (s32)(lightB * 128.0f);
@@ -619,11 +619,11 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
         playerUnit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, fldPlayerUnit));
         evtUnitLightOn(playerUnit);
     }
-    if (D_0054EAF0 != 0) {
-        secondUnit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, D_0054EAF0));
+    if (fldDanteUnit != 0) {
+        secondUnit = evtGetUnitHandle2(EE_ADDR_AS(dds3Basic_t *, fldDanteUnit));
         evtUnitLightOn(secondUnit);
     }
-    mainUnit = evtGetUnitHandle2(D_0054EAE8);
+    mainUnit = evtGetUnitHandle2(fldUnitControlHandle);
     evtUnitLightOn(mainUnit);
 
     r = (s32)(r0 * 128.0f);
@@ -638,7 +638,7 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     if (fldPlayerUnit != 0) {
         evtSetUnitLightAndAmbient(playerUnit, intr, lightColor, ambientColor);
     }
-    if (D_0054EAF0 != 0) {
+    if (fldDanteUnit != 0) {
         evtSetUnitLightAndAmbient(secondUnit, intr, lightColor, ambientColor);
     }
 
@@ -651,7 +651,7 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     if (fldPlayerUnit != 0) {
         evtSetUnitLightDir(playerUnit, intr);
     }
-    if (D_0054EAF0 != 0) {
+    if (fldDanteUnit != 0) {
         evtSetUnitLightDir(secondUnit, intr);
     }
     SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)dir);
@@ -659,7 +659,7 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     if (fldPlayerUnit != 0) {
         evtSetUnitLightDir(playerUnit, 0);
     }
-    if (D_0054EAF0 != 0) {
+    if (fldDanteUnit != 0) {
         evtSetUnitLightDir(secondUnit, 0);
     }
 
@@ -798,17 +798,17 @@ void fldSkySetTblUpper(s32 idx, s32 hokan) {
             if (fldSkyTblUpperIdx == 0) {
                 previousIndex = fldSkyTable;
             }
-            D_0054ED5C = gFilterAnime;
-            D_0054ED60 = gFilterAnimeCntF;
-            D_0054ED64 = gFilterAnimeOfsA;
-            D_0054ED68 = fldSkyFilterPrev;
-            D_0054ED6C = fldSkyFilter;
-            D_0054ED70 = fldSkyFilterRate;
-            D_0054ED74 = fldSkyFilterTime;
+            fldSkyFilterAnimeSaved = gFilterAnime;
+            fldSkyFilterAnimeCntFSaved = gFilterAnimeCntF;
+            fldSkyFilterAnimeOfsASaved = gFilterAnimeOfsA;
+            fldSkyFilterPrevSaved = fldSkyFilterPrev;
+            fldSkyFilterSaved = fldSkyFilter;
+            fldSkyFilterRateSaved = fldSkyFilterRate;
+            fldSkyFilterTimeSaved = fldSkyFilterTime;
             fldSkyTableIdx = previousIndex;
-            D_0054ED7C = gSkyTblAnime;
-            D_0054ED80 = gSkyTblAnimeCntI;
-            D_0054ED84 = gSkyTblBaseIdx;
+            fldSkyTblAnimeSaved = gSkyTblAnime;
+            fldSkyTblAnimeCntISaved = gSkyTblAnimeCntI;
+            fldSkyTblBaseIdxSaved = gSkyTblBaseIdx;
             fldSkyTblUpperIdx = 1;
             fldSkyTable = idx;
             if (state->lightMaIdx == 0) {
@@ -874,11 +874,11 @@ void fldSkySetTblUpper(s32 idx, s32 hokan) {
 
 void fldSkySetTblLightMaDZ(s32 idx) {
     if (idx == 0) {
-        dds3ObjectBaseOffFlag(D_0054EAE8, 0x100);
+        dds3ObjectBaseOffFlag(fldUnitControlHandle, 0x100);
         return;
     }
-    dds3ObjectBaseOnFlag(D_0054EAE8, 0x100);
-    dds3UnitObjectBasicEL_LinkFree(D_0054EAE8);
+    dds3ObjectBaseOnFlag(fldUnitControlHandle, 0x100);
+    dds3UnitObjectBasicEL_LinkFree(fldUnitControlHandle);
 }
 
 void fldSkySetTblLightMa(s32 idx, s32 hokan) {
@@ -907,7 +907,7 @@ void fldSkySetTblLightMa(s32 idx, s32 hokan) {
                 idx = fldSkyTable;
             }
             light = &((fldLightSet_t *)fldSkyDefault)[idx];
-            D_0054ED8C = fldRunDanteGunFlag.skyTable;
+            fldSkyTableSaved = fldRunDanteGunFlag.skyTable;
             fldRunDanteGunFlag.skyTable = idx;
             fldSkyLightMaTbl = idx;
             area = light->fadeArea;
@@ -1042,7 +1042,7 @@ void fldSkyRefreshTbl(void) {
         vec[2] = light->backgroundColorZ;
         vec[3] = 1.0f;
         dds3SetAmbientColor(0, vec);
-        unit = evtGetUnitHandle2(D_0054EAE8);
+        unit = evtGetUnitHandle2(fldUnitControlHandle);
         evtUnitLightOn(unit);
         r = (s32)(light->unitColorA[0] * 128.0f);
         g = (s32)(light->unitColorA[1] * 128.0f);
@@ -1182,31 +1182,31 @@ INCLUDE_SDATA(const s32, "field/fldSky", gSkyTblBaseIdx);
 
 INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblUpperIdx);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED5C);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED60);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeCntFSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED64);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeOfsASaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED68);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterPrevSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED6C);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED70);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterRateSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED74);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterTimeSaved);
 
 INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTableIdx);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED7C);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblAnimeSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED80);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblAnimeCntISaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED84);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblBaseIdxSaved);
 
 INCLUDE_SDATA(const s32, "field/fldSky", fldSkyLightMaTbl);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED8C);
+INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTableSaved);
 
 INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED90);
 

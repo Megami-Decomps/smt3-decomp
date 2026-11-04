@@ -244,7 +244,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
 }
 
 extern sdfModelOt_t D_002F69B8[];
-extern dds3Basic_t *D_0054EAE8;
+extern dds3Basic_t *fldUnitControlHandle;
 extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
 extern void rsetOtOfs(s32 offset);
@@ -267,7 +267,7 @@ s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
         case 3:
         case 4:
             if (basic->color != 0x80808080) {
-                if (dds3ObjectBaseCheckFlag(D_0054EAE8, 1)) {
+                if (dds3ObjectBaseCheckFlag(fldUnitControlHandle, 1)) {
                     u32 color = basic->color;
                     basic->color = 0x80808080;
                     dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
