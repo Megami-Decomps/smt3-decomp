@@ -3162,9 +3162,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
                 dds3BillboardSetPosition(bill, hData->samplePositions[i][point]);
                 dds3BillboardDraw(bill);
                 dds3BillboardSetAnimKey(bill, hData->animationFrames[i][point]);
-                if (SDF_FRAME_DUE(hData->updateCount - 1)) {
-                    hData->animationFrames[i][point]++;
-                }
+                hData->animationFrames[i][point] += SDF_FRAME_DUE(hData->updateCount - 1);
             }
         }
     }

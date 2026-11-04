@@ -539,9 +539,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     dds3SetPosPoseSet(camera, &eye);
     dds3CameraObjectBasicSetFovy(camera, pNbCamera.fovy);
     work->flag |= 1;
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
-        pNbCamera.frame++;
-    }
+    pNbCamera.frame += SDF_FRAME_DUE(dds3GetKernelCount());
     return 0;
 }
 #else
