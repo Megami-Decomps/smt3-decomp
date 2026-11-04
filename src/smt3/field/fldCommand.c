@@ -348,9 +348,9 @@ extern sdfTexHandle_t *fldVLBlurHandle;
 
 extern sdfTexHandle_t *fldSnowBlurHandle;
 
-extern void *D_0054EED0;
+extern void *fldDmgBlurEffect;
 
-extern void *D_0054EEDC;
+extern void *fldTDmgEffect;
 
 extern sdfTexHandle_t *D_0054EF98;
 
@@ -414,11 +414,11 @@ extern s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put);
 
 extern sdfMemHandle_t *fldNpcModelCount;
 
-extern sdfMemHandle_t *D_0054EF1C;
+extern sdfMemHandle_t *fldTakara1Mem;
 
-extern sdfMemHandle_t *D_0054EF20;
+extern sdfMemHandle_t *fldTakara3Mem;
 
-extern sdfMemHandle_t *D_0054EF24;
+extern sdfMemHandle_t *fldTakara2Mem;
 
 extern sdfTexHandle_t *hEffPart;
 

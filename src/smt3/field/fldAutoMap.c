@@ -164,7 +164,7 @@ extern sdfMemHandle_t *fldBlurEffectTable[];
 
 extern void *fldBlurEffectId[];
 
-extern void *D_0054EED0;
+extern void *fldDmgBlurEffect;
 
 extern u16 fldAutoMapAreaNameLen[];
 
@@ -188,7 +188,7 @@ extern s32 fldAutoMapFindFloor(s32 fld, s32 area);
 
 extern s32 fldAutoMapFindPlace(s32 fld, s32 area);
 
-extern void *D_0054EEDC;
+extern void *fldTDmgEffect;
 
 extern void *dds3EffectLoad(void *pD3P);
 
@@ -216,9 +216,9 @@ extern void *D_00551CF0;
 
 extern void *D_00551CF8;
 
-extern void *D_00568E90[];
+extern void *fldModelResPtr[];
 
-extern void *D_00568F90[];
+extern void *fldModelResSize[];
 
 typedef struct
 {
@@ -371,11 +371,11 @@ extern void *D_00551D14;
 
 extern void *D_00551D1C;
 
-extern void *D_0054EF1C;
+extern void *fldTakara1Mem;
 
-extern void *D_0054EF20;
+extern void *fldTakara3Mem;
 
-extern void *D_0054EF24;
+extern void *fldTakara2Mem;
 
 extern void *D_0054EF28;
 
@@ -2152,9 +2152,9 @@ void fldInitPacLoader(void) {
     sdfMemHandle_t *handle;
     u32 i;
 
-    D_0054EF1C = NULL;
-    D_0054EF20 = NULL;
-    D_0054EF24 = NULL;
+    fldTakara1Mem = NULL;
+    fldTakara3Mem = NULL;
+    fldTakara2Mem = NULL;
     fldTakara1File = sdfDevLoadFileEx("/fld/f/bin/takara1.PB", (u32 *)&fldTakara1Data, &fldTakara1Size);
     fldTakara3File = sdfDevLoadFileEx("/fld/f/bin/takara3.PB", (u32 *)&fldTakara3Data, &fldTakara3Size);
     fldTakara2File = sdfDevLoadFileEx("/fld/f/bin/takara2.PB", (u32 *)&fldTakara2Data, &fldTakara2Size);
@@ -2267,9 +2267,9 @@ void fldInitBlurEffect(void) {
     if (fldGlobalBase.area >= 0xC8) {
         return;
     }
-    D_0054EEDC = dds3EffectLoad(D_00551D18);
+    fldTDmgEffect = dds3EffectLoad(D_00551D18);
     if (fldGlobalBase.area >= 0xB) {
-        D_0054EED0 = dds3EffectLoad(D_00551D08);
+        fldDmgBlurEffect = dds3EffectLoad(D_00551D08);
         fldDmgBlurHandle = NULL;
         fldBlurEffectId[0] = dds3EffectLoad(D_00551D10);
         fldNpcBlurHandle = NULL;
@@ -2289,8 +2289,8 @@ void fldInitBlurEffect(void) {
      * swaps the first two stores. */
     for (i = 0; i < 0x40; i++) {
         *(void **)&fldBlurEffectTable[i] = NULL;
-        *(void **)&D_00568E90[i] = NULL;
-        *(void **)&D_00568F90[i] = NULL;
+        *(void **)&fldModelResPtr[i] = NULL;
+        *(void **)&fldModelResSize[i] = NULL;
     }
     fldNpcModelFreeIdx = -1;
     param.unk00 = 0x3C;
@@ -2344,13 +2344,13 @@ void fldFreeBlurEffect(void) {
             fldModelSlotTable[i].effect = NULL;
         }
     }
-    if (D_0054EEDC != NULL) {
-        dds3EffectDelete(D_0054EEDC);
-        D_0054EEDC = NULL;
+    if (fldTDmgEffect != NULL) {
+        dds3EffectDelete(fldTDmgEffect);
+        fldTDmgEffect = NULL;
     }
-    if (D_0054EED0 != NULL) {
-        dds3EffectDelete(D_0054EED0);
-        D_0054EED0 = NULL;
+    if (fldDmgBlurEffect != NULL) {
+        dds3EffectDelete(fldDmgBlurEffect);
+        fldDmgBlurEffect = NULL;
     }
     if (fldBlurEffectId[0] != NULL) {
         dds3EffectDelete(fldBlurEffectId[0]);
@@ -2405,13 +2405,13 @@ void fldClearTakaraSlots(void) {
     fldTakaraSlotCount = 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532338);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldNpcLoadScale);
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532348);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldNpcLoadAxis);
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532358);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldNpcLoadPathsFirst);
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532478);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldNpcLoadPathsSecond);
 
 INCLUDE_RODATA(const s32, "field/fldAutoMap", fldGenNpcPath);
 

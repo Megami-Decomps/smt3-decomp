@@ -181,13 +181,13 @@ extern void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadAr
 
 extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 
-extern s32 D_0054EDF4;
+extern s32 fldDoorSiseArea;
 
 extern s32 fldDoorSiseState;
 
-extern s32 D_0054EDFC;
+extern s32 fldDoorSiseZone;
 
-extern s32 D_0054EE00;
+extern s32 fldDoorSiseSub;
 
 extern s32 gFldNowDZone;
 
@@ -607,10 +607,10 @@ void fldDoor_Warp(const char *name)
             fldSetNextField(0, 0);
             fldBgmFadeOut();
             fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
-            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseArea = fldGlobalBase.area;
             fldDoorSiseState = fldGlobalBase.floor + 1;
-            D_0054EE00 = entry->sequenceKind;
-            D_0054EDFC = entry->variant;
+            fldDoorSiseSub = entry->sequenceKind;
+            fldDoorSiseZone = entry->variant;
             switch ((u32)entry->variant) {
             case 0:
                 facility = entry->sequenceKind;
@@ -750,10 +750,10 @@ void fldDoor_WarpEx(s32 ex_no) {
             fldBgmFadeOut();
             dds3FadeIn2(15);
             fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
-            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseArea = fldGlobalBase.area;
             fldDoorSiseState = fldGlobalBase.floor + 1;
-            D_0054EDFC = entry->variant;
-            D_0054EE00 = entry->sequenceKind;
+            fldDoorSiseZone = entry->variant;
+            fldDoorSiseSub = entry->sequenceKind;
             switch ((u32)entry->variant) {
             case 0:
                 facility = entry->sequenceKind;
@@ -868,12 +868,12 @@ extern s16 fldAllCnt[][2];
 void fldSetTerminalState(s32 type, s32 idx)
 {
     if (type == 0) {
-        D_0054EDFC = 3;
-        D_0054EDF4 = D_002FC1A0[idx][0];
-        D_0054EE00 = idx;
+        fldDoorSiseZone = 3;
+        fldDoorSiseArea = D_002FC1A0[idx][0];
+        fldDoorSiseSub = idx;
     } else {
-        D_0054EE00 = idx;
-        D_0054EDF4 = fldAllCnt[idx][0];
+        fldDoorSiseSub = idx;
+        fldDoorSiseArea = fldAllCnt[idx][0];
     }
 }
 
@@ -888,13 +888,13 @@ void fldDoor_SiseExit(void) {
     s32 nextKind;
     s32 shortcut;
 
-    if (D_0054EDF4 == 0) {
+    if (fldDoorSiseArea == 0) {
         return;
     }
     state = fldDoorSiseState;
-    zone = D_0054EDFC;
-    sub = D_0054EE00;
-    fldDoorLoad(D_0054EDF4);
+    zone = fldDoorSiseZone;
+    sub = fldDoorSiseSub;
+    fldDoorLoad(fldDoorSiseArea);
     for (index = 0; index < 0x100; index++) {
         entry = &fldDoorTable[index];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
@@ -920,7 +920,7 @@ void fldDoor_SiseExit(void) {
         }
         nextArea = entry->variant;
         if (nextArea == 0) {
-            nextArea = D_0054EDF4;
+            nextArea = fldDoorSiseArea;
         }
         nextKind = entry->sequenceKind;
         if (nextKind == 0) {
@@ -943,10 +943,10 @@ void fldDoor_SiseExit(void) {
         } else {
             record.callmode = 4;
         }
-        D_0054EDF4 = 0;
+        fldDoorSiseArea = 0;
         fldDoorSiseState = 0;
-        D_0054EDFC = 0;
-        D_0054EE00 = 0;
+        fldDoorSiseZone = 0;
+        fldDoorSiseSub = 0;
         dds3AdminiCallSequence(6, &record, 0xA0, 0);
         return;
     }
@@ -1029,10 +1029,10 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
             fldSetNextField(0, 0);
             fldBgmFadeOut();
             fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
-            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseArea = fldGlobalBase.area;
             fldDoorSiseState = fldGlobalBase.floor + 1;
-            D_0054EDFC = entry->variant;
-            D_0054EE00 = entry->sequenceKind;
+            fldDoorSiseZone = entry->variant;
+            fldDoorSiseSub = entry->sequenceKind;
             switch ((u32)entry->variant) {
             case 0:
                 param[0] = entry->sequenceKind;
@@ -1692,13 +1692,13 @@ INCLUDE_SDATA(const s32, "field/fldWap", gFld_ElvTakasa);
 
 INCLUDE_SDATA(const s32, "field/fldWap", fldDoorWarpTarget);
 
-INCLUDE_SDATA(const s32, "field/fldWap", D_0054EDF4);
+INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseArea);
 
 INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseState);
 
-INCLUDE_SDATA(const s32, "field/fldWap", D_0054EDFC);
+INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseZone);
 
-INCLUDE_SDATA(const s32, "field/fldWap", D_0054EE00);
+INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseSub);
 
 INCLUDE_SDATA(const s32, "field/fldWap", scriptlabel);
 

@@ -636,15 +636,15 @@ extern f32 fldCamNpcTarget;
 
 extern f32 fldCamNpcTarget2;
 
-extern f32 D_0054EF6C;
+extern f32 fldNpcCamPosX;
 
-extern f32 D_0054EF70;
+extern f32 fldNpcCamPosY;
 
-extern f32 D_0054EF74;
+extern f32 fldNpcCamPosZ;
 
-extern f32 D_0054EF78;
+extern f32 fldNpcCamAngle;
 
-extern f32 D_0054EF80;
+extern f32 fldNpcCamTargetY;
 
 extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, const sdfVector4_t *target);
 
@@ -669,33 +669,33 @@ void calcCamNormalNPC(void) {
     fldGlobalBase.encountState = SDF_FRAMES(5);
     if (fldNpcCamTarget == 2) {
         fldCamResetOn = 2;
-        eye.f[0] = D_0054EF6C;
-        eye.f[2] = D_0054EF74;
-        eye.f[1] = D_0054EF70 + fldCamNpcTarget + 60.0f;
+        eye.f[0] = fldNpcCamPosX;
+        eye.f[2] = fldNpcCamPosZ;
+        eye.f[1] = fldNpcCamPosY + fldCamNpcTarget + 60.0f;
     } else {
         fldCamResetOn = 1;
-        eye.f[0] = D_0054EF6C;
-        eye.f[2] = D_0054EF74;
-        eye.f[1] = D_0054EF70 + fldCamNpcTarget;
+        eye.f[0] = fldNpcCamPosX;
+        eye.f[2] = fldNpcCamPosZ;
+        eye.f[1] = fldNpcCamPosY + fldCamNpcTarget;
     }
     dds3CameraObjectBasicGetCameraTM(control->handle, (const sdfVector4_t *)&eye);
     dds3GetTMPoseSet(unit->handle);
     target.f[3] = 1.0f;
     if (fldNpcCamTarget == 2) {
         angle = 3.14f;
-        angle = -D_0054EF78 * angle;
+        angle = -fldNpcCamAngle * angle;
         angle = angle / 180.0f;
         dist = 200.0f;
         target.f[0] = eye.f[0] + sdfSin(angle) * dist;
-        target.f[1] = D_0054EF70 + fldCamNpcTarget;
+        target.f[1] = fldNpcCamPosY + fldCamNpcTarget;
         target.f[2] = eye.f[2] + sdfCos(angle) * dist;
     } else {
         angle = 3.14f;
-        angle = -D_0054EF78 * angle;
+        angle = -fldNpcCamAngle * angle;
         angle = angle / 180.0f;
         dist = 200.0f;
         target.f[0] = eye.f[0] + sdfSin(angle) * (fldCamNpcTarget2 + dist);
-        target.f[1] = D_0054EF70 + D_0054EF80;
+        target.f[1] = fldNpcCamPosY + fldNpcCamTargetY;
         target.f[2] = eye.f[2] + sdfCos(angle) * (fldCamNpcTarget2 + dist);
     }
     dds3SetPosPoseSet(control->handle, (const sdfVector4_t *)&target.q);

@@ -59,7 +59,7 @@ extern s32 fldGbChkNpc(s32 fld, u32 area, s32 hojiID);
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *object, s32 flags);
 
-extern u8 D_003129D0[0x100];
+extern u8 fldNpcLightTable[0x100];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
@@ -87,7 +87,7 @@ extern void dds3EffectReset(void *hEffect);
 
 extern void dds3EffectSetPosition(void *pData, const sdfVector4_t *pPos);
 
-extern void *D_0054EEDC;
+extern void *fldTDmgEffect;
 
 extern s32 evtBitCheck(s32 no);
 
@@ -107,11 +107,11 @@ extern void sdfFileClose(s32 aHandle);
 
 extern sdfMemHandle_t *fldNpcModelCount;
 
-extern sdfMemHandle_t *D_0054EF1C;
+extern sdfMemHandle_t *fldTakara1Mem;
 
-extern sdfMemHandle_t *D_0054EF20;
+extern sdfMemHandle_t *fldTakara3Mem;
 
-extern sdfMemHandle_t *D_0054EF24;
+extern sdfMemHandle_t *fldTakara2Mem;
 
 extern sdfTexHandle_t *hEffPart;
 
@@ -139,9 +139,9 @@ extern sdfTexHandle_t *fldVLTexture;
 
 extern sdfTexHandle_t *fldVLBlurHandle;
 
-extern f32 D_0054EF4C;
+extern f32 fldHudSlide;
 
-extern f32 D_0054EF60;
+extern f32 fldVLPulsePhase;
 
 extern f32 EulerAngleAxisY(void);
 
@@ -162,7 +162,7 @@ extern void *dds3EffectPartCreate(s32 type, void *pData);
 
 extern void *D_0054EF2C;
 
-extern const sdfVector4_t D_00532720;
+extern const sdfVector4_t fldItemBoxCalcAxis;
 
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
@@ -196,13 +196,13 @@ extern void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 arg
 
 extern s32 fldNpcDrawCount;
 
-extern const u8 *D_00568E90[];
+extern const u8 *fldModelResPtr[];
 
-extern s32 D_00568F90[];
+extern s32 fldModelResSize[];
 
 extern const char fldNpcUnitName[];
 
-extern const sdfVector4_t D_00532770;
+extern const sdfVector4_t fldNpcModelStartAxis;
 
 extern void *fldBlurEffectId[];
 
@@ -210,7 +210,7 @@ extern void dds3EffectSetLoop(void *hEffect, u8 loop);
 
 extern u32 fldNpcBlurHandle;
 
-extern void *D_0054EED0;
+extern void *fldDmgBlurEffect;
 
 extern u32 fldDmgBlurHandle;
 
@@ -231,7 +231,7 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     object = hEveUnit->effObj;
     model = dds3ObjectBaseGetModelHandle(object);
     SDF_VU0_LOADVECTOR(&object->poseset->rot);
-    row = &D_003129D0[(fldGlobalBase.floor + 1) * 8];
+    row = &fldNpcLightTable[(fldGlobalBase.floor + 1) * 8];
     dir = -EulerAngleAxisY();
     if (row[7] == 0) {
         dir = dir * 180.0f / 3.14f;
@@ -317,9 +317,9 @@ typedef union {
 
 extern fldNpcTable_t fldNpcDefaults[];
 extern fldNpcOverride_t fldNpcOverrides[];
-extern const fldNpcPathGroup1_t D_00532358;
-extern const fldNpcPathGroup2_t D_00532478;
-extern const volatile sdfVector4Unaligned_t D_00532338, D_00532348;
+extern const fldNpcPathGroup1_t fldNpcLoadPathsFirst;
+extern const fldNpcPathGroup2_t fldNpcLoadPathsSecond;
+extern const volatile sdfVector4Unaligned_t fldNpcLoadScale, fldNpcLoadAxis;
 extern const char fldGenNpcPath[];
 extern sdfMemHandle_t *fldBlurEffectTable[];
 extern struct effNode_t *fldNpcLoadIdx;
@@ -352,10 +352,10 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     memset(&position, 0, sizeof(position));
     position.w = 1.0f;
     memset(&rot, 0, sizeof(rot));
-    scale = D_00532338;
-    axis = D_00532348;
-    paths.groups.first = D_00532358;
-    paths.groups.second = D_00532478;
+    scale = fldNpcLoadScale;
+    axis = fldNpcLoadAxis;
+    paths.groups.first = fldNpcLoadPathsFirst;
+    paths.groups.second = fldNpcLoadPathsSecond;
     index = fldNpcModelTable;
     slot = &fldModelSlotTable[index];
     slot->x = x;
@@ -430,8 +430,8 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
             } else {
                 path = paths.groups.second.name[resourceIndex - 35];
             }
-            fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, (u32 *)&D_00568E90[resourceIndex],
-                                                                (u32 *)&D_00568F90[resourceIndex]);
+            fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, (u32 *)&fldModelResPtr[resourceIndex],
+                                                                (u32 *)&fldModelResSize[resourceIndex]);
         }
         slot->unk44 = 0;
         if (fldGlobalBase.area == 1) {
@@ -516,11 +516,11 @@ extern s32 fldTakara3Size;
 
 extern void *D_0054EF40;
 
-extern const char D_00532710[];
+extern const char fldTakaraUnitName[];
 
-extern const sdfVector4_t D_005326F0;
+extern const sdfVector4_t fldItemBoxAddScale;
 
-extern const sdfVector4_t D_00532700;
+extern const sdfVector4_t fldItemBoxAddAxis;
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -575,7 +575,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldModelSlotTable[n].rot.y = rot->y;
     fldModelSlotTable[n].rot.z = rot->z;
     fldModelSlotTable[n].rot.w = rot->w;
-    scl = D_005326F0;
+    scl = fldItemBoxAddScale;
     fldModelSlotTable[n].effect = NULL;
     fldModelSlotTable[n].cntf = 0.0f;
     fldModelSlotTable[n].cnti = 0;
@@ -599,27 +599,27 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
         }
         fldTakaraSlotTable[fldTakaraCount].effect = effect;
         minor = 0x1C;
-        if (D_0054EF1C == NULL) {
-            D_0054EF1C = sdfMemAllocDirect(fldTakara1Size);
-            ptr = sdfMemGetPtr(D_0054EF1C);
+        if (fldTakara1Mem == NULL) {
+            fldTakara1Mem = sdfMemAllocDirect(fldTakara1Size);
+            ptr = sdfMemGetPtr(fldTakara1Mem);
             memcpy(ptr, fldTakara1Data, fldTakara1Size);
             mdlPackDecode(2, 0x1C, 0x101, ptr, fldTakara1Size);
         }
         break;
     case 1:
         minor = 0x1D;
-        if (D_0054EF20 == NULL) {
-            D_0054EF20 = sdfMemAllocDirect(fldTakara3Size);
-            ptr = sdfMemGetPtr(D_0054EF20);
+        if (fldTakara3Mem == NULL) {
+            fldTakara3Mem = sdfMemAllocDirect(fldTakara3Size);
+            ptr = sdfMemGetPtr(fldTakara3Mem);
             memcpy(ptr, fldTakara3Data, fldTakara3Size);
             mdlPackDecode(2, 0x1D, 0x101, ptr, fldTakara3Size);
         }
         break;
     case 2:
         minor = 0x1E;
-        if (D_0054EF24 == NULL) {
-            D_0054EF24 = sdfMemAllocDirect(fldTakara2Size);
-            ptr = sdfMemGetPtr(D_0054EF24);
+        if (fldTakara2Mem == NULL) {
+            fldTakara2Mem = sdfMemAllocDirect(fldTakara2Size);
+            ptr = sdfMemGetPtr(fldTakara2Mem);
             memcpy(ptr, fldTakara2Data, fldTakara2Size);
             mdlPackDecode(2, 0x1E, 0x101, ptr, fldTakara2Size);
         }
@@ -628,14 +628,14 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     if (hEffPart == NULL) {
         hEffPart = sdfTexSet(D_0054EF40);
     }
-    axis = D_00532700;
+    axis = fldItemBoxAddAxis;
     SDF_VU0_LOADVECTOR(&axis);
     FromRotation(3.1415926f);
     SDF_VU0_LOADVECTOR_B(rot);
     Mult();
     SDF_VU0_STOREVECTOR(&rotation);
     object = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rotation);
-    dds3SetUnitObjectId(object, D_00532710);
+    dds3SetUnitObjectId(object, fldTakaraUnitName);
     dds3ObjectBaseMakeUnit(object, 2, minor);
     dds3SetSclPoseSet(object, &scl);
     dds3ObjectBaseOnFlag(object, 0x100);
@@ -679,9 +679,9 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
 
 #else
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_005326F0);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxAddScale);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532700);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxAddAxis);
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldItemBoxAdd);
 
@@ -705,20 +705,20 @@ void fldFreeModelTable(void) {
         sdfMemFreeDelayedDirect(fldNpcModelCount);
         fldNpcModelCount = NULL;
     }
-    if (D_0054EF1C != NULL) {
+    if (fldTakara1Mem != NULL) {
         mdlUnRegist(2, 0x15);
-        sdfMemFreeDelayedDirect(D_0054EF1C);
-        D_0054EF1C = NULL;
+        sdfMemFreeDelayedDirect(fldTakara1Mem);
+        fldTakara1Mem = NULL;
     }
-    if (D_0054EF20 != NULL) {
+    if (fldTakara3Mem != NULL) {
         mdlUnRegist(2, 0x16);
-        sdfMemFreeDelayedDirect(D_0054EF20);
-        D_0054EF20 = NULL;
+        sdfMemFreeDelayedDirect(fldTakara3Mem);
+        fldTakara3Mem = NULL;
     }
-    if (D_0054EF24 != NULL) {
+    if (fldTakara2Mem != NULL) {
         mdlUnRegist(2, 0x17);
-        sdfMemFreeDelayedDirect(D_0054EF24);
-        D_0054EF24 = NULL;
+        sdfMemFreeDelayedDirect(fldTakara2Mem);
+        fldTakara2Mem = NULL;
     }
     for (i = 0; i < 32; i++) {
         if (fldTakaraSlotTable[i].effect != NULL) {
@@ -749,7 +749,7 @@ void fldItemBoxCalcTask(void) {
     s32 i;
     mdlObj_t *model;
 
-    axis = D_00532720;
+    axis = fldItemBoxCalcAxis;
     for (i = 0; i < fldTakaraCount; i++) {
         switch (fldTakaraSlotTable[i].mode) {
         case 0:
@@ -772,7 +772,7 @@ void fldItemBoxCalcTask(void) {
                 if (fldItemBoxCount == NULL) {
                     fldItemBoxCount = dds3EffectPartCreate(6, D_0054EF2C);
                 }
-                dds3EffectReset(D_0054EEDC);
+                dds3EffectReset(fldTDmgEffect);
             } else {
                 model = dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].object);
                 if (model->first->stat == 5) {
@@ -811,8 +811,8 @@ void fldTDmgStart(f32 x, f32 y, f32 z) {
     position.y = y;
     position.z = z;
     position.w = 1.0f;
-    dds3EffectReset(D_0054EEDC);
-    dds3EffectSetPosition(D_0054EEDC, &position);
+    dds3EffectReset(fldTDmgEffect);
+    dds3EffectSetPosition(fldTDmgEffect, &position);
 }
 
 void fldDmgStart(f32 x, f32 y, f32 z) {
@@ -842,8 +842,8 @@ void fldDmgStart(f32 x, f32 y, f32 z) {
     position.x = x;
     position.y = y;
     position.z = z;
-    dds3EffectReset(D_0054EED0);
-    dds3EffectSetPosition(D_0054EED0, &position);
+    dds3EffectReset(fldDmgBlurEffect);
+    dds3EffectSetPosition(fldDmgBlurEffect, &position);
     fldDmgBlurHandle = 1;
 }
 
@@ -992,8 +992,8 @@ void fldDrawInputCursor(s32 x, s32 y) {
 extern s32 gFldElvFloorNow;
 extern f32 fldEADrawState;
 extern s32 fldEADrawWork;
-extern s32 D_0054EF54;
-extern s32 D_0054EF58;
+extern s32 fldEAPrevAlpha;
+extern s32 fldEAAlphaRising;
 extern sdfTexHandle_t *fldEATexture;
 extern f32 fldCamPitch;
 extern s32 fldChkVortex(void);
@@ -1001,7 +1001,7 @@ extern s32 nbGetEncountCnt(void);
 extern s32 nbGetEncountMax(s32 id);
 void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, f32 angle);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532720);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxCalcAxis);
 
 void fldEADraw(void) {
     s32 offset;
@@ -1017,33 +1017,33 @@ void fldEADraw(void) {
     switch (fldGlobalBase.word90) {
     case 0:
     case 4:
-        D_0054EF4C = 0.0f;
+        fldHudSlide = 0.0f;
         break;
     case 2:
     case 6:
-        if (D_0054EF4C > 0.0f) {
-            D_0054EF4C -= 0.2f;
-            if (D_0054EF4C < 0.0f) {
-                D_0054EF4C = 0.0f;
+        if (fldHudSlide > 0.0f) {
+            fldHudSlide -= 0.2f;
+            if (fldHudSlide < 0.0f) {
+                fldHudSlide = 0.0f;
             }
         }
         break;
     case 3:
     case 7:
-        if (D_0054EF4C < 1.0f) {
-            D_0054EF4C += 0.2f;
-            if (D_0054EF4C > 1.0f) {
-                D_0054EF4C = 1.0f;
+        if (fldHudSlide < 1.0f) {
+            fldHudSlide += 0.2f;
+            if (fldHudSlide > 1.0f) {
+                fldHudSlide = 1.0f;
             }
         }
         break;
     case 1:
     case 5:
-        D_0054EF4C = 1.0f;
+        fldHudSlide = 1.0f;
         break;
     }
     /* Same real 110-to-zero HUD interpolation as the matched fldVLDraw. */
-    offset = (s32)(0.0f * D_0054EF4C + 110.0f * (1.0f - D_0054EF4C));
+    offset = (s32)(0.0f * fldHudSlide + 110.0f * (1.0f - fldHudSlide));
     rsetOtOfs(0x47);
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
@@ -1083,15 +1083,15 @@ void fldEADraw(void) {
             level = 4;
         }
         alpha = (s32)(sdfSin(fldEADrawState) * 64.0f) + 64;
-        if (D_0054EF58 == 0) {
-            if (alpha < D_0054EF54) {
-                D_0054EF58 = 1;
+        if (fldEAAlphaRising == 0) {
+            if (alpha < fldEAPrevAlpha) {
+                fldEAAlphaRising = 1;
             }
-        } else if (alpha > D_0054EF54) {
-            D_0054EF58 = 0;
+        } else if (alpha > fldEAPrevAlpha) {
+            fldEAAlphaRising = 0;
             fldEADrawWork ^= 1;
         }
-        D_0054EF54 = alpha;
+        fldEAPrevAlpha = alpha;
         if (level == 4) {
             alpha = (s32)(sdfSin(fldEADrawState) * 32.0f) + 96;
             DrwSprite2D(offset + 0x1A4, offset + 0x162, 0x3D, 0x21, 0x7B, 0x5D, 0x3D, 0x21, (alpha << 24) | 0x808080, fldUiTexture);
@@ -1155,7 +1155,7 @@ void fldVLDraw(void) {
     if (fldGlobalBase.area >= 11) {
         return;
     }
-    t = D_0054EF4C;
+    t = fldHudSlide;
     x = (s32)(0.0f * t + -110.0f * (1.0f - t));
     y = (s32)(0.0f * t + 110.0f * (1.0f - t));
     x -= 2;
@@ -1164,8 +1164,8 @@ void fldVLDraw(void) {
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(x + 9, y + 0x15C, 0x5B, 0x5C, 0xA4, 1, 0x5B, 0x5C, 0x80808080, fldVLTexture);
-    D_0054EF60 = D_0054EF60 + 0.15f;
-    alpha = (s32)(sdfSin(D_0054EF60) * 50.0f + 50.0f) * 80 / 100 + 0x30;
+    fldVLPulsePhase = fldVLPulsePhase + 0.15f;
+    alpha = (s32)(sdfSin(fldVLPulsePhase) * 50.0f + 50.0f) * 80 / 100 + 0x30;
     if (alpha > 0x80) {
         alpha = 0x80;
     }
@@ -1269,7 +1269,7 @@ void fldNpcModelStart(s32 id, f32 x, f32 y, f32 z, const sdfVector4_t *rot) {
     position.w = 1.0f;
     memset(&rotation, 0, sizeof(rotation));
     rotation.w = 1.0f;
-    axis = D_00532770;
+    axis = fldNpcModelStartAxis;
     if (fldNpcFreeCount != NULL) {
         return;
     }
@@ -1284,8 +1284,8 @@ void fldNpcModelStart(s32 id, f32 x, f32 y, f32 z, const sdfVector4_t *rot) {
     case 0:
         major = 2;
         minor = 0x22;
-        mdlPackDecode(major, minor, 0x101, D_00568E90[fldModelSlotTable[id].modelIndex],
-                      D_00568F90[fldModelSlotTable[id].modelIndex]);
+        mdlPackDecode(major, minor, 0x101, fldModelResPtr[fldModelSlotTable[id].modelIndex],
+                      fldModelResSize[fldModelSlotTable[id].modelIndex]);
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(rot);
@@ -1362,25 +1362,25 @@ extern dds3Basic_t *fldUnitControlHandle;
 
 extern sdfVector4_t fldNpcWorkVec;
 
-extern f32 D_0054EF64;
+extern f32 fldWaveDistance;
 
 extern s32 D_0054EF68;
 
-extern f32 D_0054EF6C;
+extern f32 fldNpcCamPosX;
 
-extern f32 D_0054EF70;
+extern f32 fldNpcCamPosY;
 
-extern f32 D_0054EF74;
+extern f32 fldNpcCamPosZ;
 
-extern f32 D_0054EF78;
+extern f32 fldNpcCamAngle;
 
-extern f32 D_0054EF80;
+extern f32 fldNpcCamTargetY;
 
 extern f32 fldCamNpcTarget;
 
 extern f32 fldCamNpcTarget2;
 
-extern s32 D_0054EEB0;
+extern s32 fldNpcCamSlot;
 
 /* NON_MATCHING: 5 of 492 words differ (first at +0xB8), at the exact 1968-byte size. */
 #ifdef NON_MATCHING
@@ -1416,9 +1416,9 @@ void fldNpcCalc(void)
                 SDF_VU0_STOREVECTOR(&fldNpcWorkVec);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_GETLENGTH(length);
-                D_0054EF64 = D_0054EF64 + length;
-                if (D_0054EF64 > 100.0f) {
-                    D_0054EF64 = 0.0f;
+                fldWaveDistance = fldWaveDistance + length;
+                if (fldWaveDistance > 100.0f) {
+                    fldWaveDistance = 0.0f;
                     fldWaveStart(vec.x, vec.y, vec.z);
                 }
                 D_0054EF68++;
@@ -1450,12 +1450,12 @@ void fldNpcCalc(void)
                     if (fldModelSlotTable[i].cntAnmi >= 49) {
                         fldModelSlotTable[i].cntAnmi = 48;
                     }
-                    D_0054EF6C = x;
-                    D_0054EF70 = y;
-                    D_0054EF74 = z;
+                    fldNpcCamPosX = x;
+                    fldNpcCamPosY = y;
+                    fldNpcCamPosZ = z;
                     fldNpcCamTarget = 2;
                     SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                    D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                    fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                     switch (fldTakaraTable[fldModelSlotTable[i].itemBoxIdx].type) {
                     case 0:
                     case 2:
@@ -1479,7 +1479,7 @@ void fldNpcCalc(void)
                     (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(fldModelSlotTable[i].name) != 0)) {
                     if (fldModelSlotTable[i].cntAnmi == 0) {
                         fldSePlay(0x2D);
-                        D_0054EEB0 = i;
+                        fldNpcCamSlot = i;
                         if (fldGlobalBase.area >= 11) {
                             fldNpcModelStart(i, x, y - 10.0f, z, &fldModelSlotTable[i].rot);
                         }
@@ -1494,13 +1494,13 @@ void fldNpcCalc(void)
                     fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
                     fldDeleteNpcModel(i);
                 } else {
-                    D_0054EF6C = x;
-                    D_0054EF70 = y;
-                    D_0054EF74 = z;
+                    fldNpcCamPosX = x;
+                    fldNpcCamPosY = y;
+                    fldNpcCamPosZ = z;
                     SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                    D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                    fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                     fldCamNpcTarget = -140.0f;
-                    D_0054EF80 = -140.0f;
+                    fldNpcCamTargetY = -140.0f;
                     fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     fldModelSlotTable[i].cntf += 0.05f;
                     fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
@@ -1514,58 +1514,58 @@ void fldNpcCalc(void)
                         fldNpcCamTarget = 0;
                     } else if (fldModelSlotTable[i].camera == 1) {
                         fldNpcCamTarget = 1;
-                        D_0054EEB0 = -1;
-                        D_0054EF6C = x;
-                        D_0054EF70 = y;
-                        D_0054EF74 = z;
+                        fldNpcCamSlot = -1;
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         fldCamNpcTarget = -110.0f;
-                        D_0054EF80 = -110.0f;
+                        fldNpcCamTargetY = -110.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     } else if (fldModelSlotTable[i].camera == 2) {
                         fldNpcCamTarget = 1;
-                        D_0054EEB0 = -1;
-                        D_0054EF6C = x;
-                        D_0054EF70 = y;
-                        D_0054EF74 = z;
+                        fldNpcCamSlot = -1;
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         fldCamNpcTarget = -50.0f;
-                        D_0054EF80 = -50.0f;
+                        fldNpcCamTargetY = -50.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     } else if (fldModelSlotTable[i].camera == 3) {
                         fldNpcCamTarget = 1;
-                        D_0054EEB0 = -1;
-                        D_0054EF6C = x;
-                        D_0054EF70 = y;
-                        D_0054EF74 = z;
+                        fldNpcCamSlot = -1;
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         fldCamNpcTarget = -180.0f;
-                        D_0054EF80 = -180.0f;
+                        fldNpcCamTargetY = -180.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     } else if (fldModelSlotTable[i].camera == 4) {
                         fldNpcCamTarget = 1;
-                        D_0054EEB0 = -1;
-                        D_0054EF6C = x;
-                        D_0054EF70 = y;
-                        D_0054EF74 = z;
+                        fldNpcCamSlot = -1;
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         fldCamNpcTarget = -10.0f;
-                        D_0054EF80 = -170.0f;
+                        fldNpcCamTargetY = -170.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     } else if (fldModelSlotTable[i].camera == 5) {
                         fldNpcCamTarget = 1;
-                        D_0054EEB0 = -1;
-                        D_0054EF6C = x;
-                        D_0054EF70 = y;
-                        D_0054EF74 = z;
+                        fldNpcCamSlot = -1;
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        D_0054EF78 = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         fldCamNpcTarget = -210.0f;
-                        D_0054EF80 = -180.0f;
+                        fldNpcCamTargetY = -180.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
                     }
                 }
@@ -1622,9 +1622,9 @@ void fldNpcDraw(void)
             }
             kind = fldTakaraTable[slot->tableIndex].trap;
             if (kind >= 2 && kind < 4) {
-                if (dds3EffectGetState(D_0054EEDC) != 0) {
-                    dds3EffectSetPosition(D_0054EEDC, &position);
-                    dds3EffectDraw(D_0054EEDC);
+                if (dds3EffectGetState(fldTDmgEffect) != 0) {
+                    dds3EffectSetPosition(fldTDmgEffect, &position);
+                    dds3EffectDraw(fldTDmgEffect);
                 }
             } else if (fldItemBoxCount != NULL) {
                 dds3EffectPartSetPosition(fldItemBoxCount, &position);
@@ -1747,16 +1747,16 @@ void fldNpcDraw(void)
             }
         }
     }
-    if (fldGlobalBase.area >= 11 && fldNpcCamTarget == 1 && D_0054EEB0 != -1 &&
-        fldModelSlotTable[D_0054EEB0].kind == 0) {
+    if (fldGlobalBase.area >= 11 && fldNpcCamTarget == 1 && fldNpcCamSlot != -1 &&
+        fldModelSlotTable[fldNpcCamSlot].kind == 0) {
         fldNpcDrawCount += 3;
         if (fldNpcDrawCount > 128) fldNpcDrawCount = 128;
         mdlSetColor(dds3ObjectBaseGetModelHandle(fldNpcFreeCount), ((u32)fldNpcDrawCount << 24) | 0x808080);
         dds3EffectDistortionBlurDraw(fldBlurEffectHandle);
     }
     if (fldDmgBlurHandle != 0) {
-        if (dds3EffectGetState(D_0054EED0) == 0) fldDmgBlurHandle = 0;
-        else dds3EffectDraw(D_0054EED0);
+        if (dds3EffectGetState(fldDmgBlurEffect) == 0) fldDmgBlurHandle = 0;
+        else dds3EffectDraw(fldDmgBlurEffect);
     }
     if (fldNpcBlurHandle != 0 && dds3EffectGetState(fldBlurEffectId[0]) != 0) {
         dds3EffectDraw(fldBlurEffectId[0]);
@@ -1794,16 +1794,16 @@ void fldNpcLightLoad(s32 field) {
             sprintf(path, fldNpcPlFormat, directory, field);
         }
         fd = sdfFileOpen(path);
-        sdfFileRead(fd, D_003129D0, 0x100);
+        sdfFileRead(fd, fldNpcLightTable, 0x100);
         sdfFileClose(fd);
     }
 }
 
 void fldGetEAEntry(const fldNpcPalette_t *src) {
-    memcpy(D_003129D0, src, sizeof(*src));
+    memcpy(fldNpcLightTable, src, sizeof(*src));
 }
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", D_00532770);
+INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcModelStartAxis);
 
 INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcUnitName);
 

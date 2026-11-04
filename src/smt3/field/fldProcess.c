@@ -146,13 +146,13 @@ extern s32 campCheckExitState(void);
 
 extern void fldEncountClearFlag(u32 flag);
 
-extern dds3Basic_t *D_0054EAB0;
+extern dds3Basic_t *fldRunTama1Basic;
 
 extern dds3Basic_t *fldRunTama2Basic;
 
 extern dds3Basic_t *fldRunTama3Basic;
 
-extern s32 D_0054EABC;
+extern s32 fldRunTamaNext;
 
 extern void evtEnableMoonDraw(void);
 

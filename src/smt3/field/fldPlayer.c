@@ -79,9 +79,9 @@ extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, f32 *scl);
 
 extern f32 fldWmapPlayerState;
 
-extern sdfVector4Unaligned_t D_00531D08;
+extern sdfVector4Unaligned_t fldWm3Scale;
 
-extern sdfVector4Unaligned_t D_00531D18;
+extern sdfVector4Unaligned_t fldWm4Scale;
 
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
@@ -452,7 +452,7 @@ void fldPlayerCalc_Hit(void) {
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
-extern sdfVector4_t D_00531C50;
+extern sdfVector4_t fldWarpRunAxis;
 extern sdfMatrix4_t D_002FA240;
 extern f32 EulerAngleAxisY(void);
 extern void InversMatrix(void);
@@ -468,7 +468,7 @@ void fldPlayerCalc_WarpRun(void)
     fldUnitControl_t *control = fldGetUnitControl();
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
     mdlObj_t *model2 = NULL;
-    sdfVector4_t axis __attribute__((aligned(16))) = *(volatile sdfVector4_t *)&D_00531C50;
+    sdfVector4_t axis __attribute__((aligned(16))) = *(volatile sdfVector4_t *)&fldWarpRunAxis;
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t oldPosition __attribute__((aligned(16)));
@@ -679,7 +679,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
 #endif
 
 #ifdef NON_MATCHING
-extern const volatile sdfVector4_t D_00531C60;
+extern const volatile sdfVector4_t fldNmlAxis;
 extern const char fldDamageOnMsg[], fldDamageOffMsg[];
 #define D_0054E90A ((u8 *)dds3PadStickState + 2)
 extern u8 dds3PadStickState[2][2][2];
@@ -687,8 +687,8 @@ extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, D_0054ECD8;
 extern u32 fldPlayerMoveStateSaved;
 extern f32 fldCamPitch, fldCamLength, fldCamPitchTarget;
-extern f32 D_0054C3D4, D_0054C3D8, D_0054C3DC, D_0054C3E0;
-extern f32 D_0054C3E4, D_0054C3E8, D_0054C3EC, D_0054C3F0;
+extern f32 fldNmlGunSpeedScale0, fldNmlPi0, fldNmlGunSpeedScale1, fldNmlPi1;
+extern f32 fldNmlPi2, fldNmlPitchStep, fldNmlPi3, fldNmlPi4;
 extern sdfMatrix4_t D_002FA240;
 #include "sdk_libc.h"
 
@@ -726,7 +726,7 @@ s32 fldPlayerCalc_Nml(void)
     fldUnitControl_t *control = fldGetUnitControl();
     dds3Basic_t *second = control->handle2;
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
-    sdfVector4_t axis __attribute__((aligned(16))) = D_00531C60;
+    sdfVector4_t axis __attribute__((aligned(16))) = fldNmlAxis;
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
@@ -984,23 +984,23 @@ s32 fldPlayerCalc_Nml(void)
             }
             if ((fldRunDanteGunFlag.word50 & 2) ||
                 (fldPlayerPackedState() & 0x01400000ULL)) {
-                speed *= D_0054C3D4;
+                speed *= fldNmlGunSpeedScale0;
             }
             delta = R360_LR(fldGlobalBase.camAngle, angle);
             if (delta < 0.0f) {
                 delta = -delta;
             }
-            moveAngle = (-angle * D_0054C3D8) / 180.0f;
+            moveAngle = (-angle * fldNmlPi0) / 180.0f;
             speed = (speed / 180.0f) * (180.0f - delta);
         } else {
             speed = fldPlayerMoveState == 0 ? 29.0f : 20.0f;
             if (fldRunDanteGunFlag.word50 & 2) {
-                speed *= D_0054C3DC;
+                speed *= fldNmlGunSpeedScale1;
             }
             if (fldGlobalBase.float130 > 0.0f) {
                 speed += (sdfFabs(fldGlobalBase.float130) / 40.0f) + 2.0f;
             }
-            moveAngle = (-moveAngle * D_0054C3E0) / 180.0f;
+            moveAngle = (-moveAngle * fldNmlPi1) / 180.0f;
         }
         position.x = fldGlobalBase.x - sdfSin(moveAngle) * SDF_FRAME_STEP(speed);
         position.y = fldGlobalBase.y;
@@ -1097,7 +1097,7 @@ s32 fldPlayerCalc_Nml(void)
         fldGlobalBase.camAngle += amount;
     }
     SDF_VU0_LOADVECTOR(&axis);
-    FromRotation(fldGlobalBase.camAngle * D_0054C3E4 / 180.0f);
+    FromRotation(fldGlobalBase.camAngle * fldNmlPi2 / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
     if (control->handle2 != NULL) {
@@ -1153,7 +1153,7 @@ s32 fldPlayerCalc_Nml(void)
             fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         }
         if ((left || right || forward || back) && (s32)fldCamPitch != (s32)fldCamPitchTarget) {
-            amount = D_0054C3E8;
+            amount = fldNmlPitchStep;
             delta = R360_LR(fldCamPitch, fldCamPitchTarget);
             if (fldPlayerMoveState == 0) {
                 amount = 0.5f;
@@ -1185,7 +1185,7 @@ s32 fldPlayerCalc_Nml(void)
             if (modifier) {
                 fldGlobalBase.camAngle = -fldCamPitch;
                 SDF_VU0_LOADVECTOR(&axis);
-                FromRotation(fldGlobalBase.camAngle * D_0054C3EC / 180.0f);
+                FromRotation(fldGlobalBase.camAngle * fldNmlPi3 / 180.0f);
                 SDF_VU0_STOREVECTOR(&rotation);
                 dds3SetRotPoseSet(control->handle, &rotation);
             }
@@ -1195,7 +1195,7 @@ s32 fldPlayerCalc_Nml(void)
             if (modifier) {
                 fldGlobalBase.camAngle = -fldCamPitch;
                 SDF_VU0_LOADVECTOR(&axis);
-                FromRotation(fldGlobalBase.camAngle * D_0054C3F0 / 180.0f);
+                FromRotation(fldGlobalBase.camAngle * fldNmlPi4 / 180.0f);
                 SDF_VU0_STOREVECTOR(&rotation);
                 dds3SetRotPoseSet(control->handle, &rotation);
             }
@@ -1284,9 +1284,9 @@ s32 fldPlayerCalc_Nml(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C50);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWarpRunAxis);
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531C60);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlAxis);
 
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
 #endif
@@ -1307,7 +1307,7 @@ void fldPlayerCalc_FastStart(void)
 void fldPlayerCalc_Wm3(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
-    sdfVector4_t scale = D_00531D08;
+    sdfVector4_t scale = fldWm3Scale;
     f32 next;
 
     if (fldWmWarpMode != 1) {
@@ -1330,7 +1330,7 @@ void fldPlayerCalc_Wm3(void) {
 void fldPlayerCalc_Wm4(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
-    sdfVector4_t scale = D_00531D18;
+    sdfVector4_t scale = fldWm4Scale;
     f32 next;
 
     if (fldWmWarpMode == 2) {
@@ -1373,7 +1373,7 @@ extern s32 fldHitChkMatter;
 extern s32 fldWmapMatterLast, fldWmapBlendStep;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, fldWmapPosFrom, fldWmapPosTo;
-extern sdfVector4Unaligned_t D_00531D28, D_00531D38;
+extern sdfVector4Unaligned_t fldWm2Scale, fldWm2WorkInit;
 extern sdfMatrix4_t D_002FA240;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
@@ -1399,7 +1399,7 @@ s32 fldPlayerCalc_Wm2(void)
     sdfVector4_t direction;
     sdfVector4_t normal;
     sdfVector4_t rotation;
-    sdfVector4_t scale = D_00531D28;
+    sdfVector4_t scale = fldWm2Scale;
     sdfVector4_t work;
     s32 up, down, left, right;
     s32 moving = 0;
@@ -1645,7 +1645,7 @@ s32 fldPlayerCalc_Wm2(void)
     } else if (fldHitChkMatter >= 0) {
         f32 a, b, xrot, zrot, zAbs, xAbs;
 
-        work = D_00531D38;
+        work = fldWm2WorkInit;
         work.x = fldWmapPlayerPos.x;
         work.y = fldWmapPlayerPos.y;
         work.z = fldWmapPlayerPos.z;
@@ -1690,12 +1690,12 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
  * to turnRight (387) and not turnLeft (381), so retail's set needs turnLeft to
  * outrank turnRight too and is not reachable from this source. */
 #ifdef NON_MATCHING
-extern const volatile sdfVector4_t D_00531D48;
+extern const volatile sdfVector4_t fldNmlSyukanAxis;
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;
 extern s32 D_0054ECD8;
-extern f32 fldCamPitchTarget, D_0054C414, D_0054C418, D_0054C41C, D_0054C420;
+extern f32 fldCamPitchTarget, fldSyukanGunSpeedScale, fldSyukanPi0, fldSyukanPi1, fldSyukanPi2;
 extern f32 fldCamPitch;
 extern sdfMatrix4_t D_002FA240;
 extern s32 fldCamMiwatasiChk(void);
@@ -1725,7 +1725,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
-    sdfVector4_t axis __attribute__((aligned(16))) = D_00531D48;
+    sdfVector4_t axis __attribute__((aligned(16))) = fldNmlSyukanAxis;
     f32 collisionPosition[4] __attribute__((aligned(16)));
     s32 moving = 0;
     s32 left = 0, right = 0, forward = 0, back = 0;
@@ -1956,9 +1956,9 @@ s32 fldPlayerCalc_Nml_syukan(void)
             speed = sdfFabs(fldGlobalBase.float130) / 40.0f + 2.0f + speed;
         }
         if (fldRunDanteGunFlag.word50 & 2) {
-            speed *= D_0054C414;
+            speed *= fldSyukanGunSpeedScale;
         }
-        rad = -angle * D_0054C418 / 180.0f;
+        rad = -angle * fldSyukanPi0 / 180.0f;
         position.x = fldGlobalBase.x - sdfSin(rad) * speed;
         position.y = fldGlobalBase.y;
         position.z = fldGlobalBase.z - sdfCos(rad) * speed;
@@ -2043,7 +2043,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
         fldGlobalBase.camAngle = result;
     }
     SDF_VU0_LOADVECTOR(&axis);
-    FromRotation(fldGlobalBase.camAngle * D_0054C41C / 180.0f);
+    FromRotation(fldGlobalBase.camAngle * fldSyukanPi1 / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
     target = fldCamPitchTarget;
@@ -2114,7 +2114,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     fldGlobalBase.camAngle2 = -fldCamPitchTarget;
     fldGlobalBase.camAngle = -fldCamPitch;
     SDF_VU0_LOADVECTOR(&axis);
-    FromRotation(fldGlobalBase.camAngle * D_0054C420 / 180.0f);
+    FromRotation(fldGlobalBase.camAngle * fldSyukanPi2 / 180.0f);
     SDF_VU0_STOREVECTOR(&rotation);
     dds3SetRotPoseSet(control->handle, &rotation);
     fldPlayerOn();
@@ -2269,15 +2269,15 @@ s32 fldPlayerCalc(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531D08);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm3Scale);
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531D18);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm4Scale);
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531D28);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2Scale);
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531D38);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2WorkInit);
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", D_00531D48);
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlSyukanAxis);
 
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc);
 #endif
