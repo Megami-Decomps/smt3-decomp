@@ -55,7 +55,6 @@ extern s16 fldRun_MAP_BX;
 
 extern s16 fldRun_MAP_BZ;
 
-extern s32 fldRunAiTimer __attribute__((section(".bss")));
 extern u32 dds3GetKernelCount(void);
 
 extern s32 evtBitCheck(s32 no);
@@ -307,7 +306,6 @@ extern char D_00530F30[];
 
 extern fldTest_FLDRUN_DANTE_t fldRun_Dante;
 
-extern s32 fldRunDanteHandle __attribute__((section(".bss")));
 
 extern s32 fldRunDanteSe_asise;
 
@@ -1227,7 +1225,7 @@ INCLUDE_ASM(const s32, "field/fldTest", fldSdwDraw);
 
 void fldRunDanteClear(void)
 {
-    fldRunDanteHandle = -1;
+    fldRun_Dante.old_status = -1;
 }
 
 #ifdef NON_MATCHING
@@ -2917,7 +2915,7 @@ void fldRunDanteShutdown(void)
     if (fldGlobalBase.reuseAreaResources != 0) {
         fldRun_Dante.old_status = fldRun_Dante.status;
     } else {
-        fldRunDanteHandle = -1;
+        fldRun_Dante.old_status = -1;
     }
 }
 
@@ -3247,7 +3245,7 @@ s32 fldRunEncountChk(void)
     if (evtBitCheck(0xAF3) == 0) {
         return 0;
     }
-    if (fldRunAiTimer & 1) {
+    if (fldRun_Dante.flag & 1) {
         return 0;
     }
     fldRunDanteGetDistAngle(&dist, &angle);
