@@ -614,7 +614,7 @@ extern f32 D_003170E0[][4];
 extern f32 D_003171B0[][4];
 extern f32 D_003171A0[4];
 extern u8 aViewDown[];
-extern void (*dds3ParticleAllBuffInitTable[])();
+extern void (*dds3ParticleAllBuffInitTable[])(void *);
 extern void (*dds3ParticleSetScaleTable[])(dds3Particle_Basic_t *, f32);
 
 extern void *memset(void *a, s32 b, size_t c);

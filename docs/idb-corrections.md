@@ -1210,3 +1210,5 @@ The five bases with a `D_` label inside, decided by whether code indexes across 
 - `ragListFlags`: sized 5, the array C declares. The labels at +8 and later are separate objects.
 
 Resizes that were skipped for a referenced `D_` label: `dds3PadBitTable` is now 0x20, with `D_005298C9`, `D_005298CB` and `D_005298D5` rewritten to `dds3PadBitTable[1]`, `[3]` and `[0xD]`, and `D_005298D8` to `&dds3PadBitTable[0x10]`. `fldEncountTimer` is 8 (the sequence call passes 8 bytes). `nbPanelPTPartList` stays 4: the code indexes it as a table, but `nbPressTurnTable` and `D_004F000C` are referenced as their own arrays right after it.
+
+Embedded blobs sized to their header length (u8): 81 scrEmbedded_*, itfMesEmbedded_* and similar symbols. Inner names dropped as parts of larger blobs: itfMesEmbedded_326858, itfMesEmbedded_522AF0, dds3ArcTable.

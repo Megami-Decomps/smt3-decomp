@@ -935,7 +935,7 @@ void sdfFileCmdThreadCheckPrio(void)
 /* Start worker thread `index` if it isn't running; slot 3 runs the alternate entry point. */
 void sdfFileCmdStartThread(s32 deviceType) {
     sdfFileDeviceCB_t *worker = &sdfFileDeviceCB[deviceType];
-    void (*entry)();
+    void (*entry)(sdfFileDeviceCB_t *);
     s32 thread;
     thread = worker->thId;
     if (thread < 0) {

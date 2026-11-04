@@ -1235,5 +1235,3 @@ INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB8C);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountTimer);
 
-INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB94);
-

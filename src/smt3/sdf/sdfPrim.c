@@ -118,7 +118,7 @@ struct sdfPreDrawTag_t;
 
 /* The frame worker passes the node and queued buffer index. The registered
  * handlers project the node into their distinct complete packet owners. */
-typedef void (*SdfPacketPatchCallback)();
+typedef void (*SdfPacketPatchCallback)(void *, s32);
 
 
 /* GIF REGLIST stream: PRIM, RGBAQ and two packed XYZ2 vertices. */
