@@ -5286,6 +5286,7 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
         sdfModelGetMarkPos(model->modelRoot, 1);
         SDF_VU0_STOREVECTOR(work->pos);
     }
+    SDF_FRAME_FOLLOW_BEGIN(work->frame, work->pos, work->pos_old, model->modelRoot, 1);
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
             if (i == 4) {
@@ -5301,6 +5302,7 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
             dds3EffectPartDraw(work->handleA[i]);
         }
     }
+    SDF_FRAME_FOLLOW_END(work->pos, work->pos_old);
     if (frame >= 0) {
         if (frame == 0) {
             for (i = 0; i < 5; i++) {
