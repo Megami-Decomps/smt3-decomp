@@ -1201,6 +1201,8 @@ void fldProcNextJump(void)
 /* After the definition it offsets from, which the assembler needs. */
 SYMBOL_AT(s32, fldSequenceState, fldAutoMapSeqFlags, 4);
 
+SYMBOL_AT(u32, D_0054EB94, fldEncountTimer, 4);
+
 INCLUDE_RODATA(const s32, "field/fldProcess", D_00531950);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldNextFieldId);

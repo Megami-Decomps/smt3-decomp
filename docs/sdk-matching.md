@@ -1175,3 +1175,16 @@ constants reproduce their native 48-byte block. The earlier ASM-only ownership
 change and the C promotion each pass the complete libc/libkernl owners and the
 retail checksum; plain and `-da` output agree under the selected 2.9 compiler.
 This adds 360 SDK bytes, not game-code bytes.
+
+## dptofp return-convention safeguard
+
+The 84-byte retail `dptofp` (88 bytes including alignment padding) reads `$v0` after calling `sdfPackQuad`, although
+that provider returns `f32` in `$f0`. This is the original implicit-declaration
+bug, not a valid alternative provider signature. An explicit `s32` alias to
+the `f32` provider preserves bytes but violates the truthful-type requirement.
+
+Default builds therefore retain the retail assembly for `dptofp`; the existing
+corrected C conversion is available only under `FIX_BUGS`, with the provider's
+actual signature. The truthful C control emits 132 bytes and is not claimed to
+preserve the native erroneous return. This withdraws 84 SDK code bytes of claimed C
+coverage, with no game-code change or new matching credit.
