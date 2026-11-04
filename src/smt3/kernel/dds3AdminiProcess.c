@@ -470,6 +470,9 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103420);
 #endif
 
 /* NON_MATCHING: 11 of 42 words differ (first at +0x8). */
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq38, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy,
                        void *userValue)

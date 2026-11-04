@@ -150,6 +150,9 @@ void rstAddAsignParam(void)
     func_00224230(startPos->pCurrentStock);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 cmpGetPressedButton(s32 mask);
 extern s8 cmpGetParamGaugeColor(s8 index);

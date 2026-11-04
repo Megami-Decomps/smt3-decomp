@@ -3905,6 +3905,9 @@ s32 nbCameraBoss_CheckFix(void)
     return 1;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
+ * battle_0_1, capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera);
 
@@ -5207,6 +5210,9 @@ s32 nbCameraBoss_BSLUSI_Cut23_AllParty_Set(nbCamera_t *pNbCamera)
     return 0;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 effBTLModelCheckBossID(nbFormation_t *form);
 extern void nbCameraShot_Target_Set2(nbCamera_t *camera, nbCameraSkillInfo_t *info);
@@ -5642,6 +5648,9 @@ s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
     return 0;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 9 PCSX2 call vectors give the same return and memory,
+ * capture_009, capture_010, capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *camera, nbCameraSkillInfo_t *info);
 extern void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *camera, nbCameraSkillInfo_t *info);
@@ -5940,6 +5949,9 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * capture_015, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void ToMatrix(void);
 extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);

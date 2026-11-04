@@ -2650,6 +2650,9 @@ void nmeDrawFrame(s32 type, s32 frame)
     nmeDrawQuadPanel(0x9192FF4C, 0x88D8FC33, pulse, 7);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq33, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures,
                       fclSpriteTbl_t *table, u32 color, s32 frame, s32 ot)
@@ -5904,6 +5907,9 @@ void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit
     cmpDrawStatusIconRow(x + 0x960, y + 0x3C8, 0xFFFF, colors[0], unit, mpIconFlags, 0x47);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
 {
@@ -5963,6 +5969,9 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
 extern char *datExplainTable[];
 extern u32 strlen(const char *text);
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawStatusGauge(s32 x, s32 y, s8 index, s32 intensity)
 {
@@ -6007,6 +6016,9 @@ extern s16 cmpHeartsMasterPhase FAKEMATCH_ASM_NAME("rstHeartsMasterPhase");
 extern datUnitWork_t *volatile cmpStatusBirthLive FAKEMATCH_ASM_NAME("cmbBirthPanel");
 extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused);
 
+/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
 {
@@ -6127,6 +6139,9 @@ extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
 extern s32 cmbGetParam(datUnitWork_t *unit, s32 index);
 extern volatile s32 cmpGaugeAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
                        s8 index, s8 bonus, s8 mode, datUnitWork_t *unit)
@@ -6385,6 +6400,9 @@ void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
     fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 11, D_00345D88, fclSpriteTable, 0x47);
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
                          s32 mode, s8 *count)
@@ -6490,6 +6508,9 @@ extern s32 cmpFindSkillEntry(u16 skillId);
 extern char *text1[];
 extern volatile s32 cmpSkillAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
                   rstSkillInfo_t *skills, s8 selected, s8 selectMode,
@@ -8903,6 +8924,9 @@ s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
     return 0;
 }
 
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq26, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
                         cmpCursorSlot_t *cursor, s32 mode, s32 alpha)
@@ -10980,6 +11004,9 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorSlots);
 #endif
 
 /* NON_MATCHING: 7 of 37 words differ, exact size. */
+/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
+ * seq17, seq26, seq28, seq29, seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 {
@@ -11502,6 +11529,9 @@ void func_00242320(s8 value, u8 *work)
 }
 
 /* NON_MATCHING: 16 of 38 words differ, exact size. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * seq26, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 s32 cmpCursorSlotIsSelectable(datUnitWork_t *unit, u16 mask, s8 flag)
 {
@@ -11558,6 +11588,9 @@ s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetStockInfoIndex);
 #endif
 
+/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+ * seq26, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void cmpBuildStockNameList(cmpLocalStock_t *stock)
 {
