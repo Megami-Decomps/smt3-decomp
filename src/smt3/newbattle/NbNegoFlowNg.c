@@ -533,30 +533,21 @@ s32 Flow10_33(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 15 of 35 words differ (first at +0x34). */
-#ifdef NON_MATCHING
 s32 Flow10_10(nbNegoProcessData_t *n)
 {
-    s32 mes;
-    s32 type;
-
     nbAddNegoIdKouho(n, 0x6004A);
     n->workid[6] = 0x60009;
     n->cnt6_36 = 0;
     n->cnt6_37 = 0;
     if (n->hojoaisyo == 1) {
-        mes = n->aisyomsg[n->ekucyo];
-        type = n->hojoaisyomes;
+        nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], n->hojoaisyomes, 0);
+        return 0;
     } else {
-        mes = n->flowmsg[n->ekucyo];
-        type = 0xD9;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD9, 0);
+        return 0;
     }
-    nbDispNegoMessage(n, mes, type, 0);
-    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowNg", Flow10_10);
-#endif
+
 
 s32 Flow10_11(nbNegoProcessData_t *n)
 {
