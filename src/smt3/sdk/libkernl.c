@@ -3107,9 +3107,6 @@ extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);
 
-/* NON_MATCHING: 31 of 34 words match at the native 136-byte size;
- * the final initialization store and return use different scheduling. */
-#ifdef NON_MATCHING
 s32 sceSifInitIopHeap(void)
 {
     s32 delay;
@@ -3124,12 +3121,18 @@ s32 sceSifInitIopHeap(void)
         for (delay = 0x100000; delay != -1; delay--) {
         }
     }
-    D_0052C354 = 0;
-    return 0;
+    {
+        /* SDK 2.9 otherwise separates the flag-address and return phases.
+         * Keep this real address/store/result lifetime in the return register;
+         * the binding is a reconstruction aid, not original-source evidence.
+         * This initialized lifetime starts after the final call.
+         */
+        FAKEMATCH_ASM_REG(saddr_t, result, "v0") = EE_ADDR_S(&D_0052C354);
+        *EE_ADDR_AS(s32 *, result) = 0;
+        result = 0;
+        return result;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitIopHeap);
-#endif
 
 s32 sceSifAllocIopHeap(s32 size)
 {

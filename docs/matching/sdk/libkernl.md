@@ -101,21 +101,56 @@ registration link at 0x38, while pending requests use the separate link at
 
 ## sceSifInitIopHeap
 
-31 of 34 words match at the native 136-byte size. The last three differing
-words construct the initialization-flag address, store zero and return zero:
-native uses the return register for the address before clearing it; the C
-uses a separate address register and clears the return register before the
-store. The bind/retry loop and its four countdown NOPs match ordinary C.
+34 of 34 words match at the native 136-byte size. The routine binds service
+`0x80000003` synchronously, returns -1 for a negative bind result, and retries
+after the native countdown while the client's server is null. The bind ABI,
+server field at +0x24, countdown and four native NOPs are unchanged. Only a
+successful binding clears the initialization flag and returns zero.
 
-Naming the global client at each use reproduces the native separately saved
-high address and per-iteration client address. Keeping one local client pointer
-instead emits 128 bytes. Moving the successful flag store and return into the
-loop emits 144 bytes and changes its control flow; neither is preferred.
+A nested block after the final call holds the actual flag address and then
+the zero return value in one `saddr_t` scalar, bound locally to `v0`. It is
+initialized in its declaration through `EE_ADDR_S`, consumed by the real
+`EE_ADDR_AS(s32 *, result)` store, then overwritten with the actual return.
+No live fixed value crosses a call. This uses the existing signed EE address
+representation and its matching pointer conversion, without address arithmetic,
+comparison, an alias promise or a new input bound. The externally owned flag
+remains a four-byte `s32` initialized to -1. No data ownership changes.
 
-The routine binds service `0x80000003` synchronously, returns `-1` for a negative
-bind result, and retries after the native countdown while the bound server is
-null. Only successful binding clears the heap initialization flag. No new
-volatile accesses, instruction padding or forced register use are justified.
+The binding is a target-specific reconstruction aid, not historical source
+evidence. It emits no additional instruction or empty asm. Independently
+removing only the binding restores the three-word tail mismatch: the compiler
+separates the flag-address register from the return register and clears the
+return before the store. Ordinary address/result reuse, reuse of the earlier
+bind result, a pointer-only binding and an empty live-result control also fail.
+The unsigned address representation and moving the initialized scalar into
+this narrow tail block are complete-output neutral. No signedness trick,
+artificial consumer, volatile memory access or memory barrier is involved.
+
+Earlier global-client and loop controls remain closed: keeping one client
+pointer emits 128 bytes, while moving the store and return into the loop emits
+144 and changes control flow. The retained source keeps each real global-client
+use and the original retry structure.
+
+Independent semantic and output review approves the final source. Baseline and
+candidate pass strict production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM`
+compilation, with complete plain/dump assembly, ELF-header, allocated-section,
+non-file-symbol and relocation parity. Both owner checkers report 149 match,
+0 differ. All 363 other production functions, including Add/Remove handlers,
+retain their bytes and extents; all 664 rodata bytes and 98 relocations remain
+unchanged. Full retail checksum, generated-source, regression and report checks
+pass. The production-proof machinery independently verifies compiler provenance,
+receipt hashes, unique object/link ownership and all 136 retail bytes at
+0x002E2B10. Exactly one SDK function is newly supplied by verified C; game-code
+coverage is unchanged.
+
+The current whole-binary aggregate does not add these 136 bytes: SDK units keep
+raw objdiff scores, while production reconciliation is limited to game units.
+Raw objdiff gives this function 99.70588% solely because the target disassembly
+represents the countdown at +0x18/+0x20 as `%hi(D_FFFFF)` / `%lo(D_FFFFF)` rather
+than the compiler's immediate 0x10 / -1. The absolute pseudo-symbol 0xFFFFF
+resolves to identical instructions. These countdown relocation encodings also
+explain the three raw object-byte differences; the flag-address tail is exact.
+No report category, counter, check or target metadata was changed to claim credit.
 
 ## sceSifSetIopAddr
 
