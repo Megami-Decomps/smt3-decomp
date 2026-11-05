@@ -3686,8 +3686,6 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
 
-/* Four initialization stores differ; see docs/matching/sdk/libkernl.md. */
-#ifdef NON_MATCHING
 extern s32 D_0052C378;
 extern s32 D_0052C37C;
 
@@ -3696,14 +3694,13 @@ void supplement_crt0(void)
     rpcSemaParam first;
     rpcSemaParam second;
 
-    first.maxCount = second.maxCount = 1;
-    first.initCount = second.initCount = 1;
+    first.maxCount = 1;
+    first.initCount = 1;
+    second.maxCount = 1;
+    second.initCount = 1;
     D_0052C378 = CreateSema(&first);
     D_0052C37C = CreateSema(&second);
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", supplement_crt0);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy);
 

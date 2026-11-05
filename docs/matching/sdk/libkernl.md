@@ -224,18 +224,41 @@ needed before another pass over the early dispatch.
 
 ## supplement_crt0 (sdk/libkernl, 0x48)
 
-4 of 18 words differ: four independent descriptor stores have a different
-order, beginning at +0x10. All 72 bytes are emitted; the other 14 words match.
-Two ordinary six-word `rpcSemaParam` locals receive initial and maximum
-counts of one before the first `CreateSema`; all remaining fields stay
-untouched. The two semaphore results are stored separately. The native
-0x50-byte frame needs no invented descriptor padding or alignment.
+18 of 18 words match at the native 72-byte size in ordinary C. The four
+assignments are first maximum, first initial, second maximum, second initial.
+No constraint, qualifier, type, provider declaration or compiler flag changes
+are needed. This is a matching reconstruction, not evidence of historical
+source spelling.
 
-One chained four-field initialization produced the same residual as separate
-assignments. The readable shared-field initialization retains the same four
-store differences. Extern globals use their existing data ownership without
-section overrides; there is no volatile scratch, barrier, copy assembly or
-extra flag. A follow-up needs evidence for native initialization scheduling.
+Both `rpcSemaParam` objects retain their six 32-bit fields, with signed maximum
+at +4 and initial at +8. Only those two fields in each descriptor are assigned
+one; all other fields remain untouched. Native allocation places the records
+at SP+0 and SP+0x20 in the existing 0x50 frame. No padding or extra initialization
+was introduced. The unchanged CreateSema syscall 0x40 provider consumes each
+actual descriptor pointer and returns its signed result. The first result is
+stored to D_0052C378 before the second call, and the second to D_0052C37C after
+it, preserving native call and store order.
+
+Qualified SDK 2.9 dumps show the earlier chained source's independent stores
+expand at stack offsets 0x24, 4, 0x28, 8, then schedule as 8, 0x24, 4, 0x28.
+The ordinary assignment order above expands as 4, 8, 0x24, 0x28 and schedules
+as native 0x28, 4, 8, 0x24, with the last store in the first call's delay slot.
+This observed ready-list ordering motivated one readable source control;
+no hooked comparator mechanism is claimed. Swapping only the first record's
+two assignments preserves size but leaves two differing words. The original
+chained control remains 14/18. No permutation sweep or artificial dependency
+is required.
+
+Independent semantic and full-output review approves the source. Baseline and
+candidate pass strict production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM`
+plain/dump checks for complete assembly, ELF headers, allocated section headers
+and bytes, non-file symbols and every relocation. Both complete-owner checkers
+report 150 match, 0 differ. All 363 other production function bodies and layouts,
+including heap initialization and Add/Remove handlers, remain unchanged, as do
+664 rodata bytes and 98 relocations. Independent production ownership and linked
+retail-byte proof also pass. Full retail checksum, generated-source, regression,
+guard and report gates accompany the landing. Exactly one SDK function and
+72 bytes are newly supplied by verified C; game-code coverage is unchanged.
 
 ## sceSifInitRpc
 
