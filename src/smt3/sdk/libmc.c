@@ -354,9 +354,6 @@ s32 sceMcRead(s32 a, void *b, s32 c)
     return ret;
 }
 
-/* NON_MATCHING: native 380-byte instruction size; seven words differ
- * in the branch-local request base and store scheduling. */
-#ifdef NON_MATCHING
 s32 sceMcWrite(s32 a, const void *b, s32 c)
 {
     s32 ret;
@@ -372,8 +369,8 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     D_005997C0.write.descriptor = a;
     if (c < 17) {
         D_005997C0.write.inlineSize = c;
-        D_005997C0.write.bulkBuffer = 0;
         D_005997C0.write.bulkSize = 0;
+        D_005997C0.write.bulkBuffer = 0;
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
@@ -381,9 +378,9 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
         addr_t bot = EE_ADDR(b) - 16;
         s32 head = top - bot;
 
-        D_005997C0.write.bulkBuffer = (const u8 *)b + head;
-        D_005997C0.write.bulkSize = c - head;
         D_005997C0.write.inlineSize = head;
+        D_005997C0.write.bulkSize = c - head;
+        D_005997C0.write.bulkBuffer = (const u8 *)b + head;
     }
     for (i = 0; i < D_005997C0.write.inlineSize; i++) {
         D_005997C0.write.inlineData[i] = ((const u8 *)b)[i];
@@ -397,9 +394,6 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libmc", sceMcWrite);
-#endif
 
 extern s32 iWakeupThread(s32 thread);
 extern s32 GetThreadId(void);

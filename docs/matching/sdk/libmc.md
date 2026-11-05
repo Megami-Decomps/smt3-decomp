@@ -1,8 +1,8 @@
 # sdk/libmc
 
-Nineteen of the library's twenty-one `sceMc*` entry points match. Every one
-follows the same template, so the two remaining drafts differ only in their own
-detail, not in the frame:
+Twenty-one of the library's twenty-two `sceMc*` entry points match. Only
+`sceMcSync` remains drafted. Most command-submission entry points follow this
+template:
 
     if (PollSema(D_0052BB24) < 0) return -200;
     if (D_00599740.bound == 0) { SignalSema(D_0052BB24); return -100; }
@@ -29,34 +29,52 @@ overflows a `$gp`-relative literal reference in a game unit.
 
 ## sceMcWrite
 
-380 emitted and native instruction bytes: 88 of 95 words match and seven
-differ, first at +0x6C. The 384-byte address span includes four alignment bytes.
-The leading-byte arithmetic is right, and it
-has to be written as two separate subtractions:
+Matched: all 380 native instruction bytes, 95 of 95 words match. The following
+four bytes are alignment and are not credited as function content.
 
-    u32 top = ((u32)buf - 1) & ~15;
-    u32 bot = (u32)buf - 16;
+The leading-byte arithmetic stays as two separate unsigned subtractions:
+
+    addr_t top = (EE_ADDR(buf) - 1) & ~15;
+    addr_t bot = EE_ADDR(buf) - 16;
     s32 head = top - bot;
 
-Folding it into one expression makes gcc compute `((buf-1) & ~15) + 16 - buf`
-instead, which costs three instructions. The inline payload must also be a
-named member (`req.data[i]`), not `((u8 *)&req)[32 + i]`: the cast form hoists
-`base + 32` out of the loop, where retail keeps the base and uses 32 as the
-store displacement.
+This computes `(-address) mod 16`, from zero for an aligned buffer through 15.
+Folding it into one expression changes the native instruction sequence. The
+inline payload remains a named member rather than a cast base-plus-32 view,
+which otherwise hoists its address out of the copy loop.
 
-The write-specific view records descriptor at +0, signed bulk size at +0xC,
-unsigned inline size at +0x14, bulk-buffer pointer at +0x18 and sixteen prefix
-bytes at +0x20. The remaining words stay untouched. The original signed count
-selects the short path at count < 17, including negative counts; the copy loop
-uses the unsigned inline size. Preserve that native behavior. The source buffer
-and forwarded bulk pointer are read-only.
+The exact reconstruction changes only ordinary assignment order. In the short
+path, write inline size, zero bulk size, then null bulk buffer. In the long
+path, write inline size, remaining bulk size, then bulk buffer. Qualified SDK
+2.9 RTL and ready-list dumps show the latter scheduling bulk buffer, bulk size,
+then inline size, with the native request-base allocation. Reversing only the
+two long-path bulk assignments loses the complete-owner match. This explains
+a compiler dependency, not historical source spelling; no hooked scheduler
+comparator result is claimed. There is no constraint, binding, cached request
+pointer, artificial dependency, new qualifier, type or compiler flag.
 
-Typed fields retain the same seven-word residual as the generic request view:
-branch-local request-base selection and independent stores differ. Native long
-writes store bulk buffer, bulk size, then inline size; the compiler schedules
-inline size first. A cached request pointer shortens the function to 372 bytes
-and hoists the inline-data address, so the preferred source keeps direct global
-accesses. No field qualifiers or artificial dependencies constrain the stores.
+The 48-byte request has descriptor at +0, signed bulk size at +0xC, unsigned
+inline size at +0x14, bulk pointer at +0x18 and sixteen prefix bytes at +0x20.
+Other words stay untouched. For a valid nonnegative byte count, the short path
+copies at most sixteen bytes; the long path's 0–15-byte prefix stays within
+the supplied buffer. All header stores finish before source-byte reads, so no
+invented source-disjointness assumption is needed, including aliases into the
+request. The forward byte copy and its unsigned inline-size reload remain.
+Negative counts retain native signed short-path selection and the unsigned
+copy bound; ensuing out-of-bounds corruption is not defined C behavior or a
+newly added safety guarantee. Zero count does not dereference the buffer.
+
+Semaphore errors, the cache flush, all nine RPC arguments, success command
+publication and failure release are unchanged. The direct `pbMCard.c` caller
+declaration is aligned with the provider's `const void *` source parameter,
+without changing the wrapper or its emitted code. This does not assert that
+all higher-level memory-card wrapper declarations are consistent.
+
+Both public and private complete-owner checks pass 27 functions with no
+owned-data difference. Independent native/semantic review and strict
+production, `SKIP_ASM`, and retained-C builds pass; ordinary versus dump output
+agrees in complete assembly, the ELF header, allocated-section headers/data,
+non-file symbols and relocations. All other emitted functions and owned data are preserved.
 
 ## sceMcSync
 

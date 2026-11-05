@@ -192,7 +192,7 @@ s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
     return readResult;
 }
 
-extern s32 sceMcWrite(s32 fd, void *buffer, s32 size);
+extern s32 sceMcWrite(s32 fd, const void *buffer, s32 size);
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
 
 INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536560);

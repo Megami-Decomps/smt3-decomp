@@ -406,9 +406,9 @@ sceOpen				docs/matching/sdk/libkernl.md	294
 _sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	322
 sceDclose				docs/matching/sdk/libkernl.md	351
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
-sceMcWrite			88 of 95 words match	docs/matching/sdk/libmc.md	30
-sceMcSync				docs/matching/sdk/libmc.md	61
-sceMcSetFileInfo	sdk/libmc	0x1D8		docs/matching/sdk/libmc.md	72
+sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
+sceMcSync				docs/matching/sdk/libmc.md	79
+sceMcSetFileInfo	sdk/libmc	0x1D8		docs/matching/sdk/libmc.md	90
 sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	3
 scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
