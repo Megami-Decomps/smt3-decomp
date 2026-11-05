@@ -134,3 +134,34 @@ Production and retained-C plain/dump parity, three strict modes, full retail
 byte comparison/checksum/no-op, 450 tests, 817 layout assertions, fresh stable
 141-owner/481-draft qualification and seven IRX checks pass. Reports are
 unchanged; this batch claims zero exact functions or bytes.
+
+## makaDrawNormal (pipe/pipeMakaAnim, 0x23C)
+
+143 of 143 words match at the native 572-byte extent in ordinary C.
+
+After the first gauge and blend-mode callbacks, the finished expansion scalar
+becomes the real positive-zero endpoint for the ghost fade. Explicit result
+arms select that endpoint for phase below three or at least eleven; phases
+three through five and six through ten retain their original divisions.
+The initialized endpoint is consumed by opacity, with no dummy computation,
+extra floating-point operation, fixed register or compiler constraint.
+
+Both source properties matter. The retained preinitialized-opacity shape,
+ordinary endpoint reuse with that old shape, and its nonvolatile float-operand
+control all emit 568 bytes with 100 matching prefix words and four uncovered
+native bytes. Explicit result arms with literal zeros instead emit 584 bytes,
+99 matching native-prefix words and twelve excess bytes. The ordinary reused
+endpoint plus explicit arms is exact. Adding the sibling's float operand is
+also exact but unnecessary, so it is not retained.
+
+Qualified full-owner plain/dump output pairs show the endpoint's live scalar
+phase. Initial RTL initializes the actual expansion pseudo after the second
+blend-mode call and copies it into the two zero-result opacity arms. Later
+output gives native `mtc1 $0, $f5` followed by the conditional `mov.s $f4, $f5`
+copy, including its branch delay slot. This is ordinary reconstructed source,
+not historical spelling or a claimed hooked allocation/scheduling decision.
+
+The first interpolation, signed-byte phase, captured amount, native unsigned
+word alpha conversion followed by byte narrowing, provider arguments and four
+callback order are unchanged. Both zero-result arms receive positive zero.
+Normal makaAdd initia

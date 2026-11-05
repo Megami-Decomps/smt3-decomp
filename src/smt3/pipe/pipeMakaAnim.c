@@ -100,7 +100,6 @@ s32 makaGetBarCell(s32 maka, s32 digit)
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
 
-#ifdef NON_MATCHING
 void makaDrawNormal(tagMakaObject_t *object)
 {
     s32 pos[2];
@@ -130,24 +129,21 @@ void makaDrawNormal(tagMakaObject_t *object)
                         (u32)(opacity * 128.0f), 1.0f, 1.0f);
 
     eglLinkAlpha(1);
-    opacity = 0.0f;
-    if (phase >= 3) {
-        if (phase < 6) {
-            opacity = (phase - 2) / 3.0f;
-        } else if (phase < 11) {
-            opacity = (11 - phase) / 6.0f;
-        } else {
-            opacity = 0.0f;
-        }
+    /* The completed expansion becomes the ghost-fade zero endpoint. */
+    expansion = 0.0f;
+    if (phase < 3) {
+        opacity = expansion;
+    } else if (phase < 6) {
+        opacity = (phase - 2) / 3.0f;
+    } else if (phase < 11) {
+        opacity = (11 - phase) / 6.0f;
+    } else {
+        opacity = expansion;
     }
 
     makaDrawNormalGauge(pos[0], pos[1] - 48, amount,
                         (u32)(opacity * 128.0f), 1.0f, 1.0f);
 }
-
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormal);
-#endif
 
 typedef struct { f32 value[7]; } makaEaseTable_t;
 extern const makaEaseTable_t D_00548FD8;
