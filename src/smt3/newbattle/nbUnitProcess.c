@@ -1400,7 +1400,7 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                     if (form->hunit->motionSetup.motionId != 0) {
                         nbSetUnitMotion(form, 0, 3, 1.0f);
                     } else if (form->autotime != 0) {
-                        form->autotime--;
+                        form->autotime -= SDF_FRAME_DUE(dds3GetKernelCount());
                     } else {
                         nbSetUnitMotion(form, 0, 3, 1.0f);
                     }

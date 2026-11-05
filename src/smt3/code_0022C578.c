@@ -5305,7 +5305,7 @@ void cmpStepHeartsAttachCursor(s32 step)
         {
             return;
         }
-        campDhTimerWork->unk_28++;
+        campDhTimerWork->unk_28 += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     phase = campDhTimerWork->unk_28 % period;
     if (phase == 0)
@@ -5421,7 +5421,7 @@ s32 campDhWaitMessageEnd(void)
 
 void campDhAdvanceAnim(void)
 {
-    campDhTimerWork->unk_1C++;
+    campDhTimerWork->unk_1C += SDF_FRAME_DUE(dds3GetKernelCount());
     if (campDhTimerWork->unk_1C >= 0x400) {
         campDhTimerWork->unk_1C = 0;
     }

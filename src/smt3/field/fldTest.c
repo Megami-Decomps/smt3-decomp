@@ -3097,7 +3097,7 @@ void fldRunDanteSetModel(void)
             alpha >>= 1;
         }
         fldRunDanteDrawShadow(alpha, fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z, 700.0f);
-        fldRun_Dante.gunlight_anime--;
+        fldRun_Dante.gunlight_anime -= SDF_FRAME_DUE(dds3GetKernelCount());
         fldRunDanteGetDistAngle(&distance, &angle);
         if (distance < 1800.0f) {
             intensity = (s32)((1800.0f - distance) * 0.017777777f) + 16;
