@@ -1,18 +1,31 @@
 # Matching notes: newbattle/nbMakePacket
 
-## Flow1_11 (newbattle/nbMakePacket, 0xC8)
+## Flow1_11 (newbattle/NbNegoFlowOne, 0xC8)
 
-19 of 48 words match, at the exact 192-byte size.
+50 of 50 words match in ordinary C at the native 200 bytes. The earlier 192-byte statement
+predated the current owner context and was not an exact native-size result.
 
-Same bodies, same case order, same constants. ee-gcc fills the branch delay
-slot in front of the last `nbDispNegoMessage` block where retail leaves a
-`nop`, so every word from there on is one slot early. Retail has three such
-nops after unconditional branches in this function and the draft reproduces
-the first two.
+Case zero sets the 30-frame wait, then breaks to the shared zero return; the
+default also breaks. In case one, the stage-major boss-message arm returns one
+immediately. The enemy-ID and ordinary message arms retain the common case-one
+return. No declarations, accesses, provider signatures or callback ABI changed.
 
-The `stagemajor` range test needs an `s32` local: used directly, the `u16`
-field gives `ori 0xFF10`, `addu`, `andi 0xFFFF`, `sltiu 7` instead of
-retail's `addiu -0xF0`, `sltiu 7`.
+Qualified full-owner ee-gcc 2.96 dumps show the effect: `25.sched2` still has
+three message calls; `27.jump2` redirects the enemy-ID arm to the stage-major
+call (call insn 62, new label 241), while retaining the separate ordinary-message
+call (174). `29.dbr` leaves the shared call slot empty and fills the backward
+branch with the message-number subtraction. Returning one separately from all
+three arms instead merges all three calls and does not match. The original
+source spelling remains unknown.
+
+Plain and dumped complete owner assembly and literal entire object ELF agree
+for the guarded source, the exposed old draft, and the candidate, in production,
+`SKIP_ASM`, and `SKIP_ASM` plus `NON_MATCHING` modes. The only normalization is
+the exact observed equal-length random source path. Complete allocated section
+contents match the guarded owner, and independent complete-owner
+checks report 40 match, 0 differ. The callback returns zero outside phase one
+and one after each message, as consumed by `nbNegoFlowOne` through
+`D_004EF4B0`.
 
 ## nbClearActionFlags (newbattle/nbMakePacket, 0xE0)
 

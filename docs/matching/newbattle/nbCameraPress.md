@@ -8,9 +8,24 @@ retail's.
 The two are a load and a store swapped in the block after `effColorBlend`:
 retail reloads `nbCameraPressFrame` into `$4` and then stores the blend result
 through `$16`, while the draft stores first. `-fno-strict-aliasing` leaves it
-exactly where it is and `-fno-schedule-insns2` costs 29 words, so this is the
-second scheduler's ordering of two independent memory references, not anything
-the source states. Measured and rejected: `s32 *`, `f32 *` and `void *` for the
+exactly where it is and `-fno-schedule-insns2` costs 29 words. That comparison
+does not establish a scheduling tie. Fresh complete-owner dumps show the frame
+reload (UID 187) has a true dependency on the color store (UID 135) in both
+`.17.sched` and `.25.sched2`. The store has alias set 9 and the global load
+set 0. In second-scheduler block 11 the store is ready at t=3 and the reload
+only at t=5, so they are not competing ready instructions. Physically disjoint
+native addresses do not prove compiler alias independence.
+
+Six complete-owner plain/dump pairs cover the guarded and enabled-target
+sources in production, SKIP_ASM and retained modes. Full assembly and literal
+entire ELF objects agree after only the exact observed equal-length randomized
+source pathname replacement, and all 161 pinned inputs remain unchanged.
+The target still does not match. Color/target operand constraints and a
+restrict-qualified local pointer do not remove the swap; explicitly staging
+the reload changes allocation elsewhere. No established aggregate owner for
+the two color blocks justifies a different type view.
+
+Measured and rejected: `s32 *`, `f32 *` and `void *` for the
 store's pointer with matching declarations for `D_00325970` and `D_00325998`;
 `s32` for `nbCameraPressFrame` itself, which costs a word by turning the
 `sltiu` bound test into `slti`; a `u32 color` local for the blend result; and
