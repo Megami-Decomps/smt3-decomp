@@ -1891,25 +1891,23 @@ s32 rstFindEvoEntryType7(datUnitWork_t *unit)
     return -1;
 }
 
-/* NON_MATCHING: 3 of 27 words differ (first at +0x10). */
-#ifdef NON_MATCHING
 s32 rstFindEvoEntryType5(datUnitWork_t *unit)
 {
-    fclSkillParam_t *entry = datLevelUpTable[unit->id].entry;
+    /* Factor the actual 102-byte row stride as in the matched type-seven
+     * scan, preserving separate multiply intermediates for the native compiler. */
+    u32 idTripled = (u32)unit->id * 3;
+    u32 offset = idTripled * (sizeof(datLevelUpRecord_t) / 3);
+    datLevelUpRecord_t *row = (datLevelUpRecord_t *)((u8 *)&datLevelUpTable + offset);
     u8 level = unit->level;
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (entry[0].kind == 5 && entry[0].level < level) {
+        if (row->entry[i].kind == 5 && row->entry[i].level < level) {
             return (s8)i;
         }
-        entry++;
     }
     return -1;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstFindEvoEntryType5);
-#endif
 
 /* NON_MATCHING: 4 of 29 words differ (first at +0x10). */
 #ifdef NON_MATCHING

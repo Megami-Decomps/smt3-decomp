@@ -52,8 +52,9 @@ without a new concrete source or compiler premise.
 `rstFindEvoEntryType5`, and on the first record of kind 5 returns that
 record's devil's `datDevilTable` entry byte at +5.
 
-The four differing words are the same `* 0x66` register exchange recorded for
-`rstFindEvoEntryType5` below, plus the one scheduling slot it drags with it:
+The four differing words are the historical `* 0x66` register exchange now
+resolved for `rstFindEvoEntryType5` below, plus one scheduling slot. The new
+factorization has not been applied or qualified for this sibling:
 retail emits the first `sll` before the hoisted `addiu $7, $2,
 %lo(datDevilTable)` and this emits it after.
 
@@ -205,19 +206,39 @@ is unchanged; the strict retained-draft compile passes.
 
 ## rstFindEvoEntryType5 (rstcalc, 0x6C)
 
-Remains assembly-backed. An earlier indexed-row draft had 24 of 27 words
-matching at the exact size. It scans a devil's 24 level-up records for kind 5 with a
-level strictly below the unit's level, returning the index as an `s8`, or -1.
-The earlier three differing words exchanged the two temporary registers in
-the multiply-by-102 row address, as described for type 7 above. The new type-7
-factorization has not been applied or qualified for this sibling.
+27 of 27 words match at 108 bytes in ordinary C. This sibling uses the
+same real 102-byte row-stride factorization as the matched type-seven scan,
+but selects kind 5 with a level strictly below the unit's snapshotted low-byte level.
+Equal levels must not qualify. It returns the first qualifying index narrowed
+to `s8`, or -1, and preserves the unsigned ID, kind and level reads.
 
-Earlier controls ruled out: `datLevelUpTable + id * 0x66` against
-`&datLevelUpTable[...]`, a separate `s32` offset local, `0x66 * id`, a `u16`
-and a `u32` local for the ID, declaring the level before and after the entry
-pointer, assignments split out of declarations, a byte walk reading `p[6]`
-and `p[7]`, and nested `if`s instead of `&&`. Those measurements predate the
-successful type-7 factorization; they do not establish a source-level barrier.
+The current pointer-walk draft gives 21/27. Indexing the actual row's entries
+with an ordinary single multiply gives 24/27. Factoring the real row offset
+as `idTripled = (u32)unit->id * 3`, then multiplying by
+`sizeof(datLevelUpRecord_t) / 3`, gives 27/27. The single-multiply ablation
+restores only the three register-allocation differences at `+0x10`, `+0x14`
+and `+0x18`. No constraint, binding, helper, declaration or compiler flag
+changes are needed.
+
+As in type seven, the byte view starts from the complete `&datLevelUpTable`
+array and the selected row is accessed through its actual record type.
+Each 102-byte row contains a six-byte header and 24 four-byte entries; the
+recorded `0x5940`-byte table has 224 rows. Valid row IDs remain an inherited
+input requirement. Both unsigned products fit for every `u16` ID, and the
+loop's field reads remain within the selected actual row. There are no
+writes, calls, invented bounds or extra consumers.
+
+The complete target-enabled owner checks 91 match, 0 differ. Nine complete
+plain/stock-dump assembly and ELF pairs pass for the final source, original
+owner and single-multiply ablation in production, `SKIP_ASM` and retained-draft
+contexts. Production allocated code/data and resolved relocations equal the
+assembly-backed owner. All 104/90/104 peers and non-code data are preserved;
+SKIP-only call displacements shifted by insertion resolve to the same targets.
+These measurements establish the source reconstruction, not original spelling.
+
+Earlier negative address, ID-type, declaration-order, pointer-walk and nested
+condition controls predated the successful factorization. They did not establish
+a source-level barrier, and are superseded by the minimal ordinary ablation.
 
 ## cmbInitStockUnit
 
