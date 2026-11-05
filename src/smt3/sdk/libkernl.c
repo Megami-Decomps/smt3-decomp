@@ -656,8 +656,8 @@ extern const char D_0054BAB0[];
 extern const char D_0054BAC8[];
 
 /* The asynchronous callback observes progress and publishes completion with
- * volatile word accesses. The interrupt-protected writer uses the ordinary
- * record view. */
+ * volatile word accesses. The writer uses the same shared-word views while
+ * polling the transport. */
 #define TTY_CALLBACK_WORD(state, member) (*(volatile s32 *)&(state)->member)
 
 void sceTtyHandler(s32 event, s32 byteCount, void *argument)
@@ -720,7 +720,75 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
 
 
 #undef TTY_CALLBACK_WORD
-INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyWrite);
+/* The transport header is eight bytes; TTY adds a four-byte reserved word.
+ * Both native backing buffers span 320 bytes. */
+typedef struct ttyPacket_t {
+    u16 length;
+    u16 reserved;
+    u16 protocol;
+    u8 source;
+    u8 destination;
+    u32 ttyReserved;
+    u8 payload[308];
+} ttyPacket_t;
+
+extern ttyPacket_t D_0059B6C0;
+extern ttyPacket_t D_0059B800;
+extern s32 sceDeci2ReqSend(s32 handle, s8 destination);
+extern s32 sceDeci2Poll(s32 handle);
+
+s32 sceTtyWrite(const char *buffer, s32 length)
+{
+    s32 consumed = 0;
+    s32 outputLength = 0;
+    /* Reuse the live transport status for the request and completion tests. */
+    s32 status;
+    ttyPacket_t *packet;
+    u8 *output;
+
+    if ((*(volatile ttyState_t *)&D_0059B690).sendBusy != 0) {
+        return -1;
+    }
+    DIntr();
+    packet = (ttyPacket_t *)(EE_ADDR(&D_0059B6C0) | 0x20000000);
+    D_0059B690.sendBusy = 1;
+    D_0059B690.sendBuffer = (u8 *)packet;
+    output = packet->payload;
+    /* Native decrement wraps even for negative lengths; only zero stops it. */
+    while ((length = (s32)((u32)length - 1)) != -1) {
+        if (*buffer == '\n') {
+            *output++ = '\r';
+            if (++outputLength >= 256) {
+                break;
+            }
+        }
+        *output++ = *buffer++;
+        outputLength++;
+        consumed++;
+        if (outputLength >= 256) {
+            break;
+        }
+    }
+    {
+        volatile ttyState_t *state = &D_0059B690;
+
+        state->sendLength = outputLength + 12;
+        packet->length = state->sendLength;
+        status = sceDeci2ReqSend((*(volatile ttyState_t *)&D_0059B690).handle,
+                                 (s8)packet->destination);
+        if (status < 0) {
+            state->sendBusy = 0;
+            EIntr();
+            return -1;
+        }
+        while ((status = state->sendBusy) != 0) {
+            sceDeci2Poll((*(volatile ttyState_t *)&D_0059B690).handle);
+        }
+        EIntr();
+        return consumed;
+    }
+}
+
 
 
 s32 sceTtyRead(char *buffer, s32 length)
@@ -739,20 +807,6 @@ s32 sceTtyRead(char *buffer, s32 length)
     return count;
 }
 
-/* The transport header is eight bytes; TTY adds a four-byte reserved word.
- * Both native backing buffers span 320 bytes. */
-typedef struct ttyPacket_t {
-    u16 length;
-    u16 reserved;
-    u16 protocol;
-    u8 source;
-    u8 destination;
-    u32 ttyReserved;
-    u8 payload[308];
-} ttyPacket_t;
-
-extern ttyPacket_t D_0059B6C0;
-extern ttyPacket_t D_0059B800;
 extern void FlushCache(s32 mode);
 extern s32 sceDeci2Open(u16 protocol, void *argument,
                        void (*handler)(s32, s32, void *));

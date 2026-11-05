@@ -531,3 +531,53 @@ Full retail checksum, generated-source, regression, guarded-source and report
 gates pass, with a unique compiler-owned production span. SDK coverage gains
 one function and 188 bytes; game coverage is unchanged. This is a matching
 reconstruction, not a claim about original source spelling.
+
+## sceTtyWrite
+
+The ordinary C reconstruction matches all 336 native bytes. It rejects an
+already-busy transmitter before disabling interrupts, restores the uncached
+packet pointer advanced by the callback, and encodes at most 256 payload bytes.
+LF expands to CR/LF. If the inserted CR fills the packet, the LF remains
+unconsumed; the return counts consumed input bytes, not encoded output bytes.
+Repeated input reads on the LF path remain intact, including aliasing with
+output. The last possible store is packet byte 267, within its 320-byte object.
+
+The signed API length is decremented with unsigned 32-bit arithmetic and
+converted back using the pinned EE two's-complement representation. This keeps
+native wrapping at INT_MIN without signed-overflow UB. Zero length still sends
+the 12-byte header; negative lengths are not rejected. The packet length gets
+its real halfword write from the reread shared send length, and destination
+retains the native signed-byte conversion. Request failure clears busy, enables
+interrupts and returns -1. Success polls until completion, enables interrupts
+and returns consumed input. There is no timeout or prior-interrupt-state restore.
+
+Shared-state observations and progress publication use actual volatile context
+word accesses. Packet stores remain ordinary. No barrier, competing handle
+writer or race-free protocol is claimed. Moving the existing packet declarations
+earlier supplies the same truthful complete type to the writer; all other
+functions and storage remain unchanged.
+
+A real signed transport-status scalar serves two disjoint phases: the request
+result's failure test, then the callback busy word's polling condition. Qualified
+RTL assigns both to pseudo 88: request copy 187 and sign test 191, then busy load
+215 and branch 219. Local allocation records four live instructions, two sets
+and two deaths, with no call crossing; global allocation selects register 2.
+Splitting only the busy condition into a separate real local changes it to
+pseudo 89/register 3 and reproduces the sole two mismatches at +0x114/+0x118.
+Both forms pass strict output parity. This is ordinary live scalar reuse, not a
+binding, artificial lifetime or claim about historical variable spelling.
+
+Independent semantic, ABI, storage and compiler-trace review approves the exact
+source. Both complete-owner checkers report 157 match and 0 differ. Baseline,
+final and minimal control pass complete assembly and literal entire-ELF
+plain/dump parity in all three modes with per-invocation hashes. All production
+code/data and 1,773 relocation descriptors are unchanged; 156 SKIP_ASM and 161
+retained peers preserve bytes and resolved targets. Reader HI16 relocation
+record ordering changes in those nonproduction modes, but paired targets are
+independently verified; plain/dump comparisons still cover literal whole files.
+
+An independent UBSan oracle passes 150,000 pure encoding/count cases, including
+zero, negative and INT_MIN lengths, high-bit bytes and LF capacity boundaries.
+It does not execute the hardware transport. Full retail checksum, generation,
+569 regression tests, guarded sources, reports and production provenance pass.
+SDK coverage gains one function and 336 bytes; game coverage is unchanged.
