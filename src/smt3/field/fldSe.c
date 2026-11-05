@@ -787,26 +787,25 @@ extern void p2sdSetStandPos(f32 cameraX, f32 cameraY, f32 cameraZ,
                            f32 playerX, f32 playerY, f32 playerZ);
 extern void p2sdPlaySe3DEx(s32 midiNo, s32 x, f32 y, f32 z, f32 limit);
 
-#ifdef NON_MATCHING
 void fld_145DC0(s32 soundId, f32 x, f32 y, f32 z, f32 limit)
 {
-    f32 dx = fldCamTarget[0] - D_002FC9C0[0];
-    f32 dz = fldCamTarget[2] - D_002FC9C0[2];
-    f32 distance = fsqrtf(dx * dx + dz * dz);
-    f32 listenerX = fldCamTarget[0];
-    f32 listenerZ = fldCamTarget[2];
+    f32 listenerX = fldCamTarget[0] - D_002FC9C0[0];
+    f32 listenerY = D_002FC9C0[1];
+    f32 listenerZ = fldCamTarget[2] - D_002FC9C0[2];
+    f32 distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
 
     if (distance > 200.0f) {
-        listenerX = D_002FC9C0[0] + dx / distance * 200.0f;
-        listenerZ = D_002FC9C0[2] + dz / distance * 200.0f;
+        listenerX = D_002FC9C0[0] + listenerX / distance * 200.0f;
+        listenerZ = D_002FC9C0[2] + listenerZ / distance * 200.0f;
+    } else {
+        listenerX = fldCamTarget[0];
+        listenerZ = fldCamTarget[2];
     }
-    p2sdSetStandPos(listenerX, D_002FC9C0[1], listenerZ,
+    p2sdSetStandPos(listenerX, listenerY, listenerZ,
                     D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
     p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + soundId, (s32)(x / 100.0f), y, z, limit);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSe", fld_145DC0);
-#endif
+
 INCLUDE_SDATA(const s32, "field/fldSe", gFldBgmBit);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldSeLastBgm);
