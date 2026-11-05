@@ -40,6 +40,7 @@ void evtMoonShutdown(dds3ProcessID_t *id);
 extern sdfTexHandle_t *DeadMoonTmx;
 extern s32 evtDeadMoonDraw_total_cnt;
 extern s32 evtDeadMoonDraw_a_cnt;
+extern u32 dds3GetKernelCount(void);
 extern void rsetOtOfs(s32 otofs);
 extern void rsetAlpha(s32 mode);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
@@ -104,8 +105,10 @@ void evtDeadMoonDraw(evtMoonProcessData_t *data)
         evtDrawDeadMoonSprite(ox + 38, oy + 16, 37, 29, 110, 1, 17, 14, 0x808080,
                               DeadMoonTmx, ox, oy, 0.0f, alpha, alpha, 100.0f, 100.0f);
         rsetAlpha(0);
-        evtDeadMoonDraw_total_cnt = (evtDeadMoonDraw_total_cnt + 1) % 74;
-        evtDeadMoonDraw_a_cnt = (evtDeadMoonDraw_a_cnt + 1) % 48;
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            evtDeadMoonDraw_total_cnt = (evtDeadMoonDraw_total_cnt + 1) % 74;
+            evtDeadMoonDraw_a_cnt = (evtDeadMoonDraw_a_cnt + 1) % 48;
+        }
     }
 }
 
