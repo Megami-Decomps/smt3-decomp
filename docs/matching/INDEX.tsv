@@ -401,6 +401,7 @@ sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	87
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	43
 sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59
+sceIpuInit	sdk/libipu	0x238		docs/matching/sdk/libipu.md	84
 _request_end_0	sdk/libkernl	180 bytes	45 of 45 words match	docs/matching/sdk/libkernl.md	3
 sceSifAddCmdHandler	sdk/libkernl	0x2C	11 of 11 words match	docs/matching/sdk/libkernl.md	52
 sceSifRemoveCmdHandler	sdk/libkernl	0x28	10 of 10 words match	docs/matching/sdk/libkernl.md	80

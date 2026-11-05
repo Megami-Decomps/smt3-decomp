@@ -80,3 +80,50 @@ original guarded source matched 74 of 84 words. Binding the bit pointer or
 buffered count as well is unnecessary and was removed. Ordinary and `-da`
 builds have identical full `.text`, relocation records, and normalized assembly.
 The full enabled owner has six matching functions and no differences.
+
+## sceIpuInit (sdk/libipu, 0x238)
+
+All 142 words match at the native 568-byte extent under the configured 2.9
+compiler. The complete seven-function owner, including padding, reproduces
+all 1552 retail bytes after its fifteen relocations are resolved.
+
+The routine writes 1 to the input DMA channel control register, resets the
+IPU and clears its command, transfers the quantizer tables, issues the two quantizer commands,
+transfers the CLUT, issues the CLUT and final mode commands, then resets and
+clears the command again. All eight busy waits read the signed 32-bit control
+word until its high bit clears. The compiler supplies each poll's four hazard
+slots; no manual nop or new instruction-emitting helper is used.
+
+There are ten volatile 128-bit FIFO writes. Eight use quantizer chunks
+0, 1, 2, 3, 4, 4, 4, 4; the last two use CLUT chunks 0 and 1. In particular,
+native performs four separate loads of the final quantizer chunk. The external
+80-byte and 32-byte tables are represented directly as five and two u128
+chunks. Both actual storage ranges are 16-byte aligned. The source reads
+through those declared types, without casting byte/halfword arrays to wider
+lvalues, inventing bounds, making source tables volatile, or changing their
+existing data ownership. Assembly byte/halfword presentation metadata is not
+a conflicting C declaration.
+
+One existing empty live-value operand constrains the initialized FIFO pointer
+after the first store and before the other seven quantizer transfers. Its
+actual value remains 0x10007010, and it has real store consumers until the last
+quantizer write. No call crosses that lifetime. This is a conservative compiler
+visibility aid, not a memory barrier or recovered original source spelling.
+The first store retains its ordinary scheduling; the later pointer opacity
+prevents the compiler from discarding native source reloads.
+
+Removing only this operand lets cse2 replace three repeated source loads with
+copies of the first loaded quadword, while retaining the FIFO writes. Qualified
+complete compiler output establishes that dependency. The ordinary ablation
+is not retained, and no false alias promise or table volatility is used to
+repair it.
+
+Independent review verifies the hardware addresses, volatile access widths,
+poll ordering, table bounds, real pointer lifetime, caller and provider ABI.
+The corrected direct-chunk source and minimal ablation pass strict three-mode
+plain/dump complete assembly and ELF parity, normalizing only randomized source
+pathnames. Both complete-owner checkers report 7 match, 0 differ. All six
+previous functions and all resolved relocation targets remain exact; this
+owner introduces no non-text allocated data. Full retail and regression gates
+accompany the landing. Existing SDK archive and DDS correspondence are prior
+provenance, not a new archive comparison in this pass.
