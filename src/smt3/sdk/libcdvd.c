@@ -181,9 +181,32 @@ void _sceCd_cd_read_intr(void *argument)
     _sceCd_cd_callback(&D_0052A054);
 }
 
+extern s32 cdvdScmdSema __attribute__((section(".data")));
+extern void sceSifRemoveCmdHandler(s32 command);
+
 INCLUDE_ASM(const s32, "sdk/libcdvd", cmd_sem_init);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", cdvd_exit);
+void cdvd_exit(void)
+{
+    s32 intr;
+
+    if (cdvdCallbackThreadId != 0) {
+        /* The one-pass block preserves the SDK compiler's native ordering:
+         * publish the stop reason before loading the semaphore to signal. */
+        do {
+            D_0052A054 = -1;
+        } while (0);
+        SignalSema(cdvdScmdSema);
+    }
+    DeleteSema(cdvdNcmdSema);
+    DeleteSema(D_0052A02C);
+    DeleteSema(cdvdScmdSema);
+    intr = DIntr();
+    sceSifRemoveCmdHandler(0x80000012);
+    if (intr) {
+        EIntr();
+    }
+}
 
 cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argument)
 {

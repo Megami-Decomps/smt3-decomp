@@ -94,3 +94,39 @@ progress terminates. Each subsequent request uses remaining sectors and the
 buffer offset in 2048-byte sectors. The final diagnostic precedes publishing
 the sticky error. The configured SDK 2.9 register choice at the active check
 remains unresolved; no dummy dependency, qualifier or primitive was added.
+
+## cdvd_exit (sdk/libcdvd, 148 bytes)
+
+All 37 of 37 words match in ordinary C. If the callback thread ID is nonzero,
+the routine publishes signed stop reason -1 before signaling its semaphore.
+It deletes the ncmd, companion and scmd semaphores in native order, disables
+interrupts, and removes command handler 0x80000012. Interrupts are re-enabled
+only when DIntr returned nonzero. The function returns void; its caller resets
+the handles separately. No wait, thread deletion, handle reset, new guard or
+failure handling is introduced.
+
+A one-pass block around the actual reason store retains the native store-before-
+semaphore-load schedule. Qualified SDK 2.9 whole-owner traces show that its
+loop-end note preserves the scheduling dependency from that store to the
+following semaphore address setup. The direct spelling has the same 148-byte
+size but differs in five words. This is a target compiler reconstruction aid,
+not evidence of the historical source spelling. No compiler constraint,
+volatile storage, altered ABI, compiler flag or artificial consumer is needed.
+
+The added semaphore declaration retains the external signed word and data
+section. The command-removal declaration matches the actual void(s32) provider.
+The callback reason, signal, three deletes, interrupt calls and handler target
+retain their native accesses and order. Baseline, declaration-only, final and
+minimal direct-control sources have strict plain/dump complete assembly and
+ELF parity in production, SKIP_ASM and retained-C contexts. Declaration-only
+changes are output-neutral. The complete 0x31c-byte production rodata remains
+identical to retail, with no ownership change.
+
+Independent semantic, ABI and compiler-evidence review passes. Both complete-
+owner checkers report 27 exact C functions. All 35 production, 26 SKIP_ASM and
+27 retained-C peers preserve their instructions and resolved relocation targets;
+mode-specific data remains unchanged. The new C-only target naturally shifts
+following function offsets, without changing peer behavior. Full retail,
+generated-source, regression, guarded-source and report gates pass. Production
+provenance verifies a unique compiler-owned 148-byte linked span, adding one
+SDK function and 148 bytes while leaving game coverage unchanged.
