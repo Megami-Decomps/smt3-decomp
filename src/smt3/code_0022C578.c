@@ -3994,10 +3994,6 @@ s32 campDhIconIsReady(void)
     return campInfoWork->unk_1168 != 0;
 }
 
-/* NON_MATCHING: 136 emitted bytes against retail's 140; one register copy short. */
-#ifdef NON_MATCHING
-extern char D_0053FCE8[];
-
 extern sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *aTex);
 
 void campDhCheckTextures(void)
@@ -4006,17 +4002,31 @@ void campDhCheckTextures(void)
     s32 i;
 
     for (i = 0, ofs = 0x1160; i < 3; i++, ofs += 4) {
-        void **tex = (void **)((u8 *)campInfoWork + ofs + 0xC);
+        /* Keep the freshly observed owner in its native temporary home. It
+         * dies at the row calculation, before any callback can clobber v0.
+         * This is a target compiler constraint, not original-source evidence. */
+        FAKEMATCH_ASM_REG(campInfoWork_t *, work, "v0") = campInfoWork;
+        u8 *row;
+        u8 *textureRow;
+        TMX_HEADER_t *texture;
 
-        if (*tex != NULL && *(s32 *)((u8 *)campInfoWork + ofs) == 0) {
-            *(s32 *)((u8 *)campInfoWork + ofs) = EE_ADDR(sdfTexSet(*tex));
-            printf(D_0053FCE8, i);
+        row = (u8 *)work + ofs;
+        textureRow = row;
+
+        /* The two real reads use separate row-address copies in native code.
+         * This input-only operand retains the texture-load cursor; it is not
+         * a memory barrier and adds no instruction or dummy consumer. */
+        FAKEMATCH_ASM_READ(textureRow);
+        texture = EE_ADDR_AS(TMX_HEADER_t *, *(s32 *)(textureRow + 0xC));
+        if (texture != NULL && *(s32 *)row == 0) {
+            sdfTexHandle_t *handle = sdfTexSet(texture);
+
+            *(s32 *)((u8 *)campInfoWork + ofs) = EE_ADDR(handle);
+            printf("Set hearts tex. : %d\n", i);
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhCheckTextures);
-#endif
+
 
 typedef struct
 {
