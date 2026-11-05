@@ -780,25 +780,22 @@ s32 evtOjbectListMenu(s32 x, s32 y)
                           &viewerinfo->objlist_base, NULL, &viewerinfo->objlist_y);
 }
 
-/* NON_MATCHING: 39 of 78 words differ (first at +0x20). */
-#ifdef NON_MATCHING
+/* Reload column kind and width after the draw/link calls, as the native loop does. */
 s32 evtFrameListHead(void *tag, s32 ox, s32 oy)
 {
     s32 type = viewerinfo->framelist_target->type;
     s32 i;
 
     for (i = 0; i < evtFrameList[type].count; i++) {
-        s32 w = framelist_xcnt[evtFrameList[type].columns[i]] * 0xC0;
+        s32 w;
 
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054F9B8,
                                                frameheadstr[evtFrameList[type].columns[i]])));
+        w = framelist_xcnt[evtFrameList[type].columns[i]] * 0xC0;
         ox += w;
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtFrameListHead);
-#endif
 
 extern char D_0054FA40[], D_0054FA48[], D_0054FA50[], D_0054FA58[];
 extern char D_0054FA60[], D_0054FA68[], D_0054FA70[], D_0054FA78[];

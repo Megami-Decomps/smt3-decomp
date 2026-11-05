@@ -21,22 +21,38 @@ needed: with only the six reachable values the switch falls under
 
 ## evtFrameListHead (event/evtEventViewerMenu, 0x138)
 
-39 of 78 words differ, exact size. The loop, both `D_0032C9E2` reads, the shared
-`type * 10` offset and all four table lookups match. The one difference is which
-loop invariant gets the ninth saved register: retail hoists the `lui`/`addiu`
-pair for `evtFrameList`'s address and rematerialises `D_0054F9B8`'s address
-inside the loop, while the C hoists `%hi(D_0054F9B8)` and rematerialises
-`evtFrameList`. Both use nine saved registers, so this is gcc's choice of
-movable rather than register pressure; the three remaining symbol addresses
-(`D_0032C9E2`, `frameheadstr`, `framelist_xcnt`) stay in the loop on both sides.
+78 of 78 words match at the native 312-byte size in ordinary C. The real
+column-width read belongs after both `sdfDevPrintf` and `sdfDrawTagLink`.
+The entry track type remains captured once. Each iteration reads its header
+column before the calls, then reloads the same column and its signed width
+after them. The count is also reloaded for the next iteration. The exact
+`evtFrameListItemSub` sibling already has this post-call width observation.
 
-Computing the column width into a local before the draw is what brings the size
-to exact (it was one instruction long without it), so keep that statement order.
-Ruled out: `s16 *table = evtFrameList;` as a local, declared first or second
-(gcc then hoists both and the body is two words short); `*(s16 *)((u8 *)evtFrameList
-+ type * 10)` for the bound; reading `viewerinfo->frameGroup->type` inline at
-each use instead of a local (74 of 78); caching the `D_0032C9E2` byte in a local
-re-read twice.
+The former draft initialized `w` before the draw calls. That snapshot does
+not express native callback-sensitive read ordering. Moving only its actual
+assignment after the calls restores native output without a binding, empty
+operand, volatile qualifier, provider change, or new storage view. The
+existing ten-byte row type and its eight-column member remain unchanged.
+The old advice to keep the width computation before drawing was incorrect
+for the native memory contract and is retired.
+
+The current complete-owner baseline emits 308 bytes, with 31 matching and
+46 differing words over its 77-word prefix and four native bytes uncovered.
+The historical 39/78 score referred to an older source context and is
+not the current baseline. A separate genuine column-member pointer control
+preserves post-call reloads and native 312-byte size, but matches 48/78; the
+simpler indexed form is preferred. No other coordinate, declaration-order,
+base-pointer, register, or constraint sweep is needed.
+
+Complete-owner candidate checks preserve all 59 exact peers and owned data.
+Production and SKIP_ASM canonical/plain/dump builds of the baseline,
+candidate and member-pointer control have matching full allocated-section,
+non-file-symbol, relocation and normalized-assembly contracts. All nine
+three-mode strict builds are silent. Six existing row-layout assertions are
+object/assembly-neutral in both modes, and a wrong row-size assertion fails.
+These compiler observations do not establish original source spelling or
+prove that the tables are immutable. Full retail and regression qualification
+accompanies promotion.
 
 ## evtSaveViewerHeader (event/evtEventViewerMenu, 0x400)
 
