@@ -1,5 +1,54 @@
 # sdk/libkernl
 
+## _request_end_0 (sdk/libkernl, 180 bytes)
+
+45 of 45 words match in ordinary C. The unsigned response-command switch
+handles call completion, binding and read-data completion. The explicit
+read-data case is a genuine no-op before common cleanup: `_request_rdata`
+writes command 0x8000000C into the response and sends it to this handler.
+Removing only that case emits 160 rather than 180 bytes, with 7 of 40
+compared words matching. No fabricated case, constraint or compiler flag is
+used; matching does not establish the original source spelling.
+
+Full RPC clients now contain the existing 12-byte transaction header as their
+first member. Common cleanup can therefore access either that actual subobject
+or the standalone 12-byte header used by read-data requests. Only the call and
+bind cases convert the first-member pointer back to its containing 40-byte
+client. All field offsets are unchanged. The eight corresponding field
+expressions in `sceSifBindRpc` are updated, with no output change.
+
+The 48-byte response type describes the observed prefix of a received command.
+The native command interrupt dispatcher copies incoming quadwords into stack
+scratch before passing that scratch to the registered handler. This is not a
+typed overlay on the separately declared outgoing `rpcPacket` word-array pool.
+Strict aliasing remains enabled. Independent layout checks cover every field
+of the transaction, full client and response, as well as packet size.
+
+Call completion captures the full client and invokes its optional callback
+with the saved argument, then rereads the response's client after the callback.
+Binding copies server, buffer and callback-buffer fields in native order.
+Common cleanup captures the transaction once, signals a nonnegative signed
+semaphore, reads its packet after signaling, frees that packet and clears the
+same transaction's packet field. It does not cache the packet prematurely or
+reload the response client after signaling/freeing. The generic two-pointer,
+void-return dispatcher ABI and all scalar access widths are preserved.
+
+Independent semantic and complete-output review approves the end-only change;
+`_request_bind` remains assembly-backed. The declaration/embedding-only control
+is completely output-neutral. Baseline, declarations, final source and no-op
+case ablation pass twelve strict production, SKIP_ASM and retained-C plain/dump
+assembly/ELF parity pairs. Public and local complete-owner checks report 154
+match, 0 differ. All 363 production, 153 existing SKIP_ASM and 158 retained-C
+peer bodies preserve their instructions, extents and resolved relocation targets.
+All owned allocated data is unchanged, including 664 production rodata bytes
+and 98 relocations. The retained initializer's newly defined callback relocation
+is explicitly resolved to the same function and offset, rather than masked.
+
+Production provenance verifies the unique compiler-owned 180-byte span at
+0x002DE808 and its exact linked retail bytes. Full retail checksum,
+generated-source, regression, guarded-source and report gates pass. Exactly
+one SDK function and 180 bytes are added; game-code coverage is unchanged.
+
 ## sceSifAddCmdHandler (sdk/libkernl, 0x2C)
 
 11 of 11 words match, 44 bytes. The command's sign selects the existing

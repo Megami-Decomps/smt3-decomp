@@ -1200,7 +1200,72 @@ rpcPacket *_sceRpcGetFPacket2(rpcQueue *queue, s32 index)
     return &queue->indexedBase[index];
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _request_end_0);
+/* Shared transaction fields used by RPC completion. */
+typedef struct rpcTransactionPrefix {
+    void *packet;
+    u32 sequence;
+    s32 sema;
+} rpcTransactionPrefix;
+
+SIZE_CHECK(rpcTransactionPrefix_size_must_be_12, rpcTransactionPrefix, 12);
+
+typedef struct rpcClient {
+    rpcTransactionPrefix transaction;
+    u32 unk_C;
+    u32 serverId;
+    void *buffer;
+    void *cbuffer;
+    void (*endFunction)(void *);
+    void *endParam;
+    void *server;
+} rpcClient;
+
+SIZE_CHECK(rpcClient_size_must_be_40, rpcClient, 40);
+
+/* Observed completion-response prefix, not the complete packet allocation. */
+typedef struct rpcResponse {
+    u32 commandHeader[4];
+    u32 flags;
+    void *packetAddress;
+    u32 sequence;
+    rpcTransactionPrefix *client;
+    u32 command;
+    void *server;
+    void *buffer;
+    void *cbuffer;
+} rpcResponse;
+
+SIZE_CHECK(rpcResponse_prefix_size_must_be_48, rpcResponse, 48);
+
+void _request_end_0(void *packet, void *queue)
+{
+    rpcResponse *response = packet;
+    rpcClient *client;
+    rpcTransactionPrefix *transaction;
+
+    switch (response->command) {
+    case 0x8000000A:
+        client = (rpcClient *)response->client;
+        if (client->endFunction != NULL) {
+            client->endFunction(client->endParam);
+        }
+        break;
+    case 0x80000009:
+        client = (rpcClient *)response->client;
+        client->server = response->server;
+        client->buffer = response->buffer;
+        client->cbuffer = response->cbuffer;
+        break;
+    case 0x8000000C:
+        break;
+    }
+    transaction = response->client;
+    if (transaction->sema >= 0) {
+        iSignalSema(transaction->sema);
+    }
+    _sceRpcFreePacket_0(transaction->packet);
+    transaction->packet = NULL;
+}
 
 void _request_rdata(rpcPacket *request, rpcQueue *queue)
 {
@@ -1215,26 +1280,6 @@ void _request_rdata(rpcPacket *request, rpcQueue *queue)
     isceSifSendCmd(0x80000008, packet, 0x40, EE_ADDR_AS(void *, request->w[8]),
                    EE_ADDR_AS(void *, request->w[9]), request->w[10]);
 }
-
-/* Shared transaction fields used by read-data completion. */
-typedef struct rpcTransactionPrefix {
-    void *packet;
-    u32 sequence;
-    s32 sema;
-} rpcTransactionPrefix;
-
-typedef struct rpcClient {
-    void *packet;
-    u32 sequence;
-    s32 sema;
-    u32 unk_C;
-    u32 serverId;
-    void *buffer;
-    void *cbuffer;
-    void (*endFunction)(void *);
-    void *endParam;
-    void *server;
-} rpcClient;
 
 extern s32 WaitSema(s32 sema);
 extern s32 DeleteSema(s32 sema);
@@ -1308,29 +1353,29 @@ s32 sceSifBindRpc(rpcClient *client, u32 serverId, s32 mode)
     if (packet == NULL) {
         return -1;
     }
-    client->packet = packet;
-    client->sequence = packet->w[6];
+    client->transaction.packet = packet;
+    client->transaction.sequence = packet->w[6];
     packet->w[8] = serverId;
     packet->w[5] = EE_ADDR(packet);
     packet->w[7] = EE_ADDR(client);
     if ((mode & 1) == 0) {
         param.maxCount = 1;
         param.initCount = 0;
-        client->sema = CreateSema(&param);
-        if (client->sema < 0) {
+        client->transaction.sema = CreateSema(&param);
+        if (client->transaction.sema < 0) {
             _sceRpcFreePacket_0(packet);
             return -3;
         }
         if (sceSifSendCmd(0x80000009, packet, 0x40, NULL, NULL, 0) == 0) {
             _sceRpcFreePacket_0(packet);
-            DeleteSema(client->sema);
+            DeleteSema(client->transaction.sema);
             return -2;
         }
-        WaitSema(client->sema);
-        DeleteSema(client->sema);
+        WaitSema(client->transaction.sema);
+        DeleteSema(client->transaction.sema);
         return 0;
     }
-    client->sema = -1;
+    client->transaction.sema = -1;
     if (sceSifSendCmd(0x80000009, packet, 0x40, NULL, NULL, 0) == 0) {
         _sceRpcFreePacket_0(packet);
         return -2;

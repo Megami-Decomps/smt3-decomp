@@ -396,20 +396,21 @@ sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	87
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	43
 sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59
-sceSifAddCmdHandler	sdk/libkernl	0x2C	11 of 11 words match	docs/matching/sdk/libkernl.md	3
-sceSifRemoveCmdHandler	sdk/libkernl	0x28	10 of 10 words match	docs/matching/sdk/libkernl.md	31
-sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	55
-sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	74
-sceSifRegisterRpc				docs/matching/sdk/libkernl.md	95
-sceSifInitIopHeap			34 of 34 words match	docs/matching/sdk/libkernl.md	126
-sceSifSetIopAddr	sdk/libkernl	220 bytes	55 of 55 words match	docs/matching/sdk/libkernl.md	179
-sceClose				docs/matching/sdk/libkernl.md	216
-sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	238
-supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	264
-sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	302
-sceOpen				docs/matching/sdk/libkernl.md	333
-_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	361
-sceDclose				docs/matching/sdk/libkernl.md	390
+_request_end_0	sdk/libkernl	180 bytes	45 of 45 words match	docs/matching/sdk/libkernl.md	3
+sceSifAddCmdHandler	sdk/libkernl	0x2C	11 of 11 words match	docs/matching/sdk/libkernl.md	52
+sceSifRemoveCmdHandler	sdk/libkernl	0x28	10 of 10 words match	docs/matching/sdk/libkernl.md	80
+sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	104
+sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	123
+sceSifRegisterRpc				docs/matching/sdk/libkernl.md	144
+sceSifInitIopHeap			34 of 34 words match	docs/matching/sdk/libkernl.md	175
+sceSifSetIopAddr	sdk/libkernl	220 bytes	55 of 55 words match	docs/matching/sdk/libkernl.md	228
+sceClose				docs/matching/sdk/libkernl.md	265
+sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	287
+supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	313
+sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	351
+sceOpen				docs/matching/sdk/libkernl.md	382
+_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	410
+sceDclose				docs/matching/sdk/libkernl.md	439
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79
