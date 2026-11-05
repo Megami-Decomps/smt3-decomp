@@ -683,11 +683,9 @@ void nbPnl_rsetAlpha(s32 mode)
     ot->regFunc(ot, list);
 }
 
-#ifdef NON_MATCHING
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 extern sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr);
 extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
-#endif
 
 void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                  sdfTexHandle_t *th)
@@ -1048,6 +1046,9 @@ void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
     nbPnlSprite(x + 0x36, y, 0xE4, 0x17, 0x69, 1, 1, 0x17, nbPanelBaseABGR, p->pnltex[0]);
 }
 
+/* One 46-row array; the auto panel uses its final two rows. */
+extern nbPanelProcess_nbPanelXYZ_t D_004F0268[];
+#define D_004F05D8 (D_004F0268 + 44)
 extern f32 sdfSin(f32 angle);
 
 extern void cmpSetSkillListRows(s32 rows);
@@ -3086,7 +3087,6 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 /* One 46-row array; the other panel tables are slices of it. */
-extern nbPanelProcess_nbPanelXYZ_t D_004F0268[];
 #define D_004F02A4 (D_004F0268 + 3)
 #define D_004F02E0 (D_004F0268 + 6)
 #define D_004F03A8 (D_004F0268 + 16)
@@ -3098,7 +3098,6 @@ extern nbPanelProcess_nbPanelXYZ_t D_004F0268[];
 #define D_004F0510 (D_004F0268 + 34)
 #define D_004F0574 (D_004F0268 + 39)
 #define D_004F0588 (D_004F0268 + 40)
-#define D_004F05D8 (D_004F0268 + 44)
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFDD0[], D_004EFDE0[], D_004EFE00[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE10[], D_004EFE20[], D_004EFE30[], D_004EFE40[];
 extern datDevilFormat_t datDevilTable[];
@@ -3501,14 +3500,6 @@ void nbPanelAutoInit(void)
     PanelAutoShow = 1;
 }
 
-/* NON_MATCHING: 226 of 232 words match at the native 928-byte size.
- * Six background-sprite argument loads remain reordered; see
- * docs/matching/newbattle/nbPanelProcess.md. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-extern f32 sdfSin(f32 angle);
 extern nbPanelProcess_nbPanelXYZ_t D_004F0600[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE60[];
 extern void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *geometry,
@@ -3584,11 +3575,14 @@ void nbPanelAuto(nbMainProcessData_t *p)
         {
             sdfTexHandle_t *texture = p->pnltex[1];
             u32 drawColor = effMagaCylinderCalcColor(color, nbPanelBaseABGR);
-            lower = geometry - 1;
-            lowerUV = uv - 2;
+            /* Construct the next-row pointers in the final argument so these
+             * real uses end the current-row pointer lifetimes. Earlier
+             * construction lets ee-gcc prioritize height loads as dying uses.
+             * This is a compiler-lifetime reconstruction aid. */
             nbPnlSprite(geometry->x + 0x1C1, geometry->y + 0x12,
                         geometry->w, geometry->h,
-                        uv->u0, uv->v0, uv->u1, uv->v1, drawColor, texture);
+                        uv->u0, uv->v0, uv->u1, uv->v1, drawColor,
+                        (lower = geometry - 1, lowerUV = uv - 2, texture));
         }
         {
             sdfTexHandle_t *texture = p->pnltex[2];
@@ -3601,9 +3595,6 @@ void nbPanelAuto(nbMainProcessData_t *p)
     }
     nbPanelBaseColorSet(0x80808080);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelAuto);
-#endif
 
 void nbPanelDraw(s32 flag)
 {

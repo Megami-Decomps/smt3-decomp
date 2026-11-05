@@ -226,6 +226,7 @@ nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	d
 nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	147
 nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	168
 nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/matching/newbattle/nbCameraBoss.md	198
+nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	225
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	58 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
@@ -274,7 +275,7 @@ nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanel
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
 nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
-nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	214
+nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	218
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3

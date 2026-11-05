@@ -164,41 +164,45 @@ spellings of the comparison, were ruled out.
 
 ## nbPanelAuto (0x3A0)
 
-226 of 232 instruction words match at the native 928-byte size. Assembly
-remains active; this reconstruction carries no exact-match credit.
+All 232 instruction words match at the native 928-byte extent in ordinary C.
+The final argument of the first normal sprite call constructs the two real
+next-row pointers, then returns the already captured texture. The next sprite
+consumes those pointers. This is a compiler-lifetime reconstruction aid, not
+historical source spelling or a portable argument-evaluation-order guarantee.
+No other argument reads the assigned locals, and their assignments complete
+before the call, so the semantics do not depend on argument evaluation order.
 
-The two packed colors are distinct: PanelAutoABGR supplies the animation
-color, while PanelAutoBaseColor fades the common panel color. A hidden panel
-with zero base alpha returns before changing that common color. Each texture
-handle is captured before its color callback. Both sine phases read the
-unsigned battle timer independently, and both use 0.2f (native pool bits
-0x3E4CCCCC). Keep the float-to-integer conversions and the packed RGB additions.
+Qualified complete-owner compiler dumps locate the dependency before sched1.
+In the old form, geometry and UV pointers die at the height and UV-height
+loads. Those dying uses win the scheduler ties and leave six words reordered.
+In the final form, the genuine next-row computations carry the dying uses
+instead, and all current-row argument loads acquire the native order. Moving
+only those computations back before the call restores precisely the six-word
+mismatch at the same extent. Naming both dimensions instead moves the geometry
+pointer's death to the Y load and leaves eight differences. No register binding,
+empty constraint, fabricated consumer, alias promise or compiler flag is used.
 
-The two polygon rows start at D_004F0600 and D_004F0614 and are submitted in
-reverse order. The three UV rows start at D_004EFE60, D_004EFE70 and
-D_004EFE80. The curated base symbols separate these rows from preceding
-objects without replacing their data. The source uses complete array bases;
-no pointer indexes before an unrelated data owner. Separate drawing-stage
-scopes keep the geometry and texture lifetimes bounded to their actual uses.
+The two packed colors remain distinct. A hidden panel with zero base alpha
+returns before changing the common color. Each texture is captured before its
+color callback. Both sine phases independently read the unsigned battle timer
+and use 0.2f, native bits 0x3E4CCCCC. Float conversions, packed RGB arithmetic,
+callback order and final 0x80808080 base-color reset are unchanged.
 
-All remaining differences are in the first sprite of the normal branch:
-retail loads width before height, while the draft loads height before width;
-the draft also loads UV height before its other three UV components. The
-values and call arguments agree. Offsets +0x2D8/+0x2E0 exchange the dimension
-loads; +0x2E8 through +0x2F4 rotate the four UV loads.
+Geometry rows 45 and 44 belong to the complete 46-row D_004F0268 object.
+UV rows 2 and 0 belong to the three-row D_004EFE60 object. Polygon rows 1 and 0
+of the two-row D_004F0600 object are submitted in reverse order. No pointer
+crosses an unrelated data owner. Three existing sdf2D declarations are exposed
+unconditionally with their actual provider types; the declaration-only control
+is completely output-neutral in all three modes.
 
-A qualified no-dumps scheduler trace passes hooked/unhooked/plain assembly
-parity. In sched2, width UID 567 and height UID 569 both have priority 8;
-height wins the original-order tie (LUID 171 versus 177). UV-height UID 577
-and UV-u UID 571 likewise tie at priority 8 and height wins the LUID tie
-(173 versus 179). A named width local leaves the six words unchanged.
-Caching all six dimension/UV inputs swaps the geometry/UV saved registers
-and worsens the result to sixteen differing words; that form was retired.
-
-Reproduce the trace with `tools/cc1probe.sh
-src/smt3/newbattle/nbPanelProcess.c --func nbPanelAuto --cflag -DNON_MATCHING
---sched --no-dumps --out <output>`. Preserve `verify: OK` before relying on
-its instruction IDs; declaration or source changes can renumber them.
+Independent review verifies semantics, array extents, provider ABI, native
+calls and access order. Strict production, SKIP_ASM and retained-C builds pass
+complete plain/dump assembly and ELF parity. Both complete-owner checkers give
+60 match, 0 differ. All 70 production/retained peers, all 59 SKIP peers and owned
+data preserve their code and resolved relocation targets. The minimal ablation
+also preserves every peer and data object. Only the two inherited pointer
+conversion warnings remain. Integrated retail and regression qualification is
+recorded with the landing.
 
 ### Why the akuma fields are reached by offset here
 

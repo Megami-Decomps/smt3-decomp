@@ -221,3 +221,43 @@ blend factor reaches both lerps of an arm through one `PS2_FLOAT_BITS` GPR;
 `slti`; and spimdisasm's ten-digit `.lit4` decimals are each one ULP low for
 ee-as, which truncates toward zero, so the literals have to be spelled from
 the exact float value rounded away from zero.
+
+## nbCameraBoss_BSKAGU_EP_IT_Set (newbattle/nbCameraBoss, 0x144)
+
+All 81 words match at the native 324-byte extent. Two RNG arms supply real odd
+and even choices to one shared conditional selection. For cut flag 1, odd/even
+selects 0/3; otherwise it selects 1/2. Exactly one RNG call executes, and all
+four coordinate cases, scalar store order, default exit and return 1 remain.
+
+Two localized constraints preserve the native allocation. An initialized
+unsigned one has real consumers in the cut-flag comparison and the second
+arm's odd choice. A nonvolatile empty live operand immediately before the
+comparison keeps that actual value in a register across its uses. It emits no
+instruction and is not a memory barrier; the complete output verifies that
+the flag load still follows model-show callbacks. The selector is locally
+bound to register 4, but its value is assigned only after each RNG call and
+is consumed before any further call. No fixed-register value crosses a call.
+These are target-specific reconstruction aids, not original source spelling.
+
+Ordinary shared selection loses the saved-one/frame shape and emits 320 bytes.
+Removing only the live operand has the same failure. Keeping the live operand
+but removing the selector binding restores the extent while leaving nine
+allocation-dependent words different. The original draft is 78/81, correcting
+its obsolete 19/79 comment. Qualified complete plain/dump pairs establish the
+shared conditional in initial RTL without claiming a debugger-hook mechanism.
+
+The RNG parameter declaration now matches its actual void-pointer provider;
+its unsigned result and real 16-byte state are unchanged. This declaration-only
+correction is output-neutral in production, SKIP_ASM and retained-C contexts.
+Independent review checks the actual scalar lifetimes, callers, provider ABI,
+all eight camera stores and all 25 native literal addresses and bit patterns.
+Production and retained literal pools are identical. SKIP_ASM adds exactly the
+100 native bytes for this target, with every prior literal preserved.
+
+Both complete-owner checkers give 109 match, 0 differ. All 125 production,
+108 SKIP_ASM and 125 retained peers preserve extents, instructions, owned data
+and resolved relocation targets. Final source and both minimal ablations pass
+strict three-mode complete plain/dump assembly and ELF parity. RNG and model
+show provider owners also pass independently. No header, layout, source owner
+or compiler flag changes are needed. Integrated retail and regression
+qualification is recorded with the landing.

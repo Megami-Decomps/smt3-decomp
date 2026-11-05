@@ -32,7 +32,7 @@ typedef struct nbCamera_t {
 
 extern u8 dds3EffectBase[];
 
-extern u32 dds3GetRandA(u8 *name);
+extern u32 dds3GetRandA(void *name);
 
 extern void effBTLModelAllHide(void);
 
@@ -4368,18 +4368,27 @@ s32 nbCameraBoss_BSNET_EP_IT_Set(nbCamera_t *pNbCamera)
 }
 
 
-/* NON_MATCHING: 19 of 79 words; the bodies are exact, the selector movz is not. */
-#ifdef NON_MATCHING
 s32 nbCameraBoss_BSKAGU_EP_IT_Set(nbCamera_t *pNbCamera)
 {
-    u32 n;
+    /* Keep the native shared selector and the real comparison/odd-choice
+     * value live. These local constraints reproduce this compiler's allocation,
+     * not historical source spelling; n is assigned only after the RNG call. */
+    FAKEMATCH_ASM_REG(u32, n, "$4");
+    u32 even, draw;
+    u32 one = 1;
 
     effBTLModelAllShow();
-    if (nbCameraBossCutFlag == 1) {
-        n = ((dds3GetRandA(dds3EffectBase) & 1) != 0) ? 0 : 3;
+    FAKEMATCH_ASM_LIVE(one);
+    if (nbCameraBossCutFlag == one) {
+        draw = dds3GetRandA(dds3EffectBase) & 1;
+        even = 3;
+        n = 0;
     } else {
-        n = ((dds3GetRandA(dds3EffectBase) & 1) != 0) ? 1 : 2;
+        draw = dds3GetRandA(dds3EffectBase) & 1;
+        even = 2;
+        n = one;
     }
+    if (draw == 0) n = even;
     switch (n) {
     case 0:
         pNbCamera->direction.x = -0.31f;
@@ -4424,9 +4433,6 @@ s32 nbCameraBoss_BSKAGU_EP_IT_Set(nbCamera_t *pNbCamera)
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSKAGU_EP_IT_Set);
-#endif
 
 
 s32 nbCameraBoss_BSBERU_EP_IT_Set(nbCamera_t *pNbCamera)
