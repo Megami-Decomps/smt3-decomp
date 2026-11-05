@@ -265,9 +265,9 @@ Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbat
 Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/matching/newbattle/nbMakePacket.md	294
 Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/matching/newbattle/nbMakePacket.md	307
 nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	328
-ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/matching/newbattle/nbMakePacket.md	346
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	367
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	395
+ChkCost	newbattle/nbAi	0xC8	50 of 50 words match	docs/matching/newbattle/nbMakePacket.md	346
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	375
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	403
 nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76

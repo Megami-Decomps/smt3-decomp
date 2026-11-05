@@ -343,26 +343,34 @@ unresolved. The earlier integer pointer arithmetic and explicit byte
 offset have been replaced with indexing through the existing formation
 type; no new layout or field extent is introduced.
 
-## ChkCost (newbattle/nbMakePacket, 0xC8)
+## ChkCost (newbattle/nbAi, 0xC8)
 
-34 of 49 words match, one word short of retail's 50.
+50 of 50 words match in ordinary C. Command 0 checks skill 0; commands 1 and 5
+check the unsigned current skill. Other signed command values return zero
+without calling the cost provider. After a nonzero cost result, the work pointer
+is reloaded before the unit ID and unsigned AI level are read. Levels 1 and 2
+reject the action; level 0 and levels above 2 do not.
 
-The `nowcommand` dispatch is right with `case 0` written before the shared
-`case 1`/`case 5`: that order gives retail's `beq 1`, `slti 2`, `beqz`,
-`beq 5` tree, where `case 1` first costs 29 words. `skill` is
-`a->work->nowindex` for 1 and 5 and 0 for case 0, the guard is
-`nbCheckSkillCost(a->form->formindex, skill)`, and the table read is
-`D_003989E0[a->work->id].ailevel` at the already-named 164-byte stride.
+The level test is a grouped `switch` with cases 0, 1 and 2 assigning
+`ret = ailevel != 0`. This reflects the same real level cases used by adjacent
+`ChkClose`. The former `if (ailevel < 3)` draft omitted retail's `xori ..., 0`
+and changed scheduling. The switch produces that instruction without identity
+arithmetic, dummy code or constraints. Qualified compiler snapshots first show
+the XOR after conditional-move conversion (`15.ce`), absent through combine;
+this locates the transformation boundary, not the original source spelling or
+an independently hooked compiler decision.
 
-Retail emits `slti $3, $4, 0x3`, `sltu $4, $0, $4`, `xori $3, $3, 0`,
-`movn $17, $4, $3` for the tail. ee-gcc emits the `sltu` first and no
-`xori`, which is the missing word, and the swapped order gives the table
-address a different register.
-
-Ruled out for the `xori`: `ailevel < 3`, `!(ailevel >= 3)`,
-`!(ailevel > 2)`, an empty `if (ailevel >= 3)` with the work in its `else`,
-and `(ailevel >= 3) ? ret : (ailevel != 0)` as a ternary. All five give the
-same two-instruction form.
+Independent review verifies signed command/form-index loads, unsigned skill,
+unit ID and level loads, the 164-byte AI record stride, the exact cost-provider
+signature, post-call observations and the caller's rejection test. Complete
+owner checking gives 48 match, 0 differ. All allocated production code and data
+bytes equal the assembly-backed baseline. Nine complete-owner plain/dump pairs
+cover guarded, former draft and final source in production, SKIP_ASM and
+retained modes; full assembly and literal entire ELF objects agree after only
+the exact randomized source pathname replacement. Required retained strict
+compilation passes. Optional strict production/SKIP_ASM checks still report
+inherited missing declarations for `nbPickAiAction` and `SetKoudou`; this change
+introduces no new diagnostic.
 
 ## nbSetActionCommand (newbattle/nbMakePacket, 0x100)
 

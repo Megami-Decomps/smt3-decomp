@@ -1615,11 +1615,6 @@ s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
     return ret;
 }
 
-/* NON_MATCHING: 15 of 49 words differ (first at +0x3C). */
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 ChkCost(nbActionProcessData_t *a)
 {
     s32 skill;
@@ -1640,15 +1635,16 @@ s32 ChkCost(nbActionProcessData_t *a)
     }
     if (nbCheckSkillCost(a->form->formindex, skill) != 0) {
         ailevel = D_003989E0[a->work->id].ailevel;
-        if (ailevel < 3) {
+        switch (ailevel) {
+        case 0:
+        case 1:
+        case 2:
             ret = ailevel != 0;
+            break;
         }
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", ChkCost);
-#endif
 
 s32 ChkClose(nbActionProcessData_t *a)
 {
