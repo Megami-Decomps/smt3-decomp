@@ -2985,8 +2985,6 @@ effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCreatePCF(void *parameterT
     return effPCPBossKAGUThunderboltCreate(firstBlock, secondBlock, thirdBlock);
 }
 
-/* NON_MATCHING: 23 of 44 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCopy(effPCPBossKAGUThunderbolt_t *hData,
                                                            s32 bPos, s32 tbldata)
 {
@@ -2994,8 +2992,10 @@ effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCopy(effPCPBossKAGUThunder
     effPCPBossPlace_t place;
     effPCPBossBED_t *bed;
     effPCPCrack_t *crack;
+    f32 rotationW;
 
     crack = effPCPCrackCopy(hData->pCrack);
+    rotationW = 1.0f;
     bed = hData->hBED;
     work->hBED = bed;
     work->pCrack = crack;
@@ -3006,7 +3006,7 @@ effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCopy(effPCPBossKAGUThunder
     place.payload[4] = 0.0f;
     place.payload[5] = 0.0f;
     place.payload[6] = 0.0f;
-    place.payload[7] = 1.0f;
+    place.payload[7] = rotationW;
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
     place.payload[10] = work->scale;
@@ -3014,9 +3014,6 @@ effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCopy(effPCPBossKAGUThunder
     work->hBEDCut = effEveBEDCutCreate(bed, 2, &place);
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCopy);
-#endif
 
 void effPCPBossKAGUThunderboltDelete(effPCPBossKAGUThunderbolt_t *hData)
 {
