@@ -143,14 +143,14 @@ void fclRbnSetPara(fclRibbon_t *handle, s32 index,
 
 #include "sdk_libc.h"
 
-#ifdef NON_MATCHING
 void dumpCursorInfo(fclRibbon_t *handle)
 {
     s32 count = handle->num;
-    fclribbon_elem_t *entry = handle->pelem;
+    fclribbon_elem_t *entry;
     s32 i;
 
-    for (i = 0; i < count; i++, entry++) {
+    for (i = 0; i < count; i++) {
+        entry = &handle->pelem[i];
         printf("**[%2d]**********************\n", i);
         printf("  pos_act  = %3d, %3d, %3d, %3d\n",
                entry->pos_act.pm[0] >> 4, entry->pos_act.pm[1] >> 3,
@@ -167,9 +167,7 @@ void dumpCursorInfo(fclRibbon_t *handle)
         printf("  texhandle = %08x\n", EE_ADDR(&entry->tex[0]));
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRibbon", dumpCursorInfo);
-#endif
+
 
 void MoveActive(fclRibbon_t *phandle)
 {
