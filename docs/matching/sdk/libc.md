@@ -351,3 +351,64 @@ checkers pass 78 functions with no owned-data difference.
 All other emitted functions are preserved in each mode (100 production,
 77 `SKIP_ASM`, 82 retained-C), including resolved code-relative relocations;
 complete owned data, layout and data-symbol contracts are unchanged.
+
+
+## strcasecmp
+
+The reconstruction matches all 216 native bytes with ordinary GNU C and
+scoped, once-evaluated byte snapshots. The loop stops on the original left
+NUL, compares folded signed bytes, and advances both input cursors when equal.
+The exit reloads unsigned bytes, folds each independently and subtracts.
+No helper, binding, compiler flag, ABI or storage extent changes are needed.
+
+Retail has a signed-byte classification bug. Its 257-byte `_ctype_` object
+spans `[0x0054B550, 0x0054B651)`, including the EOF entry. Loop bytes 0x80 through
+0xFE read preceding addresses in the real 192-byte CFI dispatch table
+`jtbl_0054B490`; 0xFF selects the actual EOF entry. The final unsigned lookups
+stay in bounds. Integer EE 32-bit address arithmetic followed by an unsigned
+character read preserves those actual mapped bytes without inventing a larger
+ctype array or forming an out-of-array pointer expression.
+
+The actual preceding table byte classifies 0xE0 as uppercase. Its signed value
+-32 folds to zero, so a left 0xE0 can compare equal to a right NUL and advance
+past that terminator. Left `{0xE0, 'A', 0}` and right `{0, 'B', 0}` return -1.
+Input cursor advancement also uses integer EE addresses, preserving traversal
+between adjacent readable mapped objects. This deliberately relies on the
+EE implementation's numeric-address mapping, not portable ISO C provenance,
+an ASCII-only precondition, or an ordinary string-length safety guarantee.
+No guard repairs native faults or malformed-input behavior.
+
+Each statement expression captures a real signed or unsigned byte in its own
+initialized signed 32-bit local. It introduces no dummy consumer or artificial
+lifetime. Qualified compiler traces retain native peeled/repeated loop roles:
+peeled signed byte pseudo 136 selects register 7 and folded result 137 selects
+register 6; repeated signed byte 107 selects register 6 and plus-32 result 124
+selects register 7. Exit snapshots 109/116 select registers 5/2. These distinct
+actual roles prevent the late tail merge seen in an outer-local control.
+A minimal lexical-scope ablation keeps the statement-expression shape but
+reuses outer left/right snapshots across the signed and unsigned phases; it
+emits 228 bytes with different allocation. Complete plain/dump output parity
+qualifies both forms. This is evidence about the configured compiler, not the
+historical source spelling. An earlier separate-fold-local control also changes
+retained `_d2b` and is not an owner-safe alternative.
+
+Independent review verifies all 54 instruction words after resolving the 12
+real HI/LO relocation records. Both owner checkers report 79 match, 0 differ.
+Baseline/final complete assembly and literal entire-ELF plain/dump comparisons
+pass in production, `SKIP_ASM` and retained-C modes, with per-invocation hashes.
+All 100/78/83 peers, allocated data, NOBITS layouts, section metadata and
+974/454/806 non-target symbol contracts are preserved. Compiler-local label
+renamings are checked by their actual locations and resolved targets. All
+reused low relocations are separately audited, including the native allocator
+high-register paths; production peers also retain identical raw instructions
+and relocation tuples without masks.
+
+An independent decoder of the 54 retail instructions, including branch-likely
+and delay slots, agrees with a source-expression model on all 65,536 byte
+pairs, 10,000 backing-buffer cases and four corner cases. This is a focused
+instruction decoder, not a general EE emulator or hardware execution claim.
+The full linked 48-entry CFI dispatch table, all resolved destinations and
+adjacent ctype bytes remain identical to retail. Full retail checksum,
+generated-source, 569 regression-test, guarded-source and report gates pass,
+with a unique compiler-owned production span. SDK coverage gains one function
+and 216 bytes; game coverage is unchanged.

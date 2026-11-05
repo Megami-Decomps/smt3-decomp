@@ -384,6 +384,7 @@ _d2b				docs/matching/sdk/libc.md	134
 func_002D6678				docs/matching/sdk/libc.md	159
 _dtoa_r				docs/matching/sdk/libc.md	267
 _b2d	sdk/libc	0x198	102 of 102 words match	docs/matching/sdk/libc.md	308
+strcasecmp				docs/matching/sdk/libc.md	356
 What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51
