@@ -73,31 +73,55 @@ unchanged; do not repeat that local-result control without a new premise.
 
 ## sceSifSetRpcQueue
 
-140 of 148 native bytes, 17 of 35 compared words match; eight bytes are
-uncovered. The native append walk keeps separate next-link and current-node
-copies. The direct C walk coalesces them and uses another register for the
-initial head, shifting the following instructions. An explicit next cursor
-in the loop condition shrinks to 132 bytes, so it does not recover those
-copies. No additional cursor/declaration sweep is justified.
+Matched all 148 native instruction bytes in ordinary C. The initial head
+pointer is tested separately, then the walking cursor is initialized only
+inside the nonempty branch. This preserves the native head-to-current copy
+before the peeled first link read. The subsequent next-link/current copies
+already appeared in the earlier ordinary loop.
 
-The routine uses the shared six-word server queue and appends to the global
-queue list at packet-pool header offset 0x28. It initializes thread ID, active,
-server list, pending start/end and next under interrupts disabled, then
-restores interrupts through a tail call. It returns void. This server queue
-is distinct from the packet-pool header.
+Qualified SDK 2.9 output retains the genuine branch-local cursor lifetime.
+Moving only its initialization before the null test, while retaining both
+locals, returns to 140 bytes and 17 of 35 matching words. A narrow head-binding
+diagnostic also matched, but removing the binding preserves exact output,
+so no compiler constraint is needed or retained.
+
+The checked six-word queue initializes thread ID, active, server list,
+pending start/end and next, then appends to the packet-pool header's queue
+list at +0x28 through queue +0x14. DIntr's prior-state result is discarded,
+and EIntr is called unconditionally at the tail. The function returns void;
+sdfPrint's stale signed-return declaration is corrected without changing any
+output, local record layout or callback cast.
 
 ## sceSifRegisterRpc
 
-200 of 208 native bytes, 27 of 50 compared words match; eight bytes are
-uncovered. It has the same append-walk copy difference as `sceSifSetRpcQueue`.
-The explicit next-cursor condition instead emits 192 bytes; keep the direct
-walk until a new compiler property explains the native copies.
+Matched all 208 native instruction bytes with the same ordinary head/current
+lifetime split. Moving the cursor initialization before the initial null test
+returns to 200 bytes and 27 of 50 matching words. No register binding,
+artificial dependency, memory qualifier or provider visibility change is used.
 
-The shared 0x44-byte server record supplies the handler, buffer, optional
-callback/buffer, service ID, registration link, request link and owning queue.
-Only native-written fields are initialized. The function appends through the
-registration link at 0x38, while pending requests use the separate link at
-0x3C. The owning queue is at 0x40. Interrupt restoration is a void tail call.
+The checked 0x44-byte server record retains its handler, buffer, optional
+callback/buffer, service ID and owning queue fields. Only native-written
+fields are initialized. Registration uses the link at +0x38; pending requests
+use the distinct +0x3C link. The owning queue is at +0x40. The native
+unconditional EIntr tail call and all memory accesses are unchanged.
+
+Both promotions qualify individually and together. Combined public and local
+complete-owner checks report 153 match, 0 differ, preserving all 151 existing
+matches. Baseline, ordinary ablation, separate promotions and combined source
+pass strict production, SKIP_ASM and retained-C plain/dump full assembly/ELF
+parity. All 362 production peer bodies, 664 owned rodata bytes and 98 data
+relocations are unchanged. The sdfPrint declaration correction is completely
+output-neutral in all three contexts. These are matching reconstructions,
+not evidence of historical source spelling.
+
+
+Independent semantic, ABI and complete-owner review approves both changes.
+All 151 prior SKIP_ASM and 156 other retained-C function bodies and resolved
+data/relocation targets also remain unchanged. Full retail, generated-source,
+regression, guarded-source and report gates pass with both affected owners.
+Production provenance verifies unique compiler-owned linked spans for both
+functions. Only SDK coverage gains two functions and 356 bytes; game coverage
+is unchanged.
 
 ## sceSifInitIopHeap
 

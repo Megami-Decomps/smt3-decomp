@@ -1368,11 +1368,10 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
 #endif
 
 
-/* NON_MATCHING: 140 of 148 native bytes; linked-list cursor copies coalesce. */
-#ifdef NON_MATCHING
 void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
 {
     sifRpcDataQueue_t *current;
+    sifRpcDataQueue_t *head;
 
     DIntr();
     queue->threadId = threadId;
@@ -1381,10 +1380,11 @@ void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
     queue->start = NULL;
     queue->end = NULL;
     queue->next = NULL;
-    current = D_0059D440.queues;
-    if (current == NULL) {
+    head = D_0059D440.queues;
+    if (head == NULL) {
         D_0059D440.queues = queue;
     } else {
+        current = head;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -1392,18 +1392,14 @@ void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
     }
     EIntr();
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetRpcQueue);
-#endif
 
-/* NON_MATCHING: 200 of 208 native bytes; the same append-loop cursor copies coalesce. */
-#ifdef NON_MATCHING
 void sceSifRegisterRpc(sifRpcServerData_t *server, u32 serviceId,
                         sifRpcFunc_t handler, void *buffer,
                         sifRpcFunc_t callback, void *callbackBuffer,
                         sifRpcDataQueue_t *queue)
 {
     sifRpcServerData_t *current;
+    sifRpcServerData_t *head;
 
     DIntr();
     server->next = NULL;
@@ -1414,10 +1410,11 @@ void sceSifRegisterRpc(sifRpcServerData_t *server, u32 serviceId,
     server->callback = callback;
     server->callbackBuffer = callbackBuffer;
     server->queue = queue;
-    current = queue->link;
-    if (current == NULL) {
+    head = queue->link;
+    if (head == NULL) {
         queue->link = server;
     } else {
+        current = head;
         while (current->link != NULL) {
             current = current->link;
         }
@@ -1425,9 +1422,6 @@ void sceSifRegisterRpc(sifRpcServerData_t *server, u32 serviceId,
     }
     EIntr();
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRegisterRpc);
-#endif
 
 sifRpcServerData_t *sceSifRemoveRpc(sifRpcServerData_t *server, sifRpcDataQueue_t *queue)
 {
