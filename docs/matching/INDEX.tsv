@@ -229,8 +229,8 @@ nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/m
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	58 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	30 of 30 words match	docs/matching/newbattle/nbCameraSkill.md	55
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/matching/newbattle/nbCameraSkill.md	100
-nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/matching/newbattle/nbCameraSkill.md	137
-bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	194 of 194 words match	docs/matching/newbattle/nbCameraSkill.md	164
+nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/matching/newbattle/nbCameraSkill.md	190
+bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	194 of 194 words match	docs/matching/newbattle/nbCameraSkill.md	246
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
@@ -391,18 +391,20 @@ sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	87
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	43
 sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59
-sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	3
-sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	22
-sceSifRegisterRpc				docs/matching/sdk/libkernl.md	37
-sceSifInitIopHeap			31 of 34 words match	docs/matching/sdk/libkernl.md	50
-sceSifSetIopAddr			51 of 55 words match	docs/matching/sdk/libkernl.md	68
-sceClose				docs/matching/sdk/libkernl.md	90
-sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	112
-supplement_crt0	sdk/libkernl	0x48	4 of 18 words differ	docs/matching/sdk/libkernl.md	138
-sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	153
-sceOpen				docs/matching/sdk/libkernl.md	184
-_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	212
-sceDclose				docs/matching/sdk/libkernl.md	241
+sceSifAddCmdHandler	sdk/libkernl	0x2C	11 of 11 words match	docs/matching/sdk/libkernl.md	3
+sceSifRemoveCmdHandler	sdk/libkernl	0x28	10 of 10 words match	docs/matching/sdk/libkernl.md	31
+sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	55
+sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	74
+sceSifRegisterRpc				docs/matching/sdk/libkernl.md	89
+sceSifInitIopHeap			31 of 34 words match	docs/matching/sdk/libkernl.md	102
+sceSifSetIopAddr			51 of 55 words match	docs/matching/sdk/libkernl.md	120
+sceClose				docs/matching/sdk/libkernl.md	142
+sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	164
+supplement_crt0	sdk/libkernl	0x48	4 of 18 words differ	docs/matching/sdk/libkernl.md	190
+sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	205
+sceOpen				docs/matching/sdk/libkernl.md	236
+_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	264
+sceDclose				docs/matching/sdk/libkernl.md	293
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			88 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	61

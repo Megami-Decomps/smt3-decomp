@@ -935,9 +935,42 @@ sifCommandHandler_t *sceSifSetSysCmdBuffer(sifCommandHandler_t *buffer, s32 coun
     return previous;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifAddCmdHandler);
+/* The sign selects the table. Scaling in 32 bits drops that selector and
+ * gives the native eight-byte entry offset. Once tested, command is reused
+ * for the selected table's actual address; its old value is no longer live.
+ */
+void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument)
+{
+    u32 address = (u32)command << 3;
+    sifCommandHandler_t *entry;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRemoveCmdHandler);
+    if (command < 0) {
+        command = EE_ADDR_S(D_0059BA98.systemHandlers);
+    } else {
+        command = EE_ADDR_S(D_0059BA98.handlers);
+    }
+    address += (u32)command;
+    entry = (sifCommandHandler_t *)address;
+    entry->handler = handler;
+    entry->argument = argument;
+}
+
+
+void sceSifRemoveCmdHandler(s32 command)
+{
+    u32 address = (u32)command << 3;
+    sifCommandHandler_t *entry;
+
+    if (command < 0) {
+        command = EE_ADDR_S(D_0059BA98.systemHandlers);
+    } else {
+        command = EE_ADDR_S(D_0059BA98.handlers);
+    }
+    address += (u32)command;
+    entry = (sifCommandHandler_t *)address;
+    entry->handler = NULL;
+}
+
 
 /* DMA bus addresses and transfer controls occupy four 32-bit words. */
 typedef struct sifDmaTransfer_t {

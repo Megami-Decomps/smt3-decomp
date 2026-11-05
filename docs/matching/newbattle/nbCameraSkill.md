@@ -103,20 +103,22 @@ landing; no compiler flags, ABI or shared header changed.
 
 The structure is mapped and believed correct; what the draft cannot reproduce
 is one instruction, and losing it costs the 84 bytes that feed it. After the
-formation loop retail emits a bare `c.lt.s $f20, $f23` (the enemy-height
+formation loop retail emits a bare `c.lt.s $f20, $f21` (the enemy-height
 clamp) with no branch after it and no later reader of the condition: the
 compare is dead, and `$f20` (the accumulated width) is overwritten with
-`0.5f` five instructions later. `nbCameraShot_All_Set3` is the same function
-over a caller-supplied target vector and has the identical dead compare, so it
-is not a one-off.
+`0.5f` at `0x001B6424`. `nbCameraShot_All_Set3` is the same function
+over a caller-supplied target vector and has the corresponding dead compare
+with `$f23` as its second operand, so it is not a one-off. Direct retail
+decoding confirms Set2 word `0x4615A034` at `0x001B640C` and Set3 word
+`0x4617A034` at `0x001B665C`; the former was previously mislabelled here.
 
 Written the obvious way, `if (total < maxEnemyHeight) { total = maxEnemyHeight; }`,
 ee-gcc sees `total`'s only consumer is that compare, deletes the assignment,
 the compare and then the whole accumulation: the `r * scl` sum in the loop,
 the `nbGetEnemyInterval()` multiply and the unsigned-to-float conversion all
-go, which is exactly the 84 missing bytes. Retail kept the compare, so in its
-compile the branch must have survived to a pass after the last dead-code
-elimination.
+go, which is exactly the 84 missing bytes. A source shape that retains the
+branch until after the relevant dead-code elimination is a working hypothesis,
+not proof of the original source or compiler invocation.
 
 Ruled out: an empty `if` body (drops even more), `total = (total <
 maxEnemyHeight) ? maxEnemyHeight : total`, `!(total >= maxEnemyHeight)`,
@@ -129,10 +131,61 @@ What the draft does have right, and is worth keeping: the four zeroed `f32`
 accumulators as `maxPlayerHeight = 0.0f;` plus three copies from it, which
 gives retail's one `mtc1 $0` and three `mov.s`; `width = r * scl; width +=
 width; total += width;` for the in-place double; `(u32)(enemies - 1)` for the
-`bltz`/`srl`/`andi`/`or` unsigned-to-float conversion; the single local reused
-for the accumulator, then `0.5f`, then the `SDF_VU0_GETLENGTH` output, which
-is why all three land in `$f20`; and `maxEnemyHeight` reused for the
+`bltz`/`srl`/`andi`/`or` unsigned-to-float conversion; retail's reuse of `$f20`
+for accumulated width, then `0.5f`, then the `SDF_VU0_GETLENGTH` result; and
+`maxEnemyHeight` reused for the
 `sdfAtan(0.5235987f)` result so the quotient divisor stays in `$f21`.
+The current draft uses separate `total` and `value` locals; an actual-phase
+reuse control remains output-neutral.
+
+### Qualified postreload deletion boundary (2026-11-05)
+
+In the current complete owner, the clamp assignment has disappeared by the
+first life-analysis dump. Compare UID 214, conditional branch 215 and the
+width/interval accumulation still survive in the global-allocation dump.
+A read-only observation of the pinned compiler separates the subsequent
+operations that share the next dump interval:
+
+- Postreload `jump_optimize` deletes branch 215 through `delete_jump`,
+  `delete_computation` and `delete_insn`. Compare 214 and its feeders remain.
+- `cleanup_cfg` leaves that compare and chain present.
+- The following `life_analysis` removes compare 214 through
+  `propagate_block_delete_insn` and `flow_delete_insn`, then removes total
+  accumulation 210, interval product 209 and the conversion/width feeders.
+
+The observed jump site queries the previous active instruction at the branch
+target and compares it with the current jump before deletion. The arm already
+contains no active instruction. This supports empty-branch collapse followed
+by dead-chain removal; no unobserved local flag or unavailable vendor source
+is assigned a meaning here. Cleanup and the final delay-slot pass are not
+the deleting pass for this draft.
+
+Qualification uses compiler SHA-256
+`d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`.
+The run records 45 target-gated events and verifies the original bytes at all
+eleven hook sites. All 28 baseline/observed artifact pairs agree, including full-owner
+assembly, object, RTL dumps and logs. Fresh ordinary-wrapper, direct-plain,
+direct-dumped and observed assembly also agree after only generated `.file`
+scratch-path normalization. Independent review rehashed all 56 paired files,
+checked the hook bytes and corrected RTL/argument decoding, and corroborated
+the before/after instruction chains. This reviews the qualified run; it is
+not a second hooked execution.
+
+One new ordinary control has specific matched-camera-family support:
+`nbCameraBoss_Sp_MURET2_Set` selects a half-height or half-width radius in two
+arms. Applying that copied selection before Set2's existing radius overwrite
+adds no consumer, but both assignments disappear before postreload. The
+control retains 500 bytes and the original complete-owner allocated-section
+bytes, with 35 exact peers. Fresh full plain/dump assembly parity passes.
+It therefore supplies no missing active-block property. Matched `nbCalc`
+equal-arm cases show that later merging is possible, but do not justify
+duplicating unrelated camera calls or stores solely to retain a predicate.
+
+Keep the fallback. The unresolved requirement is a native-supported ordinary
+block shape that survives this branch-collapse boundary without changing the
+algorithm. Repeating clamp spellings, adding a dummy live operand, or importing
+the sibling's real radius consumer does not establish such a shape. This
+investigation changes no source, compiler flags, owned data or matching credit.
 
 ## nbCameraState_SkillAttack_Init (newbattle/nbCameraSkill, 0x224)
 
@@ -150,16 +203,45 @@ emits `bc1f` to the `printf` arm with an empty delay slot and falls through to
 `bCameraShot_AttackInvokeTargetPartyNear_Set`; both arms then set `$2 = 0xB`
 and cross-jump to one shared `sw $2, nbCameraSkillAttackStep`. The draft gets
 the arms the other way round, with `daddu $4, $17` hoisted into a `bc1tl`
-delay slot, and the two `nbCameraSkillAttackStep = 0xB;` stores are not
-cross-jumped because the constant lands in `$2` in one arm and `$3` in the
-other. Retail also keeps `D_005349A0` in `$16` across the `sdfFloatToULong`
-call, where the draft materialises it after.
+delay slot. The two `nbCameraSkillAttackStep = 0xB;` assignments are not
+a remaining cross-jump problem. In the current complete-owner baseline they
+already cross-jump through `$2` to one shared store; the earlier claim here
+that they use different registers is stale. Retail also keeps the diagnostic
+format address in `$16` across `fptodp`, where the draft materialises it after.
 
 Ruled out for the arm order: inverting the test so the `printf` arm is the
 `if` body, hoisting `nbCameraSkillAttackStep = 0xB;` below the `if`/`else`
 (47 words out), and a `char *msg = D_005349A0;` local for the format string.
 The matching `nbCameraState_SkillAttack_Calc` needed its actual ground-collision
 callee visible as C; see [callee visibility](../../levers/callee-visibility.md).
+
+A fresh bounded continuation separates these issues. An ordinary
+`const char *message` initialized to the existing literal, followed by
+`f64 diagnosticWidth = fptodp(width)` and `printf(message, diagnosticWidth)`,
+reproduces the native diagnostic instruction sequence without constraints:
+the format high half is in the conversion call's delay slot, its low half
+follows the call, and the argument move occupies the `printf` delay slot.
+This does not fix the arm layout. The native-sized candidate still reports
+117/137 positional words, and the complete checker rejects its misplaced
+relocations; this diagnostic count is not acceptance evidence.
+
+Truthful same-symbol external views of the near provider and, separately,
+the reverse provider are complete-assembly neutral against their ordinary
+controls in production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM`.
+No opaque declaration is retained. Baseline, ordinary format/conversion and
+visibility controls pass complete plain/dump assembly parity in those three
+modes after generated scratch-path normalization. The ordinary format control
+also passes strict implicit-declaration checks; the canonical owner remains
+35 match, 0 differ, with the target fallback still active.
+
+Qualified baseline snapshots put the near call before the diagnostic call in
+`rtl.00.rtl`, but reverse their order by `rtl.01.sibling`. The unresolved
+layout therefore appears in that early interval, not only in late scheduling.
+No hooked explanation of the responsible algorithm is claimed. Repeating
+late operand constraints or callee opacity without a new premise is not a
+justified next step. The ordinary format control and NaN-preserving inverted
+test remain diagnostic only; no guarded source change or matching credit is
+included in this documentation update.
 
 ## bCameraShot_AttackInvokeTargetPartyNear_Set (newbattle/nbCameraSkill, 0x308)
 

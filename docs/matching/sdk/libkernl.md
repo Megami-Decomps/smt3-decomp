@@ -1,5 +1,57 @@
 # sdk/libkernl
 
+## sceSifAddCmdHandler (sdk/libkernl, 0x2C)
+
+11 of 11 words match, 44 bytes. The command's sign selects the existing
+system or user handler table. Its unsigned 32-bit left shift by three forms
+the native byte offset, dropping the upper three bits, including the selector,
+through normal truncation.
+The callback and argument use the existing eight-byte record, at offsets zero
+and four. The emitted stores publish the argument before the callback, with
+the callback store in the return delay slot, exactly as retail.
+
+The original command is consumed by the shift and sign test. Both branches
+then overwrite that same scalar with the selected table's actual EE address;
+the later unsigned addition consumes only this new value. This disjoint-phase
+reuse keeps the native table-base register without a fixed binding or empty
+constraint. Actual configured SDK RTL shows the shift and sign uses before
+the table-load definitions, then the address addition and real entry stores.
+Ordinary-wrapper and diagnostic output agree across the complete owner;
+no hidden allocator decision or original-source spelling is claimed.
+
+Existing table setters and the native dispatcher establish the same table
+fields and callback signature. The dispatcher checks its table count, but
+registration itself has no bounds or null check. Preserve that native contract:
+callers must select valid initialized table storage. This is EE 32-bit address
+arithmetic, not a general host-pointer or concurrent-publication guarantee.
+No table extent, record layout, qualifier, provider type or data ownership
+changes. Provenance maps this routine to `libkernl.a/sifcmd.o` by SDK name;
+it is not one of the syscall stubs.
+
+## sceSifRemoveCmdHandler (sdk/libkernl, 0x28)
+
+10 of 10 words match, 40 bytes. The same unsigned offset, sign-selected table
+and disjoint command/address scalar phases locate the existing entry. Only
+the callback word is cleared; the argument word is left unchanged. The native
+store remains in the return delay slot. The SDK object map independently
+byte-identifies this routine in `libkernl.a/sifcmd.o`.
+
+Both new bodies use ordinary C. A prior diagnostic local register binding
+also matched, but the scalar reuse makes it unnecessary and it is not retained.
+All 362 pre-existing full-production functions retain their bytes, offsets and
+sizes. All 664 rodata bytes and 98 rodata relocations remain unchanged. The
+four changed raw object text bytes are equivalent data-symbol relocation
+addends within the new targets; resolved targets and the linked retail image
+are checked separately, rather than treating raw-object equality as proof.
+
+Strict implicit-declaration builds pass in production, `SKIP_ASM`, and
+`NON_MATCHING` plus `SKIP_ASM`. Full plain/dumped assembly agrees in all three
+modes after only generated `.file` scratch-path normalization. The unchanged
+public checker reports 148 match, 0 differ for the complete owner. Full retail
+checksum, affected-owner/data and regression qualification accompany the
+landing. Exactly two SDK functions and 84 SDK bytes are added; game-code
+coverage is unchanged.
+
 ## sceSifCheckStatRpc
 
 44 of 60 native bytes, with 5 of 11 compared words matching and 16 bytes
