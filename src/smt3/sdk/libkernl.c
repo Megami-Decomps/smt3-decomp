@@ -3580,9 +3580,6 @@ s32 sceSifGetIopAddr(void *address, void *output, u32 kind)
     return 0;
 }
 
-/* NON_MATCHING: 51 of 55 words match at the native 220-byte size;
- * the final RPC result selection uses different constant scheduling. */
-#ifdef NON_MATCHING
 s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
 {
     if (_lf_bind() < 0) {
@@ -3599,12 +3596,15 @@ s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
     } else {
         return -65538;
     }
-    return sceSifCallRpc(&D_0059EC00, 2, 0, &D_0059EA00, 32,
-                         &D_0059EA00, 16, NULL, NULL) < 0 ? -65537 : 0;
+    {
+        s32 status = sceSifCallRpc(&D_0059EC00, 2, 0, &D_0059EA00, 32,
+                               &D_0059EA00, 16, NULL, NULL);
+        /* Keep the selected post-RPC return value in its ABI register.
+         * This is a target-specific matching aid, not an original-source claim. */
+        FAKEMATCH_ASM_REG(s32, result, "v0") = status < 0 ? -65537 : 0;
+        return result;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifSetIopAddr);
-#endif
 
 typedef struct sifResetPacket_t {
     u64 packetSize : 8;

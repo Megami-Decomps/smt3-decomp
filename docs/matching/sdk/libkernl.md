@@ -152,27 +152,42 @@ resolves to identical instructions. These countdown relocation encodings also
 explain the three raw object-byte differences; the flag-address tail is exact.
 No report category, counter, check or target metadata was changed to claim credit.
 
-## sceSifSetIopAddr
+## sceSifSetIopAddr (sdk/libkernl, 220 bytes)
 
-51 of 55 words match at the native 220-byte size. The final four differences
-are the error constant / `-1` setup order and the zero/error conditional-move
-selection. Address/width header writes, input-width dispatch, request payload,
-RPC arguments and all earlier instructions match. The native initializes the
-error result and conditionally selects zero; the ordinary ternary uses the
-opposite selection direction.
+All 55 of 55 words match at the native 220-byte size. The final RPC status
+is captured in an ordinary signed local, then the selected signed return
+value is initialized in its ABI result register. This one local register
+binding is a target-specific matching aid, not evidence of original source
+spelling. No empty operand, extra consumer, new type, layout or compiler flag
+is needed. The fixed value is initialized after the last call and immediately
+returned; it never carries a live value across a clobbering operation.
 
-An explicit result initialized before binding retains an extra saved register
-and emits 224 bytes. Assigning that result after capturing RPC status emits
-216 bytes, as does a direct nonnegative-success return. Keep the native-sized
-ternary until a new compiler premise explains the selection; no forced use,
-volatile result or register assignment is justified.
+The ordinary explicit-status control remains 51/55 at the same size: the
+error/threshold setup order and zero/error conditional selection differ.
+Binding the actual selected result closes those four words. An additional
+empty live operand is unnecessary and was removed. Earlier negative controls
+constrained an error arm before selection, rather than the actual selected
+return value. Embedding the call in the bound initializer is not equivalent
+for matching and was also discarded. Complete plain/dump output parity
+qualifies these observations; no hooked compiler-decision claim is made.
 
-Binding failure returns `-65536`. After a successful bind, the address and kind
+Binding failure returns -65536. After a successful bind, the address and kind
 header words are written before validating kind. Kinds zero, one and two copy
 one, two and four bytes respectively into request offset eight. An invalid
-kind returns `-65538` after the header writes, without reading the input or
+kind returns -65538 after the header writes, without reading the input or
 calling RPC. The valid transaction sends 32 bytes, receives 16 bytes, and
-returns zero for a nonnegative RPC status or `-65537` otherwise.
+returns zero for every nonnegative signed RPC status or -65537 otherwise.
+Input can alias the shared request: the header stores remain before the
+width-selected input load. No null, alignment, non-alias or provider-return
+range assumption is added; native halfword/word alignment requirements remain.
+
+Independent native and ABI review covers the unchanged nine-argument RPC,
+all accesses and error paths. Public and local complete-owner checks report
+151 match, 0 differ. Strict production, SKIP_ASM and retained-C plain/dump
+checks preserve complete assembly and ELF contracts. All 363 production peers
+and the 664-byte owned rodata with 98 relocations are unchanged. Full retail,
+generated-source, regression, guarded-source and report gates accompany this
+source-only landing; private checker changes and raw traces are excluded.
 
 ## sceClose
 
