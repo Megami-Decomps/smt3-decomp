@@ -3615,6 +3615,7 @@ s32 func_00232198(void)
 {
     s32 i;
 
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
     for (i = 0; i < 0x10; i++) {
         if (campWork->stockDelay[i] > 0) {
             campWork->stockDelay[i]--;

@@ -777,7 +777,7 @@ void fldReleaseUnitPad(void)
         fldEncountClearFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(ctl->handle, 0);
     }
-    fldGlobalBase.word5C = 4;
+    fldGlobalBase.word5C = SDF_FRAMES(4);
 }
 
 #ifdef NON_MATCHING
