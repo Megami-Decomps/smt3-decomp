@@ -1393,9 +1393,6 @@ have_mode:
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillMsg);
 #endif
 
-/* NON_MATCHING: 22 of 40 words differ at the exact size: msg lands in $2
- * instead of $8 and the whole register numbering shifts with it. */
-#ifdef NON_MATCHING
 extern s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit);
 extern s32 cmbChkDevilEvo(datUnitWork_t *unit);
 
@@ -1414,10 +1411,10 @@ s32 cmpGetKugatatiMsg(void)
     }
     diff = entry - stock->level;
     lvl = ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->level;
-    msg = 0;
-    if (diff < 2)
+    msg = 26;
+    if (diff >= 2)
     {
-        msg = 26;
+        msg = 0;
     }
     if (diff == 2)
     {
@@ -1437,9 +1434,6 @@ s32 cmpGetKugatatiMsg(void)
     }
     return 31;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
-#endif
 
 #ifdef NON_MATCHING
 s32 cmpStartItemMsg(u16 item, s32 errorFlags)
