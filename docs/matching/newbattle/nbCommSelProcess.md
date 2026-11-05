@@ -131,3 +131,45 @@ three-word lower-bound residual is now resolved independently; this does not
 resolve the caller's scheduling differences. Reproduce the caller measurement with
 `tools/check_unit.py src/smt3/newbattle/nbCommSelProcess.c
 --cflags=-DNON_MATCHING --func DispCommandPanel -v`.
+
+## SetCommCursor2 (newbattle/nbCommSelProcess, 0x21C)
+
+135 of 135 words match at the native 540-byte extent.
+
+The native command scan has separate successful call/return blocks for the
+special-command cases and ordinary row types 0, 1 and 2. Writing these actual
+arms directly, with a signed switch for the ordinary row type, recovers the
+native block layout and five jump-table destinations. The shared matches
+accumulator was 464 bytes with 52 matching words; direct calls with an if-chain
+were 508 bytes with 49 matching words. The ordinary direct-switch form is
+133/135 at 540 bytes, differing only in the initial halfword-load order.
+
+One nonvolatile empty `+r` operand on the initialized `u16 previousIndex`
+retains the native `lhu` observation before the signed `lh previousCommand`
+observation. The index has real later equality comparisons and reset assignments;
+no dummy consumer or fixed register is introduced. A deletion-only control
+restores the two-word exchange; the volatile operand instead leaves six words
+different. An ordinary promoted command local is inert.
+
+Qualified pass snapshots show the ordinary load reversal first in sched1;
+the candidate schedules the index load and its real operand before the command
+load, which later fills the config-call delay slot. Complete plain/dump output
+contracts agree. This is a localized target-specific compiler reconstruction
+aid, not original-source evidence, a hooked comparator claim or a general memory
+barrier. The exact emitted output verifies the particular native accesses.
+
+Both previous-state values remain snapshots before config queries 2 then 1.
+Each query's action-pointer/status observation stays after that callback.
+Reset conditions, signed/unsigned widths, ascending first-match order, special
+commands and literal successful row arguments are unchanged. Every successful
+arm calls the existing SetPrevCursor exactly once and returns. The existing valid
+work/action objects and row counts within 288 entries remain preconditions.
+
+All 32 existing exact peers and owned data remain exact. Thirteen target layout
+assertions preserve full output; all used fields fit within the requested
+0x14D0-byte work region. The existing complete view is 0x14D4 and the allocator
+rounds to 0x1500; neither fact establishes tail-field initialization. No layout or
+allocation changed. Extracted-body host tests cover 15,728,640 single-entry
+cases and 120,000 multirow/callback scenarios, not native execution. Strict
+production/SKIP modes preserve four inherited missing declarations; retained
+strict mode passes. Broader integration qualification is recorded separately.

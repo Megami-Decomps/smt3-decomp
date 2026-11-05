@@ -1648,19 +1648,19 @@ void SetPrevCursor(nbCommSelProcessData_t *s, s32 type, s32 ind)
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
-/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
- * battle_0_1, capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void SetCommCursor2(nbCommSelProcessData_t *s)
 {
     datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
     u16 previousIndex = work->previndex;
-    s16 previousCommand = work->prevcommand;
+    s16 previousCommand;
     u16 entry;
     s32 type;
     s32 i;
-    s32 matches;
+
+    /* Keep the initialized index observation ahead of the command read.
+     * This local operand preserves the native load order; it emits no code. */
+    FAKEMATCH_ASM_LIVE(previousIndex);
+    previousCommand = work->prevcommand;
 
     if (dds3GetGlobalConfigFlag(2) == 0 && (s->act->stat & 0x80)) {
         previousCommand = 0;
@@ -1673,33 +1673,59 @@ void SetCommCursor2(nbCommSelProcessData_t *s)
     for (type = 0; type < 6; type++) {
         for (i = 0; i < s->commcnt[type]; i++) {
             entry = s->commlist[type][i];
-            matches = 0;
             switch (entry) {
-            case 0x8000: matches = previousCommand == 0; break;
-            case 0x8001: matches = previousCommand == 2; break;
-            case 0x8002: matches = previousCommand == 3; break;
-            case 0x8003: matches = previousCommand == 7; break;
-            case 0x8004: break;
-            default:
-                if (type == 0) {
-                    matches = previousCommand == 1 && previousIndex == entry;
-                } else if (type == 1) {
-                    matches = previousCommand == 4 && previousIndex == entry;
-                } else if (type == 2) {
-                    matches = previousCommand == 5 && previousIndex == entry;
+            case 0x8000:
+                if (previousCommand == 0) {
+                    SetPrevCursor(s, type, i);
+                    return;
                 }
                 break;
-            }
-            if (matches) {
-                SetPrevCursor(s, type, i);
-                return;
+            case 0x8001:
+                if (previousCommand == 2) {
+                    SetPrevCursor(s, type, i);
+                    return;
+                }
+                break;
+            case 0x8002:
+                if (previousCommand == 3) {
+                    SetPrevCursor(s, type, i);
+                    return;
+                }
+                break;
+            case 0x8003:
+                if (previousCommand == 7) {
+                    SetPrevCursor(s, type, i);
+                    return;
+                }
+                break;
+            case 0x8004:
+                break;
+            default:
+                switch (type) {
+                case 0:
+                    if (previousCommand == 1 && previousIndex == entry) {
+                        SetPrevCursor(s, 0, i);
+                        return;
+                    }
+                    break;
+                case 1:
+                    if (previousCommand == 4 && previousIndex == entry) {
+                        SetPrevCursor(s, 1, i);
+                        return;
+                    }
+                    break;
+                case 2:
+                    if (previousCommand == 5 && previousIndex == entry) {
+                        SetPrevCursor(s, 2, i);
+                        return;
+                    }
+                    break;
+                }
+                break;
             }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", SetCommCursor2);
-#endif
 
 void nbSetAutoCommSel(void)
 {

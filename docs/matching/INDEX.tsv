@@ -237,6 +237,7 @@ DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/mat
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
 DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	91
+SetCommCursor2	newbattle/nbCommSelProcess	0x21C	135 of 135 words match	docs/matching/newbattle/nbCommSelProcess.md	135
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 SelectDevil	newbattle/nbDebugProcess	0x218	79 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
