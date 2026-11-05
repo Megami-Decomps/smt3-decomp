@@ -12,9 +12,9 @@ both native and emitted sizes when they differ.
 | Entries | Unit | Page |
 |---|---|---|
 | 37 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 17 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 16 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 12 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |

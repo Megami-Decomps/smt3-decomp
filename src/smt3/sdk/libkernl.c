@@ -739,7 +739,50 @@ s32 sceTtyRead(char *buffer, s32 length)
     return count;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyInit);
+/* The transport header is eight bytes; TTY adds a four-byte reserved word.
+ * Both native backing buffers span 320 bytes. */
+typedef struct ttyPacket_t {
+    u16 length;
+    u16 reserved;
+    u16 protocol;
+    u8 source;
+    u8 destination;
+    u32 ttyReserved;
+    u8 payload[308];
+} ttyPacket_t;
+
+extern ttyPacket_t D_0059B6C0;
+extern ttyPacket_t D_0059B800;
+extern void FlushCache(s32 mode);
+extern s32 sceDeci2Open(u16 protocol, void *argument,
+                       void (*handler)(s32, s32, void *));
+
+s32 sceTtyInit(void)
+{
+    ttyPacket_t *packet;
+
+    /* Registration exposes this context to the asynchronous TTY callback.
+     * Publish and observe its shared words with native-width accesses. */
+    FlushCache(0);
+    (*(volatile s32 *)&D_0059B690.handle) = sceDeci2Open(0x210, &D_0059B690, sceTtyHandler);
+    if ((*(volatile s32 *)&D_0059B690.handle) < 0) {
+        return 0;
+    }
+    (*(volatile s32 *)&D_0059B690.sendBusy) = 0;
+    (*(volatile s32 *)&D_0059B690.sendLength) = 0;
+    (*(volatile s32 *)&D_0059B690.receiveLength) = 0;
+    D_0059B690.receiveBuffer = (u8 *)(EE_ADDR(&D_0059B800) | 0x20000000);
+    packet = (ttyPacket_t *)(EE_ADDR(&D_0059B6C0) | 0x20000000);
+    D_0059B690.sendBuffer = (u8 *)packet;
+    packet->protocol = 0x210;
+    packet->source = 'E';
+    packet->destination = 'H';
+    packet->reserved = 0;
+    packet->ttyReserved = 0;
+    D_0059B690.queue = gcc2_compiled__10(0x100);
+    return 1;
+}
+
 
 s32 kputchar(s32 character)
 {

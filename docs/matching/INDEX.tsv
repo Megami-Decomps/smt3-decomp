@@ -418,6 +418,7 @@ sceOpen				docs/matching/sdk/libkernl.md	382
 _sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	410
 sceDclose				docs/matching/sdk/libkernl.md	439
 kputchar				docs/matching/sdk/libkernl.md	462
+sceTtyInit				docs/matching/sdk/libkernl.md	489
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79

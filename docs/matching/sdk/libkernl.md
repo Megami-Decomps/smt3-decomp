@@ -485,3 +485,49 @@ contracts remain unchanged. The entire 39,036-byte production text section,
 Full retail checksum, generated-source, regression, guarded-source and report
 gates pass. Production provenance verifies the compiler-owned linked span.
 Only SDK coverage gains one function and 56 bytes; game coverage is unchanged.
+
+## sceTtyInit
+
+The ordinary typed initialization matches all 188 native bytes. It flushes the
+cache, registers protocol `0x210` with the existing callback/context, publishes
+and reloads the signed handle, and returns zero only for a negative handle.
+Success clears the three progress words, selects the two uncached buffer
+addresses, initializes the send-packet header, publishes the 256-byte receive
+queue and returns one. Packet length, payload and receive-buffer bytes remain
+untouched. No additional error handling or allocation is introduced.
+
+Each buffer has a proven 320-byte backing extent. Its typed packet contains the
+12-byte header and 308 remaining bytes; this does not change the writer's
+256-byte payload cap. Native field widths and offsets agree with the
+[DECI2 TTY layout](https://github.com/ps2dev/ps2sdk/blob/master/ee/kernel/src/tty.c),
+used only to corroborate field meanings. The native backing extent, not that
+reference's smaller buffer, determines the declarations. Character accesses
+observe the declared packet's representation without a conflicting array type.
+
+The existing context prefix reaches its queue at `+0x18`. Initializer stores,
+relative callback loads and direct reader references independently prove that
+`D_0059B6A8` is an interior field label, not a separate C object boundary.
+Only the 28-byte prefix is established; the remaining storage is not assigned
+invented fields.
+
+The handle and progress words use native-width volatile views of genuinely
+published asynchronous context state. The callback reads the handle and
+reads/writes progress. No competing handle writer is proven, so the preserved
+reload is not described as required by concurrent mutation. Volatile supplies
+neither a general memory barrier nor a repaired initialization protocol. The
+packet and pointer fields retain ordinary accesses. Constructing the actual
+local send-packet pointer after setting the receive pointer gives native
+address scheduling without a compiler constraint or helper.
+
+Independent storage, shared-state, ABI and complete-owner review approves the
+source. Both checkers report 156 match and 0 differ. Baseline/candidate strict
+three-mode complete assembly and literal entire-ELF plain/dump parity passes,
+with hashes bracketing every compile. All production code/data and 1,773
+relocation descriptors are unchanged; 155 SKIP_ASM and 160 retained peers keep
+their bytes and resolved targets. All 13 target relocations are independently
+resolved and the resulting 188 bytes match retail without masking.
+
+Full retail checksum, generated-source, regression, guarded-source and report
+gates pass, with a unique compiler-owned production span. SDK coverage gains
+one function and 188 bytes; game coverage is unchanged. This is a matching
+reconstruction, not a claim about original source spelling.
