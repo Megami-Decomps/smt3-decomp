@@ -2,26 +2,55 @@
 
 ## nbCameraShot_PullOne_Init (newbattle/nbCameraSkill, 0xE8)
 
-56 of 58 words match, at the exact 232-byte size.
+58 of 58 words match at the native 232-byte size. The complete owner has
+35 matching functions and exact owned data, including the separate
+SkillStart promotion below.
 
-One store is scheduled differently. Retail emits `div.s`, then
-`swc1 pCamera->distance`, then the two `sw $0` that zero `angles.x` and
-`angles.z`, then the `lqc2` of `pForm->rot`. The draft emits the two `sw $0`
-first: cc1's second scheduling pass fills the `div.s` latency with them and
-sinks the `swc1` behind, which retail's cc1 run did not do.
+Retail stores the computed distance after `div.s`, then zeroes `angles.x`
+and `angles.z`, before loading the formation rotation into VU0. The earlier
+56/58-word draft used z-then-x source order and scheduled both zero stores
+before the distance store. The matched form uses ordinary x-then-z
+initialization and one `FAKEMATCH_ASM_LIVE(pNbCamera)` immediately after the
+distance assignment. Removing only that operand constraint, with the same
+x-then-z source, yields 55/58 at 232 bytes: only the three store words move.
+Do not confuse that control with the earlier z-then-x draft.
 
-All six orders of the three statements give either `sw, sw, swc1` or, once
-the `SDF_VU0_LOADVECTOR` moves above the two zero stores,
-`swc1, lqc2, sw, sw` with the function one word shorter. Also ruled out:
-zeroing `angles.y` as well (dead store, one word longer),
-`angles.x = angles.z = 0.0f` (one word longer), a `volatile sdfVector4_t`
-(longer), `SDF_VU0_LOADVECTOR_BARRIER` in place of the plain load (same
-sinking), and writing the zeros through a `sdfVector4_t *` local so the two
-stores alias `pCamera->distance` (unchanged).
+The incoming camera pointer is already initialized and remains live for the
+later direction stores and VU result. The empty tied register operand emits
+no instructions, adds no memory accesses or runtime consumer, and does not extend
+its lifetime. It is a localized scheduling aid, not a memory barrier or
+original-source evidence. The actual pointer remains in callee-saved `$17`
+through both calls, with the native 48-byte frame and saved-register layout.
 
-The rest is exact, including `pForm->r > pForm->h` for the load order of the
-compare, the `0.69813163f` and `0.78539807f` pool literals, and the
-`-1.0f`/`0.0f` direction stores in `x, z, y, w` source order.
+Qualified compiler snapshots locate the store-order difference in the first
+scheduler, rather than only the second scheduler as previously recorded.
+Both inputs put the distance store before the zero stores in regmove.
+With the constraint, sched1 records output dependencies from both zero
+stores to the distance store; without it, those edges are absent and the
+zeros move ahead. Sched2 preserves each order. These are observed dependency
+lists and schedules, not an explanation of an unobserved alias-analysis
+routine or a general promise about empty assembly.
+
+`SetRotateMatrixXYZ` now has its provider's exact
+`void(const sdfVector3_t *)` declaration. All six angle locals passed to it
+are actual `sdfVector3_t` objects: each uses only XYZ scalar accesses and
+this call, with no W member or VU transfer. This replaces the old four-vector
+declaration without casts. The declaration and all six local-type changes
+are complete-output neutral in production, `SKIP_ASM`, and
+`NON_MATCHING`/`SKIP_ASM`, for both constrained and unconstrained controls.
+The five existing callers receive no matching credit.
+
+The radius/height comparison, scale product, division, negated Euler angle,
+constants and call order remain native. All XYZ components are initialized
+before the rotation provider reads them. The formation rotation and camera
+direction retain their native quadword alignment and VU load/apply/store
+operations. Direction stores remain x/z/y/w in source and native order.
+
+Independent semantic/provider review, complete-owner/data checking,
+three-mode implicit-declaration checks and full plain/nohook-dump output
+parity pass. Full retail checksum and regression qualification accompany
+the landing. Earlier statement-order, extra-zero, volatile-vector and load
+barrier controls remain historical negatives; none is retained here.
 
 ## nbCameraState_SkillStart_Init (newbattle/nbCameraSkill, 0x78)
 

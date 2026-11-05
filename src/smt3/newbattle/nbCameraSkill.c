@@ -152,7 +152,7 @@ extern void mdlGetPosition(mdlObj_t *aHandle);
 extern void effBTLModelInvokeGroupHide(void);
 extern f32 sdfAtan(f32 aX);
 extern f32 EulerAngleAxisY(void);
-extern void SetRotateMatrixXYZ(sdfVector4_t *aAngles);
+extern void SetRotateMatrixXYZ(const sdfVector3_t *aAngles);
 extern s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera);
 extern s32 nbCameraHero_Cut1_Run(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern void nbCameraState_Cut1Enemy_Calc(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
@@ -438,7 +438,7 @@ extern void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection);
 void nbCameraShot_TargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
     sdfVector4_t direction;
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     sdfVector4_t pos;
     sdfVector4_t neg;
     u32 group;
@@ -664,7 +664,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetParty
 void nbCameraShot_Invoke_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
     sdfVector4_t direction;
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     nbFormation_t *pForm;
     f32 radius;
     f32 scale;
@@ -709,7 +709,7 @@ void nbCameraShot_Invoke_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSIn
 void nbCameraShot_Target_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
     sdfVector4_t direction;
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     sdfVector4_t pos;
     sdfVector4_t neg;
     nbFormation_t *pForm;
@@ -801,7 +801,7 @@ void nbCameraShot_One_Init(nbCamera_t *pCamera, nbFormation_t *pForm)
     sdfVector4_t targetPos;
     sdfVector4_t formPos;
     sdfVector4_t delta;
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     nbCamera_t *pBoss;
     nbFormation_t *pTarget;
     u32 invokeParty;
@@ -888,11 +888,9 @@ void nbCameraShot_One_Calc(nbCamera_t *pNbCamera, nbFormation_t *pFormation)
     SDF_VU0_STOREVECTOR(pNbCamera);
 }
 
-/* NON_MATCHING: 2 of 58 words differ (first at +0x74). */
-#ifdef NON_MATCHING
 void nbCameraShot_PullOne_Init(nbCamera_t *pNbCamera)
 {
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     nbFormation_t *pForm;
     f32 fovy;
     f32 width;
@@ -908,8 +906,11 @@ void nbCameraShot_PullOne_Init(nbCamera_t *pNbCamera)
         width = pForm->h * pForm->scl;
     }
     pNbCamera->distance = width / fovy;
-    angles.z = 0.0f;
+    /* Target-specific live-pointer constraint preserves the native distance
+     * store scheduling. No memory barrier or original-source claim is made. */
+    FAKEMATCH_ASM_LIVE(pNbCamera);
     angles.x = 0.0f;
+    angles.z = 0.0f;
     SDF_VU0_LOADVECTOR(&pForm->rot);
     angles.y = -EulerAngleAxisY();
     SetRotateMatrixXYZ(&angles);
@@ -921,9 +922,6 @@ void nbCameraShot_PullOne_Init(nbCamera_t *pNbCamera)
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_PullOne_Init);
-#endif
 
 void nbCameraShot_PullOne_Calc(nbCamera_t *pNbCamera, f32 rate)
 {
@@ -1411,7 +1409,7 @@ void nbCameraShot_InvokeParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *p
 {
     sdfVector4_t pos;
     sdfVector4_t direction;
-    sdfVector4_t angles;
+    sdfVector3_t angles;
     u32 group;
     f32 radius;
     f32 half;
