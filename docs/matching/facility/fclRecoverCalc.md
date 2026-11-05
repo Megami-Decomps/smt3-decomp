@@ -61,3 +61,48 @@ Independent semantic review and canonical complete-owner checking pass
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 537 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+## rcvFullHeal (facility/fclRecoverCalc, 160 bytes)
+
+All 40 of 40 words match. The initialized signed result mask is bound locally
+to its native callee-saved register, and the MP comparison sets its genuine
+bit with `result |= 1`. On that path the incoming mask is only zero or one,
+so this is equivalent to assigning one. The later status tests OR mask value 2 for
+0x20, 0x40 or 0x100 and mask value 4 for 0x800; the result remains in 0..7.
+
+HP and MP comparisons retain their unsigned types and actual unsigned
+providers. The HP halfword is read before the maximum-HP call, MP after that
+call and before the maximum-MP call, and the status halfword after both calls.
+The mask is initialized before its real lifetime spans the MP call. That
+provider saves and restores the selected callee-saved register, and this
+function preserves its caller's value as well. No type, layout, callback,
+alias, volatile or capacity promise changes.
+
+Qualified ee-gcc 2.96 traces show that the localized binding and real bit-set
+update retain five branches through combine; later conditional conversion
+creates the five native XOR-zero/select sequences. The unconstrained form
+converts earlier and loses the XORs during common-subexpression elimination.
+Removing only the binding emits 132 bytes; replacing the MP bit-set with an
+assignment emits 156. Both changes are needed. The constraint is a narrow
+reconstruction aid, not evidence of the historical source spelling.
+
+Independent semantic, provider-ABI and compiler-evidence review passes.
+The public complete-owner checker reports 23 match, 0 differ. Baseline, final
+and both minimal ablations pass all twelve three-mode plain/dump complete
+assembly and ELF-file comparisons. Normalization is confined to temporary
+source-filename metadata, never code or data. All 23 production, 22 SKIP_ASM
+and 23 retained-C peers and their resolved relocation targets are preserved,
+as are all allocated data. The production text and relocation entries are
+byte-identical to the assembly-backed baseline; among production symbols,
+only local compiler label suffixes change. Earlier stock-recovery and price-display matches remain exact.
+
+Final source and both controls also pass strict implicit-declaration checks in
+all three modes, with identical output to their non-strict builds. The baseline
+passes strict retained-C checks; its production and SKIP_ASM contexts retain
+one inherited implicit target declaration at the caller because the definition
+is hidden there. Promotion supplies the definition without adding declarations.
+
+Full retail, generated-source, regression, guarded-source and report gates
+pass. Production provenance verifies a unique compiler-owned linked 160-byte
+span matching retail. Game coverage gains one function and 160 bytes, with the
+same increase in the all-unit report.

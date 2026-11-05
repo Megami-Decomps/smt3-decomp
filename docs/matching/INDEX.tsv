@@ -128,6 +128,7 @@ ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/matching/facili
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	28
 rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
 rcvDrawPanelAt	facility/fclRecoverCalc	0x1AC	107 of 107 words match	docs/matching/facility/fclRecoverCalc.md	42
+rcvFullHeal	facility/fclRecoverCalc	160 bytes	40 of 40 words match	docs/matching/facility/fclRecoverCalc.md	65
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3

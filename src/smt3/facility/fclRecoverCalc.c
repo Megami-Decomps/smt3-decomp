@@ -151,16 +151,18 @@ void sfply_AdjustPrepEnd(datUnitWork_t *unit)
     rcvClearStatusBits(unit);
 }
 
-#ifdef NON_MATCHING
 s32 rcvFullHeal(datUnitWork_t *unit)
 {
     u32 hp = unit->hp;
-    s32 result = hp < datGetMaxHp(unit);
+    /* Keep this live mask in its native saved register. With the real
+     * bit-set updates below, the localized constraint preserves late
+     * conditional-move lowering in ee-gcc 2.96; it emits no instruction. */
+    FAKEMATCH_ASM_REG(s32, result, "$16") = hp < datGetMaxHp(unit);
     u32 mp = unit->mp;
     u16 status;
 
     if (mp < datGetMaxMp(unit)) {
-        result = 1;
+        result |= 1;
     }
     status = unit->badstatus;
     if (status & 0x20) {
@@ -177,9 +179,6 @@ s32 rcvFullHeal(datUnitWork_t *unit)
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvFullHeal);
-#endif
 
 typedef struct rcvCalcWork_t {
     u8 flags;
