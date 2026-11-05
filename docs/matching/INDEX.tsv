@@ -314,7 +314,7 @@ roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
 pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	73
 roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	113
 pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	148
-pbRebuildOutline				docs/matching/pb/pbGameDraw.md	3
+pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
 pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	30

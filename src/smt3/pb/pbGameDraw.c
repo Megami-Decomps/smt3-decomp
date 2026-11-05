@@ -214,18 +214,17 @@ typedef struct {
 extern pbOutlineEdge_t D_00327780[];
 extern u8 pbGetBlockAt(s16 x, s16 y, s16 group);
 
-/* NON_MATCHING: 96 of 98 words match at 392 native/emitted bytes. Only the
- * two block-address additions commute their operands (+0x4C and +0xDC). */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+/* Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * seq38, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* EE flat-32 address arithmetic retains native offset-first block additions.
+ * Both lookups observe the current block base, including after pbGetBlockAt. */
 void pbRebuildOutline(pbGroupData_t *group)
 {
     s32 i;
 
     for (i = 0; i < group->num; i++) {
-        pbBlockEntry_t *block = &group->blk[i];
+        pbBlockEntry_t *block = EE_ADDR_AS(pbBlockEntry_t *, (u32)i * sizeof(pbBlockEntry_t) + EE_ADDR(group->blk));
         f32 x = (f32)(block->x * 40);
         f32 z = (f32)(block->y * 40);
         s32 bits;
@@ -237,7 +236,7 @@ void pbRebuildOutline(pbGroupData_t *group)
             if (((bits >> side) & 1) != 0) {
                 u16 n;
 
-                pbBlockEntry_t *destination = &group->blk[i];
+                pbBlockEntry_t *destination = EE_ADDR_AS(pbBlockEntry_t *, (u32)i * sizeof(pbBlockEntry_t) + EE_ADDR(group->blk));
                 n = destination->outline_num;
                 destination->outline_num += 2;
                 destination->outline[n][0] = D_00327780[side].from[0] + x;
@@ -250,9 +249,6 @@ void pbRebuildOutline(pbGroupData_t *group)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
-#endif
 
 pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);

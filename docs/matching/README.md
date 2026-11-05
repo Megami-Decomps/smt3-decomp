@@ -100,7 +100,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 1 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
-| 1 |  | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
+| 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
