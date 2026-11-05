@@ -5,11 +5,14 @@ typedef struct rpcPacket {
     u32 w[16];
 } rpcPacket;
 
-/* Queue prefix: sequence number, packet base, signed capacity. */
+/* Observed prefix of the 0x40-byte M-RPC queue allocation. The remaining
+ * bytes have no established fields and are not accessed through this view. */
 typedef struct rpcQueue {
     u32 seq;
     rpcPacket *base;
     s32 count;
+    u32 unk_C; /* Cleared during initialization. */
+    u32 unk_10; /* Cleared during initialization. */
 } rpcQueue;
 
 extern s32 D_0052BA88 __attribute__((section(".data")));
@@ -18,7 +21,39 @@ extern rpcQueue D_00599700 __attribute__((section(".data")));
 extern s32 DIntr(void);
 extern s32 EIntr(void);
 
-INCLUDE_ASM(const s32, "sdk/libmrpc", sceSifMInitRpc);
+extern rpcPacket D_00598F00[32];
+extern void _request_end(void *packet, void *queue);
+extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument);
+extern u32 sceSifGetSreg(s32 index);
+extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 length);
+
+void sceSifMInitRpc(s32 mode)
+{
+    rpcPacket *packets;
+    rpcPacket *packet;
+    rpcQueue *queue;
+
+    if (D_0052BA88 != 0) {
+        return;
+    }
+    D_0052BA88 = 1;
+    DIntr();
+    packets = D_00598F00;
+    queue = &D_00599700;
+    queue->base = EE_ADDR_AS(rpcPacket *, (EE_ADDR(packets) | 0x20000000));
+    queue->count = 32;
+    queue->seq = 1;
+    queue->unk_C = 0;
+    queue->unk_10 = 0;
+    sceSifAddCmdHandler(0x80000018, _request_end, queue);
+    EIntr();
+    packet = packets + 1;
+    packet->w[4] = 1;
+    packet->w[5] = 1;
+    sceSifSendCmd(0x80000001, packet, 24, NULL, NULL, 0);
+    while (sceSifGetSreg(1) == 0) {
+    }
+}
 
 void sceSifMExitRpc(void)
 {
