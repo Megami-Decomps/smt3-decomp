@@ -267,7 +267,7 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 
 
-extern u8 datModelParamTable[];
+extern datUnitVisual_t datModelParamTable[];
 
 extern u128 D_00526420;
 
@@ -1085,8 +1085,6 @@ void nbClearActionFlags(nbMainProcessData_t *data)
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbClearActionFlags);
 #endif
 
-/* NON_MATCHING: 24 of 62 words differ (first at +0x5C). */
-#ifdef NON_MATCHING
 s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
 {
     nbFormation_t *form;
@@ -1110,17 +1108,14 @@ s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
         if ((form[i].stat & 1) == 0) {
             form[i].stat |= 0x800;
             if (command > 0) {
-                form[i].r = *(f32 *)(datModelParamTable + command * 784 + 0x10) *
-                            *(f32 *)(datModelParamTable + command * 784 + 0x18);
+                form[i].r = datModelParamTable[command].formsize *
+                            datModelParamTable[command].formscale;
             }
             ret = 1;
         }
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetActionCommand);
-#endif
 INCLUDE_SDATA(const s32, "newbattle/nbFormation", D_005514F8);
 
 INCLUDE_SDATA(const s32, "newbattle/nbFormation", nbFormEnemyInterval);
