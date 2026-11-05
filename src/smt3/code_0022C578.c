@@ -5147,9 +5147,11 @@ void campDhEquipHearts(void)
     }
 }
 
-/* NON_MATCHING: 143 of 146 words match at 584 bytes; the default-input
- * tail branch schedules its argument move and saved-register restore differently. */
-#ifdef NON_MATCHING
+/* Exact-type, same-symbol view withholds the earlier provider definition.
+ * The direct call leaves three default-tail words different; this conservative
+ * visibility boundary restores the native delay slots without changing the
+ * provider or call target. This is a reconstruction aid, not historical source. */
+extern void campDhHideInfoWindowView(void) FAKEMATCH_ASM_NAME("campHideInfoWindow");
 void campDhUpdateCursor(void)
 {
     u16 button = (u16)cmpGetPressedButton(0xF3);
@@ -5183,7 +5185,7 @@ void campDhUpdateCursor(void)
         }
         break;
     case 2:
-        campHideInfoWindow();
+        campDhHideInfoWindowView();
         break;
     case 0x10:
         campDhApplyEntry(0x10);
@@ -5200,9 +5202,6 @@ void campDhUpdateCursor(void)
     }
     cmpPlayCursorSE(button);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhUpdateCursor);
-#endif
 
 s32 cmpUnloadStatusModel(void)
 {
