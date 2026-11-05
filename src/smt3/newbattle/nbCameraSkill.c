@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdk_libgcc.h"
+#include "sdk_libc.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -2071,21 +2072,19 @@ void nbCameraState_SkillAttack_Calc(void)
     nbCameraShot_GroundCollision(&pNbCamera);
 }
 
-/* NON_MATCHING: 1 of 30 words differ (first at +0x48). */
-#ifdef NON_MATCHING
 void nbCameraState_SkillStart_Init(void)
 {
     datNormalSkillVisual_t *pVisual = datSkillTable.visual;
 
     nbCamera_SkillInfo_Set(&nbCameraSkillNBSInfo, &D_00320EB0[effBTLSkillGetID()]);
+    /* Target-specific live-base constraint keeps first CSE from reversing
+     * the native base/index operands; this is not original-source evidence. */
+    FAKEMATCH_ASM_LIVE_VOLATILE(pVisual);
     pVisual += effBTLSkillGetID();
     if (pVisual->hatudo == 0) {
         nbCameraSetState(7);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillStart_Init);
-#endif
 
 void nbCameraState_Cut1Enemy_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {

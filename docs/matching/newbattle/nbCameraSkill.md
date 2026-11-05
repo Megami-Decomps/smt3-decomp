@@ -25,26 +25,48 @@ compare, the `0.69813163f` and `0.78539807f` pool literals, and the
 
 ## nbCameraState_SkillStart_Init (newbattle/nbCameraSkill, 0x78)
 
-29 of 30 words match, at the exact 120-byte size.
+30 of 30 words match at the native 120-byte size. The complete owner has
+34 matching functions, including this promotion, with owned data exact.
 
-The one differing word is the `addu` operand order:
-retail `addu $16, $16, $2` (base, index), the draft `addu $16, $2, $16`. Both
-write the same register and keep the `lbu 0x2` displacement, so only the
-commutative operand order inside the address differs.
+The ordinary draft matched 29 words. At +0x48 it emitted
+`addu $16, $2, $16`, while retail uses `addu $16, $16, $2`: the same live
+base and scaled index, destination and following `lbu 0x2`, with only the
+commutative source operands exchanged. The local pointer base preserves
+`datSkillTable + 0x4388` in the relocation addend; direct subscripting folds
+that offset into the byte-load displacement instead.
 
-Retail also keeps `datSkillTable + 0x4388` in the relocation addend, which
-only a local pointer base reproduces: `datSkillTable.visual[id].hatudo`
-written directly folds the whole `0x4388 + 2` into the `lbu` displacement and
-leaves the relocation at addend 0.
+One `FAKEMATCH_ASM_LIVE_VOLATILE(pVisual)` after `nbCamera_SkillInfo_Set`
+and before the second `effBTLSkillGetID` preserves the native operand order.
+The pointer is already initialized from the real embedded visual array and
+already lives across these calls to feed the indexed `hatudo` byte read.
+The empty tied operand emits no instructions, adds no memory accesses or
+barrier claim, and does not extend that lifetime. The final code keeps the
+pointer in callee-saved `$16`, preserves both skill-ID queries and their
+intervening setup call, and retains the conditional `nbCameraSetState(7)`
+tail call. This is the project's localized compiler constraint, not evidence
+of the original source spelling.
 
-Ruled out for the operand order, all giving the identical `addu $16, $2, $16`:
-`pVisual += effBTLSkillGetID()`, `pVisual = pVisual + id`,
-`pVisual += (s32)id`, `pVisual -= -(s32)id`, a `u8 *` base with
-`+= id * 4` and `+= id << 2`, a `u32` base with `+= id * 4`, a separate
-`u32 ofs = id * 4` added to either base type, both casts
-`(u8 *)pVisual + ofs` and `(u32)pVisual + ofs`, and the reversed
-`id * 4 + (u32)pVisual`. Subscripting (`pVisual[id].hatudo`) instead of
-assigning the pointer costs two more words by moving the result into `$3`.
+Paired compiler snapshots locate the change at the first CSE pass: the
+ordinary control begins with base-plus-index and becomes index-plus-base;
+the constrained form retains base-plus-index through allocation. This does
+not identify an internal comparator or backend decision. Removing only the
+constraint reproduces the sole +0x48 mismatch. A nonvolatile operand and
+other tested placements did not match and are not retained.
+
+Earlier ordinary controls also remain negative: pointer addition and
+subtraction spellings, byte or unsigned address views, separate scaled
+offsets, reversed source operands and direct indexing. Their failure does
+not justify changing the actual pointer type or either provider call.
+
+The existing `sdk_libc.h` supplies provider-truthful `printf` and `sprintf`
+declarations, fixing an inherited implicit `printf` in `SkillCut2_Init`.
+That header is output-neutral in production, `SKIP_ASM`, and
+`NON_MATCHING`/`SKIP_ASM`; only generated scratch-file names differ in debug
+metadata. All three modes pass implicit-declaration errors and full
+ordinary/nohook/diagnostic output comparisons. Independent review confirms
+the pointer lifetime, provider types, calls, native byte read and complete
+owner. Full retail checksum and regression qualification accompany the
+landing; no compiler flags, ABI or shared header changed.
 
 ## nbCameraShot_All_Set2 (newbattle/nbCameraSkill, 0x248)
 
