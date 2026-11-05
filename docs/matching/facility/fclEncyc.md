@@ -262,3 +262,57 @@ register and clobbers no memory; it is not a memory barrier. Removing it
 reproduces the ordinary shared-speed source byte-for-byte. Both controls have
 qualified plain/diagnostic parity and unchanged non-text allocated sections,
 non-file symbols and relocations relative to baseline. Neither is retained.
+
+## DrawReadStatusMoney (facility/fclEncyc, 0x178)
+
+94 of 94 words match at the native 376-byte size, in ordinary C without a
+new compiler constraint, type declaration, qualifier, provider or flag.
+
+The local record contains precisely the two actual eight-byte position
+records followed by the actual sixteen-byte color. Its size is 32, alignment
+four, and color offset sixteen, matching native's SP+0 and SP+0x10 objects.
+There is no padding directive, fabricated member, widened bound or dummy use.
+This is a useful ordinary representation, not proof of historical spelling.
+
+Native copies all sixteen template bytes, stores alpha at SP+0x1C, and reloads
+that word at 0x21D2E8 after both sprite calls, ordering-table registration and
+font positioning. The final font color therefore consumes the actual color
+component rather than a separately retained scalar. Both vertex arrays are
+fully initialized before use. Coordinates remain snapshots across callbacks;
+texture and each successive font handle retain their native fresh reads.
+
+On the current owner, the target-only old draft emits 380 bytes, with 17 of
+94 native-prefix words matching and four excess bytes. Changing only the final
+consumer to the actual color component reaches 42/94 at 376 bytes. Removing
+the separate scalar and deferring declarations independently leave that same
+complete output. Grouping the real positions and color closes all remaining
+words. Restoring the separate alpha in that grouped form emits 380 bytes,
+13/94 matching prefix words and four excess bytes. Both substantive features
+are load-bearing; no register or source-order sweep was used.
+
+The sprite providers synchronously copy color values into packets. They do
+not mutate or retain the local color, so this is native storage/dataflow
+reconstruction, not a demonstrated gameplay bug. Independent exact-body
+ASan/UBSan tests cover all 65,536 signed-halfword alpha inputs and sixteen
+combinations of deliberate callback color mutation, for 1,048,576 paired
+cases. They also check retained coordinates and successive font-handle
+reloads. Those mutations are adversarial fixtures, not claims about actual
+providers, and bounded host fixtures are not retail execution.
+
+Signed-halfword alpha gives `128 - alpha` in [-32639,32896]. Converting it to
+the unsigned component and ORing `0x80808000` preserves native low-word bits,
+including negative values. No byte mask or 0..128 restriction is added.
+Coordinate additions retain their inherited valid-UI-domain signed-overflow
+limits. The existing allocator caller pointer return versus provider signed
+EE address return is unchanged; this is not global prototype closure.
+
+Complete final owner/data checking gives 115 match, 0 differ. Sixteen full
+plain/dump pairs pass, including original, final and minimal controls in
+production, SKIP_ASM and retained-C contexts. Twelve strict declaration
+builds pass with unchanged output; the existing process-pointer warning
+remains. All 114 production/SKIP and 121 retained peers are unchanged after
+normalizing generated local-label names. Original and final production
+allocated sections and raw relocations agree, but non-file symbols do not:
+labels renumber and undefined D_003309E0/F0 become size sixteen instead of
+zero. No whole-object-contract identity or hooked compiler-decision claim
+is made. Full integration and retail gates remain required for promotion.

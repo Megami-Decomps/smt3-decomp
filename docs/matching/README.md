@@ -20,10 +20,10 @@ both native and emitted sizes when they differ.
 | 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 9 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
+| 9 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 8 |  | [sdk/libc.md](sdk/libc.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
-| 8 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 7 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |

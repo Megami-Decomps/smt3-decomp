@@ -115,6 +115,7 @@ ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/fac
 GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	168
 CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	191
 InitPhaseReadStatus	facility/fclEncyc	0x334	195 of 205 words match	docs/matching/facility/fclEncyc.md	218
+DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	266
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	25
 fclDrawPanelType0	facility/fclPanel	0x394	172 of 229 words match	docs/matching/facility/fclPanel.md	66
