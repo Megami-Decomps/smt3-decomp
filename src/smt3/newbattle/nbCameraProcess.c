@@ -357,7 +357,6 @@ void nbCameraScriptSetBougai(nbFormation_t *pTargetForm)
     nbCameraSetState(0x1B);
 }
 
-#ifdef NON_MATCHING
 extern sdfVector4_t D_00320E30;
 extern void ToMatrix(void);
 
@@ -372,14 +371,14 @@ void nbCameraScriptSet(sdfVector4_t *position, sdfVector4_t *rotation)
     SDF_VU0_STOREVECTOR(&pNbCamera.direction);
     SDF_VU0_LOADVECTOR_B(position);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(&pNbCamera.target);
+    /* No C access observes the target vector here: the following scalar
+     * stores and state setter touch disjoint fields. Keep the SDK address-only
+     * store; invalidating unrelated memory changes this unit's code generation. */
+    SDF_VU0_STOREVECTOR_NOMEM(&pNbCamera.target);
     pNbCamera.distance = 1.0f;
     pNbCamera.fovy = 0.6981316209f;
     nbCameraSetState(0x1C);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraScriptSet);
-#endif
 
 void nbCameraInit(void)
 {
