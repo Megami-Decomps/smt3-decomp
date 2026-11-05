@@ -164,4 +164,17 @@ not historical spelling or a claimed hooked allocation/scheduling decision.
 The first interpolation, signed-byte phase, captured amount, native unsigned
 word alpha conversion followed by byte narrowing, provider arguments and four
 callback order are unchanged. Both zero-result arms receive positive zero.
-Normal makaAdd initia
+Normal makaAdd initializes count to fifteen; PipeMain decrements active counts
+and clears the amount at zero, and ObjectDraw skips zero amounts. This supports
+the inspected normal lifecycle, not arbitrary counter mutation or universal
+writer closure. Existing float-to-u32 casts are not portable for negative or
+out-of-range alpha, and this reconstruction does not extend their domain.
+
+All nine prior exact peers and owned data remain exact. Seven complete
+plain/dump pairs and five output-neutral EE layout assertions pass. Original
+and final compile silently in all three strict-declaration modes. A host
+extracted-body fixture checks 2,113,536 complete calls in the defined count
+0..15 domain, including callback object mutation, and all 256 ghost-phase
+values; address, undefined-behavior and float-cast sanitizers pass. These are
+host semantic checks, not EE execution or a claim that host and EE floating
+arithmetic coincide. Broader integration qualification is recorded separately.
