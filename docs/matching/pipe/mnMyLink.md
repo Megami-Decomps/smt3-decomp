@@ -19,3 +19,52 @@ Whole-owner plain/dump output parity was verified for the ordinary and bound inv
 There is no uniqueness or nonzero-ID guarantee: low 16-bit IDs repeat every
 65536 counter values, and a low-16-zero allocation remains discoverable as
 free later, as in native code. No clamp or new capacity bound is introduced.
+
+
+## LoadLinkData (pipe/mnMyLink, 404 bytes)
+
+101 of 101 words match, through the return delay slot at 0x002A68C8; the
+following alignment nop earns no function credit. The existing guarded draft
+emitted 412 bytes with broad differences. The reconstruction promotes only
+this function; the closed `pipeMakeNodeLink` draft and all other peers remain
+unchanged. Both complete-owner checkers now report 29 match, 0 differ.
+
+The eight-byte source supplies a signed count and data pointer. The real
+caller constructs it from loaded file-header words, receives the four fields
+of the 16-byte output info record, and releases the temporary stream only after
+return. Nodes are actual 16-byte allocations, with a halfword ID and parts ID
+followed by next/previous pointers. The function counts the encoded stream,
+creates nodes, decodes each byte and connects consecutive nodes. Its mode
+argument is unused and its native return is always one.
+
+Byte decoding preserves the native signed-byte conversions, zero-to-six
+selection and turn flag. Reverse direction also wraps through the target's
+signed-byte representation; its incoming-direction shift is explicitly
+unsigned. No validity bound excludes malformed byte values. Exhaustive checks
+cover all 256 first-node byte values and 65,536 code/reverse combinations.
+First-node ID one and parts bit eight, halfword store widths, call order and
+last-node ID 0xFFFF remain intact. Native allocation/null behavior is unchanged:
+with one node, `last` stays null and the terminal write faults. The existing
+`FIX_BUGS` alternative remains opt-in; it is not part of the matching path.
+
+The initial stream base and advancing cursor have real, separate consumers.
+The cursor is initialized from the actual source pointer before use, reads the
+first byte and then continues from base plus one. One local binding keeps it
+in callee-saved register 17 across the real count/allocation/link calls. It has
+no artificial consumer or uninitialized path, and no empty asm is required.
+Removing exactly that declaration's binding emits 396 bytes rather than 404.
+Distinct first-node and loop byte scopes preserve their actual decode roles.
+This is a localized compiler-allocation aid, not historical source spelling.
+
+Independent review qualifies candidate, baseline and the one-declaration
+ordinary control in production, `SKIP_ASM` and retained-C modes. Complete
+assembly and literal entire-ELF plain/dump comparisons pass with stable
+119-input hash closure. Every native target word is compared after resolving
+all five real calls. All actual owner relocations are R_MIPS_26, with their
+original destinations verified; no relocation mask hides changed targets.
+All 29/28/29 prior peers, owned allocated data, NOBITS layouts and section/symbol
+contracts are preserved. The previously nonmatching allocator is not credited.
+
+Full retail checksum, generated-source, 569 regression-test, guarded-source,
+IRX, inline-asm and report gates pass, with a unique compiler-owned production
+span. Game coverage gains one function and 404 bytes; SDK totals are unchanged.
