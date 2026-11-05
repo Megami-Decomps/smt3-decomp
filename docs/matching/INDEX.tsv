@@ -331,6 +331,7 @@ makaDrawNormalGauge	pipe/pipeMakaAnim	0x2E0	110 of 184 words match	docs/matching
 makaDrawBar	pipe/pipeMakaAnim	0x2F8	143 of 190 words match	docs/matching/pipe/pipeMakaAnim.md	106
 makaDrawNormal	pipe/pipeMakaAnim	0x23C	143 of 143 words match	docs/matching/pipe/pipeMakaAnim.md	138
 objOption				docs/matching/pipe/pipeObject.md	3
+objLoad				docs/matching/pipe/pipeObject.md	30
 pipeFileLoad	pipe/pipePosTable	424 bytes	106 of 106 words match	docs/matching/pipe/pipePosTable.md	3
 ActionZMotion	pipe/pipeSection	0x140	74 of 80 words match	docs/matching/pipe/pipeSection.md	3
 EmTask	pipe/pipeSection	0x34C	211 of 211 words match	docs/matching/pipe/pipeSection.md	27

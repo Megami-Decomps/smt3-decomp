@@ -25,3 +25,51 @@ extension timing, the status-threshold copy and case-tail layout, and the
 sixteen-iteration loop's sentinel hoisting and field-load scheduling. The
 ordinary decrement-to-option-boundary loop already matches. Resolve those
 specific differences before retrying declaration or loop-form changes.
+
+
+## objLoad
+
+The ordinary C reconstruction matches all 552 native bytes (138 words). The
+complete owner checks 41 match, 0 differ. No constraint, opaque declaration,
+new flag or fabricated bound is used.
+
+The source is an eight-byte spawn record from the actual sixteen-byte pipe
+table's tabPtr field at +8, not a separate pointer object at the interior
+label. The producer allocates count*9 bytes, copies count*8 record bytes and
+places the loaded flags after them. The caller supplies a distinct zeroed
+32-byte object. Its signed file count remains unchecked; neither this source
+nor the matching claim asserts validated indices for malformed input.
+
+One RNG call is added to the actual record address with unsigned 32-bit wrap.
+Byte narrowing preserves the native decimal mode/place intermediates. Special
+modes and zero places use remainder-nine selection; randomized center position
+five retries with random += random >> 1 and no extra RNG call. Explicit center
+five remains valid. The signed-word-to-float radius and native diagonal
+constant preserve coordinate signs, including negative zero. The comparison
+chains follow the already matched objMake sibling.
+
+Natural id/offset/enabled/action/count statements reproduce the native memory
+order. Missing metadata returns zero after partial initialization. Otherwise
+width is copied, low-category actions 6/15/16 subtract 0x230 with 32-bit wrap,
+and category bit 0x10 scales the source value by ten. ID and action reloads
+across the metadata call and the final value reload remain intact; untouched
+output fields stay untouched. This is a matching reconstruction, not evidence
+of the original source spelling.
+
+Independent review verifies actual producer/caller/provider contracts and all
+552 resolved retail bytes in production, SKIP_ASM and retained configurations.
+All 41/40/41 other functions, owned data, section and symbol contracts, and all
+relocation targets pass. Production data is unchanged. In SKIP_ASM the new
+four-byte diagonal literal shifts later references without changing values.
+Retained C removes the old draft's non-native switch table and its measured
+alignment padding; every remaining string, table and peer target is verified.
+
+Baseline and final source pass six strict plain/dump pairs covering complete
+assembly and literal entire ELF files, with per-invocation input hashes. An
+independent host/native-derived reference checks 176,128 cases covering all byte
+way/ID/action values, seed boundaries, wrapping, all output bytes and return
+paths. This is not EE execution or an exhaustive RNG-state proof.
+
+Full retail checksum, generated-source, 569 regression tests, guarded-source,
+report and compiler-ownership gates pass. Game coverage gains one function and
+552 bytes; SDK coverage is unchanged.

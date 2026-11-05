@@ -299,16 +299,16 @@ typedef struct {
     u8 value;
 } pipeObjectSource_t;
 
-extern pipeObjectSource_t *D_00528F70;
+extern tagPipeTable D_00528F68;
 extern u32 dds3GetRandA(void *state);
 
-#ifdef NON_MATCHING
 u8 objLoad(tagPipeObject *object, s32 index)
 {
-    pipeObjectSource_t *source = &D_00528F70[index];
-    u32 random = (u32)(unsigned long)source + dds3GetRandA(NULL);
-    u32 mode = source->way / 10;
-    u32 place = source->way - mode * 10;
+    pipeObjectSource_t *source = &((pipeObjectSource_t *)D_00528F68.tabPtr)[index];
+    u32 random = dds3GetRandA(NULL) + (u32)(unsigned long)source;
+    u32 mode = (u8)((u32)source->way / 10);
+    u32 place = (u8)(source->way - mode * 10);
+    u8 diagonal;
     f32 radius;
     tagPipeEnemyInfo *info;
 
@@ -323,36 +323,29 @@ u8 objLoad(tagPipeObject *object, s32 index)
         }
     }
     radius = (f32)(s32)(mode * 60);
-    if (place & 1) {
+    diagonal = place & 1;
+    if (diagonal) {
         radius *= 0.7071067691f;
     }
     if (place < 4) {
         object->pos[1] = radius;
-    } else if (place < 7) {
-        object->pos[1] = 0.0f;
-    } else {
+    } else if (place >= 7) {
         object->pos[1] = -radius;
+    } else {
+        object->pos[1] = 0.0f;
     }
-    switch (place) {
-    case 1:
-    case 4:
-    case 7:
+    if (place == 1 || place == 4 || place == 7) {
         object->pos[0] = -radius;
-        break;
-    case 3:
-    case 6:
-    case 9:
+    } else if (place == 3 || place == 6 || place == 9) {
         object->pos[0] = radius;
-        break;
-    default:
+    } else {
         object->pos[0] = 0.0f;
-        break;
     }
     object->id = source->id;
-    object->enabled = 1;
     object->offset = source->offset;
-    object->count = 0;
+    object->enabled = 1;
     object->action = source->action;
+    object->count = 0;
     if (!(object->id & 0x10)) {
         info = objInfo(object->id);
         if (info == NULL) {
@@ -369,9 +362,6 @@ u8 objLoad(tagPipeObject *object, s32 index)
     }
     return source->value;
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeObject", objLoad);
-#endif
 
 extern u32 dds3GetRandA(void *state);
 
