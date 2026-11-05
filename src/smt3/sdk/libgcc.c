@@ -274,7 +274,7 @@ extern s32 close(s32 fd);
 
 extern _Bigint *_Balloc(_reent *r, s32 k);
 
-extern s32 __register_frame_info(void *fn, void *entry);
+extern void __register_frame_info(void *fn, void *entry);
 
 extern s32 __register_frame_info_table(void *fn, void *entry);
 
@@ -318,7 +318,9 @@ extern const double D_0054B930[];
 
 extern void abort(void);
 
-extern s32 __do_global_ctors(void);
+extern void __do_global_ctors(void);
+
+extern object D_0059AD40;
 
 extern s32 atexit(void (*fn)(void));
 
@@ -418,7 +420,23 @@ void __do_global_dtors(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", __do_global_ctors);
+void __do_global_ctors(void) {
+    unsigned long count;
+    unsigned int index;
+
+    __register_frame_info(D_0052D940, &D_0059AD40);
+    count = (s32)D_002F5600[0];
+    if (count == (unsigned long)-1) {
+        count = 0;
+        while (D_002F5600[count + 1] != NULL) {
+            count++;
+        }
+    }
+    for (index = count; index != 0; index--) {
+        D_002F5600[index]();
+    }
+    atexit(__do_global_dtors);
+}
 
 void __main(void) {
     if (D_0059AD58 == 0) {
@@ -840,7 +858,7 @@ void libc_2D1EA8(fde_vector *left, const fde_vector *right)
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1FA0);
 
-s32 __register_frame_info(void *fn, void *entry) {
+void __register_frame_info(void *fn, void *entry) {
     object *e = entry;
 
     e->fde_begin = fn;
@@ -857,8 +875,8 @@ s32 __register_frame_info(void *fn, void *entry) {
     return;
 }
 
-s32 __register_frame(void *fn) {
-    return __register_frame_info(fn, malloc(0x18));
+void __register_frame(void *fn) {
+    __register_frame_info(fn, malloc(0x18));
 }
 
 s32 __register_frame_info_table(void *fn, void *entry) {

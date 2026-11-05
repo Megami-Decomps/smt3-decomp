@@ -452,7 +452,7 @@ extern s32 close(s32 fd);
 
 extern _Bigint *_Balloc(_reent *r, s32 k);
 
-extern s32 __register_frame_info(void *fn, void *entry);
+extern void __register_frame_info(void *fn, void *entry);
 
 extern s32 __register_frame_info_table(void *fn, void *entry);
 
@@ -496,7 +496,7 @@ extern const double D_0054B930[];
 
 extern void abort(void);
 
-extern s32 __do_global_ctors(void);
+extern void __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
