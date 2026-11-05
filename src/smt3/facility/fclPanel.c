@@ -316,28 +316,26 @@ void fclDrawPanelEdges(fclPanel_t *panel, s32 ot)
     }
 }
 
-#ifdef NON_MATCHING
 void fclDrawPanelType3(fclPanel_t *panel, s32 ot)
 {
     s32 z = panel->Z << 4;
+    s32 inset;
 
     if (panel->TexHandle != 0) {
         fclDrawPanelType3BackGrad(panel, ot);
         fclDrawPanelCorners(panel, ot);
         fclDrawPanelEdges(panel, ot);
     }
-    fclDrawSpriteFilter(panel->X + 0x170, panel->Y + 0x30, z, 0, NULL,
+    inset = 0x170;
+    fclDrawSpriteFilter(panel->X + inset, panel->Y + 0x30, z, 0, NULL,
                         10, 13, D_00345D88, fclSpriteTable, ot);
-    fclDrawSpriteSizeFilter(panel->X + 0x170, panel->Y + 0xF8, z, 0x13,
+    fclDrawSpriteSizeFilter(panel->X + inset, panel->Y + 0xF8, z, 0x13,
                             (u16)panel->H - 0x3E, 0, NULL, 10, 15,
                             D_00345D88, fclSpriteTable, ot);
-    fclDrawSpriteFilter(panel->X + 0x170, panel->Y + (((u16)panel->H - 0x1F) << 3),
+    fclDrawSpriteFilter(panel->X + inset, panel->Y + (((u16)panel->H - 0x1F) << 3),
                         z, 0, NULL, 10, 14, D_00345D88, fclSpriteTable, ot);
     fclDrawPanelBorder(panel, z, 0x17, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType3);
-#endif
 
 void fclUpdatePanelType3(fclPanel_t *pPanel)
 {
