@@ -303,3 +303,51 @@ allocation probes pass output parity with pinned cc1
 `d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1`,
 using `--func _dtoa_r --alloc --no-dumps --maxlines 8000`. Do not repeat that
 control unchanged.
+
+
+## _b2d (sdk/libc, 0x198)
+
+102 of 102 words match at 408 bytes in ordinary C. This owner uses the
+configured default ee-gcc 2.96, not the older Sony SDK compiler.
+
+The optional lower limb in the `leading < 11` branch is selected with
+`below = first < last ? *--last : 0`. It performs the same conditional
+pointer decrement and unsigned limb read as the zero-initialization plus
+`if` control. The false arm neither decrements nor reads. Actual compiler
+dumps show the two-arm join preserves the second `11 - leading` calculation
+through CSE; the control reuses the earlier shift distance and leaves fourteen
+words different at the same size. This ordinary control-flow shape restores
+the native final join without a constraint, extra consumer or artificial
+lifetime. It does not establish historical source spelling or a hooked
+internal CSE decision.
+
+The existing bigint contract supplies a populated nonempty limb allocation,
+with `1 <= wds <= maxwds`; normalized magnitude interpretation also requires
+a nonzero top limb. The allocator's trailing `x[1]` uses the configured old
+compiler's overallocated-storage convention, not portable ISO array bounds.
+Subsequent decrements occur only while another limb remains. All variable
+shifts operate on unsigned 32-bit values with distances below 32, and the
+zero-distance path is separate. No bounds check, sign handling, rounding or
+invalid-input repair is added.
+
+Both union words are written before returning the target little-endian
+binary64 value. This uses the existing GNU union representation contract.
+For normalized magnitudes, the result keeps the leading one and next 52 bits,
+truncating lower bits, with the same exponent output. An independent integer
+oracle passed 256,000 cases covering all 32 leading-zero counts and one to
+eight limbs; this supplements native matching rather than claiming target
+execution. The actual `_ratio` caller's pointer, exponent-output and return
+contracts agree with the provider.
+
+The existing truthful `_close_r(_reent *, s32)` declaration is now visible
+before unconditional `__sclose`. Declaration-only comparisons preserve full
+outputs in all three modes. This repairs an inherited strict implicit-call
+failure, not a demonstrated runtime bug. Candidate production, `SKIP_ASM`
+and retained-C strict builds pass; candidate/control ordinary-versus-dump
+comparisons cover complete assembly, ELF and allocated-section headers/data,
+non-file symbols and all relocations. Independently checked native bytes
+resolve the actual `_hi0bits` relocation without masking. Both complete-owner
+checkers pass 78 functions with no owned-data difference.
+All other emitted functions are preserved in each mode (100 production,
+77 `SKIP_ASM`, 82 retained-C), including resolved code-relative relocations;
+complete owned data, layout and data-symbol contracts are unchanged.

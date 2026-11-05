@@ -3290,7 +3290,6 @@ f64 _ulp(f64 x)
     return result.value;
 }
 
-#ifdef NON_MATCHING
 f64 _b2d(_Bigint *b, s32 *exponent)
 {
     libcDoubleBits_t result;
@@ -3309,10 +3308,7 @@ f64 _b2d(_Bigint *b, s32 *exponent)
     if (leading < 11) {
         u32 below;
         result.word[1] = (top >> (11 - leading)) | 0x3FF00000;
-        below = 0;
-        if (first < last) {
-            below = *--last;
-        }
+        below = first < last ? *--last : 0;
         result.word[0] = (top << (leading + 21)) | (below >> (11 - leading));
     } else {
         if (first < last) {
@@ -3339,9 +3335,6 @@ f64 _b2d(_Bigint *b, s32 *exponent)
     }
     return result.value;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libc", _b2d);
-#endif
 
 _Bigint *_d2b(_reent *r, f64 d, s32 *e, s32 *bitsOut) {
     libcDoubleBits_t value;
@@ -3469,9 +3462,7 @@ long __sseek(void *cookie, s32 offset, s32 whence) {
     return result;
 }
 
-#ifdef NON_MATCHING
 extern s32 _close_r(_reent *r, s32 fd);
-#endif
 
 s32 __sclose(void *cookie) {
     FILE *fp = cookie;
