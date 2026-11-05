@@ -11,10 +11,7 @@ typedef struct lstWindowWork_t lstWindowWork_t;
 
 typedef struct
 {
-    u8 unk_0000[9];
-    u8 unk_0009[0x17];
-    s32 flags;
-    u8 unk_0024[0x1C];
+    fclPanel_t panel;
     union {
         struct {
             fclPanelPos_t pos;

@@ -173,6 +173,10 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_F32_VOLATILE
 #define FAKEMATCH_ASM_LIVE_F32_VOLATILE(value) __asm__ volatile ("" : "+f" (value))
 #endif
+/* Input-only extended asm is implicitly volatile; it emits no instruction. */
+#ifndef FAKEMATCH_ASM_READ
+#define FAKEMATCH_ASM_READ(value) __asm__("" : : "r" (value))
+#endif
 #ifndef FAKEMATCH_ASM_READ_PAIR
 #define FAKEMATCH_ASM_READ_PAIR(first, second) __asm__("" : : "r" (first), "r" (second))
 #endif

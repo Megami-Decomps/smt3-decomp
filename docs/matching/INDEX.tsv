@@ -181,7 +181,7 @@ frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interf
 frCreateNameHandle	interface/frName	0xC0	48 of 48 words match	docs/matching/interface/frName.md	154
 DrawSelectCursor	interface/itfMesManager	0x2FC		docs/matching/interface/itfMesManager.md	3
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	38
-lstDrawListWindow	interface/lstListWindow	0x84	26 of 33 words match	docs/matching/interface/lstListWindow.md	3
+lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/matching/kernel/dds3AdminiProcess.md	3

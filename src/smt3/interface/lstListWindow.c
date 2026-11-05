@@ -14,30 +14,28 @@ extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Sty
 
 extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 
-extern void fclInitPanel(lstWork_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 color, s8 type,
+extern void fclInitPanel(fclPanel_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 color, s8 type,
                          s8 speed);
 
 extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, u16 W, u16 H, s32 Work, void *pPanelPos);
 
-extern void fclDrawPanel(lstWork_t *pPanel, s32 OtNo);
+extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 
 extern void fclDrawPanelSprite(s32 id, s32 ot);
 
 extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
 
-extern s32 fclUpdatePanel(lstWork_t *pPanel);
+extern void fclUpdatePanel(fclPanel_t *pPanel);
 
 
-#ifdef NON_MATCHING
 extern void *memset(void *a, s32 b, size_t c);
-#endif
 
 void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lstWork_t *work)
 {
     if (Style == 0) {
-        fclInitPanel(work, X, Y, Z, W, H, 0, 1, 0x10);
+        fclInitPanel(&work->panel, X, Y, Z, W, H, 0, 1, 0x10);
     } else {
-        fclInitPanel(work, X, Y, Z, W, H, 0, 3, 0x10);
+        fclInitPanel(&work->panel, X, Y, Z, W, H, 0, 3, 0x10);
     }
     fclInitPanelPos(X, Y, Z, W, H, 0, work->panelPos);
     work->unk_58 = 0;
@@ -73,7 +71,7 @@ void lstMoveCursor(lstWork_t *pListWindow, s8 Dir)
         if (pos == first) {
             break;
         }
-        if ((pListWindow->unk_0009[pos + 0x50] & 1) != 0) {
+        if ((pListWindow->slotFlags[pos] & 1) != 0) {
             break;
         }
     }
@@ -97,7 +95,7 @@ void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir)
         if (pos == first) {
             break;
         }
-        if ((pListWindow->unk_0009[pos + 0x50] & 1) != 0) {
+        if ((pListWindow->slotFlags[pos] & 1) != 0) {
             break;
         }
     }
@@ -105,7 +103,7 @@ void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir)
 
 void lstDrawUpDownCursor(lstWork_t *work, s32 ot)
 {
-    s32 flags = work->flags & 0xFFFF0000;
+    s32 flags = work->panel.Flag & 0xFFFF0000;
 
     if (work->listCursor.unk_22 != 0) {
         flags |= 1;
@@ -113,28 +111,32 @@ void lstDrawUpDownCursor(lstWork_t *work, s32 ot)
     if ((work->listCursor.unk_22 + work->listCursor.unk_26) != work->listCursor.unk_20) {
         flags |= 2;
     }
-    work->flags = flags;
+    work->panel.Flag = flags;
 }
 
-/* NON_MATCHING: 26 of 33 words match at the exact size; the scheduler sinks the
- * parameter sign-extension past the first call. */
-#ifdef NON_MATCHING
 void lstDrawListWindow(lstWork_t *work, s8 noCursor, s32 ot)
 {
     s32 hideCursor = noCursor;
 
-    fclDrawPanel(work, ot);
+    fclDrawPanel(&work->panel, ot);
+    /* Target-specific scheduling aid: retain the genuine signed-byte
+     * conversion across the first draw, before the cursor test. */
+    FAKEMATCH_ASM_READ(hideCursor);
     fclDrawPanelSprite(0x53001, ot);
     if (hideCursor == 0) {
         lstDrawUpDownCursor(work, ot);
     }
-    fclDrawPanelSprite(0x5101B, ot);
+    {
+        s32 spriteId = 0x5101B;
+
+        /* Keep this real sprite argument complete before call setup.
+         * Empty constraints reconstruct scheduling, not original spelling. */
+        FAKEMATCH_ASM_READ(spriteId);
+        fclDrawPanelSprite(spriteId, ot);
+    }
     cmpUpdateCursorSlots(&work->listCursor);
-    fclUpdatePanel(work);
+    fclUpdatePanel(&work->panel);
 }
-#else
-INCLUDE_ASM(const s32, "interface/lstListWindow", lstDrawListWindow);
-#endif
 
 typedef struct lstWindowWork_t
 {
