@@ -42,6 +42,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
+| 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
@@ -65,7 +66,6 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
-| 2 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |

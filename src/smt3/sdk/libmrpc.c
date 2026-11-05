@@ -100,8 +100,6 @@ void _sceRpcFreePacket(rpcPacket *p)
     p->w[4] = flags & ~1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libmrpc", _request_end);
-
 /* The M-RPC client extends the shared client prefix. Packet addresses are
  * opaque, as in SifRpcClientData_t in include/irx/iop.h. */
 typedef struct rpcClient {
@@ -119,6 +117,60 @@ typedef struct rpcClient {
     s32 result;
     u32 parameters[3];
 } rpcClient;
+
+/* Observed completion-response prefix; fields after this prefix are unknown. */
+typedef struct rpcResponse {
+    u32 commandHeader[4];
+    u32 flags;
+    void *self;
+    u32 sequence;
+    rpcClient *client;
+    u32 command;
+    union {
+        void *server;
+        s32 result;
+    } value;
+    void *buffer;
+    void *cbuffer;
+} rpcResponse;
+
+extern s32 iSignalSema(s32 sema);
+
+void _request_end(void *packet, void *queue)
+{
+    rpcResponse *response = packet;
+    rpcClient *client;
+
+    switch (response->command) {
+    case 0x8000001A:
+        client = response->client;
+        if (client->endFunction != NULL) {
+            client->endFunction(client->endParam);
+        }
+        iSignalSema(client->completionSema);
+        break;
+    case 0x80000019:
+        client = response->client;
+        client->server = response->value.server;
+        client->buffer = response->buffer;
+        client->cbuffer = response->cbuffer;
+        iSignalSema(client->completionSema);
+        break;
+    case 0x8000001D:
+        client = response->client;
+        client->result = response->value.result;
+        iSignalSema(client->completionSema);
+        break;
+    case 0x8000001C:
+        break;
+    }
+    client = response->client;
+    if (client->sema >= 0) {
+        iSignalSema(client->sema);
+    }
+    _sceRpcFreePacket(client->packet);
+    client->packet = NULL;
+}
 
 typedef struct sdfSemaParam_t {
     s32 count;

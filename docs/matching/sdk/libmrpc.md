@@ -66,3 +66,45 @@ exactly as native. Creation failure frees only the packet and returns -3;
 send failure frees the packet and deletes only the new semaphore, returning
 -2. Success waits for and deletes the new semaphore, deletes the old one,
 and returns the client result. No extra resets or failure cleanup are added.
+
+## _request_end (sdk/libmrpc, 264 bytes)
+
+All 66 of 66 words match at the native 264-byte size in ordinary C. The
+unsigned command dispatch retains cases 0x8000001A, 0x80000019, 0x8000001D
+and 0x8000001C, followed by the shared cleanup. No constraint, compiler flag,
+volatile storage, callback view or new optimizer promise is needed.
+
+The command 0x8000001A arm captures the client, conditionally invokes its
+completion callback with its current argument, then reads that same client's
+completion semaphore after the callback. The bind arm copies the returned
+server, buffer and callback-buffer pointers. The result arm copies the signed
+result. Those arms signal the completion semaphore before reloading the client
+from the response. Command 0x8000001C and unknown commands go straight to the
+common cleanup. The reload after external calls remains observable; it is not
+replaced with a long-lived client snapshot.
+
+Cleanup captures the response's current client, signals its old semaphore if
+nonnegative, then loads and frees that same client's current packet before
+clearing its packet field. It does not reload the response's client after the
+optional old-semaphore signal. No extra null test, reset, error handling or
+resource release is added. Callback, signal and free
+ordering and all native access widths are preserved, including the native
+completion-semaphore load before bind/result stores in emitted code.
+
+The response is an observed 48-byte prefix, not a new whole-packet capacity
+claim. Its +0x24 union describes the actual server-pointer/result alternatives;
+the client and buffer fields keep their truthful pointer types. The existing
+client declaration is moved before this body without changing its layout.
+The two-pointer command-handler ABI and signed semaphore-provider signature
+match their actual dispatcher/providers. No allocation or data ownership moves.
+
+Independent native, callback/reentrancy, layout and ABI review approves this
+source. Both complete-owner checkers report seven exact C functions, including
+the earlier initializer. Baseline, declaration-only and final sources pass all
+nine strict three-mode plain/dump complete assembly and ELF comparisons; the
+declaration-only changes are wholly neutral. All 8/6/7 peers and owned data
+are preserved across production, SKIP_ASM and retained-C contexts, resolving
+callback-address relocations to the same function when it becomes C-defined.
+The production 168-byte rodata is unchanged. Full retail, generated-source,
+regression, guarded-source and report gates accompany this source-only landing;
+private tools, binaries and raw traces are excluded.
