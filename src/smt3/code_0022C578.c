@@ -11576,8 +11576,6 @@ no:
 INCLUDE_ASM(const s32, "code_0022C578", cmpCursorSlotIsSelectable);
 #endif
 
-/* NON_MATCHING: 3 of 32 words differ (first at +0x5C). */
-#ifdef NON_MATCHING
 s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 {
     s32 ofs = index * 0x103C + 0xC0;
@@ -11586,15 +11584,16 @@ s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 
     s8 result;
     if (flag == 0) {
-        result = ((s8 *)stock)[slot + index * 0x56 + 5];
+        s32 offset = slot;
+        offset += index * 0x56;
+        result = ((s8 *)stock)[offset + 5];
     } else {
-        result = ((s8 *)stock)[slot + index * 0x56 + 0x15];
+        s32 offset = slot;
+        offset += index * 0x56;
+        result = *(s8 *)((u32)offset + (u32)stock + 0x15);
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetStockInfoIndex);
-#endif
 
 /* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * seq26, covering only the paths those calls took.
