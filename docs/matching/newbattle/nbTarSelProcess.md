@@ -96,3 +96,37 @@ remain identical to the earlier guarded owner. Strict production, SKIP_ASM,
 and NON_MATCHING/SKIP_ASM compilations pass. Full-owner plain/dump parity
 covers all four allocated sections, including the 152-byte owned rodata,
 148 non-file symbols and 66 ordered relocations in production.
+
+## OnOffTargetCursor (newbattle/nbTarSelProcess, 132 bytes)
+
+All 33 of 33 words match at the native 132-byte size. Ordinary local mask
+selection supplies the real boolean value, and one nonvolatile empty `+r`
+operand keeps the actual data pointer available at the decision/write boundary.
+This target-specific reconstruction aid retains native formation-pointer
+re-observation; it is not a memory barrier or an original-source claim.
+No fixed register, volatile storage, extra consumer, type, layout or compiler flag
+change is needed. Removing the operand from this same source emits 92 bytes,
+with the formation base hoisted and the separate offset inductions collapsed.
+An earlier mask-register binding was unnecessary and was removed.
+
+The data pointer is captured once from the process. Every one of 16 iterations
+reloads the byte state and, only for state one, reads the current formation's
+32-bit status. The selected boolean is normalized from status mask 0x8. The formation
+pointer is then reloaded before the 32-bit anime read/modify/write, which sets
+flag 0x8 for a qualifying formation and clears it otherwise. Other bits,
+240-byte stride, ascending formation order and all accesses are preserved.
+The pointer operand lies within its real condition/write/loop lifetime and
+never crosses a call; this function has none.
+
+The old guarded volatile spelling is not retained. Valid process, main-data
+and formation storage is still required; no new disjointness, alignment or
+state-stability promise is introduced. The earlier four emulator vectors
+produced no memory changes and are not used as a general semantic proof.
+Independent native access, alias and caller review covers the retained source.
+
+Both complete-owner checkers report 19 match, 0 differ. Final and same-source
+ordinary controls pass strict production, SKIP_ASM and retained-C plain/dump
+complete assembly and ELF parity. All 21/18/21 other functions and owned data
+are preserved in those contexts after resolving code-relative relocations.
+Full retail, generated-source, regression, guarded-source and report gates
+accompany this source-only landing; private tooling and traces are excluded.

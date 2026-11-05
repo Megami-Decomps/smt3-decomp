@@ -400,27 +400,29 @@ selection_done:
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail only on the path that writes
- * nothing: 4 of 4 PCSX2 call vectors, none of which changed memory, battle
- * savestate (sdfport a1f0fdd, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void OnOffTargetCursor(nbTarSelProcessData_t *process)
 {
-    volatile nbTarSelProcessData_t *selection = process;
-    volatile nbMainProcessData_t *data = selection->data;
+    nbMainProcessData_t *data = process->data;
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        if (selection->stat == 1 && (data->form[i].stat & 8) != 0) {
+        s32 flag;
+        if (process->stat == 1) {
+            u32 bits = data->form[i].stat & 8;
+            flag = bits != 0;
+        } else {
+            flag = 0;
+        }
+        /* This target-specific constraint keeps the live data pointer at the
+         * decision boundary, retaining retail's formation-pointer reload. */
+        FAKEMATCH_ASM_LIVE(data);
+        if (flag) {
             data->form[i].anime |= 8;
         } else {
             data->form[i].anime &= ~8;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", OnOffTargetCursor);
-#endif
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 index);
 extern void nbDispDevilName(s32 id);

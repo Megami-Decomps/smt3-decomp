@@ -286,6 +286,7 @@ SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/n
 StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
+OnOffTargetCursor	newbattle/nbTarSelProcess	132 bytes	33 of 33 words match	docs/matching/newbattle/nbTarSelProcess.md	100
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
