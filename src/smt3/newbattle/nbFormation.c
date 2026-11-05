@@ -1048,42 +1048,41 @@ void nbUpdateFormation(nbMainProcessData_t *data)
     }
 }
 
-/* NON_MATCHING: 38 of 56 words differ (first at +0x4). */
-#ifdef NON_MATCHING
 void nbClearActionFlags(nbMainProcessData_t *data)
 {
     nbFormation_t *form;
     nbFormation_t *p;
+    nbFormation_t *clear;
     s32 mask;
     s32 i;
     s32 src;
+    u32 status;
 
     form = data->form;
     mask = ~0x800;
-    p = form;
+    clear = form;
     for (i = 3; i >= 0; i--) {
-        p->stat &= mask;
-        p++;
+        clear->stat &= mask;
+        clear++;
     }
+    i = 0;
     src = -1;
     p = form;
-    for (i = 0; i < 4; i++) {
-        if (!(p->stat & 1) && src >= 0) {
+    for (; i < 4; i++) {
+        status = p->stat;
+        if (!(status & 1) && src >= 0) {
             SDF_VU0_COPYVECTOR(&p->orgpos, &form[src].orgpos);
             p->orgpos.x += form[src].r + 100.0f + 50.0f;
             SDF_VU0_COPYVECTOR(&p->pos, &p->orgpos);
             SDF_VU0_COPYVECTOR(&p->orgrot, &form[src].orgrot);
             SDF_VU0_COPYVECTOR(&p->rot, &p->orgrot);
-            p->stat |= 0x800;
+            p->stat = status | 0x800;
             return;
         }
         src = i;
         p++;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbFormation", nbClearActionFlags);
-#endif
 
 s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
 {
