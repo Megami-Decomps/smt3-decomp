@@ -16,7 +16,7 @@ both native and emitted sizes when they differ.
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
-| 12 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
+| 13 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 12 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 9 |  | [sdk/libc.md](sdk/libc.md) |
 | 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |

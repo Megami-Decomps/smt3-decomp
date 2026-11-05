@@ -158,25 +158,66 @@ exact result; a paired-operand constraint and an old-snapshot $3 binding were
 therefore removed as unnecessary. Final-source owner, compiler parity and
 independent retail checks qualify publication.
 
-## rstFindEvoEntryType5, rstFindEvoEntryType7 (rstcalc, 0x6C each)
+## rstFindEvoEntryType7 (result/rstcalc, 0x6C)
 
-24 of 27 words each match, at the exact size. Both scan a devil's 24 level-up
-records for a record of kind 5 (or 7) whose level field is below (or at or
-below) the unit's level, and return that record's index as an `s8`, or -1.
+27 of 27 words match at 108 bytes in ordinary C. The scan returns the first of
+24 level-up entries whose kind is 7 and whose level is at or below the unit's
+snapshotted level, narrowing the index to `s8`, or returns -1 if none qualifies.
+No new constraint, register binding, helper, type or compiler flag is needed.
 
-The three differing words are the `* 0x66` row multiply: retail puts `3 * id`
-in `$3` and `48 * id` in `$2`, this puts them the other way round. The
-accumulate (`addu $2, $2, $3`) and the final `sll 1` are identical either
-way, so it is which register the first temporary of the synthesised multiply
-lands in, nothing in the source.
+The current guarded pointer walk starts at 21/27. Direct indexing through the
+actual `datLevelUpRecord_t` restores the native record-relative `+6` and `+7`
+loads, giving 24/27. The remaining three words exchange the two temporaries
+in the 102-byte row multiply. Naming `idTripled = (u32)unit->id * 3`, then
+multiplying it by `sizeof(datLevelUpRecord_t) / 3`, gives the native allocation:
+three times the ID in `$3`, with its shifted term and final byte offset in `$2`.
+Removing that factorization alone restores the three differences at `+0x10`,
+`+0x14` and `+0x18`. Binding either the final offset or the factored intermediate
+is unnecessary; no binding is retained.
 
-Ruled out: `datLevelUpTable + id * 0x66` against `&datLevelUpTable[...]`,
-a separate `s32` offset local, `0x66 * id`, a `u16` and a `u32` local for the
-id, declaring the level before and after the entry pointer, assignments split
-out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
-typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
-the same three-word swap. This is the same register exchange recorded above
-for `cmpFindKugatatiMsgEntry`, which walks the same table.
+The source forms the byte address from `&datLevelUpTable`, the complete array
+object, and converts the selected row address back to its actual record type.
+The existing record is 102 bytes: six header bytes and 24 four-byte entries.
+The recorded table extent is `0x5940`, or 224 rows. Valid table IDs remain an
+inherited input requirement; no new behavior is claimed for out-of-range IDs.
+For every `u16` ID the two unsigned products fit in `u32` and equal ID times
+102. The indexed loads stay within the actual row's entries. The function
+preserves the unsigned ID, level and kind reads, the scan order, signed result
+conversion and failure return, and performs no writes or calls.
+
+Qualified stock compiler dumps show a source-expansion difference: the single
+multiply adds the three-times-ID term before its shifted term, while the two
+source multiplications put the shifted term first in that addition. The
+bounded unsigned sum is unchanged. This is a measured reconstruction aid,
+not evidence of the original source spelling or an instrumented claim about
+every allocator decision.
+
+The complete target-enabled owner checks 90 match, 0 differ. Nine complete
+ordinary/stock-dump assembly and ELF parity pairs cover the original owner,
+final source and minimal ablation in production, `SKIP_ASM` and retained-draft
+contexts. Production allocated code/data and resolved relocations equal the
+assembly-backed owner. All 104/89/104 peers and non-code owned data are
+preserved; thirteen changed raw call words in the original-to-final
+`SKIP_ASM` comparison resolve to the same function targets after insertion.
+Independent native, layout and focused host-model review approved the source.
+The existing strict production/SKIP implicit declaration in `rstInitSkillAct`
+is unchanged; the strict retained-draft compile passes.
+
+## rstFindEvoEntryType5 (rstcalc, 0x6C)
+
+Remains assembly-backed. An earlier indexed-row draft had 24 of 27 words
+matching at the exact size. It scans a devil's 24 level-up records for kind 5 with a
+level strictly below the unit's level, returning the index as an `s8`, or -1.
+The earlier three differing words exchanged the two temporary registers in
+the multiply-by-102 row address, as described for type 7 above. The new type-7
+factorization has not been applied or qualified for this sibling.
+
+Earlier controls ruled out: `datLevelUpTable + id * 0x66` against
+`&datLevelUpTable[...]`, a separate `s32` offset local, `0x66 * id`, a `u16`
+and a `u32` local for the ID, declaring the level before and after the entry
+pointer, assignments split out of declarations, a byte walk reading `p[6]`
+and `p[7]`, and nested `if`s instead of `&&`. Those measurements predate the
+successful type-7 factorization; they do not establish a source-level barrier.
 
 ## cmbInitStockUnit
 
