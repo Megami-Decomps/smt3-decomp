@@ -14,6 +14,14 @@
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
+extern s32 fclEncycGetRatio(void);
+extern void ReleaseWork(fclEncyc_instance_tag *pinst);
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+extern void DrawExplainBack(s32 alpha);
+extern void DrawReadStatusMoney(fclEncyc_instance_tag *pinst);
+extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
+extern void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng);
+
 
 typedef struct
 {
@@ -3894,9 +3902,6 @@ extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern const char *D_003323D8[4];
 extern char fclEncycMarkerOn[];
 
-#ifdef NON_MATCHING
-/* 103 of 106 words match; three argument-setup instructions reorder.
- * See docs/matching/facility/fclEncyc.md. */
 s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                           sdfDrawTag_t *tag)
 {
@@ -3937,16 +3942,18 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
     y = 0x7A00;
     label = D_003323D8;
     for (i = 2; i >= 0; i--) {
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7380, y, 0xFFFFF0, 0, *label++)));
+        /* Keep the real zero attribute in its argument register through this
+         * print only. This localized compiler constraint restores native
+         * argument setup order; it is not original-source evidence. */
+        FAKEMATCH_ASM_REG(s32, attr, "$7") = 0;
+        FAKEMATCH_ASM_LIVE(attr);
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7380, y, 0xFFFFF0, attr, *label++)));
         y += 0x60;
     }
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + work->selection * 0x60,
                                          0xFFFFF0, 0, fclEncycMarkerOn)));
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcMenu_fclEncyc);
-#endif
 
 extern char D_0053D868[];
 extern char D_0053D878[];

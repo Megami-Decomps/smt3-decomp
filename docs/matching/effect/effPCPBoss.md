@@ -52,21 +52,48 @@ the family.
 
 ## effPCPDANTE_ShowTime_Draw (effect/effPCPBoss, 300 bytes)
 
-71 of 75 words match, at the exact 300-byte size.
+75 of 75 words match at the native 300-byte size. One localized first-call
+argument binding closes the previous four-word scheduling residual; no empty
+assembly template or handwritten instruction is added.
 
-One instruction's schedule slot. Retail places the `mov.s $f12, $f20` that
-passes 0.45f to the first `nbPanelFlashInit` directly after the two `lui`s for
-its colour arguments; the draft emits it three slots later, right before the
-`jal`, which rotates four words. Everything else is exact, including the three
-`.lit4` constants as literals: `D_0054C9D0`, `D_0054C9D4` and `D_0054C9D8` sit
-in this unit's pool at file offsets 0x44D9D0, 0x44D9D4 and 0x44D9D8 and hold
-0.45f, 0.35f and 0.55f, with 0.45f shared by the first two calls, so ee-gcc
-keeps it in `$f20` and the pool gets one entry for it.
+An ordinary `f32 rate = 0.45f` has two real consumers: the first flash's X
+scale and the second flash's Y scale. Within a nested block containing only
+the first call, initialized `scaleX` is bound to its actual argument register
+`$f12`. The block ends immediately after that call. Qualified life RTL marks
+`$f12` dead at the call; no bound value is relied on after a caller clobber.
+The separate ordinary rate remains live for the second call in saved `$f20`.
+This is a target-specific reconstruction aid, not original-source evidence.
 
-Ruled out: 0.45f through a named `f32` local, declared before `frame`, after it,
-and at the top of the guarded block. The first two are far worse (67 words),
-because the load then happens outside the guard; only the block-scoped one stays
-at four.
+Removing only the binding from the same nested source restores 71/75 words
+at 300 bytes. The first `mov.s $f12, $f20` then occurs three slots too late,
+rotating the four words beginning at `+0x34`. The bound form places it after
+the two color high-half loads, as native does. Binding an isolated literal
+without the real shared rate loses the saved literal/register arrangement;
+additional live-operand controls do not improve it. No broader scheduler
+rule or unobserved internal decision is inferred from these controls.
+
+The three existing `.lit4` entries at `D_0054C9D0`, `D_0054C9D4` and
+`D_0054C9D8` retain exact bits `0x3EE66666`, `0x3EB33333` and `0x3F0CCCCC`.
+They are the compiler's existing 0.45f, 0.35f and 0.55f representations,
+including the non-nearest 0.55f encoding. The shared 0.45f still has one pool
+entry. No literal ownership, numeric conversion or memory width changes.
+
+The truthful Bingo-draw declaration makes its existing void provider visible
+when this caller is enabled. The flash provider stores scale arguments from
+`$f12`/`$f13` into offsets `+0x28`/`+0x2C` of the existing 0x38-byte state.
+All arguments, calls, frame snapshot, draw thresholds and final frame reload
+remain native. This does not claim arbitrary callback behavior or new
+concurrent-memory guarantees.
+
+Independent review verifies the initialized argument lifetime, provider ABI,
+retail literals and reduced control. Strict production, `SKIP_ASM`, and
+`NON_MATCHING` plus `SKIP_ASM` builds pass. Complete ordinary/plain/dumped
+assembly and allocated-section/header/data, non-file symbol and relocation
+contracts agree in every mode; the ordinary control is separately qualified.
+The complete owner and data check gives 159 match, 0 differ, preserving all
+158 prior matches. Full retail checksum, generated-source, regression and
+report checks accompany the landing. Exactly one game function and 300 bytes
+are added.
 
 ## effPCPBossMETATOBeamDraw (effect/effPCPBoss, 0x25C)
 

@@ -4615,16 +4615,23 @@ void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
     work->frameParts[2] = (u32)work->frameParts[2] + 1;
 }
 
-/* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
-#ifdef NON_MATCHING
+void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work);
 
 void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
     s32 frame = hData->frame;
 
     if (frame == 0) {
-        nbPanelFlashInit(hData->flash[0], 0x43BBFF, 0x12A2F5, 0xA0, 0.45f, 0.35f, 0x5C);
-        nbPanelFlashInit(hData->flash[1], 0x3664FF, 0x3CF0, -0x8C, 0.55f, 0.45f, -0x3C);
+        f32 rate = 0.45f;
+        {
+            /* Target-specific argument binding retains native setup scheduling.
+             * scaleX is consumed only by the first call; the ordinary rate remains
+             * live for the second call. This is not original-source evidence. */
+            FAKEMATCH_ASM_REG(f32, scaleX, "$f12") = rate;
+
+            nbPanelFlashInit(hData->flash[0], 0x43BBFF, 0x12A2F5, 0xA0, scaleX, 0.35f, 0x5C);
+        }
+        nbPanelFlashInit(hData->flash[1], 0x3664FF, 0x3CF0, -0x8C, 0.55f, rate, -0x3C);
         nbPanelFlashInit(hData->flash[2], 0x31109F, 0x8D64C8, 0, 1.5f, 2.0f, 0x14);
     }
     if (frame >= 0) {
@@ -4641,9 +4648,6 @@ void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
     }
     hData->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Draw);
-#endif
 
 void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_tag *hData, const void *pPos)
 {

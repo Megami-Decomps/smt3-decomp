@@ -21,27 +21,53 @@ those variants are not retained.
 
 ## DebugProcMenu_fclEncyc (facility/fclEncyc, 0x1A8)
 
-The draft emits the native 424 bytes; 103 of 106 words match. It wraps the
-three menu choices on horizontal input, returns one on cancellation, selects
-the debug state on confirmation, then draws the three labels and selection
-marker. The label table occupies sixteen bytes: three text pointers and a
-null trailing entry. Its storage remains assembly-owned.
+106 of 106 words match at the native 424-byte size. The routine wraps three
+menu choices on horizontal input, returns one on cancellation, selects the
+debug state on confirmation, then draws the labels and selection marker.
+The existing twelve-byte dispatcher work remains the complete object, with
+its state and selection halfwords. Valid initialized menu selection is 0..2;
+no arbitrary-input bounds guarantee or new capacity is introduced.
 
-The allocator requests twelve bytes for the debug dispatcher work. A dedicated
-work type now describes those bytes, with state and selection halfwords,
-instead of borrowing the larger ribbon work type. The dispatcher and existing
-debug callbacks use the same complete twelve-byte object.
+Only the print loop's actual fourth argument is constrained: initialized
+`s32 attr = 0` is bound to its ABI register `$7`, then passed through one
+nonvolatile empty live operand before `sdfDevPrintf`. It initializes anew in
+each iteration and has no call before its sole print consumer. Nothing relies
+on that fixed value after the print or the outer `sdfDrawTagLink` call.
+X and color remain ordinary literals. The empty template emits no instruction
+and is not a memory barrier. This is a local reconstruction aid, not evidence
+of historical source spelling.
 
-Only +0x11C through +0x124 differ. Native prepares X before the color's low
-half and zero attribute; C prepares the color, attribute and X in that order.
-Qualified plain/hooked/unhooked scheduling traces agree: sched1 ties their
-priority and register weight, but X has two dependents versus three for the
-other argument setups. Sched2 retains that ordering through its original-order
-tie break. These are independent constant arguments to the same print call.
+The ordinary baseline is 103/106 words. Binding alone reaches 104/106 at
+424 bytes; removing the binding while retaining the live operand emits
+436 bytes. The combined minimal form gives the native X, color-low-half,
+zero-attribute setup order. Earlier qualified scheduling evidence established
+why the ordinary argument setups were reordered; these new controls establish
+the narrow source/output dependency without claiming an unobserved comparator
+rule for the constrained form.
 
-Capturing the returned packet or the label pointer in a local does not change
-the result. The retained source uses the direct print/link expression. Provider
-coordinate and color parameters follow the unsigned 32-bit C definition.
+The provider is exactly `void *sdfDevPrintf(u32, u32, u32, s32,
+const char *, ...)`. The assembly-owned sixteen-byte label table remains
+three pointers followed by null, with only its first three entries consumed.
+Calls, native access widths/order and marker-selection reload after drawing
+callbacks are unchanged. No table, provider, callback ABI or owned data moves.
+
+Seven unconditional forward declarations expose existing same-owner external
+providers: GetRatio, ReleaseWork, SetScreenOffset, DrawExplainBack,
+DrawReadStatusMoney, DrawReadMainHelp and ReleaseFontExplain. Their full
+prefixed names, return/parameter types, linkage and attributes agree with
+existing definitions and lower declarations. These fix inherited strict-mode
+visibility errors, not a new runtime defect. Independent three-mode pre/post
+comparisons preserve complete assembly and allocated-section/header/data,
+non-file symbol and relocation contracts. The unrelated dds3KillProcess
+pointer warning remains; strict qualification is not a warning-free claim.
+
+Independent semantic and complete-output review approves the final source.
+Strict production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` builds pass.
+Final, ordinary baseline and both minimal controls have qualified complete
+plain/dump assembly and object parity. Complete owner/data checks give
+114 match, 0 differ, preserving all 113 peers. Full retail checksum,
+generated-source, regression and reconciled-report checks accompany the
+landing. Exactly one game function and 424 bytes are added.
 
 ## DrawRegistListwinElem (facility/fclEncyc, 0x18C)
 
