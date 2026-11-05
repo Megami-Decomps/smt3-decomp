@@ -741,7 +741,13 @@ s32 sceTtyRead(char *buffer, s32 length)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceTtyInit);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", kputchar);
+s32 kputchar(s32 character)
+{
+    while (*(volatile u32 *)0x1000F130 & 0x8000) {
+    }
+    *(volatile u8 *)0x1000F180 = character;
+    return character;
+}
 
 extern s32 D_0052C2B0 __attribute__((section(".data")));
 extern char D_0059B940[128];

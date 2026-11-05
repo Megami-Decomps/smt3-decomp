@@ -458,3 +458,30 @@ normalized assembly and allocated-section/relocation parity pass.
 
 This is a target-specific reconstruction aid, not evidence of the original
 source spelling.
+
+## kputchar
+
+The ordinary C reconstruction matches all 56 native bytes. It repeatedly reads
+32-bit UART status at `0x1000F130` until bit `0x8000` clears, writes exactly one
+byte to `0x1000F180`, and returns the original signed 32-bit argument. Values
+outside the byte range are narrowed only for the transmit store. Both MMIO
+accesses retain `volatile`; no compiler constraint or instruction helper is used.
+
+The compiler's assembly places `sb` before the return, with its volatile
+assembler directives commented out. The configured 2.10 assembler moves that
+store into the `jr` delay slot. Removing volatility from only the final store
+produces 52 bytes and does not match. This case corrects the earlier blanket
+inference that a retail delay-slot store proves a nonvolatile source pointer.
+It does not establish historical source spelling or general MMIO ordering rules.
+
+Independent semantic, ABI and complete-owner review approves the exact source.
+Both checkers report 155 match and 0 differ. Baseline and candidate pass strict
+production, SKIP_ASM and retained-C plain/dump parity for complete assembly and
+literal complete ELF bytes, including padding, after normalizing only the exact
+randomized source path. All existing peer bodies and resolved data/relocation
+contracts remain unchanged. The entire 39,036-byte production text section,
+664 owned rodata bytes and 1,773 relocation descriptors are unchanged.
+
+Full retail checksum, generated-source, regression, guarded-source and report
+gates pass. Production provenance verifies the compiler-owned linked span.
+Only SDK coverage gains one function and 56 bytes; game coverage is unchanged.

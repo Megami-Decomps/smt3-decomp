@@ -179,7 +179,7 @@ GNU-version defines and assembler flags. For example, the IPU control writers
 match under 2.9 but each differ by eleven words under 2.96. Run
 `tools/test_cc.sh` to check wrapper selection and override handling.
 
-Three of its traits decide how the C has to be written:
+Two compiler traits and one assembler distinction matter when writing the C:
 
 - Sibling calls only where the result is discarded. 2.9 emits `j func` for a
   tail call whose value the caller throws away, and `jal` plus `jr $31` as soon
@@ -190,9 +190,12 @@ Three of its traits decide how the C has to be written:
   compiler.
 - 16 bytes reserved per callee-saved register, so three saved registers mean a
   48-byte frame with `sd` at 0x00, 0x10 and 0x20.
-- A `volatile` access is never moved into a delay slot. Where retail returns
-  with a store in the delay slot of `jr $31`, the original wrote the access
-  through a plain pointer.
+- Read volatile accesses at both compiler and assembler stages. In `kputchar`,
+  cc1 leaves the volatile `sb` before the return, with commented volatile
+  assembler directives. The configured 2.10 assembler then moves it into the
+  `jr` delay slot. A retail delay-slot store alone therefore does not establish
+  a plain source pointer. Keep the actual hardware access qualifiers; see the
+  [qualified kputchar reconstruction](matching/sdk/libkernl.md#kputchar).
 
 The first functions matched under it were `sceGsGetIMR`, `sceGsPutIMR`,
 `sceDmaGetChan` and `sceDmaPutStallAddr`; libdma, libgraph and libpad have
@@ -380,14 +383,16 @@ before it was understood:
 
 ### How the near misses were closed
 
-Five rules came out of taking `sceCdSyncS`, `sceCdMmode`, `sceCdGetDiskType`
-and `sceCdStatus` from one instruction out to exact, and they apply to every
-unit in this region:
+These observations came from closing near misses in `sceCdSyncS`, `sceCdMmode`,
+`sceCdGetDiskType`, `sceCdStatus` and later SDK work. Qualify each source shape
+in its own compiler and assembler context:
 
-1. **An access that must land in a delay slot cannot be `volatile`.** 2.9 never
-   moves a volatile access into one, so where retail reads a word in the delay
-   slot of a call, the original used a plain pointer. This was the whole of the
-   recurring "one instruction long, `nop` in the delay slot" difference.
+1. **Distinguish compiler call-slot choices from final assembler scheduling.**
+   Plain-pointer forms closed the measured CDVD call-slot gaps, but this does
+   not prohibit volatile accesses in final delay slots or prove original source
+   qualifiers. `kputchar` is a counterexample: its volatile transmit store reaches
+   the return slot during 2.10 assembler scheduling. Keep real hardware access
+   semantics and check both stages.
 2. **A `volatile` access cannot fill a hazard pad either**, which is why
    libipu's `IPU_CTRL` polls carry four explicit slots between the load and the
    branch; see [its page](matching/sdk/libipu.md).
