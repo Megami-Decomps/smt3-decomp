@@ -479,3 +479,49 @@ implicit-declaration failures outside this function. The existing
 `dds3GetProcessStat` declaration also differs from its canonical provider;
 this change does not modify it, and native's returned 0..3 values retain the
 same equality-to-two behavior.
+
+## shop_206A38 (facility/fclCombineInit, 0x118)
+
+70 of 70 words match at 280 bytes. Initialize the real row index directly,
+retain the entry StepY scalar and apply its eightfold spacing at each row,
+and bind the genuine font priority to native argument register 6 immediately
+before its sole font-call consumer. This per-iteration initialized `s32`
+priority is dead after argument delivery. No earlier call crosses its live
+interval, and the subsequent draw/destructor calls may clobber that register.
+No empty operand, dummy consumer, extra memory effect, fabricated type or
+compiler flag is added. The ordinary priority local leaves 68 of 70 words
+matching: its final materialization and the x argument copy exchange places.
+Adding a tied empty operand gives 66 matching words; input-only gives 46.
+These are measured output properties, not proof that no ordinary spelling
+could match, a hidden scheduler explanation or historical source spelling.
+
+Independent native/provider review confirms signed cursor offset plus unsigned
+byte selection, unsigned row count, and entry snapshots of traversal bounds
+and StepY. Empty lists make no font calls. Each row loads the current work
+pointer, eligible-stock id and text pointer, then requests, draws and destroys
+the same font request with unchanged arguments and order. Work/text changes
+between callbacks remain visible; cursor/StepY changes do not alter this
+traversal. The final native loop-delay-slot work-pointer read is retained.
+Valid eligible-stock/text indices and representable coordinate arithmetic
+remain inherited contracts; the normal 16-entry stock array is not proof
+that malformed cursor values are safe. No bounds or masking were invented.
+
+Complete owner: 195 match, 0 differ. Twenty-one development whole-assembly and
+entire-ELF normal/stock-dump pairs cover seven sources in three modes. Six
+fresh integrated guarded/final pairs pass with 176 stable collected inputs.
+All 214/194/214 production/SKIP_ASM/retained peers and owned data are unchanged.
+Independent GP-relative load resolution gives all 280 native target bytes.
+Production/SKIP_ASM strict checks still fail with identical baseline implicit
+declaration diagnostics and an inherited pointer warning; they are not clean
+passes. Retained strict checks pass. No hooked compiler trace is claimed.
+
+Optimized and ASan/UBSan host fixtures each pass 1,080,000 actual-source/reference
+comparisons across 180,000 valid-domain cases with callback mutation. They
+replace the register binding with an ordinary host declaration and do not
+establish EE runtime behavior or arbitrary-index safety. Leak detection is
+disabled in the sanitizer fixture. Integrated retail checksum/byte comparison,
+generated-source validation, 505 unittest cases without skips plus 818 layout
+assertions, frozen guarded EE/IRX checks and reconciled reports pass. The
+previous map/recovery matches remain exact; configure changes no source
+imports. Only this 280-byte function gains credit: game totals become 8,655
+functions and 1,503,504 bytes. The subsequent build has no work.

@@ -5741,26 +5741,29 @@ void func_00206A28(void) {
 void func_00206A30(void) {
 }
 
-#ifdef NON_MATCHING
 void shop_206A38(s32 x, s32 y, cmbListWork_t *list, s32 ot)
 {
-    s32 first = list->listCursor.unk_22 + (u8)list->listCursor.unk_24;
-    s32 end = first + list->listCursor.unk_26;
-    s32 step = list->listCursor.StepY * 8;
-    s32 i;
+    s32 i = list->listCursor.unk_22 + (u8)list->listCursor.unk_24;
+    s32 end = i + list->listCursor.unk_26;
+    s32 step = list->listCursor.StepY;
 
-    for (i = first; i < end; i++) {
+    for (; i < end; i++) {
         u16 id = CMB_GBWK->eligibleStock[i].id;
-        void *request = frwGetSmallFontFRQ2(x, y, 0xFFFFF, 0xA09DC380, text2[id], NULL);
+        /* Keep the real priority in its native argument register through this
+         * call setup. An ordinary local exchanges its final materialization
+         * with the x argument copy. No call crosses this value's lifetime;
+         * this is a localized reconstruction aid, not original spelling. */
+        FAKEMATCH_ASM_REG(s32, priority, "$6") = 0xFFFFF;
+        void *request;
 
-        y += step;
+        request = frwGetSmallFontFRQ2(x, y, priority, 0xA09DC380, text2[id], NULL);
+
+        y += step * 8;
         func_001C7E38(request, 1, ot);
         frDestroyFontRequestAfter(request);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", shop_206A38);
-#endif
+
 
 void shopStartEvent(s8 value)
 {
