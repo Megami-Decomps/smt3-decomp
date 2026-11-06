@@ -470,3 +470,45 @@ Fresh canonical gates pass 459 tests, 817 layout assertions, 139 guarded owners 
 479 drafts, seven IRX modules, inline/shell checks and exact retail checksum/byte
 comparison. Complete owner data and output parity remain unchanged; build and
 report are true no-ops after qualification, with stable runtime inputs.
+
+## func_00222610 (rstcalc, 0xA8)
+
+42 of 42 words match at 168 bytes in ordinary C. The scan considers the
+selected row's eight Hearts condition/skill pairs in order. Nonzero pairs
+advance an unsigned-byte count; reaching the supplied limit returns zero.
+Otherwise a pair whose condition is at most the unit's unsigned level
+appends its skill and increments the unit's unsigned-halfword skill count.
+After the complete scan the count is returned through the signed-byte cast.
+
+Direct `D_00339E00[id].heartConditions[i]` accesses produce one advancing
+address for the actual row members. The original row pointer initialized
+outside the loop emits 184 bytes and matches 5/42 words. Moving that genuine
+row pointer declaration inside the loop also matches, as does indexing a
+local table pointer. An actual entry-pointer walk reaches 38/42 at native
+size but chooses different base/displacement values.
+
+Qualified stock full-owner dumps locate the difference in `09.loop`.
+The direct form combines condition/skill/condition addresses (UID139/88/59)
+with giv57 and reduces them to one register plus 10/12/10. The original
+pre-loop row pointer leaves its skill address separate and reduces only
+the offset induction variable. The native table-plus-16 bias is generated
+by the compiler, not written into the accepted source. No biased byte
+cursor, type change, constraint or extra consumer is retained.
+
+The existing record is 66 bytes; eight four-byte entries begin at +0x1A,
+with skill halfwords at +0x1C through +0x38. Source accesses stay within
+that real member array. A valid selected row and sufficient writable unit
+skill capacity remain inherited preconditions; no bounds check or claim
+for arbitrary invalid pointers is introduced. All native byte/halfword
+reads, the repeated condition read, and count-before-skill stores remain.
+
+Complete owner: 93 match, 0 differ. Nine full assembly/entire-ELF plain-dump
+pairs cover final, original-row-pointer ablation and guarded owner across
+production, SKIP_ASM and retained-draft contexts. Two stock trace pairs
+also match the frozen builds. All 104/92/104 peers and owned data are
+preserved, resolving expected changed local call displacements. The target's
+production relocation changes from D_00339E10 to D_00339E00+16, resolving
+to the same native address. Strict production and SKIP_ASM still encounter
+the pre-existing rstSetSkillActFlag declaration gap; retained-draft strict
+compilation passes. These measurements establish compiler reconstruction,
+not original spelling or gameplay execution.
