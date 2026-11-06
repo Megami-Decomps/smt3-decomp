@@ -608,7 +608,7 @@ void fld_136800(s32 duration, f32 lightR, f32 lightG, f32 lightB,
 void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
                      f32 r3, f32 g3, f32 b3,
                      f32 x0, f32 y0, f32 z0) {
-    f32 dir[4];
+    f32 dir[4] QWORD_ALIGNED;
     evtUnit_t *playerUnit = NULL;
     evtUnit_t *secondUnit = NULL;
     evtUnit_t *mainUnit;

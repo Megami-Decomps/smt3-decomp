@@ -891,7 +891,7 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
 void mdlLinkEffect(mdlObj_t *owner, dds3ModelEffectCtrlr_t *anchorRecord) {
     sdfModelRootNode_t *model = owner->inner;
-    f32 position[4];
+    f32 position[4] QWORD_ALIGNED;
     void *resourceInstance;
 
     switch (anchorRecord->type) {

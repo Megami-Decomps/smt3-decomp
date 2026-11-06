@@ -815,11 +815,11 @@ void effMagaCylinderFreeParts(dds3MagatuhiBill_tag *work) {
 }
 
 void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
-    f32 positions[15][4];
+    f32 positions[15][4] QWORD_ALIGNED;
     u32 colors[15];
     f32 offsets[15][8];
     f32 matrix[16];
-    f32 point[4];
+    f32 point[4] QWORD_ALIGNED;
     sdfDrawTag_t *list;
     u32 packet;
     u32 *vertexPacket;
@@ -1075,7 +1075,7 @@ void effMagaSmokeConvDelete(effMagaSmokeConv_tag *pData) {
  * The vector scratch w remains unwritten, as in the retail routine. */
 void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     effMagaSmokePart_tag *particle = &pMagaSmokeConv->pPart[index];
-    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 radius;
     f32 random;
     effCubicBezierSlot_t *slot;
@@ -1119,10 +1119,10 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
 void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
-    f32 point[4];
-    f32 origin[4];
-    f32 basePosition[4];
-    f32 target[4];
+    f32 point[4] QWORD_ALIGNED;
+    f32 origin[4] QWORD_ALIGNED;
+    f32 basePosition[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     f32 viewDirection[4];
     f32 sideAxis[4];
     f32 towardTarget[4];
@@ -1387,7 +1387,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     s32 spread = pData->param.timing;
     s32 fadeIn = SDF_FRAMES(pData->param.fade_in);
     s32 fadeOut = SDF_FRAMES(pData->param.fade_out);
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 fade;
     s32 frame;
     u32 particleIndex;
@@ -1443,7 +1443,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
     s32 lifetimeFrames = work->param.life;
     u32 count = work->param.reserve;
     s32 *ages = work->pPart;
-    f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 startPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 endPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 blendFraction;
@@ -1535,8 +1535,8 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
 }
 
 void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     dds3MagatuhiBill_tag *valueWork;
     effMagaCylinderPart_tag *particle;
     u8 respawn;
@@ -1623,8 +1623,8 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 height;
     f32 angle;
     f32 radius;
@@ -1735,8 +1735,8 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
 }
 
 void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSpiralPart_tag *particle;
     u8 respawn;
@@ -1824,8 +1824,8 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 height;
     f32 angle;
     f32 radius;
@@ -1921,7 +1921,7 @@ void effMagaSmokeDelete(effMagaSmoke_tag *pData) {
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
 void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     effMagaSmokePart_tag *particle = &pMagaSmoke->pPart[index];
-    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 radius;
     f32 random;
 
@@ -1958,8 +1958,8 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
 }
 
 void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
     u8 respawn;
@@ -2049,8 +2049,8 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
     f32 lift;
     f32 angle;
     f32 scale;

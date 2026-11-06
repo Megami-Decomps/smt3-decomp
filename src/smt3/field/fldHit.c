@@ -162,8 +162,8 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
     /* Retail never touches the fourth row at SP+0xB0..0xBF. The DDS1
      * fldBuildCollisionRecordsFromGeometry twin has the same gap. Three rows
      * shrink the frame to 0x190 instead of the native 0x1A0. */
-    f32 edgeTriangle[4][4];
-    f32 center[3];
+    f32 edgeTriangle[4][4] QWORD_ALIGNED;
+    f32 center[3] QWORD_ALIGNED;
     f32 capturedPlane[4];
     f32 minimum[2];
     f32 maximum[2];
@@ -758,7 +758,7 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
 
 
 s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, collision_s *r, f32 collision) {
-    f32 probe[3];
+    f32 probe[3] QWORD_ALIGNED;
     f32 planar[2];
     f32 dist;
     f32 slack;
@@ -820,7 +820,7 @@ extern s32 fldGbChkHit(s32 fld, s32 area, s32 blk);
 extern s32 fldGbChkNpc(s32 fld, s32 area, s32 hojiID);
 
 void fldHitChkUnitElvOnly(f32 *phys_pos) {
-    f32 current[4];
+    f32 current[4] QWORD_ALIGNED;
     f32 previous[4];
     f32 currentSave[4];
     f32 previousSave[4];
@@ -1101,10 +1101,10 @@ extern void rsetAlpha(s32 mode);
  * fldHitChkUnitVWM has the same blocker. */
 void fldHitChkUnit(f32 *position)
 {
-    f32 current[4];
+    f32 current[4] QWORD_ALIGNED;
     f32 previous[4];
     f32 projected[4];
-    f32 delta[4];
+    f32 delta[4] QWORD_ALIGNED;
     f32 currentSave[4];
     f32 previousSave[4];
     f32 travel[4];
@@ -1463,10 +1463,10 @@ extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
  * the prologue table pointer and the fldGlobalBase base register. */
 void fldHitChkUnitVWM(f32 *position)
 {
-    f32 current[4];
+    f32 current[4] QWORD_ALIGNED;
     f32 previous[4];
     f32 projected[4];
-    f32 delta[4];
+    f32 delta[4] QWORD_ALIGNED;
     f32 currentSave[4];
     f32 previousSave[4];
     f32 travel[4];
@@ -1925,7 +1925,7 @@ INCLUDE_ASM(const s32, "field/fldHit", fldHitWM_Mask);
 #endif
 
 f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *collision) {
-    f32 projectedPosition[3];
+    f32 projectedPosition[3] QWORD_ALIGNED;
     f32 planarPosition[2];
     f32 clearance = pos;
     f32 planeDistance;
@@ -1991,8 +1991,8 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
-    f32 probeStart[4];
-    f32 probeEnd[4];
+    f32 probeStart[4] QWORD_ALIGNED;
+    f32 probeEnd[4] QWORD_ALIGNED;
     f32 anchor[4];
     dds3PoseSet_t *transform;
     dds3Basic_t *secondary;
@@ -2125,8 +2125,8 @@ s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
-    f32 probeStart[4];
-    f32 probeEnd[4];
+    f32 probeStart[4] QWORD_ALIGNED;
+    f32 probeEnd[4] QWORD_ALIGNED;
     f32 anchor[4];
     dds3PoseSet_t *transform;
     f32 startDistance;

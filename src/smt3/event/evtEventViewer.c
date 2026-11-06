@@ -684,8 +684,8 @@ extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1,
 
 s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *frame)
 {
-    f32 position[4];
-    f32 scale[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
     dds3Basic_t *effect;
     s32 index;
     s32 type;
@@ -756,8 +756,8 @@ void DelEffectTable_evtEventViewer(s32 index)
 
 void *AddBED(void *data, s32 cutno, s32 nameindex, s32 posindex, s32 baseframe)
 {
-    f32 position[4];
-    f32 scale[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
     void *basic;
 
     memset(position, 0, sizeof(position));

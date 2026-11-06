@@ -414,7 +414,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
 
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     f32 probe[4];
 
     if (ctl == NULL) {
@@ -639,7 +639,7 @@ extern void fldPlayerSvsOff(void);
 
 s32 fldPlayerCalcHasigo(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
 
     if (gfldPlayerDamegeCnt > 0) {
         dds3GetPosPoseSet(ctl->handle);
@@ -2363,7 +2363,7 @@ void fldPlayerSdwOff(void) {
 s32 fldPlayerFastSet(void)
 {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     f32 probe[3];
     dds3PoseSet_t *pose;
 

@@ -1489,7 +1489,7 @@ void dds3BlurUpdate(void)
 /* vu0 routine: shortest-arc quaternion rotating VF10 to VF11. */
 void dds3RotationArc(void)
 {
-    f32 identity[4];
+    f32 identity[4] QWORD_ALIGNED;
     f32 axis[4];
     f32 dot;
     f32 component;

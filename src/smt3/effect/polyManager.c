@@ -1689,7 +1689,7 @@ void dds3SpPoly_Ring_Old_New(dds3SpPoly_Ring_Old_t3 *pRing, s32 number) {
     dds3TrackPoly_t *strip = pRing->hTrackPoly;
     dds3TrackPolyList_t *cell = &strip->trackList[number];
     f32 radius = pRing->radius;
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 offset[4];
     f32 angle;
     f32 step;

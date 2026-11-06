@@ -952,7 +952,7 @@ extern void ToMatrix(void);
 
 s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 {
-    f32 dir[4];
+    f32 dir[4] QWORD_ALIGNED;
     f32 pos[4];
     s32 i;
     fldResPut_t *info;
@@ -1021,8 +1021,8 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 #ifdef NON_MATCHING
 s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
 {
-    f32 dir[4];
-    f32 pos[4];
+    f32 dir[4] QWORD_ALIGNED;
+    f32 pos[4] QWORD_ALIGNED;
     s32 i;
     fldResPut_t *info;
     f32 *probe;
@@ -1085,7 +1085,7 @@ INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkDir2);
 #endif
 
 s32 fldEveHitTestRect(f32 *pos, s32 idx) {
-    f32 probe[3];
+    f32 probe[3] QWORD_ALIGNED;
     f32 planar[2];
     fldRoomSidePlanes_t *sides;
     s32 i;

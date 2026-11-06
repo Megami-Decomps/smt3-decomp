@@ -1626,8 +1626,8 @@ extern void pbGetMyCharcterPos(pbProcHandle_t *character, sdfVector4_t *position
 
 void pbSetGameCamera1(void)
 {
-    f32 eye[4];
-    f32 target[4];
+    f32 eye[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     u32 i;
 
     if (mychar[current_char] != NULL) {
@@ -1647,8 +1647,8 @@ void pbSetGameCamera1(void)
 
 void pbSetGameCamera2(void)
 {
-    f32 eye[4];
-    f32 target[4];
+    f32 eye[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     u32 i;
 
     if (mychar[current_char] != NULL) {
@@ -1670,8 +1670,8 @@ extern s32 pbGetMyCharcterRot(pbProcHandle_t *character);
 
 void pbSetGameCamera3(void)
 {
-    f32 eye[4];
-    f32 target[4];
+    f32 eye[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     s32 direction;
 
     if (mychar[current_char] != NULL) {
@@ -1691,8 +1691,8 @@ void pbSetGameCamera3(void)
 
 void pbSetGameCamera4(s16 x, s16 y)
 {
-    f32 eye[4];
-    f32 target[4];
+    f32 eye[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     u32 i;
 
     memset(&eye, 0, sizeof(eye));

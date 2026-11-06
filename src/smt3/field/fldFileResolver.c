@@ -394,7 +394,7 @@ s32 fldLoadNextTask(void);
 
 dds3Basic_t *fldMakeDmyMatter(void) {
     f32 position[4];
-    f32 rotation[4];
+    f32 rotation[4] QWORD_ALIGNED;
     dds3Basic_t *matter;
     position[0] = 0.0f;
     position[1] = 0.0f;
@@ -529,8 +529,8 @@ extern void dds3SetPathBasicSpline(dds3Basic_t *, u32);
 
 void fldMakeResouceBasicFL1(void *typeTable, u32 batchCount) {
     fldSpawnBatch_t *batch;
-    f32 position[4];
-    f32 rotation[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 rotation[4] QWORD_ALIGNED;
     char path[64];
     char directory[32];
     s8 loaded[4];
@@ -733,8 +733,8 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVect
 
 void fldMakeResouceBasicFL2(void *typeTable, u32 batchCount) {
     fldSpawnBatch_t *batch;
-    f32 position[4];
-    f32 rotation[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 rotation[4] QWORD_ALIGNED;
     u32 batchIndex;
     u32 resourceCount;
     u32 resourceIndex;
@@ -900,7 +900,7 @@ void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *pBlockTable, u32 nBlock) {
 
 void fldMakeObjectBasic2(void) {
     f32 position[4];
-    f32 rotation[4];
+    f32 rotation[4] QWORD_ALIGNED;
     fldResHead_t *resource = D_00551C8C;
     u32 count = D_00551C90;
 

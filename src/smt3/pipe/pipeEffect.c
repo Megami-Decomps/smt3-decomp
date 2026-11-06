@@ -305,7 +305,7 @@ extern void getPosTranslate(tagPipeObject *object, f32 *position);
 void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
 {
     PIPE_EFF_t *effect;
-    f32 position[4];
+    f32 position[4] QWORD_ALIGNED;
     tagPipeObject object;
     u8 index;
 

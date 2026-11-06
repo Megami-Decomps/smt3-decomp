@@ -536,10 +536,10 @@ void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const
 /* Resample the newest history span: cubic interpolation for established
  * tracks, linear extension while the history is still short. */
 void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex) {
-    f32 firstHistory[4][4];
-    f32 secondHistory[4][4];
-    f32 firstBasePoint[4];
-    f32 secondBasePoint[4];
+    f32 firstHistory[4][4] QWORD_ALIGNED;
+    f32 secondHistory[4][4] QWORD_ALIGNED;
+    f32 firstBasePoint[4] QWORD_ALIGNED;
+    f32 secondBasePoint[4] QWORD_ALIGNED;
     f32 firstPointDelta[4];
     f32 secondPointDelta[4];
     sdfVector4_t samples[2];

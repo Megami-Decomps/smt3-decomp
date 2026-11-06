@@ -1037,8 +1037,8 @@ void fldAnaStart(f32 x, f32 y, f32 z)
 
 void fldWaveInit(void)
 {
-    f32 pos[4];
-    f32 rot[4];
+    f32 pos[4] QWORD_ALIGNED;
+    f32 rot[4] QWORD_ALIGNED;
     s32 i;
 
     memset(pos, 0, sizeof(pos));

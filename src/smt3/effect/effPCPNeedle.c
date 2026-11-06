@@ -213,7 +213,7 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCopy(effPCPNeedleSpiralParam_t *work) 
 void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     f32 position[4];
     f32 axis[4];
-    f32 vertices[2][4];
+    f32 vertices[2][4] QWORD_ALIGNED;
     f32 resourcePosition[4];
     f32 viewDirection[4];
     f32 width[4];

@@ -178,8 +178,8 @@ void evtSetTestCamera(void) {
 }
 
 s32 evtSetRegistUnit(s32 major, s32 minor) {
-    f32 position[4];
-    f32 rotation[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 rotation[4] QWORD_ALIGNED;
     s32 counter;
     dds3Basic_t *object;
 
@@ -198,8 +198,8 @@ s32 evtSetRegistUnit(s32 major, s32 minor) {
 }
 
 s32 evtLoadUnit(s32 major, s32 minor) {
-    f32 position[4];
-    f32 rotation[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 rotation[4] QWORD_ALIGNED;
     s32 counter;
     dds3Basic_t *object;
 
@@ -221,7 +221,7 @@ s32 evtLoadUnit(s32 major, s32 minor) {
 }
 
 void evtSetUnitPos(u32 unitID, u32 posID) {
-    f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    f32 quaternion[4] QWORD_ALIGNED = { 0.0f, 1.0f, 0.0f, 1.0f };
     dds3Basic_t *target;
     dds3Basic_t *source;
     evtWorldSourceTransformPrefix_t *sourceTransform;

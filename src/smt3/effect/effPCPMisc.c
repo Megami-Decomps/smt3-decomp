@@ -2563,7 +2563,7 @@ void effPCPSparkleSphereDelete(effPCPSparkleSphere_tag *hData) {
 }
 
 void effPCPSparkleSphereDraw(effPCPSparkleSphere_tag *hData) {
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     f32 dir[4];
     f32 size[4];
     billHandle_t *handle;
@@ -5984,7 +5984,7 @@ void effPCPEyeThunderDelete(effPCPEyeThunder_tag *hData) {
 }
 
 void effPCPEyeThunderDraw(effPCPEyeThunder_tag *hData) {
-    f32 point[4];
+    f32 point[4] QWORD_ALIGNED;
     f32 dir[4];
     u8 *params;
     f32 dx;
@@ -7314,7 +7314,7 @@ void effPCPRadiateTBPartInit(effPCPRadiateTB_tag *pRadiateTB, s32 index) {
 }
 
 void effPCPRadiateTBDraw(effPCPRadiateTB_tag *hData) {
-    effEveBEDParams_t place;
+    effEveBEDParams_t place QWORD_ALIGNED;
     f32 origin[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
     f32 tiltAxis[4] __attribute__((aligned(16)));

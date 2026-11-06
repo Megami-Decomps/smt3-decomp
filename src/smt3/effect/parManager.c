@@ -1017,7 +1017,7 @@ void dds3Particle_SpiralBuffInit(dds3Particle_Spiral_t3 *pSpiral, u32 number) {
 void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
     parSpiralPacket_t *packet = (parSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 offset[4];
     f32 verticalScale;
     f32 phaseStep;
@@ -1810,7 +1810,7 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
 void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
     parSphereSpiralPacket_t *packet = (parSphereSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 rotationAxis[4];
     f32 scaleVector[4];
     f32 velocityLength;
@@ -2152,7 +2152,7 @@ void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u3
 void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
     parSphereRingPacket_t *packet = (parSphereRingPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 vector[4];
     f32 rotationStep;
     f32 rotationCos;
@@ -2487,8 +2487,8 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
 /* Reflect moving packets at the frame's entry radius. The first record's
  * updated radius becomes the boundary on the following frame. */
 void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
-    f32 origin[4];
-    f32 previousPosition[4];
+    f32 origin[4] QWORD_ALIGNED;
+    f32 previousPosition[4] QWORD_ALIGNED;
     /* Retail leaves the fourth broadcast components uninitialized. The
      * XYZW operations propagate those W lanes into the packet stores. */
     f32 reflectionScale[4];
@@ -2894,7 +2894,7 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
     u32 subeffectKind = hData->head.sub.type;
     u32 mode;
     f32 positionDelta[4];
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 velocityScale;
     s32 completedCount;
     s32 lifetimeFrames;
@@ -3066,7 +3066,7 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
     u32 subeffectKind = hData->head.sub.type;
     f32 (*auxiliaryCursor)[4] = hData->aux;
     f32 positionVector[4];
-    f32 origin[4];
+    f32 origin[4] QWORD_ALIGNED;
     f32 verticalScale;
     f32 phaseStep;
     f32 waveRate;
@@ -3310,8 +3310,8 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
     parBurstPacket_t *packet = (parBurstPacket_t *)hData->head.buffer->pPhysics;
     u32 kind;
     dds3ParOffsetBuffParts_t *history = hData->history.pParts;
-    f32 origin[4];
-    f32 previousOrigin[4];
+    f32 origin[4] QWORD_ALIGNED;
+    f32 previousOrigin[4] QWORD_ALIGNED;
     f32 rotationAxis[4];
     f32 scaleVector[4];
     f32 radius;
@@ -3581,7 +3581,7 @@ void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 col
 
 void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *hBlur, s32 index, const f32 *pPosBase, u32 abgr,
                    dds3ParOffsetBuff_t *pOffBuff, f32 scale) {
-    f32 localOrigin[4];
+    f32 localOrigin[4] QWORD_ALIGNED;
     dds3ParOffsetBuffParts_t *history;
     dds3Particle_BlurBuffList_t *slot;
     f32 (*destination)[4];
@@ -3672,7 +3672,7 @@ void dds3Particle_TrackSetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pPo
     u128 *vertex = cell->history;
     u32 count = history->count;
     f32 point[4];
-    f32 localOrigin[4];
+    f32 localOrigin[4] QWORD_ALIGNED;
 
     if (count >= 2) {
         s32 segments;
@@ -3725,7 +3725,7 @@ void dds3Particle_Track2SetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pP
     u128 *vertex = cell->history;
     u32 count = history->count;
     f32 point[4];
-    f32 localOrigin[4];
+    f32 localOrigin[4] QWORD_ALIGNED;
 
     if (count >= 2) {
         s32 segments;

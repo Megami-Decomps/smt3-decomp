@@ -1536,7 +1536,7 @@ void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
     dds3P2APolygonResource_t resources;
     /* VU0 scratch is reloaded after its translation row is replaced. */
     volatile f32 matrix[4][4] __attribute__((aligned(16)));
-    f32 positions[4][4];
+    f32 positions[4][4] QWORD_ALIGNED;
     f32 uv[4][2];
     f32 secondaryUv[4][2];
     sdfDrawTag_t *list;

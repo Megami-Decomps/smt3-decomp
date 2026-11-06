@@ -1154,7 +1154,7 @@ s32 evtUnitRotationQuat(evtUnit_t *h, f32 *rot, f32 radio) {
 }
 
 s32 evtUnitMoveType0(evtUnit_t *h) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
     f32 scale;
     dds3Basic_t *obj;
 
@@ -1177,7 +1177,7 @@ s32 evtUnitMoveType0(evtUnit_t *h) {
 }
 
 s32 evtUnitMoveTypePathTrace(evtUnit_t *h) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
 
     dds3PathBasicControlIsFinished(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
     dds3PathBasicControlGetPos(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));

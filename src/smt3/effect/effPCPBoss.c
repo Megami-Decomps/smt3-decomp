@@ -4128,7 +4128,7 @@ extern f32 effBTLPartGetScalePtr(nbFormation_t *form);
 
 void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
 {
-    effPCPBossPlace_t place;
+    effPCPBossPlace_t place QWORD_ALIGNED;
     /* Scan state precedes timing snapshots for the native spill order;
        see docs/levers/scalar-spills.md. */
     u32 i;
@@ -4774,7 +4774,7 @@ void effPCP_BED_MatrixToQuaternion(f32 matrix[4][4])
 
 void effPCP_BED_Draw(effPCP_BED_tag *hData)
 {
-    effPCPBossPlace_t place;
+    effPCPBossPlace_t place QWORD_ALIGNED;
     s32 frame = hData->frame;
     s32 limit = SDF_FRAMES(hData->param.life);
     s32 fadeIn = SDF_FRAMES(hData->param.fade_in);

@@ -399,8 +399,8 @@ void BlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
 dds3Basic_t *AddEffect(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
 {
-    f32 position[4];
-    f32 scale[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
     s32 i;
     s32 kind;
     dds3Basic_t *basic;

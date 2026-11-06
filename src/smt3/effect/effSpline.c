@@ -150,7 +150,7 @@ void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordInde
 /* vu0 routine: sample the curve into vf10. */
 void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
 {
-    f32 vertex[4];
+    f32 vertex[4] QWORD_ALIGNED;
     f32 *a;
     f32 *b;
     f32 *c;

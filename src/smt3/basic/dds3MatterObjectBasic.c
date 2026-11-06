@@ -40,7 +40,7 @@ dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const d
 }
 
 dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot) {
-    f32 zero[4];
+    f32 zero[4] QWORD_ALIGNED;
     dds3Basic_t *basic;
 
     memset(zero, 0, sizeof(zero));

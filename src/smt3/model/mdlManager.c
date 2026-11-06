@@ -871,7 +871,7 @@ mdlObj_t *mdlLoad(u32 aMajor, u32 aMinor)
     mdlObj_t *head;
     sdfModelRootNode_t *inner;
     f32 modelScale;
-    f32 scale[4];
+    f32 scale[4] QWORD_ALIGNED;
     s32 searchId;
 
     node = mdlLoadPrepare(aMajor, aMinor);

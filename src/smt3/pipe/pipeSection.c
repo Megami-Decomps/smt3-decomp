@@ -1141,8 +1141,8 @@ extern f32 vecAngleBetween(f32 *a, f32 *b);
 
 void ActionBound(tagPipeObject *object) {
     f32 velocity[3];
-    f32 newPosition[4];
-    f32 angledVelocity[4];
+    f32 newPosition[4] QWORD_ALIGNED;
+    f32 angledVelocity[4] QWORD_ALIGNED;
     f32 newX;
     f32 newY;
     f32 angle;

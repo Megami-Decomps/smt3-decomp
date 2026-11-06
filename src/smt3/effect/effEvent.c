@@ -1085,8 +1085,8 @@ void eff_1AEC58(effEVECombParSmoke_t *work);
 
 /* vu0 routine: advance and draw every live particle of one smoke set. */
 void eff_1AEC58(effEVECombParSmoke_t *work) {
-    f32 offset[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 origin[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 offset[EFF_EVENT_VECTOR_COMPONENTS] QWORD_ALIGNED;
+    f32 origin[EFF_EVENT_VECTOR_COMPONENTS] QWORD_ALIGNED;
     f32 side[EFF_EVENT_VECTOR_COMPONENTS];
     effEVECombParSmokePart_t *particle;
     u8 repeat;
@@ -1227,7 +1227,7 @@ SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
 void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     effEveBillBatch_t primary, secondary;
     f32 matrix[4][4];
-    f32 position[4], origin[4], lateral[4];
+    f32 position[4] QWORD_ALIGNED, origin[4] QWORD_ALIGNED, lateral[4];
     sdfDrawTag_t *primaryList, *secondaryList;
     sdfGrOt_t *surface;
     sdfTexHandle_t *primaryTexture, *secondaryTexture;
@@ -1719,7 +1719,7 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
     s32 delayModulus = hData->param.spread;
     s32 fadeInSteps = SDF_FRAMES(hData->param.fade_in);
     s32 fadeOutSteps = SDF_FRAMES(hData->param.fade_out);
-    f32 position[3];
+    f32 position[3] QWORD_ALIGNED;
 
     (void)dds3Bezier4PGetPart(bezierSlots, 0);
     if (recordCount == 0) {

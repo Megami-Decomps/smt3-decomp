@@ -601,7 +601,7 @@ u32 evtCommand_MODEL_SHADOW_OFF(void)
 
 u32 evtCommand_MODEL_POS_XYZ(void)
 {
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     void *scene;
     s32 key;
     void *unit;
@@ -621,7 +621,7 @@ u32 evtCommand_MODEL_POS_XYZ(void)
 }
 
 u32 evtCommand_MODEL_ROT_XYZ(void) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
     void *ctx;
     s32 worldObjectKey;
     void *unit;
@@ -651,7 +651,7 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
 
 u32 evtCommand_MODEL_SCL_XYZ(void)
 {
-    f32 scl[4];
+    f32 scl[4] QWORD_ALIGNED;
     void *scene;
     s32 key;
     void *unit;
@@ -1128,8 +1128,8 @@ u32 evtCommand_MODEL_LIGHT_UNLINK(void)
 }
 
 u32 evtCommand_EFFECT_BE(void) {
-    u8 firstVector[16];
-    u8 secondVector[16];
+    u8 firstVector[16] QWORD_ALIGNED;
+    u8 secondVector[16] QWORD_ALIGNED;
     s32 taskId;
     s32 key;
     struct effPCPAgiraoFirePartList_t *descriptor;
@@ -1159,8 +1159,8 @@ u32 evtCommand_EFFECT_BE(void) {
 
 u32 evtCommand_EFFECT_LOAD(void)
 {
-    evtVec_t pos;
-    evtVec_t scale;
+    evtVec_t pos QWORD_ALIGNED;
+    evtVec_t scale QWORD_ALIGNED;
     dds3Basic_t *basic;
 
     memset(&pos, 0, sizeof(pos));
@@ -1179,8 +1179,8 @@ u32 evtCommand_EFFECT_LOAD(void)
 
 u32 evtCommand_EFFBED_LOAD(void)
 {
-    evtVec_t pos;
-    evtVec_t scale;
+    evtVec_t pos QWORD_ALIGNED;
+    evtVec_t scale QWORD_ALIGNED;
     dds3Basic_t *basic;
 
     memset(&pos, 0, sizeof(pos));
@@ -1213,8 +1213,8 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A9A8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A9D8);
 
 u32 evtCommand_EFFBED_BE(void) {
-    f32 position[4];
-    f32 scale[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
     s32 taskId;
     s32 key;
     void *resource;
@@ -1451,7 +1451,7 @@ u32 evtCommand_EFFECT_POS_XYZ(void) {
 }
 
 u32 evtCommand_EFFECT_ROT_XYZ(void) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
     dds3Basic_t *obj;
     f32 toRad;
     f32 x;
@@ -2121,7 +2121,7 @@ s32 evtCommand_CAM_CLS(void)
 
 s32 evtCommand_CAM_POS_XYZ(void) {
     void *effectUnit;
-    f32 position[4];
+    f32 position[4] QWORD_ALIGNED;
 
     memset(position, 0, sizeof(position));
     if (scrGetIntPara(0) < 0) {
@@ -2142,7 +2142,7 @@ s32 evtCommand_CAM_POS_XYZ(void) {
 /* Convert the three degree inputs before composing and storing a quaternion. */
 s32 evtCommand_CAM_ROT_XYZ(void) {
     void *effectUnit;
-    f32 quaternion[4];
+    f32 quaternion[4] QWORD_ALIGNED;
     f32 degreesToRadians;
     f32 pitch;
 
@@ -2167,7 +2167,7 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
 
 s32 evtCommand_CAM_ROT_Q(void) {
     void *effectUnit;
-    f32 quaternion[4];
+    f32 quaternion[4] QWORD_ALIGNED;
 
     if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetUnitFollowCamera();

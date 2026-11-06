@@ -930,9 +930,9 @@ void effPCPHamaCardSpiralPartInit(effPCPHamaCardSpiral_tag *pHCardSpiral, u32 nu
 }
 
 void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
+    f32 next[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
+    f32 duplicatePosition[4] QWORD_ALIGNED;
     f32 direction[4];
     f32 radial[4];
     f32 halfWidth[4];
@@ -1248,9 +1248,9 @@ void effPCPHamaCardSpherePartInit(effPCPHamaCardSphere_tag *pHCardSphere, s32 nu
 
 void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
     f32 axis[4];
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
+    f32 next[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
+    f32 duplicatePosition[4] QWORD_ALIGNED;
     f32 direction[4];
     f32 radial[4];
     f32 halfWidth[4];
@@ -1571,9 +1571,9 @@ void effPCPHamaCardScatterPartInit(effPCPHamaCardScatter_tag *pHCardScatter, s32
 /* vu0 routine: each particle sweeps three ribbon quads around its tilt angle,
  * and the tilt reverses once it passes half its stored span. */
 void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
-    f32 next[4];
-    f32 position[4];
-    f32 duplicatePosition[4];
+    f32 next[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
+    f32 duplicatePosition[4] QWORD_ALIGNED;
     f32 direction[4];
     f32 axis[4];
     f32 halfWidth[4];
