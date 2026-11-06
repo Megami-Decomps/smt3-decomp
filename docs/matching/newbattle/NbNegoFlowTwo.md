@@ -93,3 +93,52 @@ NON_MATCHING/SKIP_ASM 453 / 358. Plain and strict-diagnostic candidate output
 also agrees in every mode. Complete retail owner checking remains 72 match,
 0 differ, with owned data unchanged; all four guarded drafts still compile.
 This adds no matching credit or compiler constraint.
+
+## Flow6_65 (newbattle/NbNegoFlowTwo, 0x190)
+
+100 of 100 words match at 400 bytes. Separate race-specific affinity switches
+retain the native branch structure, and one localized binding keeps the
+initialized signed rate in its native callee-saved register. The ordinary
+switch-only control already allocates the rate to the same physical register,
+but has ten differing words at the same size; it omits the native XOR-zero
+comparison normalization. The binding exposes the hard register earlier,
+before allocation. Binding the old if ladder alone also fails. These paired controls establish the narrow source/output
+dependency without claiming a deeper allocator mechanism or historical
+source spelling.
+
+Qualified whole-owner snapshots locate the distinction. In the ordinary
+control, an early XOR in 02.jump disappears by 03.cse; conditional conversion
+later consumes the comparison directly. The candidate remains branch-based
+through 14.combine, then 15.ce introduces XOR UID 453 feeding the real rate
+update. That XOR survives in retail's position. These are observed pass
+boundaries, not a claim about an unobserved backend decision.
+
+The default rate is 50. Affinity 1 selects 30 or 40 by race, affinity 2 selects
+70, and other affinities retain the default. The independent second race
+query and player-then-enemy parameter calls remain. Strict signed parameter
+comparisons adjust the live rate by five; provider ranges keep the arithmetic
+defined. The unsigned RNG(10) test and signed RNG(100) comparison remain
+distinct. Negotiation counters, candidate loads after callbacks, message
+arguments and all zero returns preserve native behavior.
+
+The rate is initialized before its first use, and its real adjustment
+and comparison consumers remain. Every intervening provider preserves the
+callee-saved register; the function saves and restores it in the native
+32-byte frame. No caller-clobbered value crosses a call, and no artificial
+consumer, type, bound, memory effect or compiler flag is added. Provider and
+dispatch signatures, field offsets and the shared negotiation layout were
+independently reviewed.
+
+Both complete-owner checkers give 73 match, 0 differ, preserving all 72 C
+peers. Independent production objects have identical complete allocated
+text (14,200 bytes), rodata (228 bytes), empty data/BSS, and all 358 ordered
+relocations. Eighteen complete plain/dump assembly and literal ELF comparisons
+pass with 672 stable compiler/runtime inputs. Normalization changes only one
+same-length scratch-source filename. Strict declaration and uninitialized
+checks also pass in production, SKIP_ASM and retained-C modes without changing
+output.
+
+Full retail checksum, generated-source, tooling, retained EE/IRX, compiler
+wrapper and reconciled report checks pass. The linked production proof
+identifies a unique 400-byte C-owned span matching retail. Game coverage
+gains one function and 400 bytes.

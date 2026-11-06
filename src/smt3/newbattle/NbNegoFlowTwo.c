@@ -1904,11 +1904,13 @@ s32 Flow6_64(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 79 of 100 words differ (first at +0x10); four words long. */
-#ifdef NON_MATCHING
 s32 Flow6_65(nbNegoProcessData_t *n)
 {
-    s32 ritu;
+    /* Keep the live rate in its native callee-saved register. The ordinary
+     * local omits the native comparison-normalization instruction, shifting
+     * the following shared exit. This localized constraint describes the
+     * compiler dependency, not the original source spelling. */
+    FAKEMATCH_ASM_REG(s32, ritu, "$18");
     s32 ppar;
     s32 epar;
 
@@ -1917,15 +1919,23 @@ s32 Flow6_65(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x60042);
     nbAddNegoIdKouho(n, 0x90001);
     if (datGetRace(n->ework) != 0x13) {
-        if (n->aisyo == 1) {
+        switch (n->aisyo) {
+        case 1:
             ritu = 0x1E;
-        } else if (n->aisyo == 2) {
+            break;
+        case 2:
             ritu = 0x46;
+            break;
         }
-    } else if (n->aisyo == 1) {
-        ritu = 0x28;
-    } else if (n->aisyo == 2) {
-        ritu = 0x46;
+    } else {
+        switch (n->aisyo) {
+        case 1:
+            ritu = 0x28;
+            break;
+        case 2:
+            ritu = 0x46;
+            break;
+        }
     }
     if (datGetRace(n->ework) != 0x13) {
         ppar = datGetParam(n->pwork, 1);
@@ -1952,9 +1962,6 @@ s32 Flow6_65(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_65);
-#endif
 
 s32 Flow6_66(nbNegoProcessData_t *n)
 {

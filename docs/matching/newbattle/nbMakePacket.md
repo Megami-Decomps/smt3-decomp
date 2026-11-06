@@ -276,26 +276,14 @@ ee-gcc annuls each arm's first instruction into those slots instead
 
 Ruled out: all six orders of the three case arms.
 
-## Flow6_65 (newbattle/nbMakePacket, 0x190)
+## Flow6_65 (newbattle/NbNegoFlowTwo, 0x190)
 
-79 of 100 words differ, four words long.
-
-The `datGetRace(n->ework) != 0x13` arm is written first so the `== 0x13`
-arm is the branched-to one, which is retail's polarity. Two residuals
-remain and neither moved under the source forms tried.
-
-ee-gcc if-converts the `== 0x13` arm's `aisyo` ladder into two `movz`,
-where retail keeps it branchy and cross-jumps its `aisyo == 2` test with
-the other arm's. And the allocator gives `ritu` `$17` and the
-`datGetParam` result `$18`, which is retail's pair swapped; `ritu` is
-already assigned in front of the leading call, so it does get a
-callee-saved register, just the wrong one.
-
-Ruled out: `ppar`/`epar` declared before `ritu`, declared as block locals
-inside the `if`, and declared in the other order; and the second arm
-written as a braced `else` block rather than a flattened `else if`. The
-documented rule that declaration order is inert for register allocation
-holds here.
+100 of 100 words now match at 400 bytes. Two race-specific affinity switches
+and one localized initialized-rate binding supersede the earlier 416-byte
+if-ladder draft. The switch-only control already allocates the native register
+but still lacks the comparison normalization; declaration order was not the
+remaining issue. See the [current owner note](NbNegoFlowTwo.md#flow6_65-newbattlenbnegoflowtwo-0x190)
+for the qualified controls, semantics and complete-owner evidence.
 
 ## nbCollectBadCurseUnits (newbattle/nbEncProcess, 0xA4)
 
