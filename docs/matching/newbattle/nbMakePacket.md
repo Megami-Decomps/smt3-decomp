@@ -48,24 +48,12 @@ declaration orders leave it unchanged. This is the ruled-out
 register-permutation class, kept only so the next reader does not redo the
 decode.
 
-## Flow10_21 (newbattle/nbMakePacket, 0x98)
+## Flow10_21 (newbattle/NbNegoFlowNg, 0x98)
 
-11 of 37 words differ, one word short of retail's 152.
-
-Both `nbAddNegoIdKouho` ids, the three-way `ework->id` chain over `0x5C`,
-`0x3D` and `0x61` (plain `beq`s, since the values are not contiguous), the
-`evtBitCheck(8) == 0` polarity and the `(u32)dds3GetRandIntA(0, 10) < 5`
-unsigned test are all confirmed; the first 26 words are identical. The whole
-condition has to be one `||` of the two disjuncts assigning
-`nextkouho[1]`, with `nextkouho[0]` in the `else`: an early `return 0` after
-the first assignment duplicates the tail and runs eight bytes over.
-
-What is left is the rand test's polarity in the emitted code. Retail puts the
-`sltiu` result in `$3` and branches `bnez $3` to the `nextkouho[1]` block,
-which it places last; ee-gcc puts it in `$2` and emits `beql $2, $0`, keeping
-`nextkouho[1]` as the fall-through, which shifts the two branch offsets. The
-`>= 5` spelling with the arms swapped and an explicit `bit` local for the
-`evtBitCheck` result are both much worse (10 of 38 over size, and 24 of 38).
+Matched at the native 152 bytes. See the
+[current owner note](NbNegoFlowNg.md#flow10_21-newbattlenbnegoflowng-0x98)
+for the qualified post-callback return binding, ordinary ablation, native
+semantics and complete-owner evidence.
 
 ## Flow10_10 (newbattle/nbMakePacket, 0x90)
 

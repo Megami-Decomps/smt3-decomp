@@ -651,24 +651,32 @@ s32 Flow10_20(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 11 of 37 words differ (first at +0x5C). */
-#ifdef NON_MATCHING
 s32 Flow10_21(nbNegoProcessData_t *n)
 {
+    u32 selected;
+    /* This zero return is initialized after the final callback on each path.
+     * Its ABI-register home preserves the native candidate-load tail; an
+     * ordinary local differs. This is a compiler aid, not original-source evidence. */
+    FAKEMATCH_ASM_REG(s32, result, "$2");
+
     nbAddNegoIdKouho(n, 0xA0018);
     nbAddNegoIdKouho(n, 0xA001C);
-    if (((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) &&
-         evtBitCheck(8) == 0) ||
-        (u32)dds3GetRandIntA(0, 10) < 5) {
-        n->nextnegoid = n->nextkouho[1];
+    if ((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) &&
+        evtBitCheck(8) == 0) {
+        selected = n->nextkouho[1];
+        result = 0;
     } else {
-        n->nextnegoid = n->nextkouho[0];
+        u32 randomLow = dds3GetRandIntA(0, 10) < 5;
+        result = 0;
+        if (!randomLow) {
+            selected = n->nextkouho[0];
+        } else {
+            selected = n->nextkouho[1];
+        }
     }
-    return 0;
+    n->nextnegoid = selected;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowNg", Flow10_21);
-#endif
 
 s32 Flow10_22(nbNegoProcessData_t *n)
 {
