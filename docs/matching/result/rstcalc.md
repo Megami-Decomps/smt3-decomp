@@ -254,13 +254,18 @@ Earlier negative address, ID-type, declaration-order, pointer-walk and nested
 condition controls predated the successful factorization. They did not establish
 a source-level barrier, and are superseded by the minimal ordinary ablation.
 
-## cmbInitStockUnit
+## cmbInitStockUnit (result/rstcalc, 0xA0)
+
+40 of 40 words match at 160 bytes after the ordinary stride-factorization
+resolution below.
+
+### Historical direct-row draft
 
 The earlier 172-byte guarded entry-pointer form has been reduced to 160
 emitted and native bytes; 37 of 40 words match. Three differing words
 at `+0x20`, `+0x24` and `+0x2C` exchange the temporaries in the multiply-by-102
 address expansion. All loads, conditions, stores, loop ordering and calls
-match. Normal builds retain assembly.
+match. At this stage, normal builds retained assembly.
 
 The helper masks the devil ID to 16 bits, clears the unit's skills, then
 scans all 24 level-up entries in order. A kind-one, level-zero entry appends
@@ -282,6 +287,59 @@ are inert. The direct typed-row source remains preferred. A further change
 needs a genuine source lifetime or access-path premise that explains the
 different temporary combination; manually expanding the constant multiply
 is not justified by this observation.
+
+### Ordinary stride-factorization resolution (2026-11-06)
+
+40 of 40 words now match at 160 bytes. The same-owner ordinary factorization
+established by the evolution and Kugatati message lookups supplies new evidence
+beyond the historical complete-value constraints above: multiply the actual
+unsigned ID by three, then by `sizeof(datLevelUpRecord_t) / 3`. The resulting
+byte offset starts at the complete `datLevelUpTable` array and is converted
+back to its actual row type before member access. No opcode spelling,
+constraint, binding, helper, declaration, flag or layout change is added.
+
+The direct-row ablation remains 37/40 at the same extent. Qualified stock
+`00.rtl` expansion exposes the real first product as pseudo90 at UID35 and
+places shifted96 before that product in UID42's sum. The single-product
+control puts product92 before shifted93 at UID37. This records a source and
+expansion property, not a new hooked allocator claim or original spelling.
+All later native loads, condition checks, count/value/skill stores and calls
+remain exact.
+
+Both products fit for every u16 argument and equal ID times 102. Valid row
+IDs remain the inherited 224-row table requirement; no new bound is invented.
+`cmbClearUnitSkills` still runs first with its unchanged void provider ABI,
+then entries 0 through 23 are inspected in ascending order. Kind one and level
+zero append the original halfword value with the native halfword count update
+before value load and skill store. The real provider resets the count to zero,
+so at most 24 appends fit the existing skill array. A bounded semantic model
+checks all 65,536 stride inputs and 10,000 ordered append cases, not whole-game
+execution or arbitrary overlapping objects.
+
+Independent semantic review and both public and local complete-owner checkers
+pass 96 match, 0 differ. All 104 production, 95 SKIP_ASM and 104 retained peers,
+owned data and resolved relocation contracts are preserved. Nine complete
+plain/dump assembly and whole-ELF pairs cover baseline, direct-row ablation and
+factored source in all three modes, with 683 stable explicitly collected
+compiler/source/runtime inputs including QEMU and the actual second loader.
+Three additional final-source pairs pass after removing stale draft prose.
+Only the equal-length randomized source path in `.file` and its single ELF
+string occurrence is normalized; no code, data, symbol or relocation is masked.
+
+Strict production and SKIP_ASM still fail on the inherited `rstSetSkillActFlag`
+declaration gap; strict retained compilation passes. No diagnostic is suppressed
+and no new warning-clean claim is made. Integrated retail/build/regression and
+report checks are required separately before publication.
+
+Integrated verification passes the generated-source stale-line control, full
+retail build and literal image comparison, all retained EE/FIX_BUGS and seven
+IRX owners, inline-assembly/compiler-wrapper checks, reconciled game/all-binary
+reports and a no-op rebuild. The local tooling suite reports 569 cases and the
+clean public-tooling snapshot 505; each skips only the optional external dvp-as
+comparison because that executable is unavailable. Native VU assembly and the
+retail checksum pass. Linked production proofs identify both promoted targets
+as unique C-owned spans with exact retail bytes; combined game progress rises
+by two functions and 436 bytes with unchanged data totals.
 
 ## rstSetCurrentDevil (176 bytes, matched)
 

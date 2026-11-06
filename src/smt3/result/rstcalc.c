@@ -1507,26 +1507,24 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 
 
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * seq26, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 {
     datLevelUpRecord_t *row;
     s32 i;
+    u32 idTripled;
+    u32 offset;
 
     cmbClearUnitSkills(unit);
-    row = &datLevelUpTable[id];
+    idTripled = (u32)id * 3;
+    offset = idTripled * (sizeof(datLevelUpRecord_t) / 3);
+    row = (datLevelUpRecord_t *)((u8 *)&datLevelUpTable + offset);
     for (i = 0; i < 24; i++) {
         if (row->entry[i].kind == 1 && row->entry[i].level == 0) {
             unit->skill[unit->skillcnt++] = row->entry[i].value;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbInitStockUnit);
-#endif
+
 
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 

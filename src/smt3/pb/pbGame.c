@@ -61,7 +61,12 @@ typedef struct
     sdfMat_t *mat;
 } pbExit_t;
 
-typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCamWork_t;
+typedef struct
+{
+    f32 scale;
+    u8 unk04[0xC];
+    f32 eye[4], target[4];
+} pbViewCamWork_t;
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
@@ -1309,22 +1314,21 @@ void deleteRoundAutoCamera(dds3ProcessID_t *id) {
     roundCamera = NULL;
 }
 
-#ifdef NON_MATCHING
 s32 viewModeCamera(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbViewCamWork_t *work = panel->data.viewCam;
-    volatile f32 *eye = &work->eye.x;
-    volatile f32 *target = &work->target.x;
     f32 step[4];
     f64 scale;
-    s32 i;
+    u32 i;
 
-    if (panel->state == 1) {
+    switch (panel->state) {
+    case 1:
         if (panel != NULL) {
             panel->flags = 0;
         }
-    } else if (panel->state == 5) {
+        break;
+    case 5:
         return -1;
     }
     scale = work->scale;
@@ -1333,20 +1337,18 @@ s32 viewModeCamera(dds3ProcessID_t *id)
     }
     work->scale = scale + 0.005;
     for (i = 0; i < 4; i++) {
-        f32 current = eye[i];
-        f32 destination = target[i];
+        f32 current = work->eye[i];
+        f32 destination = work->target[i];
 
         step[i] = current - destination;
         step[i] *= work->scale;
-        eye[i] = step[i] + target[i];
+        work->eye[i] = step[i] + work->target[i];
     }
-    SDF_VU0_COPYVECTOR(&aViewEye, &work->eye);
-    SDF_VU0_COPYVECTOR(&aViewTarget, &work->target);
+    SDF_VU0_COPYVECTOR(&aViewEye, &work->eye[0]);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &work->target[0]);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", viewModeCamera);
-#endif
+
 
 void deleteViewModeCamera(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
@@ -1603,8 +1605,8 @@ pbProcHandle_t *pbStartViewModeCamera(pbProcHandle_t *parent) {
     panel->data.viewCam = work;
     memset(work, 0, 0x30);
     work->scale = 1.0f;
-    SDF_VU0_COPYVECTOR(&work->eye, &aViewEye);
-    SDF_VU0_COPYVECTOR(&work->target, &aViewTarget);
+    SDF_VU0_COPYVECTOR(&work->eye[0], &aViewEye);
+    SDF_VU0_COPYVECTOR(&work->target[0], &aViewTarget);
     dds3SetProcessData(panel->id, panel);
     return panel;
 }
@@ -1806,10 +1808,6 @@ extern void evtBitOn(s32 no);
 #include "sdk_libc.h"
 
 extern pbProcHandle_t *pbGetMoveChar(void);
-
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F40);
-
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F48);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F50);
 

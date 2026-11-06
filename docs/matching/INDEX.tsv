@@ -317,6 +317,7 @@ roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
 pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	73
 roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	113
 pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	148
+viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	194
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
@@ -349,13 +350,13 @@ cmbCountEvoReady	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.
 cmbGetLevelUpCount	rstcalc	0x84	33 of 33 words match	docs/matching/result/rstcalc.md	152
 rstFindEvoEntryType7	result/rstcalc	0x6C	27 of 27 words match	docs/matching/result/rstcalc.md	176
 rstFindEvoEntryType5	rstcalc	0x6C	27 of 27 words match	docs/matching/result/rstcalc.md	221
-cmbInitStockUnit			37 of 40 words match	docs/matching/result/rstcalc.md	257
-rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	286
-rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	319
-cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	355
-cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	396
-func_00222610	rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	472
-rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/rstcalc.md	514
+cmbInitStockUnit	result/rstcalc	0xA0	40 of 40 words match	docs/matching/result/rstcalc.md	257
+rstSetCurrentDevil	176 bytes	matched		docs/matching/result/rstcalc.md	344
+rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	377
+cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	413
+cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	454
+func_00222610	rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	530
+rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/rstcalc.md	572
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

@@ -190,3 +190,60 @@ no-op builds.
 Source commit `35a11cd4cd99a5a5073c1493efc915b132f1c757` passed exact-source hosted CI
 [41001048339](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41001048339),
 including build and deploy.
+
+## viewModeCamera (pb/pbGame, 0x114)
+
+69 of 69 words match at 276 bytes, excluding the four-byte trailing alignment.
+The actual 0x30-byte camera work contains a scale, twelve padding bytes and
+named `f32 eye[4], target[4]` arrays at 0x10 and 0x20. This replaces the old
+scalar-member pointer walking with bounded indexing of genuine arrays. The
+constructor and final VU0 copies use the actual element-zero addresses;
+all existing peers, including `pbStartViewModeCamera`, remain exact.
+Target assertions establish size 0x30 and alignment four, not sixteen;
+physical quadword placement remains the native allocation/copy contract.
+No union, flat record alias, new qualifier, constraint, helper or flag remains.
+
+An ordinary state switch retains state-one flag clearing, state-five early
+return and other states continuing. The four-element index is unsigned.
+The scale is promoted to double, compared against 1.025, incremented by 0.005,
+narrowed to float and stored. Each component retains the native float
+subtraction, two real scratch stores, scale reload, multiplication, target
+reload and addition before the eye store. Both native vector copies and the
+callback ABI remain unchanged. Exact EE operations, not modern-host floating
+point assumptions, establish the numerical behavior. Invalid input pointers
+remain unsupported; the old pre-null-check dereference is not repaired.
+
+The C now emits the two native double constants previously supplied by
+`INCLUDE_RODATA` at D_00535F40 and D_00535F48. Their ownership migrates to the
+compiler; values, native placement and the other data are unchanged.
+
+Independent semantic/ABI/layout review and both public and local complete-owner
+checks pass 64 match, 0 differ, versus 63 before promotion. Three final-source
+complete assembly and whole-ELF plain/dump pairs pass with 692 stable explicit
+source/compiler/runtime inputs, including actual QEMU and the second loader.
+Only the exactly-once equal-length random source path is normalized. Preliminary
+union and eight-float alternatives also matched but are unnecessary and rejected
+in favor of the two natural arrays. No hidden optimizer decision or original
+source spelling is claimed. Full integrated gates remain required separately.
+
+Complete preservation auditing keeps all 70 production, 63 SKIP_ASM and
+70 retained peers, including the constructor, unchanged after resolving local
+code and literal relocations. Production rodata (352 bytes) and lit4 (100 bytes)
+are byte-identical. SKIP_ASM adds exactly the target's 16 bytes of native double
+constants before the existing string; its relocated consumers resolve to the
+same data. Production constants remain at native 0x00535F40 and 0x00535F48.
+
+Strict diagnostics reproduce baseline debt: production and SKIP_ASM see the
+existing `pbInitGameCamera` declaration gap, and all modes see the existing
+`sdfDrawRotatedModel` first-argument type warning. No target or uninitialized
+warning is introduced; this is not a strict-clean owner claim.
+
+Integrated verification passes the generated-source stale-line control, full
+retail build and literal image comparison, all retained EE/FIX_BUGS and seven
+IRX owners, inline-assembly/compiler-wrapper checks, reconciled game/all-binary
+reports and a no-op rebuild. The local tooling suite reports 569 cases and the
+clean public-tooling snapshot 505; each skips only the optional external dvp-as
+comparison because that executable is unavailable. Native VU assembly and the
+retail checksum pass. Linked production proofs identify both promoted targets
+as unique C-owned spans with exact retail bytes; combined game progress rises
+by two functions and 436 bytes with unchanged data totals.

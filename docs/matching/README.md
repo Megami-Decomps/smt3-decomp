@@ -24,8 +24,8 @@ both native and emitted sizes when they differ.
 | 9 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 7 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 7 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
-| 6 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
