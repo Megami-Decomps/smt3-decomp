@@ -445,3 +445,48 @@ The production draft remains the 68/70 ordinary form. The scoped-index and
 constraint controls are not retained, and no exact matching credit is added.
 Further work needs a different evidence-backed premise rather than more
 initialization-order or register permutations.
+
+## nbMakeKaifukuPacket (newbattle/nbMakePacket, 0x1E8)
+
+122 of 122 words match at 488 bytes. Use the matched recovery sibling's
+signed visibility snapshot (`visible = formindex < 16`, `hidden = !visible`),
+explicit no-effect type 0/2 arms, and one localized empty read/write operand
+on the incoming `u32 badstat` argument. The status argument already has a real
+final nonzero consumer after all packet calls. The operand stays inside that
+live interval, binds no register, emits no instruction and is not a memory
+barrier. Compiler-managed saved-register allocation preserves it across calls.
+Deleting only the operand leaves 116 of 122 words matching: the incoming
+status save moves into the first visibility branch's delay slot. Direct
+`formindex >= 16` leaves 121 matching words. These are measured output
+properties, not recovered original spelling or a hooked scheduler explanation.
+
+Independent native/provider review confirms one signed form-index read before
+callbacks, including negative visible indices. Type 1 retains its hit effect;
+type 3 retains color then home-color effects. HP/MP sign combinations preserve
+number kinds, resource updates, frames, durations and call order. Hidden
+formations suppress number effects, not resource updates. Every nonzero
+status bit pattern enables the final status-recovery call; zero skips it.
+The return remains one. Valid live formation pointers and existing arithmetic
+domains remain necessary; no callback purity or new bound is assumed.
+
+Complete owner: 75 match, 0 differ. Twenty-one development whole-assembly and
+entire-ELF normal/stock-dump pairs cover seven sources in three modes. Fresh
+integrated guarded/final qualification adds six passing pairs with 116 stable
+collected inputs. All 77/74/77 production/SKIP_ASM/retained peers and owned
+data are preserved. Entire production text is identical to guarded output
+at 16,308 bytes, with identical relocation records. Strict production and
+SKIP_ASM retain the two inherited fade-in/fade-out implicit declarations;
+retained strict checks pass. No hooked compiler trace is claimed.
+
+Optimized and ASan/UBSan host fixtures each pass 51,253,248 comparisons across
+six sources, covering signed-halfword visibility, type/resource/status
+boundaries and callback mutations. They model the empty operand as an identity;
+they are not EE execution or a new portability guarantee. Leak detection is
+disabled for the allocation-free sanitizer fixture in the execution environment.
+
+Integration preserves the preceding shared-panel contract change and earlier
+item-box match. Retail checksum/byte comparison, generated-source validation,
+505 unittest cases without skips plus 818 layout assertions, frozen guarded
+EE/IRX checks and reconciled production reports pass. No source imports change.
+The production report credits only this 488-byte function: game totals become
+8,653 functions and 1,503,056 bytes. The final subsequent build has no work.

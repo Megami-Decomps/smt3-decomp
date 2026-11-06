@@ -1489,18 +1489,28 @@ s32 nbMakeDamagePacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, s3
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
 #endif
 
-#ifdef NON_MATCHING
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 
 s32 nbMakeKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                         s32 type, s32 hp, s32 mp, u32 badstat)
 {
-    s32 hidden = form->formindex >= 16;
+    s32 visible;
+    s32 hidden;
+
+    /* Native retains the incoming status word before visibility setup, then
+     * tests it after the packet calls. This target-specific empty operand
+     * keeps that entry copy out of the first branch's delay slot. */
+    FAKEMATCH_ASM_LIVE(badstat);
+    visible = form->formindex < 16;
+    hidden = !visible;
 
     if (!hidden) {
         switch (type) {
         case 1:
             nbAddHitEffKoukaPacket(startframe, uniqueid, form, 2);
+            break;
+        case 0:
+        case 2:
             break;
         case 3:
             nbAddUnitColKoukaPacket(startframe, uniqueid, form, 0x8086EB9B, 10);
@@ -1530,9 +1540,7 @@ s32 nbMakeKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeKaifukuPacket);
-#endif
+
 
 s32 nbMakeDeadPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, s32 deadchk)
 {
