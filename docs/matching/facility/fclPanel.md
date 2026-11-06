@@ -2,25 +2,27 @@
 
 ## fclDrawPanel (fclPanel, 0x54)
 
-8 of 21 words differ, at the exact 84-byte size. Draws the panel's background sprite,
-calls the panel's own `draw` hook with the panel and the id, and tail-calls the
-foreground sprite.
+15 of 21 words match at the native 84-byte size in the current complete owner.
+The six differing words are two scheduling groups: the first sprite ID's `ori`
+exchanges position with the saved `$17` store, and the final ID's `ori`
+follows three argument/restore instructions instead of immediately following
+its `lui`. The callback load and `jalr` now use the native `$2`.
 
-Four of the eight words are the same `ori` rotation recorded for `cmp_23A918`
-above: retail emits each sprite id's `ori` immediately after its `lui`, and
-ee-gcc's second scheduling pass moves it past the `sd`/`ld` of a saved register.
+The earlier ignored-`s32` return explanation is historical, not a current
+blocker. The canonical provider is now `void fclDrawPanelSprite(s32, s32)` in
+`code_0022C578.c`, and this owner's declaration agrees. There is no same-unit
+provider definition whose visibility could explain this residual. Preserve
+that actual provider contract; no type change is proposed.
 
-The other four are the function-pointer load and its `jalr`: retail uses `$2`,
-immediately after a `jal fclDrawPanelSprite` whose result is ignored, and this
-uses `$3` because the ignored `s32` result still reserves `$2`. The fix by the
-levers page is a `void` declaration of `fclDrawPanelSprite`, but it is defined
-in this unit as `s32` with `return cmpDrawSprite(...)` and matches that way, and
-three other callers ignore its result as well, so turning it `void` would have
-to be measured across all of them at once.
+In an earlier qualified source/compiler context, the scheduler reported that
+the first `ori` was not ready when the saved-register store issued, and
+raising its priority alone did not close that gap. A tail-only localized
+constraint in that older control left two differing words. These controls were
+not repeated in the current owner and do not establish the cause of its
+present residual. Neither control is exact; the ordinary guarded body remains.
 
-Also settled: the `draw` field at `+0x38` takes two parameters, the panel and
-the id, which is why `fclPanel_t` declares it that way; `panel->draw(panel)`
-does not compile to retail's `$5` setup.
+The `draw` callback at `+0x38` takes both the panel and ordering-table ID, as
+the native argument setup confirms.
 
 ## fclDrawPanelType0Grad (facility/fclPanel, 0x100)
 
@@ -64,6 +66,30 @@ swap two stores; a byte cast reloads the alpha and adds eight bytes. The word
 mask preserves the native size and the six-word scheduling residual.
 
 ## fclDrawPanelType0 (facility/fclPanel, 0x394)
+
+### Current measured blockers (2026-11-06)
+
+In a fresh current-owner measurement, 174 of 229 words match at 916 bytes
+for the unchanged ordinary body; the 172-word matching score below is
+historical. Binding only the real animated-height value to native `$22`, after
+the first background consumer, puts Y in `$fp`, but only 168 of 229
+words match at the same size. The earlier curve instead occupies `$22`
+rather than native `$23`, and blended color uses `$23` rather than native
+`$18`. The Y/height swap alone is therefore insufficient; the competing
+curve/color lifetimes and remaining opening arithmetic and color store
+scheduling still need an explanation. A whole-height declaration binding has
+the same residual. These are rejected diagnostic controls, not landed C.
+
+The ordinary and localized-height controls have complete plain/dump assembly
+and ELF parity after normalizing the single equal-length generated source
+path, in production, SKIP_ASM and retained-draft modes with stable runtime
+inputs. The localized control preserves all peers and owned data. Strict
+production/SKIP diagnostics remain the same three pre-existing implicit
+function declarations and associated prototype warnings; retained-draft strict
+compilation passes. No new allocator-hook mechanism or original source
+spelling is claimed.
+
+### Historical ordinary-source reconstruction
 
 172 of 229 words match at the native 916-byte size. The animation and drawing
 passes are reconstructed; the assembly fallback remains active and no exact

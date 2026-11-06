@@ -426,8 +426,8 @@ docs/levers/float-registers.md	31	$f12 $f20 mov.s	A float argument's **position 
 docs/levers/handle-registers.md	26	and sh	### SetAction_NEGORESULT:
 docs/levers/handle-registers.md	69	$16 $17	### Preserve the full texture index before reducing the parameter stfLoadUITexture matches all 140 bytes by preserving fullIndex = index and then reducing the…
 docs/levers/handle-registers.md	86	and move sh	### SetAction_READY:
-docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
-docs/levers/impossible.md	16		nbLoadMotionByIndex has two byte-identical arms that gcc cross-jumps.
+docs/levers/impossible.md	12		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
+docs/levers/impossible.md	15		nbLoadMotionByIndex in newbattle/nbSound.c loses its duplicated arithmetic tail between stock 25.sched2 and 27.jump2;
 docs/levers/impossible.md	19	$4	A call with no argument to a function the unit defines with a prototype, as Hatudo and nbE915_Test do to nbGetEventForm.
 docs/levers/impossible.md	32		nbMakaDispOn needs GetMakaProcessData to take an argument, as the HD reconstruction shows, but it is defined (void) in this unit.
 docs/levers/impossible.md	45	mult mult1	func_00213DF0 uses mult1, the EE's second multiply pipe, in a way no C expression reaches.

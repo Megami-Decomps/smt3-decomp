@@ -267,3 +267,62 @@ comparison because that executable is unavailable. Native VU assembly and the
 retail checksum pass. Linked production proofs identify both promoted targets
 as unique C-owned spans with exact retail bytes; combined game progress rises
 by two functions and 436 bytes with unchanged data totals.
+
+## moveBlock (pb/pbGame, 0x8C)
+
+### Scalar-vector table diagnostic (2026-11-06)
+
+A complete-owner diagnostic declares the existing displacement table as
+`extern sdfVector3_t D_00327370[]` and reads its actual x/y/z components directly.
+It emits the native 140-byte extent: 31 of 35 words match and four differ.
+However, the matching `moveChar` consumer regresses by two of its 49 words at its
+unchanged 196-byte size. Do not land this declaration or diagnostic body.
+
+The view is supported by the five native three-float displacements at
+`0x00327370`: (0,0,10), (10,0,0), (0,0,-10), (-10,0,0), (0,10,0).
+The four trailing zero bytes are not treated as another component or row.
+Existing `sdfVector3_t` has size 12 and offsets 0/4/8; no bound, padding,
+alignment, volatile access or compiler constraint is invented.
+
+The stock dumps establish this boundary in production, complete-owner
+`SKIP_ASM`, and retained-draft modes:
+
+- `00.rtl` expands three separate component addresses, with explicit base+4 and
+  base+8 expressions for y/z. `03.cse` reuses common table and scaled-index
+  values; the three address expressions survive through `13.life`.
+- `14.combine` moves 4/8 into memory displacements. The x address retains
+  offset+base order; y/z have base+offset order. The table high/low pair remains,
+  unlike the cached-row control's folded address.
+- All three sums remain in `19.lreg`. In `20.greg`, z becomes a copy from `$6`
+  to `$3`, while x remains `$2+$3 -> $5` and y remains `$3+$2 -> $6`.
+
+The four final residuals are at +0x40, +0x48, +0x4C and +0x64: a second sum
+remains, the object-z load is later, and the z pointer uses `$3` rather than
+native `$2`. This is not merely a different assignment of identical copies.
+These pass boundaries do not establish an internal allocator or scheduler cause.
+
+For `moveChar`, the original flat table has equally ordered sums after combine,
+one of which is a copy by `20.greg`. The vector view leaves oppositely ordered
+sums and both remain. Its only changed words are +0x48 (commuted addition) and
++0x4C (addition instead of a copy). Calls, memory widths and later code are
+unchanged. This is a cross-consumer regression, not matching progress.
+
+Snapshotting the real object components gives the same complete function/data
+contract as direct vector rows. Caching the vector-row pointer returns
+`moveBlock` to 132 bytes. Separately replacing only the object's three position
+floats with a position[3] member also remains 132 bytes and leaves even the
+initial target RTL identical to the scalar-position control. The useful observed
+distinction is the indexed displacement-table access, not that object-member
+array. Existing initialization and `pbSetPrimMatrix`'s pos[0..2] accesses support
+the position layout used by that rejected diagnostic.
+
+All 15 complete plain/dump assembly and ELF pairs passed with stable inputs,
+normalizing only one equal-length generated source path. Position-array preserves
+70/65/70 peers; vector rows preserve 69/64/69 peers, with only the stated
+`moveChar` regression. Owned data is unchanged. Normal and strict diagnostics
+match the sibling control, including existing implicit-declaration and pointer
+type warnings; this is not a strict-clean claim.
+
+Keep the canonical table declaration and fallback. Further investigation should
+explain the observed operand-order/copy boundary without regressing `moveChar`,
+rather than repeat generic pointer, snapshot or register sweeps.

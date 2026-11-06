@@ -7,15 +7,15 @@ without setting. The second has a register live on entry, so no per-function
 compile can produce either. They are one cross-jumping routine the IDB has
 split into two symbols; see [TU recovery](tu-recovery.md).
 
-Four more in `newbattle/nbMakePacket`, each blocked by something outside the
-function body:
+Four other recorded compiler or source-contract blockers:
 
 - `nbInitPlayer` needs three separate symbols at `test_skilllist`, `+0xF0`
   and `+0x100`. gcc 2.96 folds anything derived from one symbol into a base
   plus adds, so this is a data split, not a source change.
-- `nbLoadMotionByIndex` has two byte-identical arms that gcc cross-jumps. The
-  retail source must have differed in a way that still folds to the same
-  instructions.
+- `nbLoadMotionByIndex` in `newbattle/nbSound.c` loses its duplicated arithmetic
+  tail between stock `25.sched2` and `27.jump2`; neither the ordinary draft nor
+  the tested live-id constraint matches. See
+  [the qualified owner findings](../matching/newbattle/nbSound.md).
 - A call with no argument to a function the unit defines with a prototype,
   as `Hatudo` and `nbE915_Test` do to `nbGetEventForm`. **There is a way out
   when the definition precedes the bare call**: define the callee old-style,
