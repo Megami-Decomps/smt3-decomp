@@ -479,7 +479,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     sdfVector4_t center;
     sdfVector4_t *point;
     fldTriggerShape_t *shape;
-    fldResourcePoint_t *transform;
+    fldResourcePointUnaligned_t *transform;
     s32 index;
     s32 count;
     s32 i;
@@ -504,7 +504,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     shape = ((fldResPut_t *)resource->data)->data.shape;
     switch (shape->kind) {
     case 1:
-        transform = resource->transform;
+        transform = (fldResourcePointUnaligned_t *)resource->transform;
         width = shape->plane.width;
         height = shape->plane.height;
         positionX = transform->pos.x;
@@ -743,7 +743,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         }
         break;
     case 2:
-        transform = resource->transform;
+        transform = (fldResourcePointUnaligned_t *)resource->transform;
         width = shape->box.size[0];
         height = shape->box.size[1];
         depth = shape->box.size[2];
