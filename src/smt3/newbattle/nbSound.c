@@ -357,10 +357,6 @@ s32 nbGetMotionTable(s32 unitid, s32 index)
     return *(s8 *)(p + index * 28 + 0x31);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern u16 D_003E7028[];
 extern s32 evtBitCheck(s32 no);
 
@@ -375,13 +371,15 @@ s32 nbLoadMotionByIndex(s32 unitid, s32 index)
         return 0;
     }
     if (evtBitCheck(0xC0F)) {
-        return (s32)((u32)(id * 16 + motion + 0x1000) << 16);
+        u32 result = (u32)(id * 16 + motion + 0x1000);
+        /* Keep the live pre-shift sum distinct at the late tail-merge boundary.
+         * The operand emits no instructions; it is a target-compiler aid, not
+         * evidence of the original source spelling. */
+        FAKEMATCH_ASM_LIVE(result);
+        return (s32)(result << 16);
     }
-    return (s32)((u32)(motion + id * 16 + 0x1000) << 16);
+    return (s32)((u32)(id * 16 + motion + 0x1000) << 16);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbLoadMotionByIndex);
-#endif
 
 s32 nbGetUnitFromAction(nbFormation_t *form, s32 index)
 {

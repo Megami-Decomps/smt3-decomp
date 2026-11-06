@@ -287,7 +287,7 @@ nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/m
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
-nbLoadMotionByIndex	newbattle/nbSound	0x78	16 of 28 words match	docs/matching/newbattle/nbSound.md	3
+nbLoadMotionByIndex	newbattle/nbSound	0x78		docs/matching/newbattle/nbSound.md	3
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/matching/newbattle/nbStageProcess.md	3
 CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/matching/newbattle/nbStageProcess.md	18
 CheckAction_STKSEL	newbattle/nbActionProcess	0xE8	58 of 58 words match	docs/matching/newbattle/nbStageProcess.md	37

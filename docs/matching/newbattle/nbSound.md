@@ -2,39 +2,48 @@
 
 ## nbLoadMotionByIndex (newbattle/nbSound, 0x78)
 
-The target at `0x0028D100` has a native extent of 120 bytes / 30 words, ending
-at `0x0028D178`. Promoting the existing ordinary draft in the complete
-`src/smt3/newbattle/nbSound.c` owner emits 112 bytes / 28 words: 16 of 28 words match,
-12 differ, and eight native bytes are uncovered.
+All 30 words match at 120 bytes. The complete owner checks at 25 match,
+0 differ, including its owned data and unchanged direct callers.
 
-Both return-arm arithmetic tails survive through stock `25.sched2`; by
-`27.jump2`, their common addition of 4096 and left shift have merged. This is an
-observed pass boundary, not an explanation of an internal comparator or evidence
-of historical source spelling.
+The true event arm computes the actual unsigned pre-shift result, retains it
+through one `FAKEMATCH_ASM_LIVE` operand, then shifts and returns it. Both arms
+spell the native addition order. This localized empty operand emits no
+instructions and has an immediate real consumer. It introduces no call,
+memory effect, extra arithmetic, artificial lifetime or fixed register.
+It is a target-compiler reconstruction aid, not recovered source spelling.
 
-A diagnostic empty read/write operand (`FAKEMATCH_ASM_LIVE`) on the initialized
-mapped id immediately before its true-arm arithmetic emits 120 bytes / 30 words,
-but 15 words differ. In `20.greg`, the reported allocation order changes from
-pseudo registers 87,86 to 86,87: mapped id moves from `$17` to `$16`, and motion
-moves oppositely. The common tail still merges at `27.jump2`. Recovering native
-size is therefore not an exact reconstruction.
+A paired ablation removes only that operand. Both complete arithmetic arms
+remain in the ablation's `25.sched2` dump, but `27.jump2` removes the event
+branch and the duplicate arithmetic; the function becomes 100 bytes. With the
+operand, `27.jump2` retains the event branch and both pre-shift calculations.
+It still shares the final shift. `29.dbr` places a copy of that shift in the
+true exit's branch delay slot, yielding the native two tails. These are
+qualified stock-pass observations, not a claim about an unobserved internal
+comparator. The earlier commuted-arm ordinary draft emitted 112 bytes; its
+remaining eight-byte gap was not the same ablation as this ordered-arm form.
 
-For each form, the target fragment is identical across production, complete-owner
-`SKIP_ASM`, and retained-draft contexts at every available stock dumped pass.
-There is no demonstrated stripped-source context discrepancy. Complete emitted
-assembly and ELF parity between plain and dump builds was verified in all three
-modes with stable inputs, normalizing only the single equal-length generated
-source path. The diagnostic preserves 25/24/25 peers respectively and all owned
-data. Both forms pass strict implicit-declaration, uninitialized and warning
-checks.
+The mapped id is loaded as `u16`. `nbGetMotionTable` returns a sign-extended
+byte; negative motion returns zero before the event query. Otherwise the
+pre-shift sum ranges from 4096 through 1052783, safely within `s32`.
+The final unsigned shift preserves native truncation without signed-shift
+undefined behavior; conversion back to `s32` follows the configured target's
+representation. Independent exhaustive checks cover all 8,388,608
+nonnegative id/motion pairs in both event arms, including zero and negative
+result representations. Calls, argument contracts, accesses and early-return
+ordering are unchanged.
 
-The mapped id comes from the existing unsigned-halfword table. Motion is the
-sign-extended byte returned by `nbGetMotionTable`; negative motion returns zero.
-For nonnegative motion, both paths compute the same unsigned-shift result.
-The diagnostic changes no call target, memory width, provider type or result
-contract, and introduces no dummy consumer. It is not proposed for landing.
+Fresh candidate and ablation builds qualify all three complete-owner modes:
+production, `SKIP_ASM`, and retained drafts. Direct plain/dump assembly and
+whole ELF objects are identical; wrapper outputs agree after replacing only
+the asserted equal-length source filename metadata. The explicit frozen
+closure covers 21,362 named paths and the compiler/runtime dependencies.
+This is a conservative closure, not a syscall-complete read-set claim.
+Independent semantic and output-evidence review, complete affected-owner
+checks, generated-source checks, the full retail build and tooling gates are
+required before publication.
 
-Keep the ordinary draft and assembly fallback. A useful next investigation must
-explain how the two real tails remain distinct through `27.jump2` without changing
-behavior. Arithmetic spelling probes, the tested live-id operand and an
-exact-signature opaque provider declaration did not solve this case.
+Earlier mapped-id, motion and post-shift-result operands did not match. In
+particular, an operand after the final shift kept the shift out of the needed
+exit delay slot. The new operand is before the shift, on its actual input.
+Arithmetic-spelling sweeps and an exact-signature opaque provider declaration
+were closed negative controls and are not needed by the accepted form.
