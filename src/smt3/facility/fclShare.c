@@ -207,10 +207,10 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = x0 | ((u64)y0 << 32);
-    prim[5] = pSprite->Z;
+    prim[5] = (u32)pSprite->Z;
     prim[6] = uv[2] | ((u64)uv[3] << 32);
     prim[8] = x1 | ((u64)y1 << 32);
-    prim[9] = pSprite->Z;
+    prim[9] = (u32)pSprite->Z;
     switch (AlphaFlag) {
     case 1:
         fclDrawPanelSprite2(0x48, OtNo);

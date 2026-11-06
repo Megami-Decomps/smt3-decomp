@@ -138,7 +138,7 @@ rcvFullHeal	facility/fclRecoverCalc	160 bytes	40 of 40 words match	docs/matching
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
-fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/matching/facility/fclShare.md	67
+fclDrawSpriteCore	fclShare	728 bytes		docs/matching/facility/fclShare.md	67
 shop_Process	facility/fclShopCalc	0x100	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	41
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
@@ -307,6 +307,7 @@ StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/ne
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
 OnOffTargetCursor	newbattle/nbTarSelProcess	132 bytes	33 of 33 words match	docs/matching/newbattle/nbTarSelProcess.md	100
+CheckFormCursor	newbattle/nbTarSelProcess	388 bytes		docs/matching/newbattle/nbTarSelProcess.md	134
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40

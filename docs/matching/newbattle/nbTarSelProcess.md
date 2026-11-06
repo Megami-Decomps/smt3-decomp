@@ -130,3 +130,48 @@ complete assembly and ELF parity. All 21/18/21 other functions and owned data
 are preserved in those contexts after resolving code-relative relocations.
 Full retail, generated-source, regression, guarded-source and report gates
 accompany this source-only landing; private tooling and traces are excluded.
+
+## CheckFormCursor (newbattle/nbTarSelProcess, 388 bytes)
+
+The native extent is `[0x25DA78, 0x25DBFC)`: 97 words, excluding the
+following four-byte alignment zero. The unchanged target-active draft emits
+364 bytes: 26 of its 91 prefix words agree and 24 native bytes are uncovered.
+The canonical C remains guarded and the retail assembly fallback is unchanged.
+
+Explicit zero/one switches and an initialized conditional side value recover
+the native 388-byte extent, with 66/97 positional words agreeing. A separate masked local
+for the final rule-eight test gives 60/97 at the same size. Replacing only
+the initial side normalization with the matched sibling's ordinary masked
+`u32` local and nonzero comparison instead emits 392 bytes: 30/97 native-prefix
+words agree, 67 differ, and four bytes are excess. None is a matching result.
+These CheckFormCursor controls add no constraint, volatile RAM, false type, invented bound,
+helper or compiler-option change.
+
+Qualified ordinary compiler dumps distinguish several problems. The first
+dispatch control's initial jump pass creates a constant-one pseudo for the
+conditional normalization; first CSE reuses it for both switch comparisons.
+The masked-side control removes that seed and sharing lineage, but does not
+recover the native dispatcher or final-arm continuation. Separately, the
+last signed-range arm is converted to a result in the initial jump pass.
+The original rule-eight expression expands to xor/and; its separate masked
+local initially gives the desired and/unsigned-compare, but GCSE reuses an
+earlier bit-one mask and later conditional execution changes its guard.
+These are retained-stage observations, not an executed internal decision
+trace, proof of one cause for every difference, or original-source evidence.
+Do not repeat these controls as allocation-only experiments.
+
+Independent native and source review preserves the actual normalized side
+domain, signed formation comparison, unsigned wraparound range comparison,
+rule order and conditional formation/party reads. The sole call remains
+`GetTarSelProcessData`, at target offset `0x2C`; no callback follows it.
+Existing valid-storage and index assumptions remain. The old emulator-vector
+comment applies to the old draft, not these new controls.
+
+Across the unchanged source and four target-active sources, fifteen complete
+ordinary/dump assembly and ELF comparisons pass, as do fifteen comparisons
+against the actual-build-order direct ordinary route. Only the single generated
+source filename is normalized. All 21 production, 19 assembly-skipping and
+21 retained-draft peers preserve their complete code and ordered relocation
+contracts; owned data remains unchanged. The original direct production object
+also equals the current build object. These checks qualify the
+observations and peer preservation, not a full-link acceptance of inexact C.

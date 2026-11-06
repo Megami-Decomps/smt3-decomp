@@ -64,43 +64,59 @@ not resolve them and is not retained. This is a guarded-draft correctness fix,
 not a promotion or matching credit. The broader existing geometry arithmetic
 and input contracts are not newly qualified by this local lane proof.
 
-## fclDrawSpriteCore (fclShare, 0x2D8)
+## fclDrawSpriteCore (fclShare, 728 bytes)
 
-69 of 180 words match positionally, 111 of 180 words differ, 720 against retail's
-728 bytes. Builds the five-vertex 2D sprite packet: sets the texture filter, allocates
-the prim buffer, writes the colour quadword, the two UV pairs and the two screen
-corners, picks a `fclDrawPanelSprite2` code from `mode`, then links a draw tag into
-`sdfGrOtTable[ot]`.
+The exact native extent is `[0x214730, 0x214A08)`, 728 bytes. A fresh
+target-active compile emits 720 bytes: 76 of 180 positional words agree,
+104 differ, and eight native bytes remain uncovered. The two depth casts
+described below leave that positional score and size unchanged. This is a
+guarded-draft correctness repair, not an exact match or new matching credit.
 
-Everything about the body is settled. The 12-word prologue, the whole filter
-`if`/`else` including the three dead `addiu $5, $0, 1` that only appear once
-`sdf2DGetPrimPacketSize` is given a second argument, both colour arms (the
-`color != NULL` arm's fourth byte really does come out as `lbu` from a single
-`lw` plus `c & 0xFF`), every `dsll32`/`dsrl32`/`or` pair of the six quadword
-stores, the three-way `switch` with its two call sites, and the whole tail from
-`sdfGrAllocPacketBuff(0x20)` to the second `fclDrawPanelSprite2(0x44, ot)` are
-word-for-word.
+### Zero-extended depth packet field
 
-The one unresolved difference is a register-allocation swap in the prologue:
-retail puts `x` in `$19` and `flags` in `$20`, this puts `flags` in `$19` and
-`x` in `$20`, and every later allocation shifts with it. The first differing
-word is the prologue copy at +0x20, and the 111 differing words are that one
-swap plus the load and store order it drags behind it.
+`fclSprite_t.Z` remains signed, as do its setters. Native `lwu` at `0x2148F4`
+zero-extends the 32-bit field at sprite offset `0x18`; that value feeds the
+64-bit stores at primitive offsets `0x48` and `0x28`. The old C assigned the
+signed field directly to `u64`, producing all-one upper bits for negative
+values. Both assignments now cast the actual field to `u32` before the ordinary
+conversion to `u64`. Thus depth `-1` produces `0x00000000FFFFFFFF`, not
+`0xFFFFFFFFFFFFFFFF`, and every 32-bit depth pattern has the native zero upper
+half. No nonnegative-depth assumption, type/layout change or extra access is
+introduced.
 
-Two facts that are load-bearing and should not be re-derived: the four
-`u0/v0/u1/v1` values live in an addressable `u32 uv[4]`, not four scalars,
-which is what produces retail's four `sw` into `sp+0x0..0xC` and the four `lwu`
-reloads; and `sdf2DGetPrimPacketSize` takes two arguments, `(5, 1)`, which is
-worth 8 bytes and three instructions.
+Independent complete-owner comparisons cover normal production, assembly
+skipping, all retained drafts with and without assembly, and target-only
+activation with and without assembly. Each context compiling the target C
+changes exactly its depth load at target offset `0x1C0` from `lw` to `lwu`.
+Both stores and every other text byte, allocated data, function/data symbol and ordered
+relocation remain identical. Normal production retains the assembly fallback;
+assembly-skipping output still omits the guarded target C. Both are unchanged. The native
+listing and full-depth packing proof support this local repair; they do not
+establish whole-function equivalence or valid arbitrary geometry, storage or
+allocator capacity.
 
-Ruled out: all six orderings of the UV, screen-corner and colour blocks; three
-declaration orders for the locals (array first, scalars first, pointers last);
-`u32` against `s32` for `x0`/`y0`/`x1`/`y1` with the cast moved to the store;
-the corner swap written as a three-statement temp swap against an `if`/`else`
-that assigns both arms (the `if`/`else` is 139 words, far worse); `x + 0x6FF8`
-spelled twice so `x` has two references, which fixes the size to 182 words and
-reaches 97 matching but computes the constant twice and so is not the original;
-a `u8 f = flags` local both before and after the UV block; `flags & 1` with and
-without `!= 0`; and the `sdfGrOtTable[ot]` call written through a hoisted
-`sdfGrOt_t *` local, which the three `cmp` packet builders in this unit need but
-which changes nothing here.
+### Remaining allocation and source-shape questions
+
+Retail places the actual incoming X in `$19` and FlipFlag in `$20`; the
+current target C swaps those homes. The real X value survives five leaf
+provider calls before its first coordinate calculation, and each native
+provider preserves those saved registers. No X binding is included in this
+repair. The swap is a demonstrated allocation difference, not proof that it
+causes every residual: UV scheduling, color-byte folding and the eight-byte
+size deficit remain distinct observations. The earlier claim that the entire
+body was settled except for this swap was too strong.
+
+Keep the genuine addressable `u32 uv[4]`, whose stack stores and unsigned
+reloads are visible in native code, and the actual two-argument
+`sdf2DGetPrimPacketSize(5, 1)` contract. The canonical allocator, packet-header,
+texture and draw-tag provider signatures were checked; no declaration changes
+are part of this repair.
+
+Earlier closed controls include all six UV/screen/color block orders; three
+local-declaration orders; signed versus unsigned corner locals with casts at
+the stores; conditional-arm versus temporary swaps; repeated X-plus-offset
+calculation; a separate byte flag local before or after UV setup; explicit
+nonzero versus direct flag tests; and hoisting the order-table pointer. Their
+old scores describe their historical compiler contexts, not fresh acceptance.
+Do not repeat that grid or infer original source spelling from a positional
+score. Any later live-X constraint must be isolated and independently qualified.
