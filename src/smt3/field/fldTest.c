@@ -233,7 +233,8 @@ extern s32 fldProcCampChk(void);
 
 extern s32 fldEncountTestFlag(u32 flag);
 
-extern void dds3EffectDelete(void *pData);
+typedef struct effNode_t effNode_t;
+extern void dds3EffectDelete(effNode_t *pData);
 
 extern void dds3EffectDraw(void *pData);
 
@@ -247,7 +248,12 @@ extern void dds3EffectSetRotateMatrix(void *pData, sdfMatrix4_t *pMatrix);
 
 extern void *dds3EffectPartCreate(u16 type, void *pData);
 
-extern void dds3EffectPartDelete(void *hEffPart);
+typedef struct
+{
+    u16 type;
+    void *pHandle;
+} effPartHandle_t;
+extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
 extern void dds3EffectPartDraw(void *hEffPart);
 

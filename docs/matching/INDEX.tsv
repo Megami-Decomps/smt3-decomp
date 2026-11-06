@@ -1,9 +1,9 @@
 function	unit	size	distance	page	line
 fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/matching/code_00116AD0.md	3
-fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	46
-fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	63
-fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	90
-fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/matching/code_00116AD0.md	115
+fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	96
+fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	113
+fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	140
+fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/matching/code_00116AD0.md	165
 slCopyNonZero	historical code_00144798	0x40	16 of 16 words now match	docs/matching/code_00144798.md	3
 fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/matching/code_00144798.md	30
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	59
