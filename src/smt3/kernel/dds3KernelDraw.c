@@ -766,7 +766,7 @@ void dds3DrawFade(void)
     frameId = dds3GetFrameID();
     alpha = 0x80 - fadergba[3];
     if (alpha < 0x80) {
-        color = 0x3F80000000000000 | ((u64)fadergba[1] << 8) | fadergba[0] | ((u64)fadergba[2] << 16) | (u64)(alpha << 24);
+        color = 0x3F80000000000000 | ((u64)fadergba[1] << 8) | fadergba[0] | ((u64)fadergba[2] << 16) | (u64)(s32)((u32)alpha << 24);
         dds3FadePacket[frameId].dma.qwc = 0xA;
         dds3FadePacket[frameId].dma.pad = 0;
         dds3FadePacket[frameId].dma.id = 0x70;
