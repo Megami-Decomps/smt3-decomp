@@ -238,50 +238,9 @@ argument setup above the test.
 
 ## Flow7_20 (newbattle/NbNegoFlowQuestion, 0x130)
 
-48 of 76 words match in the November 3 complete-owner baseline. It emits
-316 bytes against 304 native bytes, with 12 excess bytes. This supersedes
-the historical 49/76 score. The historical owner label was nbMakePacket;
-the actual owner is now NbNegoFlowQuestion. The function remains guarded
-and receives no match credit.
-
-The table is a truthful `[][7]` array of `{u16 type; u8 lo; u8 hi;}`,
-indexed `[n->ekucyo][n->qindex]`. Retail loads `type`, `hi`, then `lo`;
-`hi` and `lo` survive calls in callee-saved registers. Type 0 compares the
-signed `datGetParam` results; type 1 compares unsigned `level` fields;
-default selects rate 50. The final random-result comparison is signed.
-
-The current baseline already shares the low and high selection tails
-between the two switch cases. The unresolved difference is the selection
-block topology: retail initializes the selected rate in the `nowselect`
-branch delay slot and retains separate low/high complement blocks. The
-baseline's conditional assignment produces extra branches instead. The
-old diagnosis of missing shared selection tails is not supported by this
-baseline.
-
-Bounded ordinary-C controls did not match: explicit shared low/high gotos
-emit 316 bytes (47/76), a real comparison-result selector emits 308 bytes
-(39/76), and initializing `rate` from the selected byte before conditionally
-complementing it emits 296 bytes (47/74 compared words, 8 bytes uncovered).
-The latter merges the two complement blocks into one; using the original
-`lo`/`hi` in the subtraction produces identical output. Applying this rate
-initialization only to low selections emits 308 bytes (48/76), and only
-to high selections emits 312 bytes (48/76). These are rejected controls,
-not source promotions. Plain/diagnostic compilation parity was checked;
-all ten peer text functions remain exact. Initial goto/selector checks
-also reported three jump-table padding diagnostics; unchanged-source
-serial repeats did not reproduce them. Final serial complete-owner checks
-of all seven controls use stable
-before/after input hashes and report only the target text mismatch, with no data
-diagnostics. The initial padding errors remain preserved with cause unknown.
-
-Preserve callback-sensitive reloads in further work: table values after
-candidate registration, enemy work after the first parameter call,
-`nowselect` after parameter calls, and candidate IDs after the random call.
-The byte-derived rate is 0..255 or -155..100 after complement, so the
-ordinary signed subtraction is defined without extra range assumptions.
-Further work needs new evidence for retaining two complement blocks while
-placing real rate initialization in the native branch slots, not another
-selector/goto or syntax-only sweep.
+76 of 76 words match at the native 304-byte size. See the current
+[negotiation-question note](NbNegoFlowQuestion.md) for the qualified live
+complement constraints, semantic review and closed ordinary controls.
 
 ## Flow10_1 (newbattle/nbMakePacket, 0x100)
 

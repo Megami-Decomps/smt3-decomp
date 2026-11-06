@@ -111,6 +111,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraProcess | [newbattle/nbCameraProcess.md](newbattle/nbCameraProcess.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
+| 1 | newbattle/NbNegoFlowQuestion | [newbattle/NbNegoFlowQuestion.md](newbattle/NbNegoFlowQuestion.md) |
 | 1 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 1 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |

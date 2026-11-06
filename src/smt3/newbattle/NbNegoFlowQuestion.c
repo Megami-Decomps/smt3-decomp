@@ -382,8 +382,6 @@ s32 Flow7_15(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 28 of 76 words differ (first at +0x78). */
-#ifdef NON_MATCHING
 s32 Flow7_20(nbNegoProcessData_t *n)
 {
     s32 rate;
@@ -396,39 +394,33 @@ s32 Flow7_20(nbNegoProcessData_t *n)
     lo = D_003E2540[n->ekucyo][n->qindex].lo;
     switch (D_003E2540[n->ekucyo][n->qindex].type) {
     case 0:
-        if (!(datGetParam(n->pwork, 1) < datGetParam(n->ework, 1))) {
-            if (n->nowselect != 0) {
-                rate = 0x64 - lo;
-            } else {
-                rate = lo;
-            }
-        } else {
-            if (n->nowselect != 0) {
-                rate = 0x64 - hi;
-            } else {
-                rate = hi;
-            }
-        }
-        break;
+        if (!(datGetParam(n->pwork, 1) < datGetParam(n->ework, 1))) goto low;
+        goto high;
     case 1:
-        if (!(n->pwork->level < n->ework->level)) {
-            if (n->nowselect != 0) {
-                rate = 0x64 - lo;
-            } else {
-                rate = lo;
-            }
-        } else {
-            if (n->nowselect != 0) {
-                rate = 0x64 - hi;
-            } else {
-                rate = hi;
-            }
-        }
-        break;
+        if (n->pwork->level < n->ework->level) goto high;
+        goto low;
     default:
-        rate = 0x32;
-        break;
+        rate = 50;
+        goto chosen;
     }
+/* Keep each complement's live byte operand distinct from the selected rate.
+     * This target-compiler constraint prevents coalescing the two complement
+     * paths and permits the rate copy in each nowselect branch delay slot.
+     * It is a reconstruction aid, not evidence of original source spelling. */
+low:
+    rate = lo;
+    if (n->nowselect != 0) {
+        FAKEMATCH_ASM_LIVE(lo);
+        rate = 100 - lo;
+    }
+    goto chosen;
+high:
+    rate = hi;
+    if (n->nowselect != 0) {
+        FAKEMATCH_ASM_LIVE(hi);
+        rate = 100 - hi;
+    }
+chosen:
     if ((s32)dds3GetRandIntA(0, 0x64) < rate) {
         n->nextnegoid = n->nextkouho[0];
     } else {
@@ -436,9 +428,6 @@ s32 Flow7_20(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowQuestion", Flow7_20);
-#endif
 
 extern s8 D_003E28B2[];
 extern s8 D_003E28BE[];
