@@ -1227,7 +1227,9 @@ SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
 void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     effEveBillBatch_t primary, secondary;
     f32 matrix[4][4] QWORD_ALIGNED;
-    f32 position[4] QWORD_ALIGNED, origin[4] QWORD_ALIGNED, lateral[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t origin;
+    sdfVector4_t lateral;
     sdfDrawTag_t *primaryList, *secondaryList;
     sdfGrOt_t *surface;
     sdfTexHandle_t *primaryTexture, *secondaryTexture;
@@ -1274,7 +1276,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     SDF_VU0_LOADVECTOR_B(aViewDown);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(lateral);
+    SDF_VU0_STOREVECTOR(&lateral);
     particle = work->pPart;
     particleCount = work->head.number;
     acceleration = SDF_FRAME_DECAY(work->head.accelerationPercent / 100.0f + 1.0f);
@@ -1287,7 +1289,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     color = work->head.color;
     swayPhaseStep = SDF_FRAME_STEP(work->head.swayPhaseStep);
     swayAmplitudeStep = SDF_FRAME_STEP(work->head.swayAmplitudeStep);
-    SDF_VU0_COPYVECTOR(origin, work->head.position);
+    SDF_VU0_COPYVECTOR(&origin, work->head.position);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->frame;
         if (age == 0) {
@@ -1302,24 +1304,24 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             s16 u, v;
             if (particle->wait >= 0) {
                 f32 lateralSpeed = SDF_FRAME_STEP(particle->shift_s);
-                particle->pos[0] += lateral[0] * lateralSpeed;
-                particle->pos[1] += lateral[1] * lateralSpeed;
-                particle->pos[2] += lateral[2] * lateralSpeed;
+                particle->pos[0] += lateral.x * lateralSpeed;
+                particle->pos[1] += lateral.y * lateralSpeed;
+                particle->pos[2] += lateral.z * lateralSpeed;
                 swaySine = sdfSin(particle->angle);
                 sway = particle->amplitude * swaySine;
                 particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
-                position[0] = particle->pos[0] + particle->motion[0] * sway;
-                position[1] = particle->pos[1] + particle->motion[1];
-                position[2] = particle->pos[2] + particle->motion[2] * sway;
+                position.x = particle->pos[0] + particle->motion[0] * sway;
+                position.y = particle->pos[1] + particle->motion[1];
+                position.z = particle->pos[2] + particle->motion[2] * sway;
                 particle->up_s *= acceleration;
                 particle->shift_s *= acceleration;
                 particle->amplitude += swayAmplitudeStep;
                 particle->angle += swayPhaseStep;
             } else {
                 particle->wait++;
-                position[0] = particle->pos[0];
-                position[1] = particle->pos[1];
-                position[2] = particle->pos[2];
+                position.x = particle->pos[0];
+                position.y = particle->pos[1];
+                position.z = particle->pos[2];
             }
             if (age < fadeIn) {
                 alpha = (f32)age / (f32)fadeIn;
@@ -1349,15 +1351,15 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             phaseCosine = sdfCos(particle->s_h_r);
             scaleX = scaleY + modulationX;
             scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
-            SDF_VU0_LOADVECTOR(position);
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR(&position);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(position);
+            SDF_VU0_STOREVECTOR(&position);
             {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = primary.count;
-            SDF_VU0_COPYVECTOR(&primary.centre[slot], position);
+            SDF_VU0_COPYVECTOR(&primary.centre[slot], &position);
             u = (s16)((u16)primaryTexture->width << 4);
             v = (s16)((u16)primaryTexture->height << 4);
             primary.color[slot] = primaryColor;
@@ -1395,7 +1397,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
                 f32 cosine, sine, cornerX, cornerY;
                 f32 center = 0.0f;
             slot = secondary.count;
-            SDF_VU0_COPYVECTOR(&secondary.centre[slot], position);
+            SDF_VU0_COPYVECTOR(&secondary.centre[slot], &position);
             u = (s16)((u16)secondaryTexture->width << 4);
             v = (s16)((u16)secondaryTexture->height << 4);
             secondary.color[slot] = secondaryColor;

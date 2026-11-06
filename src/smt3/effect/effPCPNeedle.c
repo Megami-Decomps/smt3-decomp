@@ -214,7 +214,7 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCopy(effPCPNeedleSpiralParam_t *work) 
 void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     sdfVector4_t position;
     sdfVector4_t axis;
-    f32 vertices[2][4] QWORD_ALIGNED;
+    sdfVector4_t vertices[2];
     sdfVector4_t resourcePosition;
     sdfVector4_t viewDirection;
     sdfVector4_t width;
@@ -356,10 +356,10 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                     SDF_VU0_SWAPVECTOR_A_C();
                     SDF_VU0_COPYVECTOR_A_TO_B();
                     SDF_VU0_ADDVECTOR_A_C();
-                    SDF_VU0_STOREVECTOR_NOMEM(vertices[0]);
+                    SDF_VU0_STOREVECTOR_NOMEM(&vertices[0]);
                     SDF_VU0_COPYVECTOR_C_TO_A();
                     SDF_VU0_SUBVECTOR_B_A();
-                    SDF_VU0_STOREVECTOR_B_NOMEM(vertices[1]);
+                    SDF_VU0_STOREVECTOR_B_NOMEM(&vertices[1]);
                     dds3TrackPolySet(hData->hTrackPoly, i, (const u128 *)vertices);
                     dds3TrackPolyVCRefresh_ParType1(hData->hTrackPoly, i);
                     dds3TrackPolyColorSet(EE_ADDR(hData->hTrackPoly), i, (color & 0xFF000000) | 0x808080);

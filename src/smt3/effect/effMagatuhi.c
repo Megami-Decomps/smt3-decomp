@@ -815,7 +815,7 @@ void effMagaCylinderFreeParts(dds3MagatuhiBill_tag *work) {
 }
 
 void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
-    f32 positions[15][4] QWORD_ALIGNED;
+    sdfVector4_t positions[15];
     u32 colors[15];
     f32 offsets[15][8];
     f32 matrix[16];
@@ -883,7 +883,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
                         index--;
                     }
                     SDF_VU0_LOADVECTOR(&point);
-                    SDF_VU0_STOREVECTOR(positions[pendingCount]);
+                    SDF_VU0_STOREVECTOR(&positions[pendingCount]);
                     SDF_VU0_LOADVECTOR_B(historyPositions[index]);
                     SDF_VU0_ADDVECTOR();
                     SDF_VU0_STOREVECTOR(&point);

@@ -370,65 +370,65 @@ void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
 }
 
 /* vu0 routine: Catmull-Rom point between p[1] and p[2], left in vf10. */
-void Eff_HermitianSpline(f32 (*p)[4], f32 t)
+void Eff_HermitianSpline(sdfVector4_t *p, f32 t)
 {
-    f32 tan[2][4] QWORD_ALIGNED;
+    sdfVector4_t tan[2];
     sdfVector4_t half;
-    f32 h[4][4] QWORD_ALIGNED;
+    sdfVector4_t h[4];
     f32 t2 = t * t;
     f32 t3 = t2 * t;
 
     half.x = 0.5f;
     half.y = 0.5f;
     half.z = 0.5f;
-    SDF_VU0_LOADVECTOR(p[1]);
-    SDF_VU0_LOADVECTOR_B(p[0]);
+    SDF_VU0_LOADVECTOR(&p[1]);
+    SDF_VU0_LOADVECTOR_B(&p[0]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR(p[2]);
-    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_LOADVECTOR(&p[2]);
+    SDF_VU0_LOADVECTOR_B(&p[1]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
     SDF_VU0_LOADVECTOR_B(&half);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_STOREVECTOR(tan[0]);
-    SDF_VU0_LOADVECTOR(p[2]);
-    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_STOREVECTOR(&tan[0]);
+    SDF_VU0_LOADVECTOR(&p[2]);
+    SDF_VU0_LOADVECTOR_B(&p[1]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR(p[3]);
-    SDF_VU0_LOADVECTOR_B(p[2]);
+    SDF_VU0_LOADVECTOR(&p[3]);
+    SDF_VU0_LOADVECTOR_B(&p[2]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
     SDF_VU0_LOADVECTOR_B(&half);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_STOREVECTOR(tan[1]);
-    h[0][0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
-    h[0][1] = 2.0f * t3 - 3.0f * t2 + 1.0f;
-    h[0][2] = 2.0f * t3 - 3.0f * t2 + 1.0f;
-    h[1][0] = t3 - 2.0f * t2 + t;
-    h[1][1] = t3 - 2.0f * t2 + t;
-    h[1][2] = t3 - 2.0f * t2 + t;
-    h[2][0] = t3 - t2;
-    h[2][1] = t3 - t2;
-    h[2][2] = t3 - t2;
-    h[3][0] = -2.0f * t3 + 3.0f * t2;
-    h[3][1] = -2.0f * t3 + 3.0f * t2;
-    h[3][2] = -2.0f * t3 + 3.0f * t2;
-    SDF_VU0_LOADVECTOR(h[0]);
-    SDF_VU0_LOADVECTOR_B(p[1]);
+    SDF_VU0_STOREVECTOR(&tan[1]);
+    h[0].x = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    h[0].y = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    h[0].z = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    h[1].x = t3 - 2.0f * t2 + t;
+    h[1].y = t3 - 2.0f * t2 + t;
+    h[1].z = t3 - 2.0f * t2 + t;
+    h[2].x = t3 - t2;
+    h[2].y = t3 - t2;
+    h[2].z = t3 - t2;
+    h[3].x = -2.0f * t3 + 3.0f * t2;
+    h[3].y = -2.0f * t3 + 3.0f * t2;
+    h[3].z = -2.0f * t3 + 3.0f * t2;
+    SDF_VU0_LOADVECTOR(&h[0]);
+    SDF_VU0_LOADVECTOR_B(&p[1]);
     SDF_VU0_MULVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR(h[1]);
-    SDF_VU0_LOADVECTOR_B(tan[0]);
+    SDF_VU0_LOADVECTOR(&h[1]);
+    SDF_VU0_LOADVECTOR_B(&tan[0]);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_C_A();
-    SDF_VU0_LOADVECTOR(h[2]);
-    SDF_VU0_LOADVECTOR_B(tan[1]);
+    SDF_VU0_LOADVECTOR(&h[2]);
+    SDF_VU0_LOADVECTOR_B(&tan[1]);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_C_A();
-    SDF_VU0_LOADVECTOR(h[3]);
-    SDF_VU0_LOADVECTOR_B(p[2]);
+    SDF_VU0_LOADVECTOR(&h[3]);
+    SDF_VU0_LOADVECTOR_B(&p[2]);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
 }
@@ -536,8 +536,8 @@ void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const
 /* Resample the newest history span: cubic interpolation for established
  * tracks, linear extension while the history is still short. */
 void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex) {
-    f32 firstHistory[4][4] QWORD_ALIGNED;
-    f32 secondHistory[4][4] QWORD_ALIGNED;
+    sdfVector4_t firstHistory[4];
+    sdfVector4_t secondHistory[4];
     sdfVector4_t firstBasePoint;
     sdfVector4_t secondBasePoint;
     sdfVector4_t firstPointDelta;
@@ -560,11 +560,11 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
         u128 *firstSampleOutputBase;
         u128 *firstSampleOutput;
 
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 3);
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 2);
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstHistory[2], (u128 *)secondHistory[2], 1);
-        SDF_VU0_COPYVECTOR(firstHistory[3], pVertex);
-        SDF_VU0_COPYVECTOR(secondHistory[3], pVertex + 1);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstHistory[0], (u128 *)&secondHistory[0], 3);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstHistory[1], (u128 *)&secondHistory[1], 2);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstHistory[2], (u128 *)&secondHistory[2], 1);
+        SDF_VU0_COPYVECTOR(&firstHistory[3], pVertex);
+        SDF_VU0_COPYVECTOR(&secondHistory[3], pVertex + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         dds3HermitianTrackPolySetCurrent(hPoly, 2);
@@ -592,12 +592,12 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
         u128 *firstSampleOutputBase;
         u128 *firstSampleOutput;
 
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 2);
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 1);
-        SDF_VU0_COPYVECTOR(firstHistory[2], pVertex);
-        SDF_VU0_COPYVECTOR(secondHistory[2], pVertex + 1);
-        SDF_VU0_COPYVECTOR(firstHistory[3], pVertex);
-        SDF_VU0_COPYVECTOR(secondHistory[3], pVertex + 1);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstHistory[0], (u128 *)&secondHistory[0], 2);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstHistory[1], (u128 *)&secondHistory[1], 1);
+        SDF_VU0_COPYVECTOR(&firstHistory[2], pVertex);
+        SDF_VU0_COPYVECTOR(&secondHistory[2], pVertex + 1);
+        SDF_VU0_COPYVECTOR(&firstHistory[3], pVertex);
+        SDF_VU0_COPYVECTOR(&secondHistory[3], pVertex + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         sampleIndex = 0;
