@@ -1017,8 +1017,8 @@ void dds3Particle_SpiralBuffInit(dds3Particle_Spiral_t3 *pSpiral, u32 number) {
 void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
     parSpiralPacket_t *packet = (parSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 offset[4] QWORD_ALIGNED;
+    sdfVector4_t origin;
+    sdfVector4_t offset;
     f32 verticalScale;
     f32 phaseStep;
     s32 completedCount;
@@ -1035,7 +1035,7 @@ void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
     packetCount = hData->head.particleCount;
     lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -1061,15 +1061,15 @@ void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
             packet->verticalOffset += SDF_FRAME_STEP(packet->verticalSpeed);
             theta = packet->phase;
             radius = packet->radialDistance;
-            offset[0] = sdfCos(theta) * radius;
-            offset[1] = packet->verticalOffset;
-            offset[2] = sdfSin(theta) * radius;
-            SDF_VU0_LOADVECTOR(offset);
+            offset.x = sdfCos(theta) * radius;
+            offset.y = packet->verticalOffset;
+            offset.z = sdfSin(theta) * radius;
+            SDF_VU0_LOADVECTOR(&offset);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(offset);
-            packet->pos[0] = origin[0] + offset[0];
-            packet->pos[1] = origin[1] + offset[1];
-            packet->pos[2] = origin[2] + offset[2];
+            SDF_VU0_STOREVECTOR(&offset);
+            packet->pos[0] = origin.x + offset.x;
+            packet->pos[1] = origin.y + offset.y;
+            packet->pos[2] = origin.z + offset.z;
             packet->verticalSpeed *= verticalScale;
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
@@ -1139,21 +1139,21 @@ void dds3Particle_SmokeDelete(void *hData) {
 /* Seed a random planar position and direction; radialDistance may be negative. */
 void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
     parSmokePacket_t *packet = (parSmokePacket_t *)pSmoke->head.buffer->pPhysics;
-    f32 directionVector[4] QWORD_ALIGNED;
+    sdfVector4_t directionVector;
     f32 radialDistance;
     f32 jitter;
 
     packet += number;
     radialDistance = pSmoke->radius * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = 0;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = 0;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(directionVector);
-    packet->pos[0] = directionVector[0] * radialDistance;
+    SDF_VU0_STOREVECTOR(&directionVector);
+    packet->pos[0] = directionVector.x * radialDistance;
     packet->pos[1] = 0;
-    packet->pos[2] = directionVector[2] * radialDistance;
+    packet->pos[2] = directionVector.z * radialDistance;
     SDF_VU0_LOADMATRIX(pSmoke->head.matrix);
     SDF_VU0_LOADVECTOR(packet->pos);
     SDF_VU0_APPLYMATRIX();
@@ -1161,10 +1161,10 @@ void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
     packet->pos[0] += pSmoke->head.origin[0];
     packet->pos[1] += pSmoke->head.origin[1];
     packet->pos[2] += pSmoke->head.origin[2];
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = 0;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = 0;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(packet->vel);
     packet->waveAmplitude = pSmoke->waveAmplitude * (dds3GetRandFloatA(dds3EffectBase) * pSmoke->waveAmplitudeJitter + (1.0f - pSmoke->waveAmplitudeJitter));
@@ -1188,7 +1188,7 @@ void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
 void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 positionDelta[4] QWORD_ALIGNED;
+    sdfVector4_t positionDelta;
     f32 verticalScale;
     f32 phaseStep;
     f32 waveRate;
@@ -1231,15 +1231,15 @@ void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
             previousWaveValue = packet->previousWaveValue;
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
-            positionDelta[0] = packet->vel[0] * factor;
-            positionDelta[1] = SDF_FRAME_STEP(verticalStep);
-            positionDelta[2] = packet->vel[2] * factor;
-            SDF_VU0_LOADVECTOR(positionDelta);
+            positionDelta.x = packet->vel[0] * factor;
+            positionDelta.y = SDF_FRAME_STEP(verticalStep);
+            positionDelta.z = packet->vel[2] * factor;
+            SDF_VU0_LOADVECTOR(&positionDelta);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += positionDelta[0];
-            packet->pos[1] += positionDelta[1];
-            packet->pos[2] += positionDelta[2];
+            SDF_VU0_STOREVECTOR(&positionDelta);
+            packet->pos[0] += positionDelta.x;
+            packet->pos[1] += positionDelta.y;
+            packet->pos[2] += positionDelta.z;
             packet->verticalVelocity = verticalStep * verticalScale;
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
@@ -1312,8 +1312,8 @@ void dds3Particle_SparkDelete(void *hData) {
 #ifdef NON_MATCHING
 void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
     parSparkPacket_t *packet = (parSparkPacket_t *)pSpark->head.buffer->pPhysics;
-    f32 position[4] QWORD_ALIGNED;
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t direction;
     f32 gravity;
     f32 radius;
     f32 cone;
@@ -1334,15 +1334,15 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
     switch (pSpark->mode) {
     case 0:
         if (pSpark->randomDir != 0) {
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = 0;
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = 0;
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
-            packet->pos[0] = direction[0] * radius;
+            SDF_VU0_STOREVECTOR(&direction);
+            packet->pos[0] = direction.x * radius;
             packet->pos[1] = 0;
-            packet->pos[2] = direction[2] * radius;
+            packet->pos[2] = direction.z * radius;
             SDF_VU0_LOADMATRIX(pSpark->head.matrix);
             SDF_VU0_LOADVECTOR(packet->pos);
             SDF_VU0_APPLYMATRIX();
@@ -1350,16 +1350,16 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[0] += pSpark->head.origin[0];
             packet->pos[1] += pSpark->head.origin[1];
             packet->pos[2] += pSpark->head.origin[2];
-            direction[0] = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
-            direction[1] = -(1.0f - cone);
-            direction[2] = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            direction.y = -(1.0f - cone);
+            direction.z = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSpark->jitter + (1.0f - pSpark->jitter);
-            packet->vel[0] = direction[0] * speed * jitter;
-            packet->vel[1] = direction[1] * speed * jitter;
-            packet->vel[2] = direction[2] * speed * jitter;
+            packet->vel[0] = direction.x * speed * jitter;
+            packet->vel[1] = direction.y * speed * jitter;
+            packet->vel[2] = direction.z * speed * jitter;
             packet->verticalAcceleration = (dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f) * gravity;
         } else {
             angle = (3.14159265f * 2.0f) / pSpark->head.particleCount * number;
@@ -1386,16 +1386,16 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[0] = pSpark->head.origin[0];
             packet->pos[1] = pSpark->head.origin[1];
             packet->pos[2] = pSpark->head.origin[2];
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSpark->jitter + (1.0f - pSpark->jitter);
-            packet->vel[0] = direction[0] * speed * jitter;
-            packet->vel[1] = direction[1] * speed * jitter;
-            packet->vel[2] = direction[2] * speed * jitter;
+            packet->vel[0] = direction.x * speed * jitter;
+            packet->vel[1] = direction.y * speed * jitter;
+            packet->vel[2] = direction.z * speed * jitter;
             packet->verticalAcceleration = gravity;
         } else {
             packet->pos[0] = pSpark->head.origin[0];
@@ -1412,37 +1412,37 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
         if (pSpark->randomDir != 0) {
             decay = pSpark->decayPct / 100.0f + 1.0f;
             SDF_VU0_STOREIDENTITY(pSpark->head.matrix);
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSpark->jitter + (1.0f - pSpark->jitter);
             steps = pSpark->head.lifetimeFrames;
-            direction[0] = direction[0] * (speed * jitter);
-            direction[1] = direction[1] * (speed * jitter);
-            direction[2] = direction[2] * (speed * jitter);
-            packet->vel[0] = -direction[0];
-            packet->vel[1] = -direction[1];
-            packet->vel[2] = -direction[2];
-            position[0] = pSpark->head.origin[0];
-            position[1] = pSpark->head.origin[1];
-            position[2] = pSpark->head.origin[2];
+            direction.x = direction.x * (speed * jitter);
+            direction.y = direction.y * (speed * jitter);
+            direction.z = direction.z * (speed * jitter);
+            packet->vel[0] = -direction.x;
+            packet->vel[1] = -direction.y;
+            packet->vel[2] = -direction.z;
+            position.x = pSpark->head.origin[0];
+            position.y = pSpark->head.origin[1];
+            position.z = pSpark->head.origin[2];
             step = 0;
             do {
-                position[0] += direction[0];
-                position[1] += direction[1];
-                position[2] += direction[2];
-                direction[0] = direction[0] * decay;
-                direction[1] = direction[1] * decay;
-                direction[2] = direction[2] * decay;
-                direction[1] += gravity;
+                position.x += direction.x;
+                position.y += direction.y;
+                position.z += direction.z;
+                direction.x = direction.x * decay;
+                direction.y = direction.y * decay;
+                direction.z = direction.z * decay;
+                direction.y += gravity;
                 step++;
             } while (step < steps);
-            packet->pos[0] = position[0];
-            packet->pos[1] = position[1];
-            packet->pos[2] = position[2];
+            packet->pos[0] = position.x;
+            packet->pos[1] = position.y;
+            packet->pos[2] = position.z;
             packet->verticalAcceleration = -gravity;
         }
         break;
@@ -1471,7 +1471,7 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
     parSparkPacket_t *packet = (parSparkPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     u32 mode;
-    f32 positionDelta[4] QWORD_ALIGNED;
+    sdfVector4_t positionDelta;
     f32 velocityScale;
     s32 completedCount;
     s32 lifetimeFrames;
@@ -1509,10 +1509,10 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
             if (mode == 0) {
                 SDF_VU0_APPLYMATRIX();
             }
-            SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += SDF_FRAME_STEP(positionDelta[0]);
-            packet->pos[1] += SDF_FRAME_STEP(positionDelta[1]);
-            packet->pos[2] += SDF_FRAME_STEP(positionDelta[2]);
+            SDF_VU0_STOREVECTOR(&positionDelta);
+            packet->pos[0] += SDF_FRAME_STEP(positionDelta.x);
+            packet->pos[1] += SDF_FRAME_STEP(positionDelta.y);
+            packet->pos[2] += SDF_FRAME_STEP(positionDelta.z);
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
                 dds3Particle_EffectSet(&hData->head.sub, packetIndex, packet->color, packet->billboardScale);
@@ -1750,7 +1750,7 @@ void dds3Particle_SphereSpiralDelete(void *hData) {
 /* Seed burst velocity and an optional random axis; retain the native spawn delay. */
 void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpiral, u32 number) {
     parSphereSpiralPacket_t *packet = (parSphereSpiralPacket_t *)pSphereSpiral->head.buffer->pPhysics;
-    f32 directionVector[4] QWORD_ALIGNED;
+    sdfVector4_t directionVector;
     f32 speed;
     f32 jitter;
     f32 velocityLength;
@@ -1760,15 +1760,15 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
     packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral->spread) + 1));
     speed = pSphereSpiral->speed;
     jitter = pSphereSpiral->jitterA;
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(directionVector);
-    packet->vel[0] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->vel[1] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->vel[2] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[2];
+    SDF_VU0_STOREVECTOR(&directionVector);
+    packet->vel[0] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.x;
+    packet->vel[1] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.y;
+    packet->vel[2] = speed * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.z;
     SDF_VU0_LOADVECTOR(packet->vel);
     SDF_VU0_GETLENGTH(velocityLength);
     SDF_VU0_LOADMATRIX(pSphereSpiral->head.matrix);
@@ -1779,15 +1779,15 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
     packet->pos[1] = packet->vel[1] + pSphereSpiral->head.origin[1];
     packet->pos[2] = packet->vel[2] + pSphereSpiral->head.origin[2];
     if (pSphereSpiral->mode == 1) {
-        directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        directionVector[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        SDF_VU0_LOADVECTOR(directionVector);
+        directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        directionVector.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        SDF_VU0_LOADVECTOR(&directionVector);
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(directionVector);
-        packet->axisX = directionVector[0];
-        packet->axisY = directionVector[1];
-        packet->axisZ = directionVector[2];
+        SDF_VU0_STOREVECTOR(&directionVector);
+        packet->axisX = directionVector.x;
+        packet->axisY = directionVector.y;
+        packet->axisZ = directionVector.z;
     } else {
         packet->axisX = 0;
         packet->axisY = -1.0f;
@@ -1810,9 +1810,9 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
 void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
     parSphereSpiralPacket_t *packet = (parSphereSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 rotationAxis[4] QWORD_ALIGNED;
-    f32 scaleVector[4] QWORD_ALIGNED;
+    sdfVector4_t origin;
+    sdfVector4_t rotationAxis;
+    sdfVector4_t scaleVector;
     f32 velocityLength;
     f32 rotationStep;
     s32 completedCount;
@@ -1828,7 +1828,7 @@ void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
     completedCount = 0;
     rotationStep = SDF_FRAME_STEP(hData->spinRate * (3.14159265f / 180.0f));
     repeatEnabled = hData->loop;
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -1845,25 +1845,25 @@ void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_GETLENGTH(velocityLength);
             velocityLength += SDF_FRAME_STEP(packet->radiusStep);
-            scaleVector[0] = velocityLength;
-            scaleVector[1] = velocityLength;
-            scaleVector[2] = velocityLength;
+            scaleVector.x = velocityLength;
+            scaleVector.y = velocityLength;
+            scaleVector.z = velocityLength;
             SDF_VU0_NORMALIZE();
-            SDF_VU0_LOADVECTOR_B(scaleVector);
+            SDF_VU0_LOADVECTOR_B(&scaleVector);
             SDF_VU0_MULVECTOR();
             SDF_VU0_STOREVECTOR(packet->vel);
             SDF_VU0_COPYMATRIX_B_TO_A();
-            rotationAxis[0] = packet->axisX;
-            rotationAxis[1] = packet->axisY;
-            rotationAxis[2] = packet->axisZ;
-            rotationAxis[3] = 0;
-            SDF_VU0_LOADVECTOR(rotationAxis);
+            rotationAxis.x = packet->axisX;
+            rotationAxis.y = packet->axisY;
+            rotationAxis.z = packet->axisZ;
+            rotationAxis.w = 0;
+            SDF_VU0_LOADVECTOR(&rotationAxis);
             SDF_VU0_APPLYMATRIX_XYZ();
-            SDF_VU0_STOREVECTOR_NOMEM(rotationAxis);
-            SetRotateMatrixAxis(rotationStep, (const sdfVector3_t *)rotationAxis);
+            SDF_VU0_STOREVECTOR_NOMEM(&rotationAxis);
+            SetRotateMatrixAxis(rotationStep, (const sdfVector3_t *)&rotationAxis);
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_APPLYMATRIX_XYZ();
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_STOREVECTOR(packet->vel);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(packet);
@@ -1936,22 +1936,22 @@ void dds3Particle_SphereSmokeDelete(void *hData) {
  * Native delay uses bitwise complement, not unary negation. */
 void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke, u32 number) {
     parSmokePacket_t *packet = (parSmokePacket_t *)pSphereSmoke->head.buffer->pPhysics;
-    f32 directionVector[4] QWORD_ALIGNED;
+    sdfVector4_t directionVector;
     f32 radius;
     f32 jitter;
 
     packet += number;
     radius = pSphereSmoke->radius;
     jitter = pSphereSmoke->radius_s_r;
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(directionVector);
-    packet->pos[0] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->pos[1] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->pos[2] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector[2];
+    SDF_VU0_STOREVECTOR(&directionVector);
+    packet->pos[0] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.x;
+    packet->pos[1] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.y;
+    packet->pos[2] = radius * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * directionVector.z;
     SDF_VU0_LOADMATRIX(pSphereSmoke->head.matrix);
     SDF_VU0_LOADVECTOR(packet->pos);
     SDF_VU0_APPLYMATRIX();
@@ -1986,7 +1986,7 @@ void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke,
 void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 positionDelta[4] QWORD_ALIGNED;
+    sdfVector4_t positionDelta;
     f32 verticalScale;
     f32 phaseStep;
     f32 waveRate;
@@ -2029,15 +2029,15 @@ void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
             previousWaveValue = packet->previousWaveValue;
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
-            positionDelta[0] = packet->vel[0] * factor;
-            positionDelta[1] = SDF_FRAME_STEP(verticalStep);
-            positionDelta[2] = packet->vel[2] * factor;
-            SDF_VU0_LOADVECTOR(positionDelta);
+            positionDelta.x = packet->vel[0] * factor;
+            positionDelta.y = SDF_FRAME_STEP(verticalStep);
+            positionDelta.z = packet->vel[2] * factor;
+            SDF_VU0_LOADVECTOR(&positionDelta);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += positionDelta[0];
-            packet->pos[1] += positionDelta[1];
-            packet->pos[2] += positionDelta[2];
+            SDF_VU0_STOREVECTOR(&positionDelta);
+            packet->pos[0] += positionDelta.x;
+            packet->pos[1] += positionDelta.y;
+            packet->pos[2] += positionDelta.z;
             packet->verticalVelocity = verticalStep * verticalScale;
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
@@ -2112,7 +2112,7 @@ void dds3Particle_SphereRingDelete(void *hData) {
 /* Seed radius and ring direction, placing the packet at its rotated vertical offset. */
 void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u32 number) {
     parSphereRingPacket_t *packet = (parSphereRingPacket_t *)pSphereRing->head.buffer->pPhysics;
-    f32 offsetVector[4] QWORD_ALIGNED;
+    sdfVector4_t offsetVector;
     f32 jitter;
     f32 radius;
     f32 angle;
@@ -2128,10 +2128,10 @@ void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u3
     packet->vel[1] = 0;
     packet->vel[2] = sdfSin(angle);
     SDF_VU0_LOADMATRIX(pSphereRing->head.matrix);
-    offsetVector[1] = radius;
-    offsetVector[0] = 0;
-    offsetVector[2] = 0;
-    SDF_VU0_LOADVECTOR(offsetVector);
+    offsetVector.y = radius;
+    offsetVector.x = 0;
+    offsetVector.z = 0;
+    SDF_VU0_LOADVECTOR(&offsetVector);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_LOADVECTOR_B(pSphereRing->head.origin);
     SDF_VU0_ADDVECTOR();
@@ -2152,8 +2152,8 @@ void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u3
 void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
     parSphereRingPacket_t *packet = (parSphereRingPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 vector[4] QWORD_ALIGNED;
+    sdfVector4_t origin;
+    sdfVector4_t vector;
     f32 rotationStep;
     f32 rotationCos;
     f32 rotationSin;
@@ -2172,7 +2172,7 @@ void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
     repeatEnabled = hData->loop;
     rotationCos = sdfCos(rotationStep);
     rotationSin = sdfSin(rotationStep);
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -2195,18 +2195,18 @@ void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
             radius = packet->radius;
             phaseCos = sdfCos(angle);
             phaseSin = sdfSin(angle);
-            vector[0] = packet->vel[0] * (radius * phaseSin);
-            vector[1] = radius * phaseCos;
-            vector[2] = packet->vel[2] * (radius * phaseSin);
-            SDF_VU0_LOADVECTOR(vector);
+            vector.x = packet->vel[0] * (radius * phaseSin);
+            vector.y = radius * phaseCos;
+            vector.z = packet->vel[2] * (radius * phaseSin);
+            SDF_VU0_LOADVECTOR(&vector);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(packet);
-            vector[0] = packet->vel[0];
-            vector[2] = packet->vel[2];
-            packet->vel[0] = rotationCos * vector[0] + rotationSin * vector[2];
-            packet->vel[2] = rotationCos * vector[2] - rotationSin * vector[0];
+            vector.x = packet->vel[0];
+            vector.z = packet->vel[2];
+            packet->vel[0] = rotationCos * vector.x + rotationSin * vector.z;
+            packet->vel[2] = rotationCos * vector.z - rotationSin * vector.x;
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
                 dds3Particle_EffectSet(&hData->head.sub, packetIndex, packet->color, packet->billboardScale);
@@ -2327,7 +2327,7 @@ void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number) {
 void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
     parSparkPacket_t *packet = (parSparkPacket_t *)hData->basic.buffer->pPhysics;
     u32 subeffectKind = hData->basic.sub.type;
-    f32 positionDelta[4] QWORD_ALIGNED;
+    sdfVector4_t positionDelta;
     f32 velocityScale;
     s32 completedCount;
     s32 lifetimeFrames;
@@ -2360,10 +2360,10 @@ void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(positionDelta);
-            packet->pos[0] += SDF_FRAME_STEP(positionDelta[0]);
-            packet->pos[1] += SDF_FRAME_STEP(positionDelta[1]);
-            packet->pos[2] += SDF_FRAME_STEP(positionDelta[2]);
+            SDF_VU0_STOREVECTOR(&positionDelta);
+            packet->pos[0] += SDF_FRAME_STEP(positionDelta.x);
+            packet->pos[1] += SDF_FRAME_STEP(positionDelta.y);
+            packet->pos[2] += SDF_FRAME_STEP(positionDelta.z);
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR(packet);
                 dds3Particle_EffectSet(&hData->basic.sub, packetIndex, packet->color, packet->billboardScale);
@@ -2429,7 +2429,7 @@ void dds3Particle_SphereAtomDelete(void *hData) {
 
 /* vu0 routine: seed radial placement, normalized velocity and activation age. */
 void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 number) {
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t direction;
     effectBufferRecord_t *packet = pSphereAtom->head.buffer->pPhysics;
     f32 radius;
     f32 value;
@@ -2437,15 +2437,15 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
     packet += number;
     if (pSphereAtom->randomSphere) {
         radius = pSphereAtom->recordScale;
-        direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        SDF_VU0_LOADVECTOR(direction);
+        direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(direction);
-        packet->position[0] = radius * dds3GetRandFloatA(dds3EffectBase) * direction[0];
-        packet->position[1] = radius * dds3GetRandFloatA(dds3EffectBase) * direction[1];
-        packet->position[2] = radius * dds3GetRandFloatA(dds3EffectBase) * direction[2];
+        SDF_VU0_STOREVECTOR(&direction);
+        packet->position[0] = radius * dds3GetRandFloatA(dds3EffectBase) * direction.x;
+        packet->position[1] = radius * dds3GetRandFloatA(dds3EffectBase) * direction.y;
+        packet->position[2] = radius * dds3GetRandFloatA(dds3EffectBase) * direction.z;
         SDF_VU0_LOADMATRIX(pSphereAtom->head.matrix);
         SDF_VU0_LOADVECTOR(packet->position);
         SDF_VU0_APPLYMATRIX();
@@ -2453,20 +2453,20 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
         packet->position[0] += pSphereAtom->head.origin[0];
         packet->position[1] += pSphereAtom->head.origin[1];
         packet->position[2] += pSphereAtom->head.origin[2];
-        direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        SDF_VU0_LOADVECTOR(direction);
+        direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
         packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
     } else {
         SDF_VU0_COPYVECTOR(packet->position, pSphereAtom->head.origin);
         value = (3.14159265f * 2.0f) / pSphereAtom->head.particleCount * number;
-        direction[0] = sdfCos(value);
-        direction[1] = sdfSin(value);
-        direction[2] = 0;
-        SDF_VU0_LOADVECTOR(direction);
+        direction.x = sdfCos(value);
+        direction.y = sdfSin(value);
+        direction.z = 0;
+        SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
         packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
@@ -2487,13 +2487,13 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
 /* Reflect moving packets at the frame's entry radius. The first record's
  * updated radius becomes the boundary on the following frame. */
 void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
-    f32 origin[4] QWORD_ALIGNED;
-    f32 previousPosition[4] QWORD_ALIGNED;
+    sdfVector4_t origin;
+    sdfVector4_t previousPosition;
     /* Retail leaves the fourth broadcast components uninitialized. The
      * XYZW operations propagate those W lanes into the packet stores. */
-    f32 reflectionScale[4] QWORD_ALIGNED;
-    f32 normal[4] QWORD_ALIGNED;
-    f32 boundaryScale[4] QWORD_ALIGNED;
+    sdfVector4_t reflectionScale;
+    sdfVector4_t normal;
+    sdfVector4_t boundaryScale;
     s32 completedCount = 0;
     s32 repeatEnabled;
     parSphereAtomPacket_t *packet = (parSphereAtomPacket_t *)hData->head.buffer->pPhysics;
@@ -2529,7 +2529,7 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             }
         }
     }
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (index = 0; index < packetCount; index++, packet++) {
         s32 age = packet->age;
         f32 distance;
@@ -2545,7 +2545,7 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             packet->color = dds3ParticleColorAnim(&hData->head.fade, packet->color, age);
             packet->color = dds3ParticleColorBlend(packet->color, hData->head.colorMask);
             if (subeffectKind != 0) {
-                SDF_VU0_COPYVECTOR(previousPosition, packet->pos);
+                SDF_VU0_COPYVECTOR(&previousPosition, packet->pos);
             }
             magnitude = packet->motionMagnitude;
             dx = packet->vel[0] * magnitude;
@@ -2557,47 +2557,47 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             magnitude *= velocityScale;
             packet->motionMagnitude = magnitude;
             SDF_VU0_LOADVECTOR(packet->pos);
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_GETLENGTH(distance);
             SDF_VU0_COPYVECTOR_C_TO_A();
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(normal);
+            SDF_VU0_STOREVECTOR(&normal);
             if (distance > radius) {
                 SDF_VU0_LOADVECTOR(packet->vel);
                 SDF_VU0_LOADVECTOR_B(D_003171A0);
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_COPYVECTOR_A_TO_C();
-                SDF_VU0_LOADVECTOR(origin);
+                SDF_VU0_LOADVECTOR(&origin);
                 SDF_VU0_LOADVECTOR_B(packet->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_COPYVECTOR_C_TO_B();
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_INNERPRODUCT(dot);
-                reflectionScale[0] = dot * 2.0f;
-                reflectionScale[1] = dot * 2.0f;
-                reflectionScale[2] = dot * 2.0f;
-                SDF_VU0_LOADVECTOR(reflectionScale);
+                reflectionScale.x = dot * 2.0f;
+                reflectionScale.y = dot * 2.0f;
+                reflectionScale.z = dot * 2.0f;
+                SDF_VU0_LOADVECTOR(&reflectionScale);
                 SDF_VU0_COPYVECTOR_C_TO_B();
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_LOADVECTOR_B(packet->vel);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR(packet->vel);
-                boundaryScale[0] = radius;
-                boundaryScale[1] = radius;
-                boundaryScale[2] = radius;
-                SDF_VU0_LOADVECTOR(normal);
-                SDF_VU0_LOADVECTOR_B(boundaryScale);
+                boundaryScale.x = radius;
+                boundaryScale.y = radius;
+                boundaryScale.z = radius;
+                SDF_VU0_LOADVECTOR(&normal);
+                SDF_VU0_LOADVECTOR_B(&boundaryScale);
                 SDF_VU0_MULVECTOR();
-                SDF_VU0_LOADVECTOR_B(origin);
+                SDF_VU0_LOADVECTOR_B(&origin);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR(packet->pos);
             }
             if (subeffectKind != 0) {
-                SDF_VU0_LOADVECTOR_C(previousPosition);
+                SDF_VU0_LOADVECTOR_C(&previousPosition);
                 SDF_VU0_LOADVECTOR(packet->pos);
                 dds3Particle_EffectSet(&hData->head.sub, index, packet->color, packet->billboardScale);
             }
@@ -2739,8 +2739,8 @@ void dds3Particle_SparkOffsetDelete(void *hData) {
 #ifdef NON_MATCHING
 void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset, s32 number) {
     parSparkOffsetPacket_t *packet = (parSparkOffsetPacket_t *)pSparkOffset->head.buffer->pPhysics;
-    f32 position[4] QWORD_ALIGNED;
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t direction;
     f32 gravity;
     f32 radius;
     f32 cone;
@@ -2761,30 +2761,30 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
     switch (pSparkOffset->mode) {
     case 0:
         if (pSparkOffset->randomDir != 0) {
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = 0;
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = 0;
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
-            packet->offsetX = direction[0] * radius;
+            SDF_VU0_STOREVECTOR(&direction);
+            packet->offsetX = direction.x * radius;
             packet->offsetY = 0;
-            packet->offsetZ = direction[2] * radius;
+            packet->offsetZ = direction.z * radius;
             SDF_VU0_COPYVECTOR(packet, pSparkOffset->head.origin);
             SDF_VU0_LOADMATRIX(pSparkOffset->head.matrix);
             SDF_VU0_LOADVECTOR(&packet->offsetX);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&packet->offsetX);
-            direction[0] = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
-            direction[1] = -(1.0f - cone);
-            direction[2] = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            direction.y = -(1.0f - cone);
+            direction.z = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSparkOffset->jitter + (1.0f - pSparkOffset->jitter);
-            packet->vel[0] = direction[0] * speed * jitter;
-            packet->vel[1] = direction[1] * speed * jitter;
-            packet->vel[2] = direction[2] * speed * jitter;
+            packet->vel[0] = direction.x * speed * jitter;
+            packet->vel[1] = direction.y * speed * jitter;
+            packet->vel[2] = direction.z * speed * jitter;
             packet->offsetAcceleration = (dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f) * gravity;
         } else {
             angle = (3.14159265f * 2.0f) / pSparkOffset->head.particleCount * number;
@@ -2809,16 +2809,16 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
             packet->offsetY = 0;
             packet->offsetZ = 0;
             SDF_VU0_COPYVECTOR(packet, pSparkOffset->head.origin);
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSparkOffset->jitter + (1.0f - pSparkOffset->jitter);
-            packet->vel[0] = direction[0] * speed * jitter;
-            packet->vel[1] = direction[1] * speed * jitter;
-            packet->vel[2] = direction[2] * speed * jitter;
+            packet->vel[0] = direction.x * speed * jitter;
+            packet->vel[1] = direction.y * speed * jitter;
+            packet->vel[2] = direction.z * speed * jitter;
             packet->offsetAcceleration = gravity;
         } else {
             packet->pos[0] = 0;
@@ -2835,37 +2835,37 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
         if (pSparkOffset->randomDir != 0) {
             decay = pSparkOffset->decayPct / 100.0f + 1.0f;
             SDF_VU0_STOREIDENTITY(pSparkOffset->head.matrix);
-            direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            SDF_VU0_LOADVECTOR(direction);
+            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             jitter = dds3GetRandFloatA(dds3EffectBase) * pSparkOffset->jitter + (1.0f - pSparkOffset->jitter);
             steps = pSparkOffset->head.lifetimeFrames;
-            direction[0] = direction[0] * (speed * jitter);
-            direction[1] = direction[1] * (speed * jitter);
-            direction[2] = direction[2] * (speed * jitter);
-            packet->vel[0] = -direction[0];
-            packet->vel[1] = -direction[1];
-            packet->vel[2] = -direction[2];
-            position[0] = 0;
-            position[1] = 0;
-            position[2] = 0;
+            direction.x = direction.x * (speed * jitter);
+            direction.y = direction.y * (speed * jitter);
+            direction.z = direction.z * (speed * jitter);
+            packet->vel[0] = -direction.x;
+            packet->vel[1] = -direction.y;
+            packet->vel[2] = -direction.z;
+            position.x = 0;
+            position.y = 0;
+            position.z = 0;
             step = 0;
             do {
-                position[0] += direction[0];
-                position[1] += direction[1];
-                position[2] += direction[2];
-                direction[0] = direction[0] * decay;
-                direction[1] = direction[1] * decay;
-                direction[2] = direction[2] * decay;
-                direction[1] += gravity;
+                position.x += direction.x;
+                position.y += direction.y;
+                position.z += direction.z;
+                direction.x = direction.x * decay;
+                direction.y = direction.y * decay;
+                direction.z = direction.z * decay;
+                direction.y += gravity;
                 step++;
             } while (step < steps);
-            packet->pos[0] = position[0];
-            packet->pos[1] = position[1];
-            packet->pos[2] = position[2];
+            packet->pos[0] = position.x;
+            packet->pos[1] = position.y;
+            packet->pos[2] = position.z;
             packet->offsetAcceleration = -gravity;
         }
         break;
@@ -2893,8 +2893,8 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
     parSparkOffsetPacket_t *packet = (parSparkOffsetPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     u32 mode;
-    f32 positionDelta[4] QWORD_ALIGNED;
-    f32 origin[4] QWORD_ALIGNED;
+    sdfVector4_t positionDelta;
+    sdfVector4_t origin;
     f32 velocityScale;
     s32 completedCount;
     s32 lifetimeFrames;
@@ -2912,7 +2912,7 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
     packetCount = hData->head.particleCount;
     lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
 
@@ -2933,12 +2933,12 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
             if (mode == 0) {
                 SDF_VU0_APPLYMATRIX();
             }
-            SDF_VU0_STOREVECTOR(positionDelta);
-            packet->offsetX += SDF_FRAME_STEP(positionDelta[0]);
-            packet->offsetY += SDF_FRAME_STEP(positionDelta[1]);
-            packet->offsetZ += SDF_FRAME_STEP(positionDelta[2]);
+            SDF_VU0_STOREVECTOR(&positionDelta);
+            packet->offsetX += SDF_FRAME_STEP(positionDelta.x);
+            packet->offsetY += SDF_FRAME_STEP(positionDelta.y);
+            packet->offsetZ += SDF_FRAME_STEP(positionDelta.z);
             SDF_VU0_LOADVECTOR(&packet->offsetX);
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(packet);
             if (subeffectKind != 0) {
@@ -3015,30 +3015,30 @@ void dds3Particle_SmokeOffsetDelete(effTemplatePacketList_t *hData) {
 void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset, u32 number) {
     parSmokePacket_t *packet = (parSmokePacket_t *)pSmokeOffset->head.buffer->pPhysics;
     f32 (*auxiliaryCursor)[4] = pSmokeOffset->aux;
-    f32 directionVector[4] QWORD_ALIGNED;
+    sdfVector4_t directionVector;
     f32 radialDistance;
     f32 jitter;
 
     packet += number;
     auxiliaryCursor += number;
     radialDistance = pSmokeOffset->radius * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = 0;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = 0;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(directionVector);
-    (*auxiliaryCursor)[0] = directionVector[0] * radialDistance;
+    SDF_VU0_STOREVECTOR(&directionVector);
+    (*auxiliaryCursor)[0] = directionVector.x * radialDistance;
     (*auxiliaryCursor)[1] = 0;
-    (*auxiliaryCursor)[2] = directionVector[2] * radialDistance;
+    (*auxiliaryCursor)[2] = directionVector.z * radialDistance;
     SDF_VU0_LOADMATRIX(pSmokeOffset->head.matrix);
     SDF_VU0_LOADVECTOR(*auxiliaryCursor);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(*auxiliaryCursor);
-    directionVector[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    directionVector[1] = 0;
-    directionVector[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(directionVector);
+    directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    directionVector.y = 0;
+    directionVector.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&directionVector);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(packet->vel);
     packet->waveAmplitude = pSmokeOffset->waveAmplitude * (dds3GetRandFloatA(dds3EffectBase) * pSmokeOffset->waveAmplitudeJitter + (1.0f - pSmokeOffset->waveAmplitudeJitter));
@@ -3065,8 +3065,8 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     f32 (*auxiliaryCursor)[4] = hData->aux;
-    f32 positionVector[4] QWORD_ALIGNED;
-    f32 origin[4] QWORD_ALIGNED;
+    sdfVector4_t positionVector;
+    sdfVector4_t origin;
     f32 verticalScale;
     f32 phaseStep;
     f32 waveRate;
@@ -3085,7 +3085,7 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
     lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     repeatEnabled = hData->loop;
     waveRate = SDF_FRAME_STEP(hData->waveGrowth);
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, auxiliaryCursor++) {
         s32 age = packet->age;
 
@@ -3110,13 +3110,13 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
             previousWaveValue = packet->previousWaveValue;
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
-            positionVector[0] = (*auxiliaryCursor)[0] + packet->vel[0] * factor;
-            positionVector[1] = (*auxiliaryCursor)[1] + SDF_FRAME_STEP(verticalStep);
-            positionVector[2] = (*auxiliaryCursor)[2] + packet->vel[2] * factor;
-            SDF_VU0_LOADVECTOR(positionVector);
+            positionVector.x = (*auxiliaryCursor)[0] + packet->vel[0] * factor;
+            positionVector.y = (*auxiliaryCursor)[1] + SDF_FRAME_STEP(verticalStep);
+            positionVector.z = (*auxiliaryCursor)[2] + packet->vel[2] * factor;
+            SDF_VU0_LOADVECTOR(&positionVector);
             SDF_VU0_STOREVECTOR(*auxiliaryCursor);
             SDF_VU0_APPLYMATRIX();
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(packet);
             packet->verticalVelocity = verticalStep * verticalScale;
@@ -3243,7 +3243,7 @@ void dds3Particle_SphereSpiral2Delete(dds3Particle_SphereSpiral2_t3 *hData) {
    their original order. */
 void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSpiral2, u32 number) {
     parBurstPacket_t *packet = (parBurstPacket_t *)pSphereSpiral2->head.buffer->pPhysics;
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t direction;
     f32 initialRadius;
     f32 jitterFactor;
     f32 initialRadiusLength;
@@ -3253,16 +3253,16 @@ void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSp
     packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral2->spawnDelayFrames) + 1));
     initialRadius = pSphereSpiral2->initialRadius;
     jitterFactor = pSphereSpiral2->initialRadiusJitter;
-    direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-    SDF_VU0_LOADVECTOR(direction);
+    direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+    SDF_VU0_LOADVECTOR(&direction);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(direction);
+    SDF_VU0_STOREVECTOR(&direction);
     /* Each component gets a separate jitter sample, not one shared radius draw. */
-    packet->radialOffset[0] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
-    packet->radialOffset[1] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
-    packet->radialOffset[2] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
+    packet->radialOffset[0] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction.x;
+    packet->radialOffset[1] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction.y;
+    packet->radialOffset[2] = initialRadius * (dds3GetRandFloatA(dds3EffectBase) * jitterFactor + (1.0f - jitterFactor)) * direction.z;
     SDF_VU0_LOADVECTOR(packet->radialOffset);
     SDF_VU0_GETLENGTH(initialRadiusLength);
     SDF_VU0_LOADMATRIX(pSphereSpiral2->head.rot);
@@ -3273,15 +3273,15 @@ void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSp
     packet->position[1] = packet->radialOffset[1] + pSphereSpiral2->head.origin[1];
     packet->position[2] = packet->radialOffset[2] + pSphereSpiral2->head.origin[2];
     if (pSphereSpiral2->axisMode == PAR_BURST_RANDOM_AXIS) {
-        direction[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        direction[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-        SDF_VU0_LOADVECTOR(direction);
+        direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+        SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(direction);
-        packet->rotationAxis[0] = direction[0];
-        packet->rotationAxis[1] = direction[1];
-        packet->rotationAxis[2] = direction[2];
+        SDF_VU0_STOREVECTOR(&direction);
+        packet->rotationAxis[0] = direction.x;
+        packet->rotationAxis[1] = direction.y;
+        packet->rotationAxis[2] = direction.z;
     } else {
         packet->rotationAxis[0] = 0;
         packet->rotationAxis[1] = -1.0f;
@@ -3310,10 +3310,10 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
     parBurstPacket_t *packet = (parBurstPacket_t *)hData->head.buffer->pPhysics;
     u32 kind;
     dds3ParOffsetBuffParts_t *history = hData->history.pParts;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 previousOrigin[4] QWORD_ALIGNED;
-    f32 rotationAxis[4] QWORD_ALIGNED;
-    f32 scaleVector[4] QWORD_ALIGNED;
+    sdfVector4_t origin;
+    sdfVector4_t previousOrigin;
+    sdfVector4_t rotationAxis;
+    sdfVector4_t scaleVector;
     f32 radius;
     f32 rotationStep;
     s32 completedCount;
@@ -3332,11 +3332,11 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
     completedCount = 0;
     rotationStep = SDF_FRAME_STEP(hData->rotationStepDegrees * (3.14159265f / 180.0f));
     repeatEnabled = hData->loop;
-    SDF_VU0_COPYVECTOR(origin, hData->head.origin);
-    previousOrigin[0] = hData->previousOrigin[0];
-    previousOrigin[1] = hData->previousOrigin[1];
-    previousOrigin[2] = hData->previousOrigin[2];
-    previousOrigin[3] = 0;
+    SDF_VU0_COPYVECTOR(&origin, hData->head.origin);
+    previousOrigin.x = hData->previousOrigin[0];
+    previousOrigin.y = hData->previousOrigin[1];
+    previousOrigin.z = hData->previousOrigin[2];
+    previousOrigin.w = 0;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++, history++) {
         s32 age = packet->age;
 
@@ -3353,25 +3353,25 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
             SDF_VU0_LOADVECTOR(packet->radialOffset);
             SDF_VU0_GETLENGTH(radius);
             radius += SDF_FRAME_STEP(packet->radiusStep);
-            scaleVector[0] = radius;
-            scaleVector[1] = radius;
-            scaleVector[2] = radius;
+            scaleVector.x = radius;
+            scaleVector.y = radius;
+            scaleVector.z = radius;
             SDF_VU0_NORMALIZE();
-            SDF_VU0_LOADVECTOR_B(scaleVector);
+            SDF_VU0_LOADVECTOR_B(&scaleVector);
             SDF_VU0_MULVECTOR();
             SDF_VU0_STOREVECTOR(packet->radialOffset);
             SDF_VU0_COPYMATRIX_B_TO_A();
-            rotationAxis[0] = packet->rotationAxis[0];
-            rotationAxis[1] = packet->rotationAxis[1];
-            rotationAxis[2] = packet->rotationAxis[2];
-            rotationAxis[3] = 0;
-            SDF_VU0_LOADVECTOR(rotationAxis);
+            rotationAxis.x = packet->rotationAxis[0];
+            rotationAxis.y = packet->rotationAxis[1];
+            rotationAxis.z = packet->rotationAxis[2];
+            rotationAxis.w = 0;
+            SDF_VU0_LOADVECTOR(&rotationAxis);
             SDF_VU0_APPLYMATRIX_XYZ();
-            SDF_VU0_STOREVECTOR_NOMEM(rotationAxis);
-            SetRotateMatrixAxis(rotationStep, (const sdfVector3_t *)rotationAxis);
+            SDF_VU0_STOREVECTOR_NOMEM(&rotationAxis);
+            SetRotateMatrixAxis(rotationStep, (const sdfVector3_t *)&rotationAxis);
             SDF_VU0_LOADVECTOR(packet->radialOffset);
             SDF_VU0_APPLYMATRIX_XYZ();
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_STOREVECTOR(packet->radialOffset);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(packet->position);
@@ -3392,16 +3392,16 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
                 switch (hData->head.kindState.type) {
                 case 1:
                     dds3Particle_BlurSetExp(hData->head.kindState.payload.history.table, packetIndex,
-                                               previousOrigin, packet->color, &hData->history,
+                                               &previousOrigin.x, packet->color, &hData->history,
                                                packet->billboardScale);
                     break;
                 case 2:
                     dds3Particle_TrackSetExp(hData->head.kindState.payload.crossStrip.drawSystem,
-                                               packetIndex, previousOrigin, color, &hData->history);
+                                               packetIndex, &previousOrigin.x, color, &hData->history);
                     break;
                 case 3:
                     dds3Particle_Track2SetExp(hData->head.kindState.payload.crossTriangle.drawSystem,
-                                                  packetIndex, previousOrigin, color, &hData->history);
+                                                  packetIndex, &previousOrigin.x, color, &hData->history);
                     break;
                 }
             }
@@ -3424,9 +3424,9 @@ void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
         }
         packet->age = age;
     }
-    hData->previousOrigin[0] = origin[0];
-    hData->previousOrigin[1] = origin[1];
-    hData->previousOrigin[2] = origin[2];
+    hData->previousOrigin[0] = origin.x;
+    hData->previousOrigin[1] = origin.y;
+    hData->previousOrigin[2] = origin.z;
 }
 
 void dds3ParticleSetColorTable(dds3ParticleColorAnim_t *pColAnim, s32 frame) {
@@ -3581,7 +3581,7 @@ void dds3Particle_BlurSet(dds3Particle_BlurBuff_t *table, s32 slotIndex, u32 col
 
 void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *hBlur, s32 index, const f32 *pPosBase, u32 abgr,
                    dds3ParOffsetBuff_t *pOffBuff, f32 scale) {
-    f32 localOrigin[4] QWORD_ALIGNED;
+    sdfVector4_t localOrigin;
     dds3ParOffsetBuffParts_t *history;
     dds3Particle_BlurBuffList_t *slot;
     f32 (*destination)[4];
@@ -3589,7 +3589,7 @@ void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *hBlur, s32 index, const f3
     s32 pointCapacity;
     s32 pointIndex;
 
-    SDF_VU0_COPYVECTOR(localOrigin, pPosBase);
+    SDF_VU0_COPYVECTOR(&localOrigin, pPosBase);
     history = &pOffBuff->pParts[index];
     slot = &hBlur->blurList[index];
     pointCount = history->count;
@@ -3605,9 +3605,9 @@ void dds3Particle_BlurSetExp(dds3Particle_BlurBuff_t *hBlur, s32 index, const f3
         do {
             --remaining;
             pointIndex = pointIndex == 0 ? lastIndex : pointIndex - 1;
-            (*destination)[0] = localOrigin[0] + points[pointIndex][0];
-            (*destination)[1] = localOrigin[1] + points[pointIndex][1];
-            (*destination)[2] = localOrigin[2] + points[pointIndex][2];
+            (*destination)[0] = localOrigin.x + points[pointIndex][0];
+            (*destination)[1] = localOrigin.y + points[pointIndex][1];
+            (*destination)[2] = localOrigin.z + points[pointIndex][2];
             ++destination;
         } while (remaining != 0);
     }
@@ -3671,8 +3671,8 @@ void dds3Particle_TrackSetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pPo
     parCell_t *cell = &hTrackPoly->cells[index];
     u128 *vertex = cell->history;
     u32 count = history->count;
-    f32 point[4] QWORD_ALIGNED;
-    f32 localOrigin[4] QWORD_ALIGNED;
+    sdfVector4_t point;
+    sdfVector4_t localOrigin;
 
     if (count >= 2) {
         s32 segments;
@@ -3680,23 +3680,23 @@ void dds3Particle_TrackSetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pPo
         s32 lastIndex;
         s32 ring;
 
-        SDF_VU0_COPYVECTOR(localOrigin, pPos);
+        SDF_VU0_COPYVECTOR(&localOrigin, pPos);
         segments = count - 1;
         cell->vertexCount = segments * 2;
         ring = history->point;
         lastIndex = pOffBuff->length - 1;
         ring = ring == 0 ? lastIndex : ring - 1;
-        point[0] = localOrigin[0] + history->points[ring][0];
-        point[1] = localOrigin[1] + history->points[ring][1];
-        point[2] = localOrigin[2] + history->points[ring][2];
-        point[3] = 0;
+        point.x = localOrigin.x + history->points[ring][0];
+        point.y = localOrigin.y + history->points[ring][1];
+        point.z = localOrigin.z + history->points[ring][2];
+        point.w = 0;
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
-            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_LOADVECTOR(&point);
             ring = ring == 0 ? lastIndex : ring - 1;
-            point[0] = localOrigin[0] + history->points[ring][0];
-            point[1] = localOrigin[1] + history->points[ring][1];
-            point[2] = localOrigin[2] + history->points[ring][2];
-            SDF_VU0_LOADVECTOR_C(point);
+            point.x = localOrigin.x + history->points[ring][0];
+            point.y = localOrigin.y + history->points[ring][1];
+            point.z = localOrigin.z + history->points[ring][2];
+            SDF_VU0_LOADVECTOR_C(&point);
             SDF_VU0_COPYVECTOR_C_TO_B();
             SDF_VU0_SUBVECTOR();
             SDF_VU0_LOADVECTOR_B(parLook);
@@ -3724,8 +3724,8 @@ void dds3Particle_Track2SetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pP
     parCell_t *cell = &hTrackPoly->cells[index];
     u128 *vertex = cell->history;
     u32 count = history->count;
-    f32 point[4] QWORD_ALIGNED;
-    f32 localOrigin[4] QWORD_ALIGNED;
+    sdfVector4_t point;
+    sdfVector4_t localOrigin;
 
     if (count >= 2) {
         s32 segments;
@@ -3733,23 +3733,23 @@ void dds3Particle_Track2SetExp(parSystem_t *hTrackPoly, s32 index, const f32 *pP
         s32 lastIndex;
         s32 ring;
 
-        SDF_VU0_COPYVECTOR(localOrigin, pPos);
+        SDF_VU0_COPYVECTOR(&localOrigin, pPos);
         segments = count - 1;
         cell->vertexCount = segments * 3;
         ring = history->point;
         lastIndex = pOffBuff->length - 1;
         ring = ring == 0 ? lastIndex : ring - 1;
-        point[0] = localOrigin[0] + history->points[ring][0];
-        point[1] = localOrigin[1] + history->points[ring][1];
-        point[2] = localOrigin[2] + history->points[ring][2];
-        point[3] = 0;
+        point.x = localOrigin.x + history->points[ring][0];
+        point.y = localOrigin.y + history->points[ring][1];
+        point.z = localOrigin.z + history->points[ring][2];
+        point.w = 0;
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex++) {
-            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_LOADVECTOR(&point);
             ring = ring == 0 ? lastIndex : ring - 1;
-            point[0] = localOrigin[0] + history->points[ring][0];
-            point[1] = localOrigin[1] + history->points[ring][1];
-            point[2] = localOrigin[2] + history->points[ring][2];
-            SDF_VU0_LOADVECTOR_C(point);
+            point.x = localOrigin.x + history->points[ring][0];
+            point.y = localOrigin.y + history->points[ring][1];
+            point.z = localOrigin.z + history->points[ring][2];
+            SDF_VU0_LOADVECTOR_C(&point);
             SDF_VU0_COPYVECTOR_C_TO_B();
             SDF_VU0_SUBVECTOR();
             SDF_VU0_LOADVECTOR_B(parLook);

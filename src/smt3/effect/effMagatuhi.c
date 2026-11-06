@@ -549,7 +549,7 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
 /* Release the allocation retained by the render/history owner. */
 void effMagaCylinderFreeParts(dds3MagatuhiBill_tag *work);
 void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work);
-void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 vector[4]);
+void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const sdfVector4_t *vector);
 /* Store a per-slot packed color; the native path does not validate the index. */
 void effMagaCylinderSetPart(dds3MagatuhiBill_tag *work, s32 index, u32 color);
 /* Accumulate 1/historyCount per entry; the nominal last fraction is below 1. */
@@ -819,7 +819,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     u32 colors[15];
     f32 offsets[15][8];
     f32 matrix[16];
-    f32 point[4] QWORD_ALIGNED;
+    sdfVector4_t point;
     sdfDrawTag_t *list;
     u32 packet;
     u32 *vertexPacket;
@@ -869,7 +869,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
         index = *writeIndices++;
         historyOffset += historyCount;
         if (slotColor & 0xFF000000) {
-            SDF_VU0_COPYVECTOR(point, historyPositions[index]);
+            SDF_VU0_COPYVECTOR(&point, historyPositions[index]);
             historyIndex = 0;
             if (validCount != 0) {
                 widthScale = baseSize * 4.0f;
@@ -882,11 +882,11 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
                     } else {
                         index--;
                     }
-                    SDF_VU0_LOADVECTOR(point);
+                    SDF_VU0_LOADVECTOR(&point);
                     SDF_VU0_STOREVECTOR(positions[pendingCount]);
                     SDF_VU0_LOADVECTOR_B(historyPositions[index]);
                     SDF_VU0_ADDVECTOR();
-                    SDF_VU0_STOREVECTOR(point);
+                    SDF_VU0_STOREVECTOR(&point);
                     UnpackRGBAWordFloat(slotColor, 0.0078125f);
                     SDF_VU0_COPYVECTOR_A_TO_B();
                     UnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
@@ -921,13 +921,13 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00320030[work->drawBucket]->regFunc)(D_00320030[work->drawBucket], list);
 }
 
-void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 vector[4]) {
+void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const sdfVector4_t *vector) {
     f32 (*newSlot)[4];
     f32 (*replayPosition)[4];
     f32 (*historyPosition)[4];
     f32 *angleRow;
     f32 *scalarOutput;
-    f32 viewDirection[4] QWORD_ALIGNED;
+    sdfVector4_t viewDirection;
     f32 baseLimit = work->historyDistanceScale;
     f32 limit;
     f32 phaseScalar;
@@ -986,11 +986,11 @@ void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 
         SDF_VU0_COPYVECTOR_C_TO_B();
         SDF_VU0_OUTERPRODUCT();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(viewDirection);
+        SDF_VU0_STOREVECTOR(&viewDirection);
         radial = sdfSin(angleRow[0]) * angleRow[1];
-        (*replayPosition)[0] += viewDirection[0] * radial;
-        (*replayPosition)[1] += viewDirection[1] * radial;
-        (*replayPosition)[2] += viewDirection[2] * radial;
+        (*replayPosition)[0] += viewDirection.x * radial;
+        (*replayPosition)[1] += viewDirection.y * radial;
+        (*replayPosition)[2] += viewDirection.z * radial;
     }
 
     SDF_VU0_LOADVECTOR_B(vector);
@@ -999,9 +999,9 @@ void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 
     SDF_VU0_GETLENGTH(radial);
     limit = baseLimit * 3.0f;
     if (limit < radial) {
-        VEC3_SPLAT(viewDirection, limit);
+        VEC3_SPLAT(&viewDirection.x, limit);
         SDF_VU0_NORMALIZE();
-        SDF_VU0_LOADVECTOR_B(viewDirection);
+        SDF_VU0_LOADVECTOR_B(&viewDirection);
         SDF_VU0_MULVECTOR();
     }
     SDF_VU0_STOREVECTOR(historyPosition);
@@ -1075,7 +1075,7 @@ void effMagaSmokeConvDelete(effMagaSmokeConv_tag *pData) {
  * The vector scratch w remains unwritten, as in the retail routine. */
 void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     effMagaSmokePart_tag *particle = &pMagaSmokeConv->pPart[index];
-    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t direction;
     f32 radius;
     f32 random;
     effCubicBezierSlot_t *slot;
@@ -1083,16 +1083,16 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = pMagaSmokeConv->head.initialRadius * (random + random);
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    direction[0] = random + random;
-    direction[1] = 0.0f;
+    direction.x = random + random;
+    direction.y = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    direction[2] = random + random;
-    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
+    direction.z = random + random;
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)&direction);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
-    particle->pos[0] = radius * direction[0];
+    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)&direction);
+    particle->pos[0] = radius * direction.x;
     particle->pos[1] = 0.0f;
-    particle->pos[2] = radius * direction[2];
+    particle->pos[2] = radius * direction.z;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->dirUp[0] = random + random;
     particle->dirUp[1] = 0.0f;
@@ -1119,14 +1119,14 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
 void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
-    f32 point[4] QWORD_ALIGNED;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 basePosition[4] QWORD_ALIGNED;
-    f32 target[4] QWORD_ALIGNED;
-    f32 viewDirection[4] QWORD_ALIGNED;
-    f32 sideAxis[4] QWORD_ALIGNED;
-    f32 towardTarget[4] QWORD_ALIGNED;
-    f32 startTangent[4] QWORD_ALIGNED;
+    sdfVector4_t point;
+    sdfVector4_t origin;
+    sdfVector4_t basePosition;
+    sdfVector4_t target;
+    sdfVector4_t viewDirection;
+    sdfVector4_t sideAxis;
+    sdfVector4_t towardTarget;
+    sdfVector4_t startTangent;
     effArrHdr_t *mathResource;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
@@ -1143,7 +1143,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_STOREVECTOR(viewDirection);
+    SDF_VU0_STOREVECTOR(&viewDirection);
     mathResource = pData->pBezier4P;
     valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
@@ -1156,12 +1156,12 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     fadeIn = SDF_FRAMES(pData->head.fade_in);
     fadeOut = SDF_FRAMES(pData->head.fade_out);
     slot = dds3Bezier4PGetPart(mathResource, 0);
-    SDF_VU0_COPYVECTOR(origin, &pData->head.originX);
+    SDF_VU0_COPYVECTOR(&origin, &pData->head.originX);
     captureDistance = pData->head.captureDistance;
     pathJitter = pData->head.c_ampli;
     pathStep = SDF_FRAME_STEP(pData->head.c_step);
     pathAcceleration = SDF_FRAME_DECAY(pData->head.c_step_a);
-    SDF_VU0_COPYVECTOR(target, &pData->head.targetX);
+    SDF_VU0_COPYVECTOR(&target, &pData->head.targetX);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
@@ -1169,51 +1169,51 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {
-                SDF_VU0_COPYVECTOR(basePosition, particle->pos);
+                SDF_VU0_COPYVECTOR(&basePosition, particle->pos);
                 radial = particle->amplitude * sdfSin(particle->angle);
                 particle->dirUp[1] += SDF_FRAME_STEP(particle->up_s);
-                point[0] = origin[0] + particle->pos[0] + particle->dirUp[0] * radial;
-                point[1] = origin[1] + particle->pos[1] + particle->dirUp[1];
-                point[2] = origin[2] + particle->pos[2] + particle->dirUp[2] * radial;
+                point.x = origin.x + particle->pos[0] + particle->dirUp[0] * radial;
+                point.y = origin.y + particle->pos[1] + particle->dirUp[1];
+                point.z = origin.z + particle->pos[2] + particle->dirUp[2] * radial;
                 particle->amplitude += scaleStep;
                 particle->angle += angleStep;
-                SDF_VU0_LOADVECTOR(target);
-                SDF_VU0_LOADVECTOR_B(point);
+                SDF_VU0_LOADVECTOR(&target);
+                SDF_VU0_LOADVECTOR_B(&point);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_GETLENGTH(distance);
                 if (distance <= captureDistance) {
                     SDF_VU0_NORMALIZE();
-                    SDF_VU0_STOREVECTOR(towardTarget);
-                    SDF_VU0_LOADVECTOR_B(viewDirection);
+                    SDF_VU0_STOREVECTOR(&towardTarget);
+                    SDF_VU0_LOADVECTOR_B(&viewDirection);
                     SDF_VU0_OUTERPRODUCT();
                     SDF_VU0_NORMALIZE();
-                    SDF_VU0_STOREVECTOR(sideAxis);
-                    SDF_VU0_LOADVECTOR(point);
-                    SDF_VU0_LOADVECTOR_B(basePosition);
+                    SDF_VU0_STOREVECTOR(&sideAxis);
+                    SDF_VU0_LOADVECTOR(&point);
+                    SDF_VU0_LOADVECTOR_B(&basePosition);
                     SDF_VU0_SUBVECTOR();
                     SDF_VU0_NORMALIZE();
-                    SDF_VU0_STOREVECTOR(startTangent);
-                    slot->controlPoints[0][0] = point[0];
-                    slot->controlPoints[0][1] = point[1];
-                    slot->controlPoints[0][2] = point[2];
+                    SDF_VU0_STOREVECTOR(&startTangent);
+                    slot->controlPoints[0][0] = point.x;
+                    slot->controlPoints[0][1] = point.y;
+                    slot->controlPoints[0][2] = point.z;
                     segmentDistance = captureDistance * 0.3999999762f;
                     offset = pathJitter * (dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f);
-                    slot->controlPoints[1][0] = point[0] + towardTarget[0] * segmentDistance + startTangent[0] * offset;
-                    slot->controlPoints[1][1] = point[1] + towardTarget[1] * segmentDistance + startTangent[1] * offset;
-                    slot->controlPoints[1][2] = point[2] + towardTarget[2] * segmentDistance + startTangent[2] * offset;
+                    slot->controlPoints[1][0] = point.x + towardTarget.x * segmentDistance + startTangent.x * offset;
+                    slot->controlPoints[1][1] = point.y + towardTarget.y * segmentDistance + startTangent.y * offset;
+                    slot->controlPoints[1][2] = point.z + towardTarget.z * segmentDistance + startTangent.z * offset;
                     segmentDistance = captureDistance * 0.6499999762f;
                     random = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
                     offset = pathJitter * (random + random);
-                    slot->controlPoints[2][0] = point[0] + towardTarget[0] * segmentDistance + sideAxis[0] * offset;
-                    slot->controlPoints[2][1] = point[1] + towardTarget[1] * segmentDistance + sideAxis[1] * offset;
-                    slot->controlPoints[2][2] = point[2] + towardTarget[2] * segmentDistance + sideAxis[2] * offset;
-                    slot->controlPoints[3][0] = target[0];
-                    slot->controlPoints[3][1] = target[1];
-                    slot->controlPoints[3][2] = target[2];
+                    slot->controlPoints[2][0] = point.x + towardTarget.x * segmentDistance + sideAxis.x * offset;
+                    slot->controlPoints[2][1] = point.y + towardTarget.y * segmentDistance + sideAxis.y * offset;
+                    slot->controlPoints[2][2] = point.z + towardTarget.z * segmentDistance + sideAxis.z * offset;
+                    slot->controlPoints[3][0] = target.x;
+                    slot->controlPoints[3][1] = target.y;
+                    slot->controlPoints[3][2] = target.z;
                     slot->step = pathStep;
                 }
             } else {
-                dds3Bezier4PPartRun(mathResource, i, point);
+                dds3Bezier4PPartRun(mathResource, i, &point.x);
                 slot->step *= pathAcceleration;
             }
             if (age < fadeIn) {
@@ -1224,7 +1224,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, point);
+            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &point);
         }
         if (age >= life && respawn) {
             particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1387,7 +1387,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     s32 spread = pData->param.timing;
     s32 fadeIn = SDF_FRAMES(pData->param.fade_in);
     s32 fadeOut = SDF_FRAMES(pData->param.fade_out);
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
     f32 fade;
     s32 frame;
     u32 particleIndex;
@@ -1400,7 +1400,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
             effMagaPoint4PartInit(pData, particleIndex);
         }
         if (frame > 0 && frame <= life) {
-            dds3Bezier4PPartRun(slots, particleIndex, out);
+            dds3Bezier4PPartRun(slots, particleIndex, &out.x);
             if (fadeIn > frame) {
                 fade = (f32)frame / (f32)fadeIn;
             } else if (life - frame <= fadeOut) {
@@ -1409,7 +1409,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, particleIndex, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            if (SDF_FRAME_DUE(frame)) effMagaCylinderSetPartPos(valueWork, particleIndex, out);
+            if (SDF_FRAME_DUE(frame)) effMagaCylinderSetPartPos(valueWork, particleIndex, &out);
         }
         if (frame >= life && respawn) {
             *delays = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1443,7 +1443,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
     s32 lifetimeFrames = work->param.life;
     u32 count = work->param.reserve;
     s32 *ages = work->pPart;
-    f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t samplePosition;
     f32 startPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 endPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 blendFraction;
@@ -1473,8 +1473,8 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
             SDF_VU0_LOADVECTOR(startPosition);
             SDF_VU0_LOADVECTOR_B(endPosition);
             SDF_VU0_INTERPOLATE(blendFraction);
-            SDF_VU0_STOREVECTOR(samplePosition);
-            effMagaCylinderSetPartPos(valueWork, particleIndex, samplePosition);
+            SDF_VU0_STOREVECTOR(&samplePosition);
+            effMagaCylinderSetPartPos(valueWork, particleIndex, &samplePosition);
             blendFraction += blendStep;
         }
         *ages = SDF_FRAMES(*ages) + 1;
@@ -1535,8 +1535,8 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
 }
 
 void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     dds3MagatuhiBill_tag *valueWork;
     effMagaCylinderPart_tag *particle;
     u8 respawn;
@@ -1556,7 +1556,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     fadeOut = SDF_FRAMES(pData->param.fade_out);
     tintColor = pData->abgr;
     valueWork = pData->pMagatuhi->valueWork;
-    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
+    SDF_VU0_COPYVECTOR_MEMOPS(&origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1566,14 +1566,14 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
         if (age > 0 && age <= life) {
             angle = particle->rotate;
             radius = particle->radius;
-            out[0] = sdfCos(angle) * radius;
-            out[1] = particle->height;
-            out[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR_B(origin);
-            SDF_VU0_LOADVECTOR(out);
+            out.x = sdfCos(angle) * radius;
+            out.y = particle->height;
+            out.z = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR_B(&origin);
+            SDF_VU0_LOADVECTOR(&out);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(out);
+            SDF_VU0_STOREVECTOR(&out);
             particle->rotate += SDF_FRAME_STEP(particle->rotate_s);
             particle->radius += SDF_FRAME_STEP(particle->radius_s);
             if (age < fadeIn) {
@@ -1585,7 +1585,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1623,8 +1623,8 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     f32 height;
     f32 angle;
     f32 radius;
@@ -1639,7 +1639,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
             maxSteps = work->param.reserve;
             frames = work->param.life;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->param.origin);
+            SDF_VU0_COPYVECTOR(&origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
@@ -1659,17 +1659,17 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
                 height = particle->height;
                 angle = particle->rotate + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
-                out[3] = 0;
+                out.w = 0;
                 for (k = 0; k < steps; k++) {
-                    out[0] = sdfCos(angle) * radius;
-                    out[1] = height;
-                    out[2] = sdfSin(angle) * radius;
-                    SDF_VU0_LOADVECTOR_B(origin);
-                    SDF_VU0_LOADVECTOR(out);
+                    out.x = sdfCos(angle) * radius;
+                    out.y = height;
+                    out.z = sdfSin(angle) * radius;
+                    SDF_VU0_LOADVECTOR_B(&origin);
+                    SDF_VU0_LOADVECTOR(&out);
                     SDF_VU0_APPLYMATRIX();
                     SDF_VU0_ADDVECTOR();
-                    SDF_VU0_STOREVECTOR(out);
-                    effMagaCylinderSetPartPos(valueWork, i, out);
+                    SDF_VU0_STOREVECTOR(&out);
+                    effMagaCylinderSetPartPos(valueWork, i, &out);
                     angle += angleStep;
                     radius += radiusStep;
                 }
@@ -1735,8 +1735,8 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
 }
 
 void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSpiralPart_tag *particle;
     u8 respawn;
@@ -1756,7 +1756,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     fadeOut = SDF_FRAMES(pData->param.fade_out);
     tintColor = pData->abgr;
     valueWork = pData->pMagatuhi->valueWork;
-    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
+    SDF_VU0_COPYVECTOR_MEMOPS(&origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1766,14 +1766,14 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
         if (age > 0 && age <= life) {
             angle = particle->rotate;
             radius = particle->radius;
-            out[0] = sdfCos(angle) * radius;
-            out[1] = particle->up;
-            out[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR_B(origin);
-            SDF_VU0_LOADVECTOR(out);
+            out.x = sdfCos(angle) * radius;
+            out.y = particle->up;
+            out.z = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR_B(&origin);
+            SDF_VU0_LOADVECTOR(&out);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(out);
+            SDF_VU0_STOREVECTOR(&out);
             particle->up += SDF_FRAME_STEP(particle->up_s);
             particle->rotate += SDF_FRAME_STEP(particle->rotate_s);
             particle->radius += SDF_FRAME_STEP(particle->radius_s);
@@ -1786,7 +1786,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1824,8 +1824,8 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     f32 height;
     f32 angle;
     f32 radius;
@@ -1841,7 +1841,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
             maxSteps = work->param.reserve;
             frames = work->param.life;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->param.origin);
+            SDF_VU0_COPYVECTOR(&origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
@@ -1862,17 +1862,17 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
                 angle = particle->rotate + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
                 height = particle->up + heightStep * (f32)frameOffset;
-                out[3] = 0;
+                out.w = 0;
                 for (k = 0; k < steps; k++) {
-                    out[0] = sdfCos(angle) * radius;
-                    out[1] = height;
-                    out[2] = sdfSin(angle) * radius;
-                    SDF_VU0_LOADVECTOR_B(origin);
-                    SDF_VU0_LOADVECTOR(out);
+                    out.x = sdfCos(angle) * radius;
+                    out.y = height;
+                    out.z = sdfSin(angle) * radius;
+                    SDF_VU0_LOADVECTOR_B(&origin);
+                    SDF_VU0_LOADVECTOR(&out);
                     SDF_VU0_APPLYMATRIX();
                     SDF_VU0_ADDVECTOR();
-                    SDF_VU0_STOREVECTOR(out);
-                    effMagaCylinderSetPartPos(valueWork, i, out);
+                    SDF_VU0_STOREVECTOR(&out);
+                    effMagaCylinderSetPartPos(valueWork, i, &out);
                     height += heightStep;
                     angle += angleStep;
                     radius += radiusStep;
@@ -1921,23 +1921,23 @@ void effMagaSmokeDelete(effMagaSmoke_tag *pData) {
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
 void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     effMagaSmokePart_tag *particle = &pMagaSmoke->pPart[index];
-    f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t direction;
     f32 radius;
     f32 random;
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = pMagaSmoke->param.radius * (random + random);
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    direction[0] = random + random;
-    direction[1] = 0.0f;
+    direction.x = random + random;
+    direction.y = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    direction[2] = random + random;
-    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
+    direction.z = random + random;
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)&direction);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
-    particle->pos[0] = radius * direction[0];
+    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)&direction);
+    particle->pos[0] = radius * direction.x;
     particle->pos[1] = 0.0f;
-    particle->pos[2] = radius * direction[2];
+    particle->pos[2] = radius * direction.z;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->dirUp[0] = random + random;
     particle->dirUp[1] = 0.0f;
@@ -1958,8 +1958,8 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
 }
 
 void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
     u8 respawn;
@@ -1982,7 +1982,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     fadeIn = SDF_FRAMES(pData->param.fadeIn);
     fadeOut = SDF_FRAMES(pData->param.fadeOut);
     valueWork = pData->pMagatuhi->valueWork;
-    SDF_VU0_COPYVECTOR_MEMOPS(origin, pData->param.origin);
+    SDF_VU0_COPYVECTOR_MEMOPS(&origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
@@ -1992,14 +1992,14 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
         if (age > 0 && age <= life) {
             radial = particle->amplitude * sdfSin(particle->angle);
             particle->dirUp[1] += SDF_FRAME_STEP(particle->up_s);
-            out[0] = particle->pos[0] + particle->dirUp[0] * radial;
-            out[1] = particle->pos[1] + particle->dirUp[1];
-            out[2] = particle->pos[2] + particle->dirUp[2] * radial;
-            SDF_VU0_LOADVECTOR_B(origin);
-            SDF_VU0_LOADVECTOR(out);
+            out.x = particle->pos[0] + particle->dirUp[0] * radial;
+            out.y = particle->pos[1] + particle->dirUp[1];
+            out.z = particle->pos[2] + particle->dirUp[2] * radial;
+            SDF_VU0_LOADVECTOR_B(&origin);
+            SDF_VU0_LOADVECTOR(&out);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(out);
+            SDF_VU0_STOREVECTOR(&out);
             particle->amplitude += scaleStep;
             particle->angle += angleStep;
             if (age < fadeIn) {
@@ -2011,7 +2011,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, out);
+            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -2049,8 +2049,8 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
     u32 i;
     u32 steps;
     s32 frameOffset; /* random age, then the initial state offset skipped before replay */
-    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
-    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT] QWORD_ALIGNED;
+    sdfVector4_t out;
+    sdfVector4_t origin;
     f32 lift;
     f32 angle;
     f32 scale;
@@ -2066,7 +2066,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
             maxSteps = work->param.reserve;
             frames = work->param.lifetimeFrames;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->param.origin);
+            SDF_VU0_COPYVECTOR(&origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);
@@ -2087,21 +2087,21 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 scale = particle->amplitude + scaleStep * (f32)frameOffset;
                 lift = particle->dirUp[1] + liftStep * (f32)frameOffset;
-                out[3] = 0;
+                out.w = 0;
                 for (k = 0; k < steps; k++) {
                     /* Native ordering: lift advances before sampling, scale/angle after. */
                     lift += liftStep;
                     /* Keep the sine evaluation even though its result is unused here. */
                     sdfSin(angle);
-                    out[0] = particle->pos[0] + particle->dirUp[0] * scale;
-                    out[1] = particle->pos[1] + lift;
-                    out[2] = particle->pos[2] + particle->dirUp[2] * scale;
-                    SDF_VU0_LOADVECTOR_B(origin);
-                    SDF_VU0_LOADVECTOR(out);
+                    out.x = particle->pos[0] + particle->dirUp[0] * scale;
+                    out.y = particle->pos[1] + lift;
+                    out.z = particle->pos[2] + particle->dirUp[2] * scale;
+                    SDF_VU0_LOADVECTOR_B(&origin);
+                    SDF_VU0_LOADVECTOR(&out);
                     SDF_VU0_APPLYMATRIX();
                     SDF_VU0_ADDVECTOR();
-                    SDF_VU0_STOREVECTOR(out);
-                    effMagaCylinderSetPartPos(valueWork, i, out);
+                    SDF_VU0_STOREVECTOR(&out);
+                    effMagaCylinderSetPartPos(valueWork, i, &out);
                     scale += scaleStep;
                     angle += angleStep;
                 }
@@ -2994,7 +2994,7 @@ extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
 /* vu0 routine: pad-driven camera translation and axis rotation. */
 void func_001AA6D0(void)
 {
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t axis;
     /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
     volatile f32 scale[4];
     /* Right stick pair; the left pair precedes it in the same pad buffer. */
@@ -3042,8 +3042,8 @@ void func_001AA6D0(void)
         SDF_VU0_COPYVECTOR_C_TO_B();
         SDF_VU0_OUTERPRODUCT();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(axis);
-        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_STOREVECTOR(&axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)&axis);
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
         SDF_VU0_SUBVECTOR();
@@ -3063,8 +3063,8 @@ void func_001AA6D0(void)
         SDF_VU0_LOADVECTOR(aViewDown);
         SDF_VU0_OUTERPRODUCT();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(axis);
-        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_STOREVECTOR(&axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)&axis);
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
         SDF_VU0_SUBVECTOR();
@@ -3139,8 +3139,8 @@ void func_001AA6D0(void)
         SDF_VU0_COPYVECTOR_C_TO_B();
         SDF_VU0_OUTERPRODUCT();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(axis);
-        SetRotateMatrixAxis(angle, (const sdfVector3_t *)axis);
+        SDF_VU0_STOREVECTOR(&axis);
+        SetRotateMatrixAxis(angle, (const sdfVector3_t *)&axis);
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
         SDF_VU0_SUBVECTOR();

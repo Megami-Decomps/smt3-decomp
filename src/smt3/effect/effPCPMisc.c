@@ -2563,9 +2563,9 @@ void effPCPSparkleSphereDelete(effPCPSparkleSphere_tag *hData) {
 }
 
 void effPCPSparkleSphereDraw(effPCPSparkleSphere_tag *hData) {
-    f32 pos[4] QWORD_ALIGNED;
-    f32 dir[4] QWORD_ALIGNED;
-    f32 size[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
+    sdfVector4_t dir;
+    sdfVector4_t size;
     billHandle_t *handle;
     f32 scale;
     u32 color;
@@ -2575,18 +2575,18 @@ void effPCPSparkleSphereDraw(effPCPSparkleSphere_tag *hData) {
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(dir);
+    SDF_VU0_STOREVECTOR(&dir);
     handle = hData->hBill;
-    size[0] = hData->area;
-    size[1] = hData->area;
-    size[2] = hData->area;
-    SDF_VU0_LOADVECTOR(size);
-    SDF_VU0_LOADVECTOR_B(dir);
+    size.x = hData->area;
+    size.y = hData->area;
+    size.z = hData->area;
+    SDF_VU0_LOADVECTOR(&size);
+    SDF_VU0_LOADVECTOR_B(&dir);
     SDF_VU0_MULVECTOR();
     SDF_VU0_LOADVECTOR_B(hData);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(pos);
-    dds3BillboardSetPosition(handle, pos);
+    SDF_VU0_STOREVECTOR(&pos);
+    dds3BillboardSetPosition(handle, &pos);
     scale = hData->area;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
@@ -2806,7 +2806,7 @@ effPCPHama02_tag *effPCPHama02Copy(effPCPHama02_tag *source) {
 
 void effPCPHama02Draw(effPCPHama02_tag *hData) {
     dds3ModelHandle_t *obj[2];
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -2815,10 +2815,10 @@ void effPCPHama02Draw(effPCPHama02_tag *hData) {
         } else {
             obj[0] = dds3EffectPartGetHandle(hData->handle[i * 2]);
             obj[1] = dds3EffectPartGetHandle(hData->handle[i * 2 + 1]);
-            pos[0] = hData->position[0];
-            pos[2] = hData->position[2];
-            pos[1] = (hData->position[1] - hData->verticalOffset[i] + 100.0f) * hData->scale;
-            SDF_VU0_LOADVECTOR(pos);
+            pos.x = hData->position[0];
+            pos.z = hData->position[2];
+            pos.y = (hData->position[1] - hData->verticalOffset[i] + 100.0f) * hData->scale;
+            SDF_VU0_LOADVECTOR(&pos);
             mdlSetPosition(obj[0]);
             dds3EffectPartSetScale(hData->handle[i * 2], hData->scale * 1.5f);
             dds3EffectPartSetScale(hData->handle[i * 2 + 1], 1.5f);
@@ -3245,8 +3245,8 @@ void effPCPZiodin01Init(effPCPZiodin01_tag *pPCPZiodin01) {
     f32 angle = 0.0f;
     f32 cosv = 0.0f;
     f32 sinv = 0.0f;
-    f32 dir[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t dir;
+    sdfVector4_t scale;
     f32 spread;
     f32 radius;
     f32 reach;
@@ -3268,23 +3268,23 @@ void effPCPZiodin01Init(effPCPZiodin01_tag *pPCPZiodin01) {
         D_0031F590->end[1] = 0;
         D_0031F590->end[0] = sinv * radius;
         D_0031F590->end[2] = cosv * radius;
-        dir[0] = sinv;
-        dir[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f + 2.0f;
-        dir[2] = cosv;
-        SDF_VU0_LOADVECTOR(dir);
+        dir.x = sinv;
+        dir.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f + 2.0f;
+        dir.z = cosv;
+        SDF_VU0_LOADVECTOR(&dir);
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(dir);
+        SDF_VU0_STOREVECTOR(&dir);
         reach = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 350.0f;
-        scale[2] = reach;
-        scale[0] = reach;
-        scale[1] = -reach;
-        SDF_VU0_LOADVECTOR(dir);
-        SDF_VU0_LOADVECTOR_B(scale);
+        scale.z = reach;
+        scale.x = reach;
+        scale.y = -reach;
+        SDF_VU0_LOADVECTOR(&dir);
+        SDF_VU0_LOADVECTOR_B(&scale);
         SDF_VU0_MULVECTOR();
         SDF_VU0_LOADVECTOR_B(effPCPZiodin01Vec);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(D_0031F590);
-        if (scale[0] < 250.0f) {
+        if (scale.x < 250.0f) {
             speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((effRandState_t *)dds3EffectBase) % 5 + 5;
         } else {
@@ -3346,7 +3346,7 @@ void effPCPZiodin02Init(effPCPZiodin01_tag *pPCPZiodin02) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t axis;
     f32 spread;
     f32 radius;
     f32 height;
@@ -3364,13 +3364,13 @@ void effPCPZiodin02Init(effPCPZiodin01_tag *pPCPZiodin02) {
         effPCPZiodin02Param->width_border = spread * 1.25f;
         effPCPZiodin02Param->width_edge = spread * 12.5f;
         radius = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 100.0f;
-        axis[0] = cosv;
-        axis[1] = 0;
-        axis[2] = -sinv;
+        axis.x = cosv;
+        axis.y = 0;
+        axis.z = -sinv;
         effPCPZiodin02Param->end[1] = 0;
         effPCPZiodin02Param->end[0] = sinv * radius;
         effPCPZiodin02Param->end[2] = cosv * radius;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)&axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin02Param->start[0] = 0;
         effPCPZiodin02Param->start[2] = 0;
@@ -3441,7 +3441,7 @@ void effPCPZiodin03Init(effPCPZiodin01_tag *pPCPZiodin03) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t axis;
     f32 spread;
     f32 height;
     f32 speed;
@@ -3460,10 +3460,10 @@ void effPCPZiodin03Init(effPCPZiodin01_tag *pPCPZiodin03) {
         effPCPZiodin03Param->end[1] = 0;
         effPCPZiodin03Param->end[0] = sinv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 500.0f);
         effPCPZiodin03Param->end[2] = cosv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 250.0f);
-        axis[0] = cosv;
-        axis[1] = 0;
-        axis[2] = -sinv;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
+        axis.x = cosv;
+        axis.y = 0;
+        axis.z = -sinv;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)&axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin03Param->start[0] = 0;
         effPCPZiodin03Param->start[2] = 0;
@@ -3534,7 +3534,7 @@ void effPCPZiodin04Init(effPCPZiodin01_tag *pPCPZiodin04) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t axis;
     f32 spread;
     f32 radius;
     f32 height;
@@ -3552,13 +3552,13 @@ void effPCPZiodin04Init(effPCPZiodin01_tag *pPCPZiodin04) {
         effPCPZiodin04Param->width_border = spread * 1.25f;
         effPCPZiodin04Param->width_edge = spread * 12.5f;
         radius = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 100.0f;
-        axis[0] = cosv;
-        axis[1] = 0;
-        axis[2] = -sinv;
+        axis.x = cosv;
+        axis.y = 0;
+        axis.z = -sinv;
         effPCPZiodin04Param->end[1] = 0;
         effPCPZiodin04Param->end[0] = sinv * radius;
         effPCPZiodin04Param->end[2] = cosv * radius;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)&axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin04Param->start[0] = 0;
         effPCPZiodin04Param->start[2] = 0;
@@ -3832,7 +3832,7 @@ void effPCPShockWave02Init(effPCPZiodin01_tag *pPCPShockWave02) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t axis;
     f32 spread;
     f32 height;
     f32 speed;
@@ -3851,10 +3851,10 @@ void effPCPShockWave02Init(effPCPZiodin01_tag *pPCPShockWave02) {
         effPCPShockWave02Param->end[1] = 0;
         effPCPShockWave02Param->end[0] = sinv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 500.0f);
         effPCPShockWave02Param->end[2] = cosv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 250.0f);
-        axis[0] = cosv;
-        axis[1] = 0;
-        axis[2] = -sinv;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
+        axis.x = cosv;
+        axis.y = 0;
+        axis.z = -sinv;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)&axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPShockWave02Param->start[0] = 0;
         effPCPShockWave02Param->start[2] = 0;
@@ -4101,14 +4101,14 @@ void effPCPMultiBlurExpDelete(effPCPMultiBlurExp_tag *hData) {
 
 void effPCPMultiBlurExpDraw(effPCPMultiBlurExp_tag *hData) {
     dds3Effect_PartialMultiBlur_t *obj;
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
 
     obj = hData->hBlur;
     SDF_VU0_LOADVECTOR(hData->pos);
     obj->param.area = (s32)((f32)effPCPBlurScreenOffset(hData->area) * hData->ratio);
-    SDF_VU0_STOREVECTOR(pos);
-    obj->param.Blur.center[0] = (s32)pos[0] - 0x800;
-    obj->param.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+    SDF_VU0_STOREVECTOR(&pos);
+    obj->param.Blur.center[0] = (s32)pos.x - 0x800;
+    obj->param.Blur.center[1] = ((s32)pos.y - 0x800) << 1;
     if (obj->param.area < hData->area_min) {
         obj->param.area = hData->area_min;
     }
@@ -4174,7 +4174,7 @@ void effPCPMultiFilterExpDelete(effPCPMultiBlurExp2_tag *hData) {
 }
 
 void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
-    f32 projected[4] QWORD_ALIGNED;
+    sdfVector4_t projected;
     s32 frame = hData->frame;
     s32 duration = SDF_FRAMES(hData->duration);
     dds3Effect_PartialMultiFilter_t *rect = hData->resource.rectangle;
@@ -4189,9 +4189,9 @@ void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
         if (hData->flags == 0) {
             SDF_VU0_LOADVECTOR(hData->position);
             effScreenOffset();
-            SDF_VU0_STOREVECTOR(projected);
-            rect->param.center[0] = (s32)projected[0] - 2048;
-            rect->param.center[1] = ((s32)projected[1] - 2048) << 1;
+            SDF_VU0_STOREVECTOR(&projected);
+            rect->param.center[0] = (s32)projected.x - 2048;
+            rect->param.center[1] = ((s32)projected.y - 2048) << 1;
         } else {
             rect->param.center[0] = 0;
             rect->param.center[1] = 0;
@@ -4265,7 +4265,7 @@ void effPCPMultiBlurExp2Delete(effPCPMultiBlurExp2_tag *hData) {
 }
 
 void effPCPMultiBlurExp2Draw(effPCPMultiBlurExp2_tag *hData) {
-    f32 projected[4] QWORD_ALIGNED;
+    sdfVector4_t projected;
     s32 frame = hData->frame;
     s32 duration = SDF_FRAMES(hData->duration);
     dds3Effect_PartialMultiBlur_t *rect = hData->resource.blur;
@@ -4280,9 +4280,9 @@ void effPCPMultiBlurExp2Draw(effPCPMultiBlurExp2_tag *hData) {
         if (hData->flags == 0) {
             SDF_VU0_LOADVECTOR(hData->position);
             effScreenOffset();
-            SDF_VU0_STOREVECTOR(projected);
-            rect->param.Blur.center[0] = (s32)projected[0] - 2048;
-            rect->param.Blur.center[1] = ((s32)projected[1] - 2048) << 1;
+            SDF_VU0_STOREVECTOR(&projected);
+            rect->param.Blur.center[0] = (s32)projected.x - 2048;
+            rect->param.Blur.center[1] = ((s32)projected.y - 2048) << 1;
         } else {
             rect->param.Blur.center[0] = 0;
             rect->param.Blur.center[1] = 0;
@@ -4832,7 +4832,7 @@ void effPCPBreathDraw(effPCPBreath_tag *work) {
     f32 muzzle[4] __attribute__((aligned(16)));
     f32 aim[4] __attribute__((aligned(16)));
     f32 center[4] __attribute__((aligned(16)));
-    f32 look[4] QWORD_ALIGNED;
+    sdfVector4_t look;
     f32 t;
     void *formation;
 
@@ -4845,9 +4845,9 @@ void effPCPBreathDraw(effPCPBreath_tag *work) {
         SDF_VU0_STOREVECTOR(center);
         effBTLModelGetSphereCenter(formation);
         SDF_VU0_STOREVECTOR(muzzle);
-        look[0] = center[0] - muzzle[0];
-        look[2] = center[2] - muzzle[2];
-        work->rotate = sdfAtan2(look[0], look[2]) - params->angle * 0.017453292f * 0.5f;
+        look.x = center[0] - muzzle[0];
+        look.z = center[2] - muzzle[2];
+        work->rotate = sdfAtan2(look.x, look.z) - params->angle * 0.017453292f * 0.5f;
     }
     if (node != 0) {
         SDF_VU0_LOADMATRIX(work->matrix);
@@ -5984,8 +5984,8 @@ void effPCPEyeThunderDelete(effPCPEyeThunder_tag *hData) {
 }
 
 void effPCPEyeThunderDraw(effPCPEyeThunder_tag *hData) {
-    f32 point[4] QWORD_ALIGNED;
-    f32 dir[4] QWORD_ALIGNED;
+    sdfVector4_t point;
+    sdfVector4_t dir;
     u8 *params;
     f32 dx;
     f32 dy;
@@ -6002,27 +6002,27 @@ void effPCPEyeThunderDraw(effPCPEyeThunder_tag *hData) {
     SDF_VU0_LOADVECTOR_B(hData);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(dir);
+    SDF_VU0_STOREVECTOR(&dir);
     params = (u8 *)effPCP_ThunderPolyGetParam(hData->pThunderPoly);
-    dx = dir[0];
-    dy = dir[1];
-    dz = dir[2];
+    dx = dir.x;
+    dy = dir.y;
+    dz = dir.z;
     s = hData->start;
     x = hData->pos[0] + dx * s;
     y = hData->pos[1] + dy * s;
     z = hData->pos[2] + dz * s;
-    point[0] = x;
-    point[1] = y;
-    point[2] = z;
-    SDF_VU0_COPYVECTOR(params, point);
+    point.x = x;
+    point.y = y;
+    point.z = z;
+    SDF_VU0_COPYVECTOR(params, &point);
     s = hData->length;
     x += dx * s;
     y += dy * s;
     z += dz * s;
-    point[0] = x;
-    point[1] = y;
-    point[2] = z;
-    SDF_VU0_COPYVECTOR(params + 0x10, point);
+    point.x = x;
+    point.y = y;
+    point.z = z;
+    SDF_VU0_COPYVECTOR(params + 0x10, &point);
     effPCP_ThunderPolySetColor(hData->pThunderPoly, hData->abgr);
     effPCP_ThunderPolyDraw(hData->pThunderPoly);
 }
@@ -6205,39 +6205,39 @@ void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
 }
 
 void effPCPRingPolyExpSetVertex(f32 pPCPRingPolyExp, effPCPRingPolyExp_tag *radius) {
-    f32 direction[4] QWORD_ALIGNED;
-    f32 inner[4] QWORD_ALIGNED;
-    f32 first[4] QWORD_ALIGNED;
-    f32 middle[4] QWORD_ALIGNED;
-    f32 outer[4] QWORD_ALIGNED;
+    sdfVector4_t direction;
+    sdfVector4_t inner;
+    sdfVector4_t first;
+    sdfVector4_t middle;
+    sdfVector4_t outer;
     f32 angle = 0.0f;
     f32 step;
     f32 *out;
     u32 count;
     u32 i;
 
-    VEC3_SPLAT(inner, pPCPRingPolyExp);
-    VEC3_SPLAT(first, pPCPRingPolyExp + radius->param.width_e_in);
-    VEC3_SPLAT(middle, first[0] + radius->param.width_c);
-    VEC3_SPLAT(outer, middle[0] + radius->param.width_e_out);
+    VEC3_SPLAT(&inner.x, pPCPRingPolyExp);
+    VEC3_SPLAT(&first.x, pPCPRingPolyExp + radius->param.width_e_in);
+    VEC3_SPLAT(&middle.x, first.x + radius->param.width_c);
+    VEC3_SPLAT(&outer.x, middle.x + radius->param.width_e_out);
     count = (s32)radius->hPoly->vertexCount >> 2;
     out = radius->hPoly->pVertex;
     step = 3.14159265f * 2.0f / (f32)radius->param.split;
-    direction[1] = 0.0f;
+    direction.y = 0.0f;
     for (i = 0; i < count; i++, out += 16) {
-        direction[0] = sdfCos(angle);
-        direction[2] = sdfSin(angle);
-        SDF_VU0_LOADVECTOR_B(direction);
-        SDF_VU0_LOADVECTOR(inner);
+        direction.x = sdfCos(angle);
+        direction.z = sdfSin(angle);
+        SDF_VU0_LOADVECTOR_B(&direction);
+        SDF_VU0_LOADVECTOR(&inner);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(out);
-        SDF_VU0_LOADVECTOR(first);
+        SDF_VU0_LOADVECTOR(&first);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(out + 4);
-        SDF_VU0_LOADVECTOR(middle);
+        SDF_VU0_LOADVECTOR(&middle);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(out + 8);
-        SDF_VU0_LOADVECTOR(outer);
+        SDF_VU0_LOADVECTOR(&outer);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(out + 12);
         angle += step;
@@ -6372,11 +6372,11 @@ void effPCPRingPolyExpSetDirection(effPCPRingPolyExp_tag *hData, void *pMatrix) 
 }
 
 void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 radius) {
-    f32 dir[4] QWORD_ALIGNED;
-    f32 rowA[4] QWORD_ALIGNED;
-    f32 rowB[4] QWORD_ALIGNED;
-    f32 rowC[4] QWORD_ALIGNED;
-    f32 rowD[4] QWORD_ALIGNED;
+    sdfVector4_t dir;
+    sdfVector4_t rowA;
+    sdfVector4_t rowB;
+    sdfVector4_t rowC;
+    sdfVector4_t rowD;
     f32 *points;
     f32 angle = 0.0f;
     f32 step;
@@ -6386,13 +6386,13 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
     s32 n;
     u32 i;
 
-    VEC3_SPLAT(rowA, radius);
+    VEC3_SPLAT(&rowA.x, radius);
     r1 = radius + pPCPRingPolyExp2->head.radiusStepA;
-    VEC3_SPLAT(rowB, r1);
+    VEC3_SPLAT(&rowB.x, r1);
     r2 = r1 + pPCPRingPolyExp2->head.radiusStepB;
-    VEC3_SPLAT(rowC, r2);
+    VEC3_SPLAT(&rowC.x, r2);
     r3 = r2 + pPCPRingPolyExp2->head.radiusStepC;
-    VEC3_SPLAT(rowD, r3);
+    VEC3_SPLAT(&rowD.x, r3);
     n = (s32)pPCPRingPolyExp2->hPoly->vertexCount >> 2;
     points = pPCPRingPolyExp2->hPoly->pVertex;
     step = 6.2831851f / (f32)pPCPRingPolyExp2->head.split;
@@ -6408,28 +6408,28 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
     }
     for (i = 0; i < n; i++) {
         if (pPCPRingPolyExp2->head.mode == 0) {
-            dir[0] = sdfCos(angle);
-            dir[1] = sdfSin(angle);
-            dir[2] = 0;
+            dir.x = sdfCos(angle);
+            dir.y = sdfSin(angle);
+            dir.z = 0;
         } else {
-            dir[0] = sdfCos(angle);
-            dir[1] = 0;
-            dir[2] = sdfSin(angle);
+            dir.x = sdfCos(angle);
+            dir.y = 0;
+            dir.z = sdfSin(angle);
         }
-        dir[3] = 0;
-        SDF_VU0_LOADVECTOR(dir);
+        dir.w = 0;
+        SDF_VU0_LOADVECTOR(&dir);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_COPYVECTOR_A_TO_B();
-        SDF_VU0_LOADVECTOR(rowA);
+        SDF_VU0_LOADVECTOR(&rowA);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(points);
-        SDF_VU0_LOADVECTOR(rowB);
+        SDF_VU0_LOADVECTOR(&rowB);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(points + 4);
-        SDF_VU0_LOADVECTOR(rowC);
+        SDF_VU0_LOADVECTOR(&rowC);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(points + 8);
-        SDF_VU0_LOADVECTOR(rowD);
+        SDF_VU0_LOADVECTOR(&rowD);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR(points + 12);
         angle += step;
@@ -6907,7 +6907,7 @@ void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
 }
 
 void effPCPMakkaDraw(effPCPMakka_tag *hData) {
-    f32 scaleVec[4] QWORD_ALIGNED;
+    sdfVector4_t scaleVec;
     dds3ModelHandle_t *model;
     sdfModelRootNode_t *inner;
     sdfMotionCtrlr_t **slot;
@@ -6936,11 +6936,11 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
             }
             mdlSetRotate(model);
             s = hData->scale * hData->scale;
-            scaleVec[3] = 0.0f;
-            scaleVec[0] = s;
-            scaleVec[1] = s;
-            scaleVec[2] = s;
-            SDF_VU0_LOADVECTOR_MEMOPS(scaleVec[0]);
+            scaleVec.w = 0.0f;
+            scaleVec.x = s;
+            scaleVec.y = s;
+            scaleVec.z = s;
+            SDF_VU0_LOADVECTOR_MEMOPS(scaleVec.x);
             mdlSetScale(model);
             mdlSetColor(model, hData->abgr);
             SDF_VU0_LOADVECTOR(hData);
@@ -6958,10 +6958,10 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
                 inner = model->modelRoot;
                 s = 1.0f / hData->scale;
                 node = (*(effPCPAgiFireball2PartList_t **)inner)->PartList[0];
-                scaleVec[0] = s;
-                scaleVec[1] = s;
-                scaleVec[2] = s;
-                SDF_VU0_LOADVECTOR_MEMOPS(scaleVec[0]);
+                scaleVec.x = s;
+                scaleVec.y = s;
+                scaleVec.z = s;
+                SDF_VU0_LOADVECTOR_MEMOPS(scaleVec.x);
                 effPCPMakkaUpdateNode(node);
                 sdfModelEvalTm(inner);
                 sdfModelLinkOt(D_002F69B8, inner);
@@ -7908,8 +7908,8 @@ INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *hData) {
     effEveBEDParams_t place;
     effBTL_SkillPositionPtr_t aim;
-    f32 position[4] QWORD_ALIGNED;
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t direction;
     u8 *form;
     f32 scale;
 
@@ -7926,12 +7926,12 @@ void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *hData) {
         aim.height = 1;
         aim.direction = 0;
         aim.radius = 0;
-        effBTLPartGetPositionPtr(form, &aim, position);
+        effBTLPartGetPositionPtr(form, &aim, &position.x);
         SDF_VU0_LOADVECTOR(aViewEye);
         SDF_VU0_LOADVECTOR_B(aViewTarget);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(direction);
+        SDF_VU0_STOREVECTOR(&direction);
         switch (effBTLModelGetID(form)) {
     case 0x102: case 0x103: case 0x108: case 0x123: case 0x124: case 0x125:
             scale = 0.0f;
@@ -7946,9 +7946,9 @@ void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *hData) {
             break;
         }
         place.center[3] = 0.0f;
-        place.center[0] = position[0] + direction[0] * scale;
-        place.center[1] = position[1] + direction[1] * scale;
-        place.center[2] = position[2] + direction[2] * scale;
+        place.center[0] = position.x + direction.x * scale;
+        place.center[1] = position.y + direction.y * scale;
+        place.center[2] = position.z + direction.z * scale;
     } else {
         place.center[0] = 0.0f;
         place.center[1] = -200.0f;
