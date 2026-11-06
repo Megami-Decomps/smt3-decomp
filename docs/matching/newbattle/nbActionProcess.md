@@ -244,3 +244,49 @@ all 85 peers and owned data. Retail checksum, 427 tests, 147 guarded owners /
 `df2cf13c91edaa9dfdc6dcae1a91b1a96290d359`. Exact-source CI
 [41088837974](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41088837974)
 attempt 1 completed successfully, with every actual step passing and none skipped.
+
+
+## CheckAction_ESCAPE (newbattle/nbActionProcess, 0xE4)
+
+57 of 57 words match at 228 bytes in ordinary C. Keep the first successful
+case's actual `SetNextActionSeq(a, 0x12); return 1;` inside case 1 instead
+of reaching the common success tail with `break`. The second case retains
+that common tail. Reverting this one arm gives 48 of 57 words at the same
+size; spelling both success calls locally also matches but is unnecessary.
+No binding, empty constraint, type change, extra operation or artificial
+consumer is needed.
+
+Qualified stock compiler outputs show why the two source-level call sites
+matter. Initial RTL has a first-case copy into `$4`; CSE removes that copy
+because the incoming action argument is already there. The life pass keeps
+`$4` live through the dispatch and case-one end-type test, whereas the
+common-tail-only control marks it dead at its entry copy. The two compare
+constants therefore use native `$5` instead of clobbering `$4`. Both real
+success calls survive scheduling and allocation; `27.jump2` merges them.
+The remaining argument scheduling and branch destination then agree with
+retail. These are paired compiler pass-output observations, not a claim to
+have recovered historical source spelling or a hooked allocator decision.
+
+The selector still converts signed-halfword `seqtime` to unsigned16 before
+dividing by 15 and narrowing the quotient. Case 1 succeeds only when the
+unsigned32 end type is not 3, clears packet time and sets next sequence 18.
+Case 2 succeeds only when it is 3, stores packet time 30, fades out, adds
+the sound packet, reads the current form and its signed index after those
+calls, updates the time list and sets next sequence 18. Other paths return
+zero without mutation. Store widths, callback-sensitive reads, original
+pointers, call targets and order are unchanged. The existing unsigned
+`dds3FadeOut` declaration disagrees with its signed provider, but all four
+unchanged positive arguments are representable in both types; this patch
+does not introduce or repair that separate declaration debt.
+
+Complete owner: 90 match, 0 differ. Original, target-enabled baseline, final
+and both-local-calls sources pass twelve complete assembly and entire-ELF
+plain/dump pairs across production, SKIP_ASM and retained-C modes. The two
+stock traces independently reproduce their corresponding complete plain
+assembly. All 132 initially frozen input hashes remain unchanged. All
+95 production, 89 SKIP_ASM and 95 retained-C peers and owned noncode targets
+are preserved; production allocated text equals the guarded baseline.
+Strict production and SKIP_ASM checks retain the same two inherited
+implicit-declaration errors; retained-C strict checks pass. Independent
+semantic, owner, parity and pass-output review passes. Integrated retail
+and regression checks remain separate publication gates.

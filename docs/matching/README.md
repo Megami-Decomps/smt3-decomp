@@ -25,10 +25,10 @@ both native and emitted sizes when they differ.
 | 8 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 7 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 7 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
-| 6 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 5 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |

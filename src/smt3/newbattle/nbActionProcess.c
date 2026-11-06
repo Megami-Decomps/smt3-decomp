@@ -3977,10 +3977,10 @@ void SetAction_ESCAPE(nbActionProcessData_t *a)
     CheckKoketaNego(a);
 }
 
-/* NON_MATCHING: 9 of 57 words differ (first at +0x1C). */
-
-#ifdef NON_MATCHING
-
+/* Keep the first successful escape-check arm's real sequence call local.
+ * ee-gcc merges it with the later success tail only after preserving the
+ * original action argument across dispatch. This ordinary source shape
+ * reproduces retail; it does not establish the original source spelling. */
 s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
 {
     switch ((u16)((u16)a->seqtime / 15)) {
@@ -3989,7 +3989,8 @@ s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
             goto out;
         }
         a->packettime = 0;
-        break;
+        SetNextActionSeq(a, 0x12);
+        return 1;
     case 2:
         if (a->data->endtype != 3) {
             goto out;
@@ -4007,12 +4008,6 @@ s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
 out:
     return 0;
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckAction_ESCAPE);
-
-#endif
 
 void SetAction_RETURN(nbActionProcessData_t *a)
 {
