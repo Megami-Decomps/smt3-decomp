@@ -136,50 +136,62 @@ this function, and the implicit declaration makes ee-gcc treat it as returning
 
 ## fldAutoMapDrawIconOfsRF (field/fldAutoMap, 0x33C)
 
-187 of 207 words match, at the exact 828-byte size.
+207 of 207 words match at the native 828-byte extent. The complete owner is
+35 match / 0 differ, including owned data. The rotated icon builds four actual
+texture-coordinate endpoints, rotates its four corners through VU0, converts
+the screen coordinates and emits one textured quad.
 
-The rotated-icon sibling of `fldAutoMapDrawIconOfsR`: it builds the same
-textured quad, but in world space, rotating the four corners through the VU0
-matrix before projecting. Fully recovered apart from register allocation.
+Two real scalar phases must remain distinct: signed integer `width`/`height`
+feed the float extents, while `u1`/`vv1` are the later texture endpoints. The
+integer arithmetic stays within s32 for every signed-halfword table element.
+The ordinary separated form still matches 187/207 words. Local bindings on
+`vv0` and `vv1`, to native call-preserved `$17` and `$18`, close the remaining
+allocation differences. Both have actual quad-call consumers; no empty asm,
+extra access, dummy consumer, invented type or bound is introduced.
 
-The shape, which carried over to the matching `fldAutoMapDrawBgOfsRF`:
+Deletion-only controls at the same 828-byte extent:
 
-- Four `sdfVector4_t` locals get `.x`, `.y = 0.0f`, `.z` in declaration order
-  `v0`, `v3`, `v1`, `v2`, which is what matches retail's store schedule. The
-  natural `v0`..`v3` order is 8 words worse here and 8 worse in the sibling.
-- Each is rotated with `SDF_VU0_LOADVECTOR(&v)`, `SDF_VU0_APPLYMATRIX_XYZ()`,
-  `SDF_VU0_STOREVECTOR_NOMEM(&v)`. The `_NOMEM` store is required: the plain
-  form's `"memory"` clobber lets gcse share the `addiu rd, $29, N` between the
-  load and the store, where retail rematerialises it for each.
-- The screen coordinates are then written back into the same fields,
-  `v.x = v.x + x * 16.0f;` and `v.z = v.z * 0.5f + y * 16.0f;`, x before z for
-  every vector *except* `v1`, where z comes first. That one inversion is worth
-  14 words; every other combination of the four is worse, and inverting all
-  four costs 23.
-- `color` needs the `+ 0x80000000` as its own statement,
-  `color = (s32)(...) << 24; color += 0x80000000;`, or the shift goes to a temp
-  and the add writes the variable, which is 2 words off.
-- `0.2f` and `3.14f` are this unit's first two `.lit4` entries, `D_0054C498`
-  and `D_0054C49C`.
+- Remove both bindings: 187/207 words.
+- Remove only `vv0`: 196/207.
+- Remove only `vv1`: 180/207.
+- Keep the bindings but reuse each extent as its endpoint: 196/207, with
+  a float conversion/store register swap and one commuted integer sum.
 
-What is left: the four texture-coordinate locals hold the other register of
-each pair. Retail has `u1` in `$16`, `v0` in `$17`, `v1` in `$18` and `u0` in
-`$19`; the draft swaps `$16` with `$17` and `$18` with `$19`, which moves ten
-`lh`/`sll`/`addu`/`sw` words and the two `daddu` argument copies. Nothing
-reached it: all 24 declaration orders and all 24 assignment orders of the four
-locals (no effect at all, gcse normalises them), separate `tw`/`th` locals for
-the widths, `u1 += u0` for `u1 = u0 + u1`, the sums computed before the float
-coordinates, `u1 = t[0] * 16 + t[2] * 16` with the bases written at the call
-sites (135 words), the bases as locals with the sums at the call sites (192),
-`u32` locals (171), the shifts as their own statements (38), and
-`fldAutoMapIconOfsTable[index][k]` at every use (160).
+These are complete-owner emitted-output measurements, not an inferred internal
+allocator mechanism or evidence of historical source spelling. Binding all four
+texture coordinates regresses and is not retained. Ordinary source remains
+preferred everywhere it already matches.
 
-The sibling `fldAutoMapDrawBgOfsRF` had the same permutation in its eight
-constant texture coordinates and *was* fixed by declaration order, because
-there they are initializers materialised in the prologue: declaring them
-`au, av, du, dv, bu, bv, cu, cv` (the `d` pair moved ahead of `b` and `c`) took
-it from 10 differing words to exact. The same lever does not exist here, since
-these four are computed from the table mid-function.
+The initialized values cross only `SetRotateMatrixY` before their final quad
+argument consumers. Native review follows its eleven transitive function bodies.
+Nine do not touch `$17`/`$18`; `__ieee754_rem_pio2f` and
+`__kernel_rem_pio2f` save and restore both. The existing VU0 sequence modifies
+its vector/accumulator state and does not touch those GPRs. The
+XYZ operation does not consume the uninitialized input W component; all native
+vector loads, arithmetic and stores are retained in their original order.
+
+Color packing converts the signed sine result to u32 before the left shift,
+matching the native low-word shift without negative signed-shift undefined
+behavior. This is byte-neutral. The two allocator/draw declarations now match
+the actual providers: `sdfGrAllocPacketBuff` returns an s32 EE address, consumed
+through `EE_ADDR_AS`, and `sdfPrimLinkFt4` takes signed color and an allocator
+function pointer. Its allocator argument remains null. The declaration-only
+control preserves all existing code and data in all three compiler modes.
+
+Complete production, SKIP_ASM and retained-draft ordinary/`-da` assembly and
+whole-object pairs agree; strict implicit-declaration builds pass. Resolved
+peer checks preserve all 39/34/39 other functions and their relocation targets.
+The production 96-byte and retained-draft 64-byte literal pools are unchanged.
+SKIP_ASM gains only this target's native eight-byte literal prefix; all peer
+literal values and the remaining pool bytes are unchanged. No hidden internal
+compiler trace is claimed.
+
+Host tests of the actual final body, with modeled VU operations, compare packet
+arguments, callback order and mutable globals/table data with an independent
+reference. They pass 100,000 finite-input/full-s16-table scenarios in optimized
+and ASan/UBSan builds. This is sampled source behavior, not EE FPU emulation,
+proof for arbitrary invalid indices or a new contract for out-of-range float
+conversions. LeakSanitizer is disabled under the execution environment.
 
 ## fldDrawAreaBlockFont (field/fldAutoMap, 0x388)
 

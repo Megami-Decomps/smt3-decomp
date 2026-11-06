@@ -149,8 +149,8 @@ trmUpdateSeqRoot	facility/fclTerminalUpdate	0x290	164 of 164 words match	docs/ma
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/matching/field/fldAutoMap.md	3
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	50
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	97
-fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/matching/field/fldAutoMap.md	137
-fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	184
+fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/matching/field/fldAutoMap.md	137
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	196
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/matching/field/fldDraw.md	3

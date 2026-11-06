@@ -390,7 +390,7 @@ extern void *D_0054EF40;
 
 extern s16 fldAutoMapIconOfsTable[][8];
 
-extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 aSize);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
@@ -398,9 +398,9 @@ extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 
 
 extern sdfGrOt_t *fldDrawGetOt(void);
 
-extern void sdfPrimLinkFt4(sdfDrawTag_t *aTag, u32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
+extern void sdfPrimLinkFt4(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
                            s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2,
-                           s32 aV2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aZ, void *aAllocator);
+                           s32 aV2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aZ, s32 (*aAllocator)(s32));
 
 void fldAutoMapFontInit(s32 bank) {
     s32 i;
@@ -586,7 +586,7 @@ void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
     s32 dx;
     s32 dy;
 
-    tag = sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, fldAutoMapSpriteTex[0], 0);
     tu = t[0];
@@ -654,9 +654,6 @@ extern f32 sdfSin(f32 aRadius);
 extern void SetRotateMatrixY(f32 aAngle);
 extern f32 D_0054EE70;
 
-/* NON_MATCHING: 187 of 207 words, exact size; the four texture-coordinate
- * locals hold the other register of each pair ($16 with $17, $18 with $19). */
-#ifdef NON_MATCHING
 void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     sdfVector4_t v0;
     sdfVector4_t v1;
@@ -667,35 +664,42 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     s16 *t;
     u32 color;
     s32 u0;
-    s32 vv0;
+    /* Target-specific allocation aid for the two real V texture coordinates.
+     * Separate widths below keep the endpoint lifetime after its extent use;
+     * both coordinates survive SetRotateMatrixY and feed the quad packet.
+     * Removing either binding loses native allocation; this is not evidence
+     * of the original source spelling. */
+    FAKEMATCH_ASM_REG(s32, vv0, "$17");
     s32 u1;
-    s32 vv1;
+    FAKEMATCH_ASM_REG(s32, vv1, "$18");
+    s32 width;
+    s32 height;
     f32 x0;
     f32 z0;
     f32 x1;
     f32 z1;
 
     if (index == 1) {
-        color = (s32)(sdfSin(D_0054EE70) * 64.0f) << 24;
+        color = (u32)(s32)(sdfSin(D_0054EE70) * 64.0f) << 24;
         color += 0x80000000;
         D_0054EE70 = D_0054EE70 + 0.2f;
     } else {
         color = 0x80000000;
     }
-    tag = sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, fldUiTexture, 0);
     t = fldAutoMapIconOfsTable[index];
     u0 = t[0] * 16;
     vv0 = t[1] * 16;
-    u1 = t[2] * 16;
-    vv1 = t[3] * 16;
+    width = t[2] * 16;
+    height = t[3] * 16;
     x0 = (f32)-(t[4] * 16);
     z0 = (f32)-(t[5] * 16);
-    x1 = x0 + (f32)u1;
-    z1 = z0 + (f32)vv1;
-    u1 = u0 + u1;
-    vv1 = vv0 + vv1;
+    x1 = x0 + (f32)width;
+    z1 = z0 + (f32)height;
+    u1 = u0 + width;
+    vv1 = vv0 + height;
     v0.x = x0;
     v0.y = 0.0f;
     v0.z = z0;
@@ -737,9 +741,6 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     ot = fldDrawGetOt();
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
-#endif
 
 void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
     sdfVector4_t v0;
@@ -757,7 +758,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
     s32 cu = 0;
     s32 cv = 0x800;
 
-    tag = sdfGrAllocPacketBuff(0x20);
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, fldAutoMapWindowTex[2], 0);
     v0.x = -4800.0f;
