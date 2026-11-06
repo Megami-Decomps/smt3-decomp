@@ -119,6 +119,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/NbNegoFlowInnen | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 1 | newbattle/NbNegoFlowFullMoon | [newbattle/NbNegoFlowFullMoon.md](newbattle/NbNegoFlowFullMoon.md) |
 | 1 | kernel/dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
+| 1 | kernel/dds3SequenceList | [kernel/dds3SequenceList.md](kernel/dds3SequenceList.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |

@@ -67,7 +67,7 @@ extern s32 cmbCheckProcessStat(void);
 extern void InitPipe(s32 data, s32 prevData);
 extern void dds3AdminiExitSequence(void);
 extern void nbInitBattleTest(void);
-extern void nbCallNewBattle(s32 encpack, void *data);
+extern void nbCallNewBattle(s32 encpack, s32 data);
 extern s32 evtLoadArea(s32 fld, s32 area);
 extern s32 evtLoadUnit(s32 major, s32 minor);
 extern evtUnit_t *evtGetUnitHandle(s32 serial);
@@ -450,7 +450,7 @@ void CallNewBattleTest(u32 flg, s32 *data)
             nbInitBattleTest();
             return;
         }
-        nbCallNewBattle(data[0], EE_ADDR_AS(void *, data[1]));
+        nbCallNewBattle(data[0], data[1]);
         return;
     }
     dds3AdminiExitSequence();
