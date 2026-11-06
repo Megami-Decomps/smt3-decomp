@@ -11481,13 +11481,6 @@ void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor)
     cursor->unk_24 = end;
 }
 
-extern f32 D_0054E474;
-
-/* NON_MATCHING: 15 of 32 words differ (first at +0x10). */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
 {
     s8 delay = work->unk_38;
@@ -11498,7 +11491,8 @@ s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
         if (next >= 0) {
             f32 scaled = next;
 
-            next = (s32)(scaled / D_0054E474);
+            /* Native .lit4 coefficient 0x3f999999, exact on EE and host compilers. */
+            next = (s32)(scaled / 0x1.333332p0f);
             work->cursor.unk_30 = next;
         }
         if (next < 0) {
@@ -11515,9 +11509,6 @@ s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
     }
     return bits;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDisablePadBitStop);
-#endif
 
 s8 cmpGetCursorRow(cmpCursorInfo_t *cursor)
 {
