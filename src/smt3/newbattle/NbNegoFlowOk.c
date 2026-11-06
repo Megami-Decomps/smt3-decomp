@@ -473,8 +473,9 @@ s32 Flow9_15(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 45 of 89 words differ (first at +0x28); one word short. */
-#ifdef NON_MATCHING
+/* Keep the full-inventory case's completion local. This ordinary return
+ * preserves retail's dispatch and shared epilogue without changing the
+ * callback-sensitive reloads or fallback item stores. */
 s32 Flow9_16(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
@@ -495,6 +496,7 @@ s32 Flow9_16(nbNegoProcessData_t *n)
             nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x97, 0);
             n->getmakka = nbGetNegoYaruMakkaA(n, n->pwork, n->ework);
             nbAddNegoIdKouho(n, 0x9000E);
+            return 0;
         }
         break;
     case 1:
@@ -508,9 +510,6 @@ s32 Flow9_16(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOk", Flow9_16);
-#endif
 
 s32 Flow9_17(nbNegoProcessData_t *n)
 {

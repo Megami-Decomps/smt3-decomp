@@ -263,18 +263,59 @@ Ruled out: the ternary as an `if`/`else` pair of stores; no early return
 in the first two arms (33 of 60 differ); and the ternary without an early
 return.
 
-## Flow9_16 (newbattle/nbMakePacket, 0x168)
+## Flow9_16 (newbattle/NbNegoFlowOk, 0x168)
 
-45 of 89 words differ, one word short of retail's 90.
+90 of 90 words match at 360 bytes in ordinary C. The full-inventory path
+in case 0 now returns zero immediately after adding candidate `0x9000E`.
+All other cases and the common final return are unchanged. This real local
+completion recovers the dispatch delay slots and shared epilogue; it adds
+no computation, qualifier, constraint, binding, type or layout change.
 
-Same residual as Flow1_29: retail materialises `return 0` in both of the
-dispatch delay slots and keeps three exit labels, because `case 0` reaches
-the epilogue with `$2` already zero from `datCheckItemFull`'s test.
-ee-gcc annuls each arm's first instruction into those slots instead
-(`beqzl`/`beql` for retail's `beqz`/`beq`), which leaves the `b` to take
-`ld $16` and shifts everything after the dispatch by one word.
+The target-enabled original emits 356 bytes with 44 of 89 words matching.
+Returning at the end of case 0, returning from every case, or adding an
+explicit zero-return default each reaches 86 of 90 words at 360 bytes, but
+swaps two instruction pairs in the full-inventory body. Returning only
+inside the full-inventory branch matches all 90. Capturing the fullness
+result and returning its actual zero on the other path reaches 88 of 90,
+with a branch-likely and saved-register reload instead of the native zero
+in the fullness-test delay slot. Reordering the three cases was previously
+ruled out and was not repeated.
 
-Ruled out: all six orders of the three case arms.
+Paired stock RTL explains the relevant block shape. In the exact source,
+initial instruction 260 assigns the genuine return zero after call 256;
+instruction 428 is the separate common return. Both remain through
+`25.sched2`, so the common zero is scheduled before a distinct epilogue
+block. `27.jump2` merges the local completion into that zero-return block.
+In the original source, the sole zero, instruction 423, follows the saved
+`$16` reload 467 inside the epilogue. In `29.dbr`, the exact dispatch
+branches 416 and 422 take copies of zero 428 in ordinary delay slots;
+the original branches 411 and 417 instead annul the first instructions
+of their target blocks. These are qualified pass-output observations,
+not a hooked scheduling-tier claim or historical source-spelling claim.
+
+Native behavior is unchanged. Case 0 selects stone only for request type
+3, stores the provider result, and overwrites zero with item 106 or 6.
+The fullness check sees that stored item. On a nonzero result, message
+setup reads the current item and voice-indexed message; display reloads
+the voice after that callback; money selection reloads both work pointers
+after display, stores the result, then adds candidate `0x9000E`. Case 1
+stores the motion result as the wait count. Case 2 adds `0x90011`, reloads
+the message/item, then reloads the message again for display. All paths
+return zero. Call targets, signatures, memory widths and ordering remain
+unchanged.
+
+Complete owner: 22 match, 0 differ. Twelve full assembly and entire-ELF
+plain/dump pairs pass across original, target-enabled baseline, exact and
+case-exit controls in production, SKIP_ASM and retained-C modes. Three
+stock trace assemblies independently equal their corresponding fresh
+plain builds. All 97 pinned inputs remain stable; all 21 peer functions,
+65 peer relocations and owned noncode content agree in every context.
+Production allocated text equals the original fallback owner. Original
+and exact strict builds pass in all three contexts. An extracted-body
+host test checks each source against a native-order model over 207,360
+cases and sixteen callback mutation patterns, both ordinarily and with
+ASan/UBSan. This is source testing, not an EE emulator or whole-game run.
+Full integrated retail and regression checks remain publication gates.
 
 ## Flow6_65 (newbattle/NbNegoFlowTwo, 0x190)
 
