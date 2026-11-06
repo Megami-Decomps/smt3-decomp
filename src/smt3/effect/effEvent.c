@@ -1085,8 +1085,8 @@ void eff_1AEC58(effEVECombParSmoke_t *work);
 
 /* vu0 routine: advance and draw every live particle of one smoke set. */
 void eff_1AEC58(effEVECombParSmoke_t *work) {
-    f32 offset[EFF_EVENT_VECTOR_COMPONENTS] QWORD_ALIGNED;
-    f32 origin[EFF_EVENT_VECTOR_COMPONENTS] QWORD_ALIGNED;
+    sdfVector4_t offset;
+    sdfVector4_t origin;
     f32 side[EFF_EVENT_VECTOR_COMPONENTS];
     effEVECombParSmokePart_t *particle;
     u8 repeat;
@@ -1125,7 +1125,7 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
     color = work->head.color;
     swayPhaseStep = SDF_FRAME_STEP(work->head.swayPhaseStep);
     swayAmplitudeStep = SDF_FRAME_STEP(work->head.swayAmplitudeStep);
-    SDF_VU0_COPYVECTOR(origin, work);
+    SDF_VU0_COPYVECTOR(&origin, work);
     i = 0;
     dds3BillboardSetMode(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), work->head.drawMode);
     dds3BillboardSetMode(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), 3);
@@ -1142,18 +1142,18 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
                 particle->pos[2] += side[2] * drift;
                 wave = particle->amplitude * sdfSin(particle->angle);
                 particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
-                offset[0] = particle->pos[0] + particle->motion[0] * wave;
-                offset[1] = particle->pos[1] + particle->motion[1];
-                offset[2] = particle->pos[2] + particle->motion[2] * wave;
+                offset.x = particle->pos[0] + particle->motion[0] * wave;
+                offset.y = particle->pos[1] + particle->motion[1];
+                offset.z = particle->pos[2] + particle->motion[2] * wave;
                 particle->up_s *= growth;
                 particle->shift_s *= growth;
                 particle->amplitude += swayAmplitudeStep;
                 particle->angle += swayPhaseStep;
             } else {
                 particle->wait++;
-                offset[0] = particle->pos[0];
-                offset[1] = particle->pos[1];
-                offset[2] = particle->pos[2];
+                offset.x = particle->pos[0];
+                offset.y = particle->pos[1];
+                offset.z = particle->pos[2];
             }
             if (age < fadeIn) {
                 ratio = (f32)age / (f32)fadeIn;
@@ -1169,16 +1169,16 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
             scaleY = particle->scale;
             scaleX = scaleY + particle->scaleAmplitudeX * sdfCos(particle->s_w_r);
             scaleY = scaleY + particle->scaleAmplitudeY * sdfCos(particle->s_h_r);
-            SDF_VU0_LOADVECTOR_MEMOPS(offset[0]);
-            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR_MEMOPS(offset.x);
+            SDF_VU0_LOADVECTOR_B(&origin);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR_MEMOPS(offset[0]);
-            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), offset);
+            SDF_VU0_STOREVECTOR_MEMOPS(offset.x);
+            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), &offset);
             dds3BillboardSetScale(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), scaleX, scaleY);
             dds3BillboardSetRGBA(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), rgba);
             dds3BillboardSetRotate(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex), particle->roll);
             dds3BillboardDraw(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill01Tex));
-            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), offset);
+            dds3BillboardSetPosition(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), &offset);
             dds3BillboardSetScale(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), scaleX, scaleY);
             dds3BillboardSetRGBA(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), rgba);
             dds3BillboardSetRotate(EE_ADDR_AS(dds3Billboard_t *, hEffEveCPSmokeBill02Tex), particle->roll);
@@ -1615,10 +1615,10 @@ void effAPPoint4Delete(effAPPoint4_tag *hData) {
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
 void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
-    f32 jitterScale[4] QWORD_ALIGNED;
-    f32 lastNormal[4] QWORD_ALIGNED;
-    f32 viewDirection[4] QWORD_ALIGNED;
-    f32 jitteredPoint[4] QWORD_ALIGNED;
+    sdfVector4_t jitterScale;
+    sdfVector4_t lastNormal;
+    sdfVector4_t viewDirection;
+    sdfVector4_t jitteredPoint;
     effAPPoint4Part_tag *record = pAPPoint4->pPart + index;
     effCubicBezierSlot_t *bezierSlot;
     f32 cursorStep;
@@ -1627,83 +1627,83 @@ void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
     SDF_VU0_LOADVECTOR(aViewEye);
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_STOREVECTOR(viewDirection);
+    SDF_VU0_STOREVECTOR(&viewDirection);
     cursorStep = 1.0f / (f32)SDF_FRAMES(pAPPoint4->param.steps);
     bezierSlot = dds3Bezier4PGetPart(pAPPoint4->pBezier4P, index);
     bezierSlot->t = 0;
     bezierSlot->step = cursorStep;
 
     centeredRandom = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
-    jitterScale[0] = pAPPoint4->param.jitter[0] * (centeredRandom + centeredRandom);
-    jitterScale[1] = jitterScale[0];
-    jitterScale[2] = jitterScale[0];
+    jitterScale.x = pAPPoint4->param.jitter[0] * (centeredRandom + centeredRandom);
+    jitterScale.y = jitterScale.x;
+    jitterScale.z = jitterScale.x;
     SDF_VU0_LOADVECTOR(pAPPoint4->param.controlPoints[0]);
     SDF_VU0_LOADVECTOR_B(pAPPoint4->param.controlPoints[1]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_LOADVECTOR_B(&viewDirection);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_LOADVECTOR_B(&jitterScale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
-    SDF_VU0_STOREVECTOR(jitteredPoint);
-    bezierSlot->controlPoints[0][0] = jitteredPoint[0];
-    bezierSlot->controlPoints[0][1] = jitteredPoint[1];
-    bezierSlot->controlPoints[0][2] = jitteredPoint[2];
+    SDF_VU0_STOREVECTOR(&jitteredPoint);
+    bezierSlot->controlPoints[0][0] = jitteredPoint.x;
+    bezierSlot->controlPoints[0][1] = jitteredPoint.y;
+    bezierSlot->controlPoints[0][2] = jitteredPoint.z;
 
     centeredRandom = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
-    jitterScale[0] = pAPPoint4->param.jitter[1] * (centeredRandom + centeredRandom);
-    jitterScale[1] = jitterScale[0];
-    jitterScale[2] = jitterScale[0];
+    jitterScale.x = pAPPoint4->param.jitter[1] * (centeredRandom + centeredRandom);
+    jitterScale.y = jitterScale.x;
+    jitterScale.z = jitterScale.x;
     SDF_VU0_LOADVECTOR(pAPPoint4->param.controlPoints[1]);
     SDF_VU0_LOADVECTOR_B(pAPPoint4->param.controlPoints[2]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_LOADVECTOR_B(&viewDirection);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_LOADVECTOR_B(&jitterScale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
-    SDF_VU0_STOREVECTOR(jitteredPoint);
-    bezierSlot->controlPoints[1][0] = jitteredPoint[0];
-    bezierSlot->controlPoints[1][1] = jitteredPoint[1];
-    bezierSlot->controlPoints[1][2] = jitteredPoint[2];
+    SDF_VU0_STOREVECTOR(&jitteredPoint);
+    bezierSlot->controlPoints[1][0] = jitteredPoint.x;
+    bezierSlot->controlPoints[1][1] = jitteredPoint.y;
+    bezierSlot->controlPoints[1][2] = jitteredPoint.z;
 
     centeredRandom = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
-    jitterScale[0] = pAPPoint4->param.jitter[2] * (centeredRandom + centeredRandom);
-    jitterScale[1] = jitterScale[0];
-    jitterScale[2] = jitterScale[0];
+    jitterScale.x = pAPPoint4->param.jitter[2] * (centeredRandom + centeredRandom);
+    jitterScale.y = jitterScale.x;
+    jitterScale.z = jitterScale.x;
     SDF_VU0_LOADVECTOR(pAPPoint4->param.controlPoints[2]);
     SDF_VU0_LOADVECTOR_B(pAPPoint4->param.controlPoints[3]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_LOADVECTOR_B(&viewDirection);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(lastNormal);
-    SDF_VU0_LOADVECTOR_B(jitterScale);
+    SDF_VU0_STOREVECTOR(&lastNormal);
+    SDF_VU0_LOADVECTOR_B(&jitterScale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
-    SDF_VU0_STOREVECTOR(jitteredPoint);
-    bezierSlot->controlPoints[2][0] = jitteredPoint[0];
-    bezierSlot->controlPoints[2][1] = jitteredPoint[1];
-    bezierSlot->controlPoints[2][2] = jitteredPoint[2];
+    SDF_VU0_STOREVECTOR(&jitteredPoint);
+    bezierSlot->controlPoints[2][0] = jitteredPoint.x;
+    bezierSlot->controlPoints[2][1] = jitteredPoint.y;
+    bezierSlot->controlPoints[2][2] = jitteredPoint.z;
 
     centeredRandom = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
-    jitterScale[0] = pAPPoint4->param.jitter[3] * (centeredRandom + centeredRandom);
-    jitterScale[1] = jitterScale[0];
-    jitterScale[2] = jitterScale[0];
-    SDF_VU0_LOADVECTOR(lastNormal);
-    SDF_VU0_LOADVECTOR_B(jitterScale);
+    jitterScale.x = pAPPoint4->param.jitter[3] * (centeredRandom + centeredRandom);
+    jitterScale.y = jitterScale.x;
+    jitterScale.z = jitterScale.x;
+    SDF_VU0_LOADVECTOR(&lastNormal);
+    SDF_VU0_LOADVECTOR_B(&jitterScale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_LOADVECTOR_B(pAPPoint4->param.controlPoints[3]);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(jitteredPoint);
-    bezierSlot->controlPoints[3][0] = jitteredPoint[0];
-    bezierSlot->controlPoints[3][1] = jitteredPoint[1];
-    bezierSlot->controlPoints[3][2] = jitteredPoint[2];
+    SDF_VU0_STOREVECTOR(&jitteredPoint);
+    bezierSlot->controlPoints[3][0] = jitteredPoint.x;
+    bezierSlot->controlPoints[3][1] = jitteredPoint.y;
+    bezierSlot->controlPoints[3][2] = jitteredPoint.z;
     dds3EffectPartSetColor(record->hPart, 0);
 }
 

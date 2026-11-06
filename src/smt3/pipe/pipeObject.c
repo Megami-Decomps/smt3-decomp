@@ -249,23 +249,23 @@ extern void vecScale(f32 *, f32);
 
 void getPosTranslate(tagPipeObject *object, f32 *output)
 {
-    f32 tangent[4] QWORD_ALIGNED;
-    f32 side[4] QWORD_ALIGNED;
-    f32 basis[4] QWORD_ALIGNED;
+    sdfVector4_t tangent;
+    sdfVector4_t side;
+    sdfVector4_t basis;
 
-    vecSet(tangent,
+    vecSet(&tangent.x,
            D_00528F58.points[object->offset + 1].position[0] - D_00528F58.points[object->offset].position[0],
            D_00528F58.points[object->offset + 1].position[1] - D_00528F58.points[object->offset].position[1],
            D_00528F58.points[object->offset + 1].position[2] - D_00528F58.points[object->offset].position[2]);
-    vecSet(basis, D_00528F58.points[object->offset].direction[0],
+    vecSet(&basis.x, D_00528F58.points[object->offset].direction[0],
            D_00528F58.points[object->offset].direction[1], D_00528F58.points[object->offset].direction[2]);
-    vecTranslate(side, tangent, basis);
-    vecNormalize(side);
-    vecScale(side, object->pos[0]);
-    vecScale(basis, object->pos[1]);
-    output[0] = D_00528F58.points[object->offset].position[0] - side[0] + basis[0];
-    output[1] = D_00528F58.points[object->offset].position[1] - side[1] + basis[1];
-    output[2] = D_00528F58.points[object->offset].position[2] - side[2] + basis[2];
+    vecTranslate(&side.x, &tangent.x, &basis.x);
+    vecNormalize(&side.x);
+    vecScale(&side.x, object->pos[0]);
+    vecScale(&basis.x, object->pos[1]);
+    output[0] = D_00528F58.points[object->offset].position[0] - side.x + basis.x;
+    output[1] = D_00528F58.points[object->offset].position[1] - side.y + basis.y;
+    output[2] = D_00528F58.points[object->offset].position[2] - side.z + basis.z;
 }
 
 
@@ -1092,35 +1092,35 @@ void objVisibleAll(s8 value)
 }
 
 void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z) {
-    f32 cross[4] QWORD_ALIGNED;
-    f32 direction[4] QWORD_ALIGNED;
-    f32 position[4] QWORD_ALIGNED;
-    f32 translated[4] QWORD_ALIGNED;
+    sdfVector4_t cross;
+    sdfVector4_t direction;
+    sdfVector4_t position;
+    sdfVector4_t translated;
     sdfMatrix4_t matrix;
     f32 radians;
     tagPipePosData *node;
     tagPipePosData *nextNode;
 
-    getPosTranslate(objPtr, translated);
+    getPosTranslate(objPtr, &translated.x);
     /* Preserve the index-first EE address sum; see
      * docs/levers/addressing-and-types.md. */
     node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(D_00528F58.points));
     nextNode = node + 1;
-    position[0] = node->direction[0];
+    position.x = node->direction[0];
     radians = 0x1.1df46ap-6f;
-    position[1] = node->direction[1];
-    position[2] = node->direction[2];
-    direction[0] = nextNode->position[0] - node->position[0];
-    direction[1] = nextNode->position[1] - node->position[1];
-    direction[2] = nextNode->position[2] - node->position[2];
-    vecTranslate(cross, direction, position);
-    vecNormalize(cross);
-    vecNormalize(direction);
-    vecNormalize(position);
+    position.y = node->direction[1];
+    position.z = node->direction[2];
+    direction.x = nextNode->position[0] - node->position[0];
+    direction.y = nextNode->position[1] - node->position[1];
+    direction.z = nextNode->position[2] - node->position[2];
+    vecTranslate(&cross.x, &direction.x, &position.x);
+    vecNormalize(&cross.x);
+    vecNormalize(&direction.x);
+    vecNormalize(&position.x);
     memset(&matrix, 0, 0x40);
-    matrix.m[0] = cross[0]; matrix.m[1] = cross[1]; matrix.m[2] = cross[2];
-    matrix.m[4] = direction[0]; matrix.m[5] = direction[1]; matrix.m[6] = direction[2];
-    matrix.m[8] = position[0]; matrix.m[9] = position[1]; matrix.m[10] = position[2];
+    matrix.m[0] = cross.x; matrix.m[1] = cross.y; matrix.m[2] = cross.z;
+    matrix.m[4] = direction.x; matrix.m[5] = direction.y; matrix.m[6] = direction.z;
+    matrix.m[8] = position.x; matrix.m[9] = position.y; matrix.m[10] = position.z;
     matrix.m[15] = 1.0f;
     mtxRotateX(&matrix, x * radians);
     mtxRotateY(&matrix, y * radians);

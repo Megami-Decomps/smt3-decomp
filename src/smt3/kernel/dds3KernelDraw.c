@@ -496,7 +496,7 @@ void *dds3GetRenderTexture(void)
 
 void dds3RunQuake(void)
 {
-    f32 range[4] QWORD_ALIGNED;
+    sdfVector4_t range;
     dds3QuakeGain_t gain = D_0054E988[0];
     f32 amplitude;
     f32 kick;
@@ -512,12 +512,12 @@ void dds3RunQuake(void)
         dds3QuakeFlag = 0;
         return;
     }
-    range[0] = dds3QuakeXRange * 0.01f;
-    range[1] = dds3QuakeYRange * 0.01f;
+    range.x = dds3QuakeXRange * 0.01f;
+    range.y = dds3QuakeYRange * 0.01f;
     for (i = 0; i < 2; i++) {
-        if (range[i] != 0.0f) {
-            amplitude = dds3GetRandFloatA(0) * range[i] * 0.5f + range[i] * 0.5f;
-            if (range[i] * gain.axis[i] <= fabsf(dds3QuakeOffset[i])) {
+        if ((&range.x)[i] != 0.0f) {
+            amplitude = dds3GetRandFloatA(0) * (&range.x)[i] * 0.5f + (&range.x)[i] * 0.5f;
+            if ((&range.x)[i] * gain.axis[i] <= fabsf(dds3QuakeOffset[i])) {
                 if (dds3QuakeOffset[i] <= 0.0f) {
                     dds3QuakeOffset[i] = dds3QuakeOffset[i] + amplitude;
                 } else {
@@ -527,11 +527,11 @@ void dds3RunQuake(void)
                 kick = amplitude * (dds3GetRandFloatA(0) - 0.5f);
                 dds3QuakeOffset[i] = dds3QuakeOffset[i] + (kick + kick);
             }
-            if (dds3QuakeOffset[i] < -range[i]) {
-                dds3QuakeOffset[i] = -range[i];
+            if (dds3QuakeOffset[i] < -(&range.x)[i]) {
+                dds3QuakeOffset[i] = -(&range.x)[i];
             }
-            if (range[i] < dds3QuakeOffset[i]) {
-                dds3QuakeOffset[i] = range[i];
+            if ((&range.x)[i] < dds3QuakeOffset[i]) {
+                dds3QuakeOffset[i] = (&range.x)[i];
             }
         }
     }
@@ -1489,13 +1489,13 @@ void dds3BlurUpdate(void)
 /* vu0 routine: shortest-arc quaternion rotating VF10 to VF11. */
 void dds3RotationArc(void)
 {
-    f32 identity[4] QWORD_ALIGNED;
-    f32 axis[4] QWORD_ALIGNED;
+    sdfVector4_t identity;
+    sdfVector4_t axis;
     f32 dot;
     f32 component;
 
-    memset(identity, 0, sizeof(identity));
-    identity[3] = 1.0f;
+    memset(&identity, 0, sizeof(identity));
+    identity.w = 1.0f;
 
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
@@ -1506,7 +1506,7 @@ void dds3RotationArc(void)
 
     SDF_VU0_INNERPRODUCT(dot);
     if (dot >= 0.9999f) {
-        SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)identity);
+        SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)&identity);
         return;
     }
 
@@ -1518,11 +1518,11 @@ void dds3RotationArc(void)
             SDF_VU0_SETVECTOR_Z(-1.0f);
         } else {
             SDF_VU0_GETVECTOR_Z(component);
-            axis[0] = -component;
-            axis[1] = 0.0f;
-            SDF_VU0_GETVECTOR_X(axis[2]);
-            axis[3] = 0.0f;
-            SDF_VU0_LOADVECTOR(axis);
+            axis.x = -component;
+            axis.y = 0.0f;
+            SDF_VU0_GETVECTOR_X(axis.z);
+            axis.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&axis);
             SDF_VU0_NORMALIZE();
         }
 
@@ -1538,7 +1538,7 @@ void dds3RotationArc(void)
     SDF_VU0_COPYVECTOR_C_TO_B();
     SDF_VU0_INNERPRODUCT(dot);
     SDF_VU0_OUTERPRODUCT();
-    SDF_VU0_STOREVECTOR(axis);
+    SDF_VU0_STOREVECTOR(&axis);
     SDF_VU0_SETVECTOR_W(dot);
     Normalize();
 }
@@ -2185,26 +2185,26 @@ void eglLinkKanji(s32 x, s32 y, s32 rgba, const char *moji)
 /* vu0 routine: project a world point into viewport pixel coordinates. */
 void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
 {
-    f32 point[4] QWORD_ALIGNED;
-    f32 screen[4] QWORD_ALIGNED;
+    sdfVector4_t point;
+    sdfVector4_t screen;
 
-    point[0] = z3;
-    point[1] = x2;
-    point[2] = y2;
-    point[3] = 1.0f;
+    point.x = z3;
+    point.y = x2;
+    point.z = y2;
+    point.w = 1.0f;
     SDF_VU0_LOADMATRIX(&D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
-    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_LOADVECTOR(&point);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(screen);
-    *x3 = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
-    *y3 = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
+    SDF_VU0_STOREVECTOR(&screen);
+    *x3 = ((s32)(screen.x * 16.0f) - 0x7000) >> 4;
+    *y3 = ((s32)(screen.y * 16.0f) - 0x7900) >> 3;
 }
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
 

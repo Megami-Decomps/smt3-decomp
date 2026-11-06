@@ -165,12 +165,12 @@ struct dds3Basic_t *dds3GetActiveScene(void);
 
 void evtSetTestCamera(void) {
     f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };
-    f32 rotation[4] QWORD_ALIGNED;
+    sdfVector4_t rotation;
     dds3Basic_t *object;
 
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
-    object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), position, rotation);
+    memset(&rotation, 0, 0x10);
+    rotation.w = 1.0f;
+    object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), position, &rotation.x);
     dds3GetRadiusPoseSet((dds3Basic_t *)object, 10.0f);
     dds3ObjectBaseCreateMover(object);
     dds3SetActiveCameraSceneBasic(dds3GetControlScene(), (dds3Basic_t *)object);
@@ -178,17 +178,17 @@ void evtSetTestCamera(void) {
 }
 
 s32 evtSetRegistUnit(s32 major, s32 minor) {
-    f32 position[4] QWORD_ALIGNED;
-    f32 rotation[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t rotation;
     s32 counter;
     dds3Basic_t *object;
 
-    memset(position, 0, 0x10);
-    position[3] = 1.0f;
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
+    memset(&position, 0, 0x10);
+    position.w = 1.0f;
+    memset(&rotation, 0, 0x10);
+    rotation.w = 1.0f;
     counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, position, rotation);
+    object = dds3AddUnitObjectBasic(counter, &position, &rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
     dds3ObjectBaseMakeUnit(object, major, minor);
@@ -198,17 +198,17 @@ s32 evtSetRegistUnit(s32 major, s32 minor) {
 }
 
 s32 evtLoadUnit(s32 major, s32 minor) {
-    f32 position[4] QWORD_ALIGNED;
-    f32 rotation[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t rotation;
     s32 counter;
     dds3Basic_t *object;
 
-    memset(position, 0, 0x10);
-    position[3] = 1.0f;
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
+    memset(&position, 0, 0x10);
+    position.w = 1.0f;
+    memset(&rotation, 0, 0x10);
+    rotation.w = 1.0f;
     counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, position, rotation);
+    object = dds3AddUnitObjectBasic(counter, &position, &rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
     dds3ObjectBaseMakeUnit(object, major, minor);
@@ -221,7 +221,7 @@ s32 evtLoadUnit(s32 major, s32 minor) {
 }
 
 void evtSetUnitPos(u32 unitID, u32 posID) {
-    f32 quaternion[4] QWORD_ALIGNED = { 0.0f, 1.0f, 0.0f, 1.0f };
+    sdfVector4_t quaternion = { 0.0f, 1.0f, 0.0f, 1.0f };
     dds3Basic_t *target;
     dds3Basic_t *source;
     evtWorldSourceTransformPrefix_t *sourceTransform;
@@ -232,12 +232,12 @@ void evtSetUnitPos(u32 unitID, u32 posID) {
         if (source != NULL) {
             sourceTransform = source->workdata;
             dds3SetPosPoseSet(target, (u128 *)&sourceTransform->position);
-                        SDF_VU0_LOADVECTOR(quaternion);
+                        SDF_VU0_LOADVECTOR(&quaternion);
             FromRotation(3.14159265f);
                         SDF_VU0_LOADVECTOR_B(sourceTransform->rotation);
             Mult();
-                        SDF_VU0_STOREVECTOR(quaternion);
-            dds3SetRotPoseSet(target, (u128 *)quaternion);
+                        SDF_VU0_STOREVECTOR(&quaternion);
+            dds3SetRotPoseSet(target, (u128 *)&quaternion);
             dds3GetPosPoseSet(target);
             SDF_VU0_STOREVECTOR(&target->poseset->pos2);
         }

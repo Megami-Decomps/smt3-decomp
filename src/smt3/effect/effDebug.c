@@ -95,7 +95,7 @@ void dds3_1AC138(effArrHdr_t *header) {
 s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
     effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
-    f32 weights[4] QWORD_ALIGNED;
+    sdfVector4_t weights;
     f32 t;
     f32 u;
     effBezierPoint_t *controlPoints;
@@ -106,13 +106,13 @@ s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
     t = slot->t;
     u = 1.0f - t;
     controlPoints = &slot->controlPoints[pointIndex];
-    weights[0] = u * u * u;
-    weights[1] = t * (u * u) * 3.0f;
-    weights[2] = t * t * u * 3.0f;
-    weights[3] = t * t * t;
-    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
-    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
-    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
+    weights.x = u * u * u;
+    weights.y = t * (u * u) * 3.0f;
+    weights.z = t * t * u * 3.0f;
+    weights.w = t * t * t;
+    out[0] = controlPoints[0].x * weights.x + controlPoints[1].x * weights.y + controlPoints[2].x * weights.z + controlPoints[3].x * weights.w;
+    out[1] = controlPoints[0].y * weights.x + controlPoints[1].y * weights.y + controlPoints[2].y * weights.z + controlPoints[3].y * weights.w;
+    out[2] = controlPoints[0].z * weights.x + controlPoints[1].z * weights.y + controlPoints[2].z * weights.z + controlPoints[3].z * weights.w;
     out[3] = 1.0f;
     t += slot->parameterStep;
     if (t > 1.0f) {
@@ -126,19 +126,19 @@ s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
 
 /* Carry excess t across the first segment; the second finishes after sampling its entry t. */
 s32 effPCPBezierEval(effBezierCurve_t *slot, f32 *out) {
-    f32 weights[4] QWORD_ALIGNED;
+    sdfVector4_t weights;
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
     effBezierPoint_t *controlPoints = &slot->controlPoints[pointIndex];
     f32 u = 1.0f - t;
 
-    weights[0] = u * u * u;
-    weights[1] = t * (u * u) * 3.0f;
-    weights[2] = t * t * u * 3.0f;
-    weights[3] = t * t * t;
-    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
-    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
-    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
+    weights.x = u * u * u;
+    weights.y = t * (u * u) * 3.0f;
+    weights.z = t * t * u * 3.0f;
+    weights.w = t * t * t;
+    out[0] = controlPoints[0].x * weights.x + controlPoints[1].x * weights.y + controlPoints[2].x * weights.z + controlPoints[3].x * weights.w;
+    out[1] = controlPoints[0].y * weights.x + controlPoints[1].y * weights.y + controlPoints[2].y * weights.z + controlPoints[3].y * weights.w;
+    out[2] = controlPoints[0].z * weights.x + controlPoints[1].z * weights.y + controlPoints[2].z * weights.z + controlPoints[3].z * weights.w;
     out[3] = 1.0f;
     t += slot->parameterStep;
     if (t > 1.0f) {
@@ -160,16 +160,16 @@ void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
     effBezierPoint_t *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[4] QWORD_ALIGNED;
+    sdfVector4_t w;
 
-    w[0] = u * u * u;
-    w[1] = t * (u * u) * 3.0f;
-    w[2] = t * t * u * 3.0f;
-    w[3] = t * t * t;
+    w.x = u * u * u;
+    w.y = t * (u * u) * 3.0f;
+    w.z = t * t * u * 3.0f;
+    w.w = t * t * t;
 
-    out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
-    out[1] = controlPoints[0].y * w[0] + controlPoints[1].y * w[1] + controlPoints[2].y * w[2] + controlPoints[3].y * w[3];
-    out[2] = controlPoints[0].z * w[0] + controlPoints[1].z * w[1] + controlPoints[2].z * w[2] + controlPoints[3].z * w[3];
+    out[0] = controlPoints[0].x * w.x + controlPoints[1].x * w.y + controlPoints[2].x * w.z + controlPoints[3].x * w.w;
+    out[1] = controlPoints[0].y * w.x + controlPoints[1].y * w.y + controlPoints[2].y * w.z + controlPoints[3].y * w.w;
+    out[2] = controlPoints[0].z * w.x + controlPoints[1].z * w.y + controlPoints[2].z * w.z + controlPoints[3].z * w.w;
     out[3] = 1.0f;
 }
 
@@ -408,7 +408,7 @@ void effDebugSelectCursorDraw(f32 *position) {
 
 /* vu0 routine: build and submit the debug geometry. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
-    f32 point[4] QWORD_ALIGNED; /* The line provider consumes xyz; preserve the untouched w lane. */
+    sdfVector4_t point; /* The line provider consumes xyz; preserve the untouched w lane. */
     f32 vertices[40][4] QWORD_ALIGNED;
     u32 colors[40];
     sdfDrawTag_t *list;
@@ -433,20 +433,20 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     for (ring = 0; ring < 20; ring++) {
         angle = 0.0f;
         out = vertices;
-        point[0] = radius;
-        point[1] = y;
-        point[2] = 0.0f;
+        point.x = radius;
+        point.y = y;
+        point.z = 0.0f;
         SDF_VU0_LOADVECTOR_B( center);
-        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         for (segment = 0; segment < 20; segment++) {
             SDF_VU0_STOREVECTOR( *out);
             out++;
             angle += angleStep;
-            point[0] = sdfCos(angle) * radius;
-            point[1] = y;
-            point[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR( point);
+            point.x = sdfCos(angle) * radius;
+            point.y = y;
+            point.z = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR( &point);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR( *out);
             out++;
@@ -459,17 +459,17 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 20; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(angle) * radius;
+        point.y = -height * 0.5f;
+        point.z = sdfSin(angle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;
-        point[0] = sdfCos(angle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(angle) * radius;
+        point.y = height * 0.5f;
+        point.z = sdfSin(angle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;
@@ -481,18 +481,18 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(angle) * radius;
+        point.y = -height * 0.5f;
+        point.z = sdfSin(angle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfCos(oppositeAngle) * radius;
-        point[1] = -height * 0.5f;
-        point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(oppositeAngle) * radius;
+        point.y = -height * 0.5f;
+        point.z = sdfSin(oppositeAngle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;
@@ -504,18 +504,18 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
-        point[0] = sdfCos(angle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(angle) * radius;
+        point.y = height * 0.5f;
+        point.z = sdfSin(angle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
-        point[0] = sdfCos(oppositeAngle) * radius;
-        point[1] = height * 0.5f;
-        point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR( point);
+        point.x = sdfCos(oppositeAngle) * radius;
+        point.y = height * 0.5f;
+        point.z = sdfSin(oppositeAngle) * radius;
+        SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR( *out);
         out++;

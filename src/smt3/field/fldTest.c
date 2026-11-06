@@ -1924,21 +1924,21 @@ void fldRunAiCng(s32 mode)
             routeBase = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + fldRun_Dante.routeCell->routeOffset);
             route = routeBase;
             if (fldRun_Dante.routeCell->routeCount >= 2) {
-                f32 position[4] QWORD_ALIGNED;
-                f32 targetPos[4] QWORD_ALIGNED;
-                f32 hitPosition[4] QWORD_ALIGNED;
+                sdfVector4_t position;
+                sdfVector4_t targetPos;
+                sdfVector4_t hitPosition;
 
                 route++;
                 fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
-                position[0] = fldRun_Dante.x;
-                position[1] = 0.0f;
-                position[2] = fldRun_Dante.z;
-                position[3] = 1.0f;
-                targetPos[0] = targetX;
-                targetPos[1] = 0.0f;
-                targetPos[2] = targetZ;
-                targetPos[3] = 1.0f;
-                if (fldHitChkEnemy(position, targetPos, hitPosition) != -1) {
+                position.x = fldRun_Dante.x;
+                position.y = 0.0f;
+                position.z = fldRun_Dante.z;
+                position.w = 1.0f;
+                targetPos.x = targetX;
+                targetPos.y = 0.0f;
+                targetPos.z = targetZ;
+                targetPos.w = 1.0f;
+                if (fldHitChkEnemy(&position.x, &targetPos.x, &hitPosition.x) != -1) {
                     route = routeBase;
                 } else {
                     printf(fldMsg1KO);
@@ -2052,8 +2052,8 @@ void fldRunDanteMove(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    f32 position[4] QWORD_ALIGNED;
-    f32 target[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t target;
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2069,15 +2069,15 @@ void fldRunDanteMove(void)
         routeEntry += fldRun_Dante.now * 4 + 8;
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
 
-        position[0] = fldRun_Dante.x;
-        position[1] = 0.0f;
-        position[2] = fldRun_Dante.z;
-        position[3] = 1.0f;
-        target[0] = targetX;
-        target[1] = 0.0f;
-        target[2] = targetZ;
-        target[3] = 1.0f;
-        if (fldHitChkEnemy(position, target, hitPosition) == -1) {
+        position.x = fldRun_Dante.x;
+        position.y = 0.0f;
+        position.z = fldRun_Dante.z;
+        position.w = 1.0f;
+        target.x = targetX;
+        target.y = 0.0f;
+        target.z = targetZ;
+        target.w = 1.0f;
+        if (fldHitChkEnemy(&position.x, &target.x, hitPosition) == -1) {
             printf("PRUN_TIKAMITI!!!\n");
             fldRun_Dante.tikamiti = 1;
             fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
@@ -2161,8 +2161,8 @@ void fldRunDantePwak(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    f32 position[4] QWORD_ALIGNED;
-    f32 target[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t target;
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2178,15 +2178,15 @@ void fldRunDantePwak(void)
         routeEntry += fldRun_Dante.now * 4 + 8;
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
 
-        position[0] = fldRun_Dante.x;
-        position[1] = 0.0f;
-        position[2] = fldRun_Dante.z;
-        position[3] = 1.0f;
-        target[0] = targetX;
-        target[1] = 0.0f;
-        target[2] = targetZ;
-        target[3] = 1.0f;
-        if (fldHitChkEnemy(position, target, hitPosition) == -1) {
+        position.x = fldRun_Dante.x;
+        position.y = 0.0f;
+        position.z = fldRun_Dante.z;
+        position.w = 1.0f;
+        target.x = targetX;
+        target.y = 0.0f;
+        target.z = targetZ;
+        target.w = 1.0f;
+        if (fldHitChkEnemy(&position.x, &target.x, hitPosition) == -1) {
             printf("TIKAMITI!!!\n");
             fldRun_Dante.tikamiti = 1;
             fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
@@ -2576,9 +2576,9 @@ extern sdfVector4_t aViewTarget;
 
 void fldRunDanteCollision(void)
 {
-    f32 position[4] QWORD_ALIGNED;
-    f32 target[4] QWORD_ALIGNED;
-    f32 hitPosition[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t target;
+    sdfVector4_t hitPosition;
     f32 dx;
     f32 dz;
     f32 viewAngle = 0.0f;
@@ -2617,15 +2617,15 @@ void fldRunDanteCollision(void)
         }
         return;
     }
-    position[0] = fldRun_Dante.x;
-    position[1] = 0.0f;
-    position[2] = fldRun_Dante.z;
-    position[3] = 1.0f;
-    target[0] = fldGlobalBase.x;
-    target[1] = 0.0f;
-    target[2] = fldGlobalBase.z;
-    target[3] = 1.0f;
-    hit = fldHitChkEnemy(position, target, hitPosition);
+    position.x = fldRun_Dante.x;
+    position.y = 0.0f;
+    position.z = fldRun_Dante.z;
+    position.w = 1.0f;
+    target.x = fldGlobalBase.x;
+    target.y = 0.0f;
+    target.z = fldGlobalBase.z;
+    target.w = 1.0f;
+    hit = fldHitChkEnemy(&position.x, &target.x, &hitPosition.x);
     if (hit != -1) {
         fldRun_Dante.flag |= 1;
     }

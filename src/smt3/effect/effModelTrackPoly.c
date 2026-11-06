@@ -373,14 +373,14 @@ void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
 void Eff_HermitianSpline(f32 (*p)[4], f32 t)
 {
     f32 tan[2][4] QWORD_ALIGNED;
-    f32 half[4] QWORD_ALIGNED;
+    sdfVector4_t half;
     f32 h[4][4] QWORD_ALIGNED;
     f32 t2 = t * t;
     f32 t3 = t2 * t;
 
-    half[0] = 0.5f;
-    half[1] = 0.5f;
-    half[2] = 0.5f;
+    half.x = 0.5f;
+    half.y = 0.5f;
+    half.z = 0.5f;
     SDF_VU0_LOADVECTOR(p[1]);
     SDF_VU0_LOADVECTOR_B(p[0]);
     SDF_VU0_SUBVECTOR();
@@ -389,7 +389,7 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     SDF_VU0_LOADVECTOR_B(p[1]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
-    SDF_VU0_LOADVECTOR_B(half);
+    SDF_VU0_LOADVECTOR_B(&half);
     SDF_VU0_MULVECTOR();
     SDF_VU0_STOREVECTOR(tan[0]);
     SDF_VU0_LOADVECTOR(p[2]);
@@ -400,7 +400,7 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     SDF_VU0_LOADVECTOR_B(p[2]);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
-    SDF_VU0_LOADVECTOR_B(half);
+    SDF_VU0_LOADVECTOR_B(&half);
     SDF_VU0_MULVECTOR();
     SDF_VU0_STOREVECTOR(tan[1]);
     h[0][0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
@@ -538,10 +538,10 @@ void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const
 void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex) {
     f32 firstHistory[4][4] QWORD_ALIGNED;
     f32 secondHistory[4][4] QWORD_ALIGNED;
-    f32 firstBasePoint[4] QWORD_ALIGNED;
-    f32 secondBasePoint[4] QWORD_ALIGNED;
-    f32 firstPointDelta[4] QWORD_ALIGNED;
-    f32 secondPointDelta[4] QWORD_ALIGNED;
+    sdfVector4_t firstBasePoint;
+    sdfVector4_t secondBasePoint;
+    sdfVector4_t firstPointDelta;
+    sdfVector4_t secondPointDelta;
     sdfVector4_t samples[2];
     s32 activePointCount = hPoly->count;
     s32 sampleCount = hPoly->split;
@@ -619,15 +619,15 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
     } else {
         u128 *firstSampleOutput;
 
-        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)firstBasePoint, (u128 *)secondBasePoint, 1);
+        dds3HermitianTrackPolyGetVertex(hPoly, (u128 *)&firstBasePoint, (u128 *)&secondBasePoint, 1);
         SDF_VU0_LOADVECTOR(pVertex);
-        SDF_VU0_LOADVECTOR_B(firstBasePoint);
+        SDF_VU0_LOADVECTOR_B(&firstBasePoint);
         SDF_VU0_SUBVECTOR();
-        SDF_VU0_STOREVECTOR(firstPointDelta);
+        SDF_VU0_STOREVECTOR(&firstPointDelta);
         SDF_VU0_LOADVECTOR(pVertex + 1);
-        SDF_VU0_LOADVECTOR_B(secondBasePoint);
+        SDF_VU0_LOADVECTOR_B(&secondBasePoint);
         SDF_VU0_SUBVECTOR();
-        SDF_VU0_STOREVECTOR(secondPointDelta);
+        SDF_VU0_STOREVECTOR(&secondPointDelta);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
 #ifdef NON_MATCHING
@@ -639,12 +639,12 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
             do {
                 sampleWeight += sampleWeightStep;
                 sampleIndex--;
-                samples[0].x = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
-                samples[0].y = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
-                samples[0].z = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
-                samples[1].x = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
-                samples[1].y = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
-                samples[1].z = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
+                samples[0].x = firstBasePoint.x + firstPointDelta.x * sampleWeight;
+                samples[0].y = firstBasePoint.y + firstPointDelta.y * sampleWeight;
+                samples[0].z = firstBasePoint.z + firstPointDelta.z * sampleWeight;
+                samples[1].x = secondBasePoint.x + secondPointDelta.x * sampleWeight;
+                samples[1].y = secondBasePoint.y + secondPointDelta.y * sampleWeight;
+                samples[1].z = secondBasePoint.z + secondPointDelta.z * sampleWeight;
                 dds3HermitianTrackPolySetVertexSub(hPoly, firstSampleOutput);
             } while (sampleIndex != 0);
         }
@@ -861,9 +861,9 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     sdfVector4_t world[2] QWORD_ALIGNED;
     s32 screen[4][4] QWORD_ALIGNED;
     /* Each scratch pair owns a quadword slot in retail's frame. */
-    f32 d[4] QWORD_ALIGNED;
-    f32 distances[4] QWORD_ALIGNED;
-    f32 offset[4] QWORD_ALIGNED;
+    sdfVector4_t d;
+    sdfVector4_t distances;
+    sdfVector4_t offset;
     f32 angle = 0.0f;
     f32 angleStep, wave, length, len;
     s32 pointCount, count, run, i, j, k;
@@ -969,7 +969,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 SDF_VU0_LOADVECTOR(&world[j - 2]);
                 SDF_VU0_LOADVECTOR_B(aViewEye);
                 SDF_VU0_SUBVECTOR();
-                SDF_VU0_GETLENGTH(distances[j - 2]);
+                SDF_VU0_GETLENGTH((&distances.x)[j - 2]);
                 SDF_VU0_LOADVECTOR(&world[j - 2]);
                 SDF_VU0_APPLYMATRIX_XYZ1();
                 SDF_VU0_PERSVECTOR();
@@ -982,7 +982,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 screen[j][0] -= 0x7000;
                 screen[j][1] -= 0x7900;
             }
-            if (distances[0] > 16.0 && distances[1] > 16.0 &&
+            if (distances.x > 16.0 && distances.y > 16.0 &&
                 (((u32)screen[0][0] <= 0x2000 && (u32)screen[0][1] <= 0xE00) ||
                  ((u32)screen[1][0] <= 0x2000 && (u32)screen[1][1] <= 0xE00) ||
                  ((u32)screen[2][0] <= 0x2000 && (u32)screen[2][1] <= 0xE00) ||
@@ -1003,34 +1003,34 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
                 quad->vtx[2].t = (f32)screen[2][1] * 0.000244140625f;
                 quad->vtx[3].s = (f32)screen[3][0] * 0.0001220703125f;
                 quad->vtx[3].t = (f32)screen[3][1] * 0.000244140625f;
-                d[0] = (f32)(screen[2][0] - screen[0][0]);
-                d[1] = (f32)(screen[2][1] - screen[0][1]);
-                if (d[0] != 0.0f || d[1] != 0.0f) {
-                    len = sdfSqrt(d[0] * d[0] + d[1] * d[1]);
-                    d[0] /= len;
-                    d[1] /= len;
+                d.x = (f32)(screen[2][0] - screen[0][0]);
+                d.y = (f32)(screen[2][1] - screen[0][1]);
+                if (d.x != 0.0f || d.y != 0.0f) {
+                    len = sdfSqrt(d.x * d.x + d.y * d.y);
+                    d.x /= len;
+                    d.y /= len;
                 }
                 quad->vtx[0].z = 0xFF0000;
                 quad->vtx[1].z = 0xFF0000;
                 quad->vtx[2].z = 0xFF0000;
                 quad->vtx[3].z = 0xFF0000;
                 quad->vtx[0].adc = 0;
-                offset[0] = d[0] * 144.0f;
-                offset[1] = d[1] * 144.0f;
-                offset[0] *= 0.0001220703125f;
-                offset[1] *= 0.000244140625f;
-                quad->vtx[0].s += offset[0];
-                quad->vtx[0].t += offset[1];
-                quad->vtx[2].s += offset[0];
-                quad->vtx[2].t += offset[1];
-                offset[0] = d[0] * 272.0f;
-                offset[1] = d[1] * 272.0f;
-                offset[0] *= 0.0001220703125f;
-                offset[1] *= 0.000244140625f;
-                quad->vtx[1].s += offset[0];
-                quad->vtx[1].t += offset[1];
-                quad->vtx[3].s += offset[0];
-                quad->vtx[3].t += offset[1];
+                offset.x = d.x * 144.0f;
+                offset.y = d.y * 144.0f;
+                offset.x *= 0.0001220703125f;
+                offset.y *= 0.000244140625f;
+                quad->vtx[0].s += offset.x;
+                quad->vtx[0].t += offset.y;
+                quad->vtx[2].s += offset.x;
+                quad->vtx[2].t += offset.y;
+                offset.x = d.x * 272.0f;
+                offset.y = d.y * 272.0f;
+                offset.x *= 0.0001220703125f;
+                offset.y *= 0.000244140625f;
+                quad->vtx[1].s += offset.x;
+                quad->vtx[1].t += offset.y;
+                quad->vtx[3].s += offset.x;
+                quad->vtx[3].t += offset.y;
                 quad->vtx[1].adc = 0;
                 quad->vtx[3].adc = 0;
                 quad->vtx[2].adc = 0;

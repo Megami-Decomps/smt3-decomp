@@ -1315,7 +1315,7 @@ s32 viewModeCamera(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbViewCamWork_t *work = panel->data.viewCam;
-    f32 step[4] QWORD_ALIGNED;
+    sdfVector4_t step;
     f64 scale;
     u32 i;
 
@@ -1337,9 +1337,9 @@ s32 viewModeCamera(dds3ProcessID_t *id)
         f32 current = work->eye[i];
         f32 destination = work->target[i];
 
-        step[i] = current - destination;
-        step[i] *= work->scale;
-        work->eye[i] = step[i] + work->target[i];
+        (&step.x)[i] = current - destination;
+        (&step.x)[i] *= work->scale;
+        work->eye[i] = (&step.x)[i] + work->target[i];
     }
     SDF_VU0_COPYVECTOR(&aViewEye, &work->eye[0]);
     SDF_VU0_COPYVECTOR(&aViewTarget, &work->target[0]);
@@ -1670,20 +1670,20 @@ extern s32 pbGetMyCharcterRot(pbProcHandle_t *character);
 
 void pbSetGameCamera3(void)
 {
-    f32 eye[4] QWORD_ALIGNED;
-    f32 target[4] QWORD_ALIGNED;
+    sdfVector4_t eye;
+    sdfVector4_t target;
     s32 direction;
 
     if (mychar[current_char] != NULL) {
         memset(&eye, 0, sizeof(eye));
         memset(&target, 0, sizeof(target));
-        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        pbGetMyCharcterPos(mychar[current_char], &target);
         SDF_VU0_COPYVECTOR(&eye, &target);
         direction = pbGetMyCharcterRot(mychar[current_char]);
-        eye[0] += (f32)pbKeyTable[direction][0] * 160.0f;
-        eye[2] += (f32)pbKeyTable[direction][1] * 160.0f;
-        eye[1] -= 60.0f;
-        target[1] -= 40.0f;
+        eye.x += (f32)pbKeyTable[direction][0] * 160.0f;
+        eye.z += (f32)pbKeyTable[direction][1] * 160.0f;
+        eye.y -= 60.0f;
+        target.y -= 40.0f;
         SDF_VU0_COPYVECTOR(&aViewEye, &eye);
         SDF_VU0_COPYVECTOR(&aViewTarget, &target);
     }

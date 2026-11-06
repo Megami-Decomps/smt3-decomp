@@ -237,7 +237,7 @@ f32 fldPlayerCalc360_4(f32 aKakudo) {
 
 s32 fldPlayerMirChk(void) {
     fldUnitControl_t *control = fldGetUnitControl();
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
 
     if (control == NULL) {
         return 0;
@@ -259,8 +259,8 @@ s32 fldPlayerMirChk(void) {
         (fldGlobalBase.area == 0xF &&
             (fldGlobalBase.floor == 0x10 || fldGlobalBase.floor == 9))) {
         dds3GetPosPoseSet(control->handle);
-        SDF_VU0_STOREVECTOR(pos);
-        if (pos[1] > -2.5f && pos[1] < 2.5f) {
+        SDF_VU0_STOREVECTOR(&pos);
+        if (pos.y > -2.5f && pos.y < 2.5f) {
             dds3ObjectBaseOffFlag(control->handle2, 1);
         } else {
             dds3ObjectBaseOnFlag(control->handle2, 1);
@@ -414,8 +414,8 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
 
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4] QWORD_ALIGNED;
-    f32 probe[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
+    sdfVector4_t probe;
 
     if (ctl == NULL) {
         return;
@@ -426,24 +426,24 @@ void fldPlayerCalc_Hit(void) {
     if (l_UseCollision == 0) {
         return;
     }
-    probe[0] = fldGlobalBase.x;
-    probe[1] = fldGlobalBase.y;
-    probe[2] = fldGlobalBase.z;
-    fldHitChkUnitElv(probe);
+    probe.x = fldGlobalBase.x;
+    probe.y = fldGlobalBase.y;
+    probe.z = fldGlobalBase.z;
+    fldHitChkUnitElv(&probe.x);
     if (fldGlobalBase.hitValid == 0) {
         return;
     }
     fldGlobalBase.x = fldGlobalBase.hitX;
     fldGlobalBase.y = fldGlobalBase.hitY;
     fldGlobalBase.z = fldGlobalBase.hitZ;
-    pos[0] = fldGlobalBase.hitX;
-    pos[1] = fldGlobalBase.hitY;
-    pos[2] = fldGlobalBase.hitZ;
-    dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
+    pos.x = fldGlobalBase.hitX;
+    pos.y = fldGlobalBase.hitY;
+    pos.z = fldGlobalBase.hitZ;
+    dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
     fldGlobalBase.hitValid = 0;
     dds3GetPosPoseSet(ctl->handle);
-    SDF_VU0_STOREVECTOR(pos);
-    SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, pos);
+    SDF_VU0_STOREVECTOR(&pos);
+    SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, &pos);
 }
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
@@ -472,7 +472,7 @@ void fldPlayerCalc_WarpRun(void)
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t oldPosition __attribute__((aligned(16)));
-    f32 collisionPosition[4] QWORD_ALIGNED;
+    sdfVector4_t collisionPosition;
     f32 pitch, warp, angle, step, distance, pi;
     dds3Basic_t *basic;
     dds3PoseSet_t *pose;
@@ -546,13 +546,13 @@ void fldPlayerCalc_WarpRun(void)
     position.z = fldGlobalBase.z - sdfCos((-fldPlayerWarpState * pi) / 180.0f) * distance;
     dds3SetPosPoseSet(control->handle, &position);
     if (l_UseCollision != 0) {
-        collisionPosition[0] = position.x;
-        collisionPosition[1] = position.y;
-        collisionPosition[2] = position.z;
+        collisionPosition.x = position.x;
+        collisionPosition.y = position.y;
+        collisionPosition.z = position.z;
         fldGlobalBase.x = position.x;
         fldGlobalBase.y = position.y;
         fldGlobalBase.z = position.z;
-        fldHitChkUnit(collisionPosition);
+        fldHitChkUnit(&collisionPosition.x);
         if (fldGlobalBase.hitValid != 0) {
             position.x = fldGlobalBase.hitX;
             position.y = fldGlobalBase.hitY + 44.0f;
@@ -639,34 +639,34 @@ extern void fldPlayerSvsOff(void);
 
 s32 fldPlayerCalcHasigo(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
 
     if (gfldPlayerDamegeCnt > 0) {
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
-        pos[1] -= SDF_FRAME_STEP(2.0f);
+        SDF_VU0_STOREVECTOR(&pos);
+        pos.y -= SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        fldGlobalBase.x = pos[0];
-        fldGlobalBase.y = pos[1];
-        fldGlobalBase.z = pos[2];
-        pos[1] = fldGlobalBase.y;
-        pos[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
+        fldGlobalBase.x = pos.x;
+        fldGlobalBase.y = pos.y;
+        fldGlobalBase.z = pos.z;
+        pos.y = fldGlobalBase.y;
+        pos.z = fldGlobalBase.z;
+        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
     } else if (gfldPlayerDamegeCnt < 0) {
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
-        pos[1] += SDF_FRAME_STEP(2.0f);
+        SDF_VU0_STOREVECTOR(&pos);
+        pos.y += SDF_FRAME_STEP(2.0f);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        fldGlobalBase.x = pos[0];
-        fldGlobalBase.y = pos[1];
-        fldGlobalBase.z = pos[2];
-        pos[1] = fldGlobalBase.y;
-        pos[2] = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
+        fldGlobalBase.x = pos.x;
+        fldGlobalBase.y = pos.y;
+        fldGlobalBase.z = pos.z;
+        pos.y = fldGlobalBase.y;
+        pos.z = fldGlobalBase.z;
+        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
     } else {
         return 0;
     }
@@ -2363,7 +2363,7 @@ void fldPlayerSdwOff(void) {
 s32 fldPlayerFastSet(void)
 {
     fldUnitControl_t *ctl = fldGetUnitControl();
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
     f32 probe[3];
     dds3PoseSet_t *pose;
 
@@ -2373,16 +2373,16 @@ s32 fldPlayerFastSet(void)
     }
     if (fldGlobalBase.area < 0xA) {
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
+        SDF_VU0_STOREVECTOR(&pos);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        probe[0] = pos[0];
-        probe[1] = pos[1] + 20.0f;
-        probe[2] = pos[2];
-        fldGlobalBase.x = pos[0];
-        fldGlobalBase.y = pos[1] + 20.0f;
-        fldGlobalBase.z = pos[2];
+        probe[0] = pos.x;
+        probe[1] = pos.y + 20.0f;
+        probe[2] = pos.z;
+        fldGlobalBase.x = pos.x;
+        fldGlobalBase.y = pos.y + 20.0f;
+        fldGlobalBase.z = pos.z;
         fldHitChkUnit(probe);
         if (fldGlobalBase.hitValid != 0) {
             fldGlobalBase.x = fldGlobalBase.hitX;
@@ -2391,45 +2391,45 @@ s32 fldPlayerFastSet(void)
             } else {
                 fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
             }
-            pos[0] = fldGlobalBase.x;
-            pos[1] = fldGlobalBase.y;
-            pos[2] = fldGlobalBase.hitZ;
+            pos.x = fldGlobalBase.x;
+            pos.y = fldGlobalBase.y;
+            pos.z = fldGlobalBase.hitZ;
             fldGlobalBase.z = fldGlobalBase.hitZ;
-            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
+            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
             fldGlobalBase.hitValid = 0;
         }
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
+        SDF_VU0_STOREVECTOR(&pos);
         pose = ctl->handle->poseset;
-        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, pos);
+        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, &pos);
         dds3OffPoseSetFlag(pose, POSESET_FLAG_POS2);
     } else {
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
+        SDF_VU0_STOREVECTOR(&pos);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        probe[0] = pos[0];
-        probe[1] = pos[1] + 10.0f;
-        probe[2] = pos[2];
-        fldGlobalBase.x = pos[0];
-        fldGlobalBase.y = pos[1] + 10.0f;
-        fldGlobalBase.z = pos[2];
+        probe[0] = pos.x;
+        probe[1] = pos.y + 10.0f;
+        probe[2] = pos.z;
+        fldGlobalBase.x = pos.x;
+        fldGlobalBase.y = pos.y + 10.0f;
+        fldGlobalBase.z = pos.z;
         fldHitChkUnit(probe);
         if (fldGlobalBase.hitValid != 0) {
             fldGlobalBase.x = fldGlobalBase.hitX;
             fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
             fldGlobalBase.z = fldGlobalBase.hitZ;
-            pos[0] = fldGlobalBase.x;
-            pos[1] = fldGlobalBase.y;
-            pos[2] = fldGlobalBase.z;
-            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)pos);
+            pos.x = fldGlobalBase.x;
+            pos.y = fldGlobalBase.y;
+            pos.z = fldGlobalBase.z;
+            dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
             fldGlobalBase.hitValid = 0;
         }
         dds3GetPosPoseSet(ctl->handle);
-        SDF_VU0_STOREVECTOR(pos);
+        SDF_VU0_STOREVECTOR(&pos);
         pose = ctl->handle->poseset;
-        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, pos);
+        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, &pos);
         dds3OffPoseSetFlag(pose, POSESET_FLAG_POS2);
     }
     return 0;

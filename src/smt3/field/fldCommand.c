@@ -624,40 +624,40 @@ extern void resetCamNormal(void);
 s32 fldCommand_SET_CHASE_CAMERA(void) {
     f32 angle;
     f32 result;
-    f32 cameraPos[4] QWORD_ALIGNED;
-    f32 targetPos[4] QWORD_ALIGNED;
+    sdfVector4_t cameraPos;
+    sdfVector4_t targetPos;
 
     fldGlobalBase.mode = 0;
 
     angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
     fldCamPitch = -fldGlobalBase.camAngle;
     result = sdfSin(angle);
-    cameraPos[0] = fldGlobalBase.x - result;
-    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+    cameraPos.x = fldGlobalBase.x - result;
+    cameraPos.y = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
 
     angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
     result = sdfCos(angle);
-    cameraPos[2] = fldGlobalBase.z + result;
+    cameraPos.z = fldGlobalBase.z + result;
 
     angle = fldCamPitch * 3.14f / 180.0f;
     {
         f32 sine = sdfSin(angle);
-        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+        targetPos.x = fldGlobalBase.x + sine * 550.0f;
     }
-    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+    targetPos.y = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
 
     angle = fldCamPitch * 3.14f / 180.0f;
     {
         f32 cosine = sdfCos(angle);
-        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+        targetPos.z = fldGlobalBase.z + cosine * 550.0f;
     }
 
-    D_002FC9C0[0] = cameraPos[0];
-    D_002FC9C0[1] = cameraPos[1];
-    D_002FC9C0[2] = cameraPos[2];
-    fldCamTarget[0] = targetPos[0];
-    fldCamTarget[1] = targetPos[1];
-    fldCamTarget[2] = targetPos[2];
+    D_002FC9C0[0] = cameraPos.x;
+    D_002FC9C0[1] = cameraPos.y;
+    D_002FC9C0[2] = cameraPos.z;
+    fldCamTarget[0] = targetPos.x;
+    fldCamTarget[1] = targetPos.y;
+    fldCamTarget[2] = targetPos.z;
 
     fldPlayerFastSet();
     if (fldGlobalBase.area < 10) {
@@ -676,8 +676,8 @@ s32 func_00158548(void) {
 s32 fldCommand_CAM_DIR(void) {
     s32 parameter;
     f32 angle;
-    f32 cameraPos[4] QWORD_ALIGNED;
-    f32 targetPos[4] QWORD_ALIGNED;
+    sdfVector4_t cameraPos;
+    sdfVector4_t targetPos;
 
     parameter = scrGetIntPara(0);
     if (parameter < 0) {
@@ -688,39 +688,39 @@ s32 fldCommand_CAM_DIR(void) {
     }
 
     angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
-    cameraPos[0] = fldGlobalBase.x - sdfSin(angle);
-    cameraPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+    cameraPos.x = fldGlobalBase.x - sdfSin(angle);
+    cameraPos.y = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
 
     angle = (fldGlobalBase.camAngle + 180.0f) * 3.14f / 180.0f;
-    cameraPos[2] = fldGlobalBase.z + sdfCos(angle);
+    cameraPos.z = fldGlobalBase.z + sdfCos(angle);
 
     angle = fldCamPitch * 3.14f / 180.0f;
     {
         f32 sine = sdfSin(angle);
-        targetPos[0] = fldGlobalBase.x + sine * 550.0f;
+        targetPos.x = fldGlobalBase.x + sine * 550.0f;
     }
-    targetPos[1] = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
+    targetPos.y = fldGlobalBase.y - 200.0f - 10.0f + 60.0f;
 
     angle = fldCamPitch * 3.14f / 180.0f;
     {
         f32 cosine = sdfCos(angle);
-        targetPos[2] = fldGlobalBase.z + cosine * 550.0f;
+        targetPos.z = fldGlobalBase.z + cosine * 550.0f;
     }
 
-    D_002FC9C0[0] = cameraPos[0];
-    D_002FC9C0[1] = cameraPos[1];
-    D_002FC9C0[2] = cameraPos[2];
-    fldCamTarget[0] = targetPos[0];
-    fldCamTarget[1] = targetPos[1];
-    fldCamTarget[2] = targetPos[2];
+    D_002FC9C0[0] = cameraPos.x;
+    D_002FC9C0[1] = cameraPos.y;
+    D_002FC9C0[2] = cameraPos.z;
+    fldCamTarget[0] = targetPos.x;
+    fldCamTarget[1] = targetPos.y;
+    fldCamTarget[2] = targetPos.z;
 
     resetCamNormal();
     return 1;
 }
 
 s32 fldCommand_CAM_SEL_PHOKAN(void) {
-    f32 pos[4] QWORD_ALIGNED;
-    f32 rot[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
+    sdfVector4_t rot;
     dds3Basic_t *target;
     dds3Basic_t *object;
     dds3Basic_t *world;
@@ -734,14 +734,14 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         if (object == NULL) {
             return 1;
         }
-        dds3CameraObjectBasicGetTgtCam(object, pos, rot);
+        dds3CameraObjectBasicGetTgtCam(object, &pos.x, &rot.x);
         fldCamGetPhokanParam();
-        fldCamPhokanSelX[0] = pos[0];
-        fldCamPhokanSelX[1] = pos[1];
-        fldCamPhokanSelX[2] = pos[2];
-        D_002FC9F0[0] = rot[0];
-        D_002FC9F0[1] = rot[1];
-        D_002FC9F0[2] = rot[2];
+        fldCamPhokanSelX[0] = pos.x;
+        fldCamPhokanSelX[1] = pos.y;
+        fldCamPhokanSelX[2] = pos.z;
+        D_002FC9F0[0] = rot.x;
+        D_002FC9F0[1] = rot.y;
+        D_002FC9F0[2] = rot.z;
         fldCamPhokanState = 0;
         fldCamPHokanMode = scrGetIntPara(1);
         fldGlobalBase.mode = 4;

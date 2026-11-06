@@ -601,27 +601,27 @@ u32 evtCommand_MODEL_SHADOW_OFF(void)
 
 u32 evtCommand_MODEL_POS_XYZ(void)
 {
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
     void *scene;
     s32 key;
     void *unit;
 
-    memset(pos, 0, 0x10);
+    memset(&pos, 0, 0x10);
     scene = dds3GetActiveScene();
     key = scrGetIntPara(0);
     unit = dds3SearchSceneBasic(scene, key, 5);
     if (unit == NULL) {
         return 1;
     }
-    pos[0] = scrGetFloatPara(1);
-    pos[1] = scrGetFloatPara(2);
-    pos[2] = scrGetFloatPara(3);
-    dds3SetPosPoseSet(unit, (u128 *)pos);
+    pos.x = scrGetFloatPara(1);
+    pos.y = scrGetFloatPara(2);
+    pos.z = scrGetFloatPara(3);
+    dds3SetPosPoseSet(unit, (u128 *)&pos);
     return 1;
 }
 
 u32 evtCommand_MODEL_ROT_XYZ(void) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
     void *ctx;
     s32 worldObjectKey;
     void *unit;
@@ -629,8 +629,8 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     f32 x;
     f32 y;
 
-    memset(v, 0, 0x10);
-    v[3] = 1.0f;
+    memset(&v, 0, 0x10);
+    v.w = 1.0f;
     ctx = dds3GetActiveScene();
     worldObjectKey = scrGetIntPara(0);
     unit = dds3SearchSceneBasic(ctx, worldObjectKey, 5);
@@ -644,30 +644,30 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     SDF_VU0_COPYVECTOR_A_TO_B();
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
     Mult();
-    SDF_VU0_STOREVECTOR(v);
-    dds3SetRotPoseSet(unit, (u128 *)v);
+    SDF_VU0_STOREVECTOR(&v);
+    dds3SetRotPoseSet(unit, (u128 *)&v);
     return 1;
 }
 
 u32 evtCommand_MODEL_SCL_XYZ(void)
 {
-    f32 scl[4] QWORD_ALIGNED;
+    sdfVector4_t scl;
     void *scene;
     s32 key;
     void *unit;
 
-    memset(scl, 0, 0x10);
-    scl[3] = 1.0f;
+    memset(&scl, 0, 0x10);
+    scl.w = 1.0f;
     scene = dds3GetActiveScene();
     key = scrGetIntPara(0);
     unit = dds3SearchSceneBasic(scene, key, 5);
     if (unit == NULL) {
         return 1;
     }
-    scl[0] = scrGetFloatPara(1);
-    scl[1] = scrGetFloatPara(2);
-    scl[2] = scrGetFloatPara(3);
-    dds3SetSclPoseSet(unit, (u128 *)scl);
+    scl.x = scrGetFloatPara(1);
+    scl.y = scrGetFloatPara(2);
+    scl.z = scrGetFloatPara(3);
+    dds3SetSclPoseSet(unit, (u128 *)&scl);
     return 1;
 }
 
@@ -1030,27 +1030,27 @@ u32 evtCommand_MODEL_LIGHT_DIR(void);
 
 u32 evtCommand_MODEL_LIGHT_DIR(void)
 {
-    f32 dir[4] QWORD_ALIGNED;
+    sdfVector4_t dir;
     evtUnit_t *unit;
     f32 mag;
 
-    memset(dir, 0, sizeof(dir));
+    memset(&dir, 0, sizeof(dir));
     unit = evtGetUnitHandle(scrGetIntPara(0));
-    dir[0] = scrGetFloatPara(2);
-    dir[1] = scrGetFloatPara(3);
-    dir[2] = scrGetFloatPara(4);
-    mag = sdfFabs(dir[0]);
+    dir.x = scrGetFloatPara(2);
+    dir.y = scrGetFloatPara(3);
+    dir.z = scrGetFloatPara(4);
+    mag = sdfFabs(dir.x);
     if (mag <= 0.01f) {
-        mag = sdfFabs(dir[1]);
+        mag = sdfFabs(dir.y);
         if (mag <= 0.01f) {
-            mag = sdfFabs(dir[2]);
+            mag = sdfFabs(dir.z);
             if (mag <= 0.01f) {
                 datDebugPrintf(D_0053A948);
                 return 1;
             }
         }
     }
-    SDF_VU0_LOADVECTOR(dir);
+    SDF_VU0_LOADVECTOR(&dir);
     evtSetUnitLightDir(unit, scrGetIntPara(1));
     return 1;
 }
@@ -1213,15 +1213,15 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A9A8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A9D8);
 
 u32 evtCommand_EFFBED_BE(void) {
-    f32 position[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t scale;
     s32 taskId;
     s32 key;
     void *resource;
     dds3Basic_t *object;
 
-    memset(position, 0, sizeof(position));
-    memset(scale, 0, sizeof(scale));
+    memset(&position, 0, sizeof(position));
+    memset(&scale, 0, sizeof(scale));
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
     resource = evtGetResorceData(taskId, key);
@@ -1231,7 +1231,7 @@ u32 evtCommand_EFFBED_BE(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = (dds3Basic_t *)dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    object = (dds3Basic_t *)dds3AddBEDEffectObjectBasic2(resource, &position, &scale);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
@@ -1451,14 +1451,14 @@ u32 evtCommand_EFFECT_POS_XYZ(void) {
 }
 
 u32 evtCommand_EFFECT_ROT_XYZ(void) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
     dds3Basic_t *obj;
     f32 toRad;
     f32 x;
     f32 y;
 
-    memset(v, 0, 0x10);
-    v[3] = 1.0f;
+    memset(&v, 0, 0x10);
+    v.w = 1.0f;
     obj = evtSearchBasic(7, scrGetIntPara(0));
     if (!(((evtModelHeader_t *)obj->workdata)->flags & 4)) {
         toRad = 0.017453293f;
@@ -1468,8 +1468,8 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
         Mult();
-        SDF_VU0_STOREVECTOR(v);
-        dds3SetRotPoseSet(obj, (u128 *)v);
+        SDF_VU0_STOREVECTOR(&v);
+        dds3SetRotPoseSet(obj, (u128 *)&v);
     }
     return 1;
 }
@@ -2092,15 +2092,15 @@ s32 evtCommand_CAM_PATH_WAIT(void)
 
 s32 evtCommand_CAM_CREATE(void)
 {
-    f32 pos[4] QWORD_ALIGNED;
-    f32 rot[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
+    sdfVector4_t rot;
     s32 id;
 
-    memset(pos, 0, 0x10);
-    memset(rot, 0, 0x10);
-    rot[3] = 1.0f;
+    memset(&pos, 0, 0x10);
+    memset(&rot, 0, 0x10);
+    rot.w = 1.0f;
     id = dds3AllocObjectId();
-    dds3GetRadiusPoseSet(dds3AddCameraObjectBasicTypeFree(id, pos, rot), 1.0f);
+    dds3GetRadiusPoseSet(dds3AddCameraObjectBasicTypeFree(id, &pos.x, &rot.x), 1.0f);
     scrSetIntReturnValue(id);
     return 1;
 }
@@ -2121,9 +2121,9 @@ s32 evtCommand_CAM_CLS(void)
 
 s32 evtCommand_CAM_POS_XYZ(void) {
     void *effectUnit;
-    f32 position[4] QWORD_ALIGNED;
+    sdfVector4_t position;
 
-    memset(position, 0, sizeof(position));
+    memset(&position, 0, sizeof(position));
     if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetUnitFollowCamera();
     } else {
@@ -2132,17 +2132,17 @@ s32 evtCommand_CAM_POS_XYZ(void) {
     if (effectUnit == NULL) {
         return 1;
     }
-    position[0] = scrGetFloatPara(1);
-    position[1] = scrGetFloatPara(2);
-    position[2] = scrGetFloatPara(3);
-    dds3SetPosPoseSet(effectUnit, (u128 *)position);
+    position.x = scrGetFloatPara(1);
+    position.y = scrGetFloatPara(2);
+    position.z = scrGetFloatPara(3);
+    dds3SetPosPoseSet(effectUnit, (u128 *)&position);
     return 1;
 }
 
 /* Convert the three degree inputs before composing and storing a quaternion. */
 s32 evtCommand_CAM_ROT_XYZ(void) {
     void *effectUnit;
-    f32 quaternion[4] QWORD_ALIGNED;
+    sdfVector4_t quaternion;
     f32 degreesToRadians;
     f32 pitch;
 
@@ -2160,14 +2160,14 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     SDF_VU0_COPYVECTOR_A_TO_B();
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
     Mult();
-    SDF_VU0_STOREVECTOR(quaternion);
-    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
+    SDF_VU0_STOREVECTOR(&quaternion);
+    dds3SetRotPoseSet(effectUnit, (u128 *)&quaternion);
     return 1;
 }
 
 s32 evtCommand_CAM_ROT_Q(void) {
     void *effectUnit;
-    f32 quaternion[4] QWORD_ALIGNED;
+    sdfVector4_t quaternion;
 
     if (scrGetIntPara(0) < 0) {
         effectUnit = fldGetUnitFollowCamera();
@@ -2177,11 +2177,11 @@ s32 evtCommand_CAM_ROT_Q(void) {
     if (effectUnit == NULL) {
         return 1;
     }
-    quaternion[0] = scrGetFloatPara(1);
-    quaternion[1] = scrGetFloatPara(2);
-    quaternion[2] = scrGetFloatPara(3);
-    quaternion[3] = scrGetFloatPara(4);
-    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
+    quaternion.x = scrGetFloatPara(1);
+    quaternion.y = scrGetFloatPara(2);
+    quaternion.z = scrGetFloatPara(3);
+    quaternion.w = scrGetFloatPara(4);
+    dds3SetRotPoseSet(effectUnit, (u128 *)&quaternion);
     return 1;
 }
 

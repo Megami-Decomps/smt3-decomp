@@ -473,7 +473,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     sdfVector4_t local;
     sdfVector4_t rotation;
     sdfVector4_t direction;
-    f32 nrm[4] QWORD_ALIGNED;
+    sdfVector4_t nrm;
     sdfVector4_t triangle[4];
     sdfVector4_t edge[4];
     sdfVector4_t center;
@@ -551,9 +551,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         for (i = 0; i < 4; i++) {
             SDF_VU0_COPYVECTOR(&triangle[i], fldEveHitTable[index].corner[i]);
         }
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[0][i] = nrm[i];
+            fldEveHitTable[index].plane[0][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[0][3] = 0.0f;
         fldEveHitTable[index].limit[0] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[0], &triangle[0]);
@@ -575,15 +575,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = 10.0f;
             edge[2].y = triangle[1].y;
             edge[2].z = triangle[1].z;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
             i = 2;
@@ -596,15 +596,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = 10.0f;
             edge[2].y = triangle[2].y;
             edge[2].z = triangle[2].z;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
             }
             i = 3;
@@ -617,15 +617,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = 10.0f;
             edge[2].y = triangle[3].y;
             edge[2].z = triangle[3].z;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
             }
             i = 4;
@@ -638,15 +638,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = 10.0f;
             edge[2].y = triangle[0].y;
             edge[2].z = triangle[0].z;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
         } else if (absX < absY && absZ < absY) {
@@ -666,15 +666,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = triangle[1].x;
             edge[2].y = triangle[1].y;
             edge[2].z = 10.0f;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
             i = 2;
@@ -687,15 +687,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = triangle[2].x;
             edge[2].y = triangle[2].y;
             edge[2].z = 10.0f;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[1]);
             }
             i = 3;
@@ -708,15 +708,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = triangle[3].x;
             edge[2].y = triangle[3].y;
             edge[2].z = 10.0f;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[2]);
             }
             i = 4;
@@ -729,15 +729,15 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
             edge[2].x = triangle[0].x;
             edge[2].y = triangle[0].y;
             edge[2].z = 10.0f;
-            fldMakeEveHitPlanes(&edge[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
-            fldEveHitTable[index].plane[i][0] = nrm[0];
-            fldEveHitTable[index].plane[i][1] = nrm[1];
-            fldEveHitTable[index].plane[i][2] = nrm[2];
+            fldMakeEveHitPlanes(&edge[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
+            fldEveHitTable[index].plane[i][0] = nrm.x;
+            fldEveHitTable[index].plane[i][1] = nrm.y;
+            fldEveHitTable[index].plane[i][2] = nrm.z;
             fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             if (fldVecDot(&center, (sdfVector4_t *)fldEveHitTable[index].plane[i]) - fldEveHitTable[index].limit[i] < 0.0f) {
-                fldEveHitTable[index].plane[i][0] = -nrm[0];
-                fldEveHitTable[index].plane[i][1] = -nrm[1];
-                fldEveHitTable[index].plane[i][2] = -nrm[2];
+                fldEveHitTable[index].plane[i][0] = -nrm.x;
+                fldEveHitTable[index].plane[i][1] = -nrm.y;
+                fldEveHitTable[index].plane[i][2] = -nrm.z;
                 fldEveHitTable[index].limit[i] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[i], &edge[0]);
             }
         }
@@ -828,9 +828,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[2][1];
         triangle[2].z = fldEveHitTable[index].corner[2][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -847,9 +847,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[5][1];
         triangle[2].z = fldEveHitTable[index].corner[5][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -866,9 +866,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[4][1];
         triangle[2].z = fldEveHitTable[index].corner[4][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -885,9 +885,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[7][1];
         triangle[2].z = fldEveHitTable[index].corner[7][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -904,9 +904,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[6][1];
         triangle[2].z = fldEveHitTable[index].corner[6][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -923,9 +923,9 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         triangle[2].y = fldEveHitTable[index].corner[4][1];
         triangle[2].z = fldEveHitTable[index].corner[4][2];
         triangle[2].w = 1.0f;
-        fldMakeEveHitPlanes(&triangle[0].x, &nrm[0], &nrm[1], &nrm[2], &nrm[3]);
+        fldMakeEveHitPlanes(&triangle[0].x, &nrm.x, &nrm.y, &nrm.z, &nrm.w);
         for (i = 0; i < 3; i++) {
-            fldEveHitTable[index].plane[n][i] = nrm[i];
+            fldEveHitTable[index].plane[n][i] = (&nrm.x)[i];
         }
         fldEveHitTable[index].plane[n][3] = 0.0f;
         fldEveHitTable[index].limit[n] = fldVecDot((sdfVector4_t *)fldEveHitTable[index].plane[n], &triangle[0]);
@@ -952,16 +952,16 @@ extern void ToMatrix(void);
 
 s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 {
-    f32 dir[4] QWORD_ALIGNED;
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t dir;
+    sdfVector4_t pos;
     s32 i;
     fldResPut_t *info;
     f32 *target;
     f32 length;
     f32 dot;
 
-    memset(pos, 0, 0x10);
-    pos[3] = 1.0f;
+    memset(&pos, 0, 0x10);
+    pos.w = 1.0f;
     for (i = 0; i < fldEveRngCount; i++) {
         if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
@@ -970,23 +970,23 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
         switch (info->data.shape->kind) {
         case 0:
             target = (f32 *)put->workdata;
-            pos[0] = target[0];
-            pos[1] = target[1];
-            pos[2] = target[2];
+            pos.x = target[0];
+            pos.y = target[1];
+            pos.z = target[2];
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
-            SDF_VU0_STORE_ROW2(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STORE_ROW2(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_NORMALIZE();
             SDF_VU0_SCALEVECTOR(-1.0f);
             SDF_VU0_COPYVECTOR_A_TO_C();
-            SDF_VU0_LOADVECTOR(pos);
+            SDF_VU0_LOADVECTOR(&pos);
             SDF_VU0_LOADVECTOR_B(&unit->poseset->pos);
             SDF_VU0_SUBVECTOR();
-            SDF_VU0_STOREVECTOR(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STOREVECTOR(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_GETLENGTH(length);
             SDF_VU0_NORMALIZE();
             SDF_VU0_COPYVECTOR_C_TO_B();
@@ -1003,12 +1003,12 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
         case 2:
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
-            SDF_VU0_STORE_ROW2(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STORE_ROW2(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(dir);
-            if (fldVecDot((sdfVector4_t *)dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.01f) {
+            SDF_VU0_STOREVECTOR(&dir);
+            if (fldVecDot(&dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.01f) {
                 return 0;
             }
             return 1;
@@ -1021,16 +1021,16 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 #ifdef NON_MATCHING
 s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
 {
-    f32 dir[4] QWORD_ALIGNED;
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t dir;
+    sdfVector4_t pos;
     s32 i;
     fldResPut_t *info;
     f32 *probe;
     f32 length;
     f32 dot;
 
-    memset(pos, 0, 0x10);
-    pos[3] = 1.0f;
+    memset(&pos, 0, 0x10);
+    pos.w = 1.0f;
     for (i = 0; i < fldEveRngCount; i++) {
         if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
@@ -1038,22 +1038,22 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
         info = (fldResPut_t *)gEvnRng[i]->data;
         switch (info->data.shape->kind) {
         case 0:
-            probe = pos;
-            *(u128 *)pos = *(u128 *)put->workdata;
+            probe = &pos.x;
+            *(u128 *)&pos = *(u128 *)put->workdata;
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
-            SDF_VU0_STORE_ROW2(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STORE_ROW2(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_NORMALIZE();
             SDF_VU0_SCALEVECTOR(-1.0f);
             SDF_VU0_COPYVECTOR_A_TO_C();
             SDF_VU0_LOADVECTOR_RWADDR(probe);
             SDF_VU0_LOADVECTOR_B(&unit->poseset->pos);
             SDF_VU0_SUBVECTOR();
-            SDF_VU0_STOREVECTOR(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STOREVECTOR(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_GETLENGTH(length);
             SDF_VU0_NORMALIZE();
             SDF_VU0_COPYVECTOR_C_TO_B();
@@ -1067,12 +1067,12 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
         case 2:
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
-            SDF_VU0_STORE_ROW2(dir);
-            dir[1] = 0.0f;
-            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_STORE_ROW2(&dir);
+            dir.y = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
             SDF_VU0_NORMALIZE();
-            SDF_VU0_STOREVECTOR(dir);
-            if (fldVecDot((sdfVector4_t *)dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.0f) {
+            SDF_VU0_STOREVECTOR(&dir);
+            if (fldVecDot(&dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.0f) {
                 return 0;
             }
             return 1;

@@ -363,7 +363,7 @@ void BillboardFreeTex(dds3BillResource_tag *hResource) {
  * Each row is eight actual X/Y offsets, consumed as a 32-byte quad stream. */
 void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
     f32 matrix[16] __attribute__((aligned(16)));
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t direction;
     f32 dot;
     sdfBillBoardBatch_t *work;
     s32 selected;
@@ -403,7 +403,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
             SDF_VU0_LOADVECTOR_B(D_00317030);
             SDF_VU0_INNERPRODUCT(dot);
             dds3BillboardTagParam[1] = 1.0 - fabs(dot);
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(dds3BillboardTagParam);
@@ -511,7 +511,7 @@ extern s32 sdfTexGetPacketCtx2Length(sdfTexHandle_t *handle);
 void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
 {
     f32 matrix[16] __attribute__((aligned(16)));
-    f32 direction[4] QWORD_ALIGNED;
+    sdfVector4_t direction;
     f32 dot;
     sdfPrimTransPacket_t *blend;
     sdfBillBoardBatch_t *batch;
@@ -570,7 +570,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
             SDF_VU0_LOADVECTOR_B(D_00317060);
             SDF_VU0_INNERPRODUCT(dot);
             dds3MultiBillboardTagParam[1] = 1.0 - fabs(dot);
-            SDF_VU0_STOREVECTOR(direction);
+            SDF_VU0_STOREVECTOR(&direction);
             SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR_BARRIER(dds3MultiBillboardTagParam);
@@ -1382,9 +1382,9 @@ void dds3BillboardSetXYOffset(billHandle_t *hBillboard, float x, float y) {
 
 /* vu0 routine: screen-space angle of a world axis at a world position. */
 f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
-    f32 delta[4] QWORD_ALIGNED;
-    f32 origin[4] QWORD_ALIGNED;
-    f32 tip[4] QWORD_ALIGNED;
+    sdfVector4_t delta;
+    sdfVector4_t origin;
+    sdfVector4_t tip;
 
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
@@ -1396,7 +1396,7 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(origin);
+    SDF_VU0_STOREVECTOR(&origin);
     SDF_VU0_LOADVECTOR(pVec);
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR(100.0f);
@@ -1408,14 +1408,14 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     SDF_VU0_MULVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(tip);
-    delta[0] = origin[0] - tip[0];
-    delta[1] = origin[1] - tip[1];
-    delta[2] = 0.0f;
-    SDF_VU0_LOADVECTOR_MEMOPS(delta[0]);
+    SDF_VU0_STOREVECTOR(&tip);
+    delta.x = origin.x - tip.x;
+    delta.y = origin.y - tip.y;
+    delta.z = 0.0f;
+    SDF_VU0_LOADVECTOR_MEMOPS(delta.x);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR_MEMOPS(delta[0]);
-    return atan2f(delta[1], delta[0]);
+    SDF_VU0_STOREVECTOR_MEMOPS(delta.x);
+    return atan2f(delta.y, delta.x);
 }
 
 /* vu0 routine: 1 - |axis . normalized view direction|. */
