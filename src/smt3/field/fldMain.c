@@ -1020,15 +1020,15 @@ INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
 
 void fldAnaStart(f32 x, f32 y, f32 z)
 {
-    f32 pos[4];
+    sdfVector4_t pos;
 
-    memset(pos, 0, sizeof(pos));
-    pos[3] = 1.0f;
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
     if (mhfldAnaFile != NULL) {
-        pos[0] = x;
-        pos[1] = y;
-        pos[2] = z;
-        dds3SetPosPoseSet(fldAnaBasic, pos);
+        pos.x = x;
+        pos.y = y;
+        pos.z = z;
+        dds3SetPosPoseSet(fldAnaBasic, &pos);
         mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldAnaBasic), 0, 0);
         dds3ObjectBaseOffFlag(fldAnaBasic, 1);
         fldSePlay(0x26);
@@ -1061,11 +1061,11 @@ void fldWaveInit(void)
 
 void fldWaveStart(f32 x, f32 y, f32 z)
 {
-    f32 pos[4];
+    sdfVector4_t pos;
     s32 i;
 
-    memset(pos, 0, sizeof(pos));
-    pos[3] = 1.0f;
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
     if (mhfldWaveFile == NULL) {
         return;
     }
@@ -1075,10 +1075,10 @@ void fldWaveStart(f32 x, f32 y, f32 z)
         }
         fldWaveBuff[i].use = 1;
         fldWaveBuff[i].cnt = 0;
-        pos[0] = x;
-        pos[1] = y;
-        pos[2] = z;
-        dds3SetPosPoseSet(fldWaveBuff[i].pBasic, pos);
+        pos.x = x;
+        pos.y = y;
+        pos.z = z;
+        dds3SetPosPoseSet(fldWaveBuff[i].pBasic, &pos);
         mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].pBasic), 0, 0);
         dds3ObjectBaseOffFlag(fldWaveBuff[i].pBasic, 1);
         mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].pBasic), 0, 0);

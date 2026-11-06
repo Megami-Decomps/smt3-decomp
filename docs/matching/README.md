@@ -133,6 +133,7 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 1 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
+| 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
 | 1 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 1 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
