@@ -2,22 +2,58 @@
 
 ## func_001F79A8 (event/evtEventViewerMenu, 0xE4)
 
-20 of 56 words differ, exact size. The jump table, its eleven case labels and every
-arm's call match; what differs is which saved register the `busy` flag and the
-`viewerinfo` load take ($4/$5 swapped against retail), and two consequences of
-that: retail materialises the default arm's `pad >= 0` as `slti`/`sltiu` where
-the C gives `nor`/`srl`, and retail cross-jumps the two `return 1` blocks where
-the C emits one epilogue inline.
+20 of 56 words differ in the current 224-byte emitted body, against retail's
+228 bytes; four native bytes are uncovered. The fallback explicitly declares
+size 0xE4. The zero at 0x1F7A8C is following alignment, not part of the function.
+The old exact-size claim was incorrect. The eleven switch-table destinations
+are exact retail addresses, but the busy/viewerinfo argument-register homes,
+default comparison and success exit still differ.
 
-Ruled out: `busy = 1` as an initializer, as a statement after the declaration,
-and set only in the arms that need it; reading the switch value into a local
-first; the 0x10/0x11 arm written as `if (state == 0) return 1; break;` and as
-`if (state != 0) break; return 1;`. Six spellings of the default arm's compare
-(`>= 0`, `!(< 0)`, `(< 0) == 0`, `(< 0) ^ 1`, `1 - (< 0)`, an `if`/`else`, a
-ternary) all compile to the same `nor`/`srl` pair, so the compare is a byproduct
-of the allocation rather than the lever. The eleven explicit case labels are
-needed: with only the six reachable values the switch falls under
-`case_values_threshold` and becomes a compare tree.
+The prerequisite change only corrects the local `dds3KillProcess` declaration
+to the actual `s32(dds3ProcessID_t *, s32)` provider in `kernel/dds3KernelCore`,
+and removes the sole unnecessary `void *` cast on the already-typed menuProcess
+argument. The existing header type, creator's returned pointer, timer one,
+ignored return and callback-sensitive viewerinfo reload before clearing are
+unchanged. All guards remain intact. Complete direct assembly and ELF objects
+are literally identical before/after this correction in production, SKIP_ASM
+and retained contexts; direct/wrapper parity also passes after only the source
+filename normalization. The complete guarded owner remains 60 match, 0 differ.
+
+Three fresh target forms are closed. After independently resolving all twelve
+target relocations against verified addresses, the ordinary baseline has 20
+literal word differences in its 56-word overlap. Binding the initialized real
+busy result to `$5` and giving it an input-only operand immediately before the
+common test reduces that to 14. It restores the initial viewerinfo and
+callback-result homes, but not the comparison or exit. A final forward shared-success
+label control has 15 differences. Every form still emits 224 bytes against
+228 native bytes; none is an exact match or a full-link approval.
+
+No constrained value crosses a clobbering call: each calling arm replaces busy
+with its result, and the common consumer ends that lifetime before the kill.
+The early-null success path still bypasses kill and clear. The final control
+was motivated by the qualified baseline delay-reorganization dump's separate
+partial epilogue and native's shared return-one block, but did not recover it.
+
+The comparison mismatch is already present in qualified initial RTL: `not`
+followed by logical-right-shift31, before allocation, in both baseline and busy
+controls. The old allocation-only explanation is therefore unsupported. This
+observes emitted RTL, not an internal expansion predicate or historical source.
+The 60 peer contracts are unchanged in production and retained contexts.
+In SKIP_ASM they agree only after accounting for the audited 48-byte target
+table/alignment insertion and shifted later rodata references. All three active
+forms have identical allocated data and data-relocation contracts within each
+mode. This is not raw SKIP_ASM identity to the guarded owner.
+Complete source/output qualification covers all 15 source/mode contexts. All
+inexact controls remain private; no new matching credit is claimed.
+
+Previously ruled out: busy initialized in its declaration, after it, or only in
+arms that need it; a local switch value; equivalent 0x10/0x11 null-test branch
+spellings; and the documented default-comparison spellings (`>= 0`, `!(< 0)`,
+`(< 0) == 0`, `(< 0) ^ 1`, `1 - (< 0)`, conditional and ternary forms). They all
+kept the `nor`/`srl` pair. Retain the eleven explicit case labels: the reduced
+case set instead fell below `case_values_threshold` and became a comparison
+tree. Do not repeat these grids, the busy constraint or the forward-success
+form without new source/consumer evidence for the native comparison or exit.
 
 ## evtFrameListHead (event/evtEventViewerMenu, 0x138)
 

@@ -105,7 +105,7 @@ extern s32 dblurProcess(void);
 
 extern s32 rblurProcess(void);
 
-extern s32 dds3KillProcess(void *id, s32 shutdowntimer);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 extern void evtFreeViewerInfo(void);
 
@@ -1211,7 +1211,7 @@ s32 func_001F79A8(void)
     if (viewerinfo->menuProcess == 0) {
         return 1;
     }
-    dds3KillProcess((void *)viewerinfo->menuProcess, 1);
+    dds3KillProcess(viewerinfo->menuProcess, 1);
     viewerinfo->menuProcess = 0;
     return 1;
 }
