@@ -63,6 +63,7 @@ effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	do
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	39
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	142 of 146 words match	docs/matching/effect/effBattleMisc.md	70
 effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/matching/effect/effBattleSystem.md	3
+func_00174DC0 and eff_174E88	effect/effBattleSystem	0xC8 and 0x1A4		docs/matching/effect/effBattleSystem.md	58
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3

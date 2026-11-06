@@ -3255,7 +3255,7 @@ void func_00174AB8(u32 color1, u32 color3)
 }
 
 extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
-extern void effDebugWireframeCylinderDraw(sdfVector4_t *center, u32 color, f32 radius, f32 height);
+extern void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height);
 extern void effDebugPointDraw(sdfVector4_t *point);
 
 void func_00174BB0(u32 color)
@@ -3269,7 +3269,7 @@ void func_00174BB0(u32 color)
         if ((formation->stat & 3) == 3) {
             effBTLModelGetSphereCenter(formation);
             SDF_VU0_STOREVECTOR(&center);
-            effDebugWireframeCylinderDraw(&center, color,
+            effDebugWireframeCylinderDraw(&center.x, color,
                 formation->r * formation->scl, formation->h * formation->scl);
             effDebugPointDraw(&center);
         }
@@ -3340,7 +3340,7 @@ extern effBTLAimParams_t D_00551DB8;
 extern u32 mdlGetColor(mdlObj_t *model);
 
 #ifdef NON_MATCHING
-s32 func_00174DC0(s32 unused)
+void *func_00174DC0(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     struct nbParty_t *party = &data->party[D_0054F130];
@@ -3367,7 +3367,7 @@ s32 func_00174DC0(s32 unused)
 INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 #endif
 
-extern s32 func_00174DC0(s32 unused);
+extern void *func_00174DC0(void *unused);
 extern s8 dds3PadBitTable[] __attribute__((section(".data")));
 extern u8 D_0054F135;
 extern sdfVector4_t D_0056AC30;
@@ -3379,7 +3379,7 @@ extern void effBTLPartGetPointLightPtr(nbFormation_t *formation, effBTLAimParams
                                       sdfVector4_t *direction);
 
 #ifdef NON_MATCHING
-void eff_174E88(void)
+void eff_174E88(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     nbFormation_t *formations = data->form;
@@ -3424,7 +3424,7 @@ void eff_174E88(void)
             if (D_0054F135 != 0) {
                 effBTLModelGetSphereCenter(formation);
                 SDF_VU0_STOREVECTOR(&center);
-                effDebugWireframeCylinderDraw(&center, 0x80802020,
+                effDebugWireframeCylinderDraw(&center.x, 0x80802020,
                                               formation->r * formation->scl,
                                               formation->h * formation->scl);
             }

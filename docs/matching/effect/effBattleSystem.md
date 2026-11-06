@@ -54,3 +54,17 @@ and relocations have parity. This is diagnostic evidence only, with no
 retained source change or matching credit. The matrix and second-position
 substitutions remain held because their asset-selected PCP consumer contracts
 are unresolved.
+
+## func_00174DC0 and eff_174E88 (effect/effBattleSystem, 0xC8 and 0x1A4)
+
+The editor descriptor at D_0031CA50 uses func_00174DC0 as its create callback and eff_174E88 as its update callback. Their declarations now match the established menu contracts, void *(void *) and void(void *). The create dispatcher consumes a pointer result when a source object exists; this descriptor supplies NULL and ignores the result. Its update dispatcher likewise supplies NULL. The create body retains its null return on every path, and both existing direct calls still pass null.
+
+The local effDebugWireframeCylinderDraw declaration now matches the provider's const f32 * parameter. Both owner callers pass &center.x from the unchanged aligned vector object. The cylinder consumes the address only through its actual VU vector loads, with no scalar C indexing across struct fields.
+
+Production, SKIP_ASM, and NON_MATCHING/SKIP_ASM preserve literal complete assembly and entire ELF objects before/after. Complete owner checking remains 290 matches and zero differences; strict implicit-declaration checks pass in all three modes. All fallbacks and function bodies are retained. This is a truthful type correction with no new matching credit, not a demonstrated native runtime change or recovered original spelling.
+
+Fresh complete-source plain/dump and wrapper/direct comparisons qualify all
+three before/after contexts with 21,227 unchanged actual-runtime input files.
+The native descriptor and actual callback dispatchers were independently
+reviewed. The nearby branch/VU and allocation experiments remain private and
+are not part of this contract repair.
