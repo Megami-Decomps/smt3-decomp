@@ -94,6 +94,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
+| 1 | sdf/sdfSound | [sdf/sdfSound-declarations.md](sdf/sdfSound-declarations.md) |
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |

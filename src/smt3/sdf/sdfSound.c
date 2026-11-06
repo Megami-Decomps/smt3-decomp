@@ -194,7 +194,7 @@ extern void sdfSndTransToIOP(s32 aIOPAddr, void *aEEAddr, s32 aSize);
 
 extern void *memcpy(void *, const void *, size_t);
 
-extern void sdfDelayThread(s32 delay);
+extern void sdfDelayThread(u32 delay);
 
 extern char * strcpy(char *, const char *);
 
@@ -512,6 +512,8 @@ void sdfSndLoadIRXModules(void) {
 
 extern char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
 extern char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
+
+void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount);
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 39 of 45 words match at the exact 180-byte size. */
@@ -1033,9 +1035,7 @@ s32 sdfFileRpcCallback(s32 unused, u32 event) {
 }
 
 /* Handle sound-file and PCM-buffer RPC commands. */
-#ifdef NON_MATCHING
 extern s32 WaitSema(s32 sema);
-#endif
 
 void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
 {
