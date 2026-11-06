@@ -526,7 +526,7 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
 }
 
 
-/* NON_MATCHING: 32 of 42 words, exact size; the first exit block is placed last. */
+/* NON_MATCHING: emitted C shares one result-call site; native has three. */
 #ifdef NON_MATCHING
 s32 fldCommand_DIR_HIT_CNTR(void) {
     dds3Basic_t *scene;

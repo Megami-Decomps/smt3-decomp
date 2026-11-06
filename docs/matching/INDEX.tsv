@@ -5,8 +5,8 @@ fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_0011
 fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	173
 fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/matching/code_00116AD0.md	198
 slCopyNonZero	historical code_00144798	0x40	16 of 16 words now match	docs/matching/code_00144798.md	3
-fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/matching/code_00144798.md	30
-fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	59
+fldCommand_DIR_HIT_CNTR	field/fldCommand	0xC0	10 of 42 words match	docs/matching/code_00144798.md	30
+fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	66
 nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/matching/code_001B0858.md	3
 nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/matching/code_001B0858.md	23
 nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matching/code_001C55F8.md	3
