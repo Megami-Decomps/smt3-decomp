@@ -47,28 +47,48 @@ reach the `movn`, and none of the four changes the register numbering.
 
 ## roundBlock (pb/pbGame, 0x8C)
 
-12 of 34 words differ, 136 bytes against retail's 140.
+35 of 35 words match at 140 bytes in ordinary C, excluding trailing alignment.
+The success step update and zero return follow the rotation arm; the guard's
+`else` returns -1. This places the two real clamp stores before the guard exit
+and the shared success tail, reproducing native layout without a goto,
+constraint, new declaration, artificial dependency or changed evaluation.
+Earlier inside-arm and goto-tail controls did not match. Whole-output parity
+establishes this source shape's output, not an internal pass attribution or
+historical spelling.
 
-The body and every register match. What differs is block placement at the
-end: retail gives each clamp arm its own `swc1 $f0, 0xB8(block)` followed by
-`b` to the shared `sh step` block, and places the `addiu $2, $0, -1` guard
-exit between the clamp arms and that block. ee-gcc cross-jumps the two
-identical stores into one block and puts the guard exit last, which is one
-word shorter.
+`step` is the zero-extended halfword snapshot, compared unsigned with four.
+The native signed halfword rotation index converts to float, multiplies by
+0.39269909f, and adds to the current float rotation. The first rotation store
+precedes the ordered positive and negative 6.28318501f comparisons. Each clamp
+performs its actual float addition/subtraction and store. Exactly one halfword
+step increment follows successful rotation; the guard path leaves both fields
+unchanged. Equality is not clamped, and unordered comparisons follow native
+behavior. The process callback still returns -1 or zero with its original ABI.
+No invalid-pointer behavior is repaired.
 
-Ruled out: the clamp pair as `if`/`else if`, as two separate `if`s with their
-own `work->step` store and `return 0`, as a nested `if` inside the `else`, and
-through a `goto` to a shared tail; `block->rot` through a `pbBlockObj_t *`
-local, through `work->block->rot` at every use, and with the sum held in an
-`f32` local and stored explicitly before the tests; the guard as
-`if (step >= 4) return -1;` ahead of the body (17 of 32) against the body
-nested in `if (step < 4)` with a trailing `return -1` (12 of 34); and
-`step` as `u16` rather than `u32`, which adds an `andi 0xffff`.
+Independent semantic review and both current and HEAD-public whole-owner
+checkers pass 65 match, 0 differ. All 70 production, 64 SKIP_ASM and 70 retained
+peers survive, including the constructor. Production data is byte-identical;
+SKIP_ASM gains only the target's native 12-byte literal triple at offset 24,
+and all affected consumers resolve to their unchanged native values.
 
-Confirmed on the way: `pbBlockObj_t` carries the rotation as an `f32` at
-`0xB8`, the `.lit4` entries the function reads are `0.39269909f`,
-`6.28318501f` and `-6.28318501f` in that order, and `work->step` has to be
-read into a `u32` local for retail's `sltiu`.
+Three final complete assembly and entire-ELF plain/dump pairs pass with 1,137
+stable inputs including actual compiler, QEMU, loaders and generated inputs.
+Independent fresh qualification repeats all three modes with 1,457 stable
+inputs including the Python environment. Only the exactly-once equal-length
+random generated source path is normalized. Strict diagnostics reproduce
+inherited `pbInitGameCamera` declaration and `sdfDrawRotatedModel` argument-type
+debt; no target or uninitialized diagnostic is introduced.
+
+Integrated verification passes the generated-source stale-line control, full
+retail checksum and literal image comparison, all retained EE/FIX_BUGS and
+seven IRX owners, inline-assembly/compiler-wrapper checks, both production
+reports and a no-op rebuild. The local tooling suite reports 569 cases and
+the clean public-tooling snapshot 505; each skips only the optional external
+dvp-as comparison because that executable is unavailable. Native VU assembly
+and the retail image remain exact. The linked target is a unique C-owned span
+at 0x001D7950, 140 bytes, with no assembly fallback. Game progress gains one
+function and 140 bytes with unchanged data totals.
 
 ## pbInitGame (pb/pbGame, 0x290)
 

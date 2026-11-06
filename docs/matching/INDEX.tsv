@@ -313,11 +313,11 @@ nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Ini
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	165
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
-roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/matching/pb/pbGame.md	48
-pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	73
-roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	113
-pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	148
-viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	194
+roundBlock	pb/pbGame	0x8C	35 of 35 words match	docs/matching/pb/pbGame.md	48
+pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	93
+roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	133
+pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	168
+viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	214
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3

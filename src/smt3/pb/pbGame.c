@@ -1242,8 +1242,6 @@ void setRoundBlockData(pbGroupData_t *grp, s32 dir) {
     pbRebuildOutline(grp);
 }
 
-/* NON_MATCHING: 12 of 34 words, 136 bytes against retail's 140; the two clamp stores cross-jump and the guard exit lands last. */
-#ifdef NON_MATCHING
 s32 roundBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
@@ -1256,14 +1254,13 @@ s32 roundBlock(dds3ProcessID_t *id) {
         } else if (block->rot < -6.28318501f) {
             block->rot += 6.28318501f;
         }
-        work->step = step + 1;
-        return 0;
+    } else {
+        return -1;
     }
-    return -1;
+    work->step = step + 1;
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", roundBlock);
-#endif
+
 
 void deleteRoundBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
