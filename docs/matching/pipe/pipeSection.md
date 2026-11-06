@@ -71,28 +71,42 @@ trace of its internal allocation is claimed.
 
 ## MyAction (pipe/pipeSection, 0x21C)
 
-129 of 135 instruction words match at the native 540-byte size. Production
-retains assembly. Action zero still reaches the shared offset-window test
-and `ActionKey`; the older reconstruction incorrectly returned early.
+135 of 135 words match at the native 540-byte size in ordinary C.
+Action zero and the default path reach the shared offset-window test and
+`ActionKey`. Production, SKIP_ASM and retained-draft contexts reproduce the
+same native target, with the complete production owner and owned data exact.
 
-The action-specific paths preserve wrapped halfword countdown ranges,
-separate attack modes one and two, signed low-count tests, and callback-visible
-count reloads. The post-effect snapshot is an unsigned halfword; its signed
-interpretation is used only for the low-count clamp. Resetting the byte attack
-mode can alias the object, so that path refreshes the snapshot before testing
-zero. The other path retains the existing snapshot as native does.
+The count snapshot is explicit on each predecessor: when status is nonzero,
+the signed comparison and unsigned halfword snapshot precede `pipeEffSet`;
+the callback path refreshes that snapshot, as does the status-zero path.
+These ordinary accesses reproduce both native loads before the effect call
+and the join load after it. Separate attack switch cases retain the two native
+mode branches. No volatile qualifier, artificial dependency, register binding
+or opaque callee declaration is needed.
 
-The six residual words are at +0x98, +0x9C, +0xAC, +0xB0, +0xB4 and +0xB8.
-Native places the post-effect count load before the attack-mode load; the
-draft schedules the mode load into the preceding branch and the count load
-into the first mode-test delay slot. Qualified compiler output parity confirms
-that ordering. No volatile qualifier or artificial dependency constrains it.
+The paths preserve wrapped halfword countdown ranges and signed low-count
+tests. After resetting the byte attack mode, that path refreshes the count before
+testing zero, matching the native reload; the other path retains its snapshot.
+The shared limit retains integer subtraction, both integer-to-single
+conversions, the single-precision addition of 256.0f and ordered comparison.
+All provider declarations retain their actual types.
 
-The consumed counter reset after `ActionKey` follows the existing same-owner
-`ObjectDraw` and `ActionZMotion` regular-call precedent. Qualified traces retain
-reset UID422 through sibling selection, remove it in life analysis, and keep
-call UID418 regular. Removing only the reset emits 532 bytes with a sibling
-call. Both controls pass normal/dumped/hooked assembly and all RTL parity.
+One reset of the consumed count local after `ActionKey` follows the matched
+same-owner `ObjectDraw` regular-call precedent. The reset-only ablation emits
+532 bytes and a sibling jump instead of retail's `jal` plus epilogue. This is
+the matching-rule tail-call exception, not a claim about original spelling.
+
+The earlier 129/135 claim described a different historical draft, not the
+retained source at feba589: that source used volatile count/attack accesses,
+merged the two attack modes and had no post-call reset. Its active C body is
+516 bytes. Removing only the false qualifiers and adding the qualified reset
+while keeping the merged attack test yields 508 bytes; the separate switch
+cases and predecessor snapshots above yield the exact 540-byte target.
+Frozen ordinary-wrapper and direct plain/dump compilations agree across all
+three contexts, including complete assembly and literal whole object files
+with only the unique, equal-length scratch source path normalized between
+wrapper and direct runs. These measurements supersede the old six-word
+scheduling-blocker claim.
 
 ## ActionKey (pipe/pipeSection, 0x5EC)
 

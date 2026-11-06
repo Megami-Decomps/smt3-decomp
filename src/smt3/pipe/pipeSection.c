@@ -645,7 +645,6 @@ extern void ActionBound(tagPipeObject *);
 extern void ActionKey(tagPipeObject *);
 extern void objMyStatusChange(tagPipeObject *, u8);
 
-#ifdef NON_MATCHING
 void MyAction(tagPipeObject *object)
 {
     u16 count;
@@ -659,22 +658,31 @@ void MyAction(tagPipeObject *object)
         }
         if ((myStatus & 0xF) != 0) {
             s16 current = object->count;
-            count = *(volatile u16 *)&object->count;
+            count = (u16)object->count;
             if (current == 21) {
                 pipeEffSet(object, 6);
-                count = *(volatile u16 *)&object->count;
+                count = (u16)object->count;
             }
         } else {
-            count = *(volatile u16 *)&object->count;
+            count = (u16)object->count;
         }
         {
-            u8 attack = *(volatile u8 *)&attackCount;
-            if (attack == 1 || attack == 2) {
+            u8 attack = (u8)attackCount;
+            switch (attack) {
+            case 1:
                 if ((u32)count - 8 < 9) {
                     object->flags &= 0xFDFF;
                 } else {
                     object->flags |= 0x200;
                 }
+                break;
+            case 2:
+                if ((u32)count - 8 < 9) {
+                    object->flags &= 0xFDFF;
+                } else {
+                    object->flags |= 0x200;
+                }
+                break;
             }
         }
         if ((s16)count < 2) {
@@ -711,10 +719,10 @@ void MyAction(tagPipeObject *object)
         object->flags |= 0x200;
     }
     ActionKey(object);
+    /* Like matched ObjectDraw in this owner, reset the consumed local after
+     * the final call to retain retail's jal and epilogue. */
+    count = 0;
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
-#endif
 
 extern tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension);
 extern void objSetAction(tagPipeObject *object, u8 action, s16 count);
