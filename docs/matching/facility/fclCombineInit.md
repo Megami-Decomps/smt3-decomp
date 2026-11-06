@@ -443,3 +443,39 @@ flag is introduced.
 Combined local gates pass the retail checksum, 26 tooling test files / 427
 cases, all 147 guarded owners / 533 drafts with stable source/compiler inputs,
 seven IRX owners, and reconciled production reports.
+
+## cmbCalcRoot (facility/fclCombineInit, 0x170)
+
+92 of 92 words match at 368 emitted/native bytes in ordinary C. Two source
+properties are needed together: use a switch for the general-status-to-script
+entry mapping (0 to 1, 1 to 2, everything else to 0), and direct the initial
+zero exit to the existing trailing zero return. The two return-one paths
+remain separate and every provider call and callback-sensitive work read is
+unchanged.
+
+The forced original body emits 356 bytes with 17 of 89 covered words matching
+and 12 native bytes uncovered. Changing only the switch gives 84 of 92 words matching
+at 368 bytes; its eight residual words are in the initial work-pointer,
+zero-exit and process-handle setup. Changing only the shared zero exit gives
+18 of 89 covered words matching at 356 bytes. Neither deletion control is exact. Actual-status
+operand and local-binding controls did not improve on the ordinary switch
+and are not retained.
+
+The forward branch uses the existing matched shared-return idiom, including
+`RetryMapLoad` in `field/fldProcess`; see
+[control-flow levers](../../levers/control-flow.md). This is an observed source
+and output dependency, not evidence of original spelling or a newly traced
+internal compiler decision. There is no new constraint, volatile access,
+register binding, declaration, layout, arithmetic, compiler flag or helper.
+
+Complete owner and owned data check at 194 match / 0 differ. Plain versus
+`-da` complete assembly and ELF-object comparisons pass for the guarded
+original, forced original, each single-change control and combined source in
+production, SKIP_ASM and retained-draft modes, with only the equal-length
+random canonical source filename normalized. Resolved peer code and allocated
+nontext data are preserved. Retained-mode strict declaration checks pass;
+raw production and SKIP_ASM strict checks retain the same pre-existing
+implicit-declaration failures outside this function. The existing
+`dds3GetProcessStat` declaration also differs from its canonical provider;
+this change does not modify it, and native's returned 0..3 values retain the
+same equality-to-two behavior.

@@ -902,7 +902,7 @@ void cmbCreateLocalStock(void)
 
 extern s32 fclScriptStart(s32 script, s32 entry, void *process);
 
-#ifdef NON_MATCHING
+
 s32 cmbCalcRoot(void)
 {
     s32 entry;
@@ -910,7 +910,7 @@ s32 cmbCalcRoot(void)
 
     CMB_GBWK->unk_00001 = 0;
     if (CMB_GBWK->unk_00004 == 0) {
-        return 0;
+        goto zero;
     }
     if (dds3GetProcessStat(CMB_GBWK->eventProcess) == 2) {
         return 1;
@@ -922,12 +922,10 @@ s32 cmbCalcRoot(void)
             fclCombineEventStart(1);
         }
         status = cmbChkGeneralStat();
-        if (status == 0) {
-            entry = 1;
-        } else if (status == 1) {
-            entry = 2;
-        } else {
-            entry = 0;
+        switch (status) {
+        case 0: entry = 1; break;
+        case 1: entry = 2; break;
+        default: entry = 0; break;
         }
     } else {
         if (fclCombineChkEventStat() == 0) {
@@ -944,11 +942,9 @@ s32 cmbCalcRoot(void)
     cmpResetCursorInfo(&CMB_GBWK->menuCursor);
     fclCombineDisableCmdZensyo();
     cmpResetCursorInfo(&CMB_GBWK->resultCursor);
+zero:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcRoot);
-#endif
 
 void cmbCalcDevSel1st(void)
 {
