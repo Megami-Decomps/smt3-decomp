@@ -42,3 +42,43 @@ Native code recomputes `index * 4` at `0x13DC04`, saves it at `sp+0x15C` at `0x1
 Its net 24-byte deficit consists of two `lui`, two `sll`, one `addu`, and one `subu`. At the plane center-store → corner-copy boundary (`0x13CDBC–0x13CDE0`), native reconstructs the table address; the candidate instead reuses the earlier `index * 304` and adjusts the table-plus-0x80 base. Equal net counts of other instruction families do not establish operand, scheduling, or semantic equivalence.
 
 **Remaining question:** obtain the native table-address reconstruction while preserving the existing scaled-index lifetime. Another unscaled-index boundary constraint is not an established solution: the combined control introduces new reloads where native retains saved register 21. Operand-level, scheduling and tail-address differences remain; mnemonic-family alignment is not a matching percentage.
+
+## fldEveHit_AddEveHitItemBox (field/fldEveHit, 0x1F8)
+
+126 of 126 words match at 504 bytes in ordinary C. Keep the real
+`fldEveHit_AddEveData` return in a separate `eventIndex` local while grouping
+the distinct sphere, put and hit-field stores before their next callback.
+Initialize a real `s32 hitKind = 2` before incrementing the count and addressing
+the returned hit-table slot; its consumer remains the signed-halfword store.
+Neither phase uses a constraint, register binding, volatile access, dummy
+consumer, invented type or changed compiler flags. Separate event and hit
+indices are equally exact to the initial shared-slot diagnostic and make
+ownership clearer. Removing the event-initialization changes leaves 104 of
+126 words matching; removing only the hit-kind local leaves 116 matching.
+These are paired output observations, not recovered original spelling or an
+unmeasured compiler-internal mechanism.
+
+Independent native/provider review preserves the count snapshot before the
+first allocator, distinct event and point ids, six-call order, full transform
+initialization before the second allocator, callback-sensitive reloads, and
+the post-registration count increment. No store moves across a callback.
+Final halfwords retain the item index, kind 2 and NPC index -1. Existing valid
+record/index and alias contracts remain necessary; no corrupt-object or
+portable-layout guarantee is inferred from matching.
+
+Complete owner: 23 match, 0 differ. Independent review resolves all 504 target
+bytes, including the three GP-relative count accesses. Eighteen development
+plain/stock-dump whole-assembly and entire-ELF parity pairs cover six sources
+in three modes. A fresh integrated guarded/final comparison adds six passing
+pairs in production, SKIP_ASM and retained-C modes, with all six strict builds
+clean and 133 collected input hashes stable. All 27/22/27 peers and owned
+data remain unchanged after resolving relocation targets. No hooked compiler
+trace is claimed.
+
+Integration on the previously published status-effect match preserves that
+owner at 390/0. Full retail checksum and byte comparison, generated-source
+validation, 505 unittest cases without skips plus 818 layout assertions,
+frozen guarded EE/IRX sweeps, and reconciled game/full-binary reports pass.
+Configure adds no source imports. The target is C-owned in the production
+report at 504 bytes; game coverage increases by one function and 504 bytes,
+to 8,652 functions and 1,502,568 bytes. The subsequent build has no work.

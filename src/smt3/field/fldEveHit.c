@@ -1465,13 +1465,12 @@ const char *fldEveHitResName_Find(addr_t pid) {
     return 0;
 }
 
-/* NON_MATCHING: 25 of 126 words differ (first at +0xC8). */
-#ifdef NON_MATCHING
 void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
 {
     u32 id;
     u32 pointId;
     s32 slot;
+    s32 eventIndex;
     s32 i = fldEveHitCount;
     fldResourcePointUnaligned_t *sisei;
     fldEveRngBox_t *box;
@@ -1481,14 +1480,15 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     id = dds3AllocObjectId();
     event = dds3AddEventBasic(id, D_002FCD90, D_002FCD70);
     D_002FCFA0[i].event.id = id;
-    D_002FCFA0[i].put.eventIndex =
-        fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
-    D_002FCFA0[i].put.visible = 1;
-    D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
+    /* Keep the event-data slot while initializing its sphere and put records. */
+    eventIndex = fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
     D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
+    D_002FCFA0[i].put.eventIndex = eventIndex;
+    D_002FCFA0[i].put.visible = 1;
     D_002FCFA0[i].put.data.parameters = &D_002FCFA0[i].ball;
+    D_002FCFA0[i].hit.data = &D_002FCFA0[i].put;
     sisei = &D_002FCFA0[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
@@ -1508,15 +1508,16 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     D_002FCFA0[i].hit.name = D_002FCD70;
     point = dds3AddPointBasic(pointId, D_002FCFA0[i].hit.transform, D_002FCD80);
     slot = fldEveHit_AddEveHit(&D_002FCFA0[i].hit, point);
-    fldEveHitCount++;
-    box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;
-    box->takaraIndex = idx;
-    box->hitKind = 2;
-    box->npcIndex = -1;
+    {
+        s32 hitKind = 2;
+        fldEveHitCount++;
+        box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;
+        box->takaraIndex = idx;
+        box->hitKind = hitKind;
+        box->npcIndex = -1;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_AddEveHitItemBox);
-#endif
+
 
 /* NON_MATCHING: 11 of 97 words differ (first at +0x2C). */
 #ifdef NON_MATCHING

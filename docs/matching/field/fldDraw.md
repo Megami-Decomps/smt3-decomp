@@ -172,6 +172,9 @@ draft.
 
 ## fldEveHit_AddEveHitItemBox (field/fldDraw, 0x1F8)
 
+Historical measurement under the former owner name. The function now matches
+in `field/fldEveHit`; see the [current qualification](fldEveHit.md#fldevehit_addevehititembox-fieldfldevehit-0x1f8).
+
 101 of 126 words match, at the exact 504-byte size, from the same record type
 as `fldEveHit_AddEveHitNpc`. It differs from its sibling by registering an
 event basic first: `dds3AddEventBasic(id, D_002FCD90, D_002FCD70)`, the id into

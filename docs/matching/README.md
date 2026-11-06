@@ -80,6 +80,7 @@ both native and emitted sizes when they differ.
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
+| 2 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 2 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
@@ -135,7 +136,6 @@ both native and emitted sizes when they differ.
 | 1 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
 | 1 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
-| 1 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc-destroy.md](facility/fclEncyc-destroy.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
