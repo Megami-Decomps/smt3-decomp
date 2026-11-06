@@ -51,6 +51,7 @@ cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_00
 campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1066
 cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1103
 cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1145
+cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1188
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54

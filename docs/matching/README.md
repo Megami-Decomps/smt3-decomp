@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 38 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 39 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 18 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
