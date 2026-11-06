@@ -891,20 +891,20 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
 void mdlLinkEffect(mdlObj_t *owner, dds3ModelEffectCtrlr_t *anchorRecord) {
     sdfModelRootNode_t *model = owner->inner;
-    f32 position[4] QWORD_ALIGNED;
+    sdfVector4_t position;
     void *resourceInstance;
 
     switch (anchorRecord->type) {
     case dds3ModelEffectType_P2A:
-        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
+        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, &position.x);
         resourceInstance = anchorRecord->payload.part.instance;
-        dds3BillboardSetPosition(resourceInstance, position);
+        dds3BillboardSetPosition(resourceInstance, &position);
         dds3BillboardDraw((mdlBillboard_t *)resourceInstance);
         break;
     case dds3ModelEffectType_D3P:
-        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
+        mdlEffect_P2A_D3P_GetPos(model, anchorRecord, &position.x);
         resourceInstance = anchorRecord->payload.part.instance;
-        dds3EffectSetPosition((mdlEffect_t *)resourceInstance, position);
+        dds3EffectSetPosition((mdlEffect_t *)resourceInstance, &position);
         dds3EffectDraw((mdlEffect_t *)resourceInstance);
         break;
     case dds3ModelEffectType_TRACK:

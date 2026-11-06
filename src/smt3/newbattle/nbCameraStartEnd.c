@@ -225,8 +225,8 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *data;
     nbFormation_t *form;
-    f32 battlePos[4] QWORD_ALIGNED;
-    f32 startPos[4] QWORD_ALIGNED;
+    sdfVector4_t battlePos;
+    sdfVector4_t startPos;
     s32 pending;
     u32 i;
 
@@ -285,11 +285,11 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
         return;
     }
 
-    nbCameraLerpVec(&nbCameraStartTable[1], startPos);
-    nbCameraLerpVec(&nbCameraStartTable[0], battlePos);
-    SDF_VU0_LOADVECTOR(battlePos);
+    nbCameraLerpVec(&nbCameraStartTable[1], &startPos.x);
+    nbCameraLerpVec(&nbCameraStartTable[0], &battlePos.x);
+    SDF_VU0_LOADVECTOR(&battlePos);
     SDF_VU0_STOREVECTOR(&pNbCamera->target);
-    SDF_VU0_LOADVECTOR_B(startPos);
+    SDF_VU0_LOADVECTOR_B(&startPos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(pNbCamera->distance);
     SDF_VU0_NORMALIZE();
@@ -575,8 +575,8 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *data;
     nbFormation_t *form;
-    f32 battlePos[4] QWORD_ALIGNED;
-    f32 startPos[4] QWORD_ALIGNED;
+    sdfVector4_t battlePos;
+    sdfVector4_t startPos;
     s32 pending;
     u32 i;
 
@@ -599,8 +599,8 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
         }
     }
 
-    nbCameraLerpVec(&nbCameraStartBAState, startPos);
-    nbCameraLerpVec(&nbCameraBAState, battlePos);
+    nbCameraLerpVec(&nbCameraStartBAState, &startPos.x);
+    nbCameraLerpVec(&nbCameraBAState, &battlePos.x);
     if (nbCameraStartBAState.t > 0.75f) {
         nbCameraStartBAState.step *= 0.9649999738f;
         if (nbCameraStartBAState.step < 0.0009999999311f) {
@@ -612,8 +612,8 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
         }
     }
 
-    SDF_VU0_LOADVECTOR_B(startPos);
-    SDF_VU0_LOADVECTOR(battlePos);
+    SDF_VU0_LOADVECTOR_B(&startPos);
+    SDF_VU0_LOADVECTOR(&battlePos);
     SDF_VU0_STOREVECTOR(&pNbCamera->target);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(pNbCamera->distance);

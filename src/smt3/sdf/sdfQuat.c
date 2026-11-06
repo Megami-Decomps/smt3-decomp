@@ -193,8 +193,8 @@ void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ)
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
 void LookAt(f32 aFrontX, f32 aFrontZ) {
-    f32 input[4] QWORD_ALIGNED;
-    f32 quaternion[4] QWORD_ALIGNED;
+    sdfVector4_t input;
+    sdfVector4_t quaternion;
     f32 x;
     f32 y;
     f32 z;
@@ -204,14 +204,14 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     f32 t;
     f32 offsetSquared;
     f32 adjustedZ;
-    SDF_VU0_STOREVECTOR(input);
+    SDF_VU0_STOREVECTOR(&input);
     t = 0.0f;
-    x = -input[0];
-    y = input[1];
+    x = -input.x;
+    y = input.y;
     if (aFrontZ < t) {
         y = -y;
     }
-    z = input[2];
+    z = input.z;
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
@@ -224,13 +224,13 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     /* Pitch quaternion from the vertical and horizontal direction lengths. */
     s = y * y;
     horizontalLength = fsqrtf(horizontalSquared);
-    quaternion[1] = t;
-    quaternion[2] = t;
+    quaternion.y = t;
+    quaternion.z = t;
     t = fsqrtf(horizontalSquared + s) + horizontalLength;
     s = frsqrtf(1.0f, t * t + s);
-    quaternion[0] = y * s;
-    quaternion[3] = t * s;
-    SDF_VU0_LOADVECTOR(quaternion);
+    quaternion.x = y * s;
+    quaternion.w = t * s;
+    SDF_VU0_LOADVECTOR(&quaternion);
     /* Yaw quaternion from the normalized, offset-adjusted XZ direction. */
     s = 1.0f / horizontalLength;
     x *= s;
@@ -242,11 +242,11 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
         SDF_VU0_LOADVECTOR_B(D_00529BB0.quaternion);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
-        quaternion[0] = 0.0f;
-        quaternion[1] = t * s;
-        quaternion[2] = 0.0f;
-        quaternion[3] = adjustedZ * s;
-        SDF_VU0_LOADVECTOR_B(quaternion);
+        quaternion.x = 0.0f;
+        quaternion.y = t * s;
+        quaternion.z = 0.0f;
+        quaternion.w = adjustedZ * s;
+        SDF_VU0_LOADVECTOR_B(&quaternion);
     }
     Mult();
 }

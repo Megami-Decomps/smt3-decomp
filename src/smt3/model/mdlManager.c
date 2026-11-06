@@ -823,7 +823,7 @@ void mdlLinkBlur(mdlObj_t *ctx, struct sdfGrOt_t **surfaces) {
     sdfModelRootNode_t *original = ctx->inner;
     dds3ModelBlurInstance_t *slot;
     sdfModelRootNode_t *model;
-    f32 tint[4] QWORD_ALIGNED;
+    sdfVector4_t tint;
     s32 remaining;
     u32 color;
 
@@ -840,7 +840,7 @@ void mdlLinkBlur(mdlObj_t *ctx, struct sdfGrOt_t **surfaces) {
         list->instants = slot;
     }
     UnpackRGBAWordFloat(original->color, 1.0f / 128.0f);
-    SDF_VU0_STOREVECTOR(tint);
+    SDF_VU0_STOREVECTOR(&tint);
     slot = list->instants;
     while (slot != NULL) {
         remaining = slot->keepCount;
@@ -856,7 +856,7 @@ void mdlLinkBlur(mdlObj_t *ctx, struct sdfGrOt_t **surfaces) {
         slot->keepCount = remaining;
         SDF_VU0_LOADVECTOR_BARRIER(list->colorBase);
         SDF_VU0_LOADVECTOR_B(list->colorDelta);
-        SDF_VU0_LOADVECTOR_C(tint);
+        SDF_VU0_LOADVECTOR_C(&tint);
         color = PackDevSlotColor(remaining - 1, 128.0f);
         model->color = color;
         sdfModelLinkOt(surfaces, model);
@@ -871,7 +871,7 @@ mdlObj_t *mdlLoad(u32 aMajor, u32 aMinor)
     mdlObj_t *head;
     sdfModelRootNode_t *inner;
     f32 modelScale;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t scale;
     s32 searchId;
 
     node = mdlLoadPrepare(aMajor, aMinor);
@@ -887,11 +887,11 @@ mdlObj_t *mdlLoad(u32 aMajor, u32 aMinor)
     inner = sdfModelMake(sdfTexListDup(node->texList), node->modelDefPtr);
     modelScale = node->scale;
     ctx->inner = inner;
-    scale[0] = modelScale;
-    scale[1] = modelScale;
-    scale[2] = modelScale;
-    scale[3] = 1.0f;
-    SDF_VU0_COPYVECTOR(&inner->scale, scale);
+    scale.x = modelScale;
+    scale.y = modelScale;
+    scale.z = modelScale;
+    scale.w = 1.0f;
+    SDF_VU0_COPYVECTOR(&inner->scale, &scale);
     ctx->objectRadius = node->radius;
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;

@@ -684,16 +684,16 @@ extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1,
 
 s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *frame)
 {
-    f32 position[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t scale;
     dds3Basic_t *effect;
     s32 index;
     s32 type;
 
     effect = NULL;
-    memset(position, 0, sizeof(position));
-    memset(scale, 0, sizeof(scale));
-    scale[3] = 1.0f;
+    memset(&position, 0, sizeof(position));
+    memset(&scale, 0, sizeof(scale));
+    scale.w = 1.0f;
 
     index = 0;
     while (index < 0x7F && viewerinfo->effectBasic[index] != NULL) {
@@ -706,7 +706,7 @@ s32 AddEffectTable2(s32 nowframe, evtViewerObject_s *object, evtFrameInfo_t *fra
     type = object->type;
     switch (type) {
     case 3:
-        effect = dds3AddD3PEffectObjectBasic2(object->effect.data, position, scale);
+        effect = dds3AddD3PEffectObjectBasic2(object->effect.data, &position, &scale);
         if (frame->param.sb[4] != 0) {
             dds3EffectObjectPresetMG12(effect);
         }
@@ -756,14 +756,14 @@ void DelEffectTable_evtEventViewer(s32 index)
 
 void *AddBED(void *data, s32 cutno, s32 nameindex, s32 posindex, s32 baseframe)
 {
-    f32 position[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t scale;
     void *basic;
 
-    memset(position, 0, sizeof(position));
-    memset(scale, 0, sizeof(scale));
-    scale[3] = 1.0f;
-    basic = dds3AddBEDEffectObjectBasic2(data, position, scale);
+    memset(&position, 0, sizeof(position));
+    memset(&scale, 0, sizeof(scale));
+    scale.w = 1.0f;
+    basic = dds3AddBEDEffectObjectBasic2(data, &position.x, &scale.x);
     dds3EffectObjectBasicStatOn(basic, 1);
     dds3StartBEDEffectObjectBasic(basic, cutno);
     LinkEffectBasic(basic, nameindex, posindex, baseframe);

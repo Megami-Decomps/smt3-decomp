@@ -541,16 +541,16 @@ void fldAutoMapLoad(void) {
 }
 
 void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
-    f32 pos[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
     sdfModelNode_t *handle;
 
-    memset(pos, 0, sizeof(pos));
-    pos[3] = 1.0f;
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
     handle = emitter->nodeList->items[0];
-    SDF_VU0_LOADVECTOR_BARRIER(pos);
+    SDF_VU0_LOADVECTOR_BARRIER(&pos);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(&emitter->tm.m[12]);
     sdfModelMakeLocalTm(handle);

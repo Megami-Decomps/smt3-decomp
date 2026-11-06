@@ -399,23 +399,23 @@ void BlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
 dds3Basic_t *AddEffect(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
 {
-    f32 position[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t scale;
     s32 i;
     s32 kind;
     dds3Basic_t *basic;
 
-    memset(position, 0, sizeof(position));
-    memset(scale, 0, sizeof(scale));
+    memset(&position, 0, sizeof(position));
+    memset(&scale, 0, sizeof(scale));
     kind = 0;
     basic = NULL;
-    scale[3] = 1.0f;
+    scale.w = 1.0f;
     for (i = 0; i < wdata->effectCount; i++) {
         if (strcmp(wdata->nameTable1[wdata->effectTable[i].NameIndex], wdata->nameTable[f->NameIndex]) == 0) {
             kind = wdata->effectTable[i].Type;
             switch (kind) {
             case 0:
-                basic = dds3AddD3PEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, position, scale);
+                basic = dds3AddD3PEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, &position.x, &scale.x);
                 break;
             case 2:
                 basic = dds3AddMG12EffectObjectBasic2(1, (u8 *)wdata->header1 + wdata->effectTable[i].DataOffset);
@@ -424,7 +424,7 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
                 basic = dds3AddMG12EffectObjectBasic2(2, (u8 *)wdata->header1 + wdata->effectTable[i].DataOffset);
                 break;
             case 1:
-                basic = dds3AddBEDEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, position, scale);
+                basic = dds3AddBEDEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, &position.x, &scale.x);
                 break;
             }
             break;

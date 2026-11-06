@@ -263,18 +263,18 @@ extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 extern void effEveBEDCutSetScale(void *hEveBEDCut, f32 scale);
 
 void *evt_1FA398(s32 taskId, s32 key, s32 modelId) {
-    f32 position[4] QWORD_ALIGNED;
-    f32 scale[4] QWORD_ALIGNED;
+    sdfVector4_t position;
+    sdfVector4_t scale;
     void *resource;
     void *object;
 
-    memset(position, 0, sizeof(position));
-    memset(scale, 0, sizeof(scale));
+    memset(&position, 0, sizeof(position));
+    memset(&scale, 0, sizeof(scale));
     resource = evtGetResorceData(taskId, key);
     if (resource == NULL) {
         return resource;
     }
-    object = dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    object = dds3AddBEDEffectObjectBasic2(resource, &position, &scale);
     if (object == NULL) {
         return object;
     }

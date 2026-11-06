@@ -10051,20 +10051,20 @@ extern void sdf3DSetCamera(sdf3DScreenParam_t *screenParam, void *camera);
 
 void func_0023FCC0(void)
 {
-    f32 lightColor[4] QWORD_ALIGNED;
-    f32 lightDirection[4] QWORD_ALIGNED;
-    f32 ambientColor[4] QWORD_ALIGNED;
-    f32 fogColor[4] QWORD_ALIGNED;
+    sdfVector4_t lightColor;
+    sdfVector4_t lightDirection;
+    sdfVector4_t ambientColor;
+    sdfVector4_t fogColor;
 
-    memcpy(lightColor, D_0053FFE8, sizeof(lightColor));
-    memcpy(lightDirection, D_0053FFF8, sizeof(lightDirection));
-    memcpy(ambientColor, D_00540008, sizeof(ambientColor));
-    memcpy(fogColor, D_00540018, sizeof(fogColor));
+    memcpy(&lightColor, D_0053FFE8, sizeof(lightColor));
+    memcpy(&lightDirection, D_0053FFF8, sizeof(lightDirection));
+    memcpy(&ambientColor, D_00540008, sizeof(ambientColor));
+    memcpy(&fogColor, D_00540018, sizeof(fogColor));
     dds3SetSoftenBias(0, 5.0f, 0.0f);
-    dds3SetLightColor(0, 0, lightColor);
-    dds3SetLightDir(0, 0, lightDirection);
-    dds3SetAmbientColor(0, ambientColor);
-    dds3SetFogColor(0, fogColor);
+    dds3SetLightColor(0, 0, &lightColor.x);
+    dds3SetLightDir(0, 0, &lightDirection.x);
+    dds3SetAmbientColor(0, &ambientColor.x);
+    dds3SetFogColor(0, &fogColor.x);
     dds3SetFogPara(0, 255.0f, 255.0f, 2000.0f, 30000.0f);
     dds3ScreenParam[3] = 0.7551904917f;
     SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);

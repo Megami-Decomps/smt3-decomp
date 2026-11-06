@@ -1141,8 +1141,8 @@ extern f32 vecAngleBetween(f32 *a, f32 *b);
 
 void ActionBound(tagPipeObject *object) {
     f32 velocity[3];
-    f32 newPosition[4] QWORD_ALIGNED;
-    f32 angledVelocity[4] QWORD_ALIGNED;
+    sdfVector4_t newPosition;
+    sdfVector4_t angledVelocity;
     f32 newX;
     f32 newY;
     f32 angle;
@@ -1176,26 +1176,26 @@ void ActionBound(tagPipeObject *object) {
     object->pos[0] = newX;
     object->pos[1] = newY;
     if (!(newX * newX + newY * newY <= 250000.0f)) {
-        newPosition[0] = newX;
-        newPosition[1] = newY;
-        newPosition[2] = 0x1.999998p-4f;
-        angledVelocity[0] = object->vpos[0];
-        angledVelocity[1] = object->vpos[1];
-        angledVelocity[2] = 0x1.999998p-4f;
-        angle = vecAngleBetween(newPosition, angledVelocity);
-        if (newPosition[0] != 0.0f && angledVelocity[0] != 0.0f &&
-            newPosition[1] / newPosition[0] <
-                angledVelocity[1] / angledVelocity[0]) {
+        newPosition.x = newX;
+        newPosition.y = newY;
+        newPosition.z = 0x1.999998p-4f;
+        angledVelocity.x = object->vpos[0];
+        angledVelocity.y = object->vpos[1];
+        angledVelocity.z = 0x1.999998p-4f;
+        angle = vecAngleBetween(&newPosition.x, &angledVelocity.x);
+        if (newPosition.x != 0.0f && angledVelocity.x != 0.0f &&
+            newPosition.y / newPosition.x <
+                angledVelocity.y / angledVelocity.x) {
             angle = -angle;
         }
         angle = angle + angle;
-        vecRotate2D(angledVelocity, angle);
+        vecRotate2D(&angledVelocity.x, angle);
 
         velocity[0] = object->pos[0];
         velocity[1] = object->pos[1];
         velocity[2] = 0.0f;
-        object->vpos[0] = -angledVelocity[0];
-        object->vpos[1] = -angledVelocity[1];
+        object->vpos[0] = -angledVelocity.x;
+        object->vpos[1] = -angledVelocity.y;
         vecNormalize(velocity);
         vecScale(velocity, 500.0f);
         object->pos[0] = velocity[0];
@@ -1318,7 +1318,7 @@ extern s8 dds3PadButtonState[];
 
 void ActionKey(tagPipeObject *object)
 {
-    f32 vector[4] QWORD_ALIGNED;
+    sdfVector4_t vector;
     f32 horizontalStep;
     f32 verticalStep;
     f32 acceleration;
@@ -1329,7 +1329,7 @@ void ActionKey(tagPipeObject *object)
     f32 velocity;
     f32 scalar;
 
-    memset(vector, 0, sizeof(vector));
+    memset(&vector, 0, sizeof(vector));
     /* Reuse the scalar scratch for coefficient initialization and, later,
        the normalized vector length; the two values have disjoint consumers. */
     scalar = 0.0f;
@@ -1466,10 +1466,10 @@ void ActionKey(tagPipeObject *object)
         velocity = object->vpos[0];
     }
 
-    vector[0] = velocity;
-    vector[1] = object->vpos[1];
-    vector[2] = 0.0f;
-    scalar = vecNormalize(vector);
+    vector.x = velocity;
+    vector.y = object->vpos[1];
+    vector.z = 0.0f;
+    scalar = vecNormalize(&vector.x);
     if (object->flags & 0x800) {
         if (scalar > 8.0f) {
             scalar = 8.0f;
@@ -1477,9 +1477,9 @@ void ActionKey(tagPipeObject *object)
     } else if (scalar > maximum) {
         scalar = maximum;
     }
-    vecScale(vector, scalar);
-    object->pos[0] += vector[0];
-    object->pos[1] += vector[1];
+    vecScale(&vector.x, scalar);
+    object->pos[0] += vector.x;
+    object->pos[1] += vector.y;
 }
 
 #ifdef NON_MATCHING

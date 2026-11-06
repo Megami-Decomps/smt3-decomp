@@ -1037,14 +1037,14 @@ void fldAnaStart(f32 x, f32 y, f32 z)
 
 void fldWaveInit(void)
 {
-    f32 pos[4] QWORD_ALIGNED;
-    f32 rot[4] QWORD_ALIGNED;
+    sdfVector4_t pos;
+    sdfVector4_t rot;
     s32 i;
 
-    memset(pos, 0, sizeof(pos));
-    pos[3] = 1.0f;
-    memset(rot, 0, sizeof(rot));
-    rot[3] = 1.0f;
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    memset(&rot, 0, sizeof(rot));
+    rot.w = 1.0f;
     if (mhfldWaveFile == NULL) {
         return;
     }
@@ -1052,7 +1052,7 @@ void fldWaveInit(void)
         fldWaveBuff[i].use = 0;
         fldWaveBuff[i].cnt = 0;
         fldWaveBuff[i].pBasic = NULL;
-        fldWaveBuff[i].pBasic = dds3AddUnitObjectBasic(dds3AllocObjectId(), pos, rot);
+        fldWaveBuff[i].pBasic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
         dds3SetUnitObjectId(fldWaveBuff[i].pBasic, fldWaveUnitName);
         dds3ObjectBaseMakeUnit(fldWaveBuff[i].pBasic, 2, 0x1B);
         dds3ObjectBaseOnFlag(fldWaveBuff[i].pBasic, 1);

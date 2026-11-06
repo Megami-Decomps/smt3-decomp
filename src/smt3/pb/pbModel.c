@@ -324,13 +324,13 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbExit_t *work = panel->data.mat;
-    f32 position[4] QWORD_ALIGNED;
+    sdfVector4_t position;
     sdfVector4_t vertices;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
     f32 angle;
 
-    memset(position, 0, sizeof(position));
+    memset(&position, 0, sizeof(position));
     memset(&vertices, 0, sizeof(vertices));
     switch (panel->state) {
     case 1:
@@ -352,10 +352,10 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
         } else if (angle < -3.141592503f) {
             D_00327248.y = angle + 6.28318500518798828125f;
         }
-        position[0] = panel->x * 40 - 380;
-        position[1] = -20.0f;
-        position[2] = panel->y * 40 - 380;
-        pbSetPrimMatrix(&D_00327248, position, tag);
+        position.x = panel->x * 40 - 380;
+        position.y = -20.0f;
+        position.z = panel->y * 40 - 380;
+        pbSetPrimMatrix(&D_00327248, &position.x, tag);
         pbDrawMapPolyTransformed(&vertices, 0x1F, 6, tag);
         ot = &sdfGrOtTable[40];
         ot->regFunc(ot, tag);

@@ -157,10 +157,10 @@ void effBTLModelGetCircumferencePtr(nbFormation_t *pFormation, u16 ptr_y, u16 pt
 
 /* Upper Y bound: scaled half-height minus the sampled position's Y. */
 f32 effBTLModelGetHeight(nbFormation_t *pFormation) {
-    f32 position[4] QWORD_ALIGNED;
+    sdfVector4_t position;
     effBTLModelGetSphereCenter(pFormation);
-    SDF_VU0_STOREVECTOR(position);
-    return pFormation->h * pFormation->scl * 0.5f - position[1];
+    SDF_VU0_STOREVECTOR(&position);
+    return pFormation->h * pFormation->scl * 0.5f - position.y;
 }
 
 f32 func_0016C898(nbFormation_t *unit) {

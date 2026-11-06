@@ -161,13 +161,13 @@ void SetBattleLight(nbMainProcessData_t *data)
 void nbAddStageCamera(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
-    f32 rot[4] QWORD_ALIGNED;
+    sdfVector4_t rot;
     dds3Basic_t *camera;
 
     pos = D_00543628;
-    memset(rot, 0, 0x10);
-    rot[3] = 1.0f;
-    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, rot);
+    memset(&rot, 0, 0x10);
+    rot.w = 1.0f;
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, &rot.x);
     camera->name = D_00551110;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
@@ -179,13 +179,13 @@ void nbAddStageCamera(nbMainProcessData_t *data)
 void nbAddStageCamera2(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
-    f32 rot[4] QWORD_ALIGNED;
+    sdfVector4_t rot;
     dds3Basic_t *camera;
 
     pos = D_00543648;
-    memset(rot, 0, 0x10);
-    rot[3] = 1.0f;
-    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, rot);
+    memset(&rot, 0, 0x10);
+    rot.w = 1.0f;
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, &rot.x);
     camera->name = D_00551114;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);

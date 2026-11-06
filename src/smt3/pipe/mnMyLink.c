@@ -219,42 +219,42 @@ void pipeFreeLink(tagPipeLinkInfo *pInfo)
 }
 
 void pipeCameraLerp(f32 *vector, f32 angle) {
-    f32 rotated[4] QWORD_ALIGNED;
+    sdfVector4_t rotated;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
-    rotated[1] = vector[1] * cosine + vector[2] * sine;
+    rotated.y = vector[1] * cosine + vector[2] * sine;
     sine = sdfSin(angle);
     cosine = sdfCos(angle);
-    rotated[2] = vector[1] * -sine + vector[2] * cosine;
-    vector[1] = rotated[1];
-    vector[2] = rotated[2];
+    rotated.z = vector[1] * -sine + vector[2] * cosine;
+    vector[1] = rotated.y;
+    vector[2] = rotated.z;
 }
 
 void vec_2A6B80(f32 *vector, f32 angle) {
-    f32 rotated[4] QWORD_ALIGNED;
+    sdfVector4_t rotated;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
-    rotated[0] = vector[0] * cosine - vector[2] * sine;
+    rotated.x = vector[0] * cosine - vector[2] * sine;
     sine = sdfSin(angle);
     cosine = sdfCos(angle);
-    rotated[2] = vector[0] * sine + vector[2] * cosine;
-    vector[0] = rotated[0];
-    vector[2] = rotated[2];
+    rotated.z = vector[0] * sine + vector[2] * cosine;
+    vector[0] = rotated.x;
+    vector[2] = rotated.z;
 }
 
 void vecRotate2D(f32 *vector, f32 angle) {
-    f32 rotated[4] QWORD_ALIGNED;
+    sdfVector4_t rotated;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
-    rotated[0] = vector[0] * cosine + vector[1] * sine;
+    rotated.x = vector[0] * cosine + vector[1] * sine;
     sine = sdfSin(angle);
     cosine = sdfCos(angle);
-    rotated[1] = vector[0] * -sine + vector[1] * cosine;
-    vector[0] = rotated[0];
-    vector[1] = rotated[1];
+    rotated.y = vector[0] * -sine + vector[1] * cosine;
+    vector[0] = rotated.x;
+    vector[1] = rotated.y;
 }
 
 void vec_2A6CA8(float *vector, float *axis, float angle) {
@@ -457,15 +457,15 @@ void mtxStore(sdfMatrix4_t *pDst, sdfMatrix4_t *pSrc) {
 }
 
 f32 *mtx_2A7B10(f32 *direction, f32 *matrix) {
-    f32 transformed[4] QWORD_ALIGNED;
+    sdfVector4_t transformed;
     f32 x = direction[0];
     f32 y = direction[1];
     f32 z = direction[2];
 
-    transformed[0] = x * matrix[0] + y * matrix[4] + z * matrix[8];
-    transformed[1] = x * matrix[1] + y * matrix[5] + z * matrix[9];
-    transformed[2] = x * matrix[2] + y * matrix[6] + z * matrix[10];
-    memcpy(direction, transformed, 16);
+    transformed.x = x * matrix[0] + y * matrix[4] + z * matrix[8];
+    transformed.y = x * matrix[1] + y * matrix[5] + z * matrix[9];
+    transformed.z = x * matrix[2] + y * matrix[6] + z * matrix[10];
+    memcpy(direction, &transformed, 16);
     return direction;
 }
 

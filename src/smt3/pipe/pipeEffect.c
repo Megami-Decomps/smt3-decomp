@@ -305,13 +305,13 @@ extern void getPosTranslate(tagPipeObject *object, f32 *position);
 void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
 {
     PIPE_EFF_t *effect;
-    f32 position[4] QWORD_ALIGNED;
+    sdfVector4_t position;
     tagPipeObject object;
     u8 index;
 
-    memset(position, 0, 0x10);
+    memset(&position, 0, 0x10);
     effect = pEffect;
-    position[3] = 1.0f;
+    position.w = 1.0f;
     index = maxSize - 2;
     if (index != 0xFF) {
         do {
@@ -325,8 +325,8 @@ void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
                     object.pos[0] = x;
                     object.pos[1] = y;
                     object.offset = effect->offset;
-                    getPosTranslate(&object, position);
-                    dds3EffectSetPosition(effect->d3p, position);
+                    getPosTranslate(&object, &position.x);
+                    dds3EffectSetPosition(effect->d3p, &position);
                     dds3EffectDraw(effect->d3p);
                     if (maxSize == 5 && effect->count != 0) {
                         effect->count--;

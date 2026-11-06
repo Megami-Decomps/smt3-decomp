@@ -137,14 +137,14 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
 void evtGetUnitDirVector(evtUnit_t *h) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
 
     SDF_VU0_LOADVECTOR(&h->effObj->poseset->rot);
     ToMatrix();
-    SDF_VU0_STORE_ROW2(v);
-    v[1] = 0.0f;
-    v[3] = 1.0f;
-    SDF_VU0_LOADVECTOR(v);
+    SDF_VU0_STORE_ROW2(&v);
+    v.y = 0.0f;
+    v.w = 1.0f;
+    SDF_VU0_LOADVECTOR(&v);
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR_V0(-1.0f);
 }
@@ -1139,7 +1139,7 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtUnitRotationQuat(evtUnit_t *h, f32 *rot, f32 radio) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
 
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
@@ -1149,12 +1149,12 @@ s32 evtUnitRotationQuat(evtUnit_t *h, f32 *rot, f32 radio) {
     SDF_VU0_SCALEVECTOR_V0(-1.0f);
     SDF_VU0_LOADVECTOR_B(&h->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(v);
-    return evtUnitRotationTarget(h, v, radio);
+    SDF_VU0_STOREVECTOR(&v);
+    return evtUnitRotationTarget(h, &v.x, radio);
 }
 
 s32 evtUnitMoveType0(evtUnit_t *h) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
     f32 scale;
     dds3Basic_t *obj;
 
@@ -1171,25 +1171,25 @@ s32 evtUnitMoveType0(evtUnit_t *h) {
     }
     scale = h->motionParameter * 0.1f;
     SDF_VU0_SCALEVECTOR_V0(scale);
-    SDF_VU0_STOREVECTOR(v);
-    dds3GetPosPoseSetMCR(obj, (u128 *)v);
+    SDF_VU0_STOREVECTOR(&v);
+    dds3GetPosPoseSetMCR(obj, (u128 *)&v);
     return 1;
 }
 
 s32 evtUnitMoveTypePathTrace(evtUnit_t *h) {
-    f32 v[4] QWORD_ALIGNED;
+    sdfVector4_t v;
 
     dds3PathBasicControlIsFinished(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
     dds3PathBasicControlGetPos(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
-    SDF_VU0_STOREVECTOR(v);
-    dds3SetPosPoseSet(h->effObj, (u128 *)v);
+    SDF_VU0_STOREVECTOR(&v);
+    dds3SetPosPoseSet(h->effObj, (u128 *)&v);
     if (h->flags & 0x10) {
         dds3PathBasicControlGetRot(EE_ADDR_AS(dds3PathBasicControl_t *, h->pathHandle));
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
-        SDF_VU0_STOREVECTOR(v);
-        dds3SetRotPoseSet(h->effObj, (u128 *)v);
+        SDF_VU0_STOREVECTOR(&v);
+        dds3SetRotPoseSet(h->effObj, (u128 *)&v);
     }
     return 1;
 }
