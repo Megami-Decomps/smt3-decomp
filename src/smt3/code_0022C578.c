@@ -1958,8 +1958,9 @@ extern char D_0054FE40[];
 
 extern char *pStr[];
 
-#ifdef NON_MATCHING
 extern s32 cmpItemHasFlag(u16 item, s8 which);
+
+#ifdef NON_MATCHING
 extern s32 fclStartSelMessage(s32 message);
 
 extern void fclSetMessageInvalid(s8 mode);
@@ -11823,21 +11824,19 @@ s32 func_002429C0(void)
 }
 
 
-/* NON_MATCHING: 13 of 17 words differ (first at +0xC). */
-#ifdef NON_MATCHING
 s32 cmpItemHasFlag(u16 item, s8 which)
 {
     if (which == 0) {
-        if ((datItemTable[item].flags & 1) != 0) {
+        u8 flag = datItemTable[item].flags & 1;
+        if (flag != 0) {
             return 1;
         }
-        return 0;
+    } else {
+        u32 flag = datItemTable[item].flags2 & 2;
+        return flag == 0;
     }
-    return (datItemTable[item].flags2 & 2) == 0;
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpItemHasFlag);
-#endif
 
 void func_00242A70(s32 key) {
 }
