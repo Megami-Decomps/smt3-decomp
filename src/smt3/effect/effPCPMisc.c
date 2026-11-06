@@ -2564,8 +2564,8 @@ void effPCPSparkleSphereDelete(effPCPSparkleSphere_tag *hData) {
 
 void effPCPSparkleSphereDraw(effPCPSparkleSphere_tag *hData) {
     f32 pos[4] QWORD_ALIGNED;
-    f32 dir[4];
-    f32 size[4];
+    f32 dir[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
     billHandle_t *handle;
     f32 scale;
     u32 color;
@@ -2806,7 +2806,7 @@ effPCPHama02_tag *effPCPHama02Copy(effPCPHama02_tag *source) {
 
 void effPCPHama02Draw(effPCPHama02_tag *hData) {
     dds3ModelHandle_t *obj[2];
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -3245,8 +3245,8 @@ void effPCPZiodin01Init(effPCPZiodin01_tag *pPCPZiodin01) {
     f32 angle = 0.0f;
     f32 cosv = 0.0f;
     f32 sinv = 0.0f;
-    f32 dir[4];
-    f32 scale[4];
+    f32 dir[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
     f32 spread;
     f32 radius;
     f32 reach;
@@ -3346,7 +3346,7 @@ void effPCPZiodin02Init(effPCPZiodin01_tag *pPCPZiodin02) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 spread;
     f32 radius;
     f32 height;
@@ -3441,7 +3441,7 @@ void effPCPZiodin03Init(effPCPZiodin01_tag *pPCPZiodin03) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 spread;
     f32 height;
     f32 speed;
@@ -3534,7 +3534,7 @@ void effPCPZiodin04Init(effPCPZiodin01_tag *pPCPZiodin04) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 spread;
     f32 radius;
     f32 height;
@@ -3832,7 +3832,7 @@ void effPCPShockWave02Init(effPCPZiodin01_tag *pPCPShockWave02) {
     f32 angle = 0.0f;
     f32 sinv = 0.0f;
     f32 cosv = 0.0f;
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 spread;
     f32 height;
     f32 speed;
@@ -4101,7 +4101,7 @@ void effPCPMultiBlurExpDelete(effPCPMultiBlurExp_tag *hData) {
 
 void effPCPMultiBlurExpDraw(effPCPMultiBlurExp_tag *hData) {
     dds3Effect_PartialMultiBlur_t *obj;
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
 
     obj = hData->hBlur;
     SDF_VU0_LOADVECTOR(hData->pos);
@@ -4174,7 +4174,7 @@ void effPCPMultiFilterExpDelete(effPCPMultiBlurExp2_tag *hData) {
 }
 
 void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
-    f32 projected[4];
+    f32 projected[4] QWORD_ALIGNED;
     s32 frame = hData->frame;
     s32 duration = SDF_FRAMES(hData->duration);
     dds3Effect_PartialMultiFilter_t *rect = hData->resource.rectangle;
@@ -4265,7 +4265,7 @@ void effPCPMultiBlurExp2Delete(effPCPMultiBlurExp2_tag *hData) {
 }
 
 void effPCPMultiBlurExp2Draw(effPCPMultiBlurExp2_tag *hData) {
-    f32 projected[4];
+    f32 projected[4] QWORD_ALIGNED;
     s32 frame = hData->frame;
     s32 duration = SDF_FRAMES(hData->duration);
     dds3Effect_PartialMultiBlur_t *rect = hData->resource.blur;
@@ -4832,7 +4832,7 @@ void effPCPBreathDraw(effPCPBreath_tag *work) {
     f32 muzzle[4] __attribute__((aligned(16)));
     f32 aim[4] __attribute__((aligned(16)));
     f32 center[4] __attribute__((aligned(16)));
-    f32 look[4];
+    f32 look[4] QWORD_ALIGNED;
     f32 t;
     void *formation;
 
@@ -5985,7 +5985,7 @@ void effPCPEyeThunderDelete(effPCPEyeThunder_tag *hData) {
 
 void effPCPEyeThunderDraw(effPCPEyeThunder_tag *hData) {
     f32 point[4] QWORD_ALIGNED;
-    f32 dir[4];
+    f32 dir[4] QWORD_ALIGNED;
     u8 *params;
     f32 dx;
     f32 dy;
@@ -6162,7 +6162,7 @@ void dds3RingPolyExpListDelete(dds3RingPolyExpList_tag *hData) {
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
-    f32 scaleMatrix[4][4];
+    f32 scaleMatrix[4][4] QWORD_ALIGNED;
     sdfDrawTag_t *list;
     s32 count;
     sdfGrOt_t *entry;
@@ -6205,11 +6205,11 @@ void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
 }
 
 void effPCPRingPolyExpSetVertex(f32 pPCPRingPolyExp, effPCPRingPolyExp_tag *radius) {
-    f32 direction[4];
-    f32 inner[4];
-    f32 first[4];
-    f32 middle[4];
-    f32 outer[4];
+    f32 direction[4] QWORD_ALIGNED;
+    f32 inner[4] QWORD_ALIGNED;
+    f32 first[4] QWORD_ALIGNED;
+    f32 middle[4] QWORD_ALIGNED;
+    f32 outer[4] QWORD_ALIGNED;
     f32 angle = 0.0f;
     f32 step;
     f32 *out;
@@ -6372,11 +6372,11 @@ void effPCPRingPolyExpSetDirection(effPCPRingPolyExp_tag *hData, void *pMatrix) 
 }
 
 void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 radius) {
-    f32 dir[4];
-    f32 rowA[4];
-    f32 rowB[4];
-    f32 rowC[4];
-    f32 rowD[4];
+    f32 dir[4] QWORD_ALIGNED;
+    f32 rowA[4] QWORD_ALIGNED;
+    f32 rowB[4] QWORD_ALIGNED;
+    f32 rowC[4] QWORD_ALIGNED;
+    f32 rowD[4] QWORD_ALIGNED;
     f32 *points;
     f32 angle = 0.0f;
     f32 step;
@@ -6907,7 +6907,7 @@ void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
 }
 
 void effPCPMakkaDraw(effPCPMakka_tag *hData) {
-    f32 scaleVec[4];
+    f32 scaleVec[4] QWORD_ALIGNED;
     dds3ModelHandle_t *model;
     sdfModelRootNode_t *inner;
     sdfMotionCtrlr_t **slot;
@@ -7908,8 +7908,8 @@ INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *hData) {
     effEveBEDParams_t place;
     effBTL_SkillPositionPtr_t aim;
-    f32 position[4];
-    f32 direction[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 direction[4] QWORD_ALIGNED;
     u8 *form;
     f32 scale;
 

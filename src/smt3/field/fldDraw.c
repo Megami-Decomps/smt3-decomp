@@ -339,7 +339,7 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
 
 void fldPoint3To2(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
     f32 vec[4] QWORD_ALIGNED = { z3, x2, y2, 1.0f };
-    f32 result[4];
+    f32 result[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
@@ -358,7 +358,7 @@ void fldPoint3To2(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
 
 void fldPoint3To2H(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
     f32 vec[4] QWORD_ALIGNED = { z3, x2, y2, 1.0f };
-    f32 result[4];
+    f32 result[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADMATRIX(aProjMatrix);
     MultMatrixRev(&dds3ScreenParam2.TM);
@@ -383,7 +383,7 @@ void fldPoint3To2_A(void) {
 
 void fldPoint3To2_B(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
     f32 vec[4] QWORD_ALIGNED = { z3, x2, y2, 1.0f };
-    f32 result[4];
+    f32 result[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();

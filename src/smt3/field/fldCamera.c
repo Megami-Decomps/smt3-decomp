@@ -405,7 +405,7 @@ void fldCamGetPhokanParam(void) {
 void fldCamUpdateFollow(void) {
     union {
         u128 q;
-        f32 f[4];
+        f32 f[4] QWORD_ALIGNED;
     } nearPoint, farPoint;
     fldFollowCameraControl_t *control = fldGetFollowCameraControl();
     f32 ratio = (f32)fldCamPhokanState / (f32)fldCamPHokanMode;
@@ -653,7 +653,7 @@ extern void dds3GetTMPoseSet(dds3Basic_t *pBasic);
 void calcCamNormalNPC(void) {
     union {
         u128 q;
-        f32 f[4];
+        f32 f[4] QWORD_ALIGNED;
     } eye, target;
     fldFollowCameraControl_t *control;
     fldUnitControl_t *unit;

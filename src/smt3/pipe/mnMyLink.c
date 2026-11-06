@@ -219,7 +219,7 @@ void pipeFreeLink(tagPipeLinkInfo *pInfo)
 }
 
 void pipeCameraLerp(f32 *vector, f32 angle) {
-    f32 rotated[4];
+    f32 rotated[4] QWORD_ALIGNED;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
@@ -232,7 +232,7 @@ void pipeCameraLerp(f32 *vector, f32 angle) {
 }
 
 void vec_2A6B80(f32 *vector, f32 angle) {
-    f32 rotated[4];
+    f32 rotated[4] QWORD_ALIGNED;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
@@ -245,7 +245,7 @@ void vec_2A6B80(f32 *vector, f32 angle) {
 }
 
 void vecRotate2D(f32 *vector, f32 angle) {
-    f32 rotated[4];
+    f32 rotated[4] QWORD_ALIGNED;
     f32 cosine = sdfCos(angle);
     f32 sine = sdfSin(angle);
 
@@ -457,7 +457,7 @@ void mtxStore(sdfMatrix4_t *pDst, sdfMatrix4_t *pSrc) {
 }
 
 f32 *mtx_2A7B10(f32 *direction, f32 *matrix) {
-    f32 transformed[4];
+    f32 transformed[4] QWORD_ALIGNED;
     f32 x = direction[0];
     f32 y = direction[1];
     f32 z = direction[2];

@@ -158,7 +158,7 @@ void SetRotateMatrixZ(f32 aAngle) {
 }
 
 void StoreRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis, sdfMatrix4_t *aMtx) {
-    f32 normalizedAxis[4];
+    f32 normalizedAxis[4] QWORD_ALIGNED;
     f32 x;
     f32 y;
     f32 z;

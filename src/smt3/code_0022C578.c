@@ -10051,10 +10051,10 @@ extern void sdf3DSetCamera(sdf3DScreenParam_t *screenParam, void *camera);
 
 void func_0023FCC0(void)
 {
-    f32 lightColor[4];
-    f32 lightDirection[4];
-    f32 ambientColor[4];
-    f32 fogColor[4];
+    f32 lightColor[4] QWORD_ALIGNED;
+    f32 lightDirection[4] QWORD_ALIGNED;
+    f32 ambientColor[4] QWORD_ALIGNED;
+    f32 fogColor[4] QWORD_ALIGNED;
 
     memcpy(lightColor, D_0053FFE8, sizeof(lightColor));
     memcpy(lightDirection, D_0053FFF8, sizeof(lightDirection));

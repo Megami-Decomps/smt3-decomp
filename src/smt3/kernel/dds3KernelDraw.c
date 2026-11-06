@@ -496,7 +496,7 @@ void *dds3GetRenderTexture(void)
 
 void dds3RunQuake(void)
 {
-    f32 range[4];
+    f32 range[4] QWORD_ALIGNED;
     dds3QuakeGain_t gain = D_0054E988[0];
     f32 amplitude;
     f32 kick;
@@ -1490,7 +1490,7 @@ void dds3BlurUpdate(void)
 void dds3RotationArc(void)
 {
     f32 identity[4] QWORD_ALIGNED;
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 dot;
     f32 component;
 
@@ -2185,8 +2185,8 @@ void eglLinkKanji(s32 x, s32 y, s32 rgba, const char *moji)
 /* vu0 routine: project a world point into viewport pixel coordinates. */
 void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
 {
-    f32 point[4];
-    f32 screen[4];
+    f32 point[4] QWORD_ALIGNED;
+    f32 screen[4] QWORD_ALIGNED;
 
     point[0] = z3;
     point[1] = x2;

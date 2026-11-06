@@ -1030,7 +1030,7 @@ u32 evtCommand_MODEL_LIGHT_DIR(void);
 
 u32 evtCommand_MODEL_LIGHT_DIR(void)
 {
-    f32 dir[4];
+    f32 dir[4] QWORD_ALIGNED;
     evtUnit_t *unit;
     f32 mag;
 
@@ -2092,8 +2092,8 @@ s32 evtCommand_CAM_PATH_WAIT(void)
 
 s32 evtCommand_CAM_CREATE(void)
 {
-    f32 pos[4];
-    f32 rot[4];
+    f32 pos[4] QWORD_ALIGNED;
+    f32 rot[4] QWORD_ALIGNED;
     s32 id;
 
     memset(pos, 0, 0x10);

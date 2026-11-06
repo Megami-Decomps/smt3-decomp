@@ -1318,7 +1318,7 @@ extern s8 dds3PadButtonState[];
 
 void ActionKey(tagPipeObject *object)
 {
-    f32 vector[4];
+    f32 vector[4] QWORD_ALIGNED;
     f32 horizontalStep;
     f32 verticalStep;
     f32 acceleration;

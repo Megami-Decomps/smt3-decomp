@@ -933,11 +933,11 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
     f32 next[4] QWORD_ALIGNED;
     f32 position[4] QWORD_ALIGNED;
     f32 duplicatePosition[4] QWORD_ALIGNED;
-    f32 direction[4];
-    f32 radial[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    f32 direction[4] QWORD_ALIGNED;
+    f32 radial[4] QWORD_ALIGNED;
+    f32 halfWidth[4] QWORD_ALIGNED;
+    f32 halfHeight[4] QWORD_ALIGNED;
+    f32 side[4] QWORD_ALIGNED;
     s32 respawn;
     s32 pulse;
     s32 duplicates;
@@ -1225,7 +1225,7 @@ void effPCPHamaCardSphereDelete(effPCPHamaCardSphere_tag *hData)
 void effPCPHamaCardSpherePartInit(effPCPHamaCardSphere_tag *pHCardSphere, s32 number)
 {
     effPCPHamaCardSpherePart_tag *sprite = &pHCardSphere->pPart[number];
-    f32 direction[4];
+    f32 direction[4] QWORD_ALIGNED;
     f32 jitter;
 
     sprite->radian = dds3GetRandFloatA(dds3EffectBase) * (EFF_SCATTER_HALF_TURN * 2.0f);
@@ -1247,15 +1247,15 @@ void effPCPHamaCardSpherePartInit(effPCPHamaCardSphere_tag *pHCardSphere, s32 nu
 }
 
 void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     f32 next[4] QWORD_ALIGNED;
     f32 position[4] QWORD_ALIGNED;
     f32 duplicatePosition[4] QWORD_ALIGNED;
-    f32 direction[4];
-    f32 radial[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    f32 direction[4] QWORD_ALIGNED;
+    f32 radial[4] QWORD_ALIGNED;
+    f32 halfWidth[4] QWORD_ALIGNED;
+    f32 halfHeight[4] QWORD_ALIGNED;
+    f32 side[4] QWORD_ALIGNED;
     s32 respawn;
     s32 pulse;
     s32 duplicates;
@@ -1548,7 +1548,7 @@ void effPCPHamaCardScatterPartInit(effPCPHamaCardScatter_tag *pHCardScatter, s32
     f32 diagonalAngle = EFF_SCATTER_DIAGONAL_ANGLE_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
     f32 tiltStep = EFF_SCATTER_TILT_STEP_DEGREES * EFF_SCATTER_DEGREES_TO_RADIANS;
     effPCPHamaCardScatterPart_tag *particle = &pHCardScatter->pPart[number];
-    f32 direction[4];
+    f32 direction[4] QWORD_ALIGNED;
 
     particle->height = 0.0f;
     particle->height_s = pHCardScatter->param.heightStep;
@@ -1574,11 +1574,11 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
     f32 next[4] QWORD_ALIGNED;
     f32 position[4] QWORD_ALIGNED;
     f32 duplicatePosition[4] QWORD_ALIGNED;
-    f32 direction[4];
-    f32 axis[4];
-    f32 halfWidth[4];
-    f32 halfHeight[4];
-    f32 side[4];
+    f32 direction[4] QWORD_ALIGNED;
+    f32 axis[4] QWORD_ALIGNED;
+    f32 halfWidth[4] QWORD_ALIGNED;
+    f32 halfHeight[4] QWORD_ALIGNED;
+    f32 side[4] QWORD_ALIGNED;
     s32 respawn;
     s32 duplicates;
     u32 i;

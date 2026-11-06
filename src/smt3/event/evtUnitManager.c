@@ -137,7 +137,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
 void evtGetUnitDirVector(evtUnit_t *h) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADVECTOR(&h->effObj->poseset->rot);
     ToMatrix();
@@ -1139,7 +1139,7 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtUnitRotationQuat(evtUnit_t *h, f32 *rot, f32 radio) {
-    f32 v[4];
+    f32 v[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();

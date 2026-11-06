@@ -677,8 +677,8 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
 void fldSkySetTbl(s32 idx, s32 hokan) {
     fldAreaWork_t *state = &fldGlobalBase;
     fldLightSet_t *light;
-    f32 vec[4];
-    f32 dir[4];
+    f32 vec[4] QWORD_ALIGNED;
+    f32 dir[4] QWORD_ALIGNED;
     s32 duration;
     s32 defaultDuration;
     s32 area;
@@ -773,8 +773,8 @@ void fldSkySetTblModosu(s32 hokan) {
 void fldSkySetTblUpper(s32 idx, s32 hokan) {
     fldAreaWork_t *state = &fldGlobalBase;
     fldLightSet_t *light;
-    f32 vec[4];
-    f32 dir[4];
+    f32 vec[4] QWORD_ALIGNED;
+    f32 dir[4] QWORD_ALIGNED;
     s32 duration;
     s32 defaultDuration;
     s32 area;
@@ -883,8 +883,8 @@ void fldSkySetTblLightMaDZ(s32 idx) {
 
 void fldSkySetTblLightMa(s32 idx, s32 hokan) {
     fldLightSet_t *light;
-    f32 vec[4];
-    f32 dir[4];
+    f32 vec[4] QWORD_ALIGNED;
+    f32 dir[4] QWORD_ALIGNED;
     s32 duration;
     s32 defaultDuration;
     s32 area;
@@ -985,8 +985,8 @@ void fld_1374F0(void) {
 
 void fldSkyRefreshTbl(void) {
     fldLightSet_t *light;
-    f32 vec[4];
-    f32 dir[4];
+    f32 vec[4] QWORD_ALIGNED;
+    f32 dir[4] QWORD_ALIGNED;
     f32 *dirp;
     evtUnit_t *unit;
     s32 r, g, b;
@@ -1066,8 +1066,8 @@ void fldSkyRefreshTbl(void) {
 
 void fldSkyBattle(void) {
     fldLightSet_t *light = &((fldLightSet_t *)fldSkyDefaultData)[fldSkyTable];
-    f32 vec[4];
-    f32 dir[4];
+    f32 vec[4] QWORD_ALIGNED;
+    f32 dir[4] QWORD_ALIGNED;
     s32 area;
     s32 value;
 

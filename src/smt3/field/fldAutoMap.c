@@ -541,7 +541,7 @@ void fldAutoMapLoad(void) {
 }
 
 void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     sdfModelNode_t *handle;
 
     memset(pos, 0, sizeof(pos));

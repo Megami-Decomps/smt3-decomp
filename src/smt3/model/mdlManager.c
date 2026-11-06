@@ -823,7 +823,7 @@ void mdlLinkBlur(mdlObj_t *ctx, struct sdfGrOt_t **surfaces) {
     sdfModelRootNode_t *original = ctx->inner;
     dds3ModelBlurInstance_t *slot;
     sdfModelRootNode_t *model;
-    f32 tint[4];
+    f32 tint[4] QWORD_ALIGNED;
     s32 remaining;
     u32 color;
 

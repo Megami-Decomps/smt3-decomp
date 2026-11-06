@@ -624,8 +624,8 @@ extern void resetCamNormal(void);
 s32 fldCommand_SET_CHASE_CAMERA(void) {
     f32 angle;
     f32 result;
-    f32 cameraPos[4];
-    f32 targetPos[4];
+    f32 cameraPos[4] QWORD_ALIGNED;
+    f32 targetPos[4] QWORD_ALIGNED;
 
     fldGlobalBase.mode = 0;
 
@@ -676,8 +676,8 @@ s32 func_00158548(void) {
 s32 fldCommand_CAM_DIR(void) {
     s32 parameter;
     f32 angle;
-    f32 cameraPos[4];
-    f32 targetPos[4];
+    f32 cameraPos[4] QWORD_ALIGNED;
+    f32 targetPos[4] QWORD_ALIGNED;
 
     parameter = scrGetIntPara(0);
     if (parameter < 0) {
@@ -719,8 +719,8 @@ s32 fldCommand_CAM_DIR(void) {
 }
 
 s32 fldCommand_CAM_SEL_PHOKAN(void) {
-    f32 pos[4];
-    f32 rot[4];
+    f32 pos[4] QWORD_ALIGNED;
+    f32 rot[4] QWORD_ALIGNED;
     dds3Basic_t *target;
     dds3Basic_t *object;
     dds3Basic_t *world;

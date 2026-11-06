@@ -95,10 +95,10 @@ extern void pipeCameraLerp(f32 *vector, f32 angle);
 
 void PipeCamera(void)
 {
-    f32 difference[4];
-    f32 forward[4];
-    f32 up[4];
-    f32 position[4];
+    f32 difference[4] QWORD_ALIGNED;
+    f32 forward[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
     s32 offset = offsetCount;
     tagPipeObject *object = objMyData();
 
@@ -134,12 +134,12 @@ void PipeCamera(void)
 
 void PipeCameraAction(void)
 {
-    f32 difference[4];
-    f32 forward[4];
-    f32 up[4];
-    f32 sum[4];
-    f32 position[4];
-    f32 vertical[4];
+    f32 difference[4] QWORD_ALIGNED;
+    f32 forward[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
+    f32 sum[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
+    f32 vertical[4] QWORD_ALIGNED;
     tagPipeObject *object;
     s32 pathIndex;
     f32 ease;
@@ -250,11 +250,11 @@ offsetReady:
 
 void PipeCameraAction2(void)
 {
-    f32 difference[4];
-    f32 forward[4];
-    f32 up[4];
-    f32 sum[4];
-    f32 position[4];
+    f32 difference[4] QWORD_ALIGNED;
+    f32 forward[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
+    f32 sum[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
     tagPipeObject *object;
     f32 blend;
     s32 offset;
@@ -313,15 +313,15 @@ void PipeCameraAction2(void)
 
 void PipeCameraAction3(void)
 {
-    f32 difference[4];
-    f32 forward[4];
-    f32 up[4];
+    f32 difference[4] QWORD_ALIGNED;
+    f32 forward[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
     /* Retained from PipeCameraAction's six-vector layout. This variant no
      * longer writes sum, but 2.96 reserves its 16-byte slot. Removing the
      * declaration shifts position, vertical and the saved registers by 16. */
-    f32 sum[4];
-    f32 position[4];
-    f32 vertical[4];
+    f32 sum[4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED;
+    f32 vertical[4] QWORD_ALIGNED;
     tagPipeObject *object;
     s32 pathIndex;
     f32 ease;

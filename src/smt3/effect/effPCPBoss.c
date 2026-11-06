@@ -1787,14 +1787,14 @@ extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
 /* Same native algorithm as dds-decomp/redthing1's effPCPCrackDraw: transform
  * each trail sample, then emit and fade its delayed flash cells. */
 void effPCPCrackDraw(effPCPCrack_t *work) {
-    f32 perpendicular[4];
-    f32 direction[4];
-    f32 axis[4];
-    f32 scaleVector[4];
-    f32 widthVector[4];
-    f32 displacement[4];
-    f32 baseVector[4];
-    f32 tipVector[4];
+    f32 perpendicular[4] QWORD_ALIGNED;
+    f32 direction[4] QWORD_ALIGNED;
+    f32 axis[4] QWORD_ALIGNED;
+    f32 scaleVector[4] QWORD_ALIGNED;
+    f32 widthVector[4] QWORD_ALIGNED;
+    f32 displacement[4] QWORD_ALIGNED;
+    f32 baseVector[4] QWORD_ALIGNED;
+    f32 tipVector[4] QWORD_ALIGNED;
     mdlObj_t *model;
     struct sdfModelRootNode_t *map;
     s32 i;

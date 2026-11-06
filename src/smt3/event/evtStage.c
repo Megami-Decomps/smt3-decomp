@@ -165,7 +165,7 @@ struct dds3Basic_t *dds3GetActiveScene(void);
 
 void evtSetTestCamera(void) {
     f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };
-    f32 rotation[4];
+    f32 rotation[4] QWORD_ALIGNED;
     dds3Basic_t *object;
 
     memset(rotation, 0, 0x10);

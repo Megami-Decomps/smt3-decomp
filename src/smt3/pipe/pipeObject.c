@@ -250,7 +250,7 @@ extern void vecScale(f32 *, f32);
 void getPosTranslate(tagPipeObject *object, f32 *output)
 {
     f32 tangent[4] QWORD_ALIGNED;
-    f32 side[4];
+    f32 side[4] QWORD_ALIGNED;
     f32 basis[4] QWORD_ALIGNED;
 
     vecSet(tangent,
@@ -1092,10 +1092,10 @@ void objVisibleAll(s8 value)
 }
 
 void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z) {
-    f32 cross[4];
+    f32 cross[4] QWORD_ALIGNED;
     f32 direction[4] QWORD_ALIGNED;
     f32 position[4] QWORD_ALIGNED;
-    f32 translated[4];
+    f32 translated[4] QWORD_ALIGNED;
     sdfMatrix4_t matrix;
     f32 radians;
     tagPipePosData *node;

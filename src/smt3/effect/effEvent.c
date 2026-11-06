@@ -1226,8 +1226,8 @@ SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt1, sdfGrOtTable, 0x600);
  * native leaves position.w untouched before its full-quadword add/copies. */
 void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
     effEveBillBatch_t primary, secondary;
-    f32 matrix[4][4];
-    f32 position[4] QWORD_ALIGNED, origin[4] QWORD_ALIGNED, lateral[4];
+    f32 matrix[4][4] QWORD_ALIGNED;
+    f32 position[4] QWORD_ALIGNED, origin[4] QWORD_ALIGNED, lateral[4] QWORD_ALIGNED;
     sdfDrawTag_t *primaryList, *secondaryList;
     sdfGrOt_t *surface;
     sdfTexHandle_t *primaryTexture, *secondaryTexture;
@@ -1615,10 +1615,10 @@ void effAPPoint4Delete(effAPPoint4_tag *hData) {
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
 void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
-    f32 jitterScale[4];
-    f32 lastNormal[4];
-    f32 viewDirection[4];
-    f32 jitteredPoint[4];
+    f32 jitterScale[4] QWORD_ALIGNED;
+    f32 lastNormal[4] QWORD_ALIGNED;
+    f32 viewDirection[4] QWORD_ALIGNED;
+    f32 jitteredPoint[4] QWORD_ALIGNED;
     effAPPoint4Part_tag *record = pAPPoint4->pPart + index;
     effCubicBezierSlot_t *bezierSlot;
     f32 cursorStep;

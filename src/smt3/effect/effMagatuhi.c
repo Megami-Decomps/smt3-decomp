@@ -927,7 +927,7 @@ void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 
     f32 (*historyPosition)[4];
     f32 *angleRow;
     f32 *scalarOutput;
-    f32 viewDirection[4];
+    f32 viewDirection[4] QWORD_ALIGNED;
     f32 baseLimit = work->historyDistanceScale;
     f32 limit;
     f32 phaseScalar;
@@ -1123,10 +1123,10 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     f32 origin[4] QWORD_ALIGNED;
     f32 basePosition[4] QWORD_ALIGNED;
     f32 target[4] QWORD_ALIGNED;
-    f32 viewDirection[4];
-    f32 sideAxis[4];
-    f32 towardTarget[4];
-    f32 startTangent[4];
+    f32 viewDirection[4] QWORD_ALIGNED;
+    f32 sideAxis[4] QWORD_ALIGNED;
+    f32 towardTarget[4] QWORD_ALIGNED;
+    f32 startTangent[4] QWORD_ALIGNED;
     effArrHdr_t *mathResource;
     dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
@@ -2994,7 +2994,7 @@ extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
 /* vu0 routine: pad-driven camera translation and axis rotation. */
 void func_001AA6D0(void)
 {
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
     volatile f32 scale[4];
     /* Right stick pair; the left pair precedes it in the same pad buffer. */

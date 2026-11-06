@@ -211,13 +211,13 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCopy(effPCPNeedleSpiralParam_t *work) 
 }
 
 void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
-    f32 position[4];
-    f32 axis[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 axis[4] QWORD_ALIGNED;
     f32 vertices[2][4] QWORD_ALIGNED;
-    f32 resourcePosition[4];
-    f32 viewDirection[4];
-    f32 width[4];
-    f32 viewOffset[4];
+    f32 resourcePosition[4] QWORD_ALIGNED;
+    f32 viewDirection[4] QWORD_ALIGNED;
+    f32 width[4] QWORD_ALIGNED;
+    f32 viewOffset[4] QWORD_ALIGNED;
     effPCPNeedleSpiralPart_tag *slot;
     s32 fadeIn;
     u32 count;

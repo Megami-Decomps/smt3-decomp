@@ -95,7 +95,7 @@ void dds3_1AC138(effArrHdr_t *header) {
 s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
     effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
-    f32 weights[4];
+    f32 weights[4] QWORD_ALIGNED;
     f32 t;
     f32 u;
     effBezierPoint_t *controlPoints;
@@ -126,7 +126,7 @@ s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
 
 /* Carry excess t across the first segment; the second finishes after sampling its entry t. */
 s32 effPCPBezierEval(effBezierCurve_t *slot, f32 *out) {
-    f32 weights[4];
+    f32 weights[4] QWORD_ALIGNED;
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
     effBezierPoint_t *controlPoints = &slot->controlPoints[pointIndex];
@@ -160,7 +160,7 @@ void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
     effBezierPoint_t *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[4];
+    f32 w[4] QWORD_ALIGNED;
 
     w[0] = u * u * u;
     w[1] = t * (u * u) * 3.0f;
@@ -408,8 +408,8 @@ void effDebugSelectCursorDraw(f32 *position) {
 
 /* vu0 routine: build and submit the debug geometry. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
-    f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
-    f32 vertices[40][4];
+    f32 point[4] QWORD_ALIGNED; /* The line provider consumes xyz; preserve the untouched w lane. */
+    f32 vertices[40][4] QWORD_ALIGNED;
     u32 colors[40];
     sdfDrawTag_t *list;
     f32 (*out)[4];

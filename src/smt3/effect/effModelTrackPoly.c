@@ -372,9 +372,9 @@ void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
 /* vu0 routine: Catmull-Rom point between p[1] and p[2], left in vf10. */
 void Eff_HermitianSpline(f32 (*p)[4], f32 t)
 {
-    f32 tan[2][4];
-    f32 half[4];
-    f32 h[4][4];
+    f32 tan[2][4] QWORD_ALIGNED;
+    f32 half[4] QWORD_ALIGNED;
+    f32 h[4][4] QWORD_ALIGNED;
     f32 t2 = t * t;
     f32 t3 = t2 * t;
 
@@ -540,8 +540,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
     f32 secondHistory[4][4] QWORD_ALIGNED;
     f32 firstBasePoint[4] QWORD_ALIGNED;
     f32 secondBasePoint[4] QWORD_ALIGNED;
-    f32 firstPointDelta[4];
-    f32 secondPointDelta[4];
+    f32 firstPointDelta[4] QWORD_ALIGNED;
+    f32 secondPointDelta[4] QWORD_ALIGNED;
     sdfVector4_t samples[2];
     s32 activePointCount = hPoly->count;
     s32 sampleCount = hPoly->split;
@@ -861,9 +861,9 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     sdfVector4_t world[2] QWORD_ALIGNED;
     s32 screen[4][4] QWORD_ALIGNED;
     /* Each scratch pair owns a quadword slot in retail's frame. */
-    f32 d[4];
-    f32 distances[4];
-    f32 offset[4];
+    f32 d[4] QWORD_ALIGNED;
+    f32 distances[4] QWORD_ALIGNED;
+    f32 offset[4] QWORD_ALIGNED;
     f32 angle = 0.0f;
     f32 angleStep, wave, length, len;
     s32 pointCount, count, run, i, j, k;

@@ -225,8 +225,8 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *data;
     nbFormation_t *form;
-    f32 battlePos[4];
-    f32 startPos[4];
+    f32 battlePos[4] QWORD_ALIGNED;
+    f32 startPos[4] QWORD_ALIGNED;
     s32 pending;
     u32 i;
 
@@ -575,8 +575,8 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *data;
     nbFormation_t *form;
-    f32 battlePos[4];
-    f32 startPos[4];
+    f32 battlePos[4] QWORD_ALIGNED;
+    f32 startPos[4] QWORD_ALIGNED;
     s32 pending;
     u32 i;
 

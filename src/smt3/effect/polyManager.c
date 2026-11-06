@@ -706,10 +706,10 @@ void dds3TrackPolyVCRefresh_ParType2(dds3TrackPoly_t *hTrackPoly, s32 index) {
     trackTriangleColors_t *vertex;
     u32 middleWord;
     u32 edgeWord;
-    f32 cur0[4];
-    f32 cur1[4];
-    f32 step0[4];
-    f32 step1[4];
+    f32 cur0[4] QWORD_ALIGNED;
+    f32 cur1[4] QWORD_ALIGNED;
+    f32 step0[4] QWORD_ALIGNED;
+    f32 step1[4] QWORD_ALIGNED;
     s32 alpha0[4];
     s32 alpha1[4];
     s32 col0[4];
@@ -903,10 +903,10 @@ void dds3TrackPolyVCSet2_Normal(dds3TrackPoly_t *hTrackPoly, u32 abgr_in, u32 ab
 
 
 void dds3TrackPolyVCSet2_Acute(dds3TrackPoly_t *hTrackPoly, u32 abgr_in, u32 abgr_out) {
-    f32 cur0[4];
-    f32 cur1[4];
-    f32 step0[4];
-    f32 step1[4];
+    f32 cur0[4] QWORD_ALIGNED;
+    f32 cur1[4] QWORD_ALIGNED;
+    f32 step0[4] QWORD_ALIGNED;
+    f32 step1[4] QWORD_ALIGNED;
     s32 alpha0[4];
     s32 alpha1[4];
     s32 col0[4];
@@ -1690,7 +1690,7 @@ void dds3SpPoly_Ring_Old_New(dds3SpPoly_Ring_Old_t3 *pRing, s32 number) {
     dds3TrackPolyList_t *cell = &strip->trackList[number];
     f32 radius = pRing->radius;
     f32 origin[4] QWORD_ALIGNED;
-    f32 offset[4];
+    f32 offset[4] QWORD_ALIGNED;
     f32 angle;
     f32 step;
     f32 cosine;
@@ -1732,7 +1732,7 @@ void dds3SpPoly_Ring_Old_New(dds3SpPoly_Ring_Old_t3 *pRing, s32 number) {
 void dds3SpPoly_Ring_Old_Move(dds3SpPoly_Ring_Old_t3 *pRing, s32 number) {
     dds3TrackPoly_t *strip = pRing->hTrackPoly;
     dds3TrackPolyList_t *entry = &strip->trackList[number];
-    f32 scale[4];
+    f32 scale[4] QWORD_ALIGNED;
     f32 *p;
     s32 pairs;
     s32 i;
@@ -1857,9 +1857,9 @@ void func_00168A50(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius)
 {
     dds3TrackPoly_t *strip = ring->hTrackPoly;
     dds3TrackPolyList_t *entry = &strip->trackList[number];
-    f32 radial[4];
-    f32 inner[4];
-    f32 outer[4];
+    f32 radial[4] QWORD_ALIGNED;
+    f32 inner[4] QWORD_ALIGNED;
+    f32 outer[4] QWORD_ALIGNED;
     f32 angleStep;
     f32 angle;
     u128 *pointCursor;
@@ -1908,9 +1908,9 @@ void dds3SpPoly_RingMove(dds3SpPoly_Ring_t3 *pRing, s32 number) {
     dds3TrackPoly_t *strip = pRing->hTrackPoly;
     dds3SpPoly_RingPhysics_t *rec = &pRing->pPhysics[number];
     dds3TrackPolyList_t *entry = &strip->trackList[number];
-    f32 radialDirection[4];
-    f32 radiusStepVector[4];
-    f32 liftVector[4];
+    f32 radialDirection[4] QWORD_ALIGNED;
+    f32 radiusStepVector[4] QWORD_ALIGNED;
+    f32 liftVector[4] QWORD_ALIGNED;
     f32 angleStep;
     f32 angle;
     f32 *pointCursor;
@@ -2088,8 +2088,8 @@ void dds3SpPoly_SphereRingMove(dds3SpPoly_SphereRing_t3 *pSphereRing, s32 number
     dds3TrackPoly_t *strip = pSphereRing->hTrackPoly;
     dds3SpPoly_SphereRingPhysics_t *record = &pSphereRing->pPhysics[number];
     dds3TrackPolyList_t *stripEntry = &strip->trackList[number];
-    f32 innerPointVector[4];
-    f32 outerPointVector[4];
+    f32 innerPointVector[4] QWORD_ALIGNED;
+    f32 outerPointVector[4] QWORD_ALIGNED;
     f32 recordRadius;
     f32 projectedInnerRadius;
     f32 verticalOffset;
@@ -2279,9 +2279,9 @@ void dds3SpPoly_RollRingMove(dds3SpPoly_RollRing_t3 *pRollRing, s32 number)
     dds3TrackPoly_t *strip = pRollRing->hTrackPoly;
     dds3SpPoly_RollRingPhysics_t *rec = &pRollRing->pPhysics[number];
     dds3TrackPolyList_t *entry = &strip->trackList[number];
-    f32 dir[4];
-    f32 baseRadiusVector[4];
-    f32 offsetRadiusVector[4];
+    f32 dir[4] QWORD_ALIGNED;
+    f32 baseRadiusVector[4] QWORD_ALIGNED;
+    f32 offsetRadiusVector[4] QWORD_ALIGNED;
     f32 step;
     f32 radius;
     f32 angle;

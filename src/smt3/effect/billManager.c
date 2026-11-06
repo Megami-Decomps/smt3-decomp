@@ -363,7 +363,7 @@ void BillboardFreeTex(dds3BillResource_tag *hResource) {
  * Each row is eight actual X/Y offsets, consumed as a 32-byte quad stream. */
 void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
     f32 matrix[16] __attribute__((aligned(16)));
-    f32 direction[4];
+    f32 direction[4] QWORD_ALIGNED;
     f32 dot;
     sdfBillBoardBatch_t *work;
     s32 selected;
@@ -511,7 +511,7 @@ extern s32 sdfTexGetPacketCtx2Length(sdfTexHandle_t *handle);
 void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
 {
     f32 matrix[16] __attribute__((aligned(16)));
-    f32 direction[4];
+    f32 direction[4] QWORD_ALIGNED;
     f32 dot;
     sdfPrimTransPacket_t *blend;
     sdfBillBoardBatch_t *batch;
@@ -1382,9 +1382,9 @@ void dds3BillboardSetXYOffset(billHandle_t *hBillboard, float x, float y) {
 
 /* vu0 routine: screen-space angle of a world axis at a world position. */
 f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
-    f32 delta[4];
-    f32 origin[4];
-    f32 tip[4];
+    f32 delta[4] QWORD_ALIGNED;
+    f32 origin[4] QWORD_ALIGNED;
+    f32 tip[4] QWORD_ALIGNED;
 
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);

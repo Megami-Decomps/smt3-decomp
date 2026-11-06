@@ -193,8 +193,8 @@ void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ)
 
 /* vu0 routine: compose pitch and offset-adjusted planar direction quaternions. */
 void LookAt(f32 aFrontX, f32 aFrontZ) {
-    f32 input[4];
-    f32 quaternion[4];
+    f32 input[4] QWORD_ALIGNED;
+    f32 quaternion[4] QWORD_ALIGNED;
     f32 x;
     f32 y;
     f32 z;

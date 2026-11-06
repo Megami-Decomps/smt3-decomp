@@ -237,7 +237,7 @@ f32 fldPlayerCalc360_4(f32 aKakudo) {
 
 s32 fldPlayerMirChk(void) {
     fldUnitControl_t *control = fldGetUnitControl();
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
 
     if (control == NULL) {
         return 0;
@@ -415,7 +415,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     f32 pos[4] QWORD_ALIGNED;
-    f32 probe[4];
+    f32 probe[4] QWORD_ALIGNED;
 
     if (ctl == NULL) {
         return;
@@ -472,7 +472,7 @@ void fldPlayerCalc_WarpRun(void)
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t oldPosition __attribute__((aligned(16)));
-    f32 collisionPosition[4];
+    f32 collisionPosition[4] QWORD_ALIGNED;
     f32 pitch, warp, angle, step, distance, pi;
     dds3Basic_t *basic;
     dds3PoseSet_t *pose;

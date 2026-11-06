@@ -1315,7 +1315,7 @@ s32 viewModeCamera(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbViewCamWork_t *work = panel->data.viewCam;
-    f32 step[4];
+    f32 step[4] QWORD_ALIGNED;
     f64 scale;
     u32 i;
 

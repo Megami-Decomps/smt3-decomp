@@ -1924,9 +1924,9 @@ void fldRunAiCng(s32 mode)
             routeBase = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + fldRun_Dante.routeCell->routeOffset);
             route = routeBase;
             if (fldRun_Dante.routeCell->routeCount >= 2) {
-                f32 position[4];
-                f32 targetPos[4];
-                f32 hitPosition[4];
+                f32 position[4] QWORD_ALIGNED;
+                f32 targetPos[4] QWORD_ALIGNED;
+                f32 hitPosition[4] QWORD_ALIGNED;
 
                 route++;
                 fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
@@ -2052,8 +2052,8 @@ void fldRunDanteMove(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    f32 position[4];
-    f32 target[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2161,8 +2161,8 @@ void fldRunDantePwak(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    f32 position[4];
-    f32 target[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2298,8 +2298,8 @@ void fldRunDantePatr(void)
     fldMapCell_t *cell;
     u8 *routeBase;
     u8 *routeEntry;
-    f32 position[4];
-    f32 target[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
     f32 hitPosition[3];
     f32 targetX;
     f32 targetZ;
@@ -2576,9 +2576,9 @@ extern sdfVector4_t aViewTarget;
 
 void fldRunDanteCollision(void)
 {
-    f32 position[4];
-    f32 target[4];
-    f32 hitPosition[4];
+    f32 position[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
+    f32 hitPosition[4] QWORD_ALIGNED;
     f32 dx;
     f32 dz;
     f32 viewAngle = 0.0f;

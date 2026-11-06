@@ -202,7 +202,7 @@ INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CE8);
 void pbLoadTextures(s32 mode, s32 stage)
 {
     u32 row, column;
-    f32 light[4];
+    f32 light[4] QWORD_ALIGNED;
 
     a_key = sdfMemAllocDirect(sizeof(pbMapWork_t));
     D_0054F5C4 = sdfMemLock(a_key);

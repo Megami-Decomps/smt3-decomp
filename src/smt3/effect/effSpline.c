@@ -353,7 +353,7 @@ s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
 }
 
 void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIndex, f32 t) {
-    f32 weights[4];
+    f32 weights[4] QWORD_ALIGNED;
     f32 oneMinusT = 1.0f - t;
     f32 *p0 = channel->points + recordIndex * 3;
     f32 *p1 = p0 + 3;

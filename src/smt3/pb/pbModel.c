@@ -324,7 +324,7 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbExit_t *work = panel->data.mat;
-    f32 position[4];
+    f32 position[4] QWORD_ALIGNED;
     sdfVector4_t vertices;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;

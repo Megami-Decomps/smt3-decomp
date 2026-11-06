@@ -68,10 +68,10 @@ void effScreenOffset(void)
 
 /* vu0 routine: measure the projected camera-right offset. */
 s32 effPCPBlurScreenOffset(f32 scale) {
-    f32 scaleVector[4];
-    f32 projectedEnd[4];
-    f32 projectedStart[4];
-    f32 original[4];
+    f32 scaleVector[4] QWORD_ALIGNED;
+    f32 projectedEnd[4] QWORD_ALIGNED;
+    f32 projectedStart[4] QWORD_ALIGNED;
+    f32 original[4] QWORD_ALIGNED;
     f32 dx;
     f32 dy;
     f32 distance;
@@ -194,7 +194,7 @@ void dds3Bezier4PDelete(effBezier4P_t *pEffBezier4P) {
 
 s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
     dds3Bezier4PPart_t *slot = &((dds3Bezier4PPart_t *)table->pPart)[slotIndex];
-    f32 w[4];
+    f32 w[4] QWORD_ALIGNED;
     f32 t = slot->t;
     f32 u = 1.0f - t;
 
@@ -215,7 +215,7 @@ s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
 }
 
 s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out) {
-    f32 w[4];
+    f32 w[4] QWORD_ALIGNED;
     f32 t = slot->t;
     f32 u = 1.0f - t;
 

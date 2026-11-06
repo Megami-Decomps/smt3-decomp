@@ -473,7 +473,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     sdfVector4_t local;
     sdfVector4_t rotation;
     sdfVector4_t direction;
-    f32 nrm[4];
+    f32 nrm[4] QWORD_ALIGNED;
     sdfVector4_t triangle[4];
     sdfVector4_t edge[4];
     sdfVector4_t center;
@@ -953,7 +953,7 @@ extern void ToMatrix(void);
 s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 {
     f32 dir[4] QWORD_ALIGNED;
-    f32 pos[4];
+    f32 pos[4] QWORD_ALIGNED;
     s32 i;
     fldResPut_t *info;
     f32 *target;

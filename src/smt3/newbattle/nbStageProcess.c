@@ -161,7 +161,7 @@ void SetBattleLight(nbMainProcessData_t *data)
 void nbAddStageCamera(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
-    f32 rot[4];
+    f32 rot[4] QWORD_ALIGNED;
     dds3Basic_t *camera;
 
     pos = D_00543628;
@@ -179,7 +179,7 @@ void nbAddStageCamera(nbMainProcessData_t *data)
 void nbAddStageCamera2(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
-    f32 rot[4];
+    f32 rot[4] QWORD_ALIGNED;
     dds3Basic_t *camera;
 
     pos = D_00543648;

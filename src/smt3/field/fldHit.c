@@ -69,9 +69,9 @@ f32 MATH_VectorLength(sdfVector4_t *v)
 }
 
 void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ, f32 *planeConstant) {
-    f32 firstPoint[4];
-    f32 secondPoint[4];
-    f32 thirdPoint[4];
+    f32 firstPoint[4] QWORD_ALIGNED;
+    f32 secondPoint[4] QWORD_ALIGNED;
+    f32 thirdPoint[4] QWORD_ALIGNED;
     f32 inverseLength;
 
     firstPoint[0] = vertices[0];
@@ -821,10 +821,10 @@ extern s32 fldGbChkNpc(s32 fld, s32 area, s32 hojiID);
 
 void fldHitChkUnitElvOnly(f32 *phys_pos) {
     f32 current[4] QWORD_ALIGNED;
-    f32 previous[4];
-    f32 currentSave[4];
-    f32 previousSave[4];
-    f32 travel[4];
+    f32 previous[4] QWORD_ALIGNED;
+    f32 currentSave[4] QWORD_ALIGNED;
+    f32 previousSave[4] QWORD_ALIGNED;
+    f32 travel[4] QWORD_ALIGNED;
     f32 clearance;
     f32 radius;
     f32 distance;
@@ -919,7 +919,7 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
 void fldHitChkUnitElv(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
-    f32 movement[4];
+    f32 movement[4] QWORD_ALIGNED;
     s32 index;
 
     memset(movement, 0, sizeof(movement));
@@ -1102,14 +1102,14 @@ extern void rsetAlpha(s32 mode);
 void fldHitChkUnit(f32 *position)
 {
     f32 current[4] QWORD_ALIGNED;
-    f32 previous[4];
-    f32 projected[4];
+    f32 previous[4] QWORD_ALIGNED;
+    f32 projected[4] QWORD_ALIGNED;
     f32 delta[4] QWORD_ALIGNED;
-    f32 currentSave[4];
-    f32 previousSave[4];
-    f32 travel[4];
-    f32 unused[4];  /* retail leaves 16 bytes unused here, at sp+0x70 */
-    f32 movement[4];
+    f32 currentSave[4] QWORD_ALIGNED;
+    f32 previousSave[4] QWORD_ALIGNED;
+    f32 travel[4] QWORD_ALIGNED;
+    f32 unused[4] QWORD_ALIGNED;  /* retail leaves 16 bytes unused here, at sp+0x70 */
+    f32 movement[4] QWORD_ALIGNED;
     f32 radius;
     f32 distance;
     f32 clearance;
@@ -1464,17 +1464,17 @@ extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 void fldHitChkUnitVWM(f32 *position)
 {
     f32 current[4] QWORD_ALIGNED;
-    f32 previous[4];
-    f32 projected[4];
+    f32 previous[4] QWORD_ALIGNED;
+    f32 projected[4] QWORD_ALIGNED;
     f32 delta[4] QWORD_ALIGNED;
-    f32 currentSave[4];
-    f32 previousSave[4];
-    f32 travel[4];
-    f32 unused[4];  /* retail leaves 16 bytes unused here, at sp+0x70 */
-    f32 movement[4];
-    f32 xs[4];
-    f32 ys[4];
-    f32 zs[4];
+    f32 currentSave[4] QWORD_ALIGNED;
+    f32 previousSave[4] QWORD_ALIGNED;
+    f32 travel[4] QWORD_ALIGNED;
+    f32 unused[4] QWORD_ALIGNED;  /* retail leaves 16 bytes unused here, at sp+0x70 */
+    f32 movement[4] QWORD_ALIGNED;
+    f32 xs[4] QWORD_ALIGNED;
+    f32 ys[4] QWORD_ALIGNED;
+    f32 zs[4] QWORD_ALIGNED;
     f32 radius;
     f32 distance;
     f32 clearance;
@@ -1988,12 +1988,12 @@ extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type
 /* Adapted from Megami-Decomps/dds-decomp, fldFileResolver.c at f79f86dc.
  * SMT3 inlines the kind-6 alpha reset instead of calling the DDS world helper. */
 s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
-    f32 origin[4];
-    f32 target[4];
-    f32 delta[4];
+    f32 origin[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
+    f32 delta[4] QWORD_ALIGNED;
     f32 probeStart[4] QWORD_ALIGNED;
     f32 probeEnd[4] QWORD_ALIGNED;
-    f32 anchor[4];
+    f32 anchor[4] QWORD_ALIGNED;
     dds3PoseSet_t *transform;
     dds3Basic_t *secondary;
     f32 startDistance;
@@ -2122,12 +2122,12 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
 /* Adapted from Megami-Decomps/dds-decomp, fldFileResolver.c at f79f86dc.
  * SMT3 uses the 0xE01 surface mask and 70-unit clearance, without DDS tags. */
 s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
-    f32 origin[4];
-    f32 target[4];
-    f32 delta[4];
+    f32 origin[4] QWORD_ALIGNED;
+    f32 target[4] QWORD_ALIGNED;
+    f32 delta[4] QWORD_ALIGNED;
     f32 probeStart[4] QWORD_ALIGNED;
     f32 probeEnd[4] QWORD_ALIGNED;
-    f32 anchor[4];
+    f32 anchor[4] QWORD_ALIGNED;
     dds3PoseSet_t *transform;
     f32 startDistance;
     f32 endDistance;

@@ -1076,8 +1076,8 @@ void effPCPFlashPolySphere2PartSetVertex(effPCPFlashPolySphere2_tag *work, s32 i
 {
     effPCPFlashPolySphere2Part_tag *part = &work->pPart[index];
     f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->hPoly, index);
-    f32 base[4];
-    f32 size[4];
+    f32 base[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
     f32 step;
     f32 angle;
     f32 radius;
@@ -1114,7 +1114,7 @@ void effPCPFlashPolySphere2PartSetVertex(effPCPFlashPolySphere2_tag *work, s32 i
 }
 
 void effPCPFlashPolySphere2Draw(effPCPFlashPolySphere2_tag *hData) {
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     s32 particleIndex;
     s32 lifetime;
     s32 particleCount;
@@ -1270,7 +1270,7 @@ void effPCPFlashPolySpherePartSetVC(effPCPFlashPolySphere_tag *work, s32 index, 
 
 void effPCPFlashPolySpherePartInit(effPCPFlashPolySphere_tag *pFlashPoly, s32 number, void *pLook) {
     effPCPFlashPolySpherePart_tag *part = pFlashPoly->pPart + number;
-    f32 direction[4];
+    f32 direction[4] QWORD_ALIGNED;
     f32 factor;
     f32 scale;
 
@@ -1301,10 +1301,10 @@ void effPCPFlashPolySpherePartSetVertex(effPCPFlashPolySphere_tag *work, s32 ind
 {
     effPCPFlashPolySpherePart_tag *part = &work->pPart[index];
     f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->hPoly, index);
-    f32 center[4];
-    f32 scale[4];
-    f32 across[4];
-    f32 up[4];
+    f32 center[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
+    f32 across[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
     f32 ratio;
     f32 size;
     f32 acrossLen;
@@ -1357,7 +1357,7 @@ void effPCPFlashPolySpherePartSetVertex(effPCPFlashPolySphere_tag *work, s32 ind
 void effPCPFlashPolySpherePartRotate(effPCPFlashPolySphere_tag *pFlashPoly, s32 number, void *pLook)
 {
     effPCPFlashPolySpherePart_tag *part = &pFlashPoly->pPart[number];
-    f32 position[4];
+    f32 position[4] QWORD_ALIGNED;
 
     position[0] = part->position[0];
     position[1] = part->position[1];
@@ -1541,11 +1541,11 @@ void effPCPFlashPolyRingPartSetVertex(effPCPFlashPolyRing_tag *work, s32 index)
 {
     effPCPFlashPolyRingExp2Part_tag *part = &work->parts[index];
     f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->hPoly, index);
-    f32 offset[4];
-    f32 unit[4];
-    f32 scaleA[4];
-    f32 scaleB[4];
-    f32 scaleC[4];
+    f32 offset[4] QWORD_ALIGNED;
+    f32 unit[4] QWORD_ALIGNED;
+    f32 scaleA[4] QWORD_ALIGNED;
+    f32 scaleB[4] QWORD_ALIGNED;
+    f32 scaleC[4] QWORD_ALIGNED;
     f32 size;
     f32 ratio;
     f32 sinv;
@@ -1780,12 +1780,12 @@ void effPCPFlashPolyPipePartSetVertex(effPCPFlashPolyPipe_tag *work, s32 index)
 {
     effPCPFlashPolyPipePart_tag *part = &work->parts[index];
     f32 *quad = dds3FlashPolyList3GetVertex(work->hPoly, index * 2);
-    f32 offset[4];
-    f32 unit[4];
-    f32 middle[4];
-    f32 outer[4];
-    f32 inner[4];
-    f32 size[4];
+    f32 offset[4] QWORD_ALIGNED;
+    f32 unit[4] QWORD_ALIGNED;
+    f32 middle[4] QWORD_ALIGNED;
+    f32 outer[4] QWORD_ALIGNED;
+    f32 inner[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
     f32 center;
     f32 outerEdge;
     f32 innerEdge;
@@ -2032,11 +2032,11 @@ void effPCPFlashPolyRingExpPartSetVertex(effPCPFlashPolyRingExp_tag *work, s32 i
 {
     effPCPFlashPolyRingExpPart_tag *part = &work->pPart[index];
     f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->hPoly, index);
-    f32 offset[4];
-    f32 unit[4];
-    f32 scaleA[4];
-    f32 scaleB[4];
-    f32 scaleC[4];
+    f32 offset[4] QWORD_ALIGNED;
+    f32 unit[4] QWORD_ALIGNED;
+    f32 scaleA[4] QWORD_ALIGNED;
+    f32 scaleB[4] QWORD_ALIGNED;
+    f32 scaleC[4] QWORD_ALIGNED;
     f32 sinv;
     f32 height;
 
@@ -2301,10 +2301,10 @@ void effPCPFlashPolySphereExpPartSetVertex(effPCPFlashPolySphereExp_tag *work, s
 {
     effPCPFlashPolySphereExpPart_tag *part = &work->parts[index];
     f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->hPoly, index);
-    f32 base[4];
-    f32 scale[4];
-    f32 across[4];
-    f32 up[4];
+    f32 base[4] QWORD_ALIGNED;
+    f32 scale[4] QWORD_ALIGNED;
+    f32 across[4] QWORD_ALIGNED;
+    f32 up[4] QWORD_ALIGNED;
     f32 ratio;
     f32 size;
     f32 acrossLen;
@@ -2527,8 +2527,8 @@ void effPCPFlashPolySphere2ExpPartSetVertex(effPCPFlashPolySphere2Exp_tag *work,
 {
     effPCPFlashPolyRingExpPart_tag *part = &work->parts[index];
     f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->hPoly, index);
-    f32 base[4];
-    f32 size[4];
+    f32 base[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
     f32 step;
     f32 angle;
     f32 radius;
@@ -2742,12 +2742,12 @@ void effPCPFlashPolySphere3PartSetVertex(effPCPFlashPolySphere3_tag *work, s32 i
 {
     effPCPFlashPolySphere3Part_tag *part = &work->parts[index];
     f32 *quad = (f32 *)dds3FlashPolyList3GetVertex(work->hPoly, index * 2);
-    f32 base[4];
-    f32 size[4];
-    f32 spare[4];
-    f32 middle[4];
-    f32 outer[4];
-    f32 inner[4];
+    f32 base[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
+    f32 spare[4] QWORD_ALIGNED;
+    f32 middle[4] QWORD_ALIGNED;
+    f32 outer[4] QWORD_ALIGNED;
+    f32 inner[4] QWORD_ALIGNED;
     f32 center;
     f32 outerEdge;
     f32 innerEdge;
@@ -2996,11 +2996,11 @@ void effPCPFlashPolyRingExp2PartSetVertex(effPCPFlashPolyRingExp2_tag *work, s32
 {
     effPCPFlashPolyRingExp2Part_tag *part = &work->pPart[index];
     f32 *quad = (f32 *)dds3FlashPolyListGetVertex(work->hPoly, index);
-    f32 offset[4];
-    f32 unit[4];
-    f32 scaleA[4];
-    f32 scaleB[4];
-    f32 scaleC[4];
+    f32 offset[4] QWORD_ALIGNED;
+    f32 unit[4] QWORD_ALIGNED;
+    f32 scaleA[4] QWORD_ALIGNED;
+    f32 scaleB[4] QWORD_ALIGNED;
+    f32 scaleC[4] QWORD_ALIGNED;
     f32 size;
     f32 ratio;
     f32 sinv;
@@ -3223,8 +3223,8 @@ void effPCPFlashPolyCirclePartSetVertex(effPCPFlashPolyCircle_tag *work, s32 ind
 {
     effPCPFlashPolyRingExpPart_tag *part = &work->parts[index];
     f32 *quad = (f32 *)dds3FlashPolyList2GetVertex(work->hPoly, index);
-    f32 base[4];
-    f32 size[4];
+    f32 base[4] QWORD_ALIGNED;
+    f32 size[4] QWORD_ALIGNED;
     f32 step;
     f32 angle;
     f32 radius;
@@ -3261,7 +3261,7 @@ void effPCPFlashPolyCirclePartSetVertex(effPCPFlashPolyCircle_tag *work, s32 ind
 }
 
 void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
-    f32 axis[4];
+    f32 axis[4] QWORD_ALIGNED;
     s32 restart;
     s32 tintColor;
     s32 index;
@@ -3446,11 +3446,11 @@ void effPCPFlashPolyRingExpHPartSetVC(effPCPFlashPolyRingExpH_tag *work, s32 ind
 void effPCPFlashPolyRingExpHPartSetVertex(effPCPFlashPolyRingExpH_tag *work, s32 index) {
     effPCPFlashPolyRingExpHPart_tag *part = &work->pPart[index];
     f32 *positions = (f32 *)dds3FlashPolyListHGetVertex(work->hPoly, index);
-    f32 orbitOffset[4];
-    f32 radialDirection[4];
-    f32 axisOffset[4];
-    f32 sideOffsetA[4];
-    f32 sideOffsetB[4];
+    f32 orbitOffset[4] QWORD_ALIGNED;
+    f32 radialDirection[4] QWORD_ALIGNED;
+    f32 axisOffset[4] QWORD_ALIGNED;
+    f32 sideOffsetA[4] QWORD_ALIGNED;
+    f32 sideOffsetB[4] QWORD_ALIGNED;
     f32 sine;
     f32 basisFactor;
 
