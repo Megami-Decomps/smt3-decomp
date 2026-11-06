@@ -48,26 +48,42 @@ without a new concrete source or compiler premise.
 
 ## cmbChkDevilEvo (rstcalc, 0x74)
 
-25 of 29 words match, at the exact size. Walks the same 24 level-up records as
-`rstFindEvoEntryType5`, and on the first record of kind 5 returns that
-record's devil's `datDevilTable` entry byte at +5.
+29 of 29 words match at 116 bytes in ordinary C. The complete owner is
+92 match, 0 differ. The scan returns the signed level byte of the devil
+named by the first kind-5 entry, or -1 when none occurs. It does not read or
+compare the unit's level or the entry's level, and it does not return the
+entry index as the type-five/type-seven eligibility scans do.
 
-The four differing words are the historical `* 0x66` register exchange now
-resolved for `rstFindEvoEntryType5` below, plus one scheduling slot. The new
-factorization has not been applied or qualified for this sibling:
-retail emits the first `sll` before the hoisted `addiu $7, $2,
-%lo(datDevilTable)` and this emits it after.
+Two independent source properties close the current draft's seven words:
 
-Settled on the way: the `+5` has to come off a pointer local,
-`info = &datDevilTable[id]; info->unk_05`. Written as
-`datDevilTable[id].unk_05` gcc hoists `datDevilTable + 5` out of the loop and
-loads at `0(reg)`, where retail hoists the bare symbol and loads at `5(reg)`.
-That was one of the five differing words.
+- Index the actual row's `entry[24]` member. The original advancing entry
+  pointer gives 22/29; a factored row offset with the same pointer walk gives
+  26/29. Row indexing preserves the native table-plus-eight anchor, with
+  `lbu -1` for kind and `lhu 0` for value. Indexing an extracted entry pointer
+  alone still gives 22/29; the containing record matters.
+- Factor the genuine 102-byte stride into `idTripled = (u32)unit->id * 3`
+  and `offset = idTripled * (sizeof(datLevelUpRecord_t) / 3)`, as in the
+  matched evolution scans. A single multiply or direct typed row address
+  gives 25/29. The factorization supplies the first intermediate in `$3`
+  and the shifted/final offset in `$2`, and also restores the first `sll`
+  before the hoisted devil-table `addiu`.
 
-Ruled out for the register exchange: `(u8 *)datLevelUpTable + id * 0x66 + 8`
-against `&datLevelUpTable[id * 0x66 + 8]`, a `u16` local for the id, and
-declaring the `datDevilInfo_t *` at function scope instead of inside the
-`if`. All three give the same four words.
+Qualified full-owner stock RTL establishes the expansion difference:
+`00.rtl` retains the first product as a source scalar and puts the shifted
+term first in the following sum. The single multiply puts the three-times-ID
+term first. This is compiler reconstruction evidence, not a claim about
+historical spelling or an instrumented scheduler comparator. Both traces
+match ordinary full assembly and the entire object; fifteen production,
+SKIP_ASM and retained-draft plain/dump pairs also pass. All 104/91/104 peers
+and owned data are unchanged after resolving expected local-call relocations.
+
+The actual table has 224 rows of 102 bytes, each with six header bytes and
+24 four-byte entries. The selected entry's unsigned halfword indexes the
+384-entry, 60-byte devil table; its byte at +5 is returned as signed eight-bit.
+Both unsigned products fit for every u16 ID; valid row and devil indexes
+remain inherited input requirements. No guard, call, write, constraint,
+helper, type or flag is added. The full-owner byte view is converted back to
+the real row type before its members are accessed.
 
 ## datFindKugatatiEntry (rstcalc, 0x74)
 

@@ -1909,26 +1909,24 @@ s32 rstFindEvoEntryType5(datUnitWork_t *unit)
     return -1;
 }
 
-/* NON_MATCHING: 4 of 29 words differ (first at +0x10). */
-#ifdef NON_MATCHING
 s32 cmbChkDevilEvo(datUnitWork_t *unit)
 {
-    fclSkillParam_t *entry = datLevelUpTable[unit->id].entry;
+    /* Factor the actual 102-byte row stride as in the matched evolution
+     * scans, preserving separate multiply intermediates for the native compiler. */
+    u32 idTripled = (u32)unit->id * 3;
+    u32 offset = idTripled * (sizeof(datLevelUpRecord_t) / 3);
+    datLevelUpRecord_t *row = (datLevelUpRecord_t *)((u8 *)&datLevelUpTable + offset);
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (entry->kind == 5) {
-            datDevilTableEntry_t *info = &datDevilTable[entry->value];
+        if (row->entry[i].kind == 5) {
+            datDevilTableEntry_t *info = &datDevilTable[row->entry[i].value];
 
             return (s8)info->level;
         }
-        entry++;
     }
     return -1;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbChkDevilEvo);
-#endif
 
 #ifdef NON_MATCHING
 s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
