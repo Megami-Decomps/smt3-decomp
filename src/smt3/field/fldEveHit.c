@@ -460,7 +460,7 @@ u32 fldEveHit_AddEveData(fldEventDataHeader_t *pEve, dds3Basic_t *pBasic) {
 
 /* NON_MATCHING: 1408 of 1559 words differ (first at +0x30). */
 #ifdef NON_MATCHING
-extern const sdfVector4_t D_00531E08;
+extern const sdfVector4Unaligned_t D_00531E08;
 extern f32 D_0054C474;
 extern void LoadIdentity(void);
 extern void ToMatrix(void);

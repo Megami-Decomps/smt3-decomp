@@ -313,7 +313,7 @@ void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
 }
 
 
-extern sdfVector4_t D_00327248;
+extern sdfVector4Unaligned_t D_00327248;
 extern const f64 D_00535C80[];
 extern f32 D_0054E2AC, D_0054E2B0, D_0054E2B4, D_0054E2B8;
 extern void pbSetPrimMatrix(sdfVector4_t *rotation, f32 *position, void *packet);
