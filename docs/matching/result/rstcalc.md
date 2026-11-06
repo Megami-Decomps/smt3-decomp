@@ -2,49 +2,47 @@
 
 ## cmpFindKugatatiMsgEntry (rstcalc, 0x60)
 
-14 of 24 words differ in the current complete-owner check, at the exact
-96-byte native size (0x002231F8 through 0x00223258). The earlier 12/24 figure
-was historical, not a newly measured current score. The function scans a
-unit's 24 level-up entries for kind 5 and returns the signed level byte,
-or -1. The current typed-index draft uses an advancing entry address after
-optimization; the earlier one-record-biased walk describes a historical form.
+24 of 24 words match at 96 bytes in ordinary C. The scan returns the signed
+level byte of the first kind-five entry among the unit's 24 level-up entries,
+or -1. It does not compare the unit level, read the value halfword or write
+memory. The existing signed-return consumer and ABI are unchanged.
 
-Retail loads the ID into `$5` and uses `$4` for the loop index. The current
-baseline instead loads the ID into `$2` and assigns the index to `$5`.
-A qualified historical allocation trace distinguishes actual coalescing from
-independent register reuse: address-arithmetic pseudos 90/91/93/94 combine
-into one local quantity assigned `$3`; ID pseudo88 independently receives
-`$2`, and intermediate92 independently receives `$4`. Loop index96 is not
-locally allocated and receives `$5` in global allocation. This does not
-establish parameter/index or ID/index coalescing.
+Two genuine source properties close the old 10/24-word draft. Indexing the
+actual row's entry member gives 12/24, retaining the native bare-table anchor
+and +7/+6 field displacements. Factoring the real 102-byte stride into unsigned
+ID times three and then sizeof(row)/three gives 21/24 with an extracted entry
+pointer. Combining both properties gives the exact native allocation and
+addressing. No constraint, binding, helper, declaration or compiler flag changes.
 
-That exact historical case verified 279 events, 34 exercised guarded hooks,
-28 equal baseline/observed artifacts and 5,565 stable inputs, with pass and
-completion gates plus owned listener/process cleanup. After the subsequent
-shared-header changes, a fresh current-context baseline has the same complete
-allocated sections, non-file symbols, ordered relocations and assembly apart
-from randomized file metadata. Input hashes have changed: this output identity
-does not turn the historical live observation into a freshly traced case.
+The row has six header bytes and 24 four-byte entries; the actual table has
+224 rows. The complete-array byte view converts the selected address back to
+the true row type. Both unsigned products fit for every u16 ID. Valid row IDs
+remain inherited input requirements. Signed level conversion, scan order and
+failure return are preserved, including negative signed-byte values.
 
-One bounded current-context control binds the initialized real signed loop
-index to `$4`. The function has no calls, and the index is used only by its
-actual bounded loop. It remains 96 bytes but worsens to 20/24 differing words:
-the ID does not move to native `$5`, the address intermediate moves there,
-and the compiler replaces the advancing pointer with scaled-index address
-recomputation. The candidate is rejected. Only this target's text changes;
-all 88 exact C peers and allocated data remain unchanged. Both controls have
-complete ordinary/plain/dump parity and independently stable 5,565-input maps.
+Qualified full-owner stock expansion records the factored product in a source
+scalar and puts the shifted term before it in the next sum; the single product
+puts the three-times-ID term first. This establishes reconstruction evidence,
+not original source spelling or an instrumented allocation claim. Fifteen
+full-assembly/literal-object plain-dump pairs cover five controls in three
+contexts using fixed same-length scratch paths; an unmodified wrapper also
+agrees after normalizing only its random file metadata. Complete owner checks
+94 match, 0 differ. All 104/93/104 peers and owned data are unchanged after
+resolving local code relocations. Strict production and SKIP_ASM retain the
+pre-existing rstSetSkillActFlag declaration gap; retained-draft strict passes.
 
-Strict implicit-declaration checks pass in NON_MATCHING and combined
-NON_MATCHING/SKIP_ASM contexts for both forms. Production fails identically
-on inherited undeclared rstSetSkillActFlag, datGetPlayerLNDList and
-cmpGetEncycWork; this is not a new control regression or a three-context pass.
-No declaration repair or source change is retained by this investigation.
+Independent semantic and exact-byte review reproduced all three contexts and
+six complete output pairs, then audited the full fifteen-pair qualification
+and its 687-file relevant compiler/runtime input closure. Full retail checksum,
+generated-source checks, 568 local and 504 public tooling cases, retained EE
+and IRX compilations, and reconciled reports pass. Linked production evidence
+proves one unique 96-byte C-owned span, adding one function and 96 game bytes.
+The optional external dvp-as comparison is skipped because that executable is
+unavailable; native VU reconstruction and the full retail checksum pass.
 
-Historical negatives remain closed: ID type/declaration order, commuted
-multiply-by-102, byte-address and one-record-biased walks, indexed forms, and
-typed-table alias controls. Do not repeat register/placement permutations
-without a new concrete source or compiler premise.
+Historical standalone ID-type, declaration-order, byte-walk and index-binding
+controls are superseded by this paired ordinary source evidence, not reopened
+as independent register permutations.
 
 ## cmbChkDevilEvo (rstcalc, 0x74)
 

@@ -1923,23 +1923,21 @@ s32 cmbChkDevilEvo(datUnitWork_t *unit)
     return -1;
 }
 
-#ifdef NON_MATCHING
 s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
 {
-    datLevelUpRecord_t *table = datLevelUpTable;
-    fclSkillParam_t *entry = table[unit->id].entry;
+    u32 idTripled = (u32)unit->id * 3;
+    u32 offset = idTripled * (sizeof(datLevelUpRecord_t) / 3);
+    datLevelUpRecord_t *row = (datLevelUpRecord_t *)((u8 *)&datLevelUpTable + offset);
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (entry[i].kind == 5) {
-            return (s8)entry[i].level;
+        if (row->entry[i].kind == 5) {
+            return (s8)row->entry[i].level;
         }
     }
     return -1;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmpFindKugatatiMsgEntry);
-#endif
+
 
 extern s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count);
 
