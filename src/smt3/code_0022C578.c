@@ -8281,18 +8281,18 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemBox);
 extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                               s32 mode, s32 alpha);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+/* Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * menu main savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
                          cmpCursorInfo_t *cursor, s32 mode, s32 alpha, s32 ot)
 {
     frFontHandle_t *font = NULL;
-    s32 boxMode = mode == 2 ? 2 : 0;
+    s32 boxMode = 0;
     s32 row = 0;
     s32 i;
 
+    if (mode == 2) boxMode = 2;
     cmpSetSkillListRows(0x12);
     for (i = 0; i < cursor->unk_20; i++) {
         u32 color = cmpDrawListItemBox(cursor, i, row, boxMode, alpha);
@@ -8308,9 +8308,6 @@ void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
     frDestroyFontRequestAfter(font);
     cmpSetSkillListRows(-1);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemText);
-#endif
 
 #ifdef NON_MATCHING
 void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight, s8 rowCount,
