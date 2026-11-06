@@ -174,7 +174,7 @@ fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
 fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Npc.md	35
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/fld_Npc.md	80
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
-fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	135
+fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	170
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
 frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	79
 frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	131

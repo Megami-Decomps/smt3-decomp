@@ -83,9 +83,9 @@ extern void dds3DeleteUnitObjectBasic(dds3Basic_t *aPtr);
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
 
-extern void dds3EffectReset(void *hEffect);
+extern void dds3EffectReset(struct effNode_t *hEffect);
 
-extern void dds3EffectSetPosition(void *pData, const sdfVector4_t *pPos);
+extern void dds3EffectSetPosition(struct effNode_t *pData, sdfVector4_t *pPos);
 
 extern void *fldTDmgEffect;
 
@@ -206,7 +206,7 @@ extern const sdfVector4_t fldNpcModelStartAxis;
 
 extern void *fldBlurEffectId[];
 
-extern void dds3EffectSetLoop(void *hEffect, u8 loop);
+extern void dds3EffectSetLoop(struct effNode_t *hEffect, u8 loop);
 
 extern u32 fldNpcBlurHandle;
 

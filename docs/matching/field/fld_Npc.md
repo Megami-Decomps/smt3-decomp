@@ -132,6 +132,41 @@ Ruled out: `position.w` assigned first, last, and between the coordinates;
 (which goes back to `$gp` and 31 words); and a `void **p = fldBlurEffectId`
 local feeding the three calls.
 
+
+### Effect-provider contracts and fresh splash observation (2026-11-06)
+
+The field owner's declarations for `dds3EffectReset`, `dds3EffectSetPosition`
+and `dds3EffectSetLoop` now agree with their canonical `effManager.c`
+providers: the handle is `struct effNode_t *`, and SetPosition's vector
+parameter is `sdfVector4_t *`. The existing incomplete node declaration is
+reused. All passed vectors are mutable local objects. This changes no body,
+handle storage, dereference, callback, access width, call order or provider.
+It removes a cross-unit function-type disagreement, not a claim that every
+position callback writes its argument.
+
+Independent native review confirms the node type/instance loads and callback
+slots. The three declarations are literally byte-neutral for complete
+assembly and entire ELF objects in production, `SKIP_ASM`, and retained-draft
+contexts, both with and without activating the splash diagnostic. All twelve
+source/context qualifications and twelve strict builds preserve full outputs.
+The complete guarded owner remains 17 match, 0 differ. No new matching credit
+is claimed, and `fldSibukiStart` remains guarded at 28 of 38 matching words.
+
+A fresh qualified actual-compiler observation separates the splash residuals.
+After reload, the s0 save has priority 13, ahead of the memset destination
+and zero arguments at 12; its address-formation dependency then starts early.
+The effect-handle load has priority 11 versus the vector stores' 9. Among
+stores with equal priority and weight, dependent-count comparisons prefer
+coordinate stores over the w store, leaving w for the Reset delay slot rather
+than native z. This is not a source-assignment-order tie.
+
+The observation preserves all 28 complete artifacts, including full assembly,
+ELF and stock dumps, with opcode, target-entry, completion and owned-process
+cleanup checks. Its conservative frozen inputs and matching runtime route
+were independently audited. It supplies no new genuine source dependency
+that closes these scheduling gaps. Earlier assignment-order, volatile-handle,
+fixed-array-bound and pointer-local probes remain closed controls.
+
 ## fldNpcDraw (field/fld_Npc, 0x8DC)
 
 145 of 561 words match, six words short of the native 2268 bytes. The whole
