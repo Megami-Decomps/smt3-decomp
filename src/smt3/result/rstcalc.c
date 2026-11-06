@@ -1529,24 +1529,23 @@ void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 
 
-#ifdef NON_MATCHING
 void cmb_222828(u16 devilId, u8 level, datUnitWork_t *unit)
 {
-    datLevelUpRecord_t *table = datLevelUpTable;
-    fclSkillParam_t *entry;
+    datLevelUpRecord_t *row;
     s32 i;
+    u32 idTripled;
+    u32 offset;
 
     cmbClearUnitSkills(unit);
-    entry = table[devilId].entry;
+    idTripled = (u32)devilId * 3;
+    offset = idTripled * (sizeof(datLevelUpRecord_t) / 3);
+    row = (datLevelUpRecord_t *)((u8 *)&datLevelUpTable + offset);
     for (i = 0; i < 24; i++) {
-        if (entry[i].kind == 1 && entry[i].level <= level) {
-            unit->skill[unit->skillcnt++] = entry[i].value;
+        if (row->entry[i].kind == 1 && row->entry[i].level <= level) {
+            unit->skill[unit->skillcnt++] = row->entry[i].value;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmb_222828);
-#endif
 
 s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count)
 {

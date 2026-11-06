@@ -357,6 +357,7 @@ cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/r
 cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	454
 func_00222610	rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	530
 rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/rstcalc.md	572
+cmb_222828	result/rstcalc	0xB0	44 of 44 words match	docs/matching/result/rstcalc.md	622
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

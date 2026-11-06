@@ -618,3 +618,58 @@ addends; independent review verifies all 25 resolved destinations. The productio
 only raw relocation differences resolve to the same global-work word and
 table-plus-58 address. Strict production/SKIP builds retain the pre-existing
 `rstSetSkillActFlag` declaration gap; strict retained drafts pass.
+
+## cmb_222828 (result/rstcalc, 0xB0)
+
+44 of 44 words match at 176 bytes. The newly matched
+`cmbInitStockUnit` supplies the bounded sibling evidence: retain the actual
+`datLevelUpRecord_t` row for member access and compute its unsigned byte offset
+as the real ID multiplied by three, then by `sizeof(datLevelUpRecord_t) / 3`.
+The offset starts at the complete `datLevelUpTable` array and is converted
+back to its actual row type. No constraint, binding, opcode spelling, helper,
+ABI, declaration, layout or compiler flag is added.
+
+Two ablations isolate this transfer. The former extracted-entry-pointer body
+emits 188 bytes and differs. Actual row access with a single whole-row index
+emits 176 bytes with only three multiply words different, at +0x28, +0x2c and
++0x34. Qualified stock `00.rtl` expansion of the factored source assigns the
+first product to pseudo93 at UID41 and puts shifted99 before that product in
+UID48's sum. The direct-row control puts product95 before shifted96 in UID43.
+This is a source/expansion observation, not a hooked allocator-mechanism claim
+or evidence of original source spelling.
+
+Both unsigned products fit for every u16 ID and equal ID times 102. The
+inherited valid-row domain remains the 224-row retail table; no new bounds or
+alias promises are introduced. `cmbClearUnitSkills` retains its actual void
+provider ABI and runs first. The scan visits all 24 entries in ascending
+order and appends exactly kind-one entries whose unsigned byte level is at
+most the supplied u8 threshold. Native byte/halfword loads, count update,
+value load, skill store and their ordering match. The unchanged provider
+clears the first twelve skill slots and resets the halfword count, so at most
+24 appends fit the 24-slot array. A bounded model covers all 65,536 stride
+inputs and 10,000 randomized ordered level-threshold scans; it is not a
+whole-game or arbitrary-overlap execution proof.
+
+Private and public complete-owner checkers pass 97 match, 0 differ. All 104
+production, 96 SKIP_ASM and 104 retained peers, owned data/layout and resolved
+relocation contracts are preserved. Twelve complete plain/dump assembly and
+whole-ELF pairs cover baseline, extracted-entry control, direct-row control
+and factored source in all three modes. All 683 collected source/compiler/
+runtime inputs remain stable, including QEMU and the actual second loader.
+Only the equal-length randomized source path in `.file` and its single ELF
+string occurrence is normalized; no code, data, symbol or relocation is
+masked.
+
+Strict production and SKIP_ASM still fail on the inherited
+`rstSetSkillActFlag` declaration gap; strict retained compilation passes.
+No diagnostic is hidden. Independent review and integrated retail/build/
+regression/report checks remain separate publication gates.
+
+Independent semantic and complete-artifact review passes. Integrated verification
+again passes the generated-source stale-line control, full retail checksum and
+literal image comparison, 569 local and 505 public tooling cases, retained
+EE/FIX_BUGS and seven IRX owners, inline-asm/compiler-wrapper checks, reconciled
+reports and a no-op rebuild. Each tooling suite skips only its optional external
+dvp-as comparison; native VU and retail checks pass. The linked 176-byte span
+is uniquely C-owned and exact. Both reports gain one function and 176 bytes,
+with data totals unchanged. Existing declaration debt is unchanged.
