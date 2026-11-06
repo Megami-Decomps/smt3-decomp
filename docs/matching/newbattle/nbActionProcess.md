@@ -290,3 +290,62 @@ Strict production and SKIP_ASM checks retain the same two inherited
 implicit-declaration errors; retained-C strict checks pass. Independent
 semantic, owner, parity and pass-output review passes. Integrated retail
 and regression checks remain separate publication gates.
+
+
+## CheckKoketaNego (newbattle/nbActionProcess, 0x1CC)
+
+115 of 115 words match at 460 bytes in ordinary C. Express the two entry
+rejections as separate returns, initialize the candidate count only after
+those guards, test the two formation bits separately, and dispatch the six
+excluded statuses with a sparse switch. The party flags use one real u16
+snapshot. Form the party address from its actual signed slot offset plus
+the actual array base through the existing EE address macros, as the matched
+CheckBinjoNego sibling does. No constraint, type, declaration, qualifier,
+layout, provider or compiler-flag change is needed.
+
+Each meaningful reversal loses exactness. Combining the entry guards gives
+408 bytes with 4 matching words; moving count initialization back above them
+gives 94 of 115 words matching. Combining the formation bits gives 452 bytes with 25
+matching words. The flat status inequality chain gives 420 bytes with 46
+matching words. Direct typed party indexing preserves the native size but
+changes six words at +0xA0..+0xB4. A redundant u16 mask conversion and its
+intermediate local are unnecessary and were removed from the final source.
+
+Qualified stock loop-pass outputs show the combined-entry control's loop
+ignored for multiple entry points. The separate-guard form has a recognized
+60-instruction loop, moves the status constants and strength-reduces the
+actual 240-byte formation stride into a 960-initialized induction value.
+The second loop pass recognizes that induction value and moves the remaining
+constants. These are observed compiler pass outputs with complete-output
+parity, not a hooked allocator claim or historical-source assertion.
+
+The scan still covers formation slots 4 through 13. It rejects absent or
+nonparticipating formations, absent parties and flag 0x20, then preserves
+unit lookup before the time-list death check. The captured formation pointer
+survives those calls; its party index is read again only for an accepted
+entry. The masked unsigned-halfword status excludes exactly 1, 2, 4, 16,
+256 and 1024. At most ten entries are stored in the existing 32-byte array.
+Each entry retains its native low byte, then sign-extends when passed to
+nbPushAction. Empty lists return zero without RNG or action calls; otherwise
+the real modulo RNG selects an initialized entry, followed by the action,
+diagnostic string and return one.
+
+Valid underlying formation, party and returned-unit objects remain inherited
+preconditions. The EE32 address form preserves native arithmetic; it does not
+make corrupt signed indices safe or prove arbitrary wide-host pointer behavior.
+No callback-sensitive read is cached across a call. The current RNG provider
+changes only its selected four-word state, and a positive count prevents a
+zero divisor and bounds its result.
+
+Complete owner: 91 match, 0 differ. Production allocated code and noncode are
+identical to the guarded baseline. All 95 production, 90 SKIP_ASM and 95
+retained-C peers preserve instructions and resolved relocation targets. The
+SKIP_ASM promotion adds only the target's diagnostic string at rodata +0x78,
+replacing eight alignment bytes with the 18-byte terminated string and six
+alignment bytes; every later rodata target shifts by 16. The complete data
+and relocation mapping is verified, rather than ignored. Retained-C and
+production owned data remain identical. Strict production/SKIP_ASM retain the
+two inherited setter declaration errors; retained-C strict checks pass.
+Complete final plain/dump assembly and entire-ELF parity pass in all three
+contexts, repeated with a 305-input source/tool/runtime closure. Integrated
+retail and regression checks remain separate publication gates.
