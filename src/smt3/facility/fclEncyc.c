@@ -759,17 +759,17 @@ extern void ReleaseFontList(frFontHandle_t **ppfont, s32 num);
 
 void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
-    u8 *base = pinst->pwork;
+    fclEncycRegistAllWork_t *work = pinst->pwork;
 
-    if (*(void **)(base + 0x11DC) != NULL)
+    if (work->request != NULL)
     {
-        frDestroyFontRequestAfter(*(void **)(base + 0x11DC));
-        *(void **)(base + 0x11DC) = NULL;
+        frDestroyFontRequestAfter(work->request);
+        work->request = NULL;
     }
-    ReleaseFontList((frFontHandle_t **)(base + 0x11E0), 7);
-    if (*(s32 *)(base + 0x11FC) != 0)
+    ReleaseFontList(work->fonts, 7);
+    if (work->process != 0)
     {
-        dds3KillProcess(*(s32 *)(base + 0x11FC), 0);
+        dds3KillProcess(work->process, 0);
     }
     ReleaseWork(pinst);
 }

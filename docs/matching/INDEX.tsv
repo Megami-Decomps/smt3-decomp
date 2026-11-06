@@ -109,6 +109,7 @@ cmbDrawBirthDevil	facility/fclCombineInit	0x274	157 of 157 words match	docs/matc
 cmbUpdateRoot	facility/fclCombineInit	0x1F4	125 of 125 words match	docs/matching/facility/fclCombineInit.md	357
 func_00201FB0	facility/fclCombineInit	0x94	37 of 37 words match	docs/matching/facility/fclCombineInit.md	396
 cmbUpdateCameraPos	facility/fclCombineInit	0x14C	83 of 83 words match	docs/matching/facility/fclCombineInit.md	421
+DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
 DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	72
