@@ -248,9 +248,6 @@ s32 ragGetHeartsFlag(s8 index)
 }
 extern s32 ragGetHeartsFlag(s8 index);
 
-/* NON_MATCHING: 22 of 29 words match, 116 bytes against retail's 128; retail
- * restores $16 twice, once in a `b`'s delay slot, and merges only the `jr`. */
-#ifdef NON_MATCHING
 u16 ragCheckHeartsChoice(s8 index)
 {
     s32 flag = ragGetHeartsFlag(index);
@@ -261,13 +258,11 @@ u16 ragCheckHeartsChoice(s8 index)
                 return ragUpdateWork->previewUnit.id;
             }
         }
-        return 0;
+    } else {
+        return *(u16 *)(ragHeartsTable + flag * 14);
     }
-    return *(u16 *)(ragHeartsTable + flag * 14);
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragCheckHeartsChoice);
-#endif
 
 extern void ragCreateAllList(s32 type, s32 count, void *work);
 

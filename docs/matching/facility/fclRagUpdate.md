@@ -2,28 +2,32 @@
 
 ## ragCheckHeartsChoice (fclRagUpdate, 0x80)
 
-22 of 29 words match, 116 emitted bytes against retail's 128. Returns a hearts
-choice: a table entry for index 1, the rag work's `+0x54` halfword for 2 and 3,
-and 0 otherwise.
+32 of 32 words match at 128 bytes with ordinary C. Retain the nested positive
+and less-than-four selector checks, put the table return in the `else` arm of
+`index != 1`, and leave the zero return after the whole conditional. This real
+common-zero exit preserves the extra table-arm branch and native duplicated
+saved-register restore. The old draft returned zero inside the non-table arm
+and fell through from its final table return, emitting 116 bytes instead.
 
-The body is settled. `ragGetHeartsFlag`'s result has to land in `$4`, the
-`index == 1` test has to be written as `if (index != 1) { ... }` with the table
-arm after it so the `beq` reaches the table arm as retail's forward branch
-does, and the two range tests have to be **nested** `if (index > 0) { if (index
-< 4) ... } return 0;` rather than two sibling early returns: as siblings
-ee-gcc folds them into an `addiu -1`/`sltiu 3` range test and loses retail's
-`blez` and `slti 4` pair, which is 8 of 30 words match.
+Qualified complete-owner stock RTL shows the table-arm jump before the trailing
+zero block at jump2; the delay-branch output fills that jump with the saved s0
+restore and targets the shared ra restore. Plain/dump assembly and literal
+entire-object parity passed for production, SKIP_ASM and retained-draft modes.
+These observations establish the emitted control flow, not historical source
+spelling or a debugger-observed internal compiler decision.
 
-The seven remaining words are the exit layout. Retail restores `$16` twice,
-once in the delay slot of the `b` that leaves the table arm and once at the
-shared `L830`, and lets `jump2` merge only from the `ld $31` on; this draft
-gets one `ld $16` and three words fewer, so every branch displacement in the
-function is off by three.
+The provider is still called once before dispatch. Selector one returns the
+unsigned table item at the signed flag's 14-byte record; selectors two and
+three return the existing preview unit's unsigned ID at work+0x54; other signed
+selectors return zero. Types, calls, load widths, peer functions and owned data
+are unchanged. No register constraints, provider-opacity aliases or extra bound
+assumptions are used. Complete-owner checking gives 20 match, 0 differ.
 
-Ruled out: `index == 1` with a `goto` to a trailing table arm (8 of 30 match);
-a `u16 ret` local assigned in each arm with one trailing `return` (8 of 30);
-the same with explicit `goto done;` out of each arm (15 of 29); and
-`(flag * 7) * 2` in place of `flag * 14` at the subscript.
+Earlier failed controls remain distinct: index==1 with a goto to trailing table,
+a common result variable, goto done from all arms, and multiply reassociation.
+A trailing-table one-pass block was also neutral. The common-zero conditional
+above supplies the missing branch without any of those changes.
+
 
 ## ragUpdateSeqConfirm (facility/fclRagUpdate, 0x208)
 
