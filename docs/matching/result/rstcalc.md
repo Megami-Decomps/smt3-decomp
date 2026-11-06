@@ -673,3 +673,58 @@ reports and a no-op rebuild. Each tooling suite skips only its optional external
 dvp-as comparison; native VU and retail checks pass. The linked 176-byte span
 is uniquely C-owned and exact. Both reports gain one function and 176 bytes,
 with data totals unchanged. Existing declaration debt is unchanged.
+
+
+## rstCalcEvo (result/rstcalc, 0x1D0)
+
+116 of 116 words match at 464 bytes in ordinary C. The event scan stays in
+its loop and the type-five fallback scan follows the loop. One signed index
+is reused across the two disjoint scan phases. Each successful candidate
+handles the result directly, with three separate equal switch-case bodies;
+ee-gcc emits the shared completion blocks and the native decision tree.
+No compiler constraint, changed type, ABI, bounds, memory access or flag is
+needed. This is reconstruction evidence, not the original source spelling.
+
+Final-relative controls isolate the source properties:
+
+- Moving fallback handling into the negative-event arm of the old infinite
+  loop emits 460 bytes, with 5 of 115 emitted words matching. Rewriting the
+  condition as an infinite loop with an early break but leaving the fallback
+  after it is independently exact: literal `while` syntax is not required.
+- Giving each phase a separate index emits 464 bytes, with 111 of 116 words
+  matching. The five residuals concern the event-phase index register and
+  argument scheduling. The phases never require both index values at once.
+- Grouping the three case labels emits 440 bytes, with 29 of 110 emitted
+  words matching; the generated range check replaces the native case tree.
+- Restoring the inline completion helper while retaining the shared index
+  emits 472 bytes, with 44 of 116 native-prefix words matching and eight
+  excess bytes. Direct handling avoids its additional return merge.
+
+The routine repeatedly asks for event information. For event five it uses
+`eventIndex - 1`, the current entry array and the signed entry count. When
+that scan ends, it asks for the fallback type-five entry and uses the actual
+102-byte level-up row. The event candidate passes -1 to `rstChkEvoEvent`;
+the fallback passes its found index. Both require a nonzero evolved ID and
+a negative unlocked-check result. Results 1, 2 and 3 are stored as the
+signed-byte evolution result and return zero. Other check results clear the
+result, set the unit-name message variable, start messages 0x15 and 0x2B,
+and return one. Exhaustion stores -1 and returns zero. Callback-visible
+`EventStart`, unit, evolution and global-work reloads remain in native order;
+no pointer is cached across these calls. Valid live objects and entry/table
+indices remain the inherited requirements.
+
+Complete target-enabled owner: 98 match, 0 differ. All 104 production, 97
+SKIP_ASM and 104 retained-C peers are preserved after resolving local call
+targets. Noncode section sizes, alignments, bytes and resolved jump-table
+targets are unchanged. Twenty-one complete assembly/entire-ELF plain-dump
+pairs cover the original owner, enabled old draft, final source and four
+controls in production, SKIP_ASM and retained-C contexts. Only the wrapper's
+equal-length randomized source filename is normalized. The 84 collected
+header/source/configuration/compiler inputs are stable; each pair records
+its candidate source hash. These are output-parity checks, not an
+instrumented compiler-pass trace.
+
+Strict production and SKIP_ASM checks retain the existing
+`rstSetSkillActFlag` declaration gap; original and final retained-C checks
+pass. Independent semantic review and integrated retail/build/regression
+checks are separate publication gates.
