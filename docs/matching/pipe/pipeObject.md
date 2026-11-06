@@ -26,6 +26,32 @@ sixteen-iteration loop's sentinel hoisting and field-load scheduling. The
 ordinary decrement-to-option-boundary loop already matches. Resolve those
 specific differences before retrying declaration or loop-form changes.
 
+A qualified current-owner comparison identifies a construction-loop blocker.
+GCSE reuses the earlier ID/action dispatch reads for the first construction,
+then inserts their callback-sensitive reloads on the backedge outside the
+loop marker. The loop pass explicitly rejects that loop for multiple entry
+points, leaving the 255 sentinel inside the emitted loop. Retail instead
+initializes 255 once before the loop and reloads ID/action in every body,
+including the first iteration. The separate option-boundary loop still
+hoists all four 20/40/60/80 constants. This is a measured compiler
+transformation, not evidence of historical source spelling.
+
+Exact-ABI opacity for `objMake` is byte-inert. A localized binding on the
+actual status threshold reaches 90 matching words out of 152 at 608 bytes but remains
+nonmatching. An input-only operand on the real option regresses to 616
+bytes. All three controls are rejected. Original, active and diagnostic
+sources pass complete direct/wrapper and plain/selected-dump assembly and
+entire-object parity in production, SKIP_ASM and retained configurations.
+All 41 peers and owned data remain unchanged; the canonical guarded source
+is unchanged and earns no new matching credit.
+
+The next distinct question is a truthful acquisition/dispatch form that
+retains the real ID/action reads within a single-entry construction loop.
+Another counter spelling, sentinel register choice or `objMake` opacity
+control does not address the measured entry topology. This evidence does
+not justify volatile casts, dummy reads, fabricated memory effects or a
+general barrier. The table-copy and status-tail residuals remain separate.
+
 
 ## objLoad
 
