@@ -877,7 +877,6 @@ extern s32 datDevilIsRegistered(u8 devilId);
 extern s8 datGetDevilSlotIndex(u8 devilId);
 extern s32 datGetDevilSlotState(u8 devilId);
 
-#ifdef NON_MATCHING
 s32 rstFindRegisteredDevil(void)
 {
     s8 id = DDS3_GBWK->equipHearts;
@@ -885,27 +884,26 @@ s32 rstFindRegisteredDevil(void)
     s32 roll;
     s32 i;
 
-    if (id == 0 || datDevilIsRegistered((u8)id) != 0) {
+    if (id == 0) {
+        return -1;
+    }
+    if (datDevilIsRegistered((u8)id) != 0) {
         return -1;
     }
     slotCount = datGetDevilSlotIndex((u8)id);
     if ((s16)datGetDevilSlotState((u8)id) >= slotCount) {
         return -1;
     }
-    if (dds3GetRandA(NULL) % 3 >= 2) {
-        return -1;
-    }
-    roll = dds3GetRandA(NULL) % 255;
-    for (i = 0; i < 8; i++) {
-        if (roll < D_00339E00[id].probabilities[i]) {
-            return (s8)i;
+    if (dds3GetRandA(NULL) % 3 < 2) {
+        roll = dds3GetRandA(NULL) % 255;
+        for (i = 0; i < 8; i++) {
+            if (roll < D_00339E00[id].probabilities[i]) {
+                return (s8)i;
+            }
         }
     }
     return -1;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstFindRegisteredDevil);
-#endif
 
 /* Called above its definition, where ee-gcc assumed int. */
 s32 datGetDevilSlotState(u8 devilId);

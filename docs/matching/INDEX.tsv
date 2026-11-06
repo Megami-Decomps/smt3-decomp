@@ -355,6 +355,7 @@ rstChkSkillPowerUp2	result/rstcalc	0xA8	42 of 42 words match	docs/matching/resul
 cmbCopyEvoDevil	result/rstcalc	0x100	64 of 64 words match	docs/matching/result/rstcalc.md	355
 cmbCalcEvoEvent	result/rstcalc	0x140	80 of 80 words match	docs/matching/result/rstcalc.md	396
 func_00222610	rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	472
+rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/rstcalc.md	514
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3

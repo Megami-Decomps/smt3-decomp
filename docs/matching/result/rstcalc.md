@@ -510,3 +510,53 @@ to the same native address. Strict production and SKIP_ASM still encounter
 the pre-existing rstSetSkillActFlag declaration gap; retained-draft strict
 compilation passes. These measurements establish compiler reconstruction,
 not original spelling or gameplay execution.
+
+## rstFindRegisteredDevil (rstcalc, 0x120)
+
+72 of 72 words match at 288 bytes in ordinary C. Complete target-enabled
+owner: 95 match, 0 differ. The routine rejects an absent or registered
+Hearts ID, checks the slot count, then performs a two-stage random selection
+against eight probability bytes. No declarations, types, constraints, helper,
+qualifier, register binding or compiler flags change.
+
+Two independent control-flow properties close the retained 37/72-word draft:
+
+- Separate the zero-ID rejection from the registration-call rejection:
+  51/72 words. In initial RTL the zero-ID arm now has its own `v0 = -1`
+  assignment (UID24), rather than branching into the short-circuit expression's
+  common failure block. The final output places that assignment in the first
+  guard's delay slot and uses `$3` for the global-work address.
+- Put the random selection and scan inside the positive `% 3 < 2` arm,
+  sharing the final `return -1` with scan exhaustion: 52/72 words alone.
+  Combining this with the separate first guards gives all 72 words.
+
+The qualified stock dumps locate the success-return placement change between
+`08.gcse` and `09.loop`. With the positive arm, the signed-byte index return
+(UID204/206 in the combined source) moves before the first random call
+(UID125); the separate-guard-only control places its corresponding return
+between the two random calls. The initial positive-arm branch (UID136)
+already targets the shared final failure label rather than a dedicated early
+failure block. This is measured compiler output and source reconstruction,
+not original source spelling or an instrumented allocation/comparator claim.
+An explicit return-label island was also tried and retained the original
+37/72-word score, so no labels are retained.
+
+The equipped ID remains one signed-byte snapshot. Helpers still receive its
+unsigned-byte form, in registration/count/state order. The state result is
+narrowed to signed16 before comparison. Both random results retain unsigned
+remainders; the second is in 0..254 and is compared as signed32 with unsigned
+probability bytes. The scan returns the first qualifying index as signed8,
+or -1. Callback mutations do not change the captured ID; threshold loads
+remain after the second random call. Valid reached table/object addresses
+remain inherited requirements, not a new negative-index safety promise.
+
+Fifteen complete plain/dump pairs cover final source, both isolated controls,
+the original activated draft and original guarded owner in production,
+SKIP_ASM and retained-draft contexts. Four stock trace outputs independently
+agree with their ordinary full assembly and objects. Existing peers are
+unchanged after resolving local-call offsets. Production and retained-draft
+non-code data are byte-identical; SKIP_ASM insertion shifts local jump-table
+addends; independent review verifies all 25 resolved destinations. The production target's
+only raw relocation differences resolve to the same global-work word and
+table-plus-58 address. Strict production/SKIP builds retain the pre-existing
+`rstSetSkillActFlag` declaration gap; strict retained drafts pass.
