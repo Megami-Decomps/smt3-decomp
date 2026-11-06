@@ -1791,13 +1791,15 @@ void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock) {
     }
 }
 
-/* NON_MATCHING: 40 of 42 words, exact size; the two `addiu -1` setups are swapped
- * between the slot before `div` and the `beql` delay slot. */
-#ifdef NON_MATCHING
 void fldAutoMapCloseBlock2(s32 fld, s32 area, s32 SBlock) {
     s32 bit = SBlock - 1;
     s32 room = fld % 100;
     s32 index = area - 1;
+
+    /* Target-specific reconstruction aid: this real address index keeps its
+     * decrement before the division. Without the operand it exchanges
+     * positions with the block-bit decrement. */
+    FAKEMATCH_ASM_LIVE(index);
 
     if (room < 10) {
         return;
@@ -1811,9 +1813,7 @@ void fldAutoMapCloseBlock2(s32 fld, s32 area, s32 SBlock) {
         *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (room * 32 + index) * 8) &= ~((u64)1 << bit);
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
-#endif
+
 
 void fldAutoMapNameU(s32 nameID) {
     if (nameID >= 0x40) {

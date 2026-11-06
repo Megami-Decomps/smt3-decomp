@@ -2,41 +2,74 @@
 
 ## fldAutoMapCloseBlock2 (field/fldAutoMap, 0xA8)
 
-40 of 42 words match, at the exact 168-byte size.
+42 of 42 words match at 168 bytes. One localized empty read/write operand on
+`index = area - 1` restores the native order of two real decrements. Both
+writing branches consume index in their actual address calculation. The
+operand emits no instruction, pins no register, adds no memory access or
+clobber, and does not extend the initialized index's lifetime. No call crosses
+that lifetime. The ordinary deletion control remains 40 of 42 words matching;
+constraining the block bit instead leaves the same residual, and an input-only
+index operand gives 16 matching words. These are paired output observations,
+not an internal scheduler ranking or recovered original source spelling.
 
-Retail computes `floor - 1` into `$7` in the instruction before the `div` and
-`flagNumber - 1` into `$6` in the `beql` delay slot of the divide-by-zero
-check. The draft emits the same two `addiu`s with the same registers, in the
-other order: `flagNumber - 1` before the `div` and `floor - 1` in the delay
-slot. Every other word, both arms included, is identical.
+Native computes the address index at +0x4 before the division, and the block
+bit at +0x14. The earlier note incorrectly called +0x14 a `beql` delay slot:
+the divide-check branch is at +0xC and its `break` delay instruction is +0x10.
+Deleting the operand exchanges only the decrements at +0x4 and +0x14.
 
-ee-gcc sinks whichever of the two locals is written later in the source into
-the delay slot, so retail's order asks for `floor - 1` first. Declaring it
-first does produce that order, but then the index lands in `$5` instead of
-`$7` and the whole `>= 30` arm reallocates, which costs 18 words. All 6
-declaration orders and all 36 declaration-order/assignment-order splits were
-measured: the three with `bit` declared ahead of `index` reach 2 words and
-nothing reaches 0.
+Independent review confirms signed remainder by 100, early return for room
+values below 10, the split after subtracting 10 at room 30, and unchanged
+low/high banks 0xFC58/0x17F10. The high bank retains the full room index.
+Each writing path performs one 64-bit load, clears the selected bit and
+performs one 64-bit store. The matched OpenBlock2 sibling corroborates the
+same banks and index/unsigned-mask roles, with OR instead of AND/complement.
 
-Also ruled out: `floor - 1` or `flagNumber - 1` written inline at the use
-sites instead of as locals (23 and 29 words), both inline (35), and the
-`u32 ofs` local in the `0xFC58` arm as well as the `0x17F10` one (which costs
-a word of size).
+Inherited source limits remain explicit: `area - 1` and `SBlock - 1` must be
+representable; reached signed offset arithmetic must be representable; reached
+shift counts must be 0..63; storage must be valid and suitably aligned. Area
+1..32 and SBlock 1..64 are a sufficient logical domain, not proven global
+caller bounds. The script caller's zero substitutions do not establish those
+bounds. No new masks, truncation, checks or input restrictions were added.
 
-`fldAutoMapOpenBlock2` is the same function with `|=` for `&= ~`, and it does
-match, from `room`, `index`, `bit` locals in that order. The extra `nor` in
-the close path is what moves the allocation.
+Complete owner: 36 match, 0 differ. Eighteen development whole-assembly and
+entire-ELF normal/stock-dump pairs cover six sources in three modes. Fresh
+integrated guarded/final qualification adds six passing pairs with 123 stable
+collected inputs, all strict modes clean. All 39/35/39 production/SKIP_ASM/retained peers and owned data are
+preserved. Independent resolution of the two GP-relative global loads gives
+all 168 native target bytes. No hooked compiler-decision trace is claimed.
 
-### Initialized-index sibling control (closed negative)
+Optimized and ASan/UBSan host fixtures each pass 2,911,040 comparisons across
+582,208 cases and five source variants. They model the empty operand as an
+identity and exercise the stated valid storage/arithmetic domain; they do not
+establish arbitrary-index safety or EE runtime behavior. Leak detection is
+disabled for the sanitizer fixture in the execution environment.
+
+Integrated retail checksum/byte comparison, generated-source validation,
+505 unittest cases without skips plus 818 layout assertions, frozen guarded
+EE/IRX checks and reconciled reports pass. Recovery and shared-panel peers
+remain exact. No source-import change is needed. Only this 168-byte function
+gains credit: game totals become 8,654 functions and 1,503,224 bytes. The
+subsequent build has no work.
+
+### Earlier ordinary-source controls (historical)
+
+Earlier declaration-order and inline-use experiments did not close the two
+setup differences. Declaring the index first corrected their order but moved
+its register and changed the high-bank arm. All six declaration orders and
+36 declaration/assignment splits were explored; no ordinary exact form was
+found. Inline index/bit expressions and a second offset local were also
+rejected. Those historical counts were not rerun for this integration.
+
+### Initialized-index sibling control (historical closed negative)
 
 A bounded recheck on c61f8129 reproduced the retained 40/42-word draft at
 168 bytes, with 34 exact peers. The matched OpenBlock2 sibling's ordinary
 initializer order gave 24/42; binding only the genuinely initialized index
 locally to its native register gave 26/42, still 168 bytes. The binding
 restored setup through +0x28 and the low-offset arm, but not the high arm's
-branch, mask and pointer allocation. Both controls were rejected. Original
-source and assembly fallback remain unchanged; no further binding grid is
-justified by this result.
+branch, mask and pointer allocation. Both controls were rejected. They left the original
+source and assembly fallback unchanged at that time; no further binding grid
+was justified by that result.
 
 Whole-owner plain/dump assembly, allocated sections, non-file symbols and
 ordered relocations agree for each control, with owned data and peers exact.
