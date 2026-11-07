@@ -16,7 +16,7 @@ extern cdvdRpcClient_t D_0052BA48 __attribute__((section(".data")));
 
 extern s32 D_0052A030 __attribute__((section(".data")));
 extern s32 D_0052A02C __attribute__((section(".data")));
-extern u8 D_0052B1D0[0x40] __attribute__((section(".data")));
+extern cdvdRpcClient_t D_0052B1D0 __attribute__((section(".data")));
 extern s32 D_0052B640 __attribute__((section(".data")));
 extern s32 D_0052B200[4] __attribute__((section(".data")));
 
@@ -259,7 +259,66 @@ s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
     return sceCdLayerSearchFile(EE_ADDR(file), (char *)name, 0);
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_ncmd_prechk);
+extern void cmd_sem_init(void);
+extern s32 PollSema(s32 sema);
+extern void sceSifInitRpc(s32 mode);
+extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
+extern s32 D_0052A01C __attribute__((section(".data")));
+SYMBOL_AT(s32, cdvdNcmdInit, D_0052A030, 8);
+
+s32 _sceCd_ncmd_prechk(s32 command)
+{
+    s32 status;
+    s32 delay;
+
+    cmd_sem_init();
+    {
+        s32 sema = cdvdNcmdSema;
+        FAKEMATCH_ASM_LIVE(sema);
+        status = PollSema(sema);
+    }
+    if (cdvdNcmdSema != status) {
+        if (D_0052A010 > 0) {
+            scePrintf("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0052A01C);
+        }
+        return 0;
+    }
+    D_0052A01C = command;
+    ReferThreadStatus(D_00598C50, D_00598C58);
+    status = sceCdSync(1);
+    {
+        FAKEMATCH_ASM_REG(s32, rpcMode, "$4") = 0;
+        if (status != 0) {
+            s32 sema = cdvdNcmdSema;
+            FAKEMATCH_ASM_LIVE(sema);
+            SignalSema(sema);
+            return 0;
+        }
+        sceSifInitRpc(rpcMode);
+    }
+    if (cdvdNcmdInit < 0) {
+        for (;;) {
+            cdvdRpcClient_t *client = &D_0052B1D0;
+
+            if (sceSifBindRpc(client, 0x80000595, 0) < 0) {
+                if (D_0052A010 > 0) {
+                    scePrintf("Libcdvd bind err N CMD\n");
+                }
+                for (delay = 0x100000; delay != -1; --delay) {
+                }
+                continue;
+            }
+            if (client->server != NULL) {
+                break;
+            }
+            for (delay = 0x100000; delay != -1; --delay) {
+            }
+        }
+        cdvdNcmdInit = 0;
+    }
+    return 1;
+}
+
 
 extern s32 _sceCd_ncmd_prechk(s32 cmd);
 extern s32 D_0052A080 __attribute__((section(".data")));
@@ -271,7 +330,7 @@ s32 sceCdNcmdDiskReady(void)
     if (!_sceCd_ncmd_prechk(2)) {
         return 0;
     }
-    if (sceSifCallRpc(D_0052B1D0, 14, 0, 0, 0, &D_0052A080, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052B1D0, 14, 0, 0, 0, &D_0052A080, 4, 0, 0) < 0) {
         SignalSema(cdvdNcmdSema);
         return 0;
     }
@@ -286,12 +345,12 @@ s32 sceCdSync(s32 mode)
         if (D_0052A010 > 0) {
             scePrintf("N cmd wait\n");
         }
-        while (D_0052A030 != 0 || sceSifCheckStatRpc(D_0052B1D0) != 0) {
+        while (D_0052A030 != 0 || sceSifCheckStatRpc(&D_0052B1D0) != 0) {
             sceCdDelayThread(60);
         }
         return 0;
     }
-    if (D_0052A030 != 0 || sceSifCheckStatRpc(D_0052B1D0) != 0) {
+    if (D_0052A030 != 0 || sceSifCheckStatRpc(&D_0052B1D0) != 0) {
         return 1;
     }
     return 0;
@@ -631,7 +690,7 @@ s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg)
         scePrintf("call cdreadstm cmd\n");
     }
     sceSifWriteBackDCache(request, 0x14);
-    if (sceSifCallRpc(D_0052B1D0, 9, 0, request, 0x14,
+    if (sceSifCallRpc(&D_0052B1D0, 9, 0, request, 0x14,
                       &D_0052A080, 4, NULL, NULL) < 0) {
         SignalSema(cdvdNcmdSema);
         return 0;

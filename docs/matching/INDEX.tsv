@@ -438,6 +438,7 @@ Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.
 sceCdStRead			95 of 98 words matching	docs/matching/sdk/libcdvd.md	70
 cdvd_exit	sdk/libcdvd	148 bytes	37 of 37 words match	docs/matching/sdk/libcdvd.md	98
 _sceCd_scmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	134
+_sceCd_ncmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	209
 sceDmaPutEnv			15 of 118 words differ	docs/matching/sdk/libdma.md	3
 __do_global_ctors	sdk/libgcc	0xC0		docs/matching/sdk/libgcc.md	3
 __umoddi3	sdk/libgcc_longlong	0x568	130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	3

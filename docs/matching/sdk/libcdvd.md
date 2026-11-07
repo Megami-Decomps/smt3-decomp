@@ -205,3 +205,102 @@ unchanged. The current production reconciler only processes game units. The
 SDK report therefore retains raw objdiff's 99.78261% for this target and leaves
 its matched-function/byte totals unchanged despite exact linked production
 bytes. No SDK dashboard increase is claimed, and report tooling is unchanged.
+
+## _sceCd_ncmd_prechk (sdk/libcdvd, 368 bytes)
+
+All 92 of 92 words match for the N-command precheck under the configured SDK
+2.9 compiler. This is a bounded transfer of the independently qualified
+S-command sibling's three localized reconstruction aids, with N's actual
+semaphore, command, client, signed initialization word, service 0x80000595
+and sceCdSync provider. The complete owner increases from 28 to 29 exact C
+functions with zero differences. Historical source spelling is not established.
+
+Each empty operand constraint carries an initialized, freshly loaded semaphore
+to its actual PollSema or SignalSema consumer and is then dead. It is not a
+general memory barrier. The zero RPC-mode argument is bound to a0 only after
+sceCdSync returns, immediately consumed by sceSifInitRpc on success, and dead
+before the busy path loads its actual semaphore argument. No fixed-register
+value remains live across a clobbering call. These are target-specific compiler
+reconstruction aids; no padding helper, fabricated consumer or storage is added.
+
+The existing RPC-client type models the real 0x28-byte provider object, with
+server at +0x24. N's native label spans 0x30 bytes, not the previously declared
+0x40-byte array. No speculative tail is accessed. Existing call sites pass
+its address explicitly without changing that address or ABI. The signed
+initialization alias names +8 in the verified 12-byte D_0052A030 region,
+initially -1, without indexing beyond a scalar object or allocating storage.
+
+Failed acquisition reloads the semaphore after PollSema, logs only for positive
+debug level and returns zero without signaling. Success publishes the command
+before ReferThreadStatus and calls the actual N sync provider. Unlike the S
+provider, sceCdSync(1) short-circuits on the busy word and returns Boolean 0/1.
+Any nonzero result signals one freshly reloaded semaphore and returns zero.
+Otherwise RPC initialization runs; negative initialization binds until a
+nonnegative result and nonnull server, then clears only the initialization
+word. Negative bind status ignores the server even if nonnull. Success returns
+one while deliberately retaining the semaphore for the caller transaction.
+Both native countdowns decrement 0x100000 through -1, exactly 0x100001 times,
+without signed overflow. The four NOPs are compiler-emitted, not source padding.
+
+Fresh full-owner controls reproduce the reviewed causal results:
+- Baseline and declaration-only: 28 matches, zero differences.
+- Complete candidate: 368 bytes, 92/92 words; 29 matches, zero differences.
+- Remove PollSema operand: 360 bytes, 14/90 covered words.
+- Remove SignalSema operand: 360 bytes, 38/90 covered words.
+- Remove mode binding: 368 bytes, 84/92 words.
+- Remove all three aids: 360 bytes, 15/90 covered words.
+Each 360-byte control leaves eight retail target bytes uncovered. Ordinary and
+no-Poll controls also retain their checker diagnostic about 0x174 rodata bytes
+with no instruction reference. They are diagnostic controls, not accepted
+matches. RTL, scheduler and delay-branch outputs preserve the narrow argument
+boundary explanation: removing a semaphore operand permits its load in the
+call delay; removing the mode binding moves the busy-path load into the
+post-sync branch delay.
+
+All seven complete sources are rebuilt in production, SKIP_ASM and retained-C
+contexts, using plain, -da and full-Werror plus implicit-declaration-strict
+options: 63 clean compilations, 21 entire assembly/ELF parity sets. Only exactly
+one equal-length generated or canonical source filename is normalized. No code,
+data, symbol, relocation or debug payload is discarded. Compiler-pass archives
+are lossless and roundtrip hash-verified. Baseline, declaration-only and final
+production owners independently link to all 7,016 retail text bytes and 796
+rodata bytes without masking.
+
+All 35 production, 28 SKIP and 29 retained peers preserve instruction bytes
+and resolved relocation contracts. HI/LO pairs are resolved in original ELF
+serialization order before comparison. Production raw peer relocation order
+also agrees. SKIP and retained raw order differs for sceCdSync, cdvd_exit and
+sceCdNcmdDiskReady; resolved per-offset contracts agree. This is explicitly
+not raw ordered identity. Allocated non-target data/symbol contracts agree
+after mapping the expected 64-byte target string block inserted at rodata zero
+in nonproduction modes. Production data matches retail exactly. The retained
+sceCdStRead mismatch is unchanged and receives no credit.
+
+Independent review approves the exact frozen source. Fresh source-extracted
+fixtures pass all 1,080 cases with the semaphore changed to 41 inside sync,
+including optimized and ASan/UBSan host executables. This checks call order,
+arguments, semaphore reloads, publication, signed initialization, debug and
+negative/null/success retry paths. It is not EE/IOP, concurrent-interrupt,
+ABI/layout, timing or hardware execution evidence. Host optimization may remove
+the empty delays; the actual native bounds/instructions are separately exact.
+
+Current-tree qualification passes all 35 owner checks, 505 no-skip tooling
+tests, 818 layout assertions, 141 guarded EE owners, seven IRX modules,
+inline policy, serialized generated-source positive/negative controls and
+full retail SHA-1/byte comparison. Final Ninja is a no-op. Production provenance
+proves a unique compiler-owned 368-byte target without target fallback input.
+The published libkernl TLB/cache trio and all prior claims/notes are preserved.
+This adds one verified SDK C function and 368 instruction bytes; game source
+coverage remains unchanged. Raw report-category changes are measured separately
+and are not inferred from that source credit. Exact-commit CI follows publication.
+
+The fresh raw SDK report gives this target 99.78261%, so matched totals receive
+no new credit: SDK remains 71,540 bytes / 409 functions (delta zero / zero).
+Its fuzzy category score does rise from 60.379163% to 60.672895%; the libcdvd
+fuzzy score rises from 52.690094% to 57.97811%, while that owner's raw matched
+totals remain 3,132 bytes / 26 functions. Only the target's function report row
+changes; every peer row and other report unit is unchanged. As for the S-command
+sibling, the current production reconciler only processes game units. The
+unique compiler-owned linked target is nevertheless all 368 retail bytes,
+and the complete native owner and full image are exact. This separates verified
+SDK source credit from raw report matched totals; reporting tools are unchanged.
