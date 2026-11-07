@@ -581,3 +581,46 @@ zero, negative and INT_MIN lengths, high-bit bytes and LF capacity boundaries.
 It does not execute the hardware transport. Full retail checksum, generation,
 569 regression tests, guarded sources, reports and production provenance pass.
 SDK coverage gains one function and 336 bytes; game coverage is unchanged.
+
+## iPutTLBEntry
+
+The checked indexed setter matches all 48 native instruction bytes in ordinary
+C. Unsigned 32-bit `index - 13U >= 35U` rejects every index outside 13 through
+47 and returns -1 without calling the provider. Accepted indices and all four
+entry words pass unchanged to `_SetTLBEntry`; its signed 32-bit result is
+returned. Native `addiu` truncation/sign extension followed by `sltiu` establishes
+this modular range test, including high-bit and wraparound inputs.
+
+The existing retail label is retained. This is not the separate four-argument
+interrupt-context Put syscall, currently labeled `iPutTLBEntry_0`. The pinned
+[ps2sdk declaration](https://github.com/ps2dev/ps2sdk/blob/d41ea62946e53d9a0c8788bb9eb8c8faf488b559/ee/kernel/include/kernel.h)
+and native `InitTLB32MB` calls corroborate the provider's five unsigned-word
+arguments and signed-word result. That public reference establishes an ABI,
+not the exact Sony source spelling. The SDK object map byte-identifies the
+selected wrapper as `libkernl.a/tlbfunc.o` in SDK 204 and 303.
+
+The error-first guard gives the native branch/epilogue order; an equivalent
+success-first control differs. A separate truthful `InitTLB` dispatch control
+still emits 44 of 64 native bytes, so `InitTLB` stays assembly-backed. No false
+return type, artificial postcall statement, constraint, volatile access,
+handwritten instruction or compiler-option change is used.
+
+Independent native/ABI review and 300,104 sanitized mocked-provider cases
+approve the frozen source; no hardware operation was executed. Fresh current
+baseline, final and both controls pass strict complete-owner plain/dump
+assembly and entire-object parity in production, SKIP_ASM and retained modes,
+after one equal-length generated source-path normalization. All 363 production, 157 SKIP_ASM and 162 retained peer functions, allocated
+nontext data and non-target symbol/relocation contracts remain unchanged.
+The complete owner advances from 157 to 158 matches with zero differences.
+All three final target bodies are exactly 48 bytes. SKIP_ASM/retained section
+growth of 52 bytes is four bytes of leading alignment plus the 48-byte body,
+not a larger target or a production-only exception.
+
+Full retail SHA-1 and byte comparison, all 35 current owner checks, 505
+no-skip tooling tests and 818 layout assertions, retained EE and seven IRX
+checks, inline-assembly and generated-source positive/negative checks pass.
+The compiler owns the unique production target, without its assembly fallback
+as a build input. Exact SDK source credit is one function and 48 bytes; game
+coverage is unchanged. Report-category deltas are separately reconciled against
+the exact parent build. These checks establish a matching reconstruction,
+not historical source spelling; exact-commit CI follows publication.

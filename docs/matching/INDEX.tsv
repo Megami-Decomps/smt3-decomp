@@ -469,6 +469,7 @@ sceDclose				docs/matching/sdk/libkernl.md	439
 kputchar				docs/matching/sdk/libkernl.md	462
 sceTtyInit				docs/matching/sdk/libkernl.md	489
 sceTtyWrite				docs/matching/sdk/libkernl.md	535
+iPutTLBEntry				docs/matching/sdk/libkernl.md	585
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79

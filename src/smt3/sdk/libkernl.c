@@ -4334,7 +4334,17 @@ INCLUDE_ASM(const s32, "sdk/libkernl", iPutTLBEntry_0);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _SetTLBEntry);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iPutTLBEntry);
+extern s32 _SetTLBEntry(u32 index, u32 pageMask, u32 entryHi, u32 entryLo0, u32 entryLo1);
+
+/* Existing retail symbol is retained; this is the checked indexed setter,
+ * not the separate interrupt-context PutTLBEntry syscall stub. */
+s32 iPutTLBEntry(u32 index, u32 pageMask, u32 entryHi, u32 entryLo0, u32 entryLo1)
+{
+    if (index - 13U >= 35U) {
+        return -1;
+    }
+    return _SetTLBEntry(index, pageMask, entryHi, entryLo0, entryLo1);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iSetTLBEntry);
 
