@@ -3,6 +3,7 @@
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "billboard.h"
 #include "draw.h"
@@ -1374,6 +1375,11 @@ void fldHitChkUnit(f32 *position)
                             if (floorHit >= 0 && clearance < distance) {
                                 clearance = distance;
                             }
+                            /* Below retail's step, the edge band of a floor pulls a sphere above it
+                             * down into the next face, which pushes it back to where it started. */
+                            if (SDF_FRAME_STEP(1.0f) < 1.0f && signedDistance > 0.0f && clearance < distance) {
+                                clearance = distance;
+                            }
                             current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
                             current.y = (projected.y + fldMatterTable[index].normal[1] * clearance) - 1.0f;
                             current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
@@ -1757,6 +1763,11 @@ void fldHitChkUnitVWM(f32 *position)
                             if (mface->normal[1] < -0.75f) {
                                 fldHitChkMatter = index;
                                 if (floorHit >= 0 && clearance < distance) {
+                                    clearance = distance;
+                                }
+                                /* Below retail's step, the edge band of a floor pulls a sphere above it
+                                 * down into the next face, which pushes it back to where it started. */
+                                if (SDF_FRAME_STEP(1.0f) < 1.0f && signedDistance > 0.0f && clearance < distance) {
                                     clearance = distance;
                                 }
                                 mface = &fldMatterTable[index];
