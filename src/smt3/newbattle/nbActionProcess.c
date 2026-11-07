@@ -1685,42 +1685,62 @@ INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckSenseiNego);
 
 #endif
 
-/* NON_MATCHING. Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
+/* Historical behaviour check against retail: 4 PCSX2 call vectors give the same return and memory,
  * capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 CheckInotiNego(nbActionProcessData_t *a)
 {
     nbFormation_t *form;
     datUnitWork_t *work;
-    struct nbParty_t *party;
     s32 i;
     s32 id;
     s32 rate;
+    s32 command;
+    s32 talkResult;
+    u32 formStatus;
+    s32 partyStatus;
+    s32 rollLimit;
 
-    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7 || (a->data->stat & 1) != 0 ||
-        (a->party->flag & 6) != 0 || a->partyindex >= 4) {
-        return 0;
-    }
-    if (evtGetAgeOfMoon() == 8 || datCheckTalk(a->work) == 0) {
-        return 0;
-    }
-    if (a->work->nowcommand != 0 && a->work->nowcommand != 1 && a->work->nowcommand != 5) {
-        return 0;
+    if ((u32)((u16)a->data->StageMajor - 0xF0) < 7) return 0;
+    if ((a->data->stat & 1) != 0) return 0;
+    if ((a->party->flag & 6) != 0) return 0;
+    if (a->partyindex >= 4) return 0;
+    if (evtGetAgeOfMoon() == 8) return 0;
+    talkResult = datCheckTalk(a->work);
+    if (talkResult == 0) return talkResult;
+    command = a->work->nowcommand;
+    switch (command) {
+    case 0: case 1: case 5: break;
+    default: return 0;
     }
     if (a->data->enemypcnt != 1) {
         return 0;
     }
     for (i = 4; i < 14; i++) {
         form = &a->data->form[i];
-        if ((form->stat & 0x49) != 0x49) {
-            continue;
-        }
+        formStatus = form->stat;
+        if ((formStatus & 1) == 0) continue;
+        if ((formStatus & 8) == 0) continue;
+        if ((formStatus & 0x40) == 0) continue;
         work = nbGetUnitWorkFromFormindex(i);
-        party = &a->data->party[form->partyindex];
-        if ((party->flag & 1) == 0 || (party->flag & 0x20) != 0 || CheckTimeListDead(a, i) != 0) {
-            continue;
+        {
+            /* Local EE allocation aids: the signed slot index and later flags
+               have disjoint live ranges in $2, with no intervening call.
+               The empty identity retains the index before real address use;
+               these are reconstruction constraints, not original spelling. */
+            FAKEMATCH_ASM_REG(s32, partyIndex, "$2") = form->partyindex;
+            struct nbParty_t *partyAddress;
+            FAKEMATCH_ASM_REG(u16, partyFlags, "$2");
+            FAKEMATCH_ASM_LIVE(partyIndex);
+            partyAddress = EE_ADDR_AS(struct nbParty_t *, (
+                (u32)(partyIndex * sizeof(struct nbParty_t)) +
+                EE_ADDR(a->data->party)));
+            partyFlags = partyAddress->flag;
+            partyStatus = (u16)(partyFlags & 1);
+            if (partyStatus == 0) continue;
+            if ((partyFlags & 0x20) != 0) continue;
         }
+        if (CheckTimeListDead(a, i) != 0) continue;
         id = work->id;
         if (master_text[id].inotitype == 0) {
             continue;
@@ -1734,15 +1754,13 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
         if (datCheckTalk(work) == 0) {
             continue;
         }
-        if ((a->data->stat & 0x2000000) != 0) {
-            rate = 100;
-        } else {
-            if (((dds3LiveBattleUnitsView_t *)DDS3_GBWK)->units[0].level < work->level) {
-                continue;
-            }
-            rate = 6;
+        {
+            u32 boosted = a->data->stat & 0x2000000;
+            if (boosted == 0 && ((dds3LiveBattleUnitsView_t *)DDS3_GBWK)->units[0].level < work->level) continue;
+            rollLimit = 100;
+            rate = boosted ? rollLimit : 6;
         }
-        if ((s32)dds3GetRandIntA(NULL, 100) < rate) {
+        if ((s32)dds3GetRandIntA(NULL, rollLimit) < rate) {
             nbPushAction(1, form->partyindex, a->partyindex, 0);
             printf("inoti party = %d (%X)\n", form->partyindex, work->id);
             return 1;
@@ -1750,13 +1768,6 @@ s32 CheckInotiNego(nbActionProcessData_t *a)
     }
     return 0;
 }
-#else
-
-
-
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckInotiNego);
-#endif
 
 s32 CheckBinjoNego(nbActionProcessData_t *a)
 {

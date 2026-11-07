@@ -349,3 +349,86 @@ two inherited setter declaration errors; retained-C strict checks pass.
 Complete final plain/dump assembly and entire-ELF parity pass in all three
 contexts, repeated with a 305-input source/tool/runtime closure. Integrated
 retail and regression checks remain separate publication gates.
+
+
+## CheckInotiNego (newbattle/nbActionProcess, 0x2B0)
+
+172 of 172 words match at 688 bytes. Keep the entry rejections separate,
+dispatch signed command values 0, 1 and 5 with a switch, and test the three
+formation bits independently. Capture the formation pointer before unit lookup,
+then use its freshly read signed slot with the current battle party-array base.
+The existing EE address macros preserve the real unsigned32 offset arithmetic;
+they do not establish validity for corrupt indices. The party flag is one u16
+snapshot. Matched CheckBinjoNego and CheckKoketaNego provide ordinary-source
+precedents for the guard and address shapes, not a compiler trace for this target.
+
+Two localized $2 bindings cover disjoint actual values: the initialized signed
+party index and the later loaded party flags. The empty read/write constraint
+retains the index until its real address consumer. Neither value is live across
+a call, and the empty template emits no instructions. It is not a general memory
+barrier, a hardware register requirement or evidence of historical source
+spelling. The ordinary source has the native size but differs in eleven words.
+The independent final-minus-identity control differs in seven words at
++0x13C..+0x154. Removing only the flags binding leaves five differing words.
+Removing only the index binding leaves ten, and a flags-only form leaves seven.
+The earlier eleven-word control also unbinds the flags and directly initializes
+the party address, so it does not isolate the need for the index identity. No false qualifiers, added
+accesses, dummy consumers, declaration changes or compiler flags are used.
+
+The real roll limit supplies both the boosted success rate and the RNG argument.
+This produces native MOVN selection without a fabricated computation. Literal
+ternary endpoints introduce four additional differing words. These comparisons
+establish a target-specific allocation dependency, not an observed internal
+allocator decision or a causal compiler hook.
+
+Native ordering remains explicit. Moon age precedes the actor talk check;
+command, enemy count and battle state are reloaded after the relevant calls.
+The loop scans formation slots 4 through 13, rejects the same formation/party
+flags and time-list death result, and reads the actual master-record byte.
+Unsigned-halfword HP values promote to signed32, with hp*100 at most 6553500,
+then undergo native signed division and threshold 25. The actor flag/id test,
+candidate talk check, fresh boosted-state/level reads, modulo-100 RNG, action
+push and diagnostic print retain their original order. After pushing, the
+formation index and candidate id are read again for the print.
+
+The real providers and allocation sites remain unchanged. Valid formation,
+party and unit objects, valid record IDs, nonzero max HP and available action
+stack capacity are inherited battle-state preconditions. Unit lookup can
+return NULL on invalid or unsuitable state; the native target also dereferences
+its result on later paths. This match adds no null check, divisor clamp, made-up
+extent or arbitrary-corrupt-state claim.
+
+Complete owner: 92 match, 0 differ. All 95 production, 91 SKIP_ASM and 95
+retained-C peers preserve instructions and resolved relocation targets.
+Production and retained-C allocated noncode are identical. SKIP_ASM adds the
+23-byte terminated target string plus one padding byte at rodata +0x60; the
+old +0x60..+0x90 range shifts by 24, followed by eight alignment bytes before
+the old jump table at +0x90. The rest shifts by 32, taking rodata from 1584 to
+1616 bytes. Every mapped byte and data relocation is checked. Production
+replaces only the target-owned D_005438D8 label with the identical compiler
+literal; that label has no other source, header or assembly consumer.
+
+Initial baseline, ordinary and final sources pass nine literal whole-assembly
+and entire-ELF wrapper/direct/plain/dump comparisons across production,
+SKIP_ASM and retained-C. After the historical capture comment was clarified,
+the exact final text passes all three contexts again. The final closure checks
+317 source/header/fallback/config/compiler/runtime inputs and 22 host paths
+before and after execution. Actual compiler, assembler, both loader paths and
+loaded libc are covered. No observer, debugger or instrumented compiler is used.
+Strict production and SKIP_ASM retain the two inherited setter declaration
+errors; retained-C strict compilation passes. The old four PCSX2 vectors remain
+historical limited-path evidence, not newly executed tests.
+
+Independent source/native/provider review approves the final source. The
+mechanically extracted actual body and an independent instruction-order model
+pass 331,072 cases in optimized host and ASan/UBSan builds, with 114,021
+successful action paths. A freestanding i386 optimized build repeats those
+cases with real 32-bit layouts and unchanged pointer arithmetic; a separate
+UBSan-trap i386 run passes 4,096 scenarios. Tests cover exhaustive signed16
+command and stage patterns, HP extremes, callback pointer/state mutations and
+post-push reloads. The host64 run has different pointer-containing layouts;
+only the i386 run establishes the tested 32-bit layouts. Its private shim
+substitutes unused 128-bit typedefs with same-size objects because i386 GCC
+lacks that mode. Callbacks and RNG are modeled; these are not new EE execution
+traces or proof for invalid pointers, zero divisors or exhausted action stacks.
+Integrated retail and regression checks remain separate publication gates.
