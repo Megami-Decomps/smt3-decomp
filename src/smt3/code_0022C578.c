@@ -1347,9 +1347,6 @@ s32 cmpStartItemTokusyuMsg(u16 item)
     return cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
-// NON_MATCHING: 19 of 40 words match at the exact size; argument setup
-// and default-mode scheduling differ before the tokusyu message call.
-#ifdef NON_MATCHING
 extern s32 cmpClearButtonGuide(s32 skill, u32 select);
 
 s32 cmpStartSkillMsg(u16 skill, s32 errorFlags)
@@ -1370,28 +1367,26 @@ s32 cmpStartSkillMsg(u16 skill, s32 errorFlags)
 zero:
     mode = 0;
 have_mode:
-    if (cmpStartSkillTokusyuMsg(skill) != 0)
+    /* Keep the ordinary message path first and share its mode/result return. */
+    if (cmpStartSkillTokusyuMsg(skill) == 0)
     {
-        return 2;
-    }
-    index = cmpFindSkillMsgIndex(mode, skill);
-    if (index <= 0)
-    {
-        return mode;
-    }
-    if (mode == 0)
-    {
-        fclStartMessage(index + 0xC);
+        index = cmpFindSkillMsgIndex(mode, skill);
+        if (index > 0)
+        {
+            if (mode == 0) {
+                fclStartMessage(index + 0xC);
+            } else {
+                fclStartMessage(index + 0x20);
+            }
+        }
     }
     else
     {
-        fclStartMessage(index + 0x20);
+        mode = 2;
     }
     return mode;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillMsg);
-#endif
+
 
 extern s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit);
 extern s32 cmbChkDevilEvo(datUnitWork_t *unit);
