@@ -515,6 +515,8 @@ INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487C8);
 
 INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487D8);
 
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487E8);
+
 INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeProcessId);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", gProcessStat);
