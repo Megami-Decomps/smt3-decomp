@@ -328,36 +328,46 @@ s32 nbGetNegoYaruItemB(datUnitWork_t *w);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-/* NON_MATCHING: 15 of 63 words differ (first at +0x7C); one word short. */
-#ifdef NON_MATCHING
+/* Preserve the real return/store phases. The middle return operand keeps
+ * its initialized zero live through the selected-ID store. The last selected
+ * ID uses native v0 only from its post-race load through its store, before
+ * the zero return. Neither constrained value crosses a call. These are local
+ * compiler aids, not evidence of original source spelling. */
 s32 Flow10_1(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0xA0002);
     nbAddNegoIdKouho(n, 0xA000B);
     nbAddNegoIdKouho(n, 0x6002B);
-    if ((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) &&
-        evtBitCheck(8) == 0 && n->negoreqtype == 0) {
-        n->nextnegoid = n->nextkouho[1];
-        return 0;
+    if (n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) {
+        s32 eventResult = evtBitCheck(8);
+        if (eventResult == 0 && n->negoreqtype == 0) {
+            n->nextnegoid = n->nextkouho[1];
+            return eventResult;
+        }
     }
     if (n->cnt6_37 != 0) {
+        u32 selected;
+        s32 result;
         if ((u32)dds3GetRandIntA(0, 0xA) < 6) {
-            n->nextnegoid = n->nextkouho[2];
+            selected = n->nextkouho[2];
         } else {
-            n->nextnegoid = n->nextkouho[1];
+            selected = n->nextkouho[1];
         }
-        return 0;
+        result = 0;
+        FAKEMATCH_ASM_LIVE(result);
+        n->nextnegoid = selected;
+        return result;
     }
     n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
     if (datGetRace(n->ework) != 0x21) {
         return 0;
     }
-    n->nextnegoid = n->nextkouho[1];
-    return 0;
+    {
+        FAKEMATCH_ASM_REG(u32, selected, "$2") = n->nextkouho[1];
+        n->nextnegoid = selected;
+        return 0;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowNg", Flow10_1);
-#endif
 
 s32 Flow10_2(nbNegoProcessData_t *n)
 {

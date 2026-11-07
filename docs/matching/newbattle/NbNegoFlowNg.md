@@ -65,3 +65,59 @@ not emulate EE register binding or establish bounds for invalid caller objects.
 Retained-C strict implicit-declaration builds pass. Production and SKIP_ASM
 retain the same two existing Flow10_33 implicit declarations, nbCameraSetTaizi
 and datGetAisyoFlag, with identical guarded/ordinary/candidate diagnostics.
+
+## Flow10_1 (newbattle/NbNegoFlowNg, 0x100)
+
+64 of 64 words match at 256 bytes. The registration calls remain first and in
+order. The work ID is reloaded after them as an unsigned halfword. The special
+ID/event path returns its actual tested-zero event result without a constraint.
+Signed request/counter tests retain full-word zero/nonzero behavior. Candidate
+loads follow the corresponding RNG callback, and the initial selected-ID store
+remains before the race provider observes it. The final alternate candidate is
+reloaded after that provider. No provider ABI, type, bound or layout is changed.
+
+Two localized compiler aids remain. In the middle path an initialized zero is
+consumed by an empty operand, the selected ID is stored, and the same zero is
+returned. There is no intervening call or fabricated memory barrier. In the
+final path the selected u32 ID is bound to native v0 only from its post-race load
+through its real store; the previous race result is dead, and the bound value
+dies before zero is returned. Neither constrained value crosses a call.
+
+Independent ablations in this source shape give 248 bytes with 37/62 overlap
+words matching and 8 native bytes uncovered without the return operand; 252
+bytes with 52/63 matching and 4 uncovered without the selected-ID binding; and
+252 bytes with 48/63 matching and 4 uncovered without either. These observations
+justify the two local aids in the reduced shape without claiming no other
+ordinary spelling could match or asserting a compiler-internal mechanism.
+
+Integration asserts every source byte outside this target span is unchanged,
+including the existing Flow10_21 binding. Guarded, enabled original, ordinary,
+final and three ablation owners receive 21 fresh complete assembly/entire-ELF
+plain-versus-stock -da parity checks. Only one equal-length temporary source
+filename is normalized. The final owner is 33 match, 0 differ; each nonmatching
+control leaves only this target different. All 32 peers and allocated nontext
+sections remain unchanged in every mode. Independently resolved final code for
+all 33 functions matches raw retail, as do the 84 owned rodata bytes; its 12-byte
+native tail is zero padding.
+
+Strict production/SKIP builds retain identical inherited Flow10_33 errors for
+nbCameraSetTaizi and datGetAisyoFlag. Retained strict builds pass. These are
+baseline-equivalent failures, not clean production strict passes. The target's
+callees are declared and their actual providers were independently reviewed.
+
+A fresh bounded interpreter fixture compares the exact extracted original,
+final and three ablation bodies with the 64 raw retail instruction words.
+Optimized and ASan/UBSan runs each pass 562,144 scenarios and 2,810,720 complete
+state/callback comparisons. Coverage includes every u16 ID, signed state
+boundaries, candidate slots, valid registration capacities, real bounded RNG
+modulo behavior and callback mutation. Caller-saved registers are poisoned,
+and the native stack/saved-register contract is checked. Target constraints
+are erased only for host execution; EE output and lifetime evidence establish
+their native behavior. This is not a full game emulator, provider end-to-end
+test, or a real-table bound proof. Out-of-contract negative capacities are
+excluded, and LeakSanitizer alone is disabled for executor compatibility.
+
+The full linked retail image is byte-identical. Generated-source controls,
+505 tooling tests without optional skips, 818 layout assertions, frozen EE/IRX
+draft sweeps, inline-assembly policy and primary/audit report-scope checks pass.
+The complete music 27/0, recovery 391/0 and birth-mask 196/0 owners are preserved.

@@ -213,6 +213,7 @@ Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newba
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
 Flow10_10	newbattle/NbNegoFlowNg	0x90	36 of 36 words match	docs/matching/newbattle/NbNegoFlowNg.md	3
 Flow10_21	newbattle/NbNegoFlowNg	0x98	38 of 38 words match	docs/matching/newbattle/NbNegoFlowNg.md	31
+Flow10_1	newbattle/NbNegoFlowNg	0x100	64 of 64 words match	docs/matching/newbattle/NbNegoFlowNg.md	69
 nbFlowGetUnitEntry	newbattle/NbNegoFlowOne	0x384	225 of 225 words match	docs/matching/newbattle/NbNegoFlowOne.md	3
 Flow7_20	newbattle/NbNegoFlowQuestion	0x130	76 of 76 words match	docs/matching/newbattle/NbNegoFlowQuestion.md	3
 Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newbattle/NbNegoFlowTwo.md	3
