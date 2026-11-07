@@ -1,9 +1,25 @@
 #include "common.h"
+extern void *memcpy(void *, const void *, size_t);
 
-/* One 0x40-byte request packet of the multi-threaded RPC queue. */
-typedef struct rpcPacket {
+typedef struct rpcClient rpcClient;
+/* The unbind request prefix after its 16-byte SIF command header. */
+typedef struct rpcUnbindPacket {
+    u32 commandHeader[4];
+    u32 flags;
+    void *self;
+    u32 sequence;
+    rpcClient *client;
+    u32 serverId;
+    void *server;
+} rpcUnbindPacket;
+
+/* The allocator and command views occupy the same 64-byte packet storage. */
+typedef union rpcPacket {
     u32 w[16];
+    rpcUnbindPacket unbind;
 } rpcPacket;
+typedef char rpcPacketSize[(sizeof(rpcPacket) == 64) ? 1 : -1];
+typedef char rpcPacketAlignment[(__alignof__(rpcPacket) == __alignof__(u32)) ? 1 : -1];
 
 /* Observed prefix of the 0x40-byte M-RPC queue allocation. The remaining
  * bytes have no established fields and are not accessed through this view. */
@@ -102,7 +118,7 @@ void _sceRpcFreePacket(rpcPacket *p)
 
 /* The M-RPC client extends the shared client prefix. Packet addresses are
  * opaque, as in SifRpcClientData_t in include/irx/iop.h. */
-typedef struct rpcClient {
+struct rpcClient {
     void *packet;
     u32 sequence;
     s32 sema;
@@ -116,7 +132,7 @@ typedef struct rpcClient {
     s32 completionSema;
     s32 result;
     u32 parameters[3];
-} rpcClient;
+};
 
 /* Observed completion-response prefix; fields after this prefix are unknown. */
 typedef struct rpcResponse {
@@ -223,8 +239,8 @@ s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32
         DeleteSema(client->completionSema);
         return -1;
     }
-    client->packet = packet;
     client->sequence = packet->w[6];
+    client->packet = packet;
     packet->w[8] = serverId;
     packet->w[9] = arg0;
     packet->w[10] = arg1;
@@ -252,25 +268,14 @@ s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32
     return 0;
 }
 
-/* The unbind request prefix after its 16-byte SIF command header. */
-typedef struct rpcUnbindPacket {
-    u32 commandHeader[4];
-    u32 flags;
-    void *self;
-    u32 sequence;
-    rpcClient *client;
-    u32 serverId;
-    void *server;
-} rpcUnbindPacket;
+/* The EE command transfers the four-byte server-pointer representation. */
+typedef char rpcUnbindServerPointerSize[(sizeof(((rpcClient *)0)->server) == 4) ? 1 : -1];
+typedef char rpcUnbindRequestPointerSize[(sizeof(((rpcUnbindPacket *)0)->server) == 4) ? 1 : -1];
 
-/* NON_MATCHING: 60 of 71 words match at the native 284-byte size; the
- * request/client prefix loads and stores use different ordering/registers. */
-#ifdef NON_MATCHING
 s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
 {
     sdfSemaParam_t param;
     rpcPacket *packet;
-    rpcUnbindPacket *request;
     s32 sema;
     s32 result;
 
@@ -282,13 +287,12 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
     packet = _sceRpcGetPacket(&D_00599700);
     result = -1;
     if (packet != NULL) {
-        request = (rpcUnbindPacket *)packet;
-        client->sequence = request->sequence;
+        client->sequence = packet->unbind.sequence;
         client->packet = packet;
-        request->serverId = client->serverId;
-        request->self = packet;
-        request->client = client;
-        request->server = client->server;
+        packet->unbind.serverId = client->serverId;
+        packet->unbind.self = packet;
+        packet->unbind.client = client;
+        memcpy(&packet->unbind.server, &client->server, sizeof(packet->unbind.server));
         param.maxCount = 1;
         param.initCount = 0;
         param.option = 0;
@@ -310,9 +314,6 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libmrpc", sceSifMUnBindRpc);
-#endif
 
 INCLUDE_RODATA(const s32, "sdk/libmrpc", D_0054ADD8);
 

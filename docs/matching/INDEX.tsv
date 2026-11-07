@@ -486,8 +486,8 @@ sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79
 sceMcSetFileInfo	sdk/libmc	0x1D8		docs/matching/sdk/libmc.md	90
 sceSifMInitRpc	sdk/libmrpc	196 bytes	49 of 49 words match	docs/matching/sdk/libmrpc.md	3
-sceSifMUnBindRpc			60 of 71 words match	docs/matching/sdk/libmrpc.md	42
-_request_end	sdk/libmrpc	264 bytes	66 of 66 words match	docs/matching/sdk/libmrpc.md	70
+sceSifMUnBindRpc	sdk/libmrpc	284 bytes	71 of 71 words now match	docs/matching/sdk/libmrpc.md	42
+_request_end	sdk/libmrpc	264 bytes	66 of 66 words match	docs/matching/sdk/libmrpc.md	135
 scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
