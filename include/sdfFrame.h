@@ -31,6 +31,14 @@
 #define SDF_FRAME_STEP(d) (d)
 #endif
 
+/* Runs where a floor face's edge band reached a sphere, before the sphere is
+ * moved to that clearance. Below retail's step the move pulls a sphere above
+ * the floor into the next face, which pushes it back each tick, so a host
+ * that shortens the step keeps it where it is. Expands to nothing here. */
+#ifndef SDF_FRAME_FLOOR_EDGE
+#define SDF_FRAME_FLOOR_EDGE(clearance, distance, signedDistance)
+#endif
+
 /* A factor applied once per tick, such as a velocity's decay. A host raises
  * it to the power it scales a step by, so the decay over a second holds. */
 #ifndef SDF_FRAME_DECAY
