@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "interface.h"
 #include "facility.h"
 #include "fpu.h"
@@ -171,7 +172,7 @@ void dumpCursorInfo(fclRibbon_t *handle)
 
 void MoveActive(fclRibbon_t *phandle)
 {
-    phandle->ctr_act -= 8;
+    phandle->ctr_act -= SDF_FRAME_STEP(8);
     if (phandle->ctr_act <= 0) {
         phandle->ctr_act = 0;
         phandle->stat &= ~1;
@@ -180,7 +181,7 @@ void MoveActive(fclRibbon_t *phandle)
 
 void MoveDeactive(fclRibbon_t *phandle)
 {
-    phandle->ctr_deact -= 0x10;
+    phandle->ctr_deact -= SDF_FRAME_STEP(0x10);
     if (phandle->ctr_deact <= 0) {
         phandle->ctr_deact = 0;
         phandle->stat &= ~2;

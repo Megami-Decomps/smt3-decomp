@@ -1,6 +1,7 @@
 #include "common.h"
 #include "facility.h"
 #include "nme.h"
+#include "sdfFrame.h"
 
 extern s32 nmeGetInputMode(nmeWork_t *work);
 extern s8 nmeGetModeFlag(nmeWork_t *work);
@@ -663,7 +664,7 @@ void nmeUpdateInput(void)
 void nmeAdvanceAnim(void)
 {
     nmeWork_t *work = nmeUpdateWork;
-    work->animation += 2;
+    work->animation += SDF_FRAME_STEP(2);
     if (work->animation >= 0x900) {
         work->animation = 0;
     }

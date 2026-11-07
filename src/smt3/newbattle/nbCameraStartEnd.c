@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -258,8 +259,8 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
         }
         break;
     case 2:
-        nbCameraStartTable[0].step += D_00551DFC;
-        nbCameraStartTable[1].step += D_00551DFC;
+        nbCameraStartTable[0].step += SDF_FRAME_STEP(D_00551DFC);
+        nbCameraStartTable[1].step += SDF_FRAME_STEP(D_00551DFC);
         if (nbCameraStartTable[0].step >= D_00551E00) {
             nbCameraStartTable[0].step = D_00551E00;
             nbCameraStartTable[1].step = D_00551E00;
@@ -272,7 +273,7 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
         }
         break;
     case 4:
-        nbCameraStartTable[1].step *= 0.9649999738f;
+        nbCameraStartTable[1].step *= SDF_FRAME_DECAY(0.9649999738f);
         if (nbCameraStartTable[1].step < 0.0009999999311f) {
             nbCameraStartTable[1].step = 0.0f;
         }
@@ -591,8 +592,8 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
     }
 
     if (pending == 0) {
-        nbCameraStartBAState.step += D_00551DFC;
-        nbCameraBAState.step += D_00551DFC;
+        nbCameraStartBAState.step += SDF_FRAME_STEP(D_00551DFC);
+        nbCameraBAState.step += SDF_FRAME_STEP(D_00551DFC);
         if (nbCameraStartBAState.step >= D_00551E00) {
             nbCameraStartBAState.step = D_00551E00;
             nbCameraBAState.step = D_00551E00;
@@ -602,11 +603,11 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
     nbCameraLerpVec(&nbCameraStartBAState, &startPos.x);
     nbCameraLerpVec(&nbCameraBAState, &battlePos.x);
     if (nbCameraStartBAState.t > 0.75f) {
-        nbCameraStartBAState.step *= 0.9649999738f;
+        nbCameraStartBAState.step *= SDF_FRAME_DECAY(0.9649999738f);
         if (nbCameraStartBAState.step < 0.0009999999311f) {
             nbCameraStartBAState.step = 0.0f;
         }
-        nbCameraBAState.step *= 0.9649999738f;
+        nbCameraBAState.step *= SDF_FRAME_DECAY(0.9649999738f);
         if (nbCameraBAState.step < 0.0009999999311f) {
             nbCameraBAState.step = 0.0f;
         }

@@ -5425,14 +5425,14 @@ void campDhAdvanceAnim(void)
     if (campDhTimerWork->unk_1C >= 0x400) {
         campDhTimerWork->unk_1C = 0;
     }
-    campDhTimerWork->unk_20 += 8;
+    campDhTimerWork->unk_20 += SDF_FRAME_STEP(8);
     if (campDhTimerWork->unk_20 >= 0x200) {
         campDhTimerWork->unk_20 = 0;
     }
     if (campDhTimerWork->unk_24 < 0x200) {
-        campDhTimerWork->unk_24 += 0x20;
+        campDhTimerWork->unk_24 += SDF_FRAME_STEP(0x20);
     } else {
-        campDhTimerWork->unk_24 += 0x10;
+        campDhTimerWork->unk_24 += SDF_FRAME_STEP(0x10);
     }
     if (campDhTimerWork->unk_24 >= 0x400) {
         campDhTimerWork->unk_24 = 0;
@@ -6596,7 +6596,7 @@ void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
                          D_00345D88, fclSpriteTable, 0x47);
         frame = cmpSkillAnimLive[2];
         if (frame < 0x100) {
-            frame += 8;
+            frame += SDF_FRAME_STEP(8);
             cmpSkillAnimLive[2] = frame;
             if (frame >= 0x100) {
                 cmpSkillAnimLive[2] = 0;

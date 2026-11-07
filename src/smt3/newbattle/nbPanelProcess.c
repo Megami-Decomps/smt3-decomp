@@ -3604,7 +3604,7 @@ void nbPanelDraw(s32 flag)
 
 s32 nbPanelRunProcess(dds3ProcessID_t *id)
 {
-    nbPnlCnt += 0.2f;
+    nbPnlCnt += SDF_FRAME_STEP(0.2f);
     return 0;
 }
 

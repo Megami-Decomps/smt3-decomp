@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "model.h"
@@ -150,7 +151,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 3: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha < 0x80) {
-            alpha += 8;
+            alpha += SDF_FRAME_STEP(8);
         }
         if (alpha >= 0x81) {
             alpha = 0x80;
@@ -161,7 +162,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 4: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha >= 0x41) {
-            alpha -= 8;
+            alpha -= SDF_FRAME_STEP(8);
         }
         if (alpha < 0x40) {
             alpha = 0x40;
@@ -172,7 +173,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 5: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha < 0x80) {
-            alpha += 4;
+            alpha += SDF_FRAME_STEP(4);
         }
         if (alpha >= 0x81) {
             alpha = 0x80;
@@ -182,7 +183,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     }
     case 6: {
         alpha = ((u8 *)&basic->color)[3];
-        alpha = alpha != 0 ? alpha - 4 : 0;
+        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP(4) : 0;
         if (alpha < 0) {
             alpha = 0;
         }
@@ -192,7 +193,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 7: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha < 0x80) {
-            alpha += 2;
+            alpha += SDF_FRAME_STEP(2);
         }
         if (alpha >= 0x81) {
             alpha = 0x80;
@@ -202,7 +203,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     }
     case 8: {
         alpha = ((u8 *)&basic->color)[3];
-        alpha = alpha != 0 ? alpha - 2 : 0;
+        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP(2) : 0;
         if (alpha <= 0) {
             alpha = 0;
         }

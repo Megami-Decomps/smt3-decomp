@@ -455,7 +455,7 @@ void nbMakaStep(nbMakaProcessData_t *w)
             w->stat = 0;
             return;
         }
-        w->alpha += 0x20;
+        w->alpha += SDF_FRAME_STEP(0x20);
         if (w->alpha > 0x80) {
             w->alpha = 0x80;
         }
@@ -466,7 +466,7 @@ void nbMakaStep(nbMakaProcessData_t *w)
             return;
         }
         if (w->alpha > 0) {
-            w->alpha -= 0x14;
+            w->alpha -= SDF_FRAME_STEP(0x14);
             if (w->alpha < 0) {
                 w->alpha = 0;
             }

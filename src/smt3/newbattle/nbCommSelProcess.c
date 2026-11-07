@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
@@ -759,14 +760,14 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
 {
     if (s->animeflag & 0x20) {
         if (s->helpa < 128) {
-            s->helpa += 32;
+            s->helpa += SDF_FRAME_STEP(32);
             if (s->helpa > 128) {
                 s->helpa = 128;
             }
         }
     } else {
         if (s->helpa > 0) {
-            s->helpa -= 21;
+            s->helpa -= SDF_FRAME_STEP(21);
             if (s->helpa < 0) {
                 s->helpa = 0;
             }
@@ -776,7 +777,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 128) {
             s->animeflag &= ~1;
         } else {
-            s->alpha += 20;
+            s->alpha += SDF_FRAME_STEP(20);
             if (s->alpha > 128) {
                 s->alpha = 128;
             }
@@ -786,7 +787,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 0) {
             s->animeflag &= ~2;
         } else {
-            s->alpha -= 12;
+            s->alpha -= SDF_FRAME_STEP(12);
             if (s->alpha < 0) {
                 s->alpha = 0;
             }

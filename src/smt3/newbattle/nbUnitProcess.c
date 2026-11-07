@@ -1198,7 +1198,7 @@ void RunDamage(nbMainProcessData_t *data, nbFormation_t *form)
     dds3SetPosPoseSet(form->basic, &pos);
 
     if (form->damageRange > 0.0f) {
-        form->damageRange -= 0.7f;
+        form->damageRange -= SDF_FRAME_STEP(0.7f);
         if (form->damageRange < 0.0f) {
             form->damageRange = 0.0f;
         }

@@ -509,12 +509,12 @@ void calcCamNormal(void) {
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
     if (fldCamHeight > D_0054ECA0) {
-        fldCamHeight -= 1000.0f;
+        fldCamHeight -= SDF_FRAME_STEP(1000.0f);
         if (fldCamHeight < D_0054ECA0) {
             fldCamHeight = D_0054ECA0;
         }
     } else if (fldCamHeight < D_0054ECA0) {
-        fldCamHeight += 1000.0f;
+        fldCamHeight += SDF_FRAME_STEP(1000.0f);
         if (D_0054ECA0 < fldCamHeight) {
             fldCamHeight = D_0054ECA0;
         }
@@ -594,9 +594,9 @@ void calcCamDirLock(void) {
     nearPoint.x = fldGlobalBase.x;
     nearPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
     nearPoint.z = fldGlobalBase.z;
-    nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) * 0.5f;
-    nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) * 0.5f;
-    nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) * 0.5f;
+    nearPoint.x = D_002FC9C0[0] + (nearPoint.x - D_002FC9C0[0]) * SDF_FRAME_DECAY(0.5f);
+    nearPoint.y = D_002FC9C0[1] + (nearPoint.y - D_002FC9C0[1]) * SDF_FRAME_DECAY(0.5f);
+    nearPoint.z = D_002FC9C0[2] + (nearPoint.z - D_002FC9C0[2]) * SDF_FRAME_DECAY(0.5f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &nearPoint);
     /* Retail keeps the reference XYZ setup at +0x10 although this mode has
      * no collision query. calcCamNormal uses this same setup as a live base. */
@@ -618,9 +618,9 @@ void calcCamDirLock(void) {
         fldCamDist = fldCamDirLock = 0.0f;
     }
     dds3SetPosPoseSet(control->handle, &farPoint);
-    farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * 0.5f;
-    farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * 0.5f;
-    farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * 0.5f;
+    farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.5f);
+    farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.5f);
+    farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.5f);
     dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
@@ -772,9 +772,9 @@ void fldEventUpdateEx_Unity_2(void)
     point.w = 1.0f;
     memset((void *)&base, 0, sizeof(base));
     base.w = 1.0f;
-    eye.x = D_002FC9C0[0] + (fldGlobalBase.x - D_002FC9C0[0]) * 0.5f;
-    eye.y = D_002FC9C0[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - D_002FC9C0[1]) * 0.125f;
-    eye.z = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]) * 0.5f;
+    eye.x = D_002FC9C0[0] + (fldGlobalBase.x - D_002FC9C0[0]) * SDF_FRAME_DECAY(0.5f);
+    eye.y = D_002FC9C0[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - D_002FC9C0[1]) * SDF_FRAME_DECAY(0.125f);
+    eye.z = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]) * SDF_FRAME_DECAY(0.5f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     dds3GetTMPoseSet(unit->handle);
     target.x = fldGlobalBase.campos.x;
@@ -891,9 +891,9 @@ void fldEventUpdateEx_Unity_2(void)
         target.y = y * inverse + by * blend;
     }
     dds3SetPosPoseSet(control->handle, &target);
-    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.125f;
-    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.125f;
-    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.125f;
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.125f);
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.125f);
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.125f);
     dds3SetPosPoseSet(control->handle, &target);
     SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
@@ -1129,16 +1129,16 @@ void fldCamUpdateChase(void) {
     eye.x = fldGlobalBase.x - sdfSin(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
     eye.y = fldGlobalBase.y - 200.0f + D_0054ECB8;
     eye.z = fldGlobalBase.z - sdfCos(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
-    eye.x = D_002FC9C0[0] + (eye.x - D_002FC9C0[0]) * 0.0625f;
-    eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) * 0.0625f;
-    eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) * 0.0625f;
+    eye.x = D_002FC9C0[0] + (eye.x - D_002FC9C0[0]) * SDF_FRAME_DECAY(0.0625f);
+    eye.y = D_002FC9C0[1] + (eye.y - D_002FC9C0[1]) * SDF_FRAME_DECAY(0.0625f);
+    eye.z = D_002FC9C0[2] + (eye.z - D_002FC9C0[2]) * SDF_FRAME_DECAY(0.0625f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     target.x = fldGlobalBase.x;
     target.y = fldGlobalBase.y - 200.0f;
     target.z = fldGlobalBase.z;
-    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * 0.0625f;
-    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * 0.0625f;
-    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * 0.0625f;
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.0625f);
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.0625f);
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.0625f);
     dds3SetPosPoseSet(control->handle, &target);
     node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
@@ -1225,12 +1225,12 @@ void calcCamSyukan(void) {
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
     if (fldCamHeight > D_0054ECA0) {
-        fldCamHeight -= 1000.0f;
+        fldCamHeight -= SDF_FRAME_STEP(1000.0f);
         if (fldCamHeight < D_0054ECA0) {
             fldCamHeight = D_0054ECA0;
         }
     } else if (fldCamHeight < D_0054ECA0) {
-        fldCamHeight += 1000.0f;
+        fldCamHeight += SDF_FRAME_STEP(1000.0f);
         if (D_0054ECA0 < fldCamHeight) {
             fldCamHeight = D_0054ECA0;
         }
@@ -1308,10 +1308,10 @@ void fldCamElvTask(void) {
         camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         if (fldElvCameraScene == 1 || fldElvCameraScene == -1) {
             if (phase < 3.14f) {
-                phase += 0.2f;
+                phase += SDF_FRAME_STEP(0.2f);
                 camera->poseset->pos.y = D_0055DB10[1] + sdfSin(phase * direction) * 2.5f;
             } else {
-                phase += 0.02f;
+                phase += SDF_FRAME_STEP(0.02f);
                 camera->poseset->pos.y = D_0055DB10[1] + sdfSin(phase * direction) * 2.0f;
             }
         }

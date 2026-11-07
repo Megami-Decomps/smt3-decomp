@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdk_libgcc.h"
 #include "pbRecord.h"
 #include "kernel.h"
@@ -1277,7 +1278,7 @@ s32 roundAutoCamera(dds3ProcessID_t *id) {
     pbRoundCamWork_t *work = panel->data.roundCam;
     s32 ret = 0;
     if (work->dir > 0) {
-        cameraAngle += 0.2f;
+        cameraAngle += SDF_FRAME_STEP(0.2f);
         if (cameraAngle >= work->angle) {
             if (work->angle >= 6.28318501f) {
                 cameraAngle = 0.0f;
@@ -1287,7 +1288,7 @@ s32 roundAutoCamera(dds3ProcessID_t *id) {
             ret = -1;
         }
     } else {
-        cameraAngle -= 0.2f;
+        cameraAngle -= SDF_FRAME_STEP(0.2f);
         if (cameraAngle <= work->angle) {
             cameraAngle = work->angle;
             ret = -1;
@@ -2158,7 +2159,7 @@ s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id)
         }
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    pbMapCursorWork += 0.2f;
+    pbMapCursorWork += SDF_FRAME_STEP(0.2f);
     if (3.1415927f <= pbMapCursorWork) {
         pbMapCursorWork = 0.0f;
     }

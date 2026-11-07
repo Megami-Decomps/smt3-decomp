@@ -2086,14 +2086,14 @@ void CalcWindow(instanceMes_tag *pinst) {
     mode = pinst->stat & 0x300;
     switch (mode) {
     case 0x100:
-        sprite->alpha += 0x18;
+        sprite->alpha += SDF_FRAME_STEP(0x18);
         if (sprite->alpha >= place->fadeLimit) {
             sprite->alpha = place->fadeLimit;
             pinst->stat = (pinst->stat & ~0x307) | 0x203;
         }
         break;
     case 0x300:
-        sprite->alpha -= 8;
+        sprite->alpha -= SDF_FRAME_STEP(8);
         if (sprite->alpha <= 0) {
             sprite->alpha = 0;
             pinst->stat &= ~0x300;
@@ -2104,14 +2104,14 @@ void CalcWindow(instanceMes_tag *pinst) {
     mode = pinst->stat & 0x3000;
     switch (mode) {
     case 0x1000:
-        frame->alpha += 0x20;
+        frame->alpha += SDF_FRAME_STEP(0x20);
         if (frame->alpha >= 0xC8) {
             frame->alpha = 0xC8;
             pinst->stat = (pinst->stat & ~0x3000) | 0x2000;
         }
         break;
     case 0x3000:
-        frame->alpha -= 0x20;
+        frame->alpha -= SDF_FRAME_STEP(0x20);
         if (frame->alpha <= 0) {
             frame->alpha = 0;
             pinst->stat &= ~0x3000;
@@ -2218,7 +2218,7 @@ void CalcSelect(instanceMes_tag *panel) {
         }
         break;
     case 3:
-        selection->glyphColorIntensity -= 16;
+        selection->glyphColorIntensity -= SDF_FRAME_STEP(16);
         if (selection->glyphColorIntensity <= 0) {
             selection->glyphColorIntensity = 0;
             selection->phase = 4;
@@ -2349,11 +2349,11 @@ void CalcCurCtr(instanceMes_tag *pinst) {
     s32 minimumAlpha;
     if (fade->isdraw != 0) {
         if (fade->ctr1 > 0) {
-            fade->ctr1 -= 8;
+            fade->ctr1 -= SDF_FRAME_STEP(8);
         }
         switch (fade->phase) {
         case 0:
-            fade->ctr0 += 8;
+            fade->ctr0 += SDF_FRAME_STEP(8);
             if (fade->ctr0 >= 0xFF) {
                 fade->phase = 1;
                 fade->ctr0 = 0xFF;
@@ -2361,7 +2361,7 @@ void CalcCurCtr(instanceMes_tag *pinst) {
             }
             break;
         case 1:
-            fade->ctr0 -= 8;
+            fade->ctr0 -= SDF_FRAME_STEP(8);
             minimumAlpha = (fade->isdraw & 1) ? 0x20 : 0x40;
             if (fade->ctr0 <= minimumAlpha) {
                 fade->ctr0 = minimumAlpha;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -108,7 +109,7 @@ void nbCameraState_NegoBougai_Calc(void)
 
     if ((pFormation->stat & 3) == 3) {
         if (nbCamera_NegoBougai_Frame >= nbCamera_NegoBougai_Wait) {
-            nbCamera_NegoBougai_Rate *= 0x1.ab851ep-1f;
+            nbCamera_NegoBougai_Rate *= SDF_FRAME_DECAY(0x1.ab851ep-1f);
             scale.x = -pCamera->distance;
             scale.y = -pCamera->distance;
             scale.z = -pCamera->distance;

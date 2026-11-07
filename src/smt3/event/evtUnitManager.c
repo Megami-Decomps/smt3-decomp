@@ -1468,7 +1468,7 @@ s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
         wobble = 1;
     }
     if (wobble != 0) {
-        unit->wobblePhase += 0.104719755f;
+        unit->wobblePhase += SDF_FRAME_STEP(0.104719755f);
         if (6.2831853f <= unit->wobblePhase) {
             unit->wobblePhase -= 6.2831853f;
         }

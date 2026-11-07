@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sndManager.h"
 #include "facility.h"
 #include "fpu.h"
@@ -423,7 +424,7 @@ void dds3TitleUpdateFade(void)
         glowAlpha = alpha;
         if (alpha == 0x80) {
             glowAlpha += (s32)(sdfSin(dds3TitleFadeLevel) * 32.0f);
-            dds3TitleFadeLevel += 0.04999999702f;
+            dds3TitleFadeLevel += SDF_FRAME_STEP(0.04999999702f);
         }
         rsetAlpha(1);
         DrwSprite2D(0x67, 0xCD, 0x132, 0x3C, 1, 0xBD, 0x132, 0x3C,
