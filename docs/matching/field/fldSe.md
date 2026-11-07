@@ -81,3 +81,50 @@ area-14 stop/reset path, special floors, event-table reloads and final audio
 updates. Reading the just-published bank through the global rather than its
 local leaves the same 19 differences. These older controls did not qualify a match; the localized final reconstruction
 above resolves the residual without changing these native/provider contracts.
+## fldBgmContinue (field/fldSe, 0x294)
+
+165 of 165 words match at 660 bytes with ordinary C. No target-specific
+register binding, empty compiler operand, volatile view or synthetic
+computation is retained.
+
+Initial and post-callback bank snapshots feed their track sums before being
+copied into the current bank. The final event-selected bank has its own local.
+The sums explicitly retain native 32-bit wrapping. The area-14 path publishes
+the initial bank before its bit check and refreshes the bank and sequence
+unconditionally after the false/true join, including after an optional stop.
+The decimal-area-20 path publishes the ordinary bank only on its non-special
+floor route, before the optional event check; rejection leaves that callback's
+observations intact. Event-table paths re-read area and floor after their
+callback. An early start-gate return leaves the resume operation at the native
+function tail.
+
+An intermediate constrained form was exact, but removing all its constraints
+at once from the corrected ordinary source also matched. Individual constraint
+ablations regressed; that did not make the constraints necessary. The final
+ordinary source and the unchanged owner independently reproduce complete
+compiler output across production, SKIP_ASM and retained contexts. All
+non-target code and allocated-data contracts are preserved.
+
+Fresh integration on main through cmpRecover passes six complete guarded/final
+plain/stock-dump assembly and entire-ELF comparisons in production, SKIP_ASM
+and retained modes. Exactly one equal-length canonical source filename is
+normalized. All strict builds are clean. Complete owner: 26 match, 0 differ.
+All 26/25/26 non-target peers and allocated data remain exact. Production and
+retained relocation ordering is unchanged. SKIP_ASM changes global HI16
+grouping, but ordered HI16/LO16 resolution gives identical targets and peer
+relocation multisets. Cross-mode target contracts agree after resolving the
+production-owned sdata symbols and their named external views.
+
+Optimized and ASan/UBSan full-state/callback fixtures each pass 337,600 cases.
+A fresh independent raw-retail interpreter comparison passes 20,000 cases,
+with every conditional branch exercised both ways and 164/165 native words
+reached; only the unreachable alignment nop is excluded. These fixtures use
+provider hooks and valid modeled indices, not full hardware execution or a
+proof of malformed-index safety. Leak detection is disabled in the allocation-
+free sanitizer fixture.
+
+Full retail checksum/byte comparison, generated-source validation, all 505
+unittest cases without skips plus 818 layout assertions, frozen EE/seven-IRX
+checks and reconciled production reports pass. The recovery and birth-mask
+owners remain 391/0 and 196/0. Only this function gains credit: game totals
+become 8,658 functions and 1,504,872 bytes. A subsequent build has no work.
