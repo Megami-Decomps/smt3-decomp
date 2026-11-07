@@ -189,59 +189,64 @@ investigation changes no source, compiler flags, owned data or matching credit.
 
 ## nbCameraState_SkillAttack_Init (newbattle/nbCameraSkill, 0x224)
 
-117 of 137 words match, at the exact 548-byte size.
+137 of 137 words match at the native 548-byte size. The complete owner
+has 36 matching functions and exact owned data.
 
-Everything up to the width test matches, including the frame: `sdfVector4_t
-look` at `0x0`, an eight-word `u32 ptr[8]` whose members 2 to 5 take the two
-`dds3GetRandA` remainders and two zeros at `0x18` through `0x24`, and
-`nbCameraSkillInfo_t work` at `0x30`. Reading the first remainder back out of
-the aggregate, `D_003246D0[ptr[2]]`, is what gives retail's `sw`/`lw` pair
-around the second `dds3GetRandA` and the `addu $1, $1, $2` table rows.
+The frame uses the existing primary `nbCameraSkillPtr_t` between `look`
+and `work`, rather than the retained draft's oversized eight-word view.
+The live first random index is stored at stack+0x18 and read back after
+the second RNG call. Both native angle lookups use this first index;
+the apparent angle-index reuse is preserved. The H/W fields are initialized
+to zero and used as the corresponding table indices.
 
-The 20 remaining words are the two arms of `if (width < 1500.0f)`. Retail
-emits `bc1f` to the `printf` arm with an empty delay slot and falls through to
-`bCameraShot_AttackInvokeTargetPartyNear_Set`; both arms then set `$2 = 0xB`
-and cross-jump to one shared `sw $2, nbCameraSkillAttackStep`. The draft gets
-the arms the other way round, with `daddu $4, $17` hoisted into a `bc1tl`
-delay slot. The two `nbCameraSkillAttackStep = 0xB;` assignments are not
-a remaining cross-jump problem. In the current complete-owner baseline they
-already cross-jump through `$2` to one shared store; the earlier claim here
-that they use different registers is stale. Retail also keeps the diagnostic
-format address in `$16` across `fptodp`, where the draft materialises it after.
+The second `% 14` remainder/store is present in retail but its field has
+no native consumer. It copies the immediately adjacent live `% 18`
+random-index initialization in the same truthful record. This is the
+canonical narrow dead-code copy-shape exception, not an invented consumer:
+removing the dead assignment while retaining the second RNG advance loses
+the native division/store sequence and yields 524 bytes. The source comment
+identifies the native trace and local live initialization. Same-function HD
+output corroborates the record role, but is not claimed as independent native
+sibling evidence or recovered source spelling.
 
-Ruled out for the arm order: inverting the test so the `printf` arm is the
-`if` body, hoisting `nbCameraSkillAttackStep = 0xB;` below the `if`/`else`
-(47 words out), and a `char *msg = D_005349A0;` local for the format string.
-The matching `nbCameraState_SkillAttack_Calc` needed its actual ground-collision
-callee visible as C; see [callee visibility](../../levers/callee-visibility.md).
+An ordinary format pointer followed by a separate `fptodp(width)` result
+reproduces the native diagnostic argument lifetime. The format high half
+occupies the conversion call's delay slot, its low half follows that call,
+and the format argument move fills the `printf` delay slot. Both locals have
+real consumers; no constraints or altered ABI are used here.
 
-A fresh bounded continuation separates these issues. An ordinary
-`const char *message` initialized to the existing literal, followed by
-`f64 diagnosticWidth = fptodp(width)` and `printf(message, diagnosticWidth)`,
-reproduces the native diagnostic instruction sequence without constraints:
-the format high half is in the conversion call's delay slot, its low half
-follows the call, and the argument move occupies the `printf` delay slot.
-This does not fix the arm layout. The native-sized candidate still reports
-117/137 positional words, and the complete checker rejects its misplaced
-relocations; this diagnostic count is not acceptance evidence.
+One one-pass block around only `nbCameraShot_InvokeTargetReverse_Set2`
+preserves the native arm order. Qualified stock compiler snapshots show
+both ordinary and final inputs expanding the near arm before the diagnostic
+and reverse arm. The ordinary control reverses them by `rtl.01.sibling`;
+the final retains loop-boundary notes around the reverse call and preserves
+the near-first order through that stage and the following jump pass. This
+is an observed boundary/order dependency, not a claim about an unobserved
+internal algorithm. It adds no runtime iteration or operation and is not
+evidence of historical source spelling.
 
-Truthful same-symbol external views of the near provider and, separately,
-the reverse provider are complete-assembly neutral against their ordinary
-controls in production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM`.
-No opaque declaration is retained. Baseline, ordinary format/conversion and
-visibility controls pass complete plain/dump assembly parity in those three
-modes after generated scratch-path normalization. The ordinary format control
-also passes strict implicit-declaration checks; the canonical owner remains
-35 match, 0 differ, with the target fallback still active.
+Removing only the one-pass block returns the 20/137-word residual at the
+same 548-byte size. The format-local-only, near-call-block and explicit
+forward-branch controls remain negative. A reverse block without the
+format locals gives 540 bytes. Previously tested callee opacity and late
+operand constraints do not address this early layout dependency.
 
-Qualified baseline snapshots put the near call before the diagnostic call in
-`rtl.00.rtl`, but reverse their order by `rtl.01.sibling`. The unresolved
-layout therefore appears in that early interval, not only in late scheduling.
-No hooked explanation of the responsible algorithm is claimed. Repeating
-late operand constraints or callee opacity without a new premise is not a
-justified next step. The ordinary format control and NaN-preserving inverted
-test remain diagnostic only; no guarded source change or matching credit is
-included in this documentation update.
+The width calculation and ordered `< 1500.0f` comparison preserve the
+native NaN/far-arm behavior. The calls, RNG advances, party/pointer caching,
+state writes, rotations and quadword look vector remain native. Both near
+and reverse providers have their canonical signatures and ignore the work
+record; its partial initialization does not supply an uninitialized field
+to either implementation.
+
+Independent semantic/provider review and a 112,640-case actual-body host
+oracle pass, including callback mutation and NaN/infinity/boundary cases;
+this is not native floating-conversion bit emulation. The complete owner,
+all unaffected function contracts and owned data pass. Production,
+`SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` each pass strict implicit-
+declaration checks and complete plain/stock-dump/strict assembly and object
+parity. The SKIP-only added diagnostic string and 1500.0f literal preserve
+all previous data and relocation targets. Full retail checksum and
+regression gates remain required at landing.
 
 ## bCameraShot_AttackInvokeTargetPartyNear_Set (newbattle/nbCameraSkill, 0x308)
 

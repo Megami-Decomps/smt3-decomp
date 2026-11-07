@@ -1957,12 +1957,10 @@ extern f32 D_003246F0[];
 extern f32 D_00324710[];
 extern f32 D_00324720[];
 
-/* NON_MATCHING: 20 of 137 words differ (first at +0x168). */
-#ifdef NON_MATCHING
 void nbCameraState_SkillAttack_Init(void)
 {
     sdfVector4_t look;
-    u32 ptr[8];
+    nbCameraSkillPtr_t ptr;
     nbCameraSkillInfo_t work;
     nbCamera_t *pCamera = &pNbCamera;
     nbFormation_t *pInvoke;
@@ -1986,14 +1984,19 @@ void nbCameraState_SkillAttack_Init(void)
         invokeParty = effBTLSkillGetInvokeParty();
         targetParty = effBTLSkillGetTargetParty();
         if ((pInvoke->stat & 0x200) != 0 && invokeParty != targetParty) {
-            ptr[2] = dds3GetRandA(dds3EffectBase) % 18;
-            ptr[3] = dds3GetRandA(dds3EffectBase) % 14;
-            work.angleH = D_003246D0[ptr[2]];
-            work.angleW = D_003246F0[ptr[2]];
-            work.HeightMin = D_00324710[0];
-            work.WidthMin = D_00324720[0];
-            ptr[4] = 0;
-            ptr[5] = 0;
+            ptr.ptr_angleH = dds3GetRandA(dds3EffectBase) % 18;
+            /* Retail retains this second remainder/store at 0x1B7348..1B73A8.
+             * It copies the adjacent live angleH random-index initialization,
+             * but both native angle lookups use angleH. Preserve that unused
+             * copied field and the second RNG advance, rather than inventing
+             * a consumer or correcting the native index reuse. */
+            ptr.ptr_angleW = dds3GetRandA(dds3EffectBase) % 14;
+            work.angleH = D_003246D0[ptr.ptr_angleH];
+            work.angleW = D_003246F0[ptr.ptr_angleH];
+            ptr.ptr_H = 0;
+            ptr.ptr_W = 0;
+            work.HeightMin = D_00324710[ptr.ptr_H];
+            work.WidthMin = D_00324720[ptr.ptr_W];
             nbCameraState_InvokeTarget_SearchSet();
             width = effBTLModelGroupGetSphere(0x200);
             width += width;
@@ -2001,8 +2004,16 @@ void nbCameraState_SkillAttack_Init(void)
                 bCameraShot_AttackInvokeTargetPartyNear_Set(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             } else {
-                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX\n", fptodp(width));
-                nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
+                const char *message = "nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX\n";
+                f64 diagnosticWidth = fptodp(width);
+                printf(message, diagnosticWidth);
+                /* The qualified early RTL pair retains this call's one-pass
+                 * loop boundary and preserves the native near/far arm order
+                 * through the sibling pass. This is a compiler reconstruction
+                 * aid, not evidence of the original source spelling. */
+                do {
+                    nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
+                } while (0);
                 nbCameraSkillAttackStep = 0xB;
             }
         } else {
@@ -2019,9 +2030,6 @@ void nbCameraState_SkillAttack_Init(void)
         effBTLModelAllPopPosition();
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillAttack_Init);
-#endif
 
 void nbCameraState_SkillAttack_Calc(void)
 {
