@@ -1,5 +1,38 @@
 # Matching notes: newbattle/nbCameraBoss
 
+## nbCameraBoss_Sp_DOUTYO_TPFix_Set (newbattle/nbCameraBoss, 0x64)
+
+All 25 words match at the native 100-byte extent. A truthful float local
+holds the direction.x read after nbCameraSetState and its zero store, then
+supplies the existing target.x and direction.y stores. A localized f1
+binding and empty live-float operand preserve native allocation and
+scheduling. The value is initialized after the call, has two real field
+consumers, and crosses no further call. These are target-specific
+reconstruction aids, not evidence of original source spelling. Removing
+either constraint leaves five differing words. The ordinary ordering of the
+two 1.0 stores completes the match; all native loads, stores, literals,
+call ordering and return remain unchanged.
+
+The complete owner passes 112 match, 0 differ. Production, SKIP_ASM and
+retained-C checks preserve all peers and nonliteral owned data. Production
+and retained literal pools are unchanged; SKIP_ASM adds only the target's
+12 native literal bytes. Complete strict plain/dump assembly and ELF parity
+passes for final source and both minimal ablations. Independent review
+resolves all 100 target bytes against retail in all three modes and checks
+the ABI, actual memory accesses and local lifetime.
+
+Host semantic fixtures pass 300,045 cases per variant at -O2, -O3 and under
+address/undefined sanitizers. Modern host GCC rounds -888.94f to
+0xc45e3c29, while pinned ee-gcc 2.96 and retail use 0xc45e3c28. The exact-
+source fixture therefore checks candidate-versus-original behavior; a
+separately labeled native-literal fixture substitutes the exact value
+-888.93994140625f to check the native integer-store oracle. The production
+source keeps its original literal. Host tests do not establish EE literal
+conversion; the independently resolved native bytes do.
+
+Integrated retail checksum and repository gates remain required before
+publication.
+
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
 All 119 words now match at 476 bytes with the exact MASEHA provider visible

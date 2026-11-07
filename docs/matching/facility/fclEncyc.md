@@ -2,22 +2,54 @@
 
 ## ApplyChangeListIndex (facility/fclEncyc, 0x128)
 
-The draft emits the native 296 bytes, with 56 of 74 words matching. It scans
-signed 16-bit record indices, clamps the selected list position to the visible
-range, updates the byte-sized drawing and logical shifts, then invokes the
-independent edge-correction helper for every found entry. When the list is
-shorter than the visible range, the upper clamp is zero.
+74 of 74 words match at the native 296-byte size in ordinary C. Complete
+owner checking gives 118 match, 0 differ, preserving all 117 existing exact
+C functions and owned data. No new constraint, qualifier, layout, provider,
+array bound or compiler flag is introduced.
 
-The remaining eighteen words begin at +0x44: comparison operand order, timing
-of the list-count and visible-count loads, signed versus unsigned comparison
-selection, and byte-store order. Native reloads Shift after writing Index;
-the draft retains it. The cursor, geometry and line-step pointers address real
-subobjects of the existing list window. No layout or extent changes are used.
+The signed 16-bit record scan keeps the requested record as the left compare
+operand. At a found record, actual ListNums and ShiftMax bytes are promoted
+into separate signed 32-bit locals before the position calculation. Their
+range is exactly the byte range; signed subtraction and comparison mirror
+native without inventing a stronger list contract. Position is clamped to
+zero or the nonnegative visible-range endpoint. The unclamped position is
+retained only for the real shift correction.
 
-A more complicated visible-end formula emitted 320 bytes. The direct clamp
-recovers the native size. Capturing both count bytes early or chaining the
-shift stores retains 296 bytes but worsens overlap to 51 or 46 matching words;
-those variants are not retained.
+The updated logical Shift is truncated through its actual byte storage and
+then copied to DrawShift, matching the existing lower-edge branch of
+ApplyEdgeListCursor. Grouping the original-minus-clamped delta reproduces
+native's subtraction before addition. Native still reloads Shift after
+publishing Index; both byte publications precede geometry calculation. The
+edge-correction helper runs for every found record, including unchanged
+positions, and no helper runs when the record is absent.
+
+Fresh ordinary baseline is 56/74. The signed-count snapshot control reaches
+68/74; fixing compare operand order and grouping the live correction gives
+72/74; logical-then-drawing source publication closes the two remaining
+store-order words. All retain the native 296 bytes. A separate explicit byte
+temporary emits 304 bytes and is rejected. A precise Shift storage operand
+was investigated but regressed and is not used. These are measured source
+and output facts, not a claim about an unobserved optimizer rule or recovered
+historical spelling.
+
+Fifteen complete plain/dump/strict triples qualify the fallback, old ordinary
+source, signed-count snapshot control, 72/74 combined control and final in
+production, SKIP_ASM and retained-C modes. Full assembly, allocated sections,
+non-file symbols and ordered relocation records agree within each triple.
+Independent function-address resolution preserves all 121 production peers,
+117 SKIP peers and 121 retained-C peers plus non-text allocated data. The SKIP
+promotion inserts the target body, so associated text HI16/LO16 addends and
+calls to the formerly undefined target are compared by exact resolved function
+and offset, retaining opcode/register bits. No raw SKIP object identity is
+claimed. Production's resolved target contract equals the native fallback.
+
+Independent native, ABI and semantic review approves the complete source. An
+actual-body differential oracle passes 4,001,720 paired cases under optimized
+and ASan/UBSan builds, including signed IDs, count and clamp boundaries, byte
+truncation, first-match and absent-entry behavior, and adversarial callback
+observation and mutation. Host fixtures are not retail execution and do not
+claim safety for arbitrary corrupt counts or overflowing geometry. Full retail
+checksum and repository release gates remain required for publication.
 
 ## DebugProcMenu_fclEncyc (facility/fclEncyc, 0x1A8)
 

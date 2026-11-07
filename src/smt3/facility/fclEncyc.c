@@ -1920,8 +1920,6 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
     return changed;
 }
 
-#ifdef NON_MATCHING
-/* Native size; eighteen words differ. See docs/matching/facility/fclEncyc.md. */
 void ApplyEdgeListCursor(lstListWindow_t *list);
 void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
 {
@@ -1933,31 +1931,30 @@ void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
     cmpCursorPos_t *cursor = &list->cursorPos;
     cmpCursorSize_t *size = &list->cursorSize;
     for (i = 0; i < count; i++) {
-        if (indices[i] == recordIndex) {
+        if (recordIndex == indices[i]) {
             break;
         }
     }
     if (i < count) {
+        s32 listNums = cursor->ListNums;
+        s32 shiftMax = cursor->ShiftMax;
         position = i - cursor->Shift;
         original = position;
         if (position < 0) {
             position = 0;
-        } else if (position > cursor->ListNums - cursor->ShiftMax) {
-            position = cursor->ListNums < cursor->ShiftMax
-                           ? 0 : cursor->ListNums - cursor->ShiftMax;
+        } else if (position > listNums - shiftMax) {
+            position = listNums < shiftMax
+                           ? 0 : listNums - shiftMax;
         }
         cursor->Index = position;
         if (position != original) {
-            cursor->DrawShift = cursor->Shift + original - position;
-            cursor->Shift = cursor->DrawShift;
+            cursor->Shift = cursor->Shift + (original - position);
+            cursor->DrawShift = cursor->Shift;
             size->Y = cursor->Shift * *stepY + size->DefY;
         }
         ApplyEdgeListCursor(list);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
-#endif
 
 void ApplyEdgeListCursor(lstListWindow_t *list)
 {

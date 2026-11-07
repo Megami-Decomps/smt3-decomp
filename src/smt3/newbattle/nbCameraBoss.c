@@ -682,23 +682,25 @@ s32 nbCameraBoss_Sp_DOUTYO_TP_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
-#ifdef NON_MATCHING
 s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera)
 {
+    /* Keep the copied direction component live between its two field stores.
+     * This local constraint reproduces native allocation and scheduling; it
+     * is a target-specific reconstruction aid, not original source spelling. */
+    FAKEMATCH_ASM_REG(f32, x, "$f1");
     nbCameraSetState(0x17);
     pNbCamera->direction.x = 0.0f;
-    pNbCamera->target.x = pNbCamera->direction.x;
+    x = pNbCamera->direction.x;
+    pNbCamera->target.x = x;
+    FAKEMATCH_ASM_LIVE_F32(x);
     pNbCamera->target.y = -88.75f;
     pNbCamera->target.z = -888.94f;
-    pNbCamera->distance = 1.0f;
-    pNbCamera->direction.y = pNbCamera->direction.x;
     pNbCamera->direction.z = 1.0f;
+    pNbCamera->distance = 1.0f;
+    pNbCamera->direction.y = x;
     pNbCamera->fovy = 0.6981316209f;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_DOUTYO_TPFix_Set);
-#endif
 
 #ifdef NON_MATCHING
 s32 nbCameraBoss_Sp_DOUTYO_Run(nbCamera_t *camera);

@@ -120,15 +120,15 @@ cmbDrawUnitLevel	facility/fclCombineInit	0x1C0	112 of 112 words match	docs/match
 cmbUpdateCameraZoom	facility/fclCombineInit	0xE8	58 of 58 words match	docs/matching/facility/fclCombineInit.md	634
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
-ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
-DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
-DrawRegistListwinElem	facility/fclEncyc	0x18C	99 of 99 words match	docs/matching/facility/fclEncyc.md	72
-ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	118
-ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	153
-GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	190
-CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	213
-InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	240
-DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	340
+ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3
+DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	54
+DrawRegistListwinElem	facility/fclEncyc	0x18C	99 of 99 words match	docs/matching/facility/fclEncyc.md	104
+ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	150
+ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	185
+GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	222
+CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	245
+InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	272
+DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	372
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	75
@@ -248,15 +248,16 @@ nbGetKoukaBadKaifuku	newbattle/nbCalc	0x1EC	98 of 123 words match	docs/matching/
 nbGetKoukaBadDamage	newbattle/nbCalc	0x41C	263 of 263 words match	docs/matching/newbattle/nbCalc.md	395
 nbGetMagicAttack	newbattle/nbCalc	0x38C	227 of 227 words match	docs/matching/newbattle/nbCalc.md	469
 nbGetMakaBaramaki	newbattle/nbCalc	0x1D4	117 of 117 words match	docs/matching/newbattle/nbCalc.md	562
-nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	3
-nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	11
-nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	56
-nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	83
-nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	113
-nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	135
-nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	156
-nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	186
-nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	237
+nbCameraBoss_Sp_DOUTYO_TPFix_Set	newbattle/nbCameraBoss	0x64		docs/matching/newbattle/nbCameraBoss.md	3
+nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	36
+nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	44
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	89
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	116
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	146
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	168
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	189
+nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	219
+nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	270
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	58 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
