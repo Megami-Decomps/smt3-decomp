@@ -8234,19 +8234,15 @@ extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot
 extern s32 cmpAllocEffectSlot(s32 color, s8 selected, s8 disabled,
                               cmpCursorSlot_t *slot);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                        s32 mode, s32 alpha)
 {
-    cmpCursorExtended_t *list = (cmpCursorExtended_t *)cursor;
     s32 selected = 0;
     s32 disabled = 0;
     u32 color;
     u32 blink;
     u32 effect;
+    u32 product;
 
     if (cursor->flagsData.bytes != NULL) {
         u8 flags = cursor->flagsData.bytes[item];
@@ -8259,25 +8255,38 @@ u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
         }
     }
     if (row == (u8)cursor->unk_25) {
-        selected = (mode & 2) == 0;
+        u32 selectionMask = (u32)mode & 2U;
+
+        selected = selectionMask == 0;
+        /* Two eight-byte slots per row; retain native EE32 offset wrap. */
         cmpSetCursorSlot(0, 1, 0x10,
-                         &list->slot[cursor->unk_22 + (u8)cursor->unk_24][0]);
+                         (cmpCursorSlot_t *)((u8 *)cursor + (s32)(0x3CU +
+                             (((u32)(s32)cursor->unk_22 + (u32)(u8)cursor->unk_24) << 4))));
     }
-    if (mode & 1) {
-        disabled = 1;
-        color = selected ? 0x8EBEF52B : 0x4D4B4B4D;
+    if (!(mode & 1)) {
+        color = 0xA09DC380;
+        if (selected) {
+            color = 0x89FEFF80;
+        }
     } else {
-        color = selected ? 0x89FEFF80 : 0xA09DC380;
+        disabled = 1;
+        color = 0x4D4B4B4D;
+        if (selected) {
+            color = 0x8EBEF52B;
+        }
     }
     blink = cmpCursorBlinkColor(alpha) & 0xFF;
+    /* This channel product is retained across the effect-slot callback. */
+    product = (color & 0xFFU) * blink;
     effect = cmpAllocEffectSlot(color, selected, disabled,
-                                &list->slot[cursor->unk_22 + item][0]);
-    effect = (effect & ~0xFF) | (((color & 0xFF) * blink >> 7) & 0xFF);
+                                (cmpCursorSlot_t *)((u8 *)cursor + (s32)(0x3CU +
+                                    (((u32)(s32)cursor->unk_22 + (u32)item) << 4))));
+    effect = (effect & ~0xFF) | ((product >> 7) & 0xFF);
     return cmpCursorFadeChannel(effect, alpha, 0);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListItemBox);
-#endif
+
+
+
 
 extern u32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 item, s32 row,
                               s32 mode, s32 alpha);
@@ -8642,27 +8651,29 @@ void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
 }
 
 
-/* NON_MATCHING: 17 of 47 words differ (first at +0x1C), exact size; the five
-   parameters land in a different callee-saved order. */
-#ifdef NON_MATCHING
 void campDrawInfoText(s32 x, s32 y, s32 z, s32 h, s32 e, s32 color, s32 g)
 {
+    /* Keep the real height and draw-order arguments in call-preserved slots.
+     * These local bindings and the mask binding below are compiler aids. */
+    FAKEMATCH_ASM_REG(s32, savedE, "$20") = e;
+    FAKEMATCH_ASM_REG(s32, savedG, "$21") = g;
     s32 corner[4];
-    s32 inner = h - 0x10;
+    FAKEMATCH_ASM_REG(u32, mask, "$6");
+    s32 inner = (s32)((u32)h - 0x10U);
 
     corner[3] = color;
     corner[1] = color;
     corner[2] = color;
     corner[0] = color;
     cmpDrawBoxGDefault(x, y, z, inner, e, corner, g);
-    corner[1] = corner[1] & 0xFFFFFF00;
-    corner[3] = corner[3] & 0xFFFFFF00;
-    cmpDrawBoxGDefault(x + inner * 16, y, z, 0x20, e, corner, g);
+    FAKEMATCH_ASM_LIVE_PAIR(savedE, savedG);
+    /* The mask is initialized after the first call and consumed before the next. */
+    mask = 0xFFFFFF00U;
+    corner[1] = corner[1] & mask;
+    corner[3] = corner[3] & mask;
+    cmpDrawBoxGDefault((s32)((u32)x + ((u32)inner << 4)), y, z,
+                       0x20, savedE, corner, savedG);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawInfoText);
-#endif
-
 
 void camp_23CC70(s32 x, s32 y, s32 z, s32 h, s32 n, s32 f, s32 g, s32 col)
 {
@@ -11110,21 +11121,23 @@ void cmpSetCursorFlag(cmpCursorInfo_t *cur, saddr_t flag)
     cmpUpdateCursorScroll(cur, 1);
 }
 
-/* NON_MATCHING: 9 of 28 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 void cmp_241A10(cmpCursorInfo_t *cursor)
 {
-    u8 *flags = cursor->flagsData.bytes;
+    u8 *root = cursor->flagsData.bytes;
+    u8 *flags;
     s32 count;
-    s32 i;
+    s32 i = cursor->unk_20;
 
-    if (flags == NULL) {
+    if (root == NULL) {
         return;
     }
-    count = cursor->unk_20;
-    i = count - 1;
+    count = i--;
     cursor->unk_21 = 0;
     if (count > 0) {
+        flags = root;
+        /* Keep the actual scan pointer distinct from the null-tested root.
+         * This empty operand is a local compiler aid, not a memory barrier. */
+        FAKEMATCH_ASM_LIVE(flags);
         do {
             if ((flags[i] & 2) != 0) {
                 cursor->unk_21++;
@@ -11133,9 +11146,8 @@ void cmp_241A10(cmpCursorInfo_t *cursor)
     }
     cmpUpdateCursorScroll(cursor, 1);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmp_241A10);
-#endif
+
+
 
 s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
 {
