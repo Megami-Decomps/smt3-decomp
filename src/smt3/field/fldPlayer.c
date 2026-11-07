@@ -1317,7 +1317,7 @@ void fldPlayerCalc_Wm3(void) {
         scale.y *= fldWmapPlayerState;
         scale.z *= fldWmapPlayerState;
         dds3SetSclPoseSet(ctl->handle, &scale.x);
-        next = fldWmapPlayerState - 0.08f;
+        next = fldWmapPlayerState - SDF_FRAME_STEP(0.08f);
         model->first->speed = 5.0f;
         if (next <= 0.1f) {
             fldWmapPlayerState = 0.1f;
@@ -1341,7 +1341,7 @@ void fldPlayerCalc_Wm4(void) {
         scale.y *= fldWmapPlayerState;
         scale.z *= fldWmapPlayerState;
         dds3SetSclPoseSet(ctl->handle, &scale.x);
-        next = fldWmapPlayerState + 0.04f;
+        next = fldWmapPlayerState + SDF_FRAME_STEP(0.04f);
         model->first->speed = 5.0f;
         if (1.0f < next) {
             fldWmapPlayerState = 1.0f;
@@ -1489,9 +1489,9 @@ s32 fldPlayerCalc_Wm2(void)
         }
         if (moving) {
             angle = -angle * 3.1399999f / 180.0f;
-            position.x = fldGlobalBase.x - sdfSin(angle) * 16.0f;
+            position.x = fldGlobalBase.x - sdfSin(angle) * SDF_FRAME_STEP(16.0f);
             position.y = fldGlobalBase.y;
-            position.z = fldGlobalBase.z - sdfCos(angle) * 16.0f;
+            position.z = fldGlobalBase.z - sdfCos(angle) * SDF_FRAME_STEP(16.0f);
             dds3SetPosPoseSet(control->handle, &position);
         } else {
             position.x = fldGlobalBase.x;
@@ -1564,9 +1564,9 @@ s32 fldPlayerCalc_Wm2(void)
                 SDF_VU0_LOADVECTOR(&direction);
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR(&normal);
-                position.x = initial.x + normal.x * 16.0f;
-                position.y = (initial.y + normal.y * 16.0f) + 3.0f;
-                position.z = initial.z + normal.z * 16.0f;
+                position.x = initial.x + normal.x * SDF_FRAME_STEP(16.0f);
+                position.y = (initial.y + normal.y * SDF_FRAME_STEP(16.0f)) + 3.0f;
+                position.z = initial.z + normal.z * SDF_FRAME_STEP(16.0f);
                 dds3SetPosPoseSet(basic, &position);
                 work.x = position.x;
                 work.y = position.y;
@@ -1959,9 +1959,9 @@ s32 fldPlayerCalc_Nml_syukan(void)
             speed *= fldSyukanGunSpeedScale;
         }
         rad = -angle * fldSyukanPi0 / 180.0f;
-        position.x = fldGlobalBase.x - sdfSin(rad) * speed;
+        position.x = fldGlobalBase.x - sdfSin(rad) * SDF_FRAME_STEP(speed);
         position.y = fldGlobalBase.y;
-        position.z = fldGlobalBase.z - sdfCos(rad) * speed;
+        position.z = fldGlobalBase.z - sdfCos(rad) * SDF_FRAME_STEP(speed);
         dds3SetPosPoseSet(control->handle, &position);
     } else {
         position.x = fldGlobalBase.x;
