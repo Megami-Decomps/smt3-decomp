@@ -1,5 +1,71 @@
-
 ## fldPlayerMotionSe (field/fldPlayer, 0x5B0)
+
+**Matched: all 364 words / 1,456 native bytes at 0x001304E8.** The single
+remaining branch residual is resolved by a localized read/write memory operand
+on the real default-category field immediately before its conditional read.
+The independently reviewed final source also repairs the RNG consumer declaration
+to the unchanged provider's canonical `u32 dds3GetRandA(void *name)` signature.
+All calls pass the null shared-state selector; target ABI and behavior are unchanged.
+
+The operand expands to empty volatile `+m` on initialized s32 storage at
+`fldGlobalBase+0x40`. It emits no instruction or machine write and is not a
+general memory barrier. It adds no fabricated local, false type, register
+binding, dummy consumer, runtime arithmetic or live value across a call.
+This is a target-specific reconstruction aid, not original source evidence.
+
+Qualified stock dumps identify the dependency precisely. Without the operand,
+pass 15.ce hoists the override decrement before the category branch. With the
+operand, that decrement stays in the override block. Final pass 29.dbr then
+uses the native taken-only delay slot and `bnel`; deleting only the operand
+restores `bne` at +0xF8, the sole differing word, at the same 1,456-byte size.
+The claim concerns observed stock RTL and output, not an unobserved internal
+rejection predicate. Read-only and override-field operands are measured negative
+controls, not alternative accepted source.
+
+The function snapshots the current model frame and previous field frame, then
+publishes the current frame before sound dispatch. It preserves special 15/20-frame
+crossings, surface sound bases, distance clamps, randomized volume, RNG order,
+transition sound, separate side variants and later volume rerolls. The existing
+shared `fsqrtf` helper supplies the only instruction-emitting inline region,
+`sqrt.s` at +0x1BC. That established helper is distinct from the new empty operand.
+
+The single pre-existing post-call volume reset remains the permitted tail-call
+blocker. Earlier qualified sibling/life traces, retained below, establish that
+reset's dependency. It is not a new dead-store exception. Existing domain limits
+are unchanged: an INT_MIN override cannot be decremented in representable s32 C;
+no expanded invalid-state or special-floating-point guarantee is claimed.
+
+Independent native/provider/operand review approves the exact final source.
+A freshly compiled full-function host fixture checks the actual +m operand,
+its erasure and a separately structured reference. Both optimized and UBSan
+runs pass 457,056 cases, comparing complete provider/RNG/sound histories, field
+state, model frame and RNG state, including callback mutations. This is finite
+host evidence, not complete EE floating emulation. The earlier six PCSX2 call
+vectors were not rerun. Target layout assertions separately verify both category
+fields' four-byte widths and offsets 0x40/0x44. The inherited generated IDB export
+still uses `char *` for the RNG parameter; no live database reconciliation or
+manual generated-file edit is claimed here.
+
+Final integrated qualification is on 6ee043af, preserving the cursor-update
+landing and all earlier peer commits. It checks 27 complete plain/dump pairs
+across guarded source and eight controls in production, SKIP_ASM and retained
+modes. Exactly one same-length canonical scratch filename is normalized per
+assembly/ELF pair. All 594 RTL files are losslessly archived and rehashed.
+All 29/21/29 non-target peer instruction and resolved relocation contracts
+remain unchanged. Production/retained owned data and NOBITS extents are exact;
+SKIP_ASM adds the target's literal pools, with peer references compared to their
+actual payloads rather than ignored. Final production target equals native
+fallback; the linked image and source/object provenance prove compiler ownership.
+
+Complete owner is 22 match / 0 differ; all 31 distinct peer-owner gates pass.
+The three final strict implicit-declaration modes and native layout assertions
+pass. Full retail/generated-source checks (including the injected stale-line
+negative control), all 505 tooling tests without skips plus 818 layout assertions,
+all EE/IRX retained drafts, inline policy and report scope pass. Retail SHA-1
+remains `5facfbf7916836613449c922e26a4ec412207b32`. This adds one game function
+and 1,456 game bytes; SDK reporting is unchanged.
+
+### Earlier baseline and reset trace, superseded where noted
 
 363 of 364 instruction words match at the native 1,456-byte size. Production
 remains assembly-backed. The single residual is at +0xF8: C emits `bne`, retail

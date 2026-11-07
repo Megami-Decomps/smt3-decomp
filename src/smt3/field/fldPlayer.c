@@ -310,13 +310,12 @@ extern f32 fldCamTarget[];
 extern f32 D_002FC9C0[];
 extern void fldSePlay(s32 id);
 extern void fldSeVol(s32 id, s32 volume);
-extern u32 dds3GetRandA(s32 stream);
+extern u32 dds3GetRandA(void *name);
 
-/* NON_MATCHING: 363 of 364 words match at the native 1456-byte size. */
+/* Native surface-category branch is retained by the localized operand below. */
 /* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
  * field underground facility, field unknown realm savestates, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
 {
     fldUnitControl_t *ctl = fldGetUnitControl();
@@ -340,6 +339,13 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
         }
     } else {
         if (fldGlobalBase.word44 == 0) {
+            /* Target-specific compiler aid on the actual default-category storage.
+             * The empty read/write operand stays in the default branch,
+             * preventing speculative override-decrement hoisting and recovering
+             * its native annulled slot. It emits
+             * no memory write and is not a general memory barrier. Removing
+             * it changes only bnel to bne; READ_MEM does not reproduce it. */
+            FAKEMATCH_ASM_LIVE_MEM(fldGlobalBase.playerSeTable);
             surface = fldGlobalBase.playerSeTable;
         } else {
             surface = fldGlobalBase.word44 - 1;
@@ -408,9 +414,6 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
         volume = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
-#endif
 
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
