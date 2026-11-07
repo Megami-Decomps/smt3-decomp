@@ -30,11 +30,11 @@ both native and emitted sizes when they differ.
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 6 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
-| 5 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |

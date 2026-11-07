@@ -173,3 +173,52 @@ allocation changed. Extracted-body host tests cover 15,728,640 single-entry
 cases and 120,000 multirow/callback scenarios, not native execution. Strict
 production/SKIP modes preserve four inherited missing declarations; retained
 strict mode passes. Broader integration qualification is recorded separately.
+
+## DispHelpPanel (newbattle/nbCommSelProcess, 0x1E8)
+
+122 of 122 words match at the native 488-byte extent (2026-11-07).
+
+Retail loads the live `drawtype` after the event-bit guard and retains an
+unsigned `< 6` test at 0x0025AF30 whose result is overwritten by color setup.
+An equal-arm conditional on this same live value performs the same real
+coordinate, color and alpha calculation once on either path. This is the
+canonical compiler-deletion-trace exception, not evidence of original branch
+spelling or historical range assumptions. The later `type != 3` sprite test
+continues to consume the snapshot.
+
+Qualified complete-owner plain and `-da` output agrees in normalized assembly,
+all allocated sections and explicit relocation contracts. In the actual
+compiler dumps, UID51 loads drawtype, UID54 computes the unsigned comparison,
+and UID55 branches to the alternate calculation. Both arms and UID55 remain
+through `25.sched2`; `27.jump2` deletes the branch and duplicate arm while
+retaining UID54 immediately after UID51. The final output reproduces the
+native location, operands and ordering. Deleting only the equal-arm decision
+returns to 480 bytes with 95 differing words in the native overlap. This
+establishes the causal pass boundary, not an instrumented internal comparator
+or source-history claim.
+
+The second quad's `x2` calculation occurs in its actual phase after the first
+quad call in C. Its non-escaping unsigned local inputs make this safe across
+the call; the compiler schedules it earlier into the exact native position.
+Keeping it before the first call in C leaves a three-word scheduling rotation.
+No new constraint, dummy operation, call, type, layout or flag is introduced.
+The event callback is before the drawtype snapshot; the texture load remains
+at the sprite call; the tag is shared by both quad calls; the OT callback is
+looked up after both. All original conversions and unsigned coordinate wrap
+operations remain unchanged.
+
+The complete owner checks 34 match / 0 differ. Baseline/candidate comparisons
+preserve all 38 production peers, 33 SKIP peers and 38 retained peers, including
+resolved code/data relocations. Production nontext bytes agree directly;
+SKIP/retained jump-table addends agree after resolving the changed function
+placements to owner-relative destinations. All seven target relocations keep
+the same call targets and `sdfGrOtTable + 0x8E0` address. Accurate existing provider declarations are available in all modes: the
+SelectCommandList and allocator/lock prototypes are outside their former
+NON_MATCHING guards, and DispCommandPanel has its exact forward declaration.
+All three candidate modes pass strict implicit-declaration checks. The memory
+prototypes agree with the actual sdfMemory providers (handle-pointer allocation
+result, void-pointer lock result), repairing the former implicit-int calls
+without changing target output. An independent
+extracted-actual-body callback oracle passes 200,000 cases at O2 and under
+ASan/UBSan; this is a host semantic test, not native execution. Full integrated
+retail and regression gates remain required for publication.

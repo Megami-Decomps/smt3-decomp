@@ -2,23 +2,11 @@
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-After the exact Lusi provider promotion below, a private caller-only promotion
-emits the native 476 bytes with 9 of 119 words differing. The complete owner
-has 108 match, 1 differ. Production keeps this caller assembly-backed.
-
-The current truthful body assigns each selected callee result to `shot` and
-returns it; default paths return zero. The caller's consumer uses that result.
-An older experimental fall-through-return description is obsolete and is not
-a valid reconstruction to restore. The case order, shared MASEHA/SIMANO calls,
-and the final arm's fall-through to default remain native.
-
-The remaining observed differences are MASEHA-arm scheduling at +0xD8..+0xF4
-and the ordinary-versus-likely branch at +0xFC. Earlier all-draft compilation
-with both guarded Lusi and MASEHA definitions visible produced a code-zero
-context diagnostic. That did not authorize promoting either nonmatching
-provider or this caller. The new Lusi-only production-context test still
-fails, so Lusi's match does not automatically unlock the caller. MASEHA remains
-a separate source problem; further context effects must be measured again.
+All 119 words now match at 476 bytes with the exact MASEHA provider visible
+alongside the already exact Lusi provider. The existing truthful C body is
+unchanged: each selected callee's result is assigned to `shot` and returned,
+and default paths return zero. The skill-camera consumer uses that result.
+This is a real-provider promotion, not the earlier all-draft diagnostic.
 
 ## nbCameraBoss_Lusi_Cut1_Set (newbattle/nbCameraBoss, 0x1F4)
 
@@ -197,30 +185,54 @@ returns 1; and the four pooled constants are `0.55f`, `0.85f`, `0.55f` and
 
 ## nbCameraBoss_BSARI_MASEHA_Run (newbattle/nbCameraBoss, 0x440)
 
-204 of 272 words match at the exact 1088-byte size. All eight arms, both
-shared tails, the `.lit4` order and every literal are right; the 68 are a
-one-instruction rotation at the head of each of the three lerp arms, plus the
-float registers and the two frame-address temps that rotation drags with it.
+All 272 words match at 1088 bytes. The interpolation helper now takes the
+actual `f32 rate` through its existing GPR input constraint. ee-gcc transfers
+its binary32 representation without a numeric conversion, following DDS's
+"Float inputs through GPR constraints" idiom. The separate integer bits
+local and explicit transfer outputs are unnecessary. Rate still has its real
+one- or two-interpolation consumers and never crosses the mark-position call.
 
-Retail opens each lerp arm with `addiu $3, $29, 0x10`, the address the
-following `SDF_VU0_LOADVECTOR` wants, and only then materialises the arm's
-constants; cc1 schedules that `addiu` last, next to the `lqc2`, which also
-swaps `$2` and `$3` between the two vectors. Nothing else in the arm moves.
+Only the first lerp arm places its unchanged signed-frame conversion,
+subtraction and division after the six private endpoint-coordinate stores.
+This crosses no callback, global store or floating-point operation on those
+coordinates. All endpoint values, native FP operations, scalar accesses,
+callback order, post-callback target reload and final signed-frame reload /
+increment remain. The hardware-only scratch w lanes retain their native
+unspecified incoming contents; no initialization or C read was invented.
 
-Ruled out: `PS2_FLOAT_BITS` after the `LOADVECTOR` pair instead of before it
-(worth 31 words on its own, so that part is settled), the `rate` division
-below the vector stores rather than above them (3 more words), and three
-declaration orders for `mark`, `from`, `to`, `bits`, `type` and `rate`.
+The original explicit-bits draft differs by 66 words in the current owner.
+Direct float inputs alone reduce this to 12 words, confined to the first
+lerp arm. Moving that arm's rate expression completes the match. Moving both
+analogous expressions instead leaves 20 differences. These paired compiler
+outputs establish the source-form dependency, not a claimed internal
+optimizer-pass mechanism or original source spelling. No new constraint,
+header, declaration, source-owner or flag change is needed.
 
-Confirmed on the way: the dispatch needs a `u32 type` local, because
-`switch (nbCameraBoss_BSARI_MASEHA_Type)` on the signed extern makes
-`balance_case_nodes` add an `slti` range split that retail does not have, the
-same shape the matching `nbCameraBoss_BSARI_SIMANO_Run` next door uses; the
-blend factor reaches both lerps of an arm through one `PS2_FLOAT_BITS` GPR;
-`nbCameraBoss_BSARI_MASEHA_Frame` is signed, since every frame threshold is
-`slti`; and spimdisasm's ten-digit `.lit4` decimals are each one ULP low for
-ee-as, which truncates toward zero, so the literals have to be spelled from
-the exact float value rounded away from zero.
+### Paired MASEHA / Cut1 qualification
+
+Together these promotions add 1,564 matching C bytes. The complete owner
+passes 111 match / 0 differ independently. Both production
+targets preserve the native fallback's resolved instruction and relocation
+contracts and extents. All 124 production, 109 SKIP_ASM and 124 retained-C
+peers preserve their resolved contracts, including Lusi and BSKAGU_EP_IT.
+Nonliteral owned data are unchanged in all modes. Production's literal pool
+is byte-identical; SKIP_ASM preserves its previous literal sequence and adds
+exactly the target's 236 literal bytes. Retained C reorders eight literal
+entries without changing their multiset or any peer's resolved values.
+
+All six baseline/final, production/SKIP_ASM/retained complete plain/dump
+assembly and ELF pairs agree. A fixture extracts the actual MASEHA and Cut1
+bodies and passes 494,760 cases at -O2 and under address/undefined sanitizers:
+negative and boundary frames, invalid types, callback mutations and ordering,
+initialized xyz outputs, all model/skill combinations in the dispatch range,
+and four distinct callee return values. The fixture is a C control/data-flow
+oracle, not a hardware VU rounding or unspecified-w oracle. Native exactness
+supplies the target-instruction evidence. Independent review checks provider
+ABIs, native memory operations and the real caller's return-value use.
+
+Integrated full-retail checksum and repository gates remain required for
+landing. Local frozen source SHA256:
+`19f5849760bd759fd542274301344ea4269075ad149e066a4c25d7a14b890139`.
 
 ## nbCameraBoss_BSKAGU_EP_IT_Set (newbattle/nbCameraBoss, 0x144)
 

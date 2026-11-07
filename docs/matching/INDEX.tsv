@@ -247,15 +247,15 @@ nbGetKoukaBadKaifuku	newbattle/nbCalc	0x1EC	98 of 123 words match	docs/matching/
 nbGetKoukaBadDamage	newbattle/nbCalc	0x41C	263 of 263 words match	docs/matching/newbattle/nbCalc.md	395
 nbGetMagicAttack	newbattle/nbCalc	0x38C	227 of 227 words match	docs/matching/newbattle/nbCalc.md	469
 nbGetMakaBaramaki	newbattle/nbCalc	0x1D4	117 of 117 words match	docs/matching/newbattle/nbCalc.md	562
-nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	9 of 119 words differing	docs/matching/newbattle/nbCameraBoss.md	3
-nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	23
-nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	68
-nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	95
-nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	125
-nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	147
-nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	168
-nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440	204 of 272 words match	docs/matching/newbattle/nbCameraBoss.md	198
-nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	225
+nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	3
+nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	11
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	56
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	83
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	113
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	135
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	156
+nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	186
+nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	237
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	58 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
@@ -268,6 +268,7 @@ DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/match
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
 DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	91
 SetCommCursor2	newbattle/nbCommSelProcess	0x21C	135 of 135 words match	docs/matching/newbattle/nbCommSelProcess.md	135
+DispHelpPanel	newbattle/nbCommSelProcess	0x1E8	122 of 122 words match	docs/matching/newbattle/nbCommSelProcess.md	177
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 SelectDevil	newbattle/nbDebugProcess	0x218	79 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3

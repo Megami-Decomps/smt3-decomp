@@ -1649,16 +1649,14 @@ s32 nbCameraBoss_BSARI_MASEHA_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
-/* NON_MATCHING: 204 of 272 words match at the exact size; the three lerp arms
- * schedule their frame-address addiu last where retail has it first. */
-#ifdef NON_MATCHING
+/* Feed the actual float rate through the interpolation helper's GPR operand;
+ * ee-gcc transfers its representation without a numeric conversion. */
 s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
 {
     nbFormation_t *pForm;
     sdfVector4_t mark;
     sdfVector4_t from;
     sdfVector4_t to;
-    u32 bits;
     u32 type;
     f32 rate;
 
@@ -1677,17 +1675,16 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
         } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
-            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
             from.x = -1449.11f;
             from.y = -15.0f;
             from.z = -2223.37f;
             to.x = 1370.34f;
             to.y = -15.0f;
             to.z = -2046.0f;
-            PS2_FLOAT_BITS(bits, rate);
+            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
-            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_INTERPOLATE(rate);
             SDF_VU0_STOREVECTOR(pNbCamera);
             effBTLModelGetMarkPosition2(pForm, 1);
             SDF_VU0_STOREVECTOR(&mark);
@@ -1719,10 +1716,9 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             to.x = -1213.17f;
             to.y = -5.17f;
             to.z = -2024.18f;
-            PS2_FLOAT_BITS(bits, rate);
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
-            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_INTERPOLATE(rate);
             SDF_VU0_STOREVECTOR(pNbCamera);
             from.x = 0.42f;
             from.y = 0.03f;
@@ -1732,7 +1728,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             to.z = 0.88f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
-            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_INTERPOLATE(rate);
             SDF_VU0_STOREVECTOR(&pNbCamera->direction);
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
@@ -1765,10 +1761,9 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             to.x = 1022.0099f;
             to.y = -66.33f;
             to.z = -2059.2098f;
-            PS2_FLOAT_BITS(bits, rate);
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
-            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_INTERPOLATE(rate);
             SDF_VU0_STOREVECTOR(pNbCamera);
             from.x = 0.29f;
             from.y = -0.3f;
@@ -1778,7 +1773,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             to.z = 0.85f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
-            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_INTERPOLATE(rate);
             SDF_VU0_STOREVECTOR(&pNbCamera->direction);
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
@@ -1797,9 +1792,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
     nbCameraBoss_BSARI_MASEHA_Frame++;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSARI_MASEHA_Run);
-#endif
+
 
 s32 nbCameraBoss_BSARI_SIMANO_Set(nbCamera_t *pNbCamera)
 {
@@ -3498,9 +3491,6 @@ s32 nbCameraBoss_Cut1_Init(nbCamera_t *pNbCamera)
     return shot;
 }
 
-/* NON_MATCHING: 33 of 117 words differ, 2 short; two arms call callees still in
- * assembly, so ee-gcc leaves a plain branch where retail annuls. */
-#ifdef NON_MATCHING
 s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera)
 {
     nbFormation_t *pForm;
@@ -3563,9 +3553,7 @@ s32 nbCameraBoss_Cut1_Run(nbCamera_t *pNbCamera)
     }
     return shot;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Run);
-#endif
+
 
 extern s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *pNbCamera);
 
