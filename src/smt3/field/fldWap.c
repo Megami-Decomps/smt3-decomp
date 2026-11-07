@@ -1405,7 +1405,7 @@ extern f32 EulerAngleAxisY(void);
    Plain blocks avoid the extra join alignment of one-pass loop macros. */
 #define LOAD_DOOR_ANGLE(resource, angle) { \
     s32 resourceID = (resource)->id; \
-    fldResourcePoint_t *point = (resource)->transform; \
+    fldResourcePointUnaligned_t *point = (resource)->transform; \
     work->evehit_resid = resourceID; \
     ((volatile sdfVector4_t *)&quaternion)->x = point->rot.x; \
     ((volatile sdfVector4_t *)&quaternion)->y = point->rot.y; \

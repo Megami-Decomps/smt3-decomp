@@ -725,7 +725,7 @@ typedef struct fldEventDataHeader_t fldEventDataHeader_t;
 extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *data, const char *name);
 extern u32 fldEveHit_AddEveData(fldEventDataHeader_t *resource, dds3Basic_t *basic);
 extern s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic);
-extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, const char *name);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePointUnaligned_t *data, const char *name);
 extern void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room, const char *name, s32 eventIndex);
 extern void fldItemBoxAdd(s32 itemId, const sdfVector4_t *rotation, f32 x, f32 y, f32 z);
 extern void fldAddSe3D(s32 soundId, f32 radius, f32 x, f32 y, f32 z);

@@ -425,12 +425,6 @@ typedef struct {
 } fldResPutEveBall_t;
 
 typedef struct {
-    sdfVector4Unaligned_t pos;
-    sdfVector4Unaligned_t rot;
-    sdfVector4Unaligned_t scl;
-} fldResourcePointUnaligned_t;
-
-typedef struct {
     fldResPutEveBall_t ball;           /* 0x00 */
     fldResPut_t put;                   /* 0x08 */
     fldResourcePointUnaligned_t sisei; /* 0x18 */
@@ -453,7 +447,7 @@ extern char D_002FCD90[];
 
 extern u32 dds3AllocObjectId(void);
 
-extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pName);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePointUnaligned_t *pData, char *pName);
 
 extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *pData, char *pName);
 
@@ -513,7 +507,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
     shape = ((fldResPut_t *)resource->data)->data.shape;
     switch (shape->kind) {
     case 1:
-        transform = (fldResourcePointUnaligned_t *)resource->transform;
+        transform = resource->transform;
         width = shape->plane.width;
         height = shape->plane.height;
         positionX = transform->pos.x;
@@ -752,7 +746,7 @@ s32 fldEveHit_AddEveHit(fldResHead_t *resource, dds3Basic_t *basic)
         }
         break;
     case 2:
-        transform = (fldResourcePointUnaligned_t *)resource->transform;
+        transform = resource->transform;
         width = shape->box.size[0];
         height = shape->box.size[1];
         depth = shape->box.size[2];
@@ -1511,7 +1505,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.transform = (fldResourcePoint_t *)sisei;
+    D_002FCFA0[i].hit.transform = sisei;
     pointId = dds3AllocObjectId();
     D_002FCFA0[i].hit.id = pointId;
     D_002FCFA0[i].hit.name = D_002FCD70;
@@ -1559,7 +1553,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
     sisei->scl.w = 1.0f;
-    D_002FCFA0[i].hit.transform = (fldResourcePoint_t *)sisei;
+    D_002FCFA0[i].hit.transform = sisei;
     id = dds3AllocObjectId();
     D_002FCFA0[i].hit.id = id;
     D_002FCFA0[i].hit.name = resname;

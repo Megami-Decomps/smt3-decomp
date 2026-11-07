@@ -10,7 +10,7 @@ typedef struct fldResourcePoint_t fldResourcePoint_t;
 
 extern dds3Basic_t *dds3AddSceneBasicData(u32 type);
 
-dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pName)
+dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePointUnaligned_t *pData, char *pName)
 {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_POINT);
 

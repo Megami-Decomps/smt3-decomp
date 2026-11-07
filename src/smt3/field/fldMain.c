@@ -803,7 +803,7 @@ extern s32 fldLightMaChk(void);
 extern void fldLightMaStart(void);
 extern s32 fldPlayerFastSet(void);
 extern void fldWaveInit(void);
-extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, char *name);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePointUnaligned_t *data, char *name);
 
 void fldSetUnit(fldResourcePoint_t *point)
 {
@@ -984,7 +984,7 @@ void fldSetUnit(fldResourcePoint_t *point)
         dds3SetUnitObjectId(fldAnaBasic, "ANA_UNIT");
     }
     if (fldGlobalBase.area >= 11) fldWaveInit();
-    dds3AddPointBasic(dds3AllocObjectId(), &fldPlayerPosRotWork, fldPlayerPosName);
+    dds3AddPointBasic(dds3AllocObjectId(), (fldResourcePointUnaligned_t *)&fldPlayerPosRotWork, fldPlayerPosName);
 }
 #else
 INCLUDE_RODATA(const s32, "field/fldMain", fldProcSequenceName);

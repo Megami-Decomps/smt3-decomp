@@ -103,6 +103,15 @@ typedef struct fldResourcePoint_t
     sdfVector4_t scl;
 } fldResourcePoint_t;
 
+/* A resource point a resource header refers to. The event-hit records place
+   theirs at 8 mod 16, so it is read through 4-aligned vectors. */
+typedef struct
+{
+    sdfVector4Unaligned_t pos;
+    sdfVector4Unaligned_t rot;
+    sdfVector4Unaligned_t scl;
+} fldResourcePointUnaligned_t;
+
 extern fldResourcePoint_t fldPlayerPosRotWork;
 
 /* Counted filename tables use a variable-length trailing array. The native
@@ -126,7 +135,7 @@ typedef struct fldResHead_t
     u32 word04;
     const char *name;
     u32 word0C;
-    fldResourcePoint_t *transform;
+    fldResourcePointUnaligned_t *transform;
     u32 areaName;
     fldFileNameTable_t *names;
     u32 word1C;
