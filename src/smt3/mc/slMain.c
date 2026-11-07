@@ -767,8 +767,8 @@ void slMcAccessDraw(void)
     s32 color;
     rsetOtOfs(0x4A);
     rsetAlpha(0);
-    if (gSlMcAccessCnt < 10) {
-        alpha = (gSlMcAccessCnt * 128) / 10;
+    if (gSlMcAccessCnt < SDF_FRAMES(10)) {
+        alpha = (SDF_FRAME_TICK(gSlMcAccessCnt) * 128) / 10;
         aDrawBoxF(0, 0x89, 0x200, 0xC, 0, 0, 0, alpha / 5);
         color = ((u32)alpha << 24) | 0x808080;
         DrwSprite2D(0x47, 0x113, 0xBB, 0x13, 0x41, 0x6C, 0xBB, 0x13, color, slProcPtr);
@@ -781,8 +781,8 @@ void slMcAccessDraw(void)
         DrwSprite2D(0x47, 0x113, 0xBB, 0x13, 0x41, 0x6C, 0xBB, 0x13, 0x80808080, slProcPtr);
         DrwSprite2D(0x102, 0x113, 0xBB, 0x13, 0xFB, 0x6C, -0xBB, 0x13, 0x80808080, slProcPtr);
     }
-    if (gSlMcAccessCnt >= 10) {
-        s32 phase = (gSlMcAccessCnt - 10) % 30;
+    if (gSlMcAccessCnt >= SDF_FRAMES(10)) {
+        s32 phase = (SDF_FRAME_TICK(gSlMcAccessCnt) - 10) % 30;
         s32 i;
         offset = 0.0f;
         alpha = 128;
@@ -822,7 +822,7 @@ void slMcAccessDraw(void)
 }
 
 s32 slChkWindowOpenDone(void) {
-    if (gSlWindowCnt < 7) {
+    if (gSlWindowCnt < SDF_FRAMES(7)) {
         return 0;
     }
     return 1;
@@ -838,8 +838,8 @@ s32 slDrawWindow(void) {
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     gSlWindowCnt++;
-    if (gSlWindowCnt < 4) {
-        cnt = gSlWindowCnt;
+    if (gSlWindowCnt < SDF_FRAMES(4)) {
+        cnt = SDF_FRAME_TICK(gSlWindowCnt);
         y = 0xE9 - cnt * 0xB5 / 4;
         h = cnt * 0x16B / 4;
     } else {
@@ -848,9 +848,9 @@ s32 slDrawWindow(void) {
     }
     aDrawBoxG(0, y / 2, 0x200, h / 2, 8, 5, 0x23, 0x66, 8, 5, 0x23, 0x66,
               8, 5, 0x23, 0x66, 8, 5, 0x23, 0x66);
-    if (gSlWindowCnt >= 2) {
-        if (gSlWindowCnt < 7) {
-            cnt = gSlWindowCnt - 2;
+    if (gSlWindowCnt >= SDF_FRAMES(2)) {
+        if (gSlWindowCnt < SDF_FRAMES(7)) {
+            cnt = SDF_FRAME_TICK(gSlWindowCnt) - 2;
             y = 0xE4 - cnt * 0x74 / 5;
             h = cnt * 0xE9 / 5;
         } else {
@@ -859,8 +859,8 @@ s32 slDrawWindow(void) {
         }
         aDrawBoxG(0, y / 2, 0x200, h / 2, 0, 0, 0, 0x26, 0, 0, 0, 0x26,
                   0, 0, 0, 0x26, 0, 0, 0, 0x26);
-        if (gSlWindowCnt < 7) {
-            cnt = gSlWindowCnt - 2;
+        if (gSlWindowCnt < SDF_FRAMES(7)) {
+            cnt = SDF_FRAME_TICK(gSlWindowCnt) - 2;
             val = cnt * 4;
         } else {
             val = 0x14;
@@ -869,8 +869,8 @@ s32 slDrawWindow(void) {
                   0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0);
         aDrawBoxG(0x100, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0,
                   0x61, 0x72, 0xF7, val * 0x80 / 0x64, 0x61, 0x72, 0xF7, 0);
-        if (gSlWindowCnt < 7) {
-            cnt = gSlWindowCnt - 2;
+        if (gSlWindowCnt < SDF_FRAMES(7)) {
+            cnt = SDF_FRAME_TICK(gSlWindowCnt) - 2;
             val = cnt * 0x200 / 5 - 0x200;
         } else {
             val = 0;
@@ -879,8 +879,8 @@ s32 slDrawWindow(void) {
                   0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0x59);
         aDrawBoxG(val, 0x36, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
                   0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
-        if (gSlWindowCnt < 7) {
-            cnt = gSlWindowCnt - 2;
+        if (gSlWindowCnt < SDF_FRAMES(7)) {
+            cnt = SDF_FRAME_TICK(gSlWindowCnt) - 2;
             val = 0x200 - cnt * 0x200 / 5;
         } else {
             val = 0;
@@ -891,7 +891,7 @@ s32 slDrawWindow(void) {
                   0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
     }
     rsetOtOfs(0x47);
-    if (gSlWindowCnt < 7) {
+    if (gSlWindowCnt < SDF_FRAMES(7)) {
         return 0;
     }
     return 1;
@@ -3057,7 +3057,7 @@ void slQueryYesNoDraw(void)
             slKanjiDrawH(0x28, 0x64, 0x64618780, slOverwriteWarnMsg2);
         }
         if (slChkWindowOpenDone() != 0) {
-            if ((s32)SDF_FRAME_STEP(gslAnimCnt) & 8) {
+            if ((s32)SDF_FRAME_TICK(gslAnimCnt) & 8) {
                 red = 0xA6;
                 green = 0x1B;
                 blue = 0x15;
