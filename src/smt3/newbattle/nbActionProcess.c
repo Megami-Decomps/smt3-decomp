@@ -4465,7 +4465,8 @@ void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
 
 void SetAction_SKILL(nbActionProcessData_t *a);
 
-nbActionFunc_t ActionFuncTable[16] = {
+/* Indexed by seq up to 0x16: seqs 0x10, 0x11 and 0x17 have no handlers. */
+nbActionFunc_t ActionFuncTable[24] = {
     { (void (*)(nbActionProcessData_t *a))SetAction_NON, CheckAction_NON },
     { SetAction_COMM, CheckAction_COMM },
     { SetAction_AI, CheckAction_AI },
@@ -4482,6 +4483,14 @@ nbActionFunc_t ActionFuncTable[16] = {
     { SetAction_ESCAPE, CheckAction_ESCAPE },
     { SetAction_RETURN, CheckAction_RETURN },
     { (void (*)(nbActionProcessData_t *a))SetAction_INVISIBLE, CheckAction_INVISIBLE },
+    { NULL, NULL },
+    { NULL, NULL },
+    { SetAction_CHECK1, CheckAction_CHECK1 },
+    { SetAction_DEADSCRIPT, CheckAction_DEADSCRIPT },
+    { (void (*)(nbActionProcessData_t *a))SetAction_CHECK3, CheckAction_CHECK3 },
+    { (void (*)(nbActionProcessData_t *a))SetAction_ATO, CheckAction_ATO },
+    { SetAction_END, CheckAction_END },
+    { NULL, NULL },
 };
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544120);

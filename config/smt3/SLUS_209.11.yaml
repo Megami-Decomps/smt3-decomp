@@ -401,7 +401,7 @@ segments:
       - [0x221C50, .data, newbattle/nbCameraProcess]
       - [0x221E30, data, data_00320E30]
       - [0x2FB7C0, .data, newbattle/nbActionProcess]
-      - [0x2FB840, data, data_003FA840]
+      - [0x2FB880, data, data_003FA880]
       - [0x42A448, .data, sdf/sdfMotion]
       - [0x42A620, data, data_00529620]
       - [0x42E940, databin, eh_frame]
