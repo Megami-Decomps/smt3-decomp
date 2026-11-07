@@ -224,6 +224,7 @@ Flow10_10	newbattle/NbNegoFlowNg	0x90	36 of 36 words match	docs/matching/newbatt
 Flow10_21	newbattle/NbNegoFlowNg	0x98	38 of 38 words match	docs/matching/newbattle/NbNegoFlowNg.md	31
 Flow10_1	newbattle/NbNegoFlowNg	0x100	64 of 64 words match	docs/matching/newbattle/NbNegoFlowNg.md	69
 nbFlowGetUnitEntry	newbattle/NbNegoFlowOne	0x384	225 of 225 words match	docs/matching/newbattle/NbNegoFlowOne.md	3
+Flow1_22	newbattle/NbNegoFlowOne	324 bytes	81 of 81 words match	docs/matching/newbattle/NbNegoFlowOne.md	42
 Flow7_20	newbattle/NbNegoFlowQuestion	0x130	76 of 76 words match	docs/matching/newbattle/NbNegoFlowQuestion.md	3
 Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newbattle/NbNegoFlowTwo.md	3
 Flow6_20	newbattle/NbNegoFlowTwo	0x1A0	104 of 104 words match	docs/matching/newbattle/NbNegoFlowTwo.md	49
@@ -261,6 +262,7 @@ nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbat
 nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	270
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
+nbCameraProcess_nbCameraProcess	newbattle/nbCameraProcess	792 bytes	198 of 198 words match	docs/matching/newbattle/nbCameraProcess.md	52
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	58 of 58 words match	docs/matching/newbattle/nbCameraSkill.md	3
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	30 of 30 words match	docs/matching/newbattle/nbCameraSkill.md	55
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/matching/newbattle/nbCameraSkill.md	100

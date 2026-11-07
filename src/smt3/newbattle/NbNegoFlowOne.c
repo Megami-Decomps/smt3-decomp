@@ -719,10 +719,9 @@ s32 Flow1_21(nbNegoProcessData_t *n)
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 Flow1_22(nbNegoProcessData_t *n)
 {
-    u8 candidates[10];
+    u8 candidates[32];
     s32 count = 0;
     s32 i;
     nbMainProcessData_t *data;
@@ -737,13 +736,14 @@ s32 Flow1_22(nbNegoProcessData_t *n)
         data = n->data;
         party = &data->party[i];
         flag = party->flag;
-        if ((flag & 1) && (flag & 2) &&
-            !(flag & 0x38) && i != n->epartyindex) {
-            work = nbGetUnitWorkPointer(data, party);
-            if (datCheckTalk(work) && master_text[work->id].tokuboutype == 1) {
-                candidates[count++] = i;
-            }
-        }
+        if ((flag & 1) == 0) continue;
+        if ((flag & 2) == 0) continue;
+        if (flag & 0x38) continue;
+        if (i == n->epartyindex) continue;
+        work = nbGetUnitWorkPointer(data, party);
+        if (!datCheckTalk(work)) continue;
+        if (master_text[work->id].tokuboutype != 1) continue;
+        candidates[count++] = i;
     }
     if (count > 0) {
         i = candidates[dds3GetRandIntA(0, count)];
@@ -752,9 +752,6 @@ s32 Flow1_22(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_22);
-#endif
 
 s32 Flow1_23(nbNegoProcessData_t *n)
 {

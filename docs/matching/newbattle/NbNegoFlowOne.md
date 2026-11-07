@@ -38,3 +38,49 @@ guarded EE/IRX and report gates passed for source commit
 `6fcee69e0072b358992d4d4cd1ebda371a64e28b`. Exact-source hosted CI
 [41036629572](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41036629572)
 completed successfully, including actual retail verification and all build/deploy steps.
+
+## Flow1_22 (newbattle/NbNegoFlowOne, 324 bytes)
+
+81 of 81 words match in ordinary C. Separate real rejection arms retain the
+shared loop tail: one unsigned-halfword flag snapshot tests presence, enemy
+status and mask 0x38, followed by selected-party exclusion. Unit lookup and
+talk eligibility precede the unit-ID and master-table reads. The loop scans
+party indices 4 through 13, reloads negotiation data each iteration and stores
+only accepted indices. Count is bounded by ten; every randomly selected byte
+was initialized. Empty lists do not call the RNG or change the selected party.
+The two candidate-ID appends, default selection and callback-visible reloads
+remain in native order. An explicit halfword conversion proved unnecessary
+and was removed from the final source.
+
+The live candidate list uses 32 bytes. Native storage begins at sp+0 and saved
+registers at sp+0x20 in a 0x60 frame. Matched CheckKoketaNego already uses a
+32-byte candidate list for the same family of ten-slot randomized selection.
+That sibling scans formations and records mapped party indices; this function
+scans parties directly. Actual party backing remains fourteen records, and
+the loop bound stays fourteen. The family convention and native placement
+support this ordinary capacity choice without proving the original array
+bound or spelling. Unused bytes could also have been padding in the original.
+No separate unused object or unused-local exception is invoked.
+
+With the same rejection arms and a ten-byte list, only seventeen frame/save
+offset words differ; all other instructions and the 324-byte extent agree.
+This is a source/output observation, not an instrumented compiler-pass claim.
+The existing RNG declaration is unchanged. Its null-state, positive-count call
+here agrees with the actual EE provider contract; this does not establish a
+general corrected signature for other calls.
+
+Independent actual-body optimized and ASan/UBSan tests each pass 897,280 cases,
+covering every flag pattern, eligibility subsets, exclusions, legal RNG
+selections, status/type fields, append counts and callback substitutions.
+Physical fourteen-party objects, ten-byte reference storage and canaries are
+preserved. These are host semantic tests, not whole-game execution or a claim
+that invalid pointers or indices are safe.
+
+Complete owner: 41 match, 0 differ. All forty peers and owned data remain
+unchanged in production, SKIP_ASM and retained-C contexts. Six strict
+baseline/final plain/dump pairs compare complete assembly and entire raw ELF
+files literally, using identical source/output paths and the actual wrapper
+arguments. Results also equal ordinary-wrapper output. All 5,566 resolved
+inputs remain stable, including the compiler-directory symlink and runtime.
+Earlier pathname-only metadata and advisory-claim snapshot differences were
+preserved separately and superseded by the final literal qualification.

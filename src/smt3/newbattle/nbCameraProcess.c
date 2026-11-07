@@ -433,10 +433,6 @@ void nbCameraCheckStateChange(void)
     }
 }
 
-/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 12 match and 5 differ in a byte, battle_0_1, capture_006.
- * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
- * tests/funcvec.sh), unconfirmed. */
-#ifdef NON_MATCHING
 #include "sdk_libc.h"
 
 extern void nbRestartMotion(void);
@@ -454,8 +450,8 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     nbMainProcessData_t *data = nbGetMainProcessData();
     dds3Basic_t *camera;
     dds3CameraObjectBasicWorkData_t *work;
-    sdfVector4_t scale;
     sdfVector4_t eye;
+    volatile sdfVector4_t scale;
     f32 distance;
     s32 rotateTail;
     s32 distanceTail;
@@ -465,8 +461,8 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
         if ((pNbCamera.state_change == 2 || pNbCamera.state_change == 4) && (data->stat & 0x40)) {
             pNbCamera.state_change = 0;
         }
-        if (pNbCamera.state_change != 0 && pNbCamera.state_change != 6 &&
-            pNbCamera.state_change != 8 && pNbCamera.state_change != 9 &&
+        if (pNbCamera.state_change != 6 && pNbCamera.state_change != 8 &&
+            pNbCamera.state_change != 9 && pNbCamera.state_change != 0 &&
             pNbCamera.state_change != 10) {
             printf("nbCamera:nbRestartMotion\n");
             nbRestartMotion();
@@ -478,7 +474,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
         pNbCamera.frame = 0;
         pNbCamera.type = 0;
         pNbCamera.angle = 0.0f;
-        if ((data->stat & 0x2000) && pNbCamera.state != 0 && pNbCamera.state != 10 &&
+        if ((data->stat & 0x2000) && pNbCamera.state != 10 && pNbCamera.state != 0 &&
             pNbCamera.state != 17) {
             nbSetEnemyFormation(data);
             data->stat &= ~0x2000;
@@ -524,9 +520,9 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
         pNbCamera.distance += CAMERA_STEP(pNbCamera.anim.distance_s, distanceTail);
     }
     distance = -pNbCamera.distance;
+    scale.z = distance;
     scale.x = distance;
     scale.y = distance;
-    scale.z = distance;
     SDF_VU0_LOADVECTOR(&pNbCamera.direction);
     SDF_VU0_LOADVECTOR_B(&scale);
     SDF_VU0_STOREVECTOR(&work->eyeVector);
@@ -541,9 +537,6 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     pNbCamera.frame += SDF_FRAME_DUE(dds3GetKernelCount());
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraProcess_nbCameraProcess);
-#endif
 
 s32 nbCameraDraw(dds3ProcessID_t *id)
 {

@@ -48,3 +48,43 @@ Full retail, generated-source, regression, guarded-source and report gates
 pass. Production provenance verifies the unique compiler-owned linked span
 against all 160 retail bytes, including resolved literal references. Game
 coverage gains one function and 160 bytes, with the same all-unit increase.
+
+## nbCameraProcess_nbCameraProcess (newbattle/nbCameraProcess, 792 bytes)
+
+198 of 198 words match. Ordinary conjunctions retain the native restart
+exclusion order 6, 8, 9, 0, 10 and formation exclusion order 10, 0, 17.
+The shared diagnostic/restart block and every callback-visible reload remain
+in place. Clearing change state precedes init lookup; init callback precedes
+calc lookup. Active-camera checks and all frame-rate hooks are unchanged.
+
+The real eye vector precedes scale in the declarations, yielding native eye
+at sp+0 and scale at sp+0x10. Scale is volatile because its initialized XYZ
+fields are consumed only by a bare-address VU load. Explicit Z/X/Y stores
+preserve native order; the volatile X/Y/Z control differs only in those three
+store offsets. No dummy object, fabricated bounds or register binding is used.
+
+Native scale.w at sp+0x1C is unwritten. Full-lane VU multiplication/addition
+propagates that stack-derived value into eye.w, followed by a full memory-
+clobber store and the pose setter's quadword copy. A later camera getter reads
+pose.pos.w in C. W is therefore neither zero nor unused, and no initialization
+or harmlessness assumption is introduced. The source does not read the
+unwritten scale.w through a C expression; the existing hardware path remains.
+The earlier nonvolatile exact form is superseded by this hardware-scratch form.
+
+Independent complete-owner checking gives 27 match, 0 differ. Actual-source
+scalar/callback tests pass 86,400 cases in optimized and ASan/UBSan builds,
+covering state pairs, flags, active/debug paths, mutating callbacks and timer
+signs. The VU model is intentionally opaque and does not read scale.w in C.
+These tests verify scalar sequencing, not vector numeric behavior, PS2
+rounding or arbitrary aliasing; native instruction and provider review cover
+the real hardware path.
+
+All twenty-six peers are preserved in production, SKIP_ASM and retained-C
+contexts. Production and retained owned data are unchanged. SKIP_ASM adds the
+target's 32-byte padded restart diagnostic before existing init strings;
+their exact payloads and all affected local/literal relocations resolve
+identically. Six same-path baseline/final plain/dump pairs compare complete
+assembly and entire raw ELF files literally and equal ordinary-wrapper output.
+All 5,568 resolved inputs are stable, including the compiler-directory symlink
+and independently checked compiler/assembler loader chains. Both actual
+loaders are included; superseded incomplete closure receipts are not used.
