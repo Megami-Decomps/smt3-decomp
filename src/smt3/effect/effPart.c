@@ -1084,12 +1084,12 @@ void **D_0031DDD0[28] = {
 };
 dds3EffectFunc_t dds3EffectFuncTable[7] = {
     { dds3EffectLoad, dds3EffectDraw, dds3EffectDelete, dds3EffectCopy, dds3EffectSetPosition, dds3EffectSetScale, dds3EffectSetRotateMatrix, dds3EffectSetRGBA, NULL, NULL },
-    { dds3EffectPartP2ABillboardCreate, dds3BillboardDraw, dds3BillboardDelete, dds3BillboardCopy, dds3BillboardSetPosition, dds3EffectPartBillboardScale, NULL, dds3BillboardSetRGBA, NULL, NULL },
-    { dds3EffectPartTMXBillboardCreate, dds3BillboardDraw, dds3BillboardDelete, dds3BillboardCopy, dds3BillboardSetPosition, dds3EffectPartBillboardScale, NULL, dds3BillboardSetRGBA, NULL, NULL },
-    { dds3EffectPartModelCreate, dds3EffectPartModelDraw, dds3EffectPartModelDelete, dds3EffectPartModelCopy, dds3EffectPartModelSetPosition, dds3EffectPartModelSetScale, dds3EffectPartModelSetRotateMatrix, dds3EffectPartModelSetColor, NULL, NULL },
-    { dds3EffectPCPCreate, dds3EffectPCPDraw, dds3EffectPCPDelete, dds3EffectPCPCopy, dds3EffectPCPSetPosition, dds3EffectPCPSetScale, dds3EffectPCPSetRotateMatrix, dds3EffectPCPSetColor, NULL, dds3EffectPCPSetArea },
+    { (void * (*)(void *))dds3EffectPartP2ABillboardCreate, dds3BillboardDraw, dds3BillboardDelete, dds3BillboardCopy, dds3BillboardSetPosition, dds3EffectPartBillboardScale, NULL, dds3BillboardSetRGBA, NULL, NULL },
+    { (void * (*)(void *))dds3EffectPartTMXBillboardCreate, dds3BillboardDraw, dds3BillboardDelete, dds3BillboardCopy, dds3BillboardSetPosition, dds3EffectPartBillboardScale, NULL, dds3BillboardSetRGBA, NULL, NULL },
+    { (void * (*)(void *))dds3EffectPartModelCreate, (void (*)(void *))dds3EffectPartModelDraw, (void (*)(void *))dds3EffectPartModelDelete, (void * (*)(void *))dds3EffectPartModelCopy, (void (*)(void *, void *))dds3EffectPartModelSetPosition, dds3EffectPartModelSetScale, (void (*)(void *, void *))dds3EffectPartModelSetRotateMatrix, (void (*)(void *, u32))dds3EffectPartModelSetColor, NULL, NULL },
+    { (void * (*)(void *))dds3EffectPCPCreate, (void (*)(void *))dds3EffectPCPDraw, (void (*)(void *))dds3EffectPCPDelete, (void * (*)(void *))dds3EffectPCPCopy, (void (*)(void *, void *))dds3EffectPCPSetPosition, (void (*)(void *, f32))dds3EffectPCPSetScale, (void (*)(void *, void *))dds3EffectPCPSetRotateMatrix, (void (*)(void *, u32))dds3EffectPCPSetColor, NULL, (void (*)(void *, f32))dds3EffectPCPSetArea },
     { dds3P2APolygonCreate, dds3P2APolygonDraw, dds3P2APolygonDelete, dds3P2APolygonCopy, dds3P2APolygonSetPosition, dds3P2APolygonSetScale, dds3P2APolygonSetRotateMatrix, dds3P2APolygonSetRGBA, dds3P2APolygonSetDirection, NULL },
-    { dds3EffectPCPCreate, dds3EffectPCPDraw, dds3EffectPCPDelete, dds3EffectPCPCopy, dds3EffectPCPSetPosition, dds3EffectPCPSetScale, dds3EffectPCPSetRotateMatrix, dds3EffectPCPSetColor, dds3EffectPCPSetDirection, dds3EffectPCPSetArea },
+    { (void * (*)(void *))dds3EffectPCPCreate, (void (*)(void *))dds3EffectPCPDraw, (void (*)(void *))dds3EffectPCPDelete, (void * (*)(void *))dds3EffectPCPCopy, (void (*)(void *, void *))dds3EffectPCPSetPosition, (void (*)(void *, f32))dds3EffectPCPSetScale, (void (*)(void *, void *))dds3EffectPCPSetRotateMatrix, (void (*)(void *, u32))dds3EffectPCPSetColor, (void (*)(void *, void *))dds3EffectPCPSetDirection, (void (*)(void *, f32))dds3EffectPCPSetArea },
 };
 sdfVector4_t D_0031DF60 __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };
 sdfVector4_t D_0031DF70 __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };

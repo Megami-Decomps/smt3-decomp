@@ -402,6 +402,8 @@ segments:
       - [0x221E30, data, data_00320E30]
       - [0x2FB7C0, .data, newbattle/nbActionProcess]
       - [0x2FB840, data, data_003FA840]
+      - [0x42A448, .data, sdf/sdfMotion]
+      - [0x42A620, data, data_00529620]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
