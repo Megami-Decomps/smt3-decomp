@@ -950,13 +950,13 @@ s32 nbResultProcess2(dds3ProcessID_t *id)
     }
     nbFindTobiwarpLabel(data);
     if (nbResultState > 0) {
-        if (nbResultState < 100) {
+        if (nbResultState < SDF_FRAMES(100)) {
             nbResultState++;
         }
-        if (nbResultState >= 16 && nbResultStep == 0) {
+        if (nbResultState >= SDF_FRAMES(16) && nbResultStep == 0) {
             nbResultAddExp();
             nbBgmFadeOut();
-            if (data->battletime >= 0x367) {
+            if (data->battletime >= SDF_FRAMES(0x367)) {
                 nbIncResultCounter();
             }
             return -1;

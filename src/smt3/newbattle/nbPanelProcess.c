@@ -1318,7 +1318,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
             hTex1 = p->pnltex[0];
             nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
                         uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
-            col = (s32)(sdfSin((f32)p->battletime * 0.2f) * 48.0f) + 0xB0;
+            col = (s32)(sdfSin((f32)SDF_FRAME_TICK(p->battletime) * 0.2f) * 48.0f) + 0xB0;
             xyz2 = &D_004EFE90[15];
             uv2 = &nbPanelParamTable[17];
             col = col + ((col << 16) + (col << 8)) + 0x80000000;
@@ -1429,7 +1429,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         sdfTexHandle_t *hTex;
         u32 c;
 
-        col = (s32)(sdfSin((f32)p->battletime * 0.2f) * 96.0f) + 0xA0;
+        col = (s32)(sdfSin((f32)SDF_FRAME_TICK(p->battletime) * 0.2f) * 96.0f) + 0xA0;
         xyz = &D_004F01A0[0];
         uv = &nbPanelParamTable[14];
         c = col + ((col << 16) + (col << 8)) + 0x80000000;
@@ -1772,7 +1772,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                             nbPressGaugeTable[2].w, nbPressGaugeTable[2].h,
                             uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
                 nbPnl_rsetAlpha(1);
-                cycle = data->battletime % 11;
+                cycle = SDF_FRAME_TICK(data->battletime) % 11;
                 if (cycle < 5) pulse = (f32)cycle / 5.0f;
                 else pulse = 1.0f - (f32)(cycle - 5) / 6.0f;
                 glow = ((D_004F0628[cycle][1] - 1.0f) * 1.25f) + 1.0f;
@@ -2960,7 +2960,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
                     uv->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR),
                     hTex);
     }
-    blink = p->battletime % 25 < 14;
+    blink = SDF_FRAME_TICK(p->battletime) % 25 < 14;
     if (blink == 0 || StockIDListTop == 0) {
         {
             nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[4];
@@ -3538,7 +3538,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
                         uv->u0, uv->v0, uv->u1, uv->v1, drawColor, texture);
         }
         {
-            f32 angle = (f32)p->battletime * 0.2f;
+            f32 angle = (f32)SDF_FRAME_TICK(p->battletime) * 0.2f;
             nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F0600[1];
             s32 pulse = (s32)(sdfSin(angle) * 64.0f) + 0x50;
             u32 pulseColor = effMagaCylinderCalcColor(pulse, color >> 24);
@@ -3549,7 +3549,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
                                0x00483902, 0x60483902, 0x00483902, 0x60483902);
         }
         {
-            f32 angle = (f32)p->battletime * 0.2f;
+            f32 angle = (f32)SDF_FRAME_TICK(p->battletime) * 0.2f;
             nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[0];
             nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[1];
             s32 pulse = (s32)(sdfSin(angle) * 48.0f) + 0xA0;

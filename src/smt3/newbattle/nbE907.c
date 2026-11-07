@@ -399,10 +399,10 @@ s32 nbE907Process_1(dds3ProcessID_t *id)
         nbCameraBoss_Bsnet_E907_2_Run();
         break;
     default:
-        if (e->time >= 0x87 && e->time <= 0x97) {
+        if (e->time >= SDF_FRAMES(0x87) && e->time <= SDF_FRAMES(0x97)) {
             nbCameraBoss_Bsnet_E907_Run();
         }
-        if (e->time >= 0xED) {
+        if (e->time >= SDF_FRAMES(0xED)) {
             nbCameraBoss_Bsnet_E907_2_Run();
         }
         break;
@@ -445,7 +445,7 @@ s32 nbE908_Test(nbEventProcessData_t *e)
 
 s32 nbE908_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x10F) {
+    if (e->seqtime >= SDF_FRAMES(0x10F)) {
         printf(D_00546830);
         e->data->endtype = 1;
         return 1;

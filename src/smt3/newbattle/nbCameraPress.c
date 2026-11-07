@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -40,8 +41,8 @@ void nbCameraPressProcessRun(void)
     if (nbCameraPressRunFlag != 0) {
         data = nbGetMainProcessData();
         if (data != NULL) {
-            if (nbCameraPressFrame < 0xA) {
-                frame = nbCameraPressFrame;
+            if (nbCameraPressFrame < SDF_FRAMES(0xA)) {
+                frame = SDF_FRAME_TICK(nbCameraPressFrame);
                 if ((data->stat & 8) != 0) {
                     target = D_00325998;
                 } else {
@@ -58,7 +59,7 @@ void nbCameraPressProcessRun(void)
             }
             frame = nbCameraPressFrame + 1;
             nbCameraPressFrame = frame;
-            if (frame >= 0x15) {
+            if (frame >= SDF_FRAMES(0x15)) {
                 nbCameraPressRunFlag = FALSE;
             }
         }
@@ -79,7 +80,7 @@ void nbCameraPressProcessInit(void)
     } else {
         nbCameraPressRunFlag = FALSE;
         nbCameraPressThrough = FALSE;
-        nbCameraPressFrame = 100;
+        nbCameraPressFrame = SDF_FRAMES(100);
     }
 }
 #else

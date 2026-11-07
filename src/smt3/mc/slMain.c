@@ -2259,7 +2259,7 @@ saddr_t slFileSelCalc(void)
 
     if (gSlFileErroeFlg == 0) {
         selected = slFileSelError;
-        if (gSlSelCnt >= 21) {
+        if (gSlSelCnt >= SDF_FRAMES(21)) {
             if (slGetPadRep(((u8)dds3PadButtonState[0x26] >> 1) & 1)) {
                 p2sdPlaySE(0, 0x7F, 0x3F);
                 {
@@ -2377,7 +2377,7 @@ s32 slFileSelDraw(s32 id)
     if (gSlNowCardCheck == 1) {
         return 0;
     }
-    gSlSelCnt = gSlSelCnt < 30 ? gSlSelCnt + 1 : 30;
+    gSlSelCnt = gSlSelCnt < SDF_FRAMES(30) ? gSlSelCnt + 1 : SDF_FRAMES(30);
     D_0054F074 += D_0054C58C;
     pulse = sdfSin(D_0054F074) * 0.5f + 0.5f;
     slFileSelWork = pulse < 0.0f ? 0.0f : pulse;
@@ -2392,7 +2392,7 @@ s32 slFileSelDraw(s32 id)
     rsetOtOfs(0x47);
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    count = gSlSelCnt;
+    count = SDF_FRAME_TICK(gSlSelCnt);
     if (count >= 8) {
         offset = count < 15 ? 0x200 - (count - 7) * 64 : 0;
         DrwSprite2D(offset + 0x17E, 0x34, 0x82, 0x1D, 4, 0xD, 0x82, 0x1D, 0x80808080, slProcPtr);
@@ -2403,8 +2403,8 @@ s32 slFileSelDraw(s32 id)
                   0, 0, 0, 0x59, 0, 0, 0, 0x59);
         aDrawBoxG(offset, 0xCF, 0x200, 2, 0, 0, 0, 0x59, 0, 0, 0, 0x59,
                   0, 0, 0, 0x59, 0, 0, 0, 0x59);
-        if (gSlSelCnt >= 8) {
-            offset = gSlSelCnt < 15 ? gSlSelCnt * 64 - 0x3C0 : 0;
+        if (gSlSelCnt >= SDF_FRAMES(8)) {
+            offset = gSlSelCnt < SDF_FRAMES(15) ? SDF_FRAME_TICK(gSlSelCnt) * 64 - 0x3C0 : 0;
             for (row = 0; row < 6; row++) {
                 s32 y = 0x58 + row * 64;
                 DrwSprite2D(offset + 0x188, y, 0x78, 6, 3, 2, 0x78, 6, 0x80808080, slProcPtr);
@@ -2413,7 +2413,7 @@ s32 slFileSelDraw(s32 id)
         }
     }
     for (row = 0; row < 5; row++) {
-        count = gSlSelCnt;
+        count = SDF_FRAME_TICK(gSlSelCnt);
         if (count >= 10) {
             offset = 0;
         } else {
@@ -2443,9 +2443,9 @@ s32 slFileSelDraw(s32 id)
                 DrwSprite2D(offset, y + 0x1A, 0x82, 0x1D, 4, 0x4D, 0x82, 0x1D, 0x80808080, slProcPtr);
                 DrwSprite2D(offset + 0x82, y + 0x1A, 0x17E, 0x1D, 0x85, 0x4D, 1, 0x1D, 0x80808080, slProcPtr);
             }
-            if ((row == 0 && gSlSelCnt < 15) || (row == 1 && gSlSelCnt < 17) ||
-                (row == 2 && gSlSelCnt < 19) || (row == 3 && gSlSelCnt < 23) ||
-                (row == 4 && gSlSelCnt < 25)) {
+            if ((row == 0 && gSlSelCnt < SDF_FRAMES(15)) || (row == 1 && gSlSelCnt < SDF_FRAMES(17)) ||
+                (row == 2 && gSlSelCnt < SDF_FRAMES(19)) || (row == 3 && gSlSelCnt < SDF_FRAMES(23)) ||
+                (row == 4 && gSlSelCnt < SDF_FRAMES(25))) {
                 continue;
             }
             state = slTopMenuSel[row];

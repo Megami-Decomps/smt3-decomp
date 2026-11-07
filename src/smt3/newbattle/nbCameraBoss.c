@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -1667,7 +1668,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
     type = nbCameraBoss_BSARI_MASEHA_Type;
     switch (type) {
     case 0:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
+        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(30)) {
             pNbCamera->direction.x = -0.27f;
             pNbCamera->direction.y = -0.08f;
             pNbCamera->direction.z = 0.96f;
@@ -1676,14 +1677,14 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->target.z = -1819.1999f;
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
-        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(130)) {
             from.x = -1449.11f;
             from.y = -15.0f;
             from.z = -2223.37f;
             to.x = 1370.34f;
             to.y = -15.0f;
             to.z = -2046.0f;
-            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+            rate = ((f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
             SDF_VU0_INTERPOLATE(rate);
@@ -1710,8 +1711,8 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
         }
         break;
     case 1:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < 135) {
-            rate = (f32)nbCameraBoss_BSARI_MASEHA_Frame / 135.0f;
+        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(135)) {
+            rate = (f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) / 135.0f;
             from.x = -940.78992f;
             from.y = -296.84995f;
             from.z = -1616.1199f;
@@ -1746,7 +1747,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
         }
         break;
     case 2:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
+        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(30)) {
             pNbCamera->direction.x = -0.27f;
             pNbCamera->direction.y = -0.08f;
             pNbCamera->direction.z = 0.96f;
@@ -1755,8 +1756,8 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->target.z = -1819.1999f;
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
-        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
-            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(130)) {
+            rate = ((f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
             from.x = -628.99994f;
             from.y = -47.56f;
             from.z = -2074.9898f;
@@ -2816,7 +2817,7 @@ void nbCameraBoss_BSBERU_E915_0_Set(void)
 
     effBTLModelAllShow();
     camera = &pNbCamera;
-    blend.value = (s32)nbCameraBoss_BSBERU_E915_Frame / 200.0f;
+    blend.value = (s32)SDF_FRAME_TICK(nbCameraBoss_BSBERU_E915_Frame) / 200.0f;
     from.x = -1028.459839f;
     from.y = -172.94f;
     from.z = -927.7399292f;
@@ -2863,7 +2864,7 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     f32 blend;
 
     nbCameraBoss_BSBERU_E915_Rate = rate * 0.99f;
-    blend = (s32)nbCameraBoss_BSBERU_E915_Frame / 30.0f;
+    blend = (s32)SDF_FRAME_TICK(nbCameraBoss_BSBERU_E915_Frame) / 30.0f;
     from.x = 361.64997f;
     from.y = -627.90992f;
     from.z = -651.73993f;

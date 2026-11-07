@@ -351,7 +351,7 @@ s32 Effect1(nbEventProcessData_t *ed)
 
 s32 Wait1(nbEventProcessData_t *ed)
 {
-    if (ed->seqtime == 1) {
+    if (ed->seqtime == SDF_FRAMES(1)) {
         nbSetEnemyFormation(ed->data);
         nbAllFormDispOn();
         nbGroupFormDispOff(0);

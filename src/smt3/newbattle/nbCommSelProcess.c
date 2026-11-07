@@ -277,7 +277,7 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
         margin = 0x2B - (s32)(s->smritu * 43.0f);
     }
     listCount = GetCommListCnt(s, type);
-    blink = s->data->battletime % 0x19 < 0xE;
+    blink = SDF_FRAME_TICK(s->data->battletime) % 0x19 < 0xE;
     if (s->nowlisty[type] > 0 && blink) {
         nbPnlSprite(ox + 0xE, oy - margin + 0x166, 7, 9, 0x53, 0x4E, 7, 9, c,
                     s->data->pnltex[0]);

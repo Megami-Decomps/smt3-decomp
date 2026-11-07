@@ -449,7 +449,7 @@ s32 nbE909_Model1Start(nbEventProcessData_t *e)
 
 s32 nbE909_Model1Wait(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x64) {
+    if (e->seqtime >= SDF_FRAMES(0x64)) {
         if (pacCheckEnd(e->pfile) != 0) {
             if (evtBitCheck(0xC0F) == 0) {
                 e->mem = fileGetMemHandle(e->file);
@@ -467,10 +467,10 @@ s32 nbE909_Model1Wait_2(nbEventProcessData_t *e)
 {
     void *p;
 
-    if (e->seqtime == 0xA) {
+    if (e->seqtime == SDF_FRAMES(0xA)) {
         func_0024D938(e);
     }
-    if (e->seqtime >= 0x1E) {
+    if (e->seqtime >= SDF_FRAMES(0x1E)) {
         if (evtBitCheck(0xC0F) == 0) {
             p = sdfMemLock(e->mem);
             mdlPackDecode(1, 0x108, 0x101, p, sdfMemGetSize(e->mem));
@@ -538,7 +538,7 @@ s32 nbE909_Model2Wait_1(nbEventProcessData_t *e)
 
 s32 nbE909_Model2Wait_15(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x51) {
+    if (e->seqtime >= SDF_FRAMES(0x51)) {
         if (nbMaeCheckDone() != 0) {
             nbMaeWaitStep();
             nbFreeEffectSlot(e);
@@ -549,7 +549,7 @@ s32 nbE909_Model2Wait_15(nbEventProcessData_t *e)
 
 s32 nbE909_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x1A) {
+    if (e->seqtime >= SDF_FRAMES(0x1A)) {
         printf(D_00546860);
         e->data->stat &= ~8;
         return 1;

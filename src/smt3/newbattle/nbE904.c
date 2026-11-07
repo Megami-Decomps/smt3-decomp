@@ -562,7 +562,7 @@ s32 Model1Wait(nbEventProcessData_t *ed)
         dds3SetQuake(0x1E, 0x1F4);
         break;
     }
-    if (ed->seqtime >= 0xF0 && pacCheckEnd(ed->pfile) != 0) {
+    if (ed->seqtime >= SDF_FRAMES(0xF0) && pacCheckEnd(ed->pfile) != 0) {
         if (evtBitCheck(0xC0F) == 0) {
             ed->mem = fileGetMemHandle(ed->file);
             fileHandleFree(ed->file);
@@ -579,10 +579,10 @@ s32 Model1Wait_2(nbEventProcessData_t *ed)
     void *buf;
     s32 size;
 
-    if (ed->seqtime == 0x1E) {
+    if (ed->seqtime == SDF_FRAMES(0x1E)) {
         func_0024D938(ed);
     }
-    if (ed->seqtime >= 0x20) {
+    if (ed->seqtime >= SDF_FRAMES(0x20)) {
         if (evtBitCheck(0xC0F) == 0) {
             buf = sdfMemLock(ed->mem);
             size = sdfMemGetSize(ed->mem);
@@ -648,7 +648,7 @@ s32 func_002930E8(nbEventProcessData_t *e)
 
 s32 nbE905_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x24) {
+    if (e->seqtime >= SDF_FRAMES(0x24)) {
         if (nbMaeCheckDone() != 0) {
             printf(D_005467E0);
             nbMaeWaitStep();

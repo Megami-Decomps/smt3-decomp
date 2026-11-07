@@ -367,7 +367,7 @@ s32 PartsEffect1(nbEventProcessData_t *ed)
     seqtime = ed->seqtime;
     form = NULL;
     mark = 0;
-    if (seqtime == 1) {
+    if (seqtime == SDF_FRAMES(1)) {
         for (i = 0; i < 4; i++) {
             form = &ed->data->form[4 + formIndices[i]];
             stockno = nbAppendEnemyDevilWork(ed->data, stockIds[i], form->formindex);
@@ -393,7 +393,7 @@ s32 PartsEffect1(nbEventProcessData_t *ed)
         mark = 3;
         break;
     }
-    if (seqtime >= 0x88 && nbCheckLoadGroup(1) == 0) {
+    if (seqtime >= SDF_FRAMES(0x88) && nbCheckLoadGroup(1) == 0) {
         for (i = 0; i < 4; i++) {
             groupForm = &ed->data->form[4 + formIndices[i]];
             nbAddFormOnOffPacket(1, 0, groupForm, 1);
@@ -416,7 +416,7 @@ s32 PartsEffect1(nbEventProcessData_t *ed)
 
 s32 PartsWait(nbEventProcessData_t *ed)
 {
-    if (ed->seqtime >= 9) {
+    if (ed->seqtime >= SDF_FRAMES(9)) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -445,7 +445,7 @@ s32 EffDel(nbEventProcessData_t *ed)
     nbKoukaProcessData_t *k;
     nbKoukaPacket_t *p;
 
-    if (ed->seqtime == 0x4B) {
+    if (ed->seqtime == SDF_FRAMES(0x4B)) {
         k = dds3GetProcessData(ed->data->koukaproc);
         p = k->first;
         while (p != NULL) {
@@ -461,7 +461,7 @@ s32 EffDel(nbEventProcessData_t *ed)
 
 s32 nbE903_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x1F) {
+    if (e->seqtime >= SDF_FRAMES(0x1F)) {
         printf(D_00546548);
         e->data->stat |= 0x2000;
         return 1;
@@ -572,7 +572,7 @@ s32 Test(nbEventProcessData_t *ed)
 
 s32 nbE904_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0xBF) {
+    if (e->seqtime >= SDF_FRAMES(0xBF)) {
         printf(D_00546570);
         e->data->endtype = 1;
         return 1;

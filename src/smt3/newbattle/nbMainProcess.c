@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "nb.h"
 #include "ps2asm.h"
@@ -1309,7 +1310,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         if (data->phasetime == 0) {
             nbPanelPressTurnStart();
         }
-        if (nbCameraPressProcessGetFrame() >= 10) {
+        if (nbCameraPressProcessGetFrame() >= SDF_FRAMES(10)) {
             nbSetNextPhase(PRESSMAE);
             next = 1;
         }
@@ -1372,7 +1373,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         } else {
             limit = 8;
         }
-        if (data->phasetime >= limit) {
+        if (data->phasetime >= SDF_FRAMES(limit)) {
             if (nbCheckActionStack()) {
                 nbSetNextPhase(CHKTURN);
                 next = 1;

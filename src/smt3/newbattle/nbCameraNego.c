@@ -77,7 +77,7 @@ void nbCameraState_NegoBougai_Init(void)
     SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->distance;
-    nbCamera_NegoBougai_Wait = 15;
+    nbCamera_NegoBougai_Wait = SDF_FRAMES(15);
     nbCamera_NegoBougai_Frame = 0;
 }
 
@@ -88,13 +88,13 @@ void nbCameraState_NegoBougai_Init2(void)
     SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->distance;
-    nbCamera_NegoBougai_Wait = 8;
+    nbCamera_NegoBougai_Wait = SDF_FRAMES(8);
     nbCamera_NegoBougai_Frame = 0;
 }
 
 void nbCameraState_NegoBougai_SetWaitFrame(u32 frame)
 {
-    nbCamera_NegoBougai_Wait = frame;
+    nbCamera_NegoBougai_Wait = SDF_FRAMES(frame);
 }
 
 void nbCameraState_NegoBougai_Calc(void)

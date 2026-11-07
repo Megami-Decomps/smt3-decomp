@@ -350,7 +350,7 @@ s32 nbE910_Test(nbEventProcessData_t *e)
 
 s32 nbE910_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= 0x15) {
+    if (e->seqtime >= SDF_FRAMES(0x15)) {
         printf(D_00546870);
         e->data->endtype = 8;
         return 1;

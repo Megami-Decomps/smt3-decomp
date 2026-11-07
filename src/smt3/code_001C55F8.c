@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -209,7 +210,7 @@ void nbCameraHelperRun(nbCameraHelper_tag *hCameraHelper)
     s32 frameMax = hCameraHelper->frameMax;
     f32 length;
 
-    if (hCameraHelper->frame < frameMax) {
+    if (hCameraHelper->frame < SDF_FRAMES(frameMax)) {
         camera = &pNbCamera;
         dds3EffectPartDraw(hCameraHelper->hPB);
         model = dds3EffectPartGetHandle(hCameraHelper->hPB);

@@ -460,15 +460,15 @@ s32 nbE915Process_1(dds3ProcessID_t *id)
         nbSetEnemyFormation(e->data);
         nbSetPlayerFormation(e->data, 0);
     }
-    if (e->time < 0x6E) {
+    if (e->time < SDF_FRAMES(0x6E)) {
         if (e->time == 0) {
             nbCameraBoss_BSBERU_E915_Init();
         }
         nbCameraBoss_BSBERU_E915_0_Set();
-    } else if (e->time == 0x6E) {
+    } else if (e->time == SDF_FRAMES(0x6E)) {
         nbCameraBoss_BSBERU_E915_1_Set();
-    } else if (e->time >= 0xFA) {
-        if (e->time == 0xFA) {
+    } else if (e->time >= SDF_FRAMES(0xFA)) {
+        if (e->time == SDF_FRAMES(0xFA)) {
             nbFormDispOff2(nbGetEventForm());
             nbCameraBoss_BSBERU_E915_Init();
         }
