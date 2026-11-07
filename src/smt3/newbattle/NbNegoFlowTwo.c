@@ -318,10 +318,8 @@ extern s32 nbFlowCheckUnit2(datUnitWork_t *pwork, datUnitWork_t *ework,
 extern s32 datCheckStockFull(void);
 extern s32 nbFlowCheckUnit(nbNegoProcessData_t *n, s32 ptype, s32 etype, s32 data);
 
-#ifdef NON_MATCHING
 s32 Flow6_1(nbNegoProcessData_t *n)
 {
-    nbNegoSkillCondition_t *condition;
     s32 skill;
     s32 ptype;
     s32 etype;
@@ -338,24 +336,22 @@ s32 Flow6_1(nbNegoProcessData_t *n)
     }
     skill = n->negoskillid - 0x180;
     n->aisyo = 0;
-    condition = D_003E1338[skill].condition;
-    for (i = 0; i < 4; i++, condition++) {
-        ptype = condition->ptype;
-        etype = condition->etype;
+    for (i = 0; i < 4; i++) {
+        ptype = D_003E1338[skill].condition[i].ptype;
+        etype = D_003E1338[skill].condition[i].etype;
         if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 1)) {
             n->aisyo = 1;
-            n->aisyomes = condition->message;
+            n->aisyomes = D_003E1338[skill].condition[i].message;
             break;
         }
     }
     if (n->aisyo == 0) {
-        condition = &D_003E1338[skill].condition[4];
-        for (i = 0; i < 4; i++, condition++) {
-            ptype = condition->ptype;
-            etype = condition->etype;
+        for (i = 0; i < 4; i++) {
+            ptype = D_003E1338[skill].condition[i + 4].ptype;
+            etype = D_003E1338[skill].condition[i + 4].etype;
             if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 0)) {
                 n->aisyo = 2;
-                n->aisyomes = condition->message;
+                n->aisyomes = D_003E1338[skill].condition[i + 4].message;
                 break;
             }
         }
@@ -373,9 +369,6 @@ s32 Flow6_1(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_1);
-#endif
 
 s32 Flow6_2(nbNegoProcessData_t *n)
 {

@@ -227,6 +227,7 @@ Flow6_24	newbattle/NbNegoFlowTwo	0x4FC	319 of 319 words match	docs/matching/newb
 Flow6_20	newbattle/NbNegoFlowTwo	0x1A0	104 of 104 words match	docs/matching/newbattle/NbNegoFlowTwo.md	49
 Flow6_22 declaration visibility				docs/matching/newbattle/NbNegoFlowTwo.md	76
 Flow6_65	newbattle/NbNegoFlowTwo	0x190	100 of 100 words match	docs/matching/newbattle/NbNegoFlowTwo.md	97
+Flow6_1	newbattle/NbNegoFlowTwo	592 bytes	148 of 148 words match	docs/matching/newbattle/NbNegoFlowTwo.md	147
 CheckAction_READY	newbattle/nbActionProcess	0x3EC	251 of 251 words match	docs/matching/newbattle/nbActionProcess.md	3
 CheckAction_COMM	newbattle/nbActionProcess	0x354	213 of 213 words match	docs/matching/newbattle/nbActionProcess.md	26
 CheckAction_CHECK1	newbattle/nbActionProcess	0x28C	163 of 163 words match	docs/matching/newbattle/nbActionProcess.md	60
@@ -297,6 +298,9 @@ nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matchi
 nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	392
 nbMakeKaifukuPacket	newbattle/nbMakePacket	0x1E8	122 of 122 words match	docs/matching/newbattle/nbMakePacket.md	449
 nbMakeDeadVisualPacket, nbMakeDamagePacket	newbattle/nbMakePacket	0x2E8 / 0x410	446 of 446 words match	docs/matching/newbattle/nbMakePacket.md	494
+nbDrawRotatedModelX	newbattle/nbMisc	404 bytes	101 of 101 words match	docs/matching/newbattle/nbMisc.md	3
+nbDrawRotatedModel	newbattle/nbMisc	508 bytes	127 of 127 words match	docs/matching/newbattle/nbMisc.md	29
+Combined rotated-model literal ownership				docs/matching/newbattle/nbMisc.md	57
 nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76
@@ -323,6 +327,7 @@ UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
 OnOffTargetCursor	newbattle/nbTarSelProcess	132 bytes	33 of 33 words match	docs/matching/newbattle/nbTarSelProcess.md	100
 CheckFormCursor	newbattle/nbTarSelProcess	388 bytes		docs/matching/newbattle/nbTarSelProcess.md	134
+AnimeTargetCursor	newbattle/nbTarSelProcess	540 bytes	135 of 135 words match	docs/matching/newbattle/nbTarSelProcess.md	180
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40

@@ -504,7 +504,6 @@ void nbMakeUnitDrawMatrix(nbFormation_t *form)
     SDF_VU0_ADDVECTOR();
 }
 
-#ifdef NON_MATCHING
 extern const f32 D_003FA880[][4];
 extern const u32 D_003FACA0[];
 extern const f32 D_003FAF20[][4];
@@ -520,13 +519,15 @@ extern void SetRotateMatrixX_B(f32 angle);
 void nbDrawRotatedModelX(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                          sdfVector4_t *center, f32 r, f32 scl, f32 h)
 {
-    sdfVector4_t scale = {1.0f, 1.0f, 1.0f, 1.0f};
+    /* VU0 consumes the scratch vector through a bare address. */
+    volatile sdfVector4_t scale = {1.0f, 1.0f, 1.0f, 1.0f};
 
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(center);
-    SDF_VU0_SCALEVECTOR(scl);
+    /* The float operand reaches VU0 through a GPR without a C conversion. */
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -535,27 +536,30 @@ void nbDrawRotatedModelX(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot
     MultMatrixNoArg();
     SDF_VU0_LOADVECTOR(&scale);
     SDF_VU0_SCALEVECTOR(r);
-    SDF_VU0_SCALEVECTOR(scl);
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     SDF_VU0_COPYMATRIX_A_TO_C();
     sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x42, 0x80)));
     SDF_VU0_COPYMATRIX_C_TO_A();
-    SetRotateMatrixX_B(3.1415925f);
+    SetRotateMatrixX_B(3.1415926f);
     MultMatrixNoArg();
     sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x40, 0x80)));
 }
 
+/* vu0 routine: transform and submit the two battle-marker models. */
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h)
 {
-    sdfVector4_t scale = {1.0f, 1.0f, 1.0f, 1.0f};
+    /* VU0 consumes this scratch vector through its bare address. */
+    volatile f32 scale[] QWORD_ALIGNED = {1.0f, 1.0f, 1.0f, 1.0f};
 
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(center);
-    SDF_VU0_SCALEVECTOR(scl);
+    /* Float operands reach VU0 through GPRs without C conversions. */
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -563,8 +567,8 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_TRANSLATE_XYZ1();
     MultMatrixNoArg();
     SDF_VU0_LOADVECTOR(&scale);
-    SDF_VU0_SCALEVECTOR(r);
-    SDF_VU0_SCALEVECTOR(scl);
+    SDF_VU0_SCALEVECTOR_BITS(r);
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FAF20, D_003FB220, 0x30, 0x80)));
@@ -572,7 +576,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(center);
-    SDF_VU0_SCALEVECTOR(scl);
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_LOADVECTOR_B(pos);
     SDF_VU0_ADDVECTOR();
@@ -580,16 +584,12 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_TRANSLATE_XYZ1();
     MultMatrixNoArg();
     SDF_VU0_LOADVECTOR(&scale);
-    SDF_VU0_SCALEVECTOR(r);
-    SDF_VU0_SCALEVECTOR(scl);
+    SDF_VU0_SCALEVECTOR_BITS(r);
+    SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FADB0, D_003FAED0, 0x12, 0x80)));
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModelX);
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModel);
-#endif
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag)
 {
@@ -721,10 +721,6 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
     if (carea != NULL) *carea = area;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544130);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
-
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 #endif
 

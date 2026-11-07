@@ -73,24 +73,25 @@ void nbSetTarSelJyokyoTime(s32 time)
     GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
-/* NON_MATCHING. Checked against retail with PCSX2 call vectors: the 4 from a battle savestate match, and
- * 2 from battle_0_1 and capture_010 differ in a float low byte, the fldNpcCalc pattern (sdfport 73e010f,
- * tools/funcvec, tests/funcvec.sh), unconfirmed. */
-#ifdef NON_MATCHING
+INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_005442B8);
+
 void AnimeTargetCursor(nbTarSelProcessData_t *process)
 {
-    s32 time = (s32)((u32)process->time + 1);
-    s32 alphaA[7] = { 25, 31, 38, 64, 52, 40, 28 };
-    s32 alphaB[7] = { 128, 102, 77, 89, 102, 114, 128 };
-    f32 scaleA[7] = { 1.0f, 1.15f, 1.3f, 0.5f,
+    s32 nextTime = (s32)((u32)process->time + 1);
+    s32 alphaA[] = { 25, 31, 38, 64, 52, 40, 28 };
+    f32 scaleA[] = { 1.0f, 1.15f, 1.3f, 0.5f,
                       0.65999998f, 0.84999998f, 1.0f };
-    f32 scaleB[7] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    s32 alphaB[] = { 128, 102, 77, 89, 102, 114, 128 };
+    f32 scaleB[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    s32 time;
     s32 index;
     f32 rate;
     f32 inverse;
+    f32 valueA;
+    f32 valueB;
 
-    process->time = time;
-    if (time >= 30) {
+    process->time = nextTime;
+    if (nextTime >= 30) {
         process->time = 0;
     }
     time = process->time;
@@ -99,12 +100,11 @@ void AnimeTargetCursor(nbTarSelProcessData_t *process)
     inverse = 1.0f - rate;
     process->alpha_a = (s32)((f32)alphaA[index] * inverse + (f32)alphaA[index + 1] * rate);
     process->alpha_b = (s32)((f32)alphaB[index] * inverse + (f32)alphaB[index + 1] * rate);
-    process->scale_b = scaleB[index] * inverse + scaleB[index + 1] * rate;
-    process->scale_a = scaleA[index] * inverse + scaleA[index + 1] * rate;
+    valueA = scaleA[index] * inverse + scaleA[index + 1] * rate;
+    valueB = scaleB[index] * inverse + scaleB[index + 1] * rate;
+    process->scale_b = valueB;
+    process->scale_a = valueA;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", AnimeTargetCursor);
-#endif
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
                         u32 rgba, sdfTexHandle_t *texture);
@@ -628,14 +628,4 @@ void nbInitTarSelProcess(nbMainProcessData_t *data)
     dds3LinkProcess(data->MainProcessID, id);
     data->tarSelProcess = id;
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_005442B8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_005442C8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_005442E8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_00544308);
-
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_00544328);
 

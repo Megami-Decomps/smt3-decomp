@@ -142,3 +142,49 @@ Full retail checksum, generated-source, tooling, retained EE/IRX, compiler
 wrapper and reconciled report checks pass. The linked production proof
 identifies a unique 400-byte C-owned span matching retail. Game coverage
 gains one function and 400 bytes.
+
+
+## Flow6_1 (newbattle/NbNegoFlowTwo, 592 bytes)
+
+All 148 of 148 words match at the native 592-byte extent. Direct, truthful
+`D_003E1338[skill].condition[i]` indexing replaces the loop-carried condition
+pointer; the second scan indexes `i + 4`. No constraint, binding, cast,
+helper, provider/type change, extra operation or compiler option is added.
+The complete owner is 74 match, 0 differ, with its entire 14,200-byte text
+and 228-byte rodata native after relocation. No literal or section moves.
+
+Five candidate appends precede the stock-full gate. Request type is read after
+that callback and skill is captured only after the gate. Each condition's
+ptype/etype are read before nbFlowCheckUnit; its message is reloaded afterwards
+from the same captured skill and current condition. Successful scans set aisyo
+before storing the message. Live aisyo controls entry to the second scan and
+the final switch. Callback changes to negoskillid must not change the captured
+row; unknown aisyo values retain nextnegoid. Both recipient objects, callbacks,
+message timing, selection order and all return-zero paths remain native.
+
+The actual table spans 0x3E1338..0x3E22A8: 38 records of 104 bytes, each with
+an eight-byte prefix and eight 12-byte conditions. Backed skill IDs are
+0x180..0x1A5. The existing initialization and negotiation dispatcher supply
+this domain, and independent decoding places all 29 type-2 negotiation skills
+inside it. Four indices in each scan cover exactly conditions 0..3 and 4..7.
+No new guard or out-of-domain storage guarantee is introduced.
+
+Pointer induction emits 556 bytes with 9/148 native-prefix words matching.
+A per-iteration row pointer has the same 556-byte result. Separate scan-pointer
+reads and indexed callback message reloads emit 616 bytes with 7/148 words;
+a captured entry pointer emits 548 bytes with 10/148. Diagnostic skill READ/LIVE
+operands do not improve those forms and are absent from the final source.
+Qualified stock RTL distinguishes indexed p/e address inductions and a separate
+message address from the baseline pointer induction combining those fields.
+This is an observed compiler handling difference, not a historical-source claim
+or a claim that one pass explains every final allocation choice.
+
+Independent review verifies the table, dispatcher, actual linked owner,
+callback reloads and source semantics. Fresh complete-owner ordinary/dump
+assembly and ELF pairs, strict declarations, all peer/data contracts and
+current final-head gates pass. Optimized and ASan/UBSan exact-body fixtures
+cover all 38 rows, both recipients, sparse/dense conditions, append saturation,
+stock checks and callback changes to p/e/message/skill/aisyo/next state.
+Earlier deliberate timing and state mutants are rejected. Host fixtures are
+not EE execution. Full retail/generated-source, tooling/layout, retained
+EE/IRX and reconciled report/provenance checks accompany the source promotion.

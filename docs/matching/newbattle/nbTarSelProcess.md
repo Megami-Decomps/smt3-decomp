@@ -175,3 +175,52 @@ source filename is normalized. All 21 production, 19 assembly-skipping and
 contracts; owned data remains unchanged. The original direct production object
 also equals the current build object. These checks qualify the
 observations and peer preservation, not a full-link acceptance of inexact C.
+
+
+## AnimeTargetCursor (newbattle/nbTarSelProcess, 540 bytes)
+
+All 135 of 135 words match at the native 540-byte extent. The final function
+is ordinary C: four initializer-sized arrays, a separate pre-copy `nextTime`
+snapshot and post-store `time` reload, and real scale-result locals calculated
+A then B and stored B then A. There is no added constraint, fixed register,
+volatile object, fabricated bound, extra consumer or compiler option.
+
+Each array has exactly seven real native values. Declaration/literal order is
+alpha A, scale A, alpha B, scale B; the native runtime copies execute alpha A,
+alpha B, scale A, scale B. Time increments through the existing unsigned-word
+addition, resets on signed `nextTime >= 30`, then reloads the stored value
+before signed division/remainder by five. Initialization and reachable updates
+keep time in 0..29, so both interpolation endpoints stay in the seven-element
+arrays. No new guarantee is made for corrupt state producing negative indexes.
+The two separately rounded products and addition per channel, integer alpha
+conversions, and alpha A/B then scale B/A stores retain native behavior.
+
+The exposed baseline has 49/135 matching words at 540 bytes. Inferred bounds
+and native literal order reach 81/135; a diagnostic time binding and ordinary
+scale phases reach exactness. Separating the two genuine time lifetimes then
+removes the final binding. Final-source controls that merge those lifetimes,
+restore direct scale stores, or explicitly fix all bounds at seven retain
+83/135, 129/135 and 83/135 respectively, each at 540 bytes. The selected bounds
+are truthful initializer-derived extents, not a false alias or storage promise.
+DDS array-copy observations supplied a lead; measured SMT3 output parity does
+not establish a historical source spelling or an unobserved scheduler cause.
+
+Source-owned tables require regenerated imports. The old assembly-backed
+object owned 152 rodata bytes beginning at 0x5442B8. The final production
+object emits the first 140 native bytes; the next owner's verified 16-byte
+alignment supplies the remaining 12 native zero bytes before 0x544350.
+SKIP_ASM and retained C expose 124 native table bytes without the assembly-only
+name and padding. Raw object-section equality is therefore not claimed.
+All other allocated data and all peers preserve their resolved contracts;
+full-image equality verifies the literal and alignment span together.
+
+Independent semantic/compiler/native-data review approves the final source.
+The complete owner is 20 match, 0 differ. Fresh integrated production,
+SKIP_ASM and retained-C ordinary/dump pairs preserve complete assembly and
+ELF output, including three final-source controls. Strict declaration checks
+pass. Optimized and ASan/UBSan exact-body fixtures cover all 30 reachable times,
+sentinel bytes, transitions and valid reset states; earlier broader numeric
+fixtures supplement them without claiming arbitrary-input PS2 FPU emulation.
+The combined battle landing passes full retail, generated-source, regression,
+retained EE/IRX and report/provenance gates. It preserves OnOffTargetCursor,
+UpdateSelect and all remaining guarded drafts.
