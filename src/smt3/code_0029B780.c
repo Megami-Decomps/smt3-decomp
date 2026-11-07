@@ -511,13 +511,15 @@ extern void fclDrawPanelSprite(s32 id, s32 ot);
 extern void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot);
 extern void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot);
 
-/* NON_MATCHING: 5 of 150 words differ; exact 600-byte size. */
-#ifdef NON_MATCHING
 void dds3DrawConfigPanel(s32 ot)
 {
     s32 colors[4];
     s32 color;
 
+    /* Keep the real ordering-table argument live through entry setup. The
+     * empty operand restores the native first-call argument schedule; it
+     * emits no instruction and is not evidence of original source spelling. */
+    FAKEMATCH_ASM_LIVE(ot);
     fclDrawPanelSprite(0x3000F, ot);
     if (((dds3ConfigWork_t *)GBWK)->textureHandle != NULL) {
         dds3DrawConfigBackground(ot);
@@ -543,10 +545,6 @@ void dds3DrawConfigPanel(s32 ot)
     fclDrawSpriteRes(0, -0x80, 0, colors, 0, 7, D_00345D88, dds3ConfigLayoutTable, ot);
     dds3DrawConfigItem(0, 0x1D8, 0, ot);
 }
-
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigPanel);
-#endif
 
 void *cfgTexLoad(void)
 {

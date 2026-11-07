@@ -57,9 +57,9 @@ cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1625
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
-dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	68
-dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/code_0029B780.md	85
-dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	160
+dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	90
+dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/code_0029B780.md	107
+dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	182
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
