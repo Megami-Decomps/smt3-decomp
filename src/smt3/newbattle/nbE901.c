@@ -427,7 +427,7 @@ s32 RunUgou(nbEventProcessData_t *e)
 
 s32 Wait1_nbE901(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0x42)) {
+    if (e->seqtime >= 0x42) {
         nbFreeEffectSlot(e);
     }
     return 0;
@@ -472,14 +472,14 @@ s32 SyuGo(nbEventProcessData_t *e)
     vec1.z = -100.0f;
     memset(&vec2, 0, sizeof(vec2));
     vec2.z = -5000.0f;
-    if (e->seqtime == SDF_FRAMES(2)) {
+    if (e->seqtime == 2) {
         nbCameraBoss_Sp_DOUTYO_TPFix_Set(pNbCamera);
     }
-    if (e->seqtime == SDF_FRAMES(5)) {
+    if (e->seqtime == 5) {
         e->data->press4_p = 0;
         e->data->pressturn = 0;
     }
-    if (e->seqtime >= SDF_FRAMES(0x38)) {
+    if (e->seqtime >= 0x38) {
         nbFreeEffectSlot(e);
     }
     h = dds3GetUnitHandleObjectBasic(D_005515B4);
@@ -492,7 +492,7 @@ s32 SyuGo(nbEventProcessData_t *e)
             sdfModelGetMarkPos(h->owner->inner, mark - i);
             SDF_VU0_STOREVECTOR(&v);
             nbSetFormPos(form, &v);
-            if (e->seqtime < SDF_FRAMES(0x33)) {
+            if (e->seqtime < 0x33) {
                 evtUnitRotationTarget(form->hunit, (f32 *)&vec1, 0.08f);
             } else {
                 evtUnitRotationTarget(form->hunit, (f32 *)&vec2, 0.05f);
@@ -510,8 +510,8 @@ s32 SyuGo2(nbEventProcessData_t *ed)
     s32 mark;
     nbFormation_t *form;
 
-    if (ed->seqtime >= SDF_FRAMES(0xB)) {
-        if (ed->seqtime == SDF_FRAMES(0xB)) {
+    if (ed->seqtime >= 0xB) {
+        if (ed->seqtime == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
                 form = (nbFormation_t *)(EE_ADDR_AS(u8 *, ofs) + EE_ADDR(ed->data->form));
@@ -521,10 +521,10 @@ s32 SyuGo2(nbEventProcessData_t *ed)
                 }
             }
         }
-        if (ed->seqtime == SDF_FRAMES(0x19)) {
+        if (ed->seqtime == 0x19) {
             dds3StartBEDEffectObjectBasic(bedbasic, 2);
         }
-        if (ed->seqtime >= SDF_FRAMES(0x31)) {
+        if (ed->seqtime >= 0x31) {
             nbFreeEffectSlot(ed);
         }
     }
@@ -560,7 +560,7 @@ s32 Daisupe(nbEventProcessData_t *ed)
 
 s32 ReadWait2(nbEventProcessData_t *ed)
 {
-    if (ed->seqtime >= SDF_FRAMES(0x1F) && nbCheckLoadGroup(1) == 0) {
+    if (ed->seqtime >= 0x1F && nbCheckLoadGroup(1) == 0) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -579,10 +579,10 @@ s32 Syutugen2(nbEventProcessData_t *ed)
     nbFormation_t *form;
     sdfVector4_t *op;
 
-    if (ed->seqtime == SDF_FRAMES(3)) {
+    if (ed->seqtime == 3) {
         nbAddHitEffKoukaPacket(0, 0, nbGetEventForm(), 4);
     }
-    if (ed->seqtime == SDF_FRAMES(5)) {
+    if (ed->seqtime == 5) {
         dds3SetQuake(0x1E, 0x258);
     }
     form = nbGetEventForm();
@@ -593,8 +593,8 @@ s32 Syutugen2(nbEventProcessData_t *ed)
         nbFreeEffectSlot(ed);
     }
     nbSetFormPos(form, &pos);
-    if (ed->seqtime >= SDF_FRAMES(4)) {
-        if (ed->seqtime == SDF_FRAMES(4)) {
+    if (ed->seqtime >= 4) {
+        if (ed->seqtime == 4) {
             SDF_VU0_LOADVECTOR(&form->pos);
             SDF_VU0_STOREVECTOR(&pos);
             op = &pos2;
@@ -613,7 +613,7 @@ s32 Syutugen2(nbEventProcessData_t *ed)
 s32 End(nbEventProcessData_t *ed)
 {
     nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
-    if (ed->seqtime < SDF_FRAMES(0x6F)) {
+    if (ed->seqtime < 0x6F) {
         return 0;
     }
     effBTLSkillEnd();

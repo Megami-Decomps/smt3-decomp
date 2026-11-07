@@ -437,7 +437,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
 
 s32 nbE911_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(2)) {
+    if (e->seqtime >= 2) {
         printf(D_00546880);
         return 1;
     }
@@ -587,7 +587,7 @@ s32 nbE912_Hatudo(nbEventProcessData_t *e)
 
 s32 nbE912_Wait1(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0x3D)) {
+    if (e->seqtime >= 0x3D) {
         nbFreeEffectSlot(e);
     }
     return 0;

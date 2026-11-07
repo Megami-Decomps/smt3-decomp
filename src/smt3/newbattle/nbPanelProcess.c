@@ -2461,7 +2461,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     switch (nbPanelPTP_1_Process) {
     case 0:
         frame = nbPanelPTP_1_Frame++;
-        if (frame >= 4) {
+        if (frame >= SDF_FRAMES(4)) {
             nbPanelPTP_1_Frame = 0;
             nbPanelPTP_1_Process = 1;
         }
@@ -2475,7 +2475,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         height0 = (f32)nbPanelPTPartList[0].h;
         height1 = (f32)nbPanelPTPartList[1].h;
         i = 0;
-        while (i < (u32)nbPanelPTP_1_Frame) {
+        while (i < (u32)SDF_FRAME_TICK(nbPanelPTP_1_Frame)) {
             i++;
             value = scale0;
             scale0 += step0;
@@ -2489,7 +2489,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                    0x08808080, value, texture);
         }
         frame = nbPanelPTP_1_Frame++;
-        if (frame >= 4) {
+        if (frame >= SDF_FRAMES(4)) {
             nbPanelPTP_1_Frame = 0;
             nbPanelPTP_1_Process = 2;
         }
@@ -2498,7 +2498,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         nbPnl_rsetAlpha(1);
         height0 = (f32)nbPanelPTPartList[0].h;
         step0 = D_0054E5D8;
-        rate = (f32)nbPanelPTP_1_Frame * 0.125f;
+        rate = (f32)nbPanelPTP_1_Frame / SDF_FRAMES_F(8.0f);
         step1 = D_0054E5DC;
         height1 = (f32)nbPanelPTPartList[1].h;
         limit0 = D_0054E5E0;
@@ -2518,7 +2518,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                    0x08808080, value, texture);
         }
         frame = nbPanelPTP_1_Frame++;
-        if (frame >= 8) {
+        if (frame >= SDF_FRAMES(8)) {
             nbPanelPTP_1_Frame = 1;
             nbPanelPTP_1_Rate = 1.0f;
             nbPanelPTP_1_Process = 3;
@@ -2528,8 +2528,8 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         nbPnl_rsetAlpha(1);
         rate = nbPanelPTP_1_Rate;
         height1 = (f32)nbPanelPTPartList[1].h;
-        nbPanelPTP_1_Rate = rate * 0.75f;
-        rate = (1.0f - (f32)nbPanelPTP_1_Frame / 18.0f) * rate;
+        nbPanelPTP_1_Rate = rate * SDF_FRAME_DECAY(0.75f);
+        rate = (1.0f - (f32)nbPanelPTP_1_Frame / SDF_FRAMES_F(18.0f)) * rate;
         scale0 = rate * D_0054E5E8 + 1.0f;
         scale1 = rate * D_0054E5EC + 1.0f;
         height0 = (f32)nbPanelPTPartList[0].h * (scale0 - 1.0f) * 0.5f;
@@ -2542,14 +2542,14 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                                    0x08808080, scale1, texture);
         }
         frame = nbPanelPTP_1_Frame++;
-        if (frame >= 18) {
+        if (frame >= SDF_FRAMES(18)) {
             nbPanelPTP_1_Frame = 0;
             nbPanelPTP_1_Process = 4;
         }
         break;
     case 4:
         frame = nbPanelPTP_1_Frame++;
-        if (frame >= 8) {
+        if (frame >= SDF_FRAMES(8)) {
             nbPanelPTP_1_Process = 5;
             nbPanelPTP_1_Rate = 1.0f;
             nbPanelPTP_1_Frame = 0;
@@ -2557,7 +2557,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 5:
         nbPnl_rsetAlpha(0);
-        rate = (f32)nbPanelPTP_1_Frame / 14.0f;
+        rate = (f32)nbPanelPTP_1_Frame / SDF_FRAMES_F(14.0f);
         color = D_005511D8 & 0xFFFFFF;
         alpha = (u32)((1.0f - rate) * 26.0f) << 24;
         tint = color | alpha;
@@ -2588,8 +2588,8 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                     nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
                     uv->u0, uv->v0, uv->u1, uv->v1, alpha, spriteTexture);
         frame = nbPanelPTP_1_Frame;
-        if (frame < 13) {
-            alpha = (u32)((1.0f - (f32)frame / 13.0f) * 128.0f) << 24;
+        if (frame < SDF_FRAMES(13)) {
+            alpha = (u32)((1.0f - (f32)frame / SDF_FRAMES_F(13.0f)) * 128.0f) << 24;
             uv = &nbPanelParamTable[titleUV[0]];
             spriteTexture = data->pnltex[3];
             tint = effMagaCylinderCalcColor(color | alpha, nbPanelBaseABGR);
@@ -2598,11 +2598,11 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                         uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
             frame = nbPanelPTP_1_Frame;
         }
-        if (frame >= 8) {
-            nbPanelPTP_1_Rate *= 1.25f;
+        if (frame >= SDF_FRAMES(8)) {
+            nbPanelPTP_1_Rate *= SDF_FRAME_DECAY(1.25f);
         }
-        if (frame < 10) {
-            rate = (f32)frame / 10.0f;
+        if (frame < SDF_FRAMES(10)) {
+            rate = (f32)frame / SDF_FRAMES_F(10.0f);
             alpha = (u32)((1.0f - rate) * 128.0f) << 24;
             uv = &nbPanelParamTable[titleUV[1]];
             tint = effMagaCylinderCalcColor(color | alpha, nbPanelBaseABGR);
@@ -2612,7 +2612,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
             frame = nbPanelPTP_1_Frame;
         }
         frame++;
-        if (frame < 14) {
+        if (frame < SDF_FRAMES(14)) {
             nbPanelPTP_1_Frame = frame;
         } else {
             nbPanelPTP_1_Frame = 0;

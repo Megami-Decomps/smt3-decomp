@@ -474,7 +474,7 @@ s32 nbE906_Test(nbEventProcessData_t *e)
 
 s32 nbE906_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0x1A5)) {
+    if (e->seqtime >= 0x1A5) {
         printf(D_005467F0);
         e->data->endtype = 1;
         return 1;

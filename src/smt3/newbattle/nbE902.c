@@ -399,7 +399,7 @@ s32 SetForm(nbEventProcessData_t *e)
 s32 nbE902_Wait1(nbEventProcessData_t *e)
 {
     nbGetEventForm();
-    if (SDF_FRAMES(*(u16 *)(datModelParamTable + 0x3386E)) < e->seqtime) {
+    if (*(u16 *)(datModelParamTable + 0x3386E) < e->seqtime) {
         nbFreeEffectSlot(e);
     }
     return 0;
@@ -458,11 +458,11 @@ s32 Bunshin1(nbEventProcessData_t *ed)
 
 s32 Wait2(nbEventProcessData_t *ed)
 {
-    if (ed->seqtime == SDF_FRAMES(1)) {
+    if (ed->seqtime == 1) {
         nbFormDispOff(5);
     }
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
-    if (SDF_FRAMES(effPCPBossBUNSIN2GetLength()) < ed->seqtime) {
+    if (effPCPBossBUNSIN2GetLength() < ed->seqtime) {
         if (dds3GetRandA(dds3EffectBase) & 1) {
             nbCameraEnemyPartySet(pNbCamera, -0.34906584f, -0.26179934f);
         } else {
@@ -545,7 +545,7 @@ s32 nbE903_Wait1(nbEventProcessData_t *e)
 
     form = nbGetEventForm();
     /* The animation block the unit basic points at; its end frame sits at +0x2E. */
-    if (SDF_FRAMES(*(u16 *)((u8 *)((dds3Basic_t *)form->hunit->owner)->poseset + 0x2E)) < e->seqtime) {
+    if (*(u16 *)((u8 *)((dds3Basic_t *)form->hunit->owner)->poseset + 0x2E) < e->seqtime) {
         nbFreeEffectSlot(e);
     }
     return 0;

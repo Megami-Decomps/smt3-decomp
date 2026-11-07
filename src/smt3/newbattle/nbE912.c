@@ -426,7 +426,7 @@ void MoveSub(nbEventProcessData_t *ed)
 s32 Move1(nbEventProcessData_t *ed)
 {
     MoveSub(ed);
-    if (ed->seqtime == SDF_FRAMES(0x55) && nbCheckLoadGroup(1) == 0) {
+    if (ed->seqtime == 0x55 && nbCheckLoadGroup(1) == 0) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -474,7 +474,7 @@ s32 nbE912_Effect1(nbEventProcessData_t *e)
 
 s32 nbE912_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0x10)) {
+    if (e->seqtime >= 0x10) {
         printf(D_00546898);
         e->data->stat &= ~8;
         return 1;
@@ -532,7 +532,7 @@ s32 nb_295D98(dds3ProcessID_t *id)
         D_00551630 = D_00551638;
         break;
     default:
-        if (e->time < SDF_FRAMES(0x3C)) {
+        if (e->time < 0x3C) {
             nbCameraBoss_BSALBI_E912_Run();
         }
         break;
@@ -557,7 +557,7 @@ s32 nbE913_Test(nbEventProcessData_t *e)
 
 s32 nbE913_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0xD3)) {
+    if (e->seqtime >= 0xD3) {
         printf(D_005468B0);
         nbDelAllKoukaPacketType(0x2B);
         e->data->endtype = 1;

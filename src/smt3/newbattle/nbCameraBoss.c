@@ -466,7 +466,7 @@ extern sdfVector4_t D_003259F0;
 void nbCameraBoss_Foru_E913_Run(void)
 {
     u32 frame = Foru_E913_Frame;
-    f32 rate = (s32)SDF_FRAME_TICK(frame) / 190.0f;
+    f32 rate = (s32)frame / 190.0f;
 
     if (rate > 1.0f) {
         rate = 1.0f;
@@ -2817,7 +2817,7 @@ void nbCameraBoss_BSBERU_E915_0_Set(void)
 
     effBTLModelAllShow();
     camera = &pNbCamera;
-    blend.value = (s32)SDF_FRAME_TICK(nbCameraBoss_BSBERU_E915_Frame) / 200.0f;
+    blend.value = (s32)nbCameraBoss_BSBERU_E915_Frame / 200.0f;
     from.x = -1028.459839f;
     from.y = -172.94f;
     from.z = -927.7399292f;
@@ -2864,7 +2864,7 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     f32 blend;
 
     nbCameraBoss_BSBERU_E915_Rate = rate * 0.99f;
-    blend = (s32)SDF_FRAME_TICK(nbCameraBoss_BSBERU_E915_Frame) / 30.0f;
+    blend = (s32)nbCameraBoss_BSBERU_E915_Frame / 30.0f;
     from.x = 361.64997f;
     from.y = -627.90992f;
     from.z = -651.73993f;

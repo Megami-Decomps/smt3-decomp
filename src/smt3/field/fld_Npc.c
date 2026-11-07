@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "basic.h"
 #include "dds3obj.h"
@@ -1489,7 +1490,7 @@ void fldNpcCalc(void)
                     fldNpcCamTarget = talk;
                 }
                 if (talk == 0) {
-                    fldModelSlotTable[i].cntf += 0.1f;
+                    fldModelSlotTable[i].cntf += SDF_FRAME_STEP(0.1f);
                     fldModelSlotTable[i].cntAnmi = 0;
                     fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
                     fldDeleteNpcModel(i);
@@ -1502,7 +1503,7 @@ void fldNpcCalc(void)
                     fldCamNpcTarget = -140.0f;
                     fldNpcCamTargetY = -140.0f;
                     fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    fldModelSlotTable[i].cntf += 0.05f;
+                    fldModelSlotTable[i].cntf += SDF_FRAME_STEP(0.05f);
                     fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
                 }
                 break;

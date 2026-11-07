@@ -351,7 +351,7 @@ s32 nbE914_Test(nbEventProcessData_t *e)
 
 s32 nbE914_End(nbEventProcessData_t *e)
 {
-    if (e->seqtime >= SDF_FRAMES(0x10F)) {
+    if (e->seqtime >= 0x10F) {
         printf(D_005468C8);
         nbDelAllKoukaPacketType(0x2B);
         e->data->endtype = 1;
