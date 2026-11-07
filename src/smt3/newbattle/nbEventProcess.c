@@ -222,7 +222,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 /* 28-byte entries; only the fields this unit reads are named. */
 typedef struct {
     s32 rid;
-    s32 unk_04;
+    s32 (*process)(dds3ProcessID_t *id);
     s32 encno;
     s32 unk_0C;
     s32 unk_10;
@@ -453,10 +453,10 @@ void *nbEventProcess3(dds3ProcessID_t *id)
             form++;
         } while (i >= 0);
     }
-    if (nbEventEntryTable[data->eventno].unk_04 != 0) {
+    if (nbEventEntryTable[data->eventno].process != NULL) {
         event->unk_18 = NULL;
         nbGetEventEntry(data);
-        return EE_ADDR_AS(void *, nbEventEntryTable[data->eventno].unk_04);
+        return (void *)nbEventEntryTable[data->eventno].process;
     }
     return (void *)-1;
 }

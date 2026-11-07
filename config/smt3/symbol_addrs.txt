@@ -318,7 +318,7 @@ DestPhaseTable = 0x003322A0; // type:u32 size:0x20
 cmpMenuTextTable = 0x00345E00; // type:u32 size:0x58
 InfoSelectTable = 0x003E4058; // type:u8 size:0x2fd0
 ActionFuncTable = 0x003FA7C0; // type:u32 size:0x80
-nbEventEntryTable = 0x00527260; // type:u8 size:0x1c0
+nbEventEntryTable = 0x00527260; // type:u32 size:0x1c0
 sdfMotGenNodeDef = 0x00529458; // type:u32 size:0x14
 sdfMotGenMatTable = 0x005294E8; // type:u32 size:0x28
 sdfDevConsColorTable = 0x00529A80; // type:u32 size:0x3c
@@ -1082,7 +1082,7 @@ D_0054F18A = 0x0054F18A; // size:0x1
 // gap labels C declares
 scrCommandTable = 0x0052E350; // type:u32 size:0x1100
 D_00317380 = 0x317380; // type:u8 size:0x80
-D_003176A0 = 0x3176A0; // type:u8 size:0x10
+D_003176A0 = 0x3176A0; // type:u32 size:0x10
 
 // narrow WORDS
 D_0032C4E0 = 0x0032C4E0; // type:u16 size:0x30

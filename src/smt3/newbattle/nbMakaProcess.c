@@ -230,7 +230,7 @@ extern char D_00551560[];
 /* 28-byte entries; only the fields this unit reads are named. */
 typedef struct {
     s32 rid;
-    s32 unk_04;
+    s32 (*process)(dds3ProcessID_t *id);
     s32 encno;
     s32 unk_0C;
     s32 unk_10;
