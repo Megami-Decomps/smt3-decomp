@@ -201,8 +201,8 @@ frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/inte
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93
 frCreateNameHandle	interface/frName	0xC0	48 of 48 words match	docs/matching/interface/frName.md	154
-DrawSelectCursor	interface/itfMesManager	0x2FC		docs/matching/interface/itfMesManager.md	3
-itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	38
+DrawSelectCursor	interface/itfMesManager	0x2FC	128 of 191 words match	docs/matching/interface/itfMesManager.md	3
+itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	58
 lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55

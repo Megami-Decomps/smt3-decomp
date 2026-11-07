@@ -35,6 +35,26 @@ instruction scheduling as not worth a second attempt and that is what this
 looks like; if it is steerable it is through something other than statement
 order.
 
+### Typed cursor storage and provider declarations (2026-11-07)
+
+The retained cursor now uses two `sdfIVector2_t` position records and genuine
+`itfColor_t` color/UV objects. These match the objects read by the canonical
+`itfMiscDrawSpritePlanePrim` and `itfMiscDrawSpritePrim2` providers; their local
+external declarations now also preserve the providers' typed parameters and
+unsigned depth word. The separate `itfMiscDrawSpritePrim` provider genuinely
+accepts `void *` buffers and a signed depth word, and remains unchanged.
+All position arithmetic, component bits, initialization and callback order are
+preserved. This corrects source type/alias contracts, not native behavior or
+matching progress: the target remains guarded and 128 of 191 words match at 764 bytes.
+
+Paired complete-owner production, SKIP_ASM and true NON_MATCHING/SKIP_ASM
+controls preserve emitted code, owned data, symbols and relocations.
+Independent fixed-filename controls also preserve literal complete assembly
+and raw ELF objects. The 119 already matched peers remain exact. Real right-edge, blue-channel and
+paired vertical-edge operand constraints reduce the target to 756 bytes and
+worsen its matching score; none is retained. The remaining store scheduling
+problem does not justify more statement permutations or fabricated consumers.
+
 ## itfMesMngGetVarLocalize (interface/itfMesManager, 0xAC)
 
 One of thirty-four words matches and the draft emits 136 bytes against

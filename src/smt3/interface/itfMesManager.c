@@ -421,11 +421,11 @@ extern u8 D_00326768[];
 
 extern u8 D_00326770[];
 
-extern void itfMiscDrawSpritePlanePrim(void *pos, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
+extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command);
 
-extern void itfMiscDrawSpritePrim2(void *pos, void *uv, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
+extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern s32 D_00326778[4];
 
@@ -2452,9 +2452,9 @@ void DrawWindow(instanceMes_tag *pinst) {
 /* NON_MATCHING: 128 of 191 words, exact size; the three stack arrays' store and constant order is scheduled differently. */
 #ifdef NON_MATCHING
 void DrawSelectCursor(instanceMes_tag *pinst) {
-    s32 uv[4];
-    s32 color[4];
-    s32 rect[4];
+    itfColor_t uv;
+    itfColor_t color;
+    sdfIVector2_t rect[2];
     curctr_tag *fade = &pinst->curctr;
     select_tag *sel = &pinst->select;
     sdfDrawTag_t *list;
@@ -2476,51 +2476,51 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     rowOfs = sel->lines * 160 - 0xC0;
     y = sel->y - rowOfs;
     y += index * 168;
-    color[0] = 0x57;
-    color[1] = 0;
-    color[2] = 0x10;
-    color[3] = 0x26;
-    rect[1] = y - 8;
-    rect[0] = x - 0xF0;
-    rect[2] = D_00326728[0];
-    rect[3] = y + 0xA8;
-    itfMiscDrawSpritePlanePrim(rect, color, pinst->z, 0, list);
+    color.components[0] = 0x57;
+    color.components[1] = 0;
+    color.components[2] = 0x10;
+    color.components[3] = 0x26;
+    rect[0].y = y - 8;
+    rect[0].x = x - 0xF0;
+    rect[1].x = D_00326728[0];
+    rect[1].y = y + 0xA8;
+    itfMiscDrawSpritePlanePrim(rect, &color, pinst->z, 0, list);
     D_00326728[1] = y - 8;
     D_00326728[3] = y - 8;
     D_00326728[5] = y + 0xA8;
     D_00326728[7] = y + 0xA8;
     itfMiscDrawRectanglePrim((sdfIVector2_t *)D_00326728, D_00326748, D_00326768, D_00326770, pinst->z, list);
-    uv[0] = 0x150;
-    uv[1] = 0x2F0;
-    uv[2] = 0x1B0;
-    uv[3] = 0x3F0;
-    color[0] = 0x80;
-    color[1] = 0x80;
-    color[2] = 0x80;
-    color[3] = 0x26;
-    rect[0] = x - 0x150;
-    rect[2] = x - 0xF0;
-    rect[3] = y + 0x88;
-    rect[1] = y + 8;
-    itfMiscDrawSpritePrim(rect, uv, color, pinst->z, itfMesMngManager.windowTexture, 0, list);
-    uv[0] = 0x260;
-    uv[1] = 0x2F0;
-    uv[3] = 0x3F0;
-    uv[2] = 0x360;
-    color[3] = fade->ctr0;
-    rect[2] = rect[0] + 0x100;
-    rect[3] = rect[1] + 0x80;
-    itfMiscDrawSpritePrim2(rect, uv, color, pinst->z, 0, list);
+    uv.components[0] = 0x150;
+    uv.components[1] = 0x2F0;
+    uv.components[2] = 0x1B0;
+    uv.components[3] = 0x3F0;
+    color.components[0] = 0x80;
+    color.components[1] = 0x80;
+    color.components[2] = 0x80;
+    color.components[3] = 0x26;
+    rect[0].x = x - 0x150;
+    rect[1].x = x - 0xF0;
+    rect[1].y = y + 0x88;
+    rect[0].y = y + 8;
+    itfMiscDrawSpritePrim(rect, &uv, &color, pinst->z, itfMesMngManager.windowTexture, 0, list);
+    uv.components[0] = 0x260;
+    uv.components[1] = 0x2F0;
+    uv.components[3] = 0x3F0;
+    uv.components[2] = 0x360;
+    color.components[3] = fade->ctr0;
+    rect[1].x = rect[0].x + 0x100;
+    rect[1].y = rect[0].y + 0x80;
+    itfMiscDrawSpritePrim2(rect, &uv, &color, pinst->z, 0, list);
     timer = fade->ctr1;
     if (timer > 0) {
         d = 0x80 - timer;
-        rect[0] -= d;
-        rect[1] -= d >> 1;
-        rect[2] += d * 2;
-        rect[3] += d >> 1;
-        color[3] = timer;
+        rect[0].x -= d;
+        rect[0].y -= d >> 1;
+        rect[1].x += d * 2;
+        rect[1].y += d >> 1;
+        color.components[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
-        itfMiscDrawSpritePrim2(rect, uv, color, pinst->z, 0, list);
+        itfMiscDrawSpritePrim2(rect, &uv, &color, pinst->z, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
     packetOwner = &sdfGrOtTable[pinst->otindex];
@@ -2529,6 +2529,7 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
 #else
 INCLUDE_ASM(const s32, "interface/itfMesManager", DrawSelectCursor);
 #endif
+
 
 
 void DrawRetPageCursor(instanceMes_tag *pinst) {
