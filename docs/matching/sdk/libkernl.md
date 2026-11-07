@@ -675,3 +675,120 @@ their diagnostic fallbacks as inputs. Exact SDK source credit is two functions
 and 40 bytes; measured report-category deltas are reconciled separately and
 game coverage is unchanged. The preceding TLB reconstruction and claim remain
 intact. Exact-commit CI follows publication.
+
+## LoadExecPS2 (72 bytes, ordinary void API)
+
+LoadExecPS2 now matches its complete 72-byte interval, 0x002E4698 through
+0x002E46E0 exclusive, under the configured SDK 2.9 compiler. The accepted
+source is ordinary C, with no noreturn promise, alternate-symbol declaration,
+compiler constraint, fabricated result, padding or instruction replay.
+Matching does not establish original source spelling or Sony provenance.
+
+### Public interface and semantic evidence
+
+The maintained PS2DEV [exit implementation](https://ps2dev.github.io/ps2sdk/exit_8c_source.html)
+(lines 85-92 as retrieved 2026-11-07) defines LoadExecPS2 as void, captures
+SetArg's packed path, calls TerminateLibrary, and invokes the load/execute
+provider with the original count and refreshed packed argument vector.
+The adjacent ExecPS2 instead forwards an s32 provider result. The public
+[kernel header](https://ps2dev.github.io/ps2sdk/kernel_8h_source.html)
+(lines 312 and 350-351) corroborates the void LoadExecPS2/_LoadExecPS2 and
+s32 _ExecPS2 distinction. These are current maintained open-source API
+references, not original Sony source, an immutable historical revision or
+proof of the precise library version bundled with SMT3.
+
+The [syscall constants](https://github.com/ps2dev/ps2sdk/blob/master/ee/kernel/include/syscallnr.h)
+and [stub implementation](https://github.com/ps2dev/ps2sdk/blob/master/ee/kernel/src/kernel.S)
+identify load/execute as syscall 6, distinct from ExecPS2's syscall 7.
+The unchanged retail libc_2DBAE0 stub loads v1 with 6, executes syscall,
+then returns through ra. A tail jump or incidental v0 contents alone do not
+establish the C result contract. The API evidence does. The modern header's
+noreturn annotation is deliberately not imported: ordinary void specifies
+no C result and permits the provider to return normally.
+
+The existing game caller and public wrapper both use
+void LoadExecPS2(const char *, s32, char **). The earlier diagnostic with a
+const-qualified pointer vector was superseded because identical target ABI
+does not make incompatible C function types acceptable. The final source
+localizes an explicit (const char *const *)arguments conversion at the existing
+SetArg boundary. SetArg only reads the vector and pointed-to strings; it does
+not store through the converted input. This preserves target pointer
+representation and native reads without changing the provider or invoking
+the same-symbol ABI-view allowance.
+
+The wrapper retains SetArg's actual packed-path result and the original
+caller count across TerminateLibrary. It then reads D_0052D668 again and
+passes arguments[1], a four-byte offset in the existing EE record, to the
+void syscall provider. Native s0/s1 lifetimes, post-termination global loads,
+call order and the terminal branch all agree. The old result-preserving
+76-byte experiment was not a legitimate semantic baseline and was excluded
+from these qualification gates; the real assembly-backed parent was used.
+No fresh search over false result contracts was performed.
+
+A fresh native direct J/JAL scan finds only 0x001005E0 calling LoadExecPS2
+and only 0x002E46D8 reaching libc_2DBAE0. The complete source/header search
+agrees, and an aligned-word scan of every file-backed allocated section finds
+no literal pointers to either function. These scans cannot disprove arbitrary
+dynamically constructed call targets. IDA types only corroborate the result
+contract and are not used to infer authoritative argument widths.
+
+### Current-parent compiler, native and semantic qualification
+
+Independent review approved the exact final complete source. Fresh integration
+starts from official main ecabd20d2ec005746b4895c0b2d6d48d7183180c, after
+rechecking the complete coordination board and the prior scope's explicit
+release. All older claim rows and matching notes remain intact. The published
+iPutTLBEntry, iSyncDCache and iInvalidDCache bodies and the complete published
+libcdvd ncmd/scmd source are preserved.
+
+Baseline and candidate are rebuilt in production, SKIP_ASM and
+SKIP_ASM+NON_MATCHING contexts. All six complete assembly/ELF plain/-da pairs
+agree after exactly one equal-length generated source filename token is
+normalized in each artifact. No code, data, symbol, relocation or other
+payload is stripped. Six full-Werror and implicit-declaration-strict builds
+succeed without diagnostics. All raw compiler passes are preserved in
+lossless archives verified by a complete roundtrip hash comparison.
+The integration's production assembly and ELF object also equal the qualified
+production pair with the same single filename normalization.
+
+The complete owner improves from 160 matches, zero differences, to 161,
+zero differences. All 363 production, 160 SKIP and 165 retained peers preserve
+instruction bytes and relocation contracts. Complete allocated nontext data
+and non-target symbol contracts agree. HI/LO pairs are resolved in the ELF's
+original relocation order before comparison; every peer's raw relocation
+order also agrees. Full symbol inventories retain the expected new undefined
+libc_2DBAE0 reference only in the two nonproduction modes, where the baseline
+omits the wrapper and syscall fallback. No other undefined contract changes.
+
+The target resolves to all 72 native bytes in every context, SHA-256
+3e56ba2809e0debcb7be976b93b1a76f03f0f997f3c444809b6e3dd7679d3f40.
+Its relocations are SetArg at +16, TerminateLibrary at +24, D_0052D668 at
++32/+40, and libc_2DBAE0 at +64. Production provenance proves a unique
+compiler-owned target, outside assembly fallback regions, with no target
+fallback in its dependency graph. The full 4,551,696-byte retail image is
+byte-identical with SHA-1 5facfbf7916836613449c922e26a4ec412207b32.
+
+A fixture extracts the wrapper, launch declaration, argument-record type and
+global declaration verbatim from the approved source. Both optimized host C
+and AddressSanitizer/UndefinedBehaviorSanitizer pass 2,430 cases, checking
+SetArg inputs, packed-path capture, original count, call ordering, refreshed
+global+1 arguments, and caller continuation when the void provider returns.
+Counts are forwarded rather than used for host indexing; unusual count/input
+pairs test forwarding only, not validity for the real SetArg. LeakSanitizer
+is disabled after a retained ptrace-environment failure; the fixture allocates
+no dynamic memory. This is not evidence of EE ABI/layout, actual SetArg
+packing, syscall success, timing, concurrency or hardware behavior.
+
+Current-tree regression gates pass all 35 complete owners, including
+libkernl 161/0 and libcdvd 29/0; 505 tooling tests with no skips; 818 layout
+assertions; 141 guarded EE owners containing 381 NON_MATCHING and 112 FIX_BUGS
+drafts; seven IRX modules; and inline-assembly policy. Generated-source
+positive and stale-line negative controls run serially before the compiler
+matrix and sweep. Fresh full baseline and candidate reports retain their
+provenance, and final Ninja is a no-op. Exact-commit CI follows publication.
+
+This adds one verified SDK C function and 72 instruction bytes, with no game
+source-credit change. The actual SDK report-category delta is 72 code bytes and 1 functions,
+measured independently from fresh current-parent reports rather than inferred
+from source promotion. The complete game report remains unchanged at
+1,518,560 matched code bytes and 8,686 matched functions.

@@ -4091,7 +4091,15 @@ s32 ExecPS2(void *entry, void *gp, s32 count, const char *const *arguments)
                     &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", LoadExecPS2);
+extern void libc_2DBAE0(const char *path, s32 count, char **arguments);
+
+void LoadExecPS2(const char *path, s32 count, char **arguments)
+{
+    char *packedPath = SetArg(path, count, (const char *const *)arguments);
+    TerminateLibrary();
+    libc_2DBAE0(packedPath, count,
+                  &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+}
 
 void Exit(s32 status)
 {
