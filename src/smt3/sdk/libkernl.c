@@ -444,13 +444,25 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _sceSDC);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", SyncDCache);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iSyncDCache);
+extern void _sceSDC(void *start, void *end);
+
+void iSyncDCache(void *start, void *end)
+{
+    _sceSDC(EE_ADDR_PTR(EE_ADDR(start) & ~63U),
+             EE_ADDR_PTR(EE_ADDR(end) & ~63U));
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceIDC);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InvalidDCache);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iInvalidDCache);
+extern void _sceIDC(void *start, void *end);
+
+void iInvalidDCache(void *start, void *end)
+{
+    _sceIDC(EE_ADDR_PTR(EE_ADDR(start) & ~63U),
+             EE_ADDR_PTR(EE_ADDR(end) & ~63U));
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", func_002DC970);
 

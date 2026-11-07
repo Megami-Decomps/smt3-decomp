@@ -624,3 +624,54 @@ as a build input. Exact SDK source credit is one function and 48 bytes; game
 coverage is unchanged. Report-category deltas are separately reconciled against
 the exact parent build. These checks establish a matching reconstruction,
 not historical source spelling; exact-commit CI follows publication.
+
+## iSyncDCache and iInvalidDCache
+
+Both interrupt-context cache wrappers match all 20 native instruction bytes
+apiece in ordinary C. The wrappers use the existing `EE_ADDR` and `EE_ADDR_PTR`
+macros and an unsigned mask to clear bits 0 through 5 of both endpoint address
+representations before forwarding to the unchanged `_sceSDC` and `_sceIDC`
+assembly providers. Both endpoints,
+including end, align down. The providers retain their inclusive unsigned
+comparisons, cache operations and synchronization. No ordering, nonempty-range,
+wraparound repair, object bounds, pointer subtraction or dereference is added.
+The integer-to-pointer conversion is target-representation dependent, not
+universally portable ISO C.
+
+The pinned [ps2sdk public declarations](https://github.com/ps2dev/ps2sdk/blob/d41ea62946e53d9a0c8788bb9eb8c8faf488b559/ee/kernel/include/kernel.h)
+corroborate the wrappers' `void(void *, void *)` interfaces. They do not declare
+the private `_sceSDC` or `_sceIDC` providers. Those void interfaces are
+reconstructed from the assembly's two address inputs, discarded scratch result
+and callers, not claimed as recovered private C declarations. Both 164-byte
+provider bodies remain assembly-backed and byte-identical. The object map's
+`cache.o` attribution is name-only, not a byte identification or a claim of
+original Sony source spelling.
+
+Independent review applies by exact extracted-body identity. Fresh optimized
+and ASan/UBSan source-extracted mock tests each check 2,524,288 provider calls,
+including every pair of low-six-bit patterns across boundary/high-bit bases
+and one million random endpoint pairs. Mock providers never execute hardware
+cache operations. The host uses explicit 32-bit guest address conversions;
+the configured target separately verifies four-byte pointer and unsigned-word
+representations. No new constraints, helper bodies or compiler flags are used.
+
+Fresh baseline/final complete-owner plain/dump assembly and entire-ELF parity,
+strict implicit-declaration checks and exact resolved native bodies pass in
+production, SKIP_ASM and retained modes. The sole normalization is one
+equal-length generated source path. All 362 production, 158 SKIP_ASM and
+163 retained peers, allocated nontext data and non-target symbol/relocation
+contracts are preserved, including the published 48-byte `iPutTLBEntry` in
+all three contexts. The complete owner advances from 158 to 160 matches with
+zero differences. Each new target owns 20 bytes; SKIP_ASM/retained text growth
+of 48 bytes is 40 instruction bytes plus eight alignment bytes, not 48 bytes
+of source credit.
+
+All 35 current owner checks, 505 no-skip tooling tests and 818 layout assertions,
+141 guarded EE owners with 381 NON_MATCHING and 112 FIX_BUGS drafts, seven IRX
+modules, inline-assembly and serial generated-source positive/negative checks
+pass. Full retail SHA-1 and byte comparison remain exact and final Ninja is a
+no-op. Production provenance proves unique compiler-owned targets without
+their diagnostic fallbacks as inputs. Exact SDK source credit is two functions
+and 40 bytes; measured report-category deltas are reconciled separately and
+game coverage is unchanged. The preceding TLB reconstruction and claim remain
+intact. Exact-commit CI follows publication.
