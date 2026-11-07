@@ -326,7 +326,7 @@ void fldSkyDrawFilter(void) {
     }
     currentWeight = fldSkyFilterRate;
     if (currentWeight < 1.0f) {
-        currentWeight += 1.0f / fldSkyFilterTime;
+        currentWeight += SDF_FRAME_STEP(1.0f / fldSkyFilterTime);
         if (currentWeight > 1.0f) {
             currentWeight = 1.0f;
             fldSkyFilterRate = currentWeight;

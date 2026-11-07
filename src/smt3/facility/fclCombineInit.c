@@ -27,6 +27,7 @@ typedef struct
 } cmbEvoTableEntry_t;
 
 
+extern u32 dds3GetKernelCount(void);
 extern char fclCombineUpdateName[];
 
 extern char fclCombineCalcName[];
@@ -5520,7 +5521,7 @@ void func_00205EA0(void)
     }
     /* Native ramp: one float below 25, with the rounded 25/3 step. */
     if (cmbTargetModelId < 0x1.8ffffep+4f) {
-        cmbTargetModelId += 0x1.0aaaaap+3f;
+        cmbTargetModelId += 0x1.0aaaaap+3f * SDF_FRAME_DUE(dds3GetKernelCount());
     }
 }
 

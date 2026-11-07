@@ -5,6 +5,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "sdfFrame.h"
 
 extern void sdfChipFreeDirect(void *aPtr);
 
@@ -22,7 +23,7 @@ void fclDrawPanelTypeDef(fclPanel_t *pPanel, s32 OtNo)
 
 void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
 {
-    pPanel->Timer += pPanel->Spd;
+    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -166,7 +167,7 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0);
 
 void fclUpdatePanelType0(fclPanel_t *pPanel)
 {
-    pPanel->Timer += pPanel->Spd;
+    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -210,7 +211,7 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
 
 void fclUpdatePanelType1(fclPanel_t *pPanel)
 {
-    pPanel->Timer += pPanel->Spd;
+    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
     if (pPanel->Timer > 0x200) {
         pPanel->Timer = 0;
     }
@@ -230,7 +231,7 @@ void fclDrawPanelType2(fclPanel_t *panel, s32 ot)
 
 void fclUpdatePanelType2(fclPanel_t *pPanel)
 {
-    pPanel->Timer += pPanel->Spd;
+    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -337,11 +338,11 @@ void fclDrawPanelType3(fclPanel_t *panel, s32 ot)
 
 void fclUpdatePanelType3(fclPanel_t *pPanel)
 {
-    pPanel->Timer += pPanel->Spd;
+    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
     if (pPanel->Timer >= 0x201) {
         pPanel->Timer = 0;
     }
-    pPanel->Timer2 += 0x20;
+    pPanel->Timer2 += SDF_FRAME_STEP(0x20);
     if (pPanel->Timer2 >= 0x201) {
         pPanel->Timer2 = 0x200;
     }

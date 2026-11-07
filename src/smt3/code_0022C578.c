@@ -6247,11 +6247,11 @@ void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
         if (frame != 0) {
             frame++;
             *timer = frame;
-            if (frame >= 24) {
+            if (frame >= SDF_FRAMES(24)) {
                 *timer = 0;
                 return;
             }
-            cmpGetGaugeBlinkAlpha(frame, 0, blinkColors);
+            cmpGetGaugeBlinkAlpha(SDF_FRAME_TICK(frame), 0, blinkColors);
             fclDrawSpriteRes((x + position * 5 - 5) * 16, rowY * 8, 0,
                              (s32 *)blinkColors, 6, 3, D_00345D88, fclSpriteTable, 0x47);
         }

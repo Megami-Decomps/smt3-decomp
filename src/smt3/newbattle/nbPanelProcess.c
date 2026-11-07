@@ -8,6 +8,8 @@
 #include "font.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
@@ -1609,10 +1611,10 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
     baseColor = nbPanelPGBaseColor;
     if (nbPanelPGShow == 0) {
         if ((baseColor & 0xFF000000) == 0) return;
-        baseColor += 0xF0000000;
+        baseColor += 0xF0000000 * SDF_FRAME_DUE(dds3GetKernelCount());
         nbPanelPGBaseColor = baseColor;
     } else if ((baseColor & 0xFF000000) != 0x80000000) {
-        baseColor += 0x10000000;
+        baseColor += 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
         nbPanelPGBaseColor = baseColor;
     }
     nbPanelBaseColorSet(baseColor);
@@ -2124,7 +2126,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 2:
         frame = nbPanelPTAFrame;
-        rate = 1.0f - (f32)frame / 6.0f;
+        rate = 1.0f - (f32)frame / SDF_FRAMES_F(6.0f);
         alpha = (u32)(rate * 128.0f) << 24;
         only = (u8)nbPanelPTAOnly;
         if (!only) {
@@ -2142,7 +2144,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
             only = (u8)nbPanelPTAOnly;
             frame = nbPanelPTAFrame;
         }
-        if (frame + 1 >= 6) {
+        if (frame + 1 >= SDF_FRAMES(6)) {
             value = D_0054E5BC;
             nbPanelPTAProcess = 3;
             nbPanelPTARate_E = value;
@@ -2154,10 +2156,10 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         break;
     case 3:
         frame = nbPanelPTAFrame;
-        alpha = (u32)((1.0f - (f32)frame / 12.0f) * 128.0f) << 24;
+        alpha = (u32)((1.0f - (f32)frame / SDF_FRAMES_F(12.0f)) * 128.0f) << 24;
         tint = (0x80000000U - alpha) | 0x808080;
-        shift = frame < 8 ? (s32)((f32)frame * 0.125f * 40.0f) : 40;
-        next = frame < 4;
+        shift = frame < SDF_FRAMES(8) ? (s32)((f32)frame * SDF_FRAME_STEP(0.125f) * 40.0f) : 40;
+        next = frame < SDF_FRAMES(4);
         only = (u8)nbPanelPTAOnly;
         if (!only) {
             uv = &nbPanelParamTable[oldUV[0]];
@@ -2168,14 +2170,14 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                         uv->u0, uv->v0, uv->u1, uv->v1,
                         spriteColor, spriteTexture);
             frame = nbPanelPTAFrame;
-            next = frame < 4;
+            next = frame < SDF_FRAMES(4);
         }
         if (!next) {
             shift = 0;
-            if (frame < 8) {
+            if (frame < SDF_FRAMES(8)) {
                 value = nbPanelPTARate_E;
-                rate = (f32)(frame - 4) * 0.25f * value;
-                nbPanelPTARate_E = value * D_0054E5C0;
+                rate = (f32)(frame - SDF_FRAMES(4)) * SDF_FRAME_STEP(0.25f) * value;
+                nbPanelPTARate_E = value * SDF_FRAME_DECAY(D_0054E5C0);
                 shift = (s32)((1.0f - rate) * 40.0f);
                 if (shift >= 41) {
                     shift = 40;
@@ -2188,14 +2190,14 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                         nbPressGaugeTable2[0].w, nbPressGaugeTable2[0].h,
                         uv->u0, uv->v0, uv->u1, uv->v1,
                         spriteColor, spriteTexture);
-            if (nbPanelPTAFrame >= 4) {
-                rate = nbPanelPTAFrame < 8 ? (f32)(nbPanelPTAFrame - 4) * 0.25f : 1.0f;
+            if (nbPanelPTAFrame >= SDF_FRAMES(4)) {
+                rate = nbPanelPTAFrame < SDF_FRAMES(8) ? (f32)(nbPanelPTAFrame - SDF_FRAMES(4)) * SDF_FRAME_STEP(0.25f) : 1.0f;
                 nbPanelSpriteScaleWHDraw(0x15D, 1, D_004F000C, &nbPanelParamTable[currentUV[1]],
                                          tint, 1.0f, rate, data->pnltex[2]);
             }
             frame = nbPanelPTAFrame;
         }
-        if (frame + 1 < 12) {
+        if (frame + 1 < SDF_FRAMES(12)) {
             nbPanelPTAFrame = frame + 1;
         } else {
             nbPanelPTAFrame = 0;
@@ -2786,7 +2788,7 @@ extern u32 StockIDList[];
 
 s32 nbPanelStockSelectCtrl(void)
 {
-    if (nbPanelStockFrame < 8) {
+    if (nbPanelStockFrame < SDF_FRAMES(8)) {
         return -1;
     }
 
@@ -2866,17 +2868,19 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
         u32 col;
 
         frame = nbPanelStockFrame - 1;
-        if (frame < 5) {
-            rate = (f32)frame / 5.0f;
+        if (frame < SDF_FRAMES(5)) {
+            rate = (f32)frame / SDF_FRAMES_F(5.0f);
         } else {
             rate = 1.0f;
         }
         col = ((u32)(rate * 128.0f) << 24) | 0x808080;
         nbPanelBaseColorSet(col);
-        nbPanelStockShiftX = nbPanelStockShiftX >> 1;
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            nbPanelStockShiftX = nbPanelStockShiftX >> 1;
+        }
         if (nbPanelStockFadeFlag != 0) {
             if ((nbPanelStockABGR & 0xFF000000) != 0) {
-                nbPanelStockABGR = nbPanelStockABGR + 0xE0000000;
+                nbPanelStockABGR = nbPanelStockABGR + 0xE0000000 * SDF_FRAME_DUE(dds3GetKernelCount());
             }
             effMagaCylinderCalcColor(col, nbPanelStockABGR);
             nbPanelBaseColorSet(nbPanelStockABGR);
@@ -3041,8 +3045,8 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
         }
     }
     {
-        if (nbPanelStockFrame < 5) {
-            rate = 1.0f - (f32)nbPanelStockFrame / 5.0f;
+        if (nbPanelStockFrame < SDF_FRAMES(5)) {
+            rate = 1.0f - (f32)nbPanelStockFrame / SDF_FRAMES_F(5.0f);
         } else {
             rate = 0.0f;
         }
@@ -3152,8 +3156,8 @@ void nbPanelAnalyzeRun(void)
         u32 red30;
         s32 scaledY;
         frame = nbPanelAnalyzeFrame;
-        if (frame >= 5) {
-            rate = ((f32)(frame - 5) / 10.0f) * nbPanelAnalyzeRate;
+        if (frame >= SDF_FRAMES(5)) {
+            rate = ((f32)(frame - SDF_FRAMES(5)) / SDF_FRAMES_F(10.0f)) * nbPanelAnalyzeRate;
             if (rate > 1.0f) rate = 1.0f;
             factor = D_0054E5F0;
             black30 = (u32)(s32)(rate * 30.0f * 128.0f * factor) << 24;
@@ -3171,7 +3175,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
             frame = nbPanelAnalyzeFrame;
         }
-        fade = 1.0f - ((f32)frame / 15.0f) * nbPanelAnalyzeRate;
+        fade = 1.0f - ((f32)frame / SDF_FRAMES_F(15.0f)) * nbPanelAnalyzeRate;
         if (fade <= 0.0f) {
             slide1 = 0;
             slide2 = 0;
@@ -3190,10 +3194,10 @@ void nbPanelAnalyzeRun(void)
         nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[6], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
         nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[7], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
         frame = nbPanelAnalyzeFrame;
-        drawContent = frame >= 12;
-        if (frame >= 2) nbPanelAnalyzeRate *= D_0054E5F8;
+        drawContent = frame >= SDF_FRAMES(12);
+        if (frame >= SDF_FRAMES(2)) nbPanelAnalyzeRate *= SDF_FRAME_DECAY(D_0054E5F8);
         frame = (s32)((u32)frame + 1);
-        if (frame >= 15) {
+        if (frame >= SDF_FRAMES(15)) {
             nbPanelAnalyzeFrame = 0;
             nbPanelAnalyzeProcess = 3;
         } else {
@@ -3216,7 +3220,7 @@ void nbPanelAnalyzeRun(void)
         s32 scaledY;
         frame = nbPanelAnalyzeFrame;
         if (frame >= 0) {
-            rate = 1.0f - (f32)frame * 0.125f;
+            rate = 1.0f - (f32)frame * SDF_FRAME_STEP(0.125f);
             if (rate < 0.0f) rate = 0.0f;
             factor = D_0054E5FC;
             black30 = (u32)(s32)(rate * 30.0f * 128.0f * factor) << 24;
@@ -3234,7 +3238,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
             frame = nbPanelAnalyzeFrame;
         }
-        fade = (f32)frame * 0.125f;
+        fade = (f32)frame * SDF_FRAME_STEP(0.125f);
         if (fade >= 1.0f) fade = 1.0f;
         slide1 = (s32)(fade * D_0054E600);
         slide2 = (s32)(fade * D_0054E604);
@@ -3255,7 +3259,7 @@ void nbPanelAnalyzeRun(void)
             textColor = alpha | 0x80808000;
             spriteColor = ((u32)(contentRate * 128.0f) << 24) | 0x808080;
             frame = (s32)((u32)nbPanelAnalyzeFrame + 1);
-            if (frame >= 8) {
+            if (frame >= SDF_FRAMES(8)) {
                 nbPanelAnalyzeFrame = 0;
                 nbPanelAnalyzeProcess = 5;
             } else {
@@ -3509,7 +3513,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
     if (p->phase < 3) {
         PanelAutoABGR = 0x40808080;
     } else if (PanelAutoABGR != 0x80808080) {
-        PanelAutoABGR += 0x04000000;
+        PanelAutoABGR += 0x04000000 * SDF_FRAME_DUE(dds3GetKernelCount());
     }
 
     baseColor = PanelAutoBaseColor;
@@ -3517,10 +3521,10 @@ void nbPanelAuto(nbMainProcessData_t *p)
         if ((baseColor & 0xFF000000) == 0) {
             return;
         }
-        baseColor -= 0x10000000;
+        baseColor -= 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
         PanelAutoBaseColor = baseColor;
     } else if ((baseColor & 0xFF000000) != 0x80000000) {
-        baseColor += 0x10000000;
+        baseColor += 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
         PanelAutoBaseColor = baseColor;
     }
     nbPanelBaseColorSet(baseColor);

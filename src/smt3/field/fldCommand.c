@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "field.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 typedef struct
 {
@@ -743,7 +744,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         D_002FC9F0[1] = rot.y;
         D_002FC9F0[2] = rot.z;
         fldCamPhokanState = 0;
-        fldCamPHokanMode = scrGetIntPara(1);
+        fldCamPHokanMode = SDF_FRAMES(scrGetIntPara(1));
         fldGlobalBase.mode = 4;
     } else {
         world = dds3GetActiveScene();

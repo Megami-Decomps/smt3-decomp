@@ -1031,19 +1031,19 @@ void fldAutoMapDrawOneArea(void)
     }
     state = fldAutoMapDrawState;
     if (state < 0) {
-        state += 4;
+        state += SDF_FRAME_STEP(4);
         fldAutoMapDrawState = state;
-        D_0054EE90 += 4;
+        D_0054EE90 += SDF_FRAME_STEP(4);
     }
     if (state > 0) {
-        fldAutoMapDrawState = state - 4;
-        D_0054EE90 -= 4;
+        fldAutoMapDrawState = state - SDF_FRAME_STEP(4);
+        D_0054EE90 -= SDF_FRAME_STEP(4);
     }
     if (!(D_0054EE80 < 1000.0f) || !(D_0054EE80 > -1000.0f)) {
         if (D_0054EE80 > 0.0f) {
-            fldAutoMapDrawX -= 500.0f;
+            fldAutoMapDrawX -= SDF_FRAME_STEP(500.0f);
         } else if (D_0054EE80 < 0.0f) {
-            fldAutoMapDrawX += 500.0f;
+            fldAutoMapDrawX += SDF_FRAME_STEP(500.0f);
         }
     }
     fldAutoMapDrawY = 0x80;

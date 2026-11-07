@@ -2813,12 +2813,12 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
     }
 
     if ((key & 0x200) != 0) {
-        work->phase.cameraRadius -= 5.0f;
+        work->phase.cameraRadius -= SDF_FRAME_STEP(5.0f);
         if (work->phase.cameraRadius < work->radiusMin) {
             work->phase.cameraRadius = work->radiusMin;
         }
     } else if ((key & 0x400) != 0) {
-        work->phase.cameraRadius += 5.0f;
+        work->phase.cameraRadius += SDF_FRAME_STEP(5.0f);
         if (work->phase.cameraRadius > work->radiusMax) {
             work->phase.cameraRadius = work->radiusMax;
         }

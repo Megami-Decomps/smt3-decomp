@@ -985,14 +985,16 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         FAKEMATCH_ASM_LIVE_VOLATILE(movement);
         phase = form->range;
         power = form->shakePower;
-        step = (1.0f - phase) * power;
-        form->shakePower = power + 0.02f;
-        if (step < 0.01f) {
-            step = 0.01f;
-        }
-        form->range = phase + step;
-        if (form->range > 1.0f) {
-            form->range = 1.0f;
+        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+            step = (1.0f - phase) * power;
+            form->shakePower = power + 0.02f;
+            if (step < 0.01f) {
+                step = 0.01f;
+            }
+            form->range = phase + step;
+            if (form->range > 1.0f) {
+                form->range = 1.0f;
+            }
         }
         SDF_VU0_LOADVECTOR(&form->startpos);
         blend = form->range;
@@ -1102,8 +1104,8 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
         FAKEMATCH_ASM_REG(f32, endpoint, "$f2") = 1.0f;
         FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
         x = form->damageRange * phase;
-        rangeStep = (endpoint - phase) * power;
-        form->shakePower = power + 0.02f;
+        rangeStep = (endpoint - phase) * power * SDF_FRAME_DUE(dds3GetKernelCount());
+        form->shakePower = power + 0.02f * SDF_FRAME_DUE(dds3GetKernelCount());
         form->range = phase + rangeStep;
         if (form->range >= 0.99f) {
             form->shakePower = -form->addmovet * 0.6f;
@@ -1112,8 +1114,8 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
         FAKEMATCH_ASM_REG(f32, negativePower, "$f4") = -power;
         FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
         x = form->damageRange * form->range;
-        rangeStep = form->range * negativePower;
-        form->shakePower = power - 0.01f;
+        rangeStep = form->range * negativePower * SDF_FRAME_DUE(dds3GetKernelCount());
+        form->shakePower = power - 0.01f * SDF_FRAME_DUE(dds3GetKernelCount());
         form->range -= rangeStep;
         if (form->range <= 0.01f) {
             form->type = 0;

@@ -2032,8 +2032,8 @@ void fldRunDanteDoin(void)
         fldFindDoorEvent(basic[1]);
     }
     if (fldRun_Dante.nextframe >= 0x15) {
-        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
-        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
     } else if (fldRun_Dante.nextframe == 0x14) {
         fldRun_Dante.update_flag = 3;
         fldRun_Dante.flag |= 2;
@@ -2124,7 +2124,7 @@ void fldRunDanteMove(void)
     } else {
         f32 angleForSin = fldRun_Dante.angleToPlayer;
         f32 sinValue = sdfSin(angleForSin * 3.14f / 180.0f);
-        f32 speed = fldRun_Dante.speed;
+        f32 speed = SDF_FRAME_STEP(fldRun_Dante.speed);
         f32 angleForCos = fldRun_Dante.angleToPlayer;
         f32 x = fldRun_Dante.x;
         f32 z;
@@ -2133,7 +2133,7 @@ void fldRunDanteMove(void)
 
         fldRun_Dante.x = x + sinValue * speed;
         cosValue = sdfCos(angleForCos * 3.14f / 180.0f);
-        cosSpeed = fldRun_Dante.speed;
+        cosSpeed = SDF_FRAME_STEP(fldRun_Dante.speed);
         z = fldRun_Dante.z;
         fldRun_Dante.z = z + cosValue * cosSpeed;
         fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.angleToPlayer, 10.0f, 1.0f);
@@ -2233,7 +2233,7 @@ void fldRunDantePwak(void)
     } else {
         f32 angleForSin = fldRun_Dante.angleToPlayer;
         f32 sinValue = sdfSin(angleForSin * 3.14f / 180.0f);
-        f32 speed = fldRun_Dante.speed;
+        f32 speed = SDF_FRAME_STEP(fldRun_Dante.speed);
         f32 angleForCos = fldRun_Dante.angleToPlayer;
         f32 x = fldRun_Dante.x;
         f32 z;
@@ -2242,7 +2242,7 @@ void fldRunDantePwak(void)
 
         fldRun_Dante.x = x + sinValue * speed;
         cosValue = sdfCos(angleForCos * 3.14f / 180.0f);
-        cosSpeed = fldRun_Dante.speed;
+        cosSpeed = SDF_FRAME_STEP(fldRun_Dante.speed);
         z = fldRun_Dante.z;
         fldRun_Dante.z = z + cosValue * cosSpeed;
         fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn,
@@ -2275,8 +2275,8 @@ void fldRunDanteSoba(void)
     fldRun_Dante.turn =
         fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.d_p_dir, 10.0f, 1.0f);
     if (dist > 100.0f) {
-        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
-        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
     }
     FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.ix, &fldRun_Dante.iz);
     if (dist < 3600.0f) {
@@ -2364,7 +2364,7 @@ void fldRunDantePatr(void)
     {
         f32 angleForSin = fldRun_Dante.angleToPlayer;
         f32 sinValue = sdfSin(angleForSin * 3.14f / 180.0f);
-        f32 speed = fldRun_Dante.speed;
+        f32 speed = SDF_FRAME_STEP(fldRun_Dante.speed);
         f32 angleForCos = fldRun_Dante.angleToPlayer;
         f32 x = fldRun_Dante.x;
         f32 z;
@@ -2373,7 +2373,7 @@ void fldRunDantePatr(void)
 
         fldRun_Dante.x = x + sinValue * speed;
         cosValue = sdfCos(angleForCos * 3.14f / 180.0f);
-        cosSpeed = fldRun_Dante.speed;
+        cosSpeed = SDF_FRAME_STEP(fldRun_Dante.speed);
         z = fldRun_Dante.z;
         fldRun_Dante.z = z + cosValue * cosSpeed;
     }
@@ -2415,8 +2415,8 @@ void fldRunDanteGun1(void)
     fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.d_p_dir, 10.0f, 1.0f);
     if (distance > 100.0f) {
         f32 pi = 3.1399999f;
-        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * pi / 180.0f) * fldRun_Dante.speed;
-        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * pi / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * pi / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * pi / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
     }
     if (fldRun_Dante.flag & 2) {
         oldframe = 0.0f;

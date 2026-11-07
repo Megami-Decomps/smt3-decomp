@@ -1112,7 +1112,7 @@ s32 fldPlayerCalc_Nml(void)
         if (aiming) {
             fldCamPitch = -fldGlobalBase.camAngle2;
             fldCamPitchTarget = fldCamPitch;
-        } else if (fldPlayerSyukanState >= 4 &&
+        } else if (fldPlayerSyukanState >= SDF_FRAMES(4) &&
                    (fldPlayerMoveState == 1 || fldPlayerMoveState == 3 ||
                     fldPlayerMoveState == 5 || fldPlayerMoveState == 7)) {
             if (fldPlayerMoveState == 3) {
@@ -1139,7 +1139,7 @@ s32 fldPlayerCalc_Nml(void)
                 }
             }
             fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
-        } else if (fldPlayerSyukanState >= 3 && (fldPlayerMoveState == 2 || fldPlayerMoveState == 6)) {
+        } else if (fldPlayerSyukanState >= SDF_FRAMES(3) && (fldPlayerMoveState == 2 || fldPlayerMoveState == 6)) {
             f32 target = -fldGlobalBase.camAngle;
             delta = R360_LR(fldCamPitch, target);
             amount = delta * 0.03125f;

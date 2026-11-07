@@ -5,6 +5,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "sdfFrame.h"
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -435,13 +436,13 @@ s32 fclRunPanelAnim(void *work)
     case 0:
         break;
     case 1:
-        anim->state.phase += anim->state.phaseStep;
+        anim->state.phase += SDF_FRAME_STEP(anim->state.phaseStep);
         if (anim->state.phase > 0x200) {
             anim->state.phase = 0x200;
         }
         break;
     case 2:
-        anim->state.phase -= anim->state.phaseStep;
+        anim->state.phase -= SDF_FRAME_STEP(anim->state.phaseStep);
         if (anim->state.phase < 0) {
             anim->state.phase = 0;
         }

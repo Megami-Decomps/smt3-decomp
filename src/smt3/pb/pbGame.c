@@ -1065,17 +1065,17 @@ s32 moveChar(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbMoveCharWork_t *work = panel->data.moveChar;
     u32 step;
-    if (work->step < 4) {
+    if (work->step < SDF_FRAMES(4)) {
         s32 dir = work->dir;
-        pbMoveMyCharcter(mychar[current_char], D_00327370[dir * 3] * work->speed,
-                         D_00327370[dir * 3 + 2] * work->speed);
+        pbMoveMyCharcter(mychar[current_char], D_00327370[dir * 3] * SDF_FRAME_STEP(work->speed),
+                         D_00327370[dir * 3 + 2] * SDF_FRAME_STEP(work->speed));
     }
     if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
         pbCharacterTable[D_0054F5C4->charIndex]();
     }
     step = work->step + 1;
     work->step = step;
-    return ((u16)step < 4) ? 0 : -1;
+    return ((u16)step < SDF_FRAMES(4)) ? 0 : -1;
 }
 
 extern void pbMoveMyCharcter2(pbProcHandle_t *p, s16 x, s16 y);
@@ -1146,15 +1146,15 @@ void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
 s32 moveBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
-    if (work->step >= 4) {
+    if (work->step >= SDF_FRAMES(4)) {
         return -1;
     }
     {
         f32 *delta = &D_00327370[work->index * 3];
         pbGroupData_t *obj = work->block;
-        obj->x = obj->x + delta[0];
-        obj->y = obj->y + delta[1];
-        obj->z = obj->z + delta[2];
+        obj->x = obj->x + SDF_FRAME_STEP(delta[0]);
+        obj->y = obj->y + SDF_FRAME_STEP(delta[1]);
+        obj->z = obj->z + SDF_FRAME_STEP(delta[2]);
     }
     work->step = work->step + 1;
     return 0;
@@ -1246,9 +1246,9 @@ s32 roundBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
     u32 step = work->step;
-    if (step < 4) {
+    if (step < SDF_FRAMES(4)) {
         pbGroupData_t *block = work->block;
-        block->rot += work->index * 0.39269909f;
+        block->rot += SDF_FRAME_STEP(work->index * 0.39269909f);
         if (block->rot > 6.28318501f) {
             block->rot -= 6.28318501f;
         } else if (block->rot < -6.28318501f) {
