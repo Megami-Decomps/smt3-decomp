@@ -2717,7 +2717,6 @@ extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
 extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
-#ifdef NON_MATCHING
 void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
                       datUnitWork_t *unit, s32 ot)
 {
@@ -2731,24 +2730,29 @@ void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
         color = 0x4D4B4B4D;
         levelColor = color;
     }
-    request = frwGetSmallFontFRQ2(x - 0x20, y, z, color,
+    x -= 0x20;
+    request = frwGetSmallFontFRQ2(x, y, z, color,
                                   datExplainTable[datDevilTable[unit->id].race], NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
-    request = frwGetSmallFontFRQ2(x + 0x460, y + 8, z, color, text2[unit->id], NULL);
+    x += 0x480;
+    {
+        /* Capture the name at its current X, then advance to the level column. */
+        const char *name = text2[unit->id];
+        s32 nameX = x;
+        x += 0x6E0;
+        request = frwGetSmallFontFRQ2(nameX, y + 8, z, color, name, NULL);
+    }
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
-    if (unit->level == datDevilTable[unit->id].level) {
+    if (datDevilTable[unit->id].level == unit->level) {
         levelColor = color;
     }
     sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(unit));
-    request = frwGetSmallNumFontFRQ(x + 0xB40, y + 0x18, z, levelColor, text, NULL);
+    request = frwGetSmallNumFontFRQ(x, y + 0x18, z, levelColor, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawUnitLevel);
-#endif
 
 extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,

@@ -576,3 +576,57 @@ and seven IRX owners, and reconciled production reports pass. The seven latest
 affected peer owners also remain exact. Only this function gains credit:
 game totals become 8,656 functions and 1,503,856 bytes. A subsequent build
 has no work. No private fixture, runtime or compiler artifact is published.
+
+## cmbDrawUnitLevel (facility/fclCombineInit, 0x1C0)
+
+112 of 112 words match at 448 bytes in ordinary C. One real X coordinate
+advances from the race column (original X minus 32), through the name column
+(original X plus 1120), to the level column (original X plus 2880). The name
+pointer snapshot and nameX are immediately consumed by the name font call
+while X advances to the level column. There is no unrelated scratch reuse,
+dummy consumer, binding, optimizer assertion or added qualifier.
+
+The initial active/color flags are captured at their native epoch. The ID is
+reloaded after the race draw/destruction sequence for the name; ID and u16
+level are reloaded after the name sequence for the species-level comparison.
+The species level is u8. The real level provider clamps to 99, and the %2d
+string fits the 32-byte buffer. All eleven provider events preserve their
+order, coordinates, color, text, draw mode, OT and request identities. Null
+font handles still reach draw and deferred destruction as native does.
+Existing opaque handle declarations retain the actual providers' pointer ABI.
+
+On the active path, defined coordinate arithmetic requires original X in
+[INT32_MIN + 32, INT32_MAX - 2880] and original Y in
+[INT32_MIN, INT32_MAX - 24]. The continuous calculation adds no overflow
+domain beyond the original direct expressions. Flag-clear returns perform
+no coordinate arithmetic. IDs/races and strings retain existing game/provider
+validity requirements; synthetic fixture tables are not a game-bound proof.
+
+The enabled original draft emits 436 bytes: 12 of 109 overlap words match,
+with 12 native bytes uncovered. Moving only the name-pointer snapshot after nameX leaves 448 bytes but changes
+10 of 112 words, starting at +0xCC. Qualified compiler dumps independently show
+the live X advances and the name-load/copy/advance order. This is observed
+source-order-dependent output, not an assertion of a scheduler tie-break
+mechanism or historical source spelling.
+
+Twelve fresh guarded/original/control/final whole-owner plain/stock -da pairs
+preserve entire assembly and ELF objects after exactly one equal-length source
+filename normalization. The final owner is 197 match, 0 differ; all
+214/196/214 peers and allocated nontext sections remain intact. Production's
+complete allocated bytes and all 1,778 ordered relocation records are unchanged.
+The 19 target relocation contracts agree across modes, including the owned
+fclCombineNum2dFmt at .sdata+0x3C versus its external reference. Its %2d bytes
+also match retail. Strict production/SKIP retain identical inherited failures;
+retained strict builds pass with the same inherited pointer warnings. No inherited failure is counted as a clean pass.
+
+The fresh independent exact-body/actual-level-provider fixture passes 262,144
+optimized and 262,144 ASan/UBSan cases, warning-free. Complete eleven-event
+traces and final state cover every initial u16 ID/level, color/flag choices,
+null-handle combinations, defined coordinate boundaries and callback mutations.
+Stale ID, stale level and skipped-null-draw negative controls all fail as
+expected. This is not a full renderer, allocator or game integration test.
+
+Full linked retail bytes, generated-source negative controls, 505 tooling tests
+without optional skips, 818 layout assertions, frozen EE/IRX drafts, inline-asm
+policy and primary/audit report scope pass. Flow10 33/0, music 27/0 and recovery
+391/0 complete-owner checks preserve the preceding landings.
