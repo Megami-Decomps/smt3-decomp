@@ -398,7 +398,7 @@ extern u32 dds3KernelDebugSignOrg;
 extern u32 dds3KernelDebugSign;
 extern void dds3FadeClear(void);
 
-void nmeDestroyName(dds3ProcessID_t *processId) {
+s32 nmeDestroyName(dds3ProcessID_t *processId) {
     if (nmeProcessId != NULL) {
         nmeBuildNameFont(nmeProcessId->targetNo, nmeProcessId);
         nmeFreeNameTextures(nmeProcessId);
@@ -408,11 +408,12 @@ void nmeDestroyName(dds3ProcessID_t *processId) {
         gProcessStat = 2;
         dds3KernelDebugSign = dds3KernelDebugSignOrg;
         dds3FadeClear();
+        /* KillProcess discards the shutdown result. The supported GNU EE bare
+         * return keeps the native tail call without inventing a return value. */
+        return;
     }
 }
 
-#ifdef NON_MATCHING
-/* 69 of 71 words match; white RGB store order differs. See docs/matching/nme/Nme_Init.md. */
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
                                       s32 startTimer, s32 shutdownTimer,
                                       dds3ProcessFunc_t process,
@@ -432,23 +433,37 @@ void nmeStartProcesses(s8 target, s8 mode, s32 unused)
     dds3StartProcess(D_00551690, 0x406, 1, 1, nmeCalc, NULL, nmeProcessId);
     dds3StartProcess(D_005487C8, 0x2B16, 1, 1, nmeDraw, NULL, nmeProcessId);
     dds3StartProcess(D_005487D8, 0x5212, 1, 1, nmeUpdate,
-                     (dds3ProcessFunc_t)nmeDestroyName,
+                     nmeDestroyName,
                      nmeProcessId);
     gProcessStat = 1;
     dds3KernelDebugSignOrg = dds3KernelDebugSign;
     dds3KernelDebugSign = 0;
-    if (evtBitCheck(0x12) == 0) {
-        D_00552020[0] = D_00552020[1] = D_00552020[2] = -1;
-    } else {
-        D_00552020[0] = 0;
-        D_00552020[1] = 0;
-        D_00552020[2] = 0;
+    {
+        s32 event = evtBitCheck(0x12);
+        /* Localized EE compiler constraints on the real fade arguments keep
+         * the shared RGB base and frame value through their native consumers.
+         * They reconstruct allocation/scheduling, not original source spelling. */
+        FAKEMATCH_ASM_REG(s32, frames, "$7") = 30;
+        FAKEMATCH_ASM_REG(u8 *, color, "$5") = D_00552020;
+        FAKEMATCH_ASM_LIVE_PAIR(frames, color);
+        if (event == 0) {
+            s32 white = -1;
+            color[2] = white;
+            /* Keep the live white value at the blue/red store boundary. */
+            FAKEMATCH_ASM_LIVE(white);
+            color[0] = color[1] = white;
+        } else {
+            color[0] = 0;
+            color[1] = 0;
+            /* The initialized green byte remains live until the fade reload.
+             * This input-only constraint emits no access and claims no write. */
+            FAKEMATCH_ASM_READ_MEM(color[1]);
+            color[2] = 0;
+        }
+        dds3FadeIn(color[0], color[1], color[2], frames);
     }
-    dds3FadeIn(D_00552020[0], D_00552020[1], D_00552020[2], 0x1E);
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeStartProcesses);
-#endif
+
 
 void nmeNameProcessEnd(void) {
     dds3KillProcessName(D_00551690, 1);
