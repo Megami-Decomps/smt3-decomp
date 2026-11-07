@@ -1081,10 +1081,6 @@ void *nbUnitDrawProcess1(dds3ProcessID_t *id)
     return NULL;
 }
 
-/* NON_MATCHING: 20 of 65 words differ (first at +0x2C). */
-
-#ifdef NON_MATCHING
-
 void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
 {
     sdfVector4_t pos;
@@ -1099,16 +1095,26 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
     }
     power = form->shakePower;
     if (power >= 0.0f) {
-        x = form->damageRange * form->range;
+        /* Localized EE constraints on real interpolation values reproduce the
+         * native FPU allocation and schedule. These are reconstruction aids,
+         * not historical source claims; no bound value survives the pose call. */
+        f32 phase = form->range;
+        FAKEMATCH_ASM_REG(f32, endpoint, "$f2") = 1.0f;
+        FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
+        x = form->damageRange * phase;
+        rangeStep = (endpoint - phase) * power;
         form->shakePower = power + 0.02f;
-        form->range += (1.0f - form->range) * power;
+        form->range = phase + rangeStep;
         if (form->range >= 0.99f) {
             form->shakePower = -form->addmovet * 0.6f;
         }
     } else {
+        FAKEMATCH_ASM_REG(f32, negativePower, "$f4") = -power;
+        FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
         x = form->damageRange * form->range;
+        rangeStep = form->range * negativePower;
         form->shakePower = power - 0.01f;
-        form->range -= form->range * -power;
+        form->range -= rangeStep;
         if (form->range <= 0.01f) {
             form->type = 0;
             SDF_VU0_COPYVECTOR(&pos, &form->pos);
@@ -1121,11 +1127,6 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
     dds3SetPosPoseSet(basic, &pos);
 }
 
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RunSake);
-
-#endif
 
 void RunBadAction(nbMainProcessData_t *data, nbFormation_t *form)
 {

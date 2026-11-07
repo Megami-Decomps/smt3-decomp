@@ -309,10 +309,9 @@ CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/matchi
 CheckAction_STKSEL	newbattle/nbActionProcess	0xE8	58 of 58 words match	docs/matching/newbattle/nbStageProcess.md	37
 CheckAction_ESCAPE	newbattle/nbActionProcess	0xE4	48 of 57 words match	docs/matching/newbattle/nbStageProcess.md	67
 nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/matching/newbattle/nbStageProcess.md	95
-RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/matching/newbattle/nbStageProcess.md	122
-CheckAction_TARSEL	newbattle/nbActionProcess	0x1CC	115 of 115 words	docs/matching/newbattle/nbStageProcess.md	151
-SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/newbattle/nbStageProcess.md	174
-StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/newbattle/nbStageProcess.md	193
+CheckAction_TARSEL	newbattle/nbActionProcess	0x1CC	115 of 115 words	docs/matching/newbattle/nbStageProcess.md	124
+SetDamagePacket	newbattle/nbActionProcess	0x1E0	120 of 120 words	docs/matching/newbattle/nbStageProcess.md	147
+StageLoad	newbattle/nbStageProcess	0x1B4	109 of 109 words match	docs/matching/newbattle/nbStageProcess.md	166
 UpdateSelect	newbattle/nbTarSelProcess	0x174	93 of 93 words match	docs/matching/newbattle/nbTarSelProcess.md	3
 CursorSelect	newbattle/nbTarSelProcess	0x294	40 of 165 words match	docs/matching/newbattle/nbTarSelProcess.md	55
 OnOffTargetCursor	newbattle/nbTarSelProcess	132 bytes	33 of 33 words match	docs/matching/newbattle/nbTarSelProcess.md	100
@@ -320,6 +319,7 @@ CheckFormCursor	newbattle/nbTarSelProcess	388 bytes		docs/matching/newbattle/nbT
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
+RunSake	newbattle/nbUnitProcess	0x104	65 of 65 words match	docs/matching/newbattle/nbUnitProcess.md	88
 datGetPlayerParam	newdata/datCalc	0x50	13 of 20 words match	docs/matching/newdata/datCalc.md	3
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	79
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	95

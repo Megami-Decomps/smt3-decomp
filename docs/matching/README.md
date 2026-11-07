@@ -19,10 +19,10 @@ both native and emitted sizes when they differ.
 | 16 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 9 |  | [sdk/libc.md](sdk/libc.md) |
-| 9 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 9 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 9 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 8 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 7 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
@@ -52,6 +52,7 @@ both native and emitted sizes when they differ.
 | 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 3 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
+| 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
@@ -74,7 +75,6 @@ both native and emitted sizes when they differ.
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
-| 2 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |

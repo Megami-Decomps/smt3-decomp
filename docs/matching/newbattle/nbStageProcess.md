@@ -119,34 +119,7 @@ fused into one condition; and four spellings of the draw loop (`for (n = n - 1;
 `if (n > 0)` wrapping a `do`/`while`), none of which keep the decrement out of
 the delay slots.
 
-## RunSake (newbattle/nbStageProcess, 0x104)
-
-45 of 65 words match, at the exact 260-byte size and with the same instruction
-multiset.
-
-Three facts are settled. The quadword position copy is
-`SDF_VU0_COPYVECTOR(&pos, &form->pos)`: the macro's two `"r"` operands are what
-give retail's `addiu $3, $5, 0x20` address temp per copy site, where a `u128`
-cast folds the offset into the `lq` and a struct assignment of a 16-byte
-aligned type drops to `ld`/`sd` pairs. `form->basic` is a local read once at
-the top, which keeps `form` in `$5` with no copy. And `form->range` is read
-inline inside each arm rather than through a shared local, which is what leaves
-the `bc1f`'s delay slot empty for the else arm's `neg.s` and gives retail's
-`bc1fl`.
-
-What is left is the float register assignment: retail has `phase` in `$f1`,
-`1.0f` in `$f2` and `-power` sharing `$f4` with the `0.99f` constant, while the
-draft pairs `1.0f` and `-power` in `$f1` and puts `phase` in `$f2`. The
-schedule shifts with it, and in both arms retail's literal load comes one word
-before the `form->damageRange` load where the draft has them the other way
-round.
-
-Ruled out: all six statement orders in the two arms, in each of three spellings
-of the `form->range` update (`+=`, the written-out form, and the multiply
-commuted) and both operand orders of `form->damageRange * form->range`, which
-all produce the identical object; an `f32 q = -power` local for the negation;
-and `f32 phase`/`f32 power` locals shared by both arms, which reload nothing
-and cost 2 words.
+RunSake findings now live with its actual owner in [nbUnitProcess](nbUnitProcess.md#runsake-newbattlenbunitprocess-0x104).
 
 ## CheckAction_TARSEL (newbattle/nbActionProcess, 0x1CC)
 
