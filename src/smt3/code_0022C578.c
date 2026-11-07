@@ -330,6 +330,8 @@ extern f32 aViewTarget[4];
 
 extern void cmpBuildStockNameList(cmpLocalStock_t *stock);
 
+extern void cmpClearCursorSlots(cmpCursorInfo_t *cur);
+
 extern void cmpInitStockCursorPos(void);
 
 extern s32 cmpStartSkillTokusyuMsg(u16 skill);
@@ -10933,25 +10935,29 @@ s32 cmpAllocEffectSlot(s32 color, s8 a, s8 b, cmpCursorSlot_t *slot)
     return color;
 }
 
-/* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
-#ifdef NON_MATCHING
 void cmpClearCursorSlots(cmpCursorInfo_t *cur)
 {
     cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cur + 0x3C);
     s32 i;
     s32 j;
 
-    for (j = 0; j < 0x100; j++) {
-        for (i = 0; i < 2; i++) {
-            slot[j][i].state = 0;
-            slot[j][i].param = 0;
-            slot[j][i].value = 0x100;
+    for (j = 0; j < 0x100; j++, slot++) {
+        u8 *valueBase;
+        i = 0;
+        /* The value word begins at +4 in each eight-byte slot. */
+        valueBase = (u8 *)slot + 4;
+        for (; i < 2; i++) {
+            cmpCursorSlot_t *entry;
+            s32 byteOffset;
+            byteOffset = i * (s32)sizeof(cmpCursorSlot_t);
+            entry = (cmpCursorSlot_t *)(byteOffset + (u8 *)slot);
+            entry->state = 0;
+            entry->param = 0;
+            *(s32 *)(byteOffset + valueBase) = 0x100;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpClearCursorSlots);
-#endif
+
 
 /* NON_MATCHING: 8 of 15 words differ (first at +0xC). */
 #ifdef NON_MATCHING
