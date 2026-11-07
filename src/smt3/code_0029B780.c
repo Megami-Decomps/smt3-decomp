@@ -38,9 +38,9 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void fclSetSprite(saddr_t pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
+extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
-extern void fclDrawBG(void *pSprite, s32 OtNo);
+extern void fclDrawBG(fclSprite_t *pSprite, s32 OtNo);
 
 extern char D_00548870[];
 
@@ -495,16 +495,16 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigText);
 
 s32 dds3DrawConfigBackground(s32 flags)
 {
-    u8 sprite[0x30];
+    fclSprite_t sprite;
     s32 ret = 1;
 
     if (GBWK[0x19] == 0) {
         GBWK[0x19] = ret;
         return ret;
     }
-    fclSetSprite(EE_ADDR_S(sprite), 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
+    fclSetSprite(&sprite, 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
                  *(s32 *)(GBWK + 0x10A4));
-    fclDrawBG(sprite, flags);
+    fclDrawBG(&sprite, flags);
 }
 
 extern void fclDrawPanelSprite(s32 id, s32 ot);

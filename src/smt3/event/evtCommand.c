@@ -126,12 +126,11 @@ typedef struct evtModelHeader_t {
 } evtModelHeader_t;
 
 
-void dds3AdminiCallSequence(s32 sequence, saddr_t data, s32 datasize, s32 restore);
+void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 enum {
     EVT_SCALAR_REQUEST_SIZE = 4,
     EVT_PAIRED_REQUEST_SIZE = 8,
-    EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0,
     EVT_WORLD_OBJECT_KIND_FIRST = 4,
     EVT_WORLD_OBJECT_KIND_LIMIT = 10,
     EVT_CAMP_TASK_READY_VALUE = 2
@@ -147,10 +146,10 @@ char *scrGetStrPara(s32 n);
 
 void fldBgmFadeOut(void);
 
-void fldSetSceneParam2(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName);
 
 
-void fldSetSceneParam3(saddr_t pParam, s32 loadField, s32 loadArea, char *pointResName);
+void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName);
 
 
 
@@ -1752,7 +1751,7 @@ s32 evtCommand_CALL_SAVE(void)
 
     payload[0] = scrGetIntPara(0);
     payload[1] = scrGetIntPara(1);
-    dds3AdminiCallSequence(0x1F, EE_ADDR_S(payload), EVT_PAIRED_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(0x1F, payload, EVT_PAIRED_REQUEST_SIZE, 0);
     scrSetIntReturnValue(0);
     return 1;
 }
@@ -1766,7 +1765,7 @@ u32 evtCommand_CALL_PUZZLEBOY(void)
     stage = scrGetIntPara(0);
     request[0] = stage;
     fldSetNextField(fldGlobalBase.area, stage + 1000);
-    dds3AdminiCallSequence(0x26, EE_ADDR_S(request), 4, 0);
+    dds3AdminiCallSequence(0x26, request, 4, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1795,7 +1794,7 @@ s32 evtCommand_CALL_EVENT(void)
 
     eventId = scrGetIntPara(0);
     printf("call_event:%d\n", eventId);
-    dds3AdminiCallSequence(7, EE_ADDR_S(&eventId), EVT_SCALAR_REQUEST_SIZE, 0);
+    dds3AdminiCallSequence(7, &eventId, EVT_SCALAR_REQUEST_SIZE, 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1815,7 +1814,7 @@ void CallBattleSub(s32 encno, s32 eventno)
     request[0] = 0;
     request[1] = encno;
     evtNextEventNo = eventno;
-    dds3AdminiCallSequence(0x13, EE_ADDR_S(request), 8, eventno > 0);
+    dds3AdminiCallSequence(0x13, request, 8, eventno > 0);
     scrAllReleaseScript();
 }
 
@@ -1838,7 +1837,7 @@ void CallBattleSub2(s32 encno)
     request[0] = 0;
     request[1] = encno;
     evtNextEventNo = 0;
-    dds3AdminiCallSequence(0x13, EE_ADDR_S(request), 8, 1);
+    dds3AdminiCallSequence(0x13, request, 8, 1);
     scrAllReleaseScript();
 }
 
@@ -1862,20 +1861,20 @@ s32 evtCommand_RESTORE_BATTLE(void)
     return 1;
 }
 
-/* A field-sequence request is a fixed 0xa0-byte VM message. */
+/* A field-sequence request is the 0xA0-byte scene parameter block. */
 s32 evtCommand_CALL_FIELD(void)
 {
     s32 stage;
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t request;
 
     fldBgmFadeOut();
     stage = scrGetIntPara(0);
     kind = scrGetIntPara(1);
     sequenceName = scrGetStrPara(2);
-    fldSetSceneParam2(EE_ADDR_S(requestBuffer), stage, kind, sequenceName);
-    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(&request, stage, kind, sequenceName);
+    dds3AdminiCallSequence(6, &request, sizeof(request), 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1885,12 +1884,12 @@ s32 evtCommand_CALL_FIELD2(void)
 {
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t request;
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam2(EE_ADDR_S(requestBuffer), fldGlobalBase.area, kind, sequenceName);
-    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam2(&request, fldGlobalBase.area, kind, sequenceName);
+    dds3AdminiCallSequence(6, &request, sizeof(request), 0);
     scrAllReleaseScript();
     return 1;
 }
@@ -1900,12 +1899,12 @@ s32 evtCommand_CALL_FIELD3(void)
 {
     s32 kind;
     char *sequenceName;
-    u8 requestBuffer[EVT_FIELD_SEQUENCE_REQUEST_SIZE];
+    fldSceneParam_t request;
 
     kind = scrGetIntPara(0);
     sequenceName = scrGetStrPara(1);
-    fldSetSceneParam3(EE_ADDR_S(requestBuffer), fldGlobalBase.area, kind, sequenceName);
-    dds3AdminiCallSequence(6, EE_ADDR_S(requestBuffer), EVT_FIELD_SEQUENCE_REQUEST_SIZE, 0);
+    fldSetSceneParam3(&request, fldGlobalBase.area, kind, sequenceName);
+    dds3AdminiCallSequence(6, &request, sizeof(request), 0);
     scrAllReleaseScript();
     return 1;
 }
