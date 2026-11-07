@@ -8,7 +8,11 @@ extern cdvdCallback_t D_00598C40 __attribute__((section(".data")));
 extern u8 D_00598ED8[] __attribute__((section(".data")));
 
 extern s32 D_0052A010 __attribute__((section(".data")));
-extern u8 D_0052BA48[0x40] __attribute__((section(".data")));
+typedef struct cdvdRpcClient_t {
+    u8 transactionAndCallbacks[0x24];
+    void *server;
+} cdvdRpcClient_t;
+extern cdvdRpcClient_t D_0052BA48 __attribute__((section(".data")));
 
 extern s32 D_0052A030 __attribute__((section(".data")));
 extern s32 D_0052A02C __attribute__((section(".data")));
@@ -75,7 +79,7 @@ typedef void (*cdvdPowerCallback_t)(void *argument);
 extern cdvdPowerCallback_t D_00598C44 __attribute__((section(".data")));
 extern void *D_00598C48 __attribute__((section(".data")));
 extern s32 D_0052A024 __attribute__((section(".data")));
-extern s32 D_0052A03C __attribute__((section(".data")));
+extern s32 D_0052A03C[6] __attribute__((section(".data")));
 extern void sceSifAddCmdHandler(s32 id, void (*handler)(void *, void *), void *argument);
 void _sceCd_Poff_Intr(void *packet, void *argument);
 s32 PowerOffCB(void);
@@ -213,7 +217,7 @@ cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argume
     cdvdPowerCallback_t old;
     s32 intr;
 
-    if (D_0052A03C < 0) {
+    if (D_0052A03C[0] < 0) {
         PowerOffCB();
     }
     intr = DIntr();
@@ -244,7 +248,7 @@ s32 PowerOffCB(void)
         EIntr();
     }
     D_0052A024 = 0;
-    D_0052A03C = 1;
+    D_0052A03C[0] = 1;
     return 1;
 }
 
@@ -300,17 +304,75 @@ s32 sceCdSyncS(s32 mode)
             scePrintf("S cmd wait\n");
         }
         while (1) {
-            if (sceSifCheckStatRpc(D_0052BA48) == 0) {
+            if (sceSifCheckStatRpc(&D_0052BA48) == 0) {
                 break;
             }
             sceCdDelayThread(60);
         }
         return 0;
     }
-    return sceSifCheckStatRpc(D_0052BA48);
+    return sceSifCheckStatRpc(&D_0052BA48);
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_scmd_prechk);
+extern void cmd_sem_init(void);
+extern s32 PollSema(s32 sema);
+extern void sceSifInitRpc(s32 mode);
+extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
+extern s32 D_0052A018 __attribute__((section(".data")));
+SYMBOL_AT(s32, cdvdScmdInit, D_0052A03C, 12);
+
+s32 _sceCd_scmd_prechk(s32 command)
+{
+    s32 status;
+    s32 delay;
+
+    cmd_sem_init();
+    {
+        s32 sema = D_0052A02C;
+        FAKEMATCH_ASM_LIVE(sema);
+        status = PollSema(sema);
+    }
+    if (D_0052A02C != status) {
+        if (D_0052A010 > 0) {
+            scePrintf("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0052A018);
+        }
+        return 0;
+    }
+    D_0052A018 = command;
+    ReferThreadStatus(D_00598C50, D_00598C58);
+    status = sceCdSyncS(1);
+    {
+        FAKEMATCH_ASM_REG(s32, rpcMode, "$4") = 0;
+        if (status != 0) {
+            s32 sema = D_0052A02C;
+            FAKEMATCH_ASM_LIVE(sema);
+            SignalSema(sema);
+            return 0;
+        }
+        sceSifInitRpc(rpcMode);
+    }
+    if (cdvdScmdInit < 0) {
+        for (;;) {
+            cdvdRpcClient_t *client = &D_0052BA48;
+
+            if (sceSifBindRpc(client, 0x80000593, 0) < 0) {
+                if (D_0052A010 > 0) {
+                    scePrintf("Libcdvd bind err S cmd\n");
+                }
+                for (delay = 0x100000; delay != -1; --delay) {
+                }
+                continue;
+            }
+            if (client->server != NULL) {
+                break;
+            }
+            for (delay = 0x100000; delay != -1; --delay) {
+            }
+        }
+        cdvdScmdInit = 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInit);
 
@@ -326,7 +388,7 @@ s32 sceCdMmode(s32 media)
     }
     D_0052B640 = media;
     sceSifWriteBackDCache(arg, 4);
-    if (sceSifCallRpc(D_0052BA48, 34, 0, arg, 4, D_0052B200, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052BA48, 34, 0, arg, 4, D_0052B200, 4, 0, 0) < 0) {
         SignalSema(D_0052A02C);
         return 0;
     }
@@ -342,7 +404,7 @@ s32 sceCdGetDiskType(void)
     if (!_sceCd_scmd_prechk(1)) {
         return 0;
     }
-    if (sceSifCallRpc(D_0052BA48, 3, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052BA48, 3, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
         SignalSema(D_0052A02C);
         return 0;
     }
@@ -358,7 +420,7 @@ s32 sceCdStatus(void)
     if (!_sceCd_scmd_prechk(2)) {
         return -1;
     }
-    if (sceSifCallRpc(D_0052BA48, 12, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052BA48, 12, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
         SignalSema(D_0052A02C);
         return -1;
     }
@@ -377,7 +439,7 @@ s32 sceCdPowerOff(s32 *result)
     if (!_sceCd_scmd_prechk(33)) {
         return 0;
     }
-    if (sceSifCallRpc(D_0052BA48, 33, 0, 0, 0, D_0052B200, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052BA48, 33, 0, 0, 0, D_0052B200, 8, 0, 0) < 0) {
         SignalSema(D_0052A02C);
         return 0;
     }
@@ -411,7 +473,7 @@ s32 sceCdReadClock(sdfCdClock_t *clock)
     if (D_0052A010 > 0) {
         scePrintf(D_0054AC78);
     }
-    if (sceSifCallRpc(D_0052BA48, 1, 0, NULL, 0,
+    if (sceSifCallRpc(&D_0052BA48, 1, 0, NULL, 0,
                       D_0052B200, 16, NULL, NULL) < 0) {
         SignalSema(D_0052A02C);
         return 0;

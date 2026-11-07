@@ -28,7 +28,7 @@ writing it out gets within one instruction without any searching:
 
     if (!_sceCd_scmd_prechk(<cmd>)) return 0;
     <optional: fill D_0052B640 and sceSifWriteBackDCache(&D_0052B640, 4)>
-    if (sceSifCallRpc(D_0052BA48, <fno>, 0, <send>, <ssize>, &D_0052B200, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_0052BA48, <fno>, 0, <send>, <ssize>, &D_0052B200, 4, 0, 0) < 0) {
         SignalSema(D_0052A02C);
         return 0;
     }
@@ -130,3 +130,78 @@ following function offsets, without changing peer behavior. Full retail,
 generated-source, regression, guarded-source and report gates pass. Production
 provenance verifies a unique compiler-owned 148-byte linked span, adding one
 SDK function and 148 bytes while leaving game coverage unchanged.
+
+## _sceCd_scmd_prechk (sdk/libcdvd, 368 bytes)
+
+All 92 of 92 words match in the configured SDK 2.9 compiler. The corrected
+RPC-client view is 0x28 bytes, ending at its server pointer at +0x24. The
+canonical provider checks that same 40-byte size; native data places the
+separate stream-active global at +0x28. The older 0x40 byte-array declaration
+did not establish a 64-byte backing object. No unsupported tail remains.
+The six-word initialization region retains its actual signed word at +12,
+and existing direct users still access word zero. Declarations allocate no
+storage; existing calls continue passing the same native client address.
+
+Two initialized semaphore operands preserve the real argument load/call
+boundaries. Each is immediately consumed by PollSema or SignalSema and then
+dead; neither spans a call or acts as a general memory barrier. The zero mode
+argument is bound to a0 only after sceCdSyncS returns, consumed immediately by
+sceSifInitRpc on success, and dead on the busy path before SignalSema. No live
+fixed-register value crosses a call. No extra mode operand, fabricated
+consumer or instruction-emitting helper remains. These are target compiler
+reconstruction aids, not evidence of historical spelling.
+
+The post-PollSema semaphore reload, positive-debug failure logging, command
+publication, thread-status call, sync failure cleanup, signed initialization
+state, service ID 0x80000593 and bind retries retain their native accesses and
+call order. A server pointer is read only after a nonnegative bind result.
+Both bounded delays decrement 0x100000 through -1 without overflow; the four
+NOPs are emitted by the configured compiler, not spelled as padding in source.
+Success clears the initialization word and deliberately retains the semaphore.
+
+Fresh corrected controls reproduce the independently reviewed results:
+- Baseline and declaration-only owners: 27 match, 0 differ.
+- Final: 368 bytes, 92/92 words matching; owner 28 match, 0 differ.
+- Removing only the PollSema operand: 360 bytes, 14/90 overlap words matching.
+- Removing only the SignalSema operand: 360 bytes, 38/90 matching.
+- Removing only the mode binding: 368 bytes, 84/92 matching.
+- Removing all three aids: 360 bytes, 15/90 matching.
+Each 360-byte control leaves eight native bytes uncovered. Qualified RTL,
+scheduler and delay-branch outputs support the narrow argument-boundary
+explanation: semaphore ablations permit their loads in call delay slots;
+mode ablation moves the busy-path load into the post-sync branch delay slot.
+
+All seven complete sources have fresh production, SKIP_ASM and retained-C
+plain/dump, implicit-declaration-strict and full-Werror builds: 84 clean
+compilations and 21 whole-output sets. Complete assembly and entire ELF agree
+after replacing exactly one equal-length generated source filename. No code,
+relocation, data, symbol or debug payload is removed. Corrected owner layout
+assertions pass under the actual SDK compiler. The outputs also reproduce
+the independent review's artifacts.
+
+All 35 production / 27 SKIP / 28 retained peers preserve instruction bytes
+and paired resolved targets. Allocated data and semantic symbol contracts
+remain equal after the explicit target-string mapping: production removes
+only its two target-owned labels without changing bytes; SKIP modes insert
+exactly the target's 64-byte string block at rodata offset 32. All single
+ablations preserve peers and nontext data. Retained sceCdStRead remains a
+known mismatch and receives no new credit.
+
+Raw relocation serialization is not identical. Production changes the order
+in _sceCd_ncmd_prechk; both SKIP modes change order in sceCdInitEeCB,
+sceCdMmode, sceCdGetDiskType, sceCdStatus and sceCdPowerOff. Their per-offset
+resolved targets and code bytes agree. Independently linking baseline,
+declarations and final gives exact unmasked 7,016-byte text and 796-byte
+rodata against retail, including the 368-byte target. This is resolved-contract
+preservation and exact final bytes, not ordered-record identity.
+
+Full current-tree retail/generated-source checks, 505 no-skip tooling tests,
+818 layout claims, frozen EE/IRX draft sweeps, inline policy and report-scope
+checks pass. Production provenance verifies one compiler-owned target and
+no target fallback input. The three upstream field/event/vector commits
+through a5cfb79d are preserved and their affected owners are rechecked.
+This promotes one verified SDK C function of 368 bytes; game coverage remains
+unchanged. The current production reconciler only processes game units. The
+SDK report therefore retains raw objdiff's 99.78261% for this target and leaves
+its matched-function/byte totals unchanged despite exact linked production
+bytes. No SDK dashboard increase is claimed, and report tooling is unchanged.
