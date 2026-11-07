@@ -2,71 +2,51 @@
 
 ## sdfGrSetFrameSetMode (sdf/sdfGraph, 0x58)
 
-Eleven of twenty-two words differ, at the exact size, and every one of them is
-a register name or the one store position that follows from it. The draft and
-retail emit the same twenty-two instructions.
+22 of 22 words match at the native 88-byte size. Complete owner checking gives
+15 match, 0 differ, with all peers and owned data preserved.
 
-Retail holds the row pointer in `$2`, the four `lh`/`lhu` values in `$3` to
-`$6`, `zbuffFormat` in `$9` and the `aSet` copy in `$10`, skipping `$7` and
-`$8`. The draft needs one register fewer: the last load reuses `$2` as the row
-pointer dies in it, so `zbuffFormat` lands in `$6`, `pixelFormat` in `$2` and
-the `aSet` copy in `$7`. With `pixelFormat` in the dying row pointer's
-register the scheduler also moves its `sb` from fourth to second, which is the
-only instruction-order difference.
+The ordinary retained reconstruction had eleven differing words at the same
+size. Native holds the row in register 2, the four width/height/pixel values
+in 3 through 6, the depth format in 9 and the destination in 10. The ordinary
+form reused the dying row register for the last field, changing allocation
+and the dependent byte-store order. Previously measured parameter, read and
+store permutations did not close that difference and are not used here.
 
-The `la $2, sdfGrFrameModes($2)` form, where the row address lands in the
-index's own register and ee-as spends `$at` on the `%hi`/`%lo` pair, is the one
-thing the source does reach, and it needs the five fields read into locals and
-a store order whose last two entries are swapped. Written as five direct
-`aSet->f = def->f` copies the loads and stores interleave instead, since the
-two pointed-to types are different alias sets.
+Three localized bindings retain only the real row pointer, destination pointer
+and depth-format scalar. Two read-only empty operands reference the initialized
+depth format, immediately after its load and before its actual destination
+store. Neither follows its consumer, invents a row-pointer use, or extends a
+value across a call. There are no calls in the function. The remaining four
+fields have ordinary locals with their original signed or unsigned halfword
+types; format publication narrows through the existing byte fields.
 
-Ruled out, all measured in the real unit:
+These are target-specific allocation and scheduling aids, not historical source
+spelling or a general memory barrier. All five loads, five field stores and
+optional three handle clears retain native widths and ordering. No extra access,
+arithmetic, write, bound, qualifier, provider or ABI change is introduced.
 
-- All 120 permutations of the store order with the reads ascending, and all
-  120 permutations of the read order with the best store order. Nothing beats
-  eleven; the five store rotations that match the read rotation reach fourteen
-  and everything else seventeen or more.
-- `s32`/`u32` locals in place of the `s16`/`u16` ones, a `const` row pointer, a
-  `u32` copy of `aMode`, a `sdfGrFrameSet_t *` copy of `aSet`, and the
-  `(T *)((u8 *)(i * sizeof(T)) + (u32)base)` cast form of the row address.
-- The row pointer assigned after the guard instead of at its declaration,
-  which loses the whole entry block.
-- Reading the fields straight out of `sdfGrFrameModes[aMode]` at each use, and
-  a `sdfGsMemSlice_t **` local for the handle clearing in either the one-local
-  or the HD reconstruction's two-local shape. All three run past the next
-  function.
-- One, two and three extra unused parameters, with the prototype and both
-  call sites widened, on the theory that `$7` and `$8` were live at entry.
-  The allocation does not move, and the HD reconstruction's signature is the
-  three parameters this unit already declares.
+Removing the row, destination or depth-format binding independently produces
+12, 9 or 10 differing words. Removing the first read operand produces five;
+removing the second produces eight. Bindings on width, height, buffer height
+and pixel format were unnecessary and removed. These paired results establish
+source/output dependence, not an unobserved internal compiler decision.
 
-This is the "register allocation that needs one register fewer than the C
-uses" row of [matching levers](matching-levers.md), reached from the other
-side: the draft is one register short rather than one long.
+The existing valid-row and correctly aligned typed-object requirements remain.
+Native indexing is unchecked and retains its 32-bit multiplication/addition
+behavior; invalid modes do not gain a defined-C safety guarantee. Incompatible
+overlapping source/destination objects are not invented as valid inputs. Opaque
+handle values may alias each other or either object because no pointee is
+accessed or freed; clear requests only replace the pointer values.
 
-### The allocation trace, and what it asks for
+Independent native, ABI/layout and semantic review passes. An extracted-body
+oracle passes 2,621,440 cases each under optimized and ASan/UBSan builds: every
+halfword pattern, all four valid modes, varied clear flags, aliased opaque
+handles, source immutability and whole-object canaries. Host pointer sizes are
+not used as evidence for the EE layout; native output supplies that evidence.
 
-    tools/cc1probe.sh <candidate> --as-unit src/smt3/sdf/sdfGraph.c --version smt3 \
-        --func sdfGrSetFrameSetMode --alloc --no-dumps --out <dir>    # verify: OK
-
-The five field values are block-local quantities of the join block, and
-`local_alloc` colors them before the two globals. Their priorities are
-`refs * 10000 / life`: `pixelFormat` `[12,16]` 5000, `w` `[6,14]` 2500,
-`h` `[8,18]` and `buffH` `[10,20]` 2000, `zbuffFormat` `[4,22]` 1111. Coloring
-in that order and taking the lowest free register each time gives
-`$2 $3 $4 $5 $6`. `global_alloc` then colors the `aFrame` copy (reg84, 9 refs,
-priority 15000) against conflicts `{$2 $3 $4 $5 $6}` to `$7`, and the row
-pointer (reg87, 6 refs) to `$2`, which it also prefers.
-
-Retail's numbering is the same algorithm run with three more registers
-unavailable in that block: the five values sit at `$3 $4 $5 $6 $9`, the copy at
-`$10` and the row pointer at `$2`. `$2`, `$7` and `$8` are all skipped, so
-retail's join block held eight hard registers' worth of block-local quantities
-where the draft holds five, and the copy's conflict set was `{$2..$9}` rather
-than `{$2..$6}`. Nothing tried adds a quantity there: the five-field read is
-exactly five values, and `u8` locals for the two byte fields (the destination's
-own types) emit the same eleven differing words. Whoever picks this up needs
-three extra block-local quantities in the join block, not another store or read
-order; the 240 permutations already measured only move which value is which.
-
+Nine complete production, SKIP_ASM and retained-C plain/stock-dump/strict
+triples preserve whole assembly, allocated sections, symbols and relocations.
+Resolved peer contracts and all owned data are unchanged in every mode; the
+production target equals the native fallback. Inputs remain unchanged across
+post-generation qualification. Full retail checksum and repository regression
+gates remain required for publication.

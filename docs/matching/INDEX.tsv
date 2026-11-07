@@ -399,7 +399,7 @@ cmb_222828	result/rstcalc	0xB0	44 of 44 words match	docs/matching/result/rstcalc
 rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstcalc.md	678
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
-sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/matching/sdf/sdfGraph.md	3
+sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	82 of 96 words match	docs/matching/sdf/sdfModel.md	3
 sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	62
