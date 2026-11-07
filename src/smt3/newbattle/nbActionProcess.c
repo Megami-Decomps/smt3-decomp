@@ -4462,6 +4462,28 @@ void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
     data->ActionProcessID[data->NowActionProcess] = id;
 }
 
+
+void SetAction_SKILL(nbActionProcessData_t *a);
+
+nbActionFunc_t ActionFuncTable[16] = {
+    { (void (*)(nbActionProcessData_t *a))SetAction_NON, CheckAction_NON },
+    { SetAction_COMM, CheckAction_COMM },
+    { SetAction_AI, CheckAction_AI },
+    { SetAction_AISCR, CheckAction_AISCR },
+    { SetAction_BAD, CheckAction_BAD },
+    { SetAction_TARSEL, CheckAction_TARSEL },
+    { SetAction_STKSEL, CheckAction_STKSEL },
+    { SetAction_READY, CheckAction_READY },
+    { SetAction_SKILL, CheckAction_SKILL },
+    { SetAction_NEGO, CheckAction_NEGO },
+    { SetAction_NEGORESULT, CheckAction_NEGORESULT },
+    { SetAction_BADWAIT, CheckAction_BADWAIT },
+    { SetAction_WAIT, CheckAction_WAIT },
+    { SetAction_ESCAPE, CheckAction_ESCAPE },
+    { SetAction_RETURN, CheckAction_RETURN },
+    { (void (*)(nbActionProcessData_t *a))SetAction_INVISIBLE, CheckAction_INVISIBLE },
+};
+
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544120);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);

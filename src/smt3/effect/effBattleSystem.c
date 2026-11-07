@@ -3830,5 +3830,65 @@ void InitModelCollisionEditorProcess(void)
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
+void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work);
+
+/* Indexed by effect family. The IDB names entries 1 on as effBTLSys*Table. */
+effBTLSystemFunc_t D_0031BF00[30] = {
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    /* effBTLSysShockTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Shock_Create, (void (*)(void *))effBTLSys_Shock_Delete, (void (*)(void *))effBTLSys_Shock_Delete2, (void (*)(void *, u32))effBTLSys_Shock_SetColor, (void (*)(void *))effBTLSys_Shock_Draw, effBTLSys_Shock_GetLength, effBTLSys_Shock_DataLoad, effBTLSys_Shock_DataFree, effBTLSys_Shock_PartHandleCreate, effBTLSys_Shock_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 0, effBTLSystem_Freeze_PartList },
+    /* effBTLSysFreezeTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Freeze_Create, (void (*)(void *))effBTLSys_Freeze_Delete, (void (*)(void *))effBTLSys_Freeze_Delete2, (void (*)(void *, u32))effBTLSys_Freeze_SetColor, (void (*)(void *))effBTLSys_Freeze_Draw, effBTLSys_Freeze_GetLength, effBTLSys_Freeze_DataLoad, effBTLSys_Freeze_DataFree, effBTLSys_Freeze_PartHandleCreate, effBTLSys_Freeze_PartHandleDelete, 0x80FFF8BC, 1, { 0, 0, 0 }, 1, effBTLSystem_Freeze_PartList },
+    /* effBTLSysSleepTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Sleep_Create, (void (*)(void *))effBTLSys_Sleep_Delete, (void (*)(void *))effBTLSys_Sleep_Delete2, (void (*)(void *, u32))effBTLSys_Sleep_SetColor, (void (*)(void *))effBTLSys_Sleep_Draw, effBTLSys_Sleep_GetLength, effBTLSys_Sleep_DataLoad, effBTLSys_Sleep_DataFree, effBTLSys_Sleep_PartHandleCreate, effBTLSys_Sleep_PartHandleDelete, 0x80FFB97D, 1, { 0, 0, 0 }, 1, effBTLSystem_Sleep_PartList },
+    /* effBTLSysPanicTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Panic_Create, (void (*)(void *))effBTLSys_Panic_Delete, (void (*)(void *))effBTLSys_Panic_Delete2, (void (*)(void *, u32))effBTLSys_Panic_SetColor, (void (*)(void *))effBTLSys_Panic_Draw, effBTLSys_Panic_GetLength, effBTLSys_Panic_DataLoad, effBTLSys_Panic_DataFree, effBTLSys_Panic_PartHandleCreate, effBTLSys_Panic_PartHandleDelete, 0x8058B8FF, 1, { 0, 0, 0 }, 1, effBTLSystem_Panic_PartList },
+    /* effBTLSysBindTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Bind_Create, (void (*)(void *))effBTLSys_Bind_Delete, (void (*)(void *))effBTLSys_Bind_Delete2, (void (*)(void *, u32))effBTLSys_Bind_SetColor, (void (*)(void *))effBTLSys_Bind_Draw, effBTLSys_Bind_GetLength, effBTLSys_Bind_DataLoad, effBTLSys_Bind_DataFree, effBTLSys_Bind_PartHandleCreate, effBTLSys_Bind_PartHandleDelete, 0x8080FFD7, 1, { 0, 0, 0 }, 0, effBTLSystem_Bind_PartList },
+    /* effBTLSysCloseTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Close_Create, (void (*)(void *))effBTLSys_Close_Delete, (void (*)(void *))effBTLSys_Close_Delete2, (void (*)(void *, u32))effBTLSys_Close_SetColor, (void (*)(void *))effBTLSys_Close_Draw, effBTLSys_Close_GetLength, effBTLSys_Close_DataLoad, effBTLSys_Close_DataFree, effBTLSys_Close_PartHandleCreate, effBTLSys_Close_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 2, effBTLSystem_Bind_PartList },
+    /* effBTLSysPoisonTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Poison_Create, (void (*)(void *))effBTLSys_Poison_Delete, (void (*)(void *))effBTLSys_Poison_Delete2, (void (*)(void *, u32))effBTLSys_Poison_SetColor, (void (*)(void *))effBTLSys_Poison_Draw, effBTLSys_Poison_GetLength, effBTLSys_Poison_DataLoad, effBTLSys_Poison_DataFree, effBTLSys_Poison_PartHandleCreate, effBTLSys_Poison_PartHandleDelete, 0x80A53A6C, 1, { 0, 0, 0 }, 1, effBTLSystem_Poison_PartList },
+    /* effBTLSysCharmTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Charm_Create, (void (*)(void *))effBTLSys_Charm_Delete, (void (*)(void *))effBTLSys_Charm_Delete2, (void (*)(void *, u32))effBTLSys_Charm_SetColor, (void (*)(void *))effBTLSys_Charm_Draw, effBTLSys_Charm_GetLength, effBTLSys_Charm_DataLoad, effBTLSys_Charm_DataFree, effBTLSys_Charm_PartHandleCreate, effBTLSys_Charm_PartHandleDelete, 0x808064FF, 1, { 0, 0, 0 }, 2, effBTLSystem_Charm_PartList },
+    /* effBTLSysParalyzeTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Paralyze_Create, (void (*)(void *))effBTLSys_Paralyze_Delete, (void (*)(void *))effBTLSys_Paralyze_Delete2, (void (*)(void *, u32))effBTLSys_Paralyze_SetColor, (void (*)(void *))effBTLSys_Paralyze_Draw, effBTLSys_Paralyze_GetLength, effBTLSys_Paralyze_DataLoad, effBTLSys_Paralyze_DataFree, effBTLSys_Paralyze_PartHandleCreate, effBTLSys_Paralyze_PartHandleDelete, 0x80589BFF, 1, { 0, 0, 0 }, 0, effBTLSystem_Curse_PartList },
+    /* effBTLSysFlyTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Fly_Create, (void (*)(void *))effBTLSys_Fly_Delete, (void (*)(void *))effBTLSys_Fly_Delete2, (void (*)(void *, u32))effBTLSys_Fly_SetColor, (void (*)(void *))effBTLSys_Fly_Draw, effBTLSys_Fly_GetLength, effBTLSys_Fly_DataLoad, effBTLSys_Fly_DataFree, effBTLSys_Fly_PartHandleCreate, effBTLSys_Fly_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 0, effBTLSystem_Curse_PartList },
+    /* effBTLSysStoneTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Stone_Create, (void (*)(void *))effBTLSys_Stone_Delete, (void (*)(void *))effBTLSys_Stone_Delete2, (void (*)(void *, u32))effBTLSys_Stone_SetColor, (void (*)(void *))effBTLSys_Stone_Draw, effBTLSys_Stone_GetLength, effBTLSys_Stone_DataLoad, effBTLSys_Stone_DataFree, effBTLSys_Stone_PartHandleCreate, effBTLSys_Stone_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 0, effBTLSystem_Curse_PartList },
+    /* effBTLSysCurseTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Curse_Create, (void (*)(void *))effBTLSys_Curse_Delete, (void (*)(void *))effBTLSys_Curse_Delete2, (void (*)(void *, u32))effBTLSys_Curse_SetColor, (void (*)(void *))effBTLSys_Curse_Draw, effBTLSys_Curse_GetLength, effBTLSys_Curse_DataLoad, effBTLSys_Curse_DataFree, effBTLSys_Curse_PartHandleCreate, effBTLSys_Curse_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Curse_PartList },
+    /* effBTLSysCurseCAMPTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_CurseCAMP_Create, (void (*)(void *))effBTLSys_CurseCAMP_Delete, (void (*)(void *))effBTLSys_CurseCAMP_Delete2, (void (*)(void *, u32))effBTLSys_CurseCAMP_SetColor, (void (*)(void *))effBTLSys_CurseCAMP_Draw, effBTLSys_CurseCAMP_GetLength, effBTLSys_CurseCAMP_DataLoad, effBTLSys_CurseCAMP_DataFree, effBTLSys_CurseCAMP_PartHandleCreate, effBTLSys_CurseCAMP_PartHandleDelete, 0x80808080, 0, { 0, 0, 0 }, 2, effBTLSystem_CurseCAMP_PartList },
+    /* effBTLSysStoneDeadTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Stone_Dead_Create, (void (*)(void *))effBTLSys_Stone_Dead_Delete, (void (*)(void *))effBTLSys_Stone_Dead_Delete2, (void (*)(void *, u32))effBTLSys_Stone_Dead_SetColor, (void (*)(void *))effBTLSys_Stone_Dead_Draw, effBTLSys_Stone_Dead_GetLength, effBTLSys_Stone_Dead_DataLoad, effBTLSys_Stone_Dead_DataFree, effBTLSys_Stone_Dead_PartHandleCreate, effBTLSys_Stone_Dead_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 3, effBTLSystem_Stone_Dead_PartList },
+    /* D_0031C248 */
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    /* effBTLSysHansyaTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Hansya_Create, (void (*)(void *))effBTLSys_Hansya_Delete, (void (*)(void *))effBTLSys_Hansya_Delete2, (void (*)(void *, u32))effBTLSys_Hansya_SetColor, (void (*)(void *))effBTLSys_Hansya_Draw, effBTLSys_Hansya_GetLength, effBTLSys_Hansya_DataLoad, effBTLSys_Hansya_DataFree, effBTLSys_Hansya_PartHandleCreate, effBTLSys_Hansya_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 3, effBTLSystem_Hansya_PartList },
+    /* effBTLSysKyusyuuTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Kyusyuu_Create, (void (*)(void *))effBTLSys_Kyusyuu_Delete, (void (*)(void *))effBTLSys_Kyusyuu_Delete2, (void (*)(void *, u32))effBTLSys_Kyusyuu_SetColor, (void (*)(void *))effBTLSys_Kyusyuu_Draw, effBTLSys_Kyusyuu_GetLength, effBTLSys_Kyusyuu_DataLoad, effBTLSys_Kyusyuu_DataFree, effBTLSys_Kyusyuu_PartHandleCreate, effBTLSys_Kyusyuu_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 2, effBTLSystem_Kyusyuu_PartList },
+    /* D_0031C328 */
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    /* effBTLSysReturnTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Return_Create, (void (*)(void *))effBTLSys_Return_Delete, (void (*)(void *))effBTLSys_Return_Delete2, (void (*)(void *, u32))effBTLSys_Return_SetColor, (void (*)(void *))effBTLSys_Return_Draw, (u32 (*)(void *))effBTLSys_Return_GetLength, effBTLSys_Return_DataLoad, effBTLSys_Return_DataFree, effBTLSys_Return_PartHandleCreate, effBTLSys_Return_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Return_PartList },
+    /* D_0031C398 */
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
+    /* effBTLSysAttackTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Attack_Create, (void (*)(void *))effBTLSys_Attack_Delete, (void (*)(void *))effBTLSys_Attack_Delete2, (void (*)(void *, u32))effBTLSys_Attack_SetColor, (void (*)(void *))effBTLSys_Attack_Draw, effBTLSys_Attack_GetLength, effBTLSys_Attack_DataLoad, effBTLSys_Attack_DataFree, effBTLSys_Attack_PartHandleCreate, effBTLSys_Attack_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 6, effBTLSystem_Attack_PartList },
+    /* effBTLSysAttackCTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_AttackC_Create, (void (*)(void *))effBTLSys_AttackC_Delete, (void (*)(void *))effBTLSys_AttackC_Delete2, (void (*)(void *, u32))effBTLSys_AttackC_SetColor, (void (*)(void *))effBTLSys_AttackC_Draw, effBTLSys_AttackC_GetLength, effBTLSys_AttackC_DataLoad, effBTLSys_AttackC_DataFree, effBTLSys_AttackC_PartHandleCreate, effBTLSys_AttackC_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 6, effBTLSystem_AttackC_PartList },
+    /* effBTLSysEncountTable */
+    { (void * (*)(nbFormation_t *))effBTLSys_Encount_Create, (void (*)(void *))effBTLSys_Encount_Delete, (void (*)(void *))effBTLSys_Encount_Delete2, (void (*)(void *, u32))effBTLSys_Encount_SetColor, (void (*)(void *))effBTLSys_Encount_Draw, (u32 (*)(void *))effBTLSys_Encount_GetLength, effBTLSys_Encount_DataLoad, effBTLSys_Encount_DataFree, effBTLSys_Encount_PartHandleCreate, effBTLSys_Encount_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Encount_PartList },
+    /* D_0031C4E8 */
+    { (void * (*)(nbFormation_t *))effBTLSys_Nego_Kaihuku_Create, (void (*)(void *))effBTLSys_Nego_Kaihuku_Delete, (void (*)(void *))effBTLSys_Nego_Kaihuku_Delete2, NULL, (void (*)(void *))effBTLSys_Nego_Kaihuku_Draw, (u32 (*)(void *))effBTLSys_Nego_Kaihuku_GetLength, effBTLSys_Nego_Kaihuku_DataLoad, effBTLSys_Nego_Kaihuku_DataFree, effBTLSys_Nego_Kaihuku_PartHandleCreate, effBTLSys_Nego_Kaihuku_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Nego_Kaihuku_PartList },
+    { (void * (*)(nbFormation_t *))effBTLSys_Nego_Kyusyu_Create, (void (*)(void *))effBTLSys_Nego_Kyusyu_Delete, (void (*)(void *))effBTLSys_Nego_Kyusyu_Delete2, NULL, (void (*)(void *))effBTLSys_Nego_Kyusyu_Draw, (u32 (*)(void *))effBTLSys_Nego_Kyusyu_GetLength, effBTLSys_Nego_Kyusyu_DataLoad, effBTLSys_Nego_Kyusyu_DataFree, effBTLSys_Nego_Kyusyu_PartHandleCreate, effBTLSys_Nego_Kyusyu_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Nego_Kyusyu_PartList },
+    { (void * (*)(nbFormation_t *))effBTLSys_Nego_Stone_Create, (void (*)(void *))effBTLSys_Nego_Stone_Delete, (void (*)(void *))effBTLSys_Nego_Stone_Delete2, NULL, (void (*)(void *))effBTLSys_Nego_Stone_Draw, (u32 (*)(void *))effBTLSys_Nego_Stone_GetLength, effBTLSys_Nego_Stone_DataLoad, effBTLSys_Nego_Stone_DataFree, effBTLSys_Nego_Stone_PartHandleCreate, effBTLSys_Nego_Stone_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Nego_Stone_PartList },
+};
+
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C40);
 

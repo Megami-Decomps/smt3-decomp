@@ -639,3 +639,98 @@ void nb_1B2340(u32 mask)
     SDF_VU0_LOADVECTOR_MEMOPS(center);
 }
 
+
+void nbCameraState_Start_Init(void);
+void nbCameraState_Start_Calc(void);
+void nbCameraState_CommandRoot_Init(void);
+void nbCameraState_CommandRoot_Calc(void);
+void nbCameraState_CommandTargetSel_Init(void);
+void nbCameraState_CommandTargetSel_Calc(void);
+void nbCameraState_SkillAttack_Init(void);
+void nbCameraState_SkillAttack_Calc(void);
+void nbCameraState_SkillStart_Init(void);
+void nbCameraState_SkillCut1_Init(void);
+void nbCameraState_SkillCut1_Calc(void);
+void nbCameraState_SkillCut2_Init(void);
+void nbCameraState_SkillCut2_Calc(void);
+void func_001B8018(void);
+void func_001B8020(void);
+void nbCameraState_NegoBougai_Init(void);
+void nbCameraState_NegoBougai_Calc(void);
+void nbCameraState_NegoTaizi_Init(void);
+void nbCameraState_NegoTaizi_Calc(void);
+void nbCameraState_NegoTarget_Init(void);
+void nbCameraState_NegoTarget_Calc(void);
+void nbCameraState_NegoHojo_Init(void);
+void nbCameraState_NegoHojo_Calc(void);
+void nbCameraState_PlayerSide_Init(void);
+void nbCameraState_EnemySide_Init(void);
+void nb_1B3470(void);
+void nb_1B3490(void);
+void nbCameraState_NegoTarget_Calc2(void);
+void nbCameraState_EnemyBad_Init(void);
+void nbCameraState_EnemyBad_Calc(void);
+void nbCameraState_NegoBougai_Init2(void);
+extern char D_0054F368[];
+extern char D_0054F360[];
+extern char D_00534598[];
+extern char D_00534588[];
+extern char D_00534570[];
+extern char D_00534560[];
+extern char D_00534550[];
+extern char D_00534540[];
+extern char D_00534530[];
+extern char D_00534520[];
+extern char D_00534510[];
+extern char D_00534500[];
+extern char D_0054F358[];
+extern char D_005344F0[];
+extern char D_005344E0[];
+extern char D_005344D0[];
+extern char D_005344C0[];
+extern char D_005344B0[];
+extern char D_005344A0[];
+extern char D_0054F350[];
+extern char D_00534490[];
+extern char D_00534480[];
+extern char D_0054F348[];
+extern char D_0054F340[];
+extern char D_00534470[];
+extern char D_00534460[];
+extern char D_00534450[];
+extern char D_00534440[];
+extern char D_00534430[];
+extern char D_00534420[];
+
+nbCameraStateEntry_t nbCameraStateTable[30] = {
+    { D_0054F368, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_0054F360, nbCameraState_Start_Init, nbCameraState_Start_Calc, 0, { 0, 0, 0 } },
+    { D_00534598, nbCameraState_CommandRoot_Init, nbCameraState_CommandRoot_Calc, 0, { 0, 0, 0 } },
+    { D_00534588, nbCameraState_CommandRoot_Init, nbCameraState_CommandRoot_Calc, 0, { 0, 0, 0 } },
+    { D_00534570, nbCameraState_CommandTargetSel_Init, nbCameraState_CommandTargetSel_Calc, 0, { 0, 0, 0 } },
+    { D_00534560, nbCameraState_SkillAttack_Init, nbCameraState_SkillAttack_Calc, 0, { 0, 0, 0 } },
+    { D_00534550, nbCameraState_SkillStart_Init, NULL, 0, { 0, 0, 0 } },
+    { D_00534540, nbCameraState_SkillCut1_Init, nbCameraState_SkillCut1_Calc, 0, { 0, 0, 0 } },
+    { D_00534530, nbCameraState_SkillCut2_Init, nbCameraState_SkillCut2_Calc, 0, { 0, 0, 0 } },
+    { D_00534520, NULL, nbCameraState_SkillCut2_Calc, 0, { 0, 0, 0 } },
+    { D_00534510, func_001B8018, func_001B8020, 0, { 0, 0, 0 } },
+    { D_00534500, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_0054F358, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_005344F0, nbCameraState_NegoBougai_Init, nbCameraState_NegoBougai_Calc, 0, { 0, 0, 0 } },
+    { D_005344E0, nbCameraState_NegoTaizi_Init, nbCameraState_NegoTaizi_Calc, 0, { 0, 0, 0 } },
+    { D_005344D0, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc, 0, { 0, 0, 0 } },
+    { D_005344C0, nbCameraState_NegoHojo_Init, nbCameraState_NegoHojo_Calc, 0, { 0, 0, 0 } },
+    { D_005344B0, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_005344A0, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_0054F350, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_00534490, nbCameraState_PlayerSide_Init, NULL, 0, { 0, 0, 0 } },
+    { D_00534480, nbCameraState_EnemySide_Init, NULL, 0, { 0, 0, 0 } },
+    { D_0054F348, nb_1B3470, nb_1B3490, 0, { 0, 0, 0 } },
+    { D_0054F340, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_00534470, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc2, 0, { 0, 0, 0 } },
+    { D_00534460, nbCameraState_EnemyBad_Init, nbCameraState_EnemyBad_Calc, 1, { 0, 0, 0 } },
+    { D_00534450, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc2, 0, { 0, 0, 0 } },
+    { D_00534440, nbCameraState_NegoBougai_Init2, nbCameraState_NegoBougai_Calc, 0, { 0, 0, 0 } },
+    { D_00534430, NULL, NULL, 0, { 0, 0, 0 } },
+    { D_00534420, nbCameraState_DebugShotAll_Init, NULL, 0, { 0, 0, 0 } },
+};

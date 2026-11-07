@@ -14,6 +14,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 LINE = re.compile(r"\s*/\*\s*[0-9A-F]+\s+([0-9A-F]{8})\s+(?:[0-9A-F]+\s*)?\*/\s*\.(\w+)\s*(.*)")
 IMAGE = ROOT / "orig/smt3/SLUS_209.11"
 VRAM_DELTA = 0xFF000
+ASM_DIR = ROOT / "asm/smt3/data"
 
 
 def load_symbols():
@@ -29,7 +30,7 @@ def read_data(start, end):
     """Yield (name, vram, bytes, {vram: (directive, operand)}) for symbols in [start, end)."""
     image = IMAGE.read_bytes()
     labels, lines = [], {}
-    for path in sorted((ROOT / "asm/smt3/data").glob("data*.data.s")):
+    for path in sorted(ASM_DIR.glob("data*.data.s")):
         pending = None
         for line in open(path):
             m = re.match(r"dlabel (\w+)", line)
@@ -93,7 +94,10 @@ def main():
     ap.add_argument("unit", help="unit path under src/smt3, e.g. effect/effPart")
     ap.add_argument("start", type=lambda s: int(s, 16), help="first vram, hex")
     ap.add_argument("end", type=lambda s: int(s, 16), help="end vram (exclusive), hex")
+    ap.add_argument("--asm", type=pathlib.Path, help="split .data directory (default asm/smt3/data)")
     args = ap.parse_args()
+    global ASM_DIR
+    ASM_DIR = args.asm or ASM_DIR
     funcs = load_symbols()
     src = ROOT / "src/smt3" / (args.unit + ".c")
     source = src.read_text() if src.exists() else ""

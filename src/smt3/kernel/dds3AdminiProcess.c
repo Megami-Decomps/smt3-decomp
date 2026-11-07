@@ -518,6 +518,183 @@ s32 fcl_103560(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t des
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103560);
 #endif
 
+
+s32 CallDebug(s32 restored, void *reqdata);
+s32 ExitDebug(void);
+s32 CheckDebug(void);
+s32 CallBootMc(s32 restored, void *reqdata);
+s32 ExitBootMc(void);
+s32 CheckBootMc(void);
+s32 CallTitle(s32 restored, void *reqdata);
+s32 ExitTitle(void);
+s32 CheckTitle(void);
+s32 CallLoad(s32 restored, void *reqdata);
+s32 ExitLoad(void);
+s32 CheckLoad_dds3SequenceList(void);
+s32 CallLoad2(s32 restored, void *reqdata);
+s32 ExitLoad2(void);
+s32 CheckLoad2(void);
+s32 CallEndSave(s32 restored, void *reqdata);
+s32 ExitEndSave(void);
+s32 CheckEndSave(void);
+s32 CallField(s32 restored, void *reqdata);
+s32 ExitField(void);
+s32 CheckField(void);
+s32 CallEvent(s32 restored, void *reqdata);
+s32 ExitEvent(void);
+s32 CheckEvent(void);
+s32 CallCamp(s32 restored, void *reqdata);
+s32 ExitCamp(void);
+s32 CheckCamp(void);
+s32 CallCombine(s32 restored, void *reqdata);
+s32 ExitCombine(void);
+s32 CheckCombine(void);
+s32 CallShop(s32 restored, void *reqdata);
+s32 ExitShop(void);
+s32 CheckShop(void);
+s32 CallRag(s32 restored, void *reqdata);
+s32 ExitRag(void);
+s32 CheckRag(void);
+s32 CallRecover(s32 restored, void *reqdata);
+s32 ExitRecover(void);
+s32 CheckRecover(void);
+s32 CallTerminal(s32 restored, void *reqdata);
+s32 ExitTerminal(void);
+s32 CheckTerminal(void);
+s32 CallResult2(s32 restored, void *reqdata);
+s32 ExitResult2(void);
+s32 CheckResult2(void);
+s32 CallNewBattle(s32 restored, void *reqdata);
+s32 ExitNewBattle(void);
+s32 CheckNewBattle(void);
+s32 CallStaff(s32 restored, void *reqdata);
+s32 ExitStaff(void);
+s32 CheckStaff(void);
+s32 CallConfig(s32 restored, void *reqdata);
+s32 ExitConfig(void);
+s32 CheckConfig(void);
+s32 CallPipe(s32 restored, void *reqdata);
+s32 ExitPipe(void);
+s32 CheckPipe(void);
+s32 CallNewBattleTest(s32 restored, void *reqdata);
+s32 ExitNewBattleTest(void);
+s32 CheckNewBattleTest(void);
+s32 CallBattleFieldTest(s32 restored, void *reqdata);
+s32 ExitBattleFieldTest(void);
+s32 CheckBattleFieldTest(void);
+s32 CallKernelTest(s32 restored, void *reqdata);
+s32 ExitKernelTest(void);
+s32 CheckKernelTest(void);
+s32 CallEventTest(s32 restored, void *reqdata);
+s32 ExitEventTest(void);
+s32 CheckEventTest(void);
+s32 CallEventViewer(s32 restored, void *reqdata);
+s32 ExitEventViewer(void);
+s32 CheckEventViewer(void);
+s32 CallInterfaceTest(s32 restored, void *reqdata);
+s32 ExitInterfaceTest(void);
+s32 CheckInterfaceTest(void);
+s32 CallMessageScriptTest(s32 restored, void *reqdata);
+s32 ExitMessageScriptTest(void);
+s32 CheckMessageScriptTest(void);
+s32 CallCampTest(s32 restored, void *reqdata);
+s32 ExitCampTest(void);
+s32 CheckCampTest(void);
+s32 CallCombineTest(s32 restored, void *reqdata);
+s32 ExitCombineTest(void);
+s32 CheckCombineTest(void);
+s32 CallShopTest(s32 restored, void *reqdata);
+s32 ExitShopTest(void);
+s32 CheckShopTest(void);
+s32 CallRagTest(s32 restored, void *reqdata);
+s32 ExitRagTest(void);
+s32 CheckRagTest(void);
+s32 CallRecoverTest(s32 restored, void *reqdata);
+s32 ExitRecoverTest(void);
+s32 CheckRecoverTest(void);
+s32 CallTerminalTest(s32 restored, void *reqdata);
+s32 ExitTerminalTest(void);
+s32 CheckTerminalTest(void);
+s32 CallResult2Test(s32 restored, void *reqdata);
+s32 ExitResult2Test(void);
+s32 CheckResult2Test(void);
+s32 CallNameTest(s32 restored, void *reqdata);
+s32 ExitNameTest(void);
+s32 CheckNameTest(void);
+s32 CallModelViewerTest(s32 restored, void *reqdata);
+s32 ExitModelViewerTest(void);
+s32 CheckModelViewerTest(void);
+s32 CallSoundTest(s32 restored, void *reqdata);
+s32 ExitSoundTest(void);
+s32 CheckSoundTest(void);
+s32 CallBillboardTest(s32 restored, void *reqdata);
+s32 ExitBillboardTest(void);
+s32 CheckBillboardTest(void);
+s32 CallFontTest(s32 restored, void *reqdata);
+s32 ExitFontTest(void);
+s32 CheckFontTest(void);
+s32 CallPuzzleBoy(s32 restored, void *reqdata);
+s32 ExitPuzzleBoy(void);
+s32 CheckPuzzleBoy(void);
+s32 CallMapEditor(s32 restored, void *reqdata);
+s32 ExitMapEditor(void);
+s32 CheckMapEditor(void);
+s32 CallMovieViewerTest(s32 restored, void *reqdata);
+s32 ExitMovieViewerTest(void);
+s32 CheckMovieViewerTest(void);
+s32 CallModeSelect(s32 restored, void *reqdata);
+s32 ExitModeSelect(void);
+s32 CheckModeSelect(void);
+s32 CallTgs(s32 restored, void *reqdata);
+s32 ExitTgs(void);
+s32 CheckTgs(void);
+
+dds3AdminiList_t dds3AdminiList[43] = {
+    { CallDebug, ExitDebug, CheckDebug },
+    { CallBootMc, ExitBootMc, CheckBootMc },
+    { CallTitle, ExitTitle, CheckTitle },
+    { CallLoad, ExitLoad, CheckLoad_dds3SequenceList },
+    { CallLoad2, ExitLoad2, CheckLoad2 },
+    { CallEndSave, ExitEndSave, CheckEndSave },
+    { CallField, ExitField, CheckField },
+    { CallEvent, ExitEvent, CheckEvent },
+    { CallCamp, ExitCamp, CheckCamp },
+    { CallCombine, ExitCombine, CheckCombine },
+    { CallShop, ExitShop, CheckShop },
+    { CallRag, ExitRag, CheckRag },
+    { CallRecover, ExitRecover, CheckRecover },
+    { CallTerminal, ExitTerminal, CheckTerminal },
+    { CallResult2, ExitResult2, CheckResult2 },
+    { CallNewBattle, ExitNewBattle, CheckNewBattle },
+    { CallStaff, ExitStaff, CheckStaff },
+    { CallConfig, ExitConfig, CheckConfig },
+    { CallPipe, ExitPipe, CheckPipe },
+    { CallNewBattleTest, ExitNewBattleTest, CheckNewBattleTest },
+    { CallBattleFieldTest, ExitBattleFieldTest, CheckBattleFieldTest },
+    { CallKernelTest, ExitKernelTest, CheckKernelTest },
+    { CallEventTest, ExitEventTest, CheckEventTest },
+    { CallEventViewer, ExitEventViewer, CheckEventViewer },
+    { CallInterfaceTest, ExitInterfaceTest, CheckInterfaceTest },
+    { CallMessageScriptTest, ExitMessageScriptTest, CheckMessageScriptTest },
+    { CallCampTest, ExitCampTest, CheckCampTest },
+    { CallCombineTest, ExitCombineTest, CheckCombineTest },
+    { CallShopTest, ExitShopTest, CheckShopTest },
+    { CallRagTest, ExitRagTest, CheckRagTest },
+    { CallRecoverTest, ExitRecoverTest, CheckRecoverTest },
+    { CallTerminalTest, ExitTerminalTest, CheckTerminalTest },
+    { CallResult2Test, ExitResult2Test, CheckResult2Test },
+    { CallNameTest, ExitNameTest, CheckNameTest },
+    { CallModelViewerTest, ExitModelViewerTest, CheckModelViewerTest },
+    { CallSoundTest, ExitSoundTest, CheckSoundTest },
+    { CallBillboardTest, ExitBillboardTest, CheckBillboardTest },
+    { CallFontTest, ExitFontTest, CheckFontTest },
+    { CallPuzzleBoy, ExitPuzzleBoy, CheckPuzzleBoy },
+    { CallMapEditor, ExitMapEditor, CheckMapEditor },
+    { CallMovieViewerTest, ExitMovieViewerTest, CheckMovieViewerTest },
+    { CallModeSelect, ExitModeSelect, CheckModeSelect },
+    { CallTgs, ExitTgs, CheckTgs },
+};
+
 INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF50);
 
 INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF60);

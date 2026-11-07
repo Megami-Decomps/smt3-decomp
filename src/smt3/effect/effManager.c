@@ -307,6 +307,72 @@ void dds3EffectDataRevision(effResourceHeader_t *header)
     }
 }
 
+
+s32 dds3ParticleCreate(u16 arg, s32 param);
+void dds3ParticleDraw(s32 instance);
+void dds3ParticleDelete(s32 instance);
+void dds3ParticleReset(s32 instance);
+s32 dds3ParticleGetState(s32 instance);
+void dds3ParticleSetPosition(s32 instance, sdfVector4_t *pos);
+void dds3ParticleSetRotateMatrix(s32 instance, sdfMatrix4_t *matrix);
+void dds3ParticleSetRGBA(s32 instance, u32 rgba);
+void dds3ParticleSetTypeFlag(s32 instance, s32 loop);
+s32 dds3ParticleGetLoop(s32 instance);
+s32 dds3ParticleCopy(s32 instance);
+void dds3ParticleSetScale(s32 instance, f32 scale);
+s32 dds3ParticleExpCreate(u16 arg, s32 param);
+void dds3ParticleExpDraw(s32 instance);
+void dds3ParticleExpDelete(s32 instance);
+void dds3ParticleExpReset(s32 instance);
+s32 dds3ParticleExpGetState(s32 instance);
+void dds3ParticleExpSetPosition(s32 instance, sdfVector4_t *pos);
+void dds3ParticleExpSetRotateMatrix(s32 instance, sdfMatrix4_t *matrix);
+void dds3ParticleExpSetRGBA(s32 instance, u32 rgba);
+void dds3ParticleExpSetLoop(s32 instance, s32 loop);
+s32 dds3ParticleExpGetLoop(s32 instance);
+s32 dds3ParticleExpCopy(s32 instance);
+void dds3ParticleExpSetScale(s32 instance, f32 scale);
+s32 dds3SpPolyCreate(u16 arg, s32 param);
+void dds3SpPolyDraw(s32 instance);
+void dds3SpPolyDelete(s32 instance);
+void dds3SpPolyReset(s32 instance);
+s32 dds3SpPolyGetState(s32 instance);
+void dds3SpPolySetPosition(s32 instance, sdfVector4_t *pos);
+void dds3SpPolySetRotateMatrix(s32 instance, sdfMatrix4_t *matrix);
+void dds3SpPolySetRGBA(s32 instance, u32 rgba);
+void dds3SpPolySetLoop(s32 instance, s32 loop);
+s32 dds3SpPolyGetLoop(s32 instance);
+s32 dds3SpPolyCopy(s32 instance);
+void dds3SpPolySetScale(s32 instance, f32 scale);
+s32 dds3MagatuhiParCreate(u16 arg, s32 param);
+void dds3MagatuhiParDraw(s32 instance);
+void dds3MagatuhiParDelete(s32 instance);
+void func_001A8CD0(s32 instance);
+s32 dds3MagatuhiParIsActive(s32 instance);
+void dds3MagatuhiParSetPosition(s32 instance, sdfVector4_t *pos);
+void dds3MagatuhiParSetRotateMatrix(s32 instance, sdfMatrix4_t *matrix);
+void dds3MagatuhiParSetRGBA(s32 instance, u32 rgba);
+void dds3MagatuhiParSetByType(s32 instance, s32 loop);
+s32 func_001A8DF8(s32 instance);
+s32 dds3MagatuhiParCopy(s32 instance);
+void func_001A8EA8(s32 instance, f32 scale);
+s32 dds3EffectPartCreate(u16 arg, s32 param);
+void dds3EffectPartDraw(s32 instance);
+void dds3EffectPartDelete(s32 instance);
+void dds3EffectPartSetPosition(s32 instance, sdfVector4_t *pos);
+void dds3EffectPartSetRotateMatrix(s32 instance, sdfMatrix4_t *matrix);
+void dds3EffectPartSetColor(s32 instance, u32 rgba);
+s32 dds3EffectPartCopy(s32 instance);
+void dds3EffectPartSetScale(s32 instance, f32 scale);
+
+effMajorEntry_t EffMajorTable[5] = {
+    { dds3ParticleCreate, dds3ParticleDraw, dds3ParticleDelete, dds3ParticleReset, dds3ParticleGetState, dds3ParticleSetPosition, dds3ParticleSetRotateMatrix, dds3ParticleSetRGBA, dds3ParticleSetTypeFlag, dds3ParticleGetLoop, dds3ParticleCopy, dds3ParticleSetScale },
+    { dds3ParticleExpCreate, dds3ParticleExpDraw, dds3ParticleExpDelete, dds3ParticleExpReset, dds3ParticleExpGetState, dds3ParticleExpSetPosition, dds3ParticleExpSetRotateMatrix, dds3ParticleExpSetRGBA, dds3ParticleExpSetLoop, dds3ParticleExpGetLoop, dds3ParticleExpCopy, dds3ParticleExpSetScale },
+    { dds3SpPolyCreate, dds3SpPolyDraw, dds3SpPolyDelete, dds3SpPolyReset, dds3SpPolyGetState, dds3SpPolySetPosition, dds3SpPolySetRotateMatrix, dds3SpPolySetRGBA, dds3SpPolySetLoop, dds3SpPolyGetLoop, dds3SpPolyCopy, dds3SpPolySetScale },
+    { dds3MagatuhiParCreate, dds3MagatuhiParDraw, dds3MagatuhiParDelete, func_001A8CD0, dds3MagatuhiParIsActive, dds3MagatuhiParSetPosition, dds3MagatuhiParSetRotateMatrix, dds3MagatuhiParSetRGBA, dds3MagatuhiParSetByType, func_001A8DF8, dds3MagatuhiParCopy, func_001A8EA8 },
+    { dds3EffectPartCreate, dds3EffectPartDraw, dds3EffectPartDelete, (void (*)(s32 instance))dds3EffectPCFReset, (s32 (*)(s32 instance))dds3EffectPCFGetState, dds3EffectPartSetPosition, dds3EffectPartSetRotateMatrix, dds3EffectPartSetColor, (void (*)(s32 instance, s32 loop))dds3EffectPCFSetLoop, (s32 (*)(s32 instance))dds3EffectPCFGetLoop, dds3EffectPartCopy, dds3EffectPartSetScale },
+};
+
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B70);
 
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B88);
