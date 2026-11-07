@@ -79,7 +79,7 @@ void sdfDecompInit(sdfDecompCb_t *cb, u8 *dst);
 
 sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
-sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
 sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
@@ -356,9 +356,9 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     return packet;
 }
 
-sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SDF_VU0_LOADMATRIX(sdf3DScreenTm);
-    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawModelWithMatrix((const f32 (*)[4])vertices, colors, vertexCount, primitiveFlags);
 }
 
 sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {

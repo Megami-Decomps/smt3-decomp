@@ -282,7 +282,7 @@ void eglInit(void);
 
 extern sdfGrOt_t sdfGrOtTable[];
 extern u64 D_002F5970[];
-extern f32 D_002F5980[][4];
+extern sdfVector4_t D_002F5980[];
 extern u32 D_002F59A0[];
 extern sdf3DScreenParam_t D_002F5B80;
 extern sdf3DLight_t *D_002F5D10[];
@@ -341,7 +341,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 void *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
 void sdfMatSetTex(sdfMat_t *aMat, sdfTexHandle_t *aTex);
 void sdfMatFreeDelayed(sdfMat_t *aMat);
-void *effDebugDrawWireModel(f32 vertices[][4], u32 *colors, s32 count, s32 alpha);
+void *effDebugDrawWireModel(const sdfVector4_t *vertices, u32 *colors, s32 count, s32 alpha);
 void sdfPrimSetOpaquePacket(void *aPkt);
 void sdfDevSetPrintCB(dds3PrintControl_t *aCB, s32 aX, s32 aY, s32 aZ, u32 aAttr);
 void *sdfDevPrintfEx(dds3PrintControl_t *aCB, const char *aStr, ...);
@@ -2141,12 +2141,12 @@ void eglLinkTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0, s32 color1, f32 x1, f32
 void eglLinkLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, u32 color0, u32 color1)
 {
     void *list;
-    D_002F5980[0][0] = x0;
-    D_002F5980[0][1] = y0;
-    D_002F5980[0][2] = z0;
-    D_002F5980[1][0] = x1;
-    D_002F5980[1][1] = y1;
-    D_002F5980[1][2] = z1;
+    D_002F5980[0].x = x0;
+    D_002F5980[0].y = y0;
+    D_002F5980[0].z = z0;
+    D_002F5980[1].x = x1;
+    D_002F5980[1].y = y1;
+    D_002F5980[1].z = z1;
     D_002F59A0[1] = color1;
     D_002F59A0[0] = color0;
     list = (void *)sdfGrAllocPacketBuff(0x20);

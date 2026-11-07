@@ -132,10 +132,10 @@ extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
 
 extern void sdfBillBoardMake1(u8 *, const sdfVector4_t *, u32, const UV_t *, const VTX_t *);
 
-sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors,
+sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors,
                                                  s32 vertexCount, u32 primitiveFlags);
 
-extern f32 D_002FC720[][4];
+extern sdfVector4_t D_002FC720[];
 
 extern u32 D_002FC740[];
 
@@ -912,17 +912,17 @@ void ooyTestLine3D(u32 x0, u32 y0, f32 z0, f32 col0, f32 x1, f32 y1, f32 z1, f32
     sdfDrawTag_t *list;
     saddr_t record;
     sdfGrOt_t *descriptor;
-    D_002FC720[0][0] = z0;
-    D_002FC720[0][1] = col0;
-    D_002FC720[0][2] = x1;
-    D_002FC720[1][0] = y1;
-    D_002FC720[1][1] = z1;
-    D_002FC720[1][2] = col1;
+    D_002FC720[0].x = z0;
+    D_002FC720[0].y = col0;
+    D_002FC720[0].z = x1;
+    D_002FC720[1].x = y1;
+    D_002FC720[1].y = z1;
+    D_002FC720[1].z = col1;
     D_002FC740[1] = y0;
     D_002FC740[0] = x0;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    record = EE_ADDR_S(effDebugDrawWireModel((const f32 (*)[4])D_002FC720, D_002FC740, 2, 0x80));
+    record = EE_ADDR_S(effDebugDrawWireModel(D_002FC720, D_002FC740, 2, 0x80));
     sdfDrawTagLink(list, record);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, list);

@@ -57,7 +57,7 @@ f32 sdfSin(f32 aRadius);
 void SetRotateMatrixX(f32 aAngle);
 void SetRotateMatrixY(f32 aAngle);
 void MultMatrixNoArg(void);
-void *effDebugDrawWireModel(f32 (*positions)[4], u32 *colors, u32 count, u32 mode);
+void *effDebugDrawWireModel(const sdfVector4_t *positions, u32 *colors, u32 count, u32 mode);
 sdfMat_t *sdfMatNew(void);
 void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
 void sdf3DPrimLinkTm(void *aTag, void *aAllocator);
@@ -298,11 +298,11 @@ void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format) {
 void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));
-    f32 vertices[40][4] __attribute__((aligned(16)));
+    sdfVector4_t vertices[40];
     u32 colors[40];
     sdfDrawTag_t *list;
     sdfGrOt_t *surface;
-    f32 (*out)[4];
+    sdfVector4_t *out;
     f32 latitude;
     f32 longitude;
     f32 ringRadius;
@@ -337,7 +337,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
             SDF_VU0_ADDVECTOR();
 
             for (segment = 0; segment < 20; segment++) {
-                SDF_VU0_STOREVECTOR( *out);
+                SDF_VU0_STOREVECTOR(out);
                 out++;
                 longitude += 0.31415924429893494f;
                 point[0] = sdfCos(longitude) * ringRadius;
@@ -347,7 +347,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
                 SDF_VU0_VECTOR_W_SET_ZERO();
                 SDF_VU0_APPLYMATRIX();
                 SDF_VU0_ADDVECTOR();
-                SDF_VU0_STOREVECTOR( *out);
+                SDF_VU0_STOREVECTOR(out);
                 out++;
             }
             sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -409,10 +409,10 @@ void effDebugSelectCursorDraw(f32 *position) {
 /* vu0 routine: build and submit the debug geometry. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
     sdfVector4_t point; /* The line provider consumes xyz; preserve the untouched w lane. */
-    f32 vertices[40][4] QWORD_ALIGNED;
+    sdfVector4_t vertices[40];
     u32 colors[40];
     sdfDrawTag_t *list;
-    f32 (*out)[4];
+    sdfVector4_t *out;
     sdfGrOt_t *surface;
     u32 ring;
     u32 segment;
@@ -440,7 +440,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
         for (segment = 0; segment < 20; segment++) {
-            SDF_VU0_STOREVECTOR( *out);
+            SDF_VU0_STOREVECTOR(out);
             out++;
             angle += angleStep;
             point.x = sdfCos(angle) * radius;
@@ -448,7 +448,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
             point.z = sdfSin(angle) * radius;
             SDF_VU0_LOADVECTOR( &point);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR( *out);
+            SDF_VU0_STOREVECTOR(out);
             out++;
         }
         sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -464,14 +464,14 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point.z = sdfSin(angle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         point.x = sdfCos(angle) * radius;
         point.y = height * 0.5f;
         point.z = sdfSin(angle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         angle += angleStep;
     }
@@ -486,7 +486,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point.z = sdfSin(angle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point.x = sdfCos(oppositeAngle) * radius;
@@ -494,7 +494,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point.z = sdfSin(oppositeAngle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         angle += angleStep;
     }
@@ -509,7 +509,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point.z = sdfSin(angle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point.x = sdfCos(oppositeAngle) * radius;
@@ -517,7 +517,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point.z = sdfSin(oppositeAngle) * radius;
         SDF_VU0_LOADVECTOR( &point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR( *out);
+        SDF_VU0_STOREVECTOR(out);
         out++;
         angle += angleStep;
     }
