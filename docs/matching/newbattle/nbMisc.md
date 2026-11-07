@@ -103,3 +103,45 @@ and explicit peer/data audits are carried to a later landing base only after
 source, dependency and artifact identities are verified. Current combined
 owner, whole-image, generated-source, tooling/layout, retained EE/IRX and
 report/provenance gates are rerun. No compiler options or common headers change.
+
+## nbDrawKoukaSprite (newbattle/nbMisc, 0x108)
+
+Exact: 66 of 66 words, 264 bytes, ordinary C. The decimal extraction and zero
+fixup are unchanged. The draw loop keeps the real digit count through its entry
+test, decrements before indexing, and draws from the most significant digit to
+the least. Alignment zero subtracts `n * 96`, alignment -1 subtracts `n * 192`,
+and every other signed alignment leaves the origin unchanged.
+
+Forward exits keep the center-aligned block before the right-aligned block.
+Under `align != 0`, positive alignment goes directly to drawing; the negative
+case exits when `align != -1` and otherwise jumps to the right-aligned block.
+No one-pass block, empty case, artificial bound, unused value, constraint,
+register binding, ABI change or new runtime computation remains.
+
+The paired ordinary control changes only the final comparison to
+`if (align == -1) goto right_aligned; goto draw_digits;`. It retains the same
+behavior but differs in 11/66 words at the native 264-byte size. In the stock
+compiler's initial `.00.rtl`, both forms have comparison instruction 92 and
+forward jumps 96/101. The accepted form emits `eq` at 92, jump 96 to draw label
+131, and jump 101 to right label 119. The control emits `ne` at 92 and reverses
+those jump destinations. After `.02.jump`, the accepted comparison directly
+targets right label 119, followed by the draw jump; the control directly targets
+draw label 131. This establishes the required early block shape. It does not
+claim the compiler's hidden internal decision rule or original source spelling.
+
+Qualification used the pinned stock ee-gcc 2.96 through `tools/cc.sh`, QEMU and
+the configured owner, with strict implicit-declaration diagnostics. Canonical,
+accepted and control sources each have whole-owner plain versus `-da` equality
+in production, `SKIP_ASM`, and `NON_MATCHING+SKIP_ASM` modes: normalized assembly,
+all allocated sections, non-file symbols and relocation contracts. The accepted
+owner checks 32/0; the canonical owner checks 31/0; the control checks 31/1 with
+only this function differing. The two recently matched rotated-model functions
+remain exact, as do every other peer and all owned data. Input hashes include
+source, headers, fallback assembly, configuration, tools, compiler/assembler,
+QEMU and its actual loader/runtime, with unchanged before/after closure.
+
+Independent semantic review extracted the actual final body into an oracle and
+passed 501,575 cases in both optimized and ASan+UBSan builds. Coverage includes
+zero, decimal boundaries, maximum `u32`, and signed alignment extremes. Portable
+signed-coordinate tests keep the initial subtraction and every x increment in
+range; no claim is made about defined ISO C behavior outside that range.

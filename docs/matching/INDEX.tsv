@@ -304,6 +304,7 @@ nbMakeDeadVisualPacket, nbMakeDamagePacket	newbattle/nbMakePacket	0x2E8 / 0x410	
 nbDrawRotatedModelX	newbattle/nbMisc	404 bytes	101 of 101 words match	docs/matching/newbattle/nbMisc.md	3
 nbDrawRotatedModel	newbattle/nbMisc	508 bytes	127 of 127 words match	docs/matching/newbattle/nbMisc.md	29
 Combined rotated-model literal ownership				docs/matching/newbattle/nbMisc.md	57
+nbDrawKoukaSprite	newbattle/nbMisc	0x108	66 of 66 words	docs/matching/newbattle/nbMisc.md	107
 nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76

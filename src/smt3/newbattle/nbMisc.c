@@ -613,13 +613,6 @@ void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 rgba)
     nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u0, uv.v0, 0xC, 0x12, rgba, th);
 }
 
-/* NON_MATCHING: 24 of 66 words differ (first at +0x74). */
-
-/* NON_MATCHING. Behaviour checked against retail: 12 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-
 void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32 align)
 {
     u8 digits[12];
@@ -636,26 +629,29 @@ void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32
         digits[0] = 0;
         n = 1;
     }
+    /* Forward exits preserve the native alignment block order and branch
+     * direction in stock initial RTL. This is a compiler-shape reconstruction,
+     * not evidence of the original source spelling. */
     if (align != 0) {
-        if (align <= 0) {
-            if (align == -1) {
-                x -= n * 192;
-            }
+        if (align > 0) {
+            goto draw_digits;
         }
-    } else {
-        x -= n * 96;
+        if (align != -1) {
+            goto draw_digits;
+        }
+        goto right_aligned;
     }
-    for (n = n - 1; n >= 0; n--) {
+    x -= n * 96;
+    goto draw_digits;
+right_aligned:
+    x -= n * 192;
+draw_digits:
+    while (n > 0) {
+        --n;
         nbDrawPanelSprite(th, digits[n], x, y, col);
         x += 0xC0;
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawKoukaSprite);
-
-#endif
 
 /* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
  * capture_006, capture_015, covering only the paths those calls took.
