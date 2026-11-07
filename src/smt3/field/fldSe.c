@@ -597,16 +597,13 @@ void fld_1457F8(s32 mode) {
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
- * field underground facility savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Bank snapshots are refreshed at the native callback boundaries before
+ * the selected track is published for the staged reload process. */
 void fldBgmLoad(void)
 {
     s32 track;
     s32 base;
     s32 floor;
-    s32 special;
 
     if (fldGlobalBase.area == 20 && fldGlobalBase.floor == 2) {
         return;
@@ -616,8 +613,11 @@ void fldBgmLoad(void)
         if (fldGlobalBase.area >= 50) {
             return;
         }
-        base = gFldBgmTop[fldGlobalBase.area].smgId;
-        track = base + fldGlobalBase.sequenceCode;
+        {
+            s32 initialBase = gFldBgmTop[fldGlobalBase.area].smgId;
+            track = (s32)((u32)initialBase + (u32)fldGlobalBase.sequenceCode);
+            base = initialBase;
+        }
         if (fldGlobalBase.area == 14) {
             fldSeSmgId = base;
             if (evtBitCheck(5) != 0) {
@@ -626,26 +626,27 @@ void fldBgmLoad(void)
                 }
                 fldGlobalBase.sequenceCode = 1;
             }
-            base = gFldBgmTop[fldGlobalBase.area].smgId;
-            track = base + fldGlobalBase.sequenceCode;
+            {
+                s32 refreshedBase = gFldBgmTop[fldGlobalBase.area].smgId;
+                track = (s32)((u32)refreshedBase + (u32)fldGlobalBase.sequenceCode);
+                base = refreshedBase;
+            }
         }
         if (fldGlobalBase.area == 20) {
             floor = fldGlobalBase.floor;
-            special = floor == 5 || floor == 8 || floor == 13 || floor == 14 ||
-                      floor == 15 || floor == 24;
-            if (!special) {
+            if (floor != 5 && floor != 8 && floor != 13 && floor != 14 &&
+                floor != 15 && floor != 24) {
                 fldSeSmgId = base;
-                if (floor == 12 && evtBitCheck(0x16) != 0) {
-                    special = 1;
+                if (floor != 12 || evtBitCheck(0x16) == 0) {
+                    goto specialBankDone;
                 }
             }
-            if (special) {
-                fldSeSmgId = gFldBgmTop[55].smgId;
-                track = fldSeSmgId + fldGlobalBase.sequenceCode;
-            }
+            fldSeSmgId = gFldBgmTop[55].smgId;
+            track = (s32)((u32)fldSeSmgId + (u32)fldGlobalBase.sequenceCode);
         } else {
             fldSeSmgId = base;
         }
+specialBankDone:
         if (fldGlobalBase.area == 0x22 || fldGlobalBase.area == 0x20 ||
             fldGlobalBase.area == 0x25 || fldGlobalBase.area == 0x24 ||
             fldGlobalBase.area == 0x29 || fldGlobalBase.area == 0x2A ||
@@ -658,17 +659,16 @@ void fldBgmLoad(void)
                 gFldBgmBit = 0;
                 fldGlobalBase.sequenceCode = fldBgmParamTable[fldGlobalBase.area].normal[fldGlobalBase.floor + 1];
             }
-            base = gFldBgmTop[fldGlobalBase.area].smgId;
-            fldSeSmgId = base;
-            track = base + fldGlobalBase.sequenceCode;
+            {
+                s32 selectedBase = gFldBgmTop[fldGlobalBase.area].smgId;
+                fldSeSmgId = selectedBase;
+                track = (s32)((u32)selectedBase + (u32)fldGlobalBase.sequenceCode);
+            }
         }
     }
     MidiNo = track;
     fldBgmReloadStep = 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSe", fldBgmLoad);
-#endif
 
 s32 fldWaitBgmReload(void) {
     switch (fldBgmReloadStep) {

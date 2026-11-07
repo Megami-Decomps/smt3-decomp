@@ -128,3 +128,56 @@ unittest cases without skips plus 818 layout assertions, frozen EE/seven-IRX
 checks and reconciled production reports pass. The recovery and birth-mask
 owners remain 391/0 and 196/0. Only this function gains credit: game totals
 become 8,658 functions and 1,504,872 bytes. A subsequent build has no work.
+
+## fldBgmLoad (field/fldSe, 0x294)
+
+165 of 165 words match at 660 bytes with ordinary C. Initial and
+post-callback bank snapshots feed wrapping track sums before the current-bank
+copy; the final event-selected bank has its own scalar. Direct special-floor
+paths preserve the native ordinary-bank publication before the optional
+event check and the no-republication false join. No new compiler constraint,
+volatile view or ABI shim is retained.
+
+Unlike fldBgmContinue, the initial decimal-area-20/floor-2 path returns before
+track resolution and preserves reload globals. Load's event-table arms update
+gFldBgmBit, and successful paths publish MidiNo then clear fldBgmReloadStep.
+There is no start gate or resume call. Both functions refresh area, floor,
+sequence and banks at their respective native callback boundaries.
+
+The forward specialBankDone join follows the independently approved ordinary
+fldBgmContinue sibling (ordinary candidate 21). Native Load likewise reaches fresh area tests after
+a false decimal-area-20/floor-12 callback without republishing fldSeSmgId, so
+any callback mutation to that value remains intact. The locals represent
+separate phases of the same bank value, not cross-role scratch reuse. No
+unobserved internal compiler-pass mechanism is asserted.
+
+The dependency is the landed ordinary `fldBgmContinue` at ed42210a, whose exact
+commit CI completed before integration. On that current owner, the enabled
+original Load draft is 676 bytes with 27/165 native-prefix words matching; the
+final ordinary form is 660 bytes with 165/165 matching. There are no new fixed
+registers, empty operands, volatile views, provider declarations or ABI shims.
+
+Fresh integration checks cover guarded, original-draft-enabled and final owners
+in production, SKIP_ASM and retained modes: nine complete plain/stock -da
+assembly and object-ELF pairs agree after one equal-length filename
+normalization. All strict implicit-declaration builds pass without diagnostics.
+The final complete owner is 27 match, 0 differ. All 26 peers in each mode,
+allocated data, NOBITS extents, resolved calls and data targets are preserved.
+SKIP_ASM raw HI16 grouping changes, but paired effective destinations and peer
+relocation multisets agree; production and retained ordering is identical.
+
+The actual final body passes 337,600 optimized and 337,600 ASan/UBSan complete
+state and ordered-callback comparisons. A fresh bounded interpreter of raw
+retail words independently passes 24,000 cases, reaches all 165 instructions
+and both outcomes of all 26 genuine conditional branches. It also covers 129
+initial skip cases with no calls or state mutation. Provider entries poison
+caller-saved registers; every native exit preserves the saved-register/frame
+contract. These are valid-domain modeled-provider checks, not a full EE/game
+emulator or evidence about asynchronous mutation or invalid indices.
+
+The complete retail image is reproduced byte-for-byte. Generated-source
+negative controls, all 505 tooling tests with no optional skips, 818 header
+layout assertions, frozen EE/IRX retained-draft sweeps, inline-asm policy and
+primary/audit game-scope reports pass. Complete recovery 391/0 and birth-mask
+196/0 owner checks remain intact. Source/header/config/tool inputs are pinned
+before and after the compiler and aggregate checks.
