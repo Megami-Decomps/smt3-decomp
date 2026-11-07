@@ -225,14 +225,14 @@ void dds3GetVibrationLevel(void)
     u8 target = dds3PadVibrationMode[1];
     u8 *level = dds3PadVibrationState + 1;
     if (target > *level) {
-        if (target - *level > 0x20) {
-            *level += 0x20;
+        if (target - *level > SDF_FRAME_STEP(0x20)) {
+            *level += SDF_FRAME_STEP(0x20);
         } else {
             *level = target;
         }
     } else if (target < *level) {
-        if (*level - target > 0x20) {
-            *level -= 0x20;
+        if (*level - target > SDF_FRAME_STEP(0x20)) {
+            *level -= SDF_FRAME_STEP(0x20);
         } else {
             *level = target;
         }

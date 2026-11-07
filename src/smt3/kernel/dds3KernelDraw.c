@@ -536,9 +536,9 @@ void dds3RunQuake(void)
         }
     }
     if (dds3QuakeFrame > 0) {
-        s32 divisor = dds3QuakeFrame + 5;
-        dds3QuakeXRange -= dds3QuakeXRange / divisor;
-        dds3QuakeYRange -= dds3QuakeYRange / divisor;
+        s32 divisor = SDF_FRAME_TICK(dds3QuakeFrame) + 5;
+        dds3QuakeXRange -= SDF_FRAME_STEP(dds3QuakeXRange / divisor);
+        dds3QuakeYRange -= SDF_FRAME_STEP(dds3QuakeYRange / divisor);
         dds3QuakeFrame--;
     }
 }

@@ -604,6 +604,7 @@ void fldPlayerCalc_WarpRun(void)
     if (step < 2.0f) {
         step = 2.0f;
     }
+    step = SDF_FRAME_STEP(step);
     if ((angle >= 0.0f && angle <= step) || (angle <= 0.0f && -step <= angle)) {
         fldGlobalBase.camAngle = fldPlayerWarpState;
     } else if (angle < 0.0f) {
@@ -1092,6 +1093,7 @@ s32 fldPlayerCalc_Nml(void)
     if (amount < 2.0f) {
         amount = 2.0f;
     }
+    amount = SDF_FRAME_STEP(amount);
     if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
         fldGlobalBase.camAngle = angle;
     } else if (delta < 0.0f) {
@@ -1114,9 +1116,9 @@ s32 fldPlayerCalc_Nml(void)
                    (fldPlayerMoveState == 1 || fldPlayerMoveState == 3 ||
                     fldPlayerMoveState == 5 || fldPlayerMoveState == 7)) {
             if (fldPlayerMoveState == 3) {
-                fldCamPitch += 3.0f;
+                fldCamPitch += SDF_FRAME_STEP(3.0f);
             } else if (fldPlayerMoveState == 5) {
-                fldCamPitch -= 3.0f;
+                fldCamPitch -= SDF_FRAME_STEP(3.0f);
             } else {
                 f32 target = -fldGlobalBase.camAngle;
                 delta = R360_LR(fldCamPitch, target);
@@ -1127,6 +1129,7 @@ s32 fldPlayerCalc_Nml(void)
                 if (amount < 1.0f) {
                     amount = 1.0f;
                 }
+                amount = SDF_FRAME_STEP(amount);
                 if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
                     fldCamPitch = target;
                 } else if (delta < 0.0f) {
@@ -1146,6 +1149,7 @@ s32 fldPlayerCalc_Nml(void)
             if (amount < 1.0f) {
                 amount = 1.0f;
             }
+            amount = SDF_FRAME_STEP(amount);
             if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
                 fldCamPitch = target;
             } else if (delta < 0.0f) {
@@ -1161,6 +1165,7 @@ s32 fldPlayerCalc_Nml(void)
             if (fldPlayerMoveState == 0) {
                 amount = 0.5f;
             }
+            amount = SDF_FRAME_STEP(amount);
             if ((delta >= 0.0f && delta <= amount) || (delta <= 0.0f && -amount <= delta)) {
                 fldCamPitch = fldCamPitchTarget;
             } else if (delta < 0.0f) {
@@ -1184,7 +1189,7 @@ s32 fldPlayerCalc_Nml(void)
                 fldGlobalBase.camAngle2 = -target;
             }
         } else if (dds3PadButtonState[0x28] != 0 && dds3PadButtonState[0x2A] == 0) {
-            fldCamPitch -= 4.0f;
+            fldCamPitch -= SDF_FRAME_STEP(4.0f);
             if (modifier) {
                 fldGlobalBase.camAngle = -fldCamPitch;
                 SDF_VU0_LOADVECTOR(&axis);
@@ -1194,7 +1199,7 @@ s32 fldPlayerCalc_Nml(void)
             }
             fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitch);
         } else if (dds3PadButtonState[0x2A] != 0 && dds3PadButtonState[0x28] == 0) {
-            fldCamPitch += 4.0f;
+            fldCamPitch += SDF_FRAME_STEP(4.0f);
             if (modifier) {
                 fldGlobalBase.camAngle = -fldCamPitch;
                 SDF_VU0_LOADVECTOR(&axis);

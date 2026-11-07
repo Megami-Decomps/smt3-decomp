@@ -870,7 +870,7 @@ void fldSdwDraw(dds3Basic_t *basic)
         if (work->EL_serialID != -1) {
             if (fldSdwLightTracking == 0) {
                 if (fldSdwBoxAlpha >= 21) {
-                    fldSdwBoxAlpha -= 2;
+                    fldSdwBoxAlpha -= SDF_FRAME_STEP(2);
                 } else {
                     fldSdwLightTracking = 1;
                     fldSdwBoxAlpha = 8;

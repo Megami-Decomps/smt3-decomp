@@ -198,7 +198,7 @@ s32 evtGetNextMovePos(evtUnit_t *h) {
                 return 0;
             }
         }
-        t += h->pathSpeed;
+        t += SDF_FRAME_STEP(h->pathSpeed);
         if (t < 0.0f) {
             t = 0.0f;
         }

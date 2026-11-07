@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "kernel.h"
 
 extern char D_0054F908[];
@@ -60,7 +61,7 @@ void evtSetSkyAlpha(s32 frame, s32 a)
             fldSkySetAlphaOfs(a);
             skyanime = 0;
         } else {
-            skyamax = frame;
+            skyamax = SDF_FRAMES(frame);
             skyatarget = current;
             skyabase_par = a;
             skyanime = 1;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_types.h"
 #include "ps2asm.h"
 #include "fpu.h"
@@ -205,7 +206,7 @@ s32 dds3Bezier4PPartRun(effBezier4P_t *table, s32 slotIndex, f32 *out) {
     out[0] = slot->controlPoints[0][0] * w.x + slot->controlPoints[1][0] * w.y + slot->controlPoints[2][0] * w.z + slot->controlPoints[3][0] * w.w;
     out[1] = slot->controlPoints[0][1] * w.x + slot->controlPoints[1][1] * w.y + slot->controlPoints[2][1] * w.z + slot->controlPoints[3][1] * w.w;
     out[2] = slot->controlPoints[0][2] * w.x + slot->controlPoints[1][2] * w.y + slot->controlPoints[2][2] * w.z + slot->controlPoints[3][2] * w.w;
-    t += slot->step;
+    t += SDF_FRAME_STEP(slot->step);
     if (t > 1.0f) {
         slot->t = 1.0f;
         return 0;

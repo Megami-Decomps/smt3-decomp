@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
@@ -311,10 +312,12 @@ extern void PipeCameraAction3(void);
 extern void PipeCameraAction(void);
 extern void PipeCamera(void);
 extern void CamActionQuake(void);
+extern u32 dds3GetKernelCount(void);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
 
 s32 pipeMainSection(void)
 {
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
     pipeOffset();
     switch (pipeIndex) {
     case 0:

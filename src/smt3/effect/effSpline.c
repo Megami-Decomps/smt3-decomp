@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -108,7 +109,7 @@ s32 dds3_1B09C0(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
     s32 running = 1;
 
     func_001B0A60(pVertex, pSpline, index, t);
-    t += pSpline->unk28;
+    t += SDF_FRAME_STEP(pSpline->unk28);
     if (t > 1.0f) {
         t -= 1.0f;
         index++;
@@ -337,7 +338,7 @@ s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
     u32 recordIndex = channel->index;
 
     func_001B1370(vertex, channel, recordIndex, position);
-    position += channel->step;
+    position += SDF_FRAME_STEP(channel->step);
     if (position > 1.0f) {
         position -= 1.0f;
         recordIndex += 3;

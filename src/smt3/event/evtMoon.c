@@ -740,10 +740,10 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
             if ((finalPhase == 1) || (finalPhase == 0xF)) {
                 DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x63, 0x1E, 0x1C, 0x1C, 0x26808080, data->MoonTmx1);
             }
-            D_0054F770 += D_0054E3BC;
-            evtMoonPhase += D_0054E3BC;
-            evtMoonTimer += D_0054E3C0;
-            evtMoonState += D_0054E3C4;
+            D_0054F770 += SDF_FRAME_STEP(D_0054E3BC);
+            evtMoonPhase += SDF_FRAME_STEP(D_0054E3BC);
+            evtMoonTimer += SDF_FRAME_STEP(D_0054E3C0);
+            evtMoonState += SDF_FRAME_STEP(D_0054E3C4);
         }
     }
     return 0;

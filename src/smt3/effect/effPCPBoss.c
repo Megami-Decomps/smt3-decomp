@@ -4916,20 +4916,20 @@ void effPadVibeFadeUpdate(void)
 void effPadVibeFadeOUT(u32 mode, u8 power, s32 frame)
 {
     if (mode < 2) {
-        effPadVibeFrames[mode] = frame;
+        effPadVibeFrames[mode] = SDF_FRAMES(frame);
         effPadVibePower[mode] = power;
         effPadVibeFadeIn[mode] = 0;
-        effPadVibeRemain[mode] = frame;
+        effPadVibeRemain[mode] = SDF_FRAMES(frame);
     }
 }
 
 void effPadVibeFadeIN(u32 mode, u8 power, s32 frame)
 {
     if (mode < 2) {
-        effPadVibeFrames[mode] = frame;
+        effPadVibeFrames[mode] = SDF_FRAMES(frame);
         effPadVibePower[mode] = power;
         effPadVibeFadeIn[mode] = 1;
-        effPadVibeRemain[mode] = frame;
+        effPadVibeRemain[mode] = SDF_FRAMES(frame);
     }
 }
 
