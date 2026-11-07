@@ -1,33 +1,64 @@
 # Matching notes: pipe/mnMyLink
 
-## pipeMakeNodeLink (pipe/mnMyLink, 0x80)
+## pipeMakeNodeLink (pipe/mnMyLink, 128 bytes)
 
-25 of 32 words match at the native 128-byte size; the draft remains guarded.
+32 of 32 words match in ordinary C. After storing the old ID's low halfword,
+the initialized local ID is updated in place with `(s32)((u32)id + 1U)` and
+then published to `nextId`. The separate successor-expression control remains
+25/32 at the same size. This is an ordinary update between two real consumers,
+not disjoint-phase reuse or a compiler constraint. No binding, dummy use, false
+type, new bound or compiler option is added. Earlier scan/ID phase-reuse trials
+remain rejected; they are not part of this reconstruction.
 
-The guarded ordinary reconstruction remains 25/32 words at the native 128 bytes; production retains assembly and gains no matching credit. Increment nextId through `(s32)((u32)id + 1U)` to represent native 32-bit wrapping without signed-add overflow. The real u16 node ID still receives the old low 16 bits and nextId retains all 32 bits. Out-of-range unsigned-to-signed conversion is EE/compiler-defined, not a portable ISO C guarantee. Valid live info/handle/node allocation and maxNum within its capacity remain required; initialization at 1 does not prove the cumulative counter never reaches INT_MAX. Complete-owner output is unchanged by this arithmetic-only edit in production, SKIP_ASM and NON_MATCHING+SKIP_ASM modes.
+The three inherited memory-provider declarations now match the canonical
+`sdfMemHandle_t` contracts for GetPtr, AllocDirect and FreeDirect. These
+corrections are byte-neutral for all existing peers and the target. GetPtr is
+called once before reading signed `maxNum`, so effects through reachable state
+remain visible. Nonpositive counts return null without node access. Positive
+counts select the first zero halfword ID or return null after exhaustion.
 
-Closed bounded investigations, each at 128 bytes and preserving the 28 existing exact C peers:
+Success clears `next`, stores the old low 16 bits, writes the full modulo-32
+successor to `nextId`, clears `prev`, and returns the selected node. Parts ID,
+padding and other nodes remain untouched. The unsigned addition avoids signed
+overflow; conversion back to signed relies on the pinned EE compiler's
+bit-preserving implementation-defined behavior. IDs need not be unique or
+nonzero: a zero low halfword leaves the slot discoverable on another call.
+Native word/halfword store widths and ordering are unchanged.
 
-- Ordinary baseline and explicit-wrap counterpart: 25/32 each.
-- Bind the actual initialized nextId pointer to native r4 in the existing free-node arm: 20/32. Final pointer definition is hoisted before the scan, but first scheduling still sees an arm-local hard-register transfer; local ID allocation displaces the node.
-- Explicit post-provider pointer placement, ordinary then r4-bound: 21/32 and 17/32. The transfer is outside the arm before scheduling, but node/ID interference persists and pointer setup occurs earlier than native.
-- Reuse the dead scan scalar for the ID on the terminal success arm, ordinary then r4-bound: 25/32 and 23/32. Qualified dumps show genuinely shared scan/ID pseudo ownership and restore node r5, but the separate increment result occupies r3 and forces the shared scalar to r6.
-- Update that shared scalar in place after storing the old node ID, ordinary then r4-bound: 19/32 each. Qualified dumps show scan, ID and successor share one pseudo, removing the separate-result conflict. Global allocation still assigns node r3 before shared scalar r5, leaving a node/scalar swap.
+Defined-C reasoning requires live, aligned, compatible info/handle objects and
+node-array backing for every visited element and any one-past pointer formed.
+It does not promise arbitrary incompatible object overlays or invalid-address
+behavior. An early success need not visit all elements implied by `maxNum`.
+The signed scan counter reaches but does not increment beyond `INT_MAX`.
 
-Whole-owner plain/dump output parity was verified for the ordinary and bound investigations. These findings describe this compiler/source context, not original source spelling. No failed binding or phase-reuse rewrite is retained; the family is closed. The arithmetic-only guarded cleanup is semantic hygiene, not matching progress, and has independent arithmetic-only review approval. Final owner 28/0 and target-only 25/32 checks pass. All three strict modes and plain/dump comparisons, full retail checksum/byte comparison/no-op, 450 tests, 817 layout assertions, fresh stable 141-owner/481-draft checks and seven IRX checks pass; reports remain unchanged.
+Independent actual-body fixtures pass 1,247 cases in both optimized and
+ASan/UBSan builds: all hole positions, exhaustion, signed count boundaries,
+ID wrap/truncation, repeated zero-ID allocation and provider mutation. Host
+pointer layout differs from EE; target output establishes the actual 16-byte
+node layout and 32-bit pointer stores. Host tests do not certify EE offsets.
 
-There is no uniqueness or nonzero-ID guarantee: low 16-bit IDs repeat every
-65536 counter values, and a low-16-zero allocation remains discoverable as
-free later, as in native code. No clamp or new capacity bound is introduced.
+Complete owner checks report 30 match, 0 differ, preserving LoadLinkData's
+404 bytes and every other peer. Baseline, corrected ordinary control and final
+have nine strict production/SKIP/retained plain-versus-dump comparisons, each
+literally equal in whole assembly and object ELF. The fixed-scratch compiler
+route is checked against the canonical wrapper, differing only in `.file`
+path. All 29 peers, resolved call/addend contracts, function inventories and
+owned data remain unchanged in every mode. Production raw text equals the
+fallback baseline; retained target output is invariant. All 282 frozen actual
+inputs, including resolved compiler, assembler, QEMU and runtime, were stable
+during the initial qualification. Upstream integration rechecks the affected
+input dependencies and complete owner before publication.
+These observations establish the source/output relation, not historical
+spelling or an unobserved internal compiler decision.
 
 
 ## LoadLinkData (pipe/mnMyLink, 404 bytes)
 
 101 of 101 words match, through the return delay slot at 0x002A68C8; the
 following alignment nop earns no function credit. The existing guarded draft
-emitted 412 bytes with broad differences. The reconstruction promotes only
-this function; the closed `pipeMakeNodeLink` draft and all other peers remain
-unchanged. Both complete-owner checkers now report 29 match, 0 differ.
+emitted 412 bytes with broad differences. That landing promoted only
+this function; the then-guarded `pipeMakeNodeLink` draft and all other peers
+remained unchanged. Both complete-owner checkers now report 29 match, 0 differ.
 
 The eight-byte source supplies a signed count and data pointer. The real
 caller constructs it from loaded file-header words, receives the four fields

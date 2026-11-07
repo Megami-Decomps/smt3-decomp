@@ -15,9 +15,9 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void *memcpy(void *a, const void *b, size_t c);
 
-extern void *sdfMemGetPtr(void *aHandle);
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
-extern void sdfMemFreeDirect(void *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 f32 vecLength(f32 *vector);
 
@@ -35,7 +35,7 @@ extern f32 vecDot(f32 *a, f32 *b);
 
 extern f32 acosf(f32 x);
 
-extern void *sdfMemAllocDirect(s32 aSize);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 
 extern s32 pipeLinkGetNum(u8 *data, s32 size);
@@ -151,8 +151,6 @@ s32 pipeInitLink(tagPipeLinkInfo *pInfo)
 }
 
 
-/* NON_MATCHING: 25 of 32 words match at the native 128-byte size. */
-#ifdef NON_MATCHING
 tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
 {
     tagPipeLinkData *pNode = sdfMemGetPtr(pInfo->aHandle);
@@ -165,7 +163,8 @@ tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
 
             pNode->next = NULL;
             pNode->id = id;
-            *pNextId = (s32)((u32)id + 1U);
+            id = (s32)((u32)id + 1U);
+            *pNextId = id;
             pNode->prev = NULL;
             return pNode;
         }
@@ -173,10 +172,6 @@ tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
     }
     return NULL;
 }
-#else
-INCLUDE_ASM(const s32, "pipe/mnMyLink", pipeMakeNodeLink);
-#endif
-
 
 s32 pipeConnectLink(tagPipeLinkData *pPrev, tagPipeLinkData *pNext)
 {
