@@ -233,11 +233,13 @@ s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
     return writeSync;
 }
 
-/* The error strings start at pbMCardErrorRows; each 0x84-byte row is preceded by its
- * own attribute word, which is why the row before supplies it. */
-typedef struct { char text[0x80]; s32 attr; } pbErrorRow_t;
-
-extern pbErrorRow_t pbMCardErrorRows[];
+/* Ten 0x84-byte records start at 0x003278D0. The recovered symbol names
+ * the first text byte, not the table base. Declare the complete table at its
+ * real address so code 0 reads its own attribute without a negative index.
+ * This alias emits no data and leaves the existing data owner unchanged. */
+typedef struct { s32 attr; char text[0x80]; } pbErrorRow_t;
+typedef pbErrorRow_t pbErrorTable_t[10];
+SYMBOL_AT(pbErrorTable_t, pbErrorTable, pbMCardErrorRows, -4);
 
 typedef struct
 {
@@ -256,30 +258,29 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 SYMBOL_AT(sdfGrOt_t, pbErrorOt39, sdfGrOtTable, 0x4E0);
 
-extern void rsetOtOfs(u32 ofs);
+extern void rsetOtOfs(s32 ofs);
 extern void rsetAlpha(s32 alpha);
 extern void rsetTest(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
 extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
-                        u32 rgba, sdfTexHandle_t *th);
-extern s32 strlen(const char *str);
-extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+                        s32 rgba, sdfTexHandle_t *th);
+extern u32 strlen(const char *str);
+extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
-extern void sdfPrimSetOpaquePacket(sdfDrawTag_t *packet);
-extern u32 dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 w, s32 h, u32 bg, u32 frame);
-extern u32 sdfDevPrintf(s32 x, s32 y, u32 z, s32 attr, const char *format, ...);
+typedef struct sdfPrimTransPacket_t sdfPrimTransPacket_t;
+extern void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *packet);
+extern u64 *dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 w, s32 h, u32 bg, u32 frame);
+#include "sdfDevCons.h"
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 27 of 135 words match; 536 bytes emitted against retail 540. */
 s32 pb_draw_error_Process(dds3ProcessID_t *id)
 {
     pbProcHandle_t *panel = id->workdata;
     pbErrorWork_t *error = panel->data.error;
     sdfDrawTag_t *tag;
-    sdfDrawTag_t *packet;
+    sdfPrimTransPacket_t *packet;
     s32 x;
     s32 len;
-    s32 half;
+    s32 pixelCenter;
     s32 pitch = 0xC0;
 
     switch (panel->state) {
@@ -291,39 +292,44 @@ s32 pb_draw_error_Process(dds3ProcessID_t *id)
     case 5:
         return -1;
     }
-    if ((u32)error->unk04 >= (u32)error->timer) {
-        return -1;
+    if ((u32)error->unk04 < (u32)error->timer) {
+        if (error->code == 9) {
+            rsetOtOfs(0x47);
+            rsetAlpha(0);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
+                        D_0054F5C4->tex344);
+        } else {
+            len = (s32)strlen(pbErrorTable[error->code].text);
+            pixelCenter = (0x200 - len * 12) >> 1;
+            /* Keep the native pixel-to-fixed-point boundary. This empty
+             * constraint is a target-specific aid, not original-source evidence. */
+            FAKEMATCH_ASM_LIVE(pixelCenter);
+            x = pixelCenter << 4;
+            tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
+            sdfDrawTagInit(tag);
+            packet = EE_ADDR_AS(sdfPrimTransPacket_t *, sdfGrAllocPacketBuff(0x40));
+            sdfPrimSetOpaquePacket(packet);
+            sdfDrawTagLink(tag, EE_ADDR(packet));
+            sdfDrawTagLink(tag, EE_ADDR(dds3PrimFrameRect(x + 0x6FD0, 0x7FB8, 0xFFFF7F,
+                                                      len * pitch + 0x60, 0x90,
+                                                      0x20000000, 0x40008000)));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, 0x7FD0, 0xFFFF80,
+                                                 pbErrorTable[error->code].attr,
+                                                 pbErrorTable[error->code].text)));
+            pbErrorOt39.regFunc(&pbErrorOt39, tag);
+        }
+        {
+            /* Retail stores the updated word before setting the return value.
+             * Constrain only this live store operand, after all drawing calls. */
+            FAKEMATCH_ASM_REG(s32, count, "$2") = (s32)((u32)error->unk04 + 1);
+            FAKEMATCH_ASM_LIVE(count);
+            error->unk04 = count;
+        }
+        return 0;
     }
-    if (error->code == 9) {
-        rsetOtOfs(0x47);
-        rsetAlpha(0);
-        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-        DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
-                    D_0054F5C4->tex344);
-    } else {
-        len = strlen(pbMCardErrorRows[error->code].text);
-        half = (0x200 - len * 12) >> 1;
-        x = half << 4;
-        tag = sdfGrAllocPacketBuff(0x20);
-        sdfDrawTagInit(tag);
-        packet = sdfGrAllocPacketBuff(0x40);
-        sdfPrimSetOpaquePacket(packet);
-        sdfDrawTagLink(tag, EE_ADDR(packet));
-        sdfDrawTagLink(tag, dds3PrimFrameRect(x + 0x6FD0, 0x7FB8, 0xFFFF7F,
-                                              len * pitch + 0x60, 0x90,
-                                              0x20000000, 0x40008000));
-        sdfDrawTagLink(tag, sdfDevPrintf(x + 0x7000, 0x7FD0, 0xFFFF80,
-                                         pbMCardErrorRows[error->code - 1].attr,
-                                         pbMCardErrorRows[error->code].text));
-        pbErrorOt39.regFunc(&pbErrorOt39, tag);
-    }
-    error->unk04++;
-    return 0;
+    return -1;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbMCard", pb_draw_error_Process);
-#endif
-
 
 void pb_draw_error_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;

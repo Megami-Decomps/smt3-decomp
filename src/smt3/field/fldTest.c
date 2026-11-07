@@ -236,30 +236,30 @@ extern s32 fldEncountTestFlag(u32 flag);
 typedef struct effNode_t effNode_t;
 extern void dds3EffectDelete(effNode_t *pData);
 
-extern void dds3EffectDraw(void *pData);
+extern void dds3EffectDraw(effNode_t *pData);
 
-extern s32 dds3EffectGetState(void *hEffect);
+extern s32 dds3EffectGetState(effNode_t *hEffect);
 
-extern void *dds3EffectLoad(void *pD3P);
+typedef struct effResourceHeader_t effResourceHeader_t;
+extern effNode_t *dds3EffectLoad(effResourceHeader_t *pD3P);
 
-extern void dds3EffectSetPosition(void *pData, sdfVector4_t *pPos);
+extern void dds3EffectSetPosition(effNode_t *pData, sdfVector4_t *pPos);
 
-extern void dds3EffectSetRotateMatrix(void *pData, sdfMatrix4_t *pMatrix);
-
-extern void *dds3EffectPartCreate(u16 type, void *pData);
+extern void dds3EffectSetRotateMatrix(effNode_t *pData, sdfMatrix4_t *pMatrix);
 
 typedef struct
 {
     u16 type;
     void *pHandle;
 } effPartHandle_t;
+extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
 extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
-extern void dds3EffectPartDraw(void *hEffPart);
+extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 
-extern void dds3EffectPartSetPosition(void *hEffPart, sdfVector4_t *pPos);
+extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPos);
 
-extern void dds3EffectPartSetRotateMatrix(void *hEffPart, sdfMatrix4_t *pMatrix);
+extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatrix);
 
 extern void SetRotateMatrixY(f32 aAngle);
 
