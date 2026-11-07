@@ -125,8 +125,8 @@ ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/fa
 ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	131
 GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	168
 CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	191
-InitPhaseReadStatus	facility/fclEncyc	0x334	195 of 205 words match	docs/matching/facility/fclEncyc.md	218
-DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	266
+InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	218
+DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	318
 fclDrawPanel	fclPanel	0x54	15 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	27
 fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	68
@@ -473,4 +473,4 @@ dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/so
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
 titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
 stfMain2	staff/stfMain	0x2D4	155 of 181 words match	docs/matching/staff/stfMain.md	3
-ObjDispOff	staff/stfMain	0x504	311 of 321 words match	docs/matching/staff/stfMain.md	69
+ObjDispOff	staff/stfMain	0x504	321 of 321 words match	docs/matching/staff/stfMain.md	68

@@ -150,10 +150,10 @@ INCLUDE_ASM(const s32, "staff/stfMain", stfMain2);
 
 extern void stfGetUIField(s32, s32, s32);
 extern void ObjDispOff(void);
-extern void rsetOtOfs(u32);
+extern void rsetOtOfs(s32);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32);
-extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, sdfTexHandle_t *);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandle_t *);
 
 void GetoStaffUI(void) {
     s32 elapsed;
@@ -201,12 +201,6 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
                       u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
                       u32 r3, u32 g3, u32 b3, u32 a3);
 
-/* NON_MATCHING: 311 of 321 words match at retail's size. Remaining
- * differences are separate constant, product, predicate and scheduling phases. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq16, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void ObjDispOff(void)
 {
     s32 step;
@@ -221,9 +215,12 @@ void ObjDispOff(void)
     if (oStaff_UI->unk_000C == 0) {
         return;
     }
-    step = 2;
-    if (oStaff_UI->unk_0110 != 0xF) {
-        step = 1;
+    {
+        s32 normalStep = 1;
+        step = 2;
+        if (oStaff_UI->unk_0110 != 0xF) {
+            step = normalStep;
+        }
     }
     if (oStaff_UI->unk_0100 >= 0x450) {
         stfResetUI();
@@ -251,9 +248,14 @@ void ObjDispOff(void)
     }
     rsetAlpha(1);
     if (oStaff_UI->unk_010C < 0) {
+        /* Keep the actual frame input/result together through the EE multiply
+         * expansion. Its last use is x, before any drawing call. */
+        FAKEMATCH_ASM_REG(s32, slide, "$2");
         width = 0x100;
         fade = 0;
-        x = (s32)(0x200u - (u32)oStaff_UI->unk_0100 * 3u);
+        slide = oStaff_UI->unk_0100;
+        slide = (s32)((u32)slide * 3u);
+        x = (s32)(0x200u - (u32)slide);
         if (x >= -0xFF) {
             if (x < 0) {
                 fade = -x;
@@ -275,12 +277,19 @@ void ObjDispOff(void)
                         EE_ADDR_AS(sdfTexHandle_t *, oStaff_UI->unk_0004));
         }
     } else {
+        /* Local reconstruction aids for the input and adjacent product/test
+         * lifetimes. Both values die before the drawing calls. */
+        FAKEMATCH_ASM_REG(s32, slice, "$2");
+        FAKEMATCH_ASM_REG(s32, frame, "$4");
         fade = 0;
         width = 0x300;
-        if ((s32)((u32)oStaff_UI->unk_0100 * 3u) <= 0x300) {
-            width = (s32)((u32)oStaff_UI->unk_0100 * 3u);
+        frame = oStaff_UI->unk_0100;
+        slice = (s32)((u32)frame * 3u);
+        if (slice <= 0x300) {
+            width = slice;
         }
-        if (width < 0x100) {
+        slice = width < 0x100;
+        if (slice) {
             fade = width / 2;
             DrwSprite2DC(0, 0, width, 0x1C0, 0, 0, width, 0x1C0,
                          ((u32)fade << 24) | 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
@@ -291,6 +300,9 @@ void ObjDispOff(void)
             if (width >= 0x201) {
                 /* The real numerator becomes the draw opacity. */
                 fade = width - 0x200;
+                /* Hold the real numerator at this point for EE scheduling;
+                 * this empty operand is not a memory barrier. */
+                FAKEMATCH_ASM_LIVE(fade);
                 fade /= 2;
                 width = 0x200 - x;
             } else {
@@ -326,9 +338,6 @@ void ObjDispOff(void)
     }
     oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + SDF_FRAME_DUE(dds3GetKernelCount()));
 }
-#else
-INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
-#endif
 
 extern s32 p2sdGetPcmState(void);
 

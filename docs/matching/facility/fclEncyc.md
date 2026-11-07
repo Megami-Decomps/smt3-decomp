@@ -217,10 +217,62 @@ and hosted evidence do not claim a new local build in the recovery workspace.
 
 ## InitPhaseReadStatus (facility/fclEncyc, 0x334)
 
+205 of 205 words match at the native 820-byte size. The current complete
+owner rises from 115 to 116 exact C functions; the ribbon provider is 14/0.
+The four-vector construction and 380-byte work layout are unchanged.
+
+An initialized signed-halfword status-alpha binding and three target-local
+empty constraints preserve real alpha/work-address dependencies across the
+initialization phases. The alpha is consumed by its first store before any
+call. The work pointer has actual stores and later calls as consumers before
+and after each constraint. These operands emit no instructions, have no
+memory clobber and are not memory barriers. They are localized compiler
+reconstruction aids, not evidence of original source spelling.
+
+The reduced source keeps the message ID as an ordinary -1 store, with no
+message local or binding. Removing the alpha binding, initial work/alpha
+pair, middle pointer operand or final pointer operand gives respectively
+193, 198, 203 and 200 of 205 matching words, always at 820 bytes with all
+115 existing C peers exact. The ribbon provider synchronously copies all
+four fully initialized 16-byte vectors and retains only texture pointers;
+the same 64-byte stack area can be reused after each call.
+
+Four direct-provider declarations are now truthful throughout the owner,
+including all local duplicates: `dds3GetActiveScene` returns `dds3Basic_t*`,
+`dds3VisibleSceneBasic` takes `(dds3Basic_t*, s8)`, `sdfMemAllocDirect` returns
+`sdfMemHandle_t*`, and `sdfMemLock` takes `sdfMemHandle_t*`. The target scene
+local is `dds3Basic_t*`. The existing `void *allocPhaseBuffer` provider and
+its allocation/lock chain are type-correct. These declaration repairs are
+byte-neutral over complete assembly and ELF in production, SKIP_ASM and
+retained C contexts. No shared provider body or header changes; unrelated
+owner declarations are not globally certified by this target review.
+
+Independent native, field-width, callback and lifetime review approves the
+final source. Six fresh complete ordinary/direct and strict/direct pairs
+cover all three contexts, and each strict output equals its plain output.
+Uninitialized-value and implicit-declaration diagnostics are clean.
+Production's complete 33,216-byte allocated text and every other allocated
+section are literally unchanged from the native-fallback baseline. All 121
+production peers and 121 retained peers are preserved. SKIP_ASM inserts the
+820-byte target plus four alignment bytes at text offset 6,968. All 115
+peers remain exact after explicitly reversing only that 824-byte insertion
+in 136 R_MIPS_26 fields and two LO16 fields. Opcode/register bits are not
+masked. Non-file symbol and ordered relocation contracts use the same exact
+insertion mapping, normalizing only generated local-text-label names.
+
+Qualified stock scheduler evidence predates the declaration repair. It is
+carried through independently verified complete-output neutrality and stable
+compiler/header inputs, not presented as a fresh repaired-source trace. It
+shows the actual alpha store and the two speed-store initialization groups;
+no unobserved scheduler comparator or original-source claim is made.
+Aggregate retail and repository checks remain separate release gates.
+
+### Earlier guarded draft, superseded
+
 195 of 205 words match at the native 820 bytes. A fresh private promotion
 checks 113 existing C peers exactly, with this target the sole difference
-and no reported owned-data failures. The production assembly fallback stays
-in place; this investigation earns no matching credit.
+and no reported owned-data failures. The production assembly fallback then stayed
+in place; that investigation earned no matching credit.
 
 The ribbon provider copies each of the four complete 16-byte vectors
 synchronously, using two unaligned 64-bit reads per vector. It retains the

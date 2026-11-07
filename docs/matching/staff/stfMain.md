@@ -63,13 +63,39 @@ Plain and diagnostic builds of the final source agree on six allocated
 sections, 108 non-file symbols, 80 ordered relocations and normalized assembly.
 The five existing C functions and owned data remain exact. Uninitialized-value
 and implicit-declaration diagnostics are clean and produce identical output;
-these options are not production flags. The adjacent guarded `ObjDispOff`
-improvement is unchanged.
+these options are not production flags. The later `ObjDispOff` promotion below preserves this retained result.
 
 ## ObjDispOff (staff/stfMain, 0x504)
 
+321 of 321 words match at the native 1284-byte size. The complete owner is
+6 match, 0 differ. The still-guarded stfMain2 retains exactly its original
+26 differences at 155 of 181 words and 724 bytes.
+
+The prior 311-word draft had four independent residuals, resolved separately before combining them:
+
+- A real initialized `normalStep = 1` local before `step = 2` preserves the native entry-constant order in ordinary C. The conditional still chooses the same 1/2 step.
+- The opposite-direction slide binding starts at the actual frame input, before the wrapped multiply, and ends at the x calculation. Binding only the product had not preserved this destructive-input choice.
+- In the other direction, the real frame input and product/test scalar retain native homes through the clamp and width test. Both die before drawing calls. Binding only the predicate changes the preceding product/clamp allocation and is insufficient.
+- A single nonvolatile live operand on the actual fade numerator, immediately before its signed divide, preserves the native division/remaining-width schedule. It emits no instruction and is not a memory barrier.
+
+The bindings and empty operand are localized reconstruction aids, not evidence of original source spelling. All values are initialized and have real consumers; no fixed value crosses a clobbering call. Explicit unsigned wrapping, signed divisions, color packing and callback-sensitive global reloads are unchanged. Two local declarations now agree exactly with their existing providers: signed rsetOtOfs input and signed DrwSprite2D packed-color input. This declaration correction is byte-inert.
+
+Qualified stock regmove, local-allocation and scheduler dumps agree with plain full assembly and ELF output in production, SKIP_ASM and retained contexts. Ordinary/direct outputs and uninitialized/implicit-declaration diagnostic outputs also agree. The complete owner is 6/0, peers and owned data are preserved, and the still-guarded stfMain2 remains 155/181 at 724 bytes.
+
+Rejected new controls include a live operand on normalStep, predicate-only bindings/live operands, using x for the width predicate, a live operand on the clamped width, and additive slide rewrites. The useful properties are the ordinary initial step value, the slide input's actual lifetime, the paired width input/test lifetimes, and the real fade numerator operand; none of the previous cover-clamp spelling controls is needed.
+
+Independent native, range, provider and fixed-value lifetime review approves
+the unchanged source. Production, SKIP_ASM and retained ordinary/direct/strict/
+selective-stock outputs agree over complete assembly and ELF. Strict
+uninitialized-value and implicit-declaration builds are warning-free. All six
+non-target functions and allocated non-text sections are unchanged in the
+production and retained comparisons. No header, layout or production compiler
+option changes. Aggregate retail and repository checks remain release gates.
+
+### Earlier guarded draft, superseded
+
 311 of 321 words match at the native 1284-byte size in the guarded draft.
-The target remains assembly-backed; this is not exact-match credit.
+The target then remained assembly-backed; that draft earned no exact-match credit.
 
 The earlier 303-word draft established the following ordinary source layout.
 

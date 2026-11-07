@@ -153,11 +153,11 @@ extern void fclEncycStartProcess(s32 mode);
 extern void fclEncycSetTexHandle(s32 *texhandle);
 
 /* Called above its definition, where ee-gcc assumed int. */
-void *dds3GetActiveScene(void);
+dds3Basic_t *dds3GetActiveScene(void);
 
-extern void *dds3GetActiveScene(void);
+extern dds3Basic_t *dds3GetActiveScene(void);
 
-extern void dds3VisibleSceneBasic(void *basic, s32 visible);
+extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s8 visible);
 
 extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
@@ -186,8 +186,8 @@ void fclEncycInitRecord(s32 mode)
     g_pdebug = NULL;
 }
 
-extern void *sdfMemAllocDirect(s32 size);
-extern void *sdfMemLock(void *handle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void InitializeInstance(fclEncyc_instance_tag *pinst);
 extern s32 fclEncycGetNum(void);
 extern void CreateSortIndexByRace(s16 *indices);
@@ -485,13 +485,13 @@ void InitializeInstance(fclEncyc_instance_tag *pinst)
     SetScreenOffset(pinst, 0);
 }
 
-extern void *sdfMemAllocDirect(s32 aSize);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemLock(void *aHandle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *sdfMemAllocDirect(s32 aSize);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemLock(void *aHandle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 void *allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
 {
@@ -787,8 +787,8 @@ extern void fclRbnSetPara(fclRibbon_t *handle, s32 index,
                           const sdfIVector4_t *posActive, const sdfIVector4_t *posDeactive,
                           const sdfIVector4_t *uvActive, const sdfIVector4_t *uvDeactive,
                           sdfTexHandle_t *texActive, sdfTexHandle_t *texDeactive);
-extern void dds3VisibleSceneBasic(void *scene, s32 visible);
-extern void *dds3GetActiveScene(void);
+extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s8 visible);
+extern dds3Basic_t *dds3GetActiveScene(void);
 extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
 extern void ChangeDevilObjectRegistConfirm(s32 unitIndex,
                                            fclEncyc_instance_tag *pinst);
@@ -1204,27 +1204,34 @@ typedef struct fclEncycReadStatusWork_t {
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 extern void ResetReadMainRibbon(fclEncyc_readmainwork_tag *work);
 
-#ifdef NON_MATCHING
 void InitPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadStatusWork_t *work = allocPhaseBuffer(pinst, sizeof(*work));
     sdfIVector4_t vectors[4];
-    void *scene;
+    dds3Basic_t *scene;
     s32 flags;
     u16 phaseFlags;
+    FAKEMATCH_ASM_REG(s16, statusAlpha, "$7") = 0x80;
 
-    work->phase.statusAlpha = 0x80;
+    /* Target-local constraints retain the initialized alpha and work address
+     * at their first store, then preserve the measured initialization phases.
+     * They emit no instructions and have no memory clobber. This is a matching
+     * aid, not evidence of the original source spelling. */
+    FAKEMATCH_ASM_LIVE_PAIR(work, statusAlpha);
+    work->phase.statusAlpha = statusAlpha;
     work->boardY = 0xC00;
     work->help[0].y = 0xCE8;
     work->viewIdleTimer = SDF_FRAMES(0x14);
     work->help[1].x = 0x1370;
     work->help[1].y = 0xD20;
     work->help[1].speed = 0x20;
+    FAKEMATCH_ASM_LIVE(work);
     work->phase.msgid = -1;
     work->phase.flags = 0;
     work->boardAlpha = 0;
     work->explainAlpha = 0;
     work->help[0].x = 0;
+    FAKEMATCH_ASM_LIVE(work);
     work->help[0].speed = 0x20;
     work->help[0].alpha = 0;
     work->help[1].alpha = 0;
@@ -1298,9 +1305,6 @@ void InitPhaseReadStatus(fclEncyc_instance_tag *pinst)
     pinst->stat = flags & ~8;
     work->phase.flags = phaseFlags | 0x10;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
-#endif
 
 struct fclEncycReadHelpWork_t;
 extern void FadeInRibbon(fclEncyc_readmainwork_tag *work);
