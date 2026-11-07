@@ -10705,39 +10705,39 @@ s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, saddr_t unused)
     return 0;
 }
 
-extern dds3GlobalWork_t *volatile cmpRecoverGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
-
-#ifdef NON_MATCHING
 void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
 {
     s32 recovered = 0;
     s32 area = cmpGetSkillTargetArea(skill);
-    dds3GlobalWork_t *work = cmpRecoverGlobalWork;
+    /* This root feeds the count/stock/party phase. Its native register lifetime
+     * ends at a recovery call; reload it before any subsequent loop use. */
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, root, "$7") = DDS3_GBWK;
+    dds3GlobalWork_t *work;
     s32 i;
 
     if (area == 1) {
         cmpExecRecover(skill, user, target);
     } else {
-        for (i = 0; i < work->stockCount; i++) {
-            target = &work->party[work->stock[i]].unit;
+        i = 0;
+        work = root;
+        while (i < work->stockCount) {
+            target = &work->party[work->stock[i++]].unit;
             if (target->flag & 2) {
                 cmpExecRecover(skill, user, target);
-                work = cmpRecoverGlobalWork;
+                root = DDS3_GBWK;
                 recovered = 1;
             }
+            work = root;
         }
     }
     if (cmpChkSkillBad(skill) & 0x800) {
         p2sdPlaySE(0x17, 0x7F, 0x3F);
-    } else if (recovered) {
-        p2sdPlaySE(0x16, 0x7F, 0x3F);
-    } else {
+    } else if (recovered == 0) {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
+    } else {
+        p2sdPlaySE(0x16, 0x7F, 0x3F);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpRecover);
-#endif
 
 char *cmpGetParamName(s8 index)
 {
