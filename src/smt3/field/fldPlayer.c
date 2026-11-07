@@ -2180,20 +2180,19 @@ extern s32 fldPlayerCalc_Nml(void);
 
 extern s32 fldPlayerCalc_Nml_syukan(void);
 
-/* NON_MATCHING: 17 of 169 words differ (first at +0x64). */
-#ifdef NON_MATCHING
-static inline s32 fldPlayerCalcNormal(void)
-{
-    fldPlayerCalc_Nml();
-    fldPlayerMirChk();
-    return 0;
-}
+/* Keep the mode-dispatch mirror check opaque to same-unit optimization.
+ * The direct view merges its tail with the default arm; this canonical
+ * same-symbol view retains the separate native call without changing ABI. */
+extern s32 fldPlayerMirChkDispatch(void) FAKEMATCH_ASM_NAME("fldPlayerMirChk");
 
 s32 fldPlayerCalc(void)
 {
     fldUnitControl_t *ctl;
     mdlObj_t *mdl;
     s32 mode;
+    /* The live motion-index comparison uses the native argument register;
+     * its value is dead before any call and has no artificial consumer. */
+    FAKEMATCH_ASM_REG(s32, motionIndex, "$4");
 
     if (fldRunDanteGunFlag.gunFlag != 0) {
         return 0;
@@ -2204,7 +2203,8 @@ s32 fldPlayerCalc(void)
     if (fldEncountTestFlag(0x40) == 0 && fldGlobalBase.word80 > 0) {
         ctl = fldGetUnitControl();
         mdl = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
-        if (mdl->current.h.motionIndex != 0xA) {
+        motionIndex = mdl->current.h.motionIndex;
+        if (motionIndex != 0xA) {
             printf(fldNoroiDamageOnMsg);
             mdl->first->speed = 1.0f;
             mdlSingleMotion(mdl, 0, 0xA);
@@ -2256,12 +2256,13 @@ s32 fldPlayerCalc(void)
     }
     mode = fldGlobalBase.mode;
     fldWmWarpMode = 0;
-    if (mode == 1) {
+    switch (mode) {
+    case 1:
         fldPlayerSvsOff();
-        return fldPlayerCalcNormal();
-    }
-    if (mode == 3) {
-        return fldPlayerCalcNormal();
+    case 3:
+        fldPlayerCalc_Nml();
+        fldPlayerMirChkDispatch();
+        return 0;
     }
     if (evtBitCheck(0xAF0) != 0) {
         fldPlayerCalc_Nml_syukan();
@@ -2271,19 +2272,6 @@ s32 fldPlayerCalc(void)
     fldPlayerMirChk();
     return 0;
 }
-#else
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm3Scale);
-
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm4Scale);
-
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2Scale);
-
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2WorkInit);
-
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlSyukanAxis);
-
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc);
-#endif
 
 s32 fldPlayerChkAna(void)
 {
@@ -2574,6 +2562,20 @@ void fldPlayerPosRot(void)
 #else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerPosRot);
 #endif
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm3Scale);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm4Scale);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2Scale);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2WorkInit);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlSyukanAxis);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldNoroiDamageOnMsg);
+
+INCLUDE_RODATA(const s32, "field/fldPlayer", fldNoroiDamageOffMsg);
+
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerWarpState);
 
 INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerFastMode);

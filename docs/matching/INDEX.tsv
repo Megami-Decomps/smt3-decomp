@@ -167,7 +167,7 @@ fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field
 fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	108
 fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	157
 fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	184
-fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	222
+fldPlayerCalc	field/fldDraw	0x2A4		docs/matching/field/fldDraw.md	222
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
@@ -177,6 +177,7 @@ fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fld
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field/fldMain.md	56
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	1
+fldPlayerCalc	field/fldPlayer	0x2A4		docs/matching/field/fldPlayer.md	102
 fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	3
 fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md	34
 fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	84

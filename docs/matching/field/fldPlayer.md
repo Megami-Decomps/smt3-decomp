@@ -98,3 +98,50 @@ The same qualified trace diagnoses the remaining branch: the category decrement
 is available before the branch and is accepted for its ordinary delay slot.
 It does not establish a source property that requires the native annulled slot;
 no branch-forcing exception or compiler option is used.
+
+## fldPlayerCalc (field/fldPlayer, 0x2A4)
+
+**Matched: all 169 words / 676 native bytes at 0x00134B20.** The native
+mode switch and two mirror-check call sites are retained with a conservative
+same-symbol ABI view of the unchanged `s32 fldPlayerMirChk(void)` provider.
+The branch-local view has that exact return and parameter type, no extra
+attributes, and the original assembler label. It introduces no wrapper,
+indirection, provider relocation or translation-unit change.
+
+The real signed halfword motion index at model offset `0x12` is promoted to
+`s32` and bound locally to native `$4` for its comparison with 10. Assignment
+follows the model-provider call; the value is dead before the first later call
+and before `$4` is reused for `printf`. The comparison is its only consumer.
+The binding and ABI view are target-specific reconstruction aids, not evidence
+of historical source spelling.
+
+Paired deletion controls establish both dependencies. Removing only the
+binding leaves four differing words at the native size (165/169 words match).
+Replacing only the branch-local ABI-view call with the direct call merges the
+two mirror-check sites, emits 668 bytes and matches 143 of 167 emitted words.
+Ordinary switch and two one-pass-block controls do not retain both native
+calls. These are observations of qualified compiler output; no unobserved
+internal pass mechanism is asserted.
+
+The source preserves callback-sensitive reloads, signed area and counter
+checks, byte-sized motion status reads, the world-map tail return, and the
+mode-1 fallthrough into mode-3 processing. An independent native/source review
+checks the provider ABI and register lifetime. An extracted-source fixture
+against an independently address-labeled native control-flow transcription
+passes 161,280 mutation and boundary cases at both `-O2` and ASan/UBSan. That
+fixture is not raw MIPS emulation or proof for arbitrary external callbacks.
+
+Promoting the function requires both existing padded Noroi strings. Configure
+moves the five existing constant imports to the owner end and imports the
+24-byte and 32-byte strings there. Independent checks resolve all 37 rodata
+pointer relocations and confirm the full 352-byte rodata, 108-byte literal pool,
+60-byte small-data section and all 24 imported objects against retail.
+
+The combined owner preserves the independently reviewed `fldPlayerMotionSe`
+match and its canonical RNG declaration. It checks at 23 match, 0 differ.
+Twelve fresh whole-assembly/ELF plain/dump pairs cover the MotionSe baseline,
+combined source and both deletion controls in production, SKIP_ASM and retained
+contexts. All 29/22/29 peer functions, allocated data, NOBITS and ordered
+relocations are unchanged; MotionSe is checked explicitly in every context.
+Full retail, generated-source, regression, retained-draft, IRX, report-scope
+and compiler-owned production-provenance gates pass on the publication base.

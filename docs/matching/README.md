@@ -81,6 +81,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
+| 2 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -134,7 +135,6 @@ both native and emitted sizes when they differ.
 | 1 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
-| 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc-destroy.md](facility/fclEncyc-destroy.md) |

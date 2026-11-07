@@ -221,51 +221,7 @@ output.
 
 ## fldPlayerCalc (field/fldDraw, 0x2A4)
 
-152 of 169 words match, at the exact 676-byte size, and the whole control flow
-is retail's.
-
-Four of the seventeen left are the `motionIndex != 0xA` test: retail orders the
-two setup instructions `daddu $16, $2, $0` then `addiu $2, $0, 0xA` and compares
-`$4` against `$2`, the draft the other way round with `$2` against `$3`. The
-other thirteen are the layout of the second half's `mode` dispatch. Retail
-branches *to* both arms, `beq mode, 1` to the `fldPlayerSvsOff` arm and
-`beq mode, 3` to the `fldPlayerCalc_Nml` arm it falls into, then `b` to the
-default arm which sits last; the draft puts the `mode == 1` arm inline behind a
-`bne`. A `switch (mode)` with `case 1:` falling into `case 3:` gives retail's
-dispatch exactly, through all thirteen words, but then ee-gcc cross-jumps the
-case arm's `fldPlayerMirChk(); return 0;` into the default arm's and the
-function is two instructions short at 136 of 167: retail keeps two copies, one
-in the case arm and one shared between the default arm and the
-`fldPlayerMotionSe` path. Forcing that pairing with a `goto` into the first
-half loses five instructions instead. Someone finishing this needs the switch
-dispatch *and* two surviving `fldPlayerMirChk` calls at once.
-
-Confirmed on the way: the three nested guards are
-`fldRunDanteGunFlag[0] != 0`, `fldAutoMapChkMode() != 0` and
-`fldEncountTestFlag(0x40) == 0 && fldGlobalBase.word80 > 0`; `fldGlobalBase +
-0x80` is the curse-damage counter the second block clears; the model handle's
-`mdlObj_t.first` is an `sdfMotionCtrlr_t *`, whose `speed` at `+0x20` takes
-`1.0f` on the damage path and `0.0f` on the world-map path and whose `stat` at
-`+0x30` is tested against 5; the damage block is
-`printf`, `speed = 1.0f`, `mdlSingleMotion(mdl, 0, 0xA)`,
-`fldDmgStart(x, y, z)`, `fldSePlay(0x22)`, two `dds3PadVibrationSet` and
-`fldStatusSet()`; the `stat == 5` guard has to be written with the body inside
-the `if` and a bare `else { return 0; }`, which is what gives retail's `bnel`
-where the `!= 5` early return gives `bne` and costs 35 words; the world-map
-branch's `fldWmWarpMode == 1` test has to be inverted to `!= 1` with the
-`fldPlayerCalc_Wm3()` call last, which moved it from 92 differing words to 43;
-and `fldGlobalBase.area < 0xA` selects the world-map paths in both halves, with
-the second one a tail call, `return fldPlayerCalc_Wm2();`.
-
-The two strings are kept as `extern char D_00531D58[]` and `D_00531D70[]`
-rather than inline literals on purpose: retail pads eight bytes after
-`D_00531D70` that no C emits, so promoting this draft needs
-`INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D58);` and the same for
-`D_00531D70` alongside it, and inline literals make the unit's whole `.rodata`
-differ from `0x00531D58` on.
-
-Ruled out: `fldPlayerCalc_Nml_syukan`/`fldPlayerCalc_Nml` in the other order in
-the default arm; the default arm written before the two cases; a `switch` with
-`default: break;` and with the default body after the switch; a `goto ret0` on
-the `stat` guard, which costs 16 bytes; and both `goto` spellings of the mode
-dispatch, which ee-gcc normalises back to the draft's layout.
+Matched in the current owner `field/fldPlayer`; see the
+[current qualification](fldPlayer.md#fldplayercalc-fieldfldplayer-0x2a4).
+The prior 17-word dispatch and comparison residual is resolved without changing
+native calls, provider ABI or callback-sensitive reloads.
