@@ -1851,7 +1851,6 @@ void func_0013B660(void) {
 void func_0013B668(void) {
 }
 
-#ifdef NON_MATCHING
 extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 extern void rsetAlpha(s32 mode);
@@ -1869,10 +1868,13 @@ extern void fldDrawPoly4(s32 c0, f32 x0, f32 y0, f32 z0,
 
 void fldHitWM_Mask(void)
 {
-    s32 i;
+    s32 i = 0;
     s32 count;
-    collision_s *table;
+    u32 byteOffset;
     collision_s *face;
+    /* The metadata/triangle row has its own native address lifetime. This
+     * local allocation aid is dead before either renderer call. */
+    FAKEMATCH_ASM_REG(collision_s *, drawFace, "$7");
     sdfVector4_t pos;
 
     rsetOtOfs(0x2F);
@@ -1881,36 +1883,46 @@ void fldHitWM_Mask(void)
     rsetFrameMaskRgbOn();
     aDrawBoxF(0, 0, 0x200, 0xE0, 0x80, 0, 0, 0x10);
 
+    /* Retail initializes the complete vector; only XYZ is consumed here. */
     pos.w = 1.0f;
     pos.x = 0.0f;
     pos.y = 0.0f;
     pos.z = 0.0f;
     count = fldValueRecordCount;
     if (count > 0) {
-        table = fldMatterTable;
-        for (i = 0; i < count; i++) {
-            face = &table[i];
+        byteOffset = 0;
+        for (; i < count; i++) {
+            /* Preserve the actual 32-bit EE byte-address sum and advance the
+             * offset before callbacks; the table is observed anew each row. */
+            face = EE_ADDR_AS(collision_s *, byteOffset + EE_ADDR(fldMatterTable));
+            byteOffset += sizeof(collision_s);
+            drawFace = face;
             if (face->matter != 0) {
                 pos.x = face->matter->poseset->pos.x;
                 pos.y = face->matter->poseset->pos.y;
                 pos.z = face->matter->poseset->pos.z;
             }
-            if ((face->pFace->attributes & 0x8000) && face->pFace->special[0] != 1 &&
-                face->pFace->special[0] != 3) {
-                if (face->numedges == 3) {
-                    fldDrawPoly3(0x80000000, 0x80000000, 0x80000000,
-                                 face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
-                                 face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
-                                 face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z);
+            if ((drawFace->pFace->attributes & 0x8000) && drawFace->pFace->special[0] != 1 &&
+                drawFace->pFace->special[0] != 3) {
+                if (drawFace->numedges == 3) {
+                    /* Real second-color argument, local to this call. The
+                     * binding preserves its native preparation order. */
+                    FAKEMATCH_ASM_REG(s32, color1, "$5") = (s32)0x80000000U;
+                    fldDrawPoly3(0x80000000, color1, 0x80000000,
+                                 drawFace->point[0][0] + pos.x, drawFace->point[0][1] + pos.y, drawFace->point[0][2] + pos.z,
+                                 drawFace->point[1][0] + pos.x, drawFace->point[1][1] + pos.y, drawFace->point[1][2] + pos.z,
+                                 drawFace->point[2][0] + pos.x, drawFace->point[2][1] + pos.y, drawFace->point[2][2] + pos.z);
                 } else {
+                    /* Real second-color argument, local to this call. The
+                     * binding preserves its native preparation order. */
+                    FAKEMATCH_ASM_REG(s32, color1, "$5") = (s32)0x80000000U;
                     fldDrawPoly4(0x80000000, face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
-                                 0x80000000, face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
+                                 color1, face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
                                  0x80000000, face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z,
                                  0x80000000, face->point[3][0] + pos.x, face->point[3][1] + pos.y, face->point[3][2] + pos.z);
                 }
                 count = fldValueRecordCount;
             }
-            table = fldMatterTable;
         }
     }
     rsetTest(1, 0, 0x80, 2, 1, 1, 1, 1);
@@ -1920,9 +1932,7 @@ void fldHitWM_Mask(void)
     rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     rsetAlpha(0);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldHit", fldHitWM_Mask);
-#endif
+
 
 f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *collision) {
     f32 projectedPosition[3] QWORD_ALIGNED;

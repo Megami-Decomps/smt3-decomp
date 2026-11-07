@@ -123,3 +123,84 @@ dummy consumers, general memory barrier, or instruction replay is added.
 The guarded draft preserves retail behavior; whole-project verification
 remains required for integration, and enabling this C as matching source
 requires resolving the remaining branch exactly.
+
+## fldHitWM_Mask (field/fldHit, 0x2B8)
+
+174 of 174 words match at 696 bytes. The index is initialized before render
+setup. A separate u32 byte offset advances by the actual collision_s size before
+row callbacks, and each row observes the current table. Count is read after
+setup and refreshed only after a real triangle/quad draw, not after skipped
+rows. A missing matter preserves the preceding XYZ translation, including
+translation obtained from a skipped row. Native signed edge/special tests,
+metadata reads, scalar additions and complete call ordering are unchanged.
+
+The address sum uses the existing EE_ADDR/EE_ADDR_AS target idiom on the actual
+allocation. fldAllocPlaneTable allocates and zeros 0x72000 bytes, enough for
+2048 native 0xE4 records, and fldMakePlane fills real records there. Valid records
+and their referents must remain within that allocation. The explicit operand
+order reproduces the native real-address addu at 0x13B710; it adds no fake
+bounds, cancelling arithmetic, qualifier or dependency. This is the existing
+32-bit EE address ABI, not a portable-ISO-C pointer representation claim.
+
+Exactly three local bindings remain. drawFace in $7 supplies metadata and
+triangle accesses and dies before call clobbers. Quad reads use the separate
+face pointer in $8 after $7 becomes the fourth color at 0x13B808. Each arm's
+second signed32 color argument is initialized to (s32)0x80000000U and bound to
+$5 only until its one consuming call. No constrained value crosses a call,
+no empty operand remains, and provider declarations retain the canonical ABI.
+Poly3's colors precede its float coordinates; Poly4 interleaves color/XYZ source
+arguments. Their integer/FPU streams and 8-byte outgoing stack slots remain
+native-exact. These are localized allocation aids, not original-source claims.
+
+The enabled original emits 700 bytes with 24/174 native-prefix words matching
+and 4 excess bytes. Ordinary two-role C emits 688 bytes with 38/172 overlap
+words matching and 8 uncovered native bytes. Draw binding alone reaches
+169/174 at 696 bytes; adding the two color bindings reaches 173/174; the real
+address-sum order supplies the last word. Removing draw binding gives 37/172
+at 688 bytes; removing either color binding gives 172/174 at 696 bytes. Removing
+all bindings or using the all-ordinary pointer walk gives 38/172 at 688 bytes.
+
+W is dead here. Retail explicitly stores 1.0f at SP+0x2C (0x13B6F0) beside the
+live XYZ stores, but no instruction reads W or passes the vector address to a
+consumer. The complete homogeneous-vector initialization is retained under
+the native-dead-code exception: the native residual is that W store, with the
+same member-initialization shape as adjacent live XYZ and engine patterns such
+as fldAnaStart/fldEveHit_ChkDir. No live W consumer can truthfully be invented.
+The source comment says only XYZ is consumed. The no-W control changes 141 of
+170 overlap words at 680 bytes; that score is supporting evidence, not policy
+permission or an unused-frame-padding justification.
+
+Fresh integration covers thirteen guarded/original/binding/address/ordinary/
+no-W/final snapshots in all three modes: 39 whole-assembly/entire-ELF plain/-da
+pairs agree after only one equal-length temporary source filename substitution.
+The complete final owner is 17 match, 0 differ. All 19/16/19 peers, allocated
+data including lit4, NOBITS, COMMON, symbol attributes and ordered paired
+relocation contracts are preserved. There are no COMMON symbols; unowned text
+is zero alignment padding. SKIP_ASM adds only the expected nine undefined
+renderer/state callees because its guarded baseline omits this function.
+
+All implicit-declaration strict builds pass with the same 62 inherited fldVecDot
+pointer warnings. Full -Werror fails guarded and final identically with exit 33;
+this owner is not warning-clean. Strict target-layout checks independently
+verify the native collision/metadata sizes and accessed field/pose offsets.
+
+A fresh independent raw-retail interpreter comparison passes 98,304 optimized
+and 98,304 ASan/UBSan cases with trace hash c8c6c3710c06d44d. It reaches all
+173 reachable instructions; the sole unexecuted word is alignment nop at
+0x13B7E4. Both outcomes of all seven conditionals execute. Tests cover every
+signed16 special value, signed counts, triangles/quads, attributes, translation
+persistence, callback count/table/pose/metadata/point changes, exact mixed-class
+call arguments, clobbered caller registers and saved frame restoration.
+
+Actual EE address macros run over a checked MAP_32BIT host arena. Native records
+are explicitly serialized at 228 bytes rather than pretending host 240-byte
+pointer-bearing records share the native layout. Finite scalar additions run
+without fast math or contraction. This is not a full R5900 NaN/denormal/exception
+or rounding emulator; exact native add.s operations establish target behavior.
+Only target register placement is erased for host execution. LeakSanitizer alone
+is disabled for executor compatibility; address/undefined-behavior checks pass.
+
+Full linked retail bytes, generated-source negative controls, 505 tooling tests
+without optional skips, 818 layout assertions, frozen EE/IRX drafts, inline-asm
+policy and primary/audit report scope pass. All preceding landed owners remain
+intact: facility 197/0, recovery 391/0, music 27/0, Flow10 33/0 and status 24/0.

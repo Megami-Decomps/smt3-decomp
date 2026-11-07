@@ -169,6 +169,7 @@ fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
+fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fldMain-vectors.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	2
