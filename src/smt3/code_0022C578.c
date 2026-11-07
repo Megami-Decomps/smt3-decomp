@@ -10985,32 +10985,45 @@ s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot)
     return slot->state;
 }
 
-/* NON_MATCHING: 30 of 31 words differ (first at +0x4). */
-#ifdef NON_MATCHING
+/* The offset and update pointer have real, separate native address lifetimes.
+ * Keep their two short-lived registers; neither crosses a call. The empty
+ * value-base operand preserves the conditional address phase, not memory order.
+ * These are local matching aids, not evidence of historical source spelling. */
 void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor)
 {
     cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
     s32 i;
     s32 j;
-
-    for (j = 0; j < 0x100; j++) {
-        for (i = 0; i < 2; i++) {
-            if (slot[j][i].state != 0) {
-                if (slot[j][i].value < 0x100) {
-                    slot[j][i].value += slot[j][i].param;
+    s32 more;
+    for (j = 0; j < 0x100; j++, slot++) {
+        i = 0;
+        do {
+            FAKEMATCH_ASM_REG(s32, byteOffset, "$3");
+            cmpCursorSlot_t *entry;
+            byteOffset = i * (s32)sizeof(cmpCursorSlot_t);
+            entry = (cmpCursorSlot_t *)(byteOffset + (u8 *)slot);
+            i++;
+            more = i < 2;
+            if (entry->state != 0) {
+                u8 *valueBase;
+                s32 *value;
+                FAKEMATCH_ASM_REG(s32 *, update, "$5");
+                valueBase = (u8 *)slot + 4;
+                FAKEMATCH_ASM_LIVE_VOLATILE(valueBase);
+                value = (s32 *)(valueBase + byteOffset);
+                update = value;
+                if (*update < 0x100) {
+                    *update += entry->param;
                 } else {
-                    slot[j][i].state = 0;
+                    entry->state = 0;
                 }
-                if (slot[j][i].value >= 0x100) {
-                    slot[j][i].value = 0x100;
+                if (*value >= 0x100) {
+                    *value = 0x100;
                 }
             }
-        }
+        } while (more);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorSlots);
-#endif
 
 /* NON_MATCHING: 7 of 37 words differ, exact size. */
 /* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
