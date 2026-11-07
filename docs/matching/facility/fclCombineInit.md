@@ -525,3 +525,54 @@ assertions, frozen guarded EE/IRX checks and reconciled reports pass. The
 previous map/recovery matches remain exact; configure changes no source
 imports. Only this 280-byte function gains credit: game totals become 8,655
 functions and 1,503,504 bytes. The subsequent build has no work.
+
+## cmbDrawBirthDevilMaskBG (facility/fclCombineInit, 0x160)
+
+88 of 88 words match at 352 bytes. After the event callback, capture the real
+fusion-work root, load the birth level, and read the two background dimensions
+through that full root. The sprite argument remains its actual member address.
+Separate dimension scalars and color stores recover the native argument
+schedule. Both roots are observed only after the event call; every work read
+is complete before rendering begins, so later callback mutation needs no reload.
+The original event and unsigned level gates, one mask draw and four resource
+draws remain in order with unchanged arguments and providers.
+
+The birth field is u16. A u32 snapshot preserves its entire value domain and
+the mixed-width comparison's ordering. One localized binding places this real
+value in native register 3: `lhu` at target +0x2C defines it and `sltu` at +0x40
+is its sole consumer, with no intervening call. It is dead before drawing.
+The ordinary u32 declaration gives 84 of 88 words, differing only in the two
+root/level register assignments, party-load base and comparison operand.
+This is a target-specific allocation aid, not original source spelling or a
+claim that no other ordinary form can match. There is no false type, dummy
+consumer, artificial lifetime, added memory access or changed compiler flag.
+
+Independent semantic and compiler reviews confirm the native accesses,
+providers and lifetime. Twenty-four development whole-assembly and entire-ELF
+plain/stock-dump pairs cover eight sources in three modes. Nine fresh integrated
+pairs cover guarded, activated-original and final source in production,
+SKIP_ASM and retained-draft modes. Exactly one equal-length canonical source
+filename is normalized; no object sections or symbols are omitted. All
+214/195/214 peers and allocated nontext data are preserved. Resolving the two
+ordinary GP relocations recovers every native target byte. Complete owner:
+196 match, 0 differ. Production/SKIP_ASM strict checks still fail on inherited
+declarations and retain the existing pointer warning; activation removes the
+former target implicit-declaration diagnostic and adds none. Retained strict
+checks pass. No hooked decision trace is claimed.
+
+Optimized and ASan/UBSan development fixtures each pass 3,310,720 comparisons
+of 20 actual bodies. A fresh integrated final-body fixture passes 165,536
+cases in each mode, including each individual u16 width and height, event and
+level exits, callback root mutation and supplied-color mutation. This is not
+the full width/height Cartesian product or a native renderer test. Constraints
+are ordinary declarations in the host fixture; target output qualifies their
+real behavior. Valid work/resource objects remain inherited preconditions,
+and leak detection is disabled in these allocation-free fixtures.
+
+Integrated on main through 5d487c81 with peer changes preserved. Complete
+retail checksum and byte comparison, generated-source validation, all 505
+unittest cases without skips plus 818 layout assertions, frozen guarded EE
+and seven IRX owners, and reconciled production reports pass. The seven latest
+affected peer owners also remain exact. Only this function gains credit:
+game totals become 8,656 functions and 1,503,856 bytes. A subsequent build
+has no work. No private fixture, runtime or compiler artifact is published.

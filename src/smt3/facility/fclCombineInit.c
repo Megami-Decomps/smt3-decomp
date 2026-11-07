@@ -3383,29 +3383,38 @@ extern fclSpriteTbl_t fclSpriteTable[];
 extern void func_002146F8(s32 x, s32 y, s32 width, s32 height, s32 *color,
                           fclSprite_t *sprite, u8 flip, s32 ot);
 
-#ifdef NON_MATCHING
 void cmbDrawBirthDevilMaskBG(void)
 {
     s32 colors[4];
     fclSprite_t *sprite;
+    cmbGbWork_t *work;
+    s32 width;
+    s32 height;
+    /* Keep the zero-extended birth level in its native comparison register.
+     * Its only consumer is the level gate below, with no intervening call. */
+    FAKEMATCH_ASM_REG(u32, birthLevel, "$3");
 
     if (evtBitCheck(0x8A0) != 0) {
         return;
     }
-    sprite = &CMB_GBWK->backgroundSprite;
-    if (DDS3_GBWK->party[0].unit.level >= CMB_GBWK->birthUnit[0].level) {
+    work = CMB_GBWK;
+    sprite = &work->backgroundSprite;
+    birthLevel = work->birthUnit[0].level;
+    if (DDS3_GBWK->party[0].unit.level >= birthLevel) {
         return;
     }
-    colors[0] = colors[1] = colors[2] = colors[3] = 0x80808060;
-    func_002146F8(0, 0, sprite->unk_04, sprite->unk_06, colors, sprite, 0, 0x46);
+    height = work->backgroundSprite.unk_06;
+    width = work->backgroundSprite.unk_04;
+    colors[0] = 0x80808060;
+    colors[1] = 0x80808060;
+    colors[2] = 0x80808060;
+    colors[3] = 0x80808060;
+    func_002146F8(0, 0, width, height, colors, sprite, 0, 0x46);
     fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x12, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x15, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x16, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x14, D_00345D88, fclSpriteTable, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevilMaskBG);
-#endif
 
 extern void cmbSetBirthPanel(datUnitWork_t *unit);
 extern s32 datGetParam(datUnitWork_t *unit, s32 type);

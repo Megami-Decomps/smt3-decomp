@@ -112,6 +112,7 @@ func_00201FB0	facility/fclCombineInit	0x94	37 of 37 words match	docs/matching/fa
 cmbUpdateCameraPos	facility/fclCombineInit	0x14C	83 of 83 words match	docs/matching/facility/fclCombineInit.md	421
 cmbCalcRoot	facility/fclCombineInit	0x170	92 of 92 words match	docs/matching/facility/fclCombineInit.md	447
 shop_206A38	facility/fclCombineInit	0x118	70 of 70 words match	docs/matching/facility/fclCombineInit.md	483
+cmbDrawBirthDevilMaskBG	facility/fclCombineInit	0x160	88 of 88 words match	docs/matching/facility/fclCombineInit.md	529
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
