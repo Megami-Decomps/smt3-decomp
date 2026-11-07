@@ -2723,19 +2723,18 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
 extern u32 frGetStrWidth2(frFontHandle_t *font);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void campDrawText(s32 id, s32 *colors)
 {
     s8 index = id;
     u8 alpha = colors != NULL ? *(u8 *)colors : 0x80;
+    /* Compute the actual font color before the row-height callback; this
+     * preserves the native live color across that call. */
+    u32 fontColor = 0xA09DC300 | alpha;
     frFontHandle_t *font;
     s32 x;
 
     cmpSetSkillListRows(0x12);
-    font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, 0xA09DC300 | alpha,
+    font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, fontColor,
                                cmpMenuStrings[index], NULL);
     fclDrawSpriteRes(0, 0, 0, colors, 0, 0x21, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(0, 0, 0, colors, 0, 0x22, D_00345D88, fclSpriteTable, 0x47);
@@ -2746,9 +2745,6 @@ void campDrawText(s32 id, s32 *colors)
     frDestroyFontRequestAfter(font);
     cmpSetSkillListRows(-1);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawText);
-#endif
 
 #ifdef NON_MATCHING
 extern const volatile f32 D_0054E45C;
@@ -4848,9 +4844,9 @@ extern const u32 D_0053FDE8[];
 extern char D_0054FE80[];
 extern s8 cmpGetParamGaugeColor(s8 index);
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
-extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
                                                u32 color, const char *text,
-                                               frFontRequest_t *previous);
+                                               frFontHandle_t *previous);
 
 typedef struct
 {
@@ -5778,9 +5774,9 @@ extern void cmpGetGaugeBlinkAlpha(s32 frame, s8 state, u32 *colors);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
                                 s32 page, s32 spriteId, s32 *texList,
                                 fclSpriteTbl_t *table, s32 ot);
-extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
                                                u32 color, const char *text,
-                                               frFontRequest_t *previous);
+                                               frFontHandle_t *previous);
 extern char D_0054FE98[];
 
 void rstDrawNumber(s32 x, s32 y, s8 number)
@@ -5834,7 +5830,7 @@ void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
     s32 ratio;
     s32 sprite;
     char text[16];
-    frFontRequest_t *font;
+    frFontHandle_t *font;
 
     colors[0] = color;
     colors[1] = color;
@@ -5885,8 +5881,8 @@ void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
     font = frwGetSmallNumFontFRQ(x + 0x50, y, z, textColor, text, NULL);
     sprintf(text, D_0054FEA0, maximum);
     font = frwGetSmallNumFontFRQ(x + 0x2C0, y, z, textColor, text, font);
-    func_001C7E38((frFontHandle_t *)font, 1, 0x47);
-    frDestroyFontRequestAfter((frFontHandle_t *)font);
+    func_001C7E38(font, 1, 0x47);
+    frDestroyFontRequestAfter(font);
 }
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusIconRow);
@@ -6038,7 +6034,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
     s32 badgeX;
     s32 length;
     frFontHandle_t *font;
-    frFontRequest_t *number;
+    frFontHandle_t *number;
     char text[16];
 
     if (mode == 3) {
@@ -6129,13 +6125,13 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
     sprintf(text, D_0054FE98, datGetLevelForDraw(unit));
     number = frwGetSmallNumFontFRQ((x + 0x2C) * 16, (y + 0x62) * 8,
                                    0xFFFF, levelColor, text, NULL);
-    func_001C7E38((frFontHandle_t *)number, 1, 0x47);
-    frDestroyFontRequestAfter((frFontHandle_t *)number);
+    func_001C7E38(number, 1, 0x47);
+    frDestroyFontRequestAfter(number);
     sprintf(text, D_0054FEA8, datAdvanceDevilLevel(unit) - live->exp);
     number = frwGetSmallNumFontFRQ((x + 0x7C) * 16, (y + 0x62) * 8,
                                    0xFFFF, textColor, text, NULL);
-    func_001C7E38((frFontHandle_t *)number, 1, 0x47);
-    frDestroyFontRequestAfter((frFontHandle_t *)number);
+    func_001C7E38(number, 1, 0x47);
+    frDestroyFontRequestAfter(number);
     cmpDrawStatusIcons(spriteX, spriteY, colors, mode, unit);
 }
 #else
@@ -6303,7 +6299,7 @@ void cmpDrawParamPanel(s32 x, s32 y, s32 *colors, s8 *bonuses, datUnitWork_t *un
         s32 textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0xA09DC380);
         s8 bonus = 0;
         s32 value;
-        frFontRequest_t *font;
+        frFontHandle_t *font;
 
         if (selected >= 0 && selectMode == 2 && i == selected) {
             textColor = cmpGetPanelAlphaOrDefault((u8 *)colors, 0x80C08080);
@@ -6322,9 +6318,9 @@ void cmpDrawParamPanel(s32 x, s32 y, s32 *colors, s8 *bonuses, datUnitWork_t *un
                             D_00345D88, fclSpriteTable, 0x47);
         sprintf(text, D_0054FE98, value);
         font = frwGetSmallNumFontFRQ(numberX, numberY, 0xFFFF, textColor, text, NULL);
-        func_001C7E38((frFontHandle_t *)font, 1, 0x47);
+        func_001C7E38(font, 1, 0x47);
         numberY += 0xA0;
-        frDestroyFontRequestAfter((frFontHandle_t *)font);
+        frDestroyFontRequestAfter(font);
         if (selected >= 0) {
             gaugeMode = 2;
         }
@@ -6817,9 +6813,9 @@ extern void cmpDrawItemListHeader(s32 x, s32 y, s32 color, u16 item);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
                              s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 ot);
-extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 width,
+extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 width,
                                                u32 color, const char *text,
-                                               frFontRequest_t *previous);
+                                               frFontHandle_t *previous);
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 extern void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot);
 extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 w, s16 h,
@@ -6907,7 +6903,7 @@ void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                         &slots[row][0]);
                     s32 color = (allocated & 0xFFFFFF00) |
                                 ((((u32)rowColor & 0xFF) * (u32)blinkLow) >> 7);
-                    frFontRequest_t *font;
+                    frFontHandle_t *font;
                     s32 quantity;
 
                     fontColor = cmpCursorFadeChannel(color, alpha, 0);
@@ -6937,8 +6933,8 @@ void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                     font = frwGetSmallNumFontFRQ(x + 0x810,
                                                  itemY + 0x10, 0x10,
                                                  (u32)fontColor, numberText, NULL);
-                    func_001C7E38((frFontHandle_t *)font, 1, 0x47);
-                    frDestroyFontRequestAfter((frFontHandle_t *)font);
+                    func_001C7E38(font, 1, 0x47);
+                    frDestroyFontRequestAfter(font);
                 }
 
                 rowY += 0xB8;
@@ -6980,6 +6976,11 @@ void campDrawInfoPanel(void)
     campWork->drawPhase = 0;
 }
 
+/* This exact-type view withholds the new same-unit body from the dispatcher.
+ * The paired direct call changes its branch/epilogue layout; the linker target
+ * and truthful provider remain unchanged. This is not an original-source claim. */
+extern void campDrawTextView(s32 id, s32 *colors) FAKEMATCH_ASM_NAME("campDrawText");
+
 void campDrawSeq3(s8 phase)
 {
     if (phase != 0) {
@@ -6992,7 +6993,7 @@ void campDrawSeq3(s8 phase)
 
     switch (phase) {
     case 0:
-        campDrawText(3, 0);
+        campDrawTextView(3, 0);
         /* fall through */
     case 3:
         campWork->drawPhase = 0;
@@ -8752,13 +8753,12 @@ extern char D_0054FED0[]; /* padded eight-byte "%3d" object */
 extern char D_0054FED8[];
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
-/* NON_MATCHING: 8 of 77 words differ at the exact 308-byte size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-void campDrawStatusRow2(s32 x, s32 y, u32 color, datUnitWork_t *unit)
+void campDrawStatusRow2(s32 inputX, s32 y, u32 color, datUnitWork_t *unit)
 {
+    /* Localized target constraint keeps the live horizontal origin in its
+     * native saved register. It emits no instruction and is not a claim
+     * about original source spelling. */
+    FAKEMATCH_ASM_REG(s32, x, "$19") = inputX;
     char text[0x20];
     frFontHandle_t *font;
     s32 drawX;
@@ -8779,9 +8779,6 @@ void campDrawStatusRow2(s32 x, s32 y, u32 color, datUnitWork_t *unit)
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow2);
-#endif
 
 extern void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color,
                               s32 id, s32 idx, s32 *texList,

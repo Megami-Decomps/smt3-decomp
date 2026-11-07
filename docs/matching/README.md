@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 40 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 41 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 18 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 18 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
