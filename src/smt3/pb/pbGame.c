@@ -978,9 +978,6 @@ void deleteGame(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-/* NON_MATCHING: 12 of 164 words differ at the exact 656-byte size.
- * The slot index and compact write cursor exchange saved registers. */
-#ifdef NON_MATCHING
 /* Initializer fields in the work allocation; the map starts at +0x1C. */
 typedef struct
 {
@@ -1010,7 +1007,12 @@ extern void pbInitGameCamera(void);
 void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
 {
     u32 i;
-    pbProcHandle_t **write;
+    /* The compact output cursor has real uses across character callbacks.
+     * This saved-register constraint restores the native allocation beside
+     * the separate slot ordinal and fixed array base. It is a target-specific
+     * reconstruction aid, not evidence of original source spelling. */
+    FAKEMATCH_ASM_REG(pbProcHandle_t **, write, "$18");
+    pbProcHandle_t **slots;
     s32 scriptLabel;
     pbCharacterFunc_t characterFunc;
 
@@ -1027,11 +1029,12 @@ void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
     dds3FadeIn2(0x1E);
     pbSetExitPos((pbProcHandle_t *)goal, ((pbMapWorkInitView_t *)D_0054F5C4)->exitX, ((pbMapWorkInitView_t *)D_0054F5C4)->exitY);
     pbSetExitDisp((pbProcHandle_t *)goal, 1);
-    write = mychar;
+    slots = mychar;
+    write = slots;
     for (i = 0; i < 4; i++) {
-        if (mychar[i] != NULL) {
-            mychar[i]->flags = 0x50000;
-            mychar[i] = NULL;
+        if (slots[i] != NULL) {
+            slots[i]->flags = 0x50000;
+            slots[i] = NULL;
         }
         if (((pbMapWorkInitView_t *)D_0054F5C4)->pcharReg[i] != 0) {
             *write = pbInitMyCharacterDraw(panel, (u32)i, 0);
@@ -1057,10 +1060,6 @@ void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
         pbMoveCharList = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", pbInitGame);
-#endif
-
 s32 moveChar(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbMoveCharWork_t *work = panel->data.moveChar;

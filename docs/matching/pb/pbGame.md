@@ -92,43 +92,45 @@ function and 140 bytes with unchanged data totals.
 
 ## pbInitGame (pb/pbGame, 0x290)
 
-152 of 164 words match, 12 differ, at the exact 656-byte size. The draft
-restores the saved 20-by-20 map, validates it, initializes the exit and
-character panels, refreshes motion, calls the selected character callback,
-clears the record, and optionally starts the stage script.
+164 of 164 words match at the native 656-byte size. The source keeps the
+unsigned original-slot ordinal, separate compact output cursor, signed script
+label and fixed character-array base. The compact cursor uses a local saved-
+register binding through FAKEMATCH_ASM_REG; the other values remain ordinary C.
+There is no empty assembly, invented consumer, artificial bound, widened type,
+new memory access or changed callback.
 
-The work prefix contains four registration bytes at +4, four pairs of signed
-coordinates at +8, exit coordinates at +0x18/+0x1A, and the map at +0x1C.
-Character retirement uses the original slot index. Creation uses a separate
-compact output cursor, advanced only for registered characters. The constructor
-receives parent, color index and motion zero; its USA provider ignores the last
-two arguments. Record clearing follows both callback paths. Script startup
-passes zero as its third argument. Work and character-slot loads after callbacks
-remain observable reloads.
+The fixed base is initialized from the real mychar array and used to retire
+original slots. The advancing cursor only increments for registered characters
+and writes created handles compactly. Both pointers address the same underlying
+global array, without any noalias promise. Reloads from character slots and work
+after callbacks remain present. The cursor's assigned register is callee-
+preserved, so its genuine cross-call lifetime is ABI-safe. The source comment
+describes a reconstruction aid, not original spelling.
 
-A qualified `cc1probe --alloc --no-dumps` run has identical hooked/unhooked
-output. The loop index has 13 references over a live range of 92, priority 4239;
-the output cursor has 10 references over 68, priority 4411. The cursor therefore
-gets saved register 17 and the index 18, opposite retail. The map-copy dispatch,
-other registers and branch layout match. See [compiler traces](../../cc1probe.md).
+Ordinary fixed-base control still differs in 12 of 164 words. Binding the cursor
+while leaving mychar[i] spelled directly gives 11 differences and hoists cursor
+address formation. The fixed-base source plus cursor binding matches all 164
+words. These paired comparisons establish the allocation/scheduling dependency
+and output, not an unobserved internal-pass mechanism. Older qualified
+allocation observations remain background, not a fresh trace of this source.
 
-An indexed compact output adds four bytes. Early cursor initialization hoists
-its address and grows the function. A shared loop-index/script-label scalar
-fixes the loop registers but changes the final label register; it remains five
-words short of exact. Explicit postincrement in the final draw call, a do-loop,
-and carrying map-validation status in the index do not close the gap. The
-preferred draft keeps the separate index, cursor and script-label values.
+Complete owner: 66 match, 0 differ. Production keeps all 70 peers, SKIP_ASM all
+65 peers, retained all 70 peers. Resolved HI16/LO16, call, absolute, GP-relative
+and literal relocation contracts preserve every peer and owned data. The
+initializer's existing pbInitGameCamera declaration is naturally exposed when
+promoting its guard, removing the old implicit declaration in production and
+SKIP_ASM. Strict implicit-declaration and uninitialized diagnostics pass all
+final modes; the preexisting sdfDrawRotatedModel pointer-type warning is
+unchanged.
 
-A current parity-qualified allocation observation also identifies the fixed
-character-array base as pseudo 129 (three references, 64 live instructions,
-three crossed calls), assigned GPR19. It is distinct from the advancing cursor
-pseudo 87/GPR17 and ordinal pseudo 86/GPR18; changing the source to name that
-fixed array base explicitly preserves the same 152 matching words. Reusing a
-signed index for the ordinal and script label gives 158/164 matching words:
-the loop bound becomes signed and the final label still occupies the wrong
-register. These controls do not close the residual. The facility flag-clear
-declaration now agrees with its actual signed-byte provider; both callers
-here pass literal zero, so their emitted instructions stay unchanged.
+Nine complete baseline/ordinary/final plain/dump assembly-and-allocated-section
+pairs pass. A separate frozen final-source run verifies full assembly and entire
+ELF bytes with only the exactly-once, equal-length generated source path
+normalized, and hashes the input closure before and after. The 1,035-input
+closure remains unchanged. Independent semantic and ABI review passes. An
+extracted-actual-body host oracle passes 8,192 callback/state cases at O2 and
+under ASan/UBSan, without claiming EE hardware execution. Full integrated retail
+and regression gates remain required for publication.
 
 ## roundDirCheck (pbGame, 0x2B4)
 

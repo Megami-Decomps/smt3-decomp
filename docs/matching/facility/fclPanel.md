@@ -2,27 +2,34 @@
 
 ## fclDrawPanel (fclPanel, 0x54)
 
-15 of 21 words match at the native 84-byte size in the current complete owner.
-The six differing words are two scheduling groups: the first sprite ID's `ori`
-exchanges position with the saved `$17` store, and the final ID's `ori`
-follows three argument/restore instructions instead of immediately following
-its `lui`. The callback load and `jalr` now use the native `$2`.
+21 of 21 words match at the native 84-byte size. Two localized empty constraints
+resolve independent scheduling groups without changing the truthful
+`void fclDrawPanelSprite(s32, s32)` contract. The entry constraint applies to the
+initialized panel pointer before its real callback load and argument use. The
+second applies to the initialized final sprite ID immediately before its real
+call. No memory access, arithmetic, callback, register binding or artificial
+consumer is added. These are target-specific reconstruction aids, not evidence
+of original source spelling.
 
-The earlier ignored-`s32` return explanation is historical, not a current
-blocker. The canonical provider is now `void fclDrawPanelSprite(s32, s32)` in
-`code_0022C578.c`, and this owner's declaration agrees. There is no same-unit
-provider definition whose visibility could explain this residual. Preserve
-that actual provider contract; no type change is proposed.
+Paired complete-owner controls at the same 84-byte size give six differing
+words with neither constraint, four with only the panel constraint, two with
+only the final-ID constraint, and zero with both. The panel constraint restores
+the opening ID's `ori` before the saved `$17` store. The final-ID constraint
+keeps its `ori` adjacent to `lui` before argument setup and restores. The actual
+callback is loaded after the first sprite call, from panel `+0x38`, and receives
+both the panel and ordering-table ID. No deeper compiler-hook mechanism is
+claimed from these paired byte comparisons.
 
-In an earlier qualified source/compiler context, the scheduler reported that
-the first `ori` was not ready when the saved-register store issued, and
-raising its priority alone did not close that gap. A tail-only localized
-constraint in that older control left two differing words. These controls were
-not repeated in the current owner and do not establish the cause of its
-present residual. Neither control is exact; the ordinary guarded body remains.
-
-The `draw` callback at `+0x38` takes both the panel and ordering-table ID, as
-the native argument setup confirms.
+Whole-owner production/SKIP checking gives 18 match, 0 differ, preserving all
+17 existing peers, including Type0Grad. The retained-draft target is also exact;
+all 19 retained peers remain unchanged. The owner has no nonempty allocated
+data payload. Existing truthful forward declarations for `cmpDrawBoxF`,
+`fclDrawPanelSprite2` and `memset` are now unconditional; all three modes pass
+strict implicit-declaration diagnostics. Complete plain/dump assembly and all
+ELF section headers and contents agree in production, SKIP and retained modes,
+normalizing only the equal-length generated source path. Independent native
+and semantic review includes callback replacement by the first sprite call,
+signed ordering-table extremes, and sanitizer checks.
 
 ## fclDrawPanelType0Grad (facility/fclPanel, 0x100)
 

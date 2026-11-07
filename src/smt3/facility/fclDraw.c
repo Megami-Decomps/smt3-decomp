@@ -80,9 +80,7 @@ void fclDrawBG(fclSprite_t *pSprite, s32 OtNo)
     }
 }
 
-#ifdef NON_MATCHING
 extern void fclSetSpriteEx(fclSprite_t *pSprite, fclSpriteRect_t *pSpriteBase, s32 X, s32 Y, s32 Z, s32 Col, s32 Flag, s32 TexHandle);
-#endif
 
 void fclSetupSprite(s32 Z, fclSprite_t *pSprite, u8 page, u16 spriteId, s32 *texList, fclSpriteTbl_t *table)
 {
@@ -259,7 +257,6 @@ s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
     return frDestroyFontRequestAfter(request);
 }
 
-#ifdef NON_MATCHING
 void trm_212CB8(fclPanelPos_t *panel, s8 count, s32 xOffset, s32 yOffset,
                 s8 *spacing, u16 *widths, u16 *heights, const char **text, s32 ot)
 {
@@ -276,13 +273,16 @@ void trm_212CB8(fclPanelPos_t *panel, s8 count, s32 xOffset, s32 yOffset,
     for (i = 0; i < count; i++) {
         fclDrawStrCenterTarget(x, y, panel->unk_08, widths[i], heights[i],
                                0xA09DC380, text[i], ot);
-        x += (spacing[i] + widths[i]) * 16;
+        {
+            /* Local allocation aid: keep the post-call spacing address and its
+             * signed byte value in separate native registers. Both lifetimes
+             * end in this advance, before the next callback. */
+            FAKEMATCH_ASM_REG(s8 *, gapAddress, "v0") = &spacing[i];
+            FAKEMATCH_ASM_REG(s32, gap, "v1") = *gapAddress;
+            x += (gap + widths[i]) * 16;
+        }
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclDraw", trm_212CB8);
-#endif
-
 /* Quantity layout shared by datAddItem and datCheckItem. */
 typedef struct
 {

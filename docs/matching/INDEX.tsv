@@ -118,6 +118,7 @@ shop_206A38	facility/fclCombineInit	0x118	70 of 70 words match	docs/matching/fac
 cmbDrawBirthDevilMaskBG	facility/fclCombineInit	0x160	88 of 88 words match	docs/matching/facility/fclCombineInit.md	529
 cmbDrawUnitLevel	facility/fclCombineInit	0x1C0	112 of 112 words match	docs/matching/facility/fclCombineInit.md	580
 cmbUpdateCameraZoom	facility/fclCombineInit	0xE8	58 of 58 words match	docs/matching/facility/fclCombineInit.md	634
+trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
@@ -128,9 +129,9 @@ GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/faci
 CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	191
 InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	218
 DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	318
-fclDrawPanel	fclPanel	0x54	15 of 21 words match	docs/matching/facility/fclPanel.md	3
-fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	27
-fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	68
+fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
+fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
+fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	75
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each		docs/matching/facility/fclRagCalc.md	3
 ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility/fclRagCalc.md	21
 ragDrawHeartsRows	fclRagCalc	0x21C	135 of 135 words match	docs/matching/facility/fclRagCalc.md	41
@@ -349,11 +350,11 @@ nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_I
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	35 of 35 words match	docs/matching/pb/pbGame.md	48
-pbInitGame	pb/pbGame	0x290	152 of 164 words match	docs/matching/pb/pbGame.md	93
-roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	133
-pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	168
-viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	214
-moveBlock	pb/pbGame	0x8C	31 of 35 words match	docs/matching/pb/pbGame.md	271
+pbInitGame	pb/pbGame	0x290	164 of 164 words match	docs/matching/pb/pbGame.md	93
+roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	135
+pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	170
+viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	216
+moveBlock	pb/pbGame	0x8C	31 of 35 words match	docs/matching/pb/pbGame.md	273
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
