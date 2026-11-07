@@ -16,7 +16,7 @@ both native and emitted sizes when they differ.
 | 18 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
-| 16 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 17 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 9 |  | [sdk/libc.md](sdk/libc.md) |
 | 9 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
@@ -25,11 +25,11 @@ both native and emitted sizes when they differ.
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
+| 8 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
+| 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
-| 7 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 6 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
-| 6 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |

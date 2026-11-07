@@ -274,3 +274,64 @@ and active plain/dump parity pass; production and SKIP object contracts equal th
 prior published version. The fresh stable 140-owner/480-draft sweep, 459 tests,
 817 layout assertions, inline/shell checks, seven IRX modules, retail byte
 comparison/SHA1/no-op and unchanged coverage reports all pass. Zero exact credit.
+
+## EnterBasicList (event/evtEventViewer, 0x264)
+
+153 of 153 words match at 612 bytes in ordinary C. Candidate qualification
+against `88b7e48302c0eb153095a2d143b521c9a6cb7719` gives a complete owner result
+of 56 match, 0 differ, with owned data intact. Only EnterBasicList changes;
+its guard and assembly fallback are removed. No compiler constraint, alias,
+layout, provider declaration or build configuration change is needed.
+
+One live traversal/selection pointer follows each scene's basic list. The
+outer scan covers types 0 through 17, skips type 3 and fetches the active scene
+afresh for each remaining type. A named-entry hit sets the real outer index
+to 18, allowing its normal increment and test to finish the scan while retaining
+the selected basic. Unsigned count and selection-sum arithmetic preserve native
+32-bit wrap. A null frame returns immediately; a zero sum skips the scan, and
+exhausted lists leave a null selection. Non-null names count even when empty.
+
+The signed-byte field switch keeps separate signed upper/lower type checks for
+field 13, admitting only types 20 and 21. Branch-local name insertion preserves
+the real byte and halfword destinations, null-selection sentinel bits and
+callback-sensitive reloads. Field 10 handles types 3, 9 and 18; type 9 searches
+for the old unit and unlinks it if found before storing the new name. Every
+non-null-frame path calls evtRunFrame, then PopMenu, and returns zero.
+
+The definition uses the actual menu callback contract,
+`s32 EnterBasicList(s32 action, s32 previousMenu)`; native ignores both arguments.
+Type 9 can carry the initialized signed-halfword name index -1. Its lookup uses
+`(const char *)viewerinfo + (0x24 + (s16)frame->param.sh[0] * 32)`, forming the
+complete signed displacement before pointer addition. The real sentinel therefore
+addresses viewer + 4 inside the live viewer object, rather than forming an invalid
+nametable[-1] subscript. Displacement arithmetic fits s32 for every s16 index;
+this does not make arbitrary out-of-object addresses valid.
+
+Independent candidate review confirms exact target bytes in production,
+SKIP_ASM and NON_MATCHING+SKIP_ASM, with all 59/55/59 respective peer functions,
+owned data, data relocations and nontext symbols preserved. Complete assembly
+and ELF agree between the actual wrapper and direct compiler routes in all
+three modes. Supported strict implicit-declaration diagnostics are silent;
+strict/plain comparisons and both contract repairs are output-neutral after
+only equal-length scratch filename normalization. Source/output controls do
+not establish historical spelling or an unobserved compiler mechanism.
+
+An exact-source host fixture passes 161,568 ordered-call and final-state cases
+in both optimized and ASan/UBSan runs, including the -1 sentinel, wrapped sums,
+null/exhausted selections and callback mutation. Its domain is live objects,
+valid real storage accesses and finite traversals; it adds no bounds checks,
+capacity guarantees, corrupt-pointer safety or asynchronous-memory guarantee.
+The separate host-port Clang checker was unavailable. These checks do not
+replace target qualification or execute the PS2 game.
+
+The owner source at `a5cfb79dea12ad2c552fb26be17df6e172cd8a85` is byte-identical
+to the reviewed base. Fresh complete-owner qualification incorporates the current
+motion header and preserves the exact target, all peers and owned data in all
+three modes. The field header is outside this owner's actual include closure.
+
+Combined-tree integration with the camera-zoom and battle-cursor matches passes
+the repository regression, header-layout, generated-source, retained-C, IRX,
+retail checksum and report gates. Unchanged previously qualified owner contexts
+and IRX results are carried only with their applicable input identities checked;
+changed dependencies and integrated outputs are freshly checked. The linked
+image is byte-identical to retail. Exact-commit CI is checked after publication.

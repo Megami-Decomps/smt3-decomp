@@ -282,3 +282,27 @@ paths at `0x27C844` and `0x27C8A4`. The nested trail loop *does* hoist it at
 outer versus inner loop placement, not a blanket absence of native table
 hoisting. Repeating pointer spellings or lexical scopes without new evidence
 about the separate base-address dependency is not a useful next control.
+
+## nbPanelCursorDraw (0x168)
+
+All 360 instruction bytes match in ordinary C. Allocate the draw tag before
+forming the coordinates, compute the far Y coordinate between the first two
+color calls, and compute the far X coordinate between the second and third.
+These real scalar lifetimes reproduce the native saved-register allocation.
+Moving the coordinate calculations before allocation or destructively reusing
+the input locals does not match. This establishes a source/output dependency,
+not historical source spelling or an unobserved internal compiler decision.
+
+Shifts and screen-offset additions remain unsigned until final s32 narrowing,
+preserving the earlier draft's modulo-32 arithmetic. Each color call observes
+nbPanelBaseABGR afresh. Both primitive submissions precede the final ordering
+table callback lookup. No null check, constraint or dummy consumer is added.
+
+The owner's sdfPrimLinkG4 declaration agrees with its actual provider: a signed
+32-bit guest tag address, signed scalar arguments and a typed allocator
+callback. All four calls explicitly use EE_ADDR_S(tag). This correction is
+output-neutral in production, SKIP_ASM and retained contexts. The complete
+owner has 61 matches and no differences. All 70/60/70 peers, owned data and
+relocations are preserved. Independent review verifies all native bytes,
+12 complete ordinary/direct assembly and ELF parity pairs, callback behavior
+and 721 stable inputs.

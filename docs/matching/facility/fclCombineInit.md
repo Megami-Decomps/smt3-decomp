@@ -630,3 +630,32 @@ Full linked retail bytes, generated-source negative controls, 505 tooling tests
 without optional skips, 818 layout assertions, frozen EE/IRX drafts, inline-asm
 policy and primary/audit report scope pass. Flow10 33/0, music 27/0 and recovery
 391/0 complete-owner checks preserve the preceding landings.
+
+## cmbUpdateCameraZoom (facility/fclCombineInit, 0xE8)
+
+58 of 58 words match at 232 bytes in ordinary C. Each native mode arm loads
+the signed target index separately and dispatches grouped cases. Mode one
+accepts targets zero through four plus terminal target five; every other mode
+accepts zero and one plus terminal target two. Signed switches preserve the
+negative and out-of-range no-op domain and reproduce the native call layout.
+The former range-test draft emits 200 bytes, per-arm target acquisition 216,
+and separate negative exits 224. No constraint, type, declaration, data table
+or compiler option is added. This establishes an exact source shape, not
+historical source spelling or an internal compiler decision.
+
+The early zoom load, signed action-step/frame tests, 80/220 frame boundaries,
+positive-zero override and original model-drawing arguments are preserved.
+The same-owner provider remains `cmbLoadTargetModel(s32, s32, f32)`. Every
+accepted path calls it once; all other paths return without a call. Callback
+mutation of globals is not followed by additional state reads.
+
+Complete owner: 198 match, 0 differ after preserving the later mask and unit-level matches. Twelve full assembly/ELF route-parity
+pairs cover baseline and final production, SKIP_ASM and retained contexts.
+All 214/197/214 peers and owned data, layouts and relocations are preserved,
+including the subsequently matched mask and unit-level renderers.
+Independent review matches all target bytes in each context. Optimized and
+ASan/UBSan actual-source fixtures each pass 2,494,464 comparisons covering
+signed domains, frame boundaries, floating representations and callback
+mutation. Leak detection is disabled in the sanitizer fixture; it uses no
+heap allocations. Strict production/SKIP declaration failures and the pointer
+warning are identical inherited debt; retained strict checks pass.

@@ -5155,7 +5155,6 @@ void cmbUpdateCameraPos(void)
 extern s8 cmbActionStep;
 extern s8 cmbActionMode;
 
-#ifdef NON_MATCHING
 void cmbUpdateCameraZoom(void)
 {
     f32 zoom = CMB_GBWK->actionZoom;
@@ -5167,24 +5166,33 @@ void cmbUpdateCameraZoom(void)
     if (CMB_GBWK->actionFrame < SDF_FRAMES(220)) {
         zoom = 0.0f;
     }
-    target = CMB_GBWK->actionTargetIndex;
     if (cmbActionMode == 1) {
-        if (target >= 0 && target < 5) {
+        target = CMB_GBWK->actionTargetIndex;
+        switch (target) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
             cmbLoadTargetModel(target, 1, zoom);
-        } else if (target == 5) {
+            break;
+        case 5:
             cmbLoadTargetModel(5, 0, zoom);
+            break;
         }
     } else {
-        if (target >= 0 && target < 2) {
+        target = CMB_GBWK->actionTargetIndex;
+        switch (target) {
+        case 0:
+        case 1:
             cmbLoadTargetModel(target, 1, zoom);
-        } else if (target == 2) {
+            break;
+        case 2:
             cmbLoadTargetModel(2, 0, zoom);
+            break;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateCameraZoom);
-#endif
 
 datUnitWork_t *cmbGetBirthDevilPanel(void)
 {

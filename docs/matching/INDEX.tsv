@@ -93,6 +93,7 @@ evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/eve
 evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	138
 EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/evtEventViewer.md	182
 evtAddFrameInfo	event/evtEventViewer	0x540	305 of 336 words match	docs/matching/event/evtEventViewer.md	206
+EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	278
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	78 of 78 words match	docs/matching/event/evtEventViewerMenu.md	58
@@ -114,6 +115,7 @@ cmbCalcRoot	facility/fclCombineInit	0x170	92 of 92 words match	docs/matching/fac
 shop_206A38	facility/fclCombineInit	0x118	70 of 70 words match	docs/matching/facility/fclCombineInit.md	483
 cmbDrawBirthDevilMaskBG	facility/fclCombineInit	0x160	88 of 88 words match	docs/matching/facility/fclCombineInit.md	529
 cmbDrawUnitLevel	facility/fclCombineInit	0x1C0	112 of 112 words match	docs/matching/facility/fclCombineInit.md	580
+cmbUpdateCameraZoom	facility/fclCombineInit	0xE8	58 of 58 words match	docs/matching/facility/fclCombineInit.md	634
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
@@ -300,6 +302,7 @@ nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
 nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
 nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	218
+nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	286
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
