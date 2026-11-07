@@ -27,25 +27,9 @@ Confirmed on the way: `fldSkyDataTable`'s row stride is
 where DDS1 passes `0x44`; the sway offset global is `fldRunDanteGunFlag[14]`,
 not `[16]`; and the clamp list is three alphas with `a3` unclamped.
 
-## fldStatusSet (field/fldDraw, 0xF8)
-
-36 of 62 words match, at the exact 248-byte size.
-
-Retail carries two induction variables where the draft has one: an integer
-offset added to `DDS3_GBWK` serving `hp` and the first `badstatus` read, and
-a pointer biased at the `badstatus` field serving the flag at `-0xE`. The
-body never uses the loop index.
-
-Ruled out: the typed `akuma[i]` form throughout; a `fldAnahoriAkuma_t *`
-local at three scopes; all eight cast orders of `(u8 *)base + ofs` against
-`(u8 *)ofs + (u32)base`, which gcc folds together here; a `u16 *` walking the
-`badstatus` field with the flag at `p[-0xE]`; and an explicit second pointer
-induction.
-
-This draft proved `fldAnahoriAkuma_t.badstatus` at `+0x12`: retail tests that
-`u16` against 0x40, 0x100, 0x20 and 0x8000, and `datCheckDying` is called on
-`&akuma[0].flag`, which makes the record `datUnitWork_t` shifted by four and
-puts `badstatus` at `0x0E + 4`.
+The historical fldStatusSet experiments moved to its current owner,
+[field/fldEveHit](fldEveHit.md#fldstatusset-fieldfldevehit-0xf8), with the final
+match and current-baseline accounting.
 
 ## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
 

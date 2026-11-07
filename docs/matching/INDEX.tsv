@@ -159,15 +159,15 @@ fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/matching/field/fldDraw.md	3
-fldStatusSet	field/fldDraw	0xF8	36 of 62 words match	docs/matching/field/fldDraw.md	30
-fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	50
-fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	82
-fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	124
-fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	173
-fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	200
-fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	238
+fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	34
+fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	66
+fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	108
+fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	157
+fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	184
+fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/matching/field/fldDraw.md	222
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
+fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fldMain-vectors.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3

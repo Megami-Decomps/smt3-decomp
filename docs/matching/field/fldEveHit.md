@@ -82,3 +82,81 @@ frozen guarded EE/IRX sweeps, and reconciled game/full-binary reports pass.
 Configure adds no source imports. The target is C-owned in the production
 report at 504 bytes; game coverage increases by one function and 504 bytes,
 to 8,652 functions and 1,502,568 bytes. The subsequent build has no work.
+
+## fldStatusSet (field/fldEveHit, 0xF8)
+
+62 of 62 words match at 248 bytes. The final body captures the complete work
+object once and walks its 16 actual 0xEC-byte records using a record offset and
+a separate status-biased address. Both byte-pointer walks are anchored to the
+complete declared object, including the final unused advance. The native u32
+flag, u16 HP and u16 status widths and alignment are preserved. The ordered
+status tests map 0x40, 0x100, 0x20 and 0x8000 to summary bits 1, 4, 8 and 0x10.
+
+One empty read/write operand follows the actual 0x100 status snapshot and uses
+the initialized status address. Later real reads and loop advances consume
+that address. It is dead before the provider call, with no fixed register,
+volatile alias, artificial consumer or emitted instruction. It is not a general
+memory barrier. Removing only that operand emits 244 bytes with 19/61 overlap
+words matching and 4 native bytes uncovered. Development proved the earlier
+binding and extra operand unnecessary and removed both. This supports the
+remaining local dependency without an unobserved compiler-pass claim.
+
+The provider argument is the canonical &work->unitwork[0] union view at +0xA54.
+The real datCheckDying provider computes hp * 100 / maxhp < 25 from u16 fields;
+nonzero maxhp remains its valid-domain requirement. The captured pre-call work
+object supplies the argument. A nonzero return, including conservative negative
+hook results, causes a fresh signed word50 read/OR/write, preserving callback
+changes. Redirection of DDS3_GBWK does not retroactively change the argument.
+
+The current activated original draft emits 236 bytes: 7 of 59 overlap words
+match, with 12 native bytes uncovered. This is distinct from the older exact-
+size 36/62 experiment recorded below. Final20 uses the reviewed canonical union
+argument, not a superseded earlier candidate. The complete owner is 24 match,
+0 differ. Guarded, original, final and ordinary-ablation owners pass twelve
+fresh complete assembly/entire-ELF plain-versus-stock -da checks, after only one
+equal-length temporary source filename normalization. All strict builds pass.
+
+All 27/23/27 peers preserve resolved instruction/relocation contracts. An
+independent audit also preserves owned bytes, section sizes/alignments/flags,
+NOBITS, COMMON and non-target symbol locations, ordered relocations and paired
+HI16 effective targets, including R_MIPS_LITERAL and the lit4 pool.
+
+The exact final body passes 1,114,112 optimized and 1,114,112 ASan/UBSan host
+comparisons. A separate interpreter freshly executes the exact 248 raw retail
+bytes against that body for 327,680 cases under each build. All 62 instructions
+and both outcomes of all eight conditionals are covered. Both runs produce
+the same signature and cover all 16 slots, every u16 status/HP/low flag value,
+valid provider arithmetic, callback writes, global-pointer redirection and
+caller-register clobbering. Complete modeled objects, callback entry, and native
+read widths/counts/addresses are checked. The host layout asserts the actual
+complete-work size and accessed offsets. These are bounded modeled-provider
+fixtures, not full game execution or guarantees for invalid maxhp/indexes.
+LeakSanitizer alone is disabled for executor compatibility.
+
+The linked retail image is byte-identical. Generated-source negative controls,
+505 tooling tests with no optional skips, 818 layout assertions, frozen EE/IRX
+drafts, inline-asm policy and primary/audit report-scope checks pass. Complete
+facility 197/0, recovery 391/0, music 27/0 and Flow10 33/0 owners remain intact.
+
+### Historical draft experiments
+
+This earlier experiment had 36 of 62 words matching at 248 bytes. It is
+not the current activated-original baseline, which emits 236 bytes with
+7 of 59 overlapping words matching. The observations below are historical.
+
+Retail carries two induction variables where the draft has one: an integer
+offset added to `DDS3_GBWK` serving `hp` and the first `badstatus` read, and
+a pointer biased at the `badstatus` field serving the flag at `-0xE`. The
+body never uses the loop index.
+
+Experiments that did not match at that stage: the typed `akuma[i]` form throughout; a `fldAnahoriAkuma_t *`
+local at three scopes; all eight cast orders of `(u8 *)base + ofs` against
+`(u8 *)ofs + (u32)base`, which gcc folds together here; a `u16 *` walking the
+`badstatus` field with the flag at `p[-0xE]`; and an explicit second pointer
+induction.
+
+This draft proved `fldAnahoriAkuma_t.badstatus` at `+0x12`: retail tests that
+`u16` against 0x40, 0x100, 0x20 and 0x8000, and the early draft passed
+`&akuma[0].flag` to `datCheckDying`. That native address makes the record
+`datUnitWork_t` shifted by four, placing `badstatus` at `0x0E + 4`. The final
+code uses the canonical `unitwork[0]` union view of the same address.

@@ -283,44 +283,53 @@ void fldKaifukuTest(void) {
     p2sdPlaySE(0x10, 0x7F, 0x3F);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vectors give the same return and memory,
- * field underground facility savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Each live party member contributes its status bits to the field summary. */
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s32 datCheckDying(datUnitWork_t *work);
 
 void fldStatusSet(void)
 {
-    s32 i;
+    dds3GlobalWork_t *work = DDS3_GBWK;
+    /* Both walks stay inside the complete save-work object: the first record
+     * starts at 0xA50 and its status is at +0x12. The native loop uses the
+     * record offset for hp/first status and a status-biased walk for flags. */
+    s32 offset = 0xA50;
+    u8 *statusAddress = (u8 *)work + 0xA62;
+    s32 remaining = 15;
 
     fldRunDanteGunFlag.word50 = 0;
-    for (i = 0; i < 16; i++) {
-        fldAnahoriAkuma_t *unit = &DDS3_GBWK->akuma[i];
-        volatile u16 *badstatus = &unit->badstatus;
-
-        if ((unit->flag & 2) && unit->hp != 0) {
-            if (*badstatus & 0x40) {
+    do {
+        fldAnahoriAkuma_t *unit = (fldAnahoriAkuma_t *)((u8 *)work + offset);
+        fldAnahoriAkuma_t *walking = (fldAnahoriAkuma_t *)(statusAddress - 0x12);
+        if ((walking->flag & 2) && unit->hp != 0) {
+            u16 status;
+            if (unit->badstatus & 0x40) {
                 fldRunDanteGunFlag.word50 |= 1;
             }
-            if (*badstatus & 0x100) {
+            status = *(u16 *)statusAddress;
+            /* This real address is needed for the remaining status reads.
+             * The local operand keeps those native reloads after the current
+             * snapshot without volatile storage; it emits no instructions. */
+            FAKEMATCH_ASM_LIVE(statusAddress);
+            if (status & 0x100) {
                 fldRunDanteGunFlag.word50 |= 4;
             }
-            if (*badstatus & 0x20) {
+            status = *(u16 *)statusAddress;
+            if (status & 0x20) {
                 fldRunDanteGunFlag.word50 |= 8;
             }
-            if (*badstatus & 0x8000) {
+            if (*(u16 *)statusAddress & 0x8000) {
                 fldRunDanteGunFlag.word50 |= 0x10;
             }
         }
-    }
-    if (datCheckDying((datUnitWork_t *)&DDS3_GBWK->akuma[0].flag)) {
+        statusAddress += sizeof(fldAnahoriAkuma_t);
+        offset += sizeof(fldAnahoriAkuma_t);
+    } while (--remaining >= 0);
+    if (datCheckDying(&work->unitwork[0])) {
         fldRunDanteGunFlag.word50 |= 2;
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldEveHit", fldStatusSet);
-#endif
+
 
 extern s32 fldEveRngPrevIdx;
 
