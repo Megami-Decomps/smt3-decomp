@@ -6403,8 +6403,8 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
         SetRotateMatrixZ(pPCPRingPolyExp2->rotate_z);
         SetRotateMatrixY_B(pPCPRingPolyExp2->rotate_y);
         MultMatrixRevNoArg();
-        pPCPRingPolyExp2->rotate_y += pPCPRingPolyExp2->rotate_s;
-        pPCPRingPolyExp2->rotate_s *= pPCPRingPolyExp2->head.rotate_a;
+        pPCPRingPolyExp2->rotate_y += SDF_FRAME_STEP(pPCPRingPolyExp2->rotate_s);
+        pPCPRingPolyExp2->rotate_s *= SDF_FRAME_DECAY(pPCPRingPolyExp2->head.rotate_a);
     }
     for (i = 0; i < n; i++) {
         if (pPCPRingPolyExp2->head.mode == 0) {

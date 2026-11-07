@@ -1,5 +1,4 @@
 #include "common.h"
-#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -77,7 +76,7 @@ void nbCameraState_NegoBougai_Init(void)
     SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->distance;
-    nbCamera_NegoBougai_Wait = SDF_FRAMES(15);
+    nbCamera_NegoBougai_Wait = 15;
     nbCamera_NegoBougai_Frame = 0;
 }
 
@@ -88,13 +87,13 @@ void nbCameraState_NegoBougai_Init2(void)
     SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->distance;
-    nbCamera_NegoBougai_Wait = SDF_FRAMES(8);
+    nbCamera_NegoBougai_Wait = 8;
     nbCamera_NegoBougai_Frame = 0;
 }
 
 void nbCameraState_NegoBougai_SetWaitFrame(u32 frame)
 {
-    nbCamera_NegoBougai_Wait = SDF_FRAMES(frame);
+    nbCamera_NegoBougai_Wait = frame;
 }
 
 void nbCameraState_NegoBougai_Calc(void)
@@ -109,7 +108,7 @@ void nbCameraState_NegoBougai_Calc(void)
 
     if ((pFormation->stat & 3) == 3) {
         if (nbCamera_NegoBougai_Frame >= nbCamera_NegoBougai_Wait) {
-            nbCamera_NegoBougai_Rate *= SDF_FRAME_DECAY(0x1.ab851ep-1f);
+            nbCamera_NegoBougai_Rate *= 0x1.ab851ep-1f;
             scale.x = -pCamera->distance;
             scale.y = -pCamera->distance;
             scale.z = -pCamera->distance;

@@ -1,5 +1,6 @@
 #include "fileManager.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "basic.h"
 #include "model.h"
@@ -2065,7 +2066,7 @@ void fldDrawAreaBlockFont(void) {
         break;
     case 2:
         if (v > 0.0f) {
-            v -= 0.1f;
+            v -= SDF_FRAME_STEP(0.1f);
             if (v < 0.0f) {
                 v = 0.0f;
                 fldAreaFontWork = 0;
@@ -2077,7 +2078,7 @@ void fldDrawAreaBlockFont(void) {
         break;
     case 3:
         if (v < 1.0f) {
-            v += 0.1f;
+            v += SDF_FRAME_STEP(0.1f);
             if (!(v > 1.0f)) {
                 fldAreaFontWork = 1;
             } else {
@@ -2094,14 +2095,14 @@ void fldDrawAreaBlockFont(void) {
         if (v < 0.99f) {
             if (v > 0.01f) {
                 if (fldAreaFontWork == -1) {
-                    v -= 0.1f;
+                    v -= SDF_FRAME_STEP(0.1f);
                     if (v < 0.0f) {
                         v = 0.0f;
                         fldAreaFontWork = 0;
                     }
                     D_0054EEA4 = v;
                 } else if (fldAreaFontWork == 1) {
-                    v += 0.1f;
+                    v += SDF_FRAME_STEP(0.1f);
                     if (v > 1.0f) {
                         v = 1.0f;
                         fldAreaFontWork = 0;

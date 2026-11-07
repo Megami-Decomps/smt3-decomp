@@ -1,5 +1,4 @@
 #include "common.h"
-#include "sdfFrame.h"
 #include "sdk_libgcc.h"
 #include "sdk_libc.h"
 #include "newbattle.h"
@@ -1645,9 +1644,9 @@ void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
     }
     rate = nbCamera_Analyze_Rate + nbCamera_Analyze_Rate_Add;
     if (rate > 0.215f) {
-        nbCamera_Analyze_Rate_Add *= SDF_FRAME_DECAY(1.1f);
+        nbCamera_Analyze_Rate_Add *= 1.1f;
     } else {
-        nbCamera_Analyze_Rate_Add *= SDF_FRAME_DECAY(0.725f);
+        nbCamera_Analyze_Rate_Add *= 0.725f;
     }
     nbCamera_Analyze_Rate = rate < 0.0f ? 0.0f : rate;
     distance = -pNbCamera->distance;
@@ -2129,7 +2128,7 @@ void nbCameraState_Cut1Enemy_Calc(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pN
     f32 want;
 
     if (nbCamera_Cut1Enemy_Frame >= 0) {
-        nbCamera_Cut1Enemy_Rate *= SDF_FRAME_DECAY(0.88f);
+        nbCamera_Cut1Enemy_Rate *= 0.88f;
         distance = -pNbCamera->distance;
         scale.x = distance;
         scale.y = distance;
@@ -2599,7 +2598,7 @@ void nbCameraState_EnemyBad_Calc(void)
     sdfVector4_t scale;
     f32 distance = -pCamera->distance;
 
-    nbCameraEnemyBadStep *= SDF_FRAME_DECAY(0.925f);
+    nbCameraEnemyBadStep *= 0.925f;
     scale.x = distance;
     scale.y = distance;
     scale.z = distance;

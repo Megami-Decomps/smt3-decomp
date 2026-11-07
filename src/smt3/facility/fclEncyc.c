@@ -1732,6 +1732,7 @@ void AcceptKeyRegistConfirm(fclEncyc_instance_tag *pinst)
 
 void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
 {
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     if (work->flag == 0) {
         work->statusAlpha += 0x10;
         if (work->statusAlpha >= 0xA1) {
@@ -2425,6 +2426,7 @@ void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 
 void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
 {
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     pwork->ribbonAlpha -= 0x10;
     if (pwork->ribbonAlpha < 0) {
         pwork->ribbonAlpha = 0;
@@ -2437,6 +2439,7 @@ void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
 
 void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
 {
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     pwork->ribbonAlpha += 0x10;
     if (pwork->ribbonAlpha >= 0x81) {
         pwork->ribbonAlpha = 0x80;
@@ -2650,12 +2653,12 @@ void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag)
 void MoveScreenOffset(fclEncyc_instance_tag *pinst)
 {
     if ((pinst->stat & 8) != 0) {
-        pinst->screenOfsX -= 16.0f;
+        pinst->screenOfsX -= SDF_FRAME_STEP(16.0f);
         if (pinst->screenOfsX < 2048.0f) {
             pinst->screenOfsX = 2048.0f;
         }
     } else {
-        pinst->screenOfsX += 16.0f;
+        pinst->screenOfsX += SDF_FRAME_STEP(16.0f);
         if (2188.0f < pinst->screenOfsX) {
             pinst->screenOfsX = 2188.0f;
         }
@@ -2788,22 +2791,22 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
     mdlGetRotate(model);
     if ((key & 2) != 0) {
         SDF_VU0_LOADVECTOR_B(D_00529630);
-        FromRotation_B(-0.034906583f);
+        FromRotation_B(-SDF_FRAME_STEP(0.034906583f));
         Mult();
     } else if ((key & 4) != 0) {
         SDF_VU0_LOADVECTOR_B(D_00529630);
-        FromRotation_B(0.034906583f);
+        FromRotation_B(SDF_FRAME_STEP(0.034906583f));
         Mult();
     }
     mdlSetRotate(model);
 
     if ((key & 8) != 0) {
-        work->phase.cameraAngle += 0.034906583f;
+        work->phase.cameraAngle += SDF_FRAME_STEP(0.034906583f);
         if (work->phase.cameraAngle > work->rotationMax) {
             work->phase.cameraAngle = work->rotationMax;
         }
     } else if ((key & 0x10) != 0) {
-        work->phase.cameraAngle -= 0.034906583f;
+        work->phase.cameraAngle -= SDF_FRAME_STEP(0.034906583f);
         if (work->phase.cameraAngle < work->rotationMin) {
             work->phase.cameraAngle = work->rotationMin;
         }
@@ -3174,6 +3177,7 @@ void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
 {
     s32 alpha = pwork->registAlpha;
 
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     if (pwork->dispregist != 0) {
         alpha += 0x10;
         if (alpha > 0x80) {
@@ -3210,6 +3214,7 @@ void CalcMoveReadMainHelp(fclEncycReadHelpWork_t *work)
     s32 secondaryAlpha = work->panels[1].alpha;
     s32 primaryAlpha;
 
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     if (flags & 0x10) {
         secondaryAlpha += 0x10;
         if (secondaryAlpha > 0x80) {
@@ -3259,6 +3264,7 @@ void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     s32 alpha = pwork->ribbonAlpha;
 
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
     if ((pwork->flags & 0x20) == 0) {
         alpha += 0x10;
         if (alpha >= 0x81) {

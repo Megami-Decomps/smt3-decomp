@@ -1,5 +1,4 @@
 #include "common.h"
-#include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -1668,7 +1667,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
     type = nbCameraBoss_BSARI_MASEHA_Type;
     switch (type) {
     case 0:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(30)) {
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
             pNbCamera->direction.x = -0.27f;
             pNbCamera->direction.y = -0.08f;
             pNbCamera->direction.z = 0.96f;
@@ -1677,14 +1676,14 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->target.z = -1819.1999f;
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
-        } else if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(130)) {
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
             from.x = -1449.11f;
             from.y = -15.0f;
             from.z = -2223.37f;
             to.x = 1370.34f;
             to.y = -15.0f;
             to.z = -2046.0f;
-            rate = ((f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
+            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
             SDF_VU0_INTERPOLATE(rate);
@@ -1711,8 +1710,8 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
         }
         break;
     case 1:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(135)) {
-            rate = (f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) / 135.0f;
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 135) {
+            rate = (f32)nbCameraBoss_BSARI_MASEHA_Frame / 135.0f;
             from.x = -940.78992f;
             from.y = -296.84995f;
             from.z = -1616.1199f;
@@ -1747,7 +1746,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
         }
         break;
     case 2:
-        if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(30)) {
+        if (nbCameraBoss_BSARI_MASEHA_Frame < 30) {
             pNbCamera->direction.x = -0.27f;
             pNbCamera->direction.y = -0.08f;
             pNbCamera->direction.z = 0.96f;
@@ -1756,8 +1755,8 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->target.z = -1819.1999f;
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
-        } else if (nbCameraBoss_BSARI_MASEHA_Frame < SDF_FRAMES(130)) {
-            rate = ((f32)SDF_FRAME_TICK(nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
+        } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
+            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
             from.x = -628.99994f;
             from.y = -47.56f;
             from.z = -2074.9898f;
@@ -2301,7 +2300,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
 
     switch (type) {
     case 0:
-        frame = SDF_FRAME_TICK(nbCameraBoss_Pish_MUHENK_Frame);
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 38) {
             rate = (f32)frame / 160.0f;
             if (1.0f < rate) {
@@ -2374,7 +2373,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
         pNbCamera->fovy = 0.698131621f;
         break;
     case 1:
-        frame = SDF_FRAME_TICK(nbCameraBoss_Pish_MUHENK_Frame);
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 75) {
             rate = (f32)frame / 160.0f;
             if (1.0f < rate) {
@@ -2448,7 +2447,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
         pNbCamera->fovy = 0.698131621f;
         break;
     case 2:
-        frame = SDF_FRAME_TICK(nbCameraBoss_Pish_MUHENK_Frame);
+        frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 75) {
             rate = (f32)frame / 160.0f;
             if (1.0f < rate) {
@@ -5697,13 +5696,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
     switch (skill) {
     case 0x83:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(58)) {
+        if (frame < 58) {
             nbCameraShot_PullOne_Calc(camera, 0.099999996f);
             SetRotateMatrixY(0.0087266455f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(58) && pNbCamera.state != 7) {
+        } else if (frame == 58 && pNbCamera.state != 7) {
             info->ptr23 = 1;
             info->shot_23 = 1;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
@@ -5718,13 +5717,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0x85:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(54)) {
+        if (frame < 54) {
             nbCameraShot_PullOne_Calc(camera, 0.25f);
             SetRotateMatrixY(0.0087266455f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(54) && pNbCamera.state != 7) {
+        } else if (frame == 54 && pNbCamera.state != 7) {
             choice = dds3GetRandIntA(NULL, 3);
             if (choice == 0) {
                 info->ptr23 = 1;
@@ -5774,13 +5773,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0x88:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(76)) {
+        if (frame < 76) {
             nbCameraShot_PullOne_Calc(camera, 0.25f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(76) && pNbCamera.state != 7) {
+        } else if (frame == 76 && pNbCamera.state != 7) {
             nbCameraBoss_InvokeTarget_Set(camera, -25.0f, 0.59999998f);
             effBTLModelAllShow();
             effBTLModelInvokeGroupHide();
@@ -5789,13 +5788,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0x93:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(87)) {
+        if (frame < 87) {
             nbCameraShot_PullOne_Calc(camera, 0.35f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(87) && pNbCamera.state != 7) {
+        } else if (frame == 87 && pNbCamera.state != 7) {
             nbCameraBoss_InvokeTarget_Set(camera, -25.0f, 0.59999998f);
             effBTLModelAllShow();
             effBTLModelInvokeGroupHide();
@@ -5804,13 +5803,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0xA0:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(40)) {
+        if (frame < 40) {
             nbCameraShot_PullOne_Calc(camera, 0.45f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(40) && pNbCamera.state != 7) {
+        } else if (frame == 40 && pNbCamera.state != 7) {
             nbCameraBoss_InvokeTarget_Set(camera, -25.0f, 0.59999998f);
             effBTLModelAllShow();
             effBTLModelInvokeGroupHide();
@@ -5819,13 +5818,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0x8F:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(41)) {
+        if (frame < 41) {
             nbCameraShot_PullOne_Calc(camera, 0.25f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(41) && pNbCamera.state != 7) {
+        } else if (frame == 41 && pNbCamera.state != 7) {
             info->ptr23 = 1;
             info->shot_23 = 1;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
@@ -5840,13 +5839,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0x90:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(87)) {
+        if (frame < 87) {
             nbCameraShot_PullOne_Calc(camera, 0.25f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(87) && pNbCamera.state != 7) {
+        } else if (frame == 87 && pNbCamera.state != 7) {
             info->ptr23 = 1;
             info->shot_23 = 1;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
@@ -5861,13 +5860,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0xA1:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(50)) {
+        if (frame < 50) {
             nbCameraShot_PullOne_Calc(camera, 0.5f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(50) && pNbCamera.state != 7) {
+        } else if (frame == 50 && pNbCamera.state != 7) {
             info->shot_23 = 15;
             info->ptr23 = 11;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
@@ -5881,13 +5880,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
         return 1;
     case 0xA3:
         if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < SDF_FRAMES(50)) {
+        if (frame < 50) {
             nbCameraShot_PullOne_Calc(camera, 0.149999995f);
             SetRotateMatrixY(0.006108651636f);
             SDF_VU0_LOADVECTOR(&camera->direction);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == SDF_FRAMES(50) && pNbCamera.state != 7) {
+        } else if (frame == 50 && pNbCamera.state != 7) {
             radius = effBTLModelGroupGetSphere(targetParty);
             height = effBTLModelGetGroupMaxHeight(targetParty);
             if (nbCameraBoss_CheckFix() && radius <= 700.0f && height < 500.0f) {
