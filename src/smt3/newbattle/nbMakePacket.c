@@ -1339,7 +1339,6 @@ s32 nbMakeUnitFadeOutPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern s32 mdlGetNumOfCut(struct mdlObj_t *model, s32 group);
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 extern s32 nbCheckDeadEvent(nbFormation_t *form);
@@ -1363,15 +1362,15 @@ s32 nbMakeDeadVisualPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form
         deadtype = 2;
     }
     switch (deadtype) {
-    case 0:
-        nbAddBadDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 0);
-        sound = 0x10000;
-        nbMakeUnitFadeOutPacket(startframe + 7, uniqueid, form, 0, 10, 10, 10);
-        break;
     case 1:
         nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 2, 2, 2);
         sound = 0x10004;
-        nbAddHitEffKoukaPacket(startframe + 1, uniqueid, form, 6);
+        nbAddHitEffKoukaPacket((s32)((u32)startframe + 1U), uniqueid, form, 6);
+        break;
+    case 0:
+        nbAddBadDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 0);
+        sound = 0x10000;
+        nbMakeUnitFadeOutPacket((s32)((u32)startframe + 7U), uniqueid, form, 0, 10, 10, 10);
         break;
     case 2:
         if (mdlGetNumOfCut(form->hunit->owner, 0) < 24) {
@@ -1382,26 +1381,35 @@ s32 nbMakeDeadVisualPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form
             nbAddMotionKoukaPacket(startframe, uniqueid, form, 1);
         }
         event = nbCheckDeadEvent(form);
-        sound = 0x10000;
         if (event != 0) {
+            u32 fadeStart;
+
             fadeTime = nbGetDeadEventFadeTime(event);
             fadeOut = nbGetDeadEventFadeOutFrame(event);
             fadeStop = nbGetDeadEventFadeStopFrame(event);
             fadeIn = nbGetDeadEventFadeInFrame(event);
-            nbAddFadeOutKoukaPacket(startframe + fadeTime, uniqueid, fadeOut, 1);
+            /* EE packet-frame arithmetic wraps modulo 2^32. */
+            fadeStart = (u32)startframe + (u32)fadeTime;
+            nbAddFadeOutKoukaPacket((s32)fadeStart, uniqueid, fadeOut, 1);
             if (fadeIn > 0) {
-                nbAddFadeInKoukaPacket(startframe + fadeStop + fadeOut + 2 + fadeTime,
+                u32 fadeInFrame = (u32)startframe + (u32)fadeStop;
+                u32 fadeOutWithGap;
+
+                /* Combine the fade-in base, fade-out gap and fade delay. */
+                fadeOutWithGap = (u32)fadeOut + 2U;
+                nbAddFadeInKoukaPacket((s32)(fadeInFrame + fadeOutWithGap + (u32)fadeTime),
                                        uniqueid, fadeIn, 1);
             }
-            nbAddDeadEventKoukaPacket(startframe + fadeTime + fadeOut + fadeStop - 3,
-                                      uniqueid, form, event);
+            nbAddDeadEventKoukaPacket(
+                (s32)(fadeStart + (u32)fadeOut + (u32)fadeStop - 3U), uniqueid, form, event);
         }
+        sound = 0x10000;
         break;
     }
     if (deadpcm != 0) {
-        nbAddDeadPcmPacket(startframe + 7, uniqueid, form);
+        nbAddDeadPcmPacket((s32)((u32)startframe + 7U), uniqueid, form);
         if (sound != 0) {
-            nbAddSePacket(startframe + 7, uniqueid, sound);
+            nbAddSePacket((s32)((u32)startframe + 7U), uniqueid, sound);
         }
     }
     if (form->stat & 0x100) {
@@ -1413,11 +1421,7 @@ s32 nbMakeDeadVisualPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDeadVisualPacket);
-#endif
 
-#ifdef NON_MATCHING
 extern s32 nbMakeFlyBadPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
 extern s32 nbMakeBadDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, u32 bad);
 
@@ -1425,7 +1429,8 @@ s32 nbMakeDamagePacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, s3
                        s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
                        s32 animeoff)
 {
-    s32 invisible = form->formindex >= 16;
+    s32 visible = form->formindex < 16;
+    s32 invisible = !visible;
     s32 numberFrame;
 
     if (!invisible) {
@@ -1441,24 +1446,36 @@ s32 nbMakeDamagePacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, s3
                 nbMakeFlyBadPacket(startframe, uniqueid, form);
                 break;
             default:
-                if (type >= 0 && type < 3) {
-                    nbAddDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 1);
-                } else if (type == 3) {
+                switch (type) {
+                case 3:
                     nbAddEasyDmgMotKoukaPacket(startframe, uniqueid, form, 10.0f);
                     nbAddSePacket(startframe, uniqueid, 0x10002);
+                    break;
+                case 0:
+                    nbAddDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 1);
+                    break;
+                case 1:
+                case 2:
+                    nbAddDmgMotKoukaPacket(startframe, uniqueid, form, 17.0f, 1);
+                    break;
                 }
                 break;
             }
         }
-        if (hiteff) {
-            if (type == 0 || type == 2) {
-                nbAddHitEffKoukaPacket(startframe, uniqueid, form, 0);
-            } else if (type == 1) {
-                nbAddHitEffKoukaPacket(startframe, uniqueid, form, 7);
-            }
+    }
+    if (hiteff && !invisible) {
+        switch (type) {
+        case 0:
+        case 2:
+            nbAddHitEffKoukaPacket(startframe, uniqueid, form, 0);
+            break;
+        case 1:
+            nbAddHitEffKoukaPacket(startframe, uniqueid, form, 7);
+            break;
         }
     }
-    numberFrame = startframe + animeoff + 1;
+    /* EE packet-frame additions preserve the low 32 bits. */
+    numberFrame = (s32)((u32)startframe + (u32)animeoff + 1U);
     if (hp >= 0 && mp >= 0) {
         if (!invisible && moji) {
             nbAddNumEffKoukaPacket(numberFrame, 45, uniqueid, form, hp, mp, 4);
@@ -1477,17 +1494,19 @@ s32 nbMakeDamagePacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form, s3
         nbAddHpMpKoukaPacket(startframe, uniqueid, form, -hp, 0);
     }
     if (moji) {
-        if (type == 1) {
+        switch (type) {
+        case 0:
+            break;
+        case 1:
             nbAddMojiEffKoukaPacket(numberFrame, 45, uniqueid, form, 2);
-        } else if (type == 2) {
+            break;
+        case 2:
             nbAddMojiEffKoukaPacket(numberFrame, 45, uniqueid, form, 1);
+            break;
         }
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeDamagePacket);
-#endif
 
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 

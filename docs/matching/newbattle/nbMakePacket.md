@@ -490,3 +490,50 @@ item-box match. Retail checksum/byte comparison, generated-source validation,
 EE/IRX checks and reconciled production reports pass. No source imports change.
 The production report credits only this 488-byte function: game totals become
 8,653 functions and 1,503,056 bytes. The final subsequent build has no work.
+
+## nbMakeDeadVisualPacket, nbMakeDamagePacket (newbattle/nbMakePacket, 0x2E8 / 0x410)
+
+446 of 446 words match in ordinary C across the two packet builders:
+186 words (744 bytes) and 260 words (1,040 bytes), respectively. No new compiler constraint,
+macro, flag, opaque declaration or provider substitution is retained.
+
+Damage keeps the signed type families as distinct switch arms, including
+separate type-0 and grouped type-1/2 animation calls. The type-3 arm precedes
+those bodies so the final ordinary-animation call falls into the next phase.
+Qualified stock scheduling/jump dumps of the earlier numeric-order control
+show its two animation calls merging into one at late jump optimization;
+that control is not the native body. The hit-effect gate remains a separate
+phase using the original visibility snapshot. The final message switch
+includes the real no-effect type-0 arm. Dead-path priority, all status cases,
+packet ordering, number kinds and the twelve-argument EE ABI are unchanged.
+The last one-word damage discrepancy was the dead-path branch's annul bit;
+it closes with the real, now-exact DeadVisual provider visible as C.
+
+DeadVisual retains the native case-1, case-0, case-2 layout and assigns the
+case-2 sound after the event/fade phase. Its actual timing components are
+named explicitly: fade-out start, the fade-in base and the two-frame
+fade-out gap. Two temporary empty-operand controls matched during the
+investigation. Removing either one alone left twelve differing words,
+while removing both also matched. The final source therefore retains only
+the ordinary timing locals. These measured compiler properties do not
+establish the original source spelling.
+
+Frame additions and subtractions use u32 arithmetic and the EE's s32
+conversion to preserve the native low 32 bits, including overflow inputs.
+HP/MP negation remains restricted to nonnegative values and needs no type
+change. The signed form-index snapshot, event and model reads, callback
+order, fresh post-callback status reads, shock strengths and durations are
+preserved. Neither function changes the movement draft or its hardware
+scratch contract.
+
+The complete owner reports 77 match, 0 differ. Production, SKIP_ASM and
+retained-C builds have full assembly and entire-ELF equality between the
+ordinary wrapper, direct stock compiler and selective-dump routes. The
+76/75/76 non-target emitted peers and all owned data are unchanged. After
+resolving relocations, every production allocated section is identical to
+the guarded owner, including all 16,308 text bytes; both production objects
+have 286 text and 53 rodata relocations. Uninitialized warnings are silent
+and preserve whole output in all three modes. Strict implicit-declaration
+checks retain the two preexisting fade-in/fade-out declarations missing
+from production/SKIP_ASM; retained-C strict compilation passes. This is not
+a claim that the entire owner is strict-warning-clean.
