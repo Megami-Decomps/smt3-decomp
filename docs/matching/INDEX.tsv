@@ -122,13 +122,13 @@ trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fc
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	56 of 74 words matching	docs/matching/facility/fclEncyc.md	3
 DebugProcMenu_fclEncyc	facility/fclEncyc	0x1A8	106 of 106 words match	docs/matching/facility/fclEncyc.md	22
-DrawRegistListwinElem	facility/fclEncyc	0x18C	71 of 99 words matching	docs/matching/facility/fclEncyc.md	72
-ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	96
-ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	131
-GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	168
-CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	191
-InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	218
-DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	318
+DrawRegistListwinElem	facility/fclEncyc	0x18C	99 of 99 words match	docs/matching/facility/fclEncyc.md	72
+ApplyEdgeListCursor	facility/fclEncyc	0xA8	42 of 42 words match	docs/matching/facility/fclEncyc.md	118
+ChangeModelMotion	facility/fclEncyc	0x104	65 of 65 words match	docs/matching/facility/fclEncyc.md	153
+GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/facility/fclEncyc.md	190
+CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	213
+InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	240
+DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	340
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	75

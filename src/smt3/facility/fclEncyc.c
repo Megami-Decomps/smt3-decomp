@@ -3352,14 +3352,16 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-/* NON_MATCHING: 83 of 99 words match at native 396-byte size. */
-#ifdef NON_MATCHING
 extern itfColor_t D_00330930;
 extern itfColor_t D_00330940;
 extern itfColor_t D_00330950;
 extern itfColor_t g_uv_summon_back[];
-void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
+void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
 {
+    /* Keep the live instance pointer in its native callee-saved register.
+     * This local allocation aid preserves fresh per-row texture reads; it
+     * is not evidence of the original source spelling. */
+    FAKEMATCH_ASM_REG(fclEncyc_instance_tag *, pinst, "$21") = instance;
     fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
     sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
     sdfIVector2_t pos[2];
@@ -3394,9 +3396,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *pinst)
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistListwinElem);
-#endif
+
 
 extern itfColor_t D_00332368;
 extern itfColor_t D_00332378;

@@ -71,27 +71,49 @@ landing. Exactly one game function and 424 bytes are added.
 
 ## DrawRegistListwinElem (facility/fclEncyc, 0x18C)
 
-The draft emits the native 396 bytes with 83 of 99 instruction words matching.
-It draws seven registration rows. The existing work record's `fonts[7]` starts
-at +0x11E0; the request at +0x11DC precedes that array and is not an eighth row.
-Each iteration reads the current texture handle for the background, then reads
-the font request after that draw callback. A non-null request receives two
-foreground sprites and a font draw. The tag is finally submitted through the
-ordering-table callback. The work view is captured before tag allocation.
+99 of 99 words match at the native 396-byte size. The complete owner checks
+117 match, 0 differ, preserving its 116 existing exact C functions and owned
+data. Exactly seven font entries begin at +0x11E0; the request at +0x11DC is
+not an eighth row.
 
-The font provider's native sign extension establishes its `s8` mode parameter;
-its existing font-unit declaration and native return paths establish
-`func_001C7E38(frFontHandle_t *, s8, u32) -> s32`. The owner declarations now
-agree with that contract, preserving all 105 normal C matches.
+Only the initialized instance pointer receives a local binding to native's
+callee-saved register. It feeds the pre-allocation work capture and each
+iteration's fresh texture read. Its lifetime genuinely spans the draw calls;
+the native prologue and epilogue preserve this register. No empty operand,
+artificial consumer, loop bound, type, provider or memory-access change is
+needed. This is a local compiler allocation aid, not recovered historical
+source spelling or a claim about an unobserved allocator decision.
 
-Sixteen words remain different at +0x20, +0x24, +0x28, +0x2C, +0x30, +0x34,
-+0x38, +0x3C, +0x48, +0x60, +0x68, +0x70, +0x74, +0x8C, +0xCC and +0x10C.
-The unresolved question is the native saved-register allocation and address /
-sprite-argument scheduling; the operations and frame size agree. A separate
-font-array cursor regressed to 71 of 99 words matching and was discarded.
-A default scratch promotion qualified the complete owner at 105 match / 1
-differ with this target as the sole difference. The retail build retains its
-assembly fallback.
+The ordinary promoted source gives 85/99 at 396 bytes. One empty live operand
+on the instance pointer gives 93/99, leaving only the instance/countdown
+register swap. Binding the pointer gives 99/99 with or without that operand,
+so the operand is removed. An explicit UV-pointer local regresses to 73/99
+and is not retained.
+
+Work remains captured before packet allocation; every font entry is read
+after its background draw. The loaded request survives the two foreground
+callbacks, and the next iteration reloads texture and font state. The font
+provider remains `s32 (frFontHandle_t *, s8, u32)` and the tag's ordering-table
+callback and argument order are unchanged. Independent native and semantic
+review confirms the register lifetime and seven-row accesses.
+
+Fifteen complete plain/dump/strict triples qualify the fallback, ordinary
+promoted source, final source and both constraint controls across production,
+SKIP_ASM and retained-C contexts. Entire assembly and ELF section headers and
+contents agree within each triple. The final preserves all 116 production
+and SKIP C peers and 121 retained C peers after generated local-label
+normalization. Against the ordinary promoted baseline, peer text and
+relocations, non-text allocated data and non-file symbols remain exact in
+all three modes. Target relocation positions change with the corrected
+setup ordering; whole-object identity with the old draft is not claimed.
+Native-compiler layout assertions confirm size 0x1200 and both font offsets.
+Aggregate retail and repository release gates remain separate.
+
+An independent extracted-actual-body oracle passes 65,536 callback-mutation
+cases at O2 and under ASan/UBSan. It verifies old-work capture, fresh texture,
+font and OT observations, retained requests across foreground callbacks and
+position mutation. This is host semantic evidence, not native execution.
+
 
 ## ApplyEdgeListCursor (facility/fclEncyc, 0xA8)
 
