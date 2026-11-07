@@ -390,6 +390,8 @@ segments:
       - [0x1F6680, data, data]
       - [0x218380, .data, effect/polyManager]
       - [0x2186C0, data, data_003176C0]
+      - [0x21EDD0, .data, effect/effPart]
+      - [0x220020, data, data_0031F020]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
