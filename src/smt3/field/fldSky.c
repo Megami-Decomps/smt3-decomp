@@ -1146,7 +1146,8 @@ void fldFreeMatterTable(void) {
     fldItemBoxObjBuf = 0;
 }
 
-f32 fldVecDot(sdfVector4_t *a, sdfVector4_t *b)
+/* The collision records' planes sit at 4 mod 16, after two s16 fields. */
+f32 fldVecDot(const sdfVector4Unaligned_t *a, const sdfVector4Unaligned_t *b)
 {
     return a->x * b->x + a->y * b->y + a->z * b->z;
 }

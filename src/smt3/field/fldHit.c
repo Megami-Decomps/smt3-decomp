@@ -58,7 +58,7 @@ extern void fldHitChkUnit(f32 *phys_pos);
 
 void fldFreeMatterTable(void);
 
-f32 fldVecDot(sdfVector4_t *a, sdfVector4_t *b);
+f32 fldVecDot(const sdfVector4Unaligned_t *a, const sdfVector4Unaligned_t *b);
 
 f32 MATH_VectorLength(sdfVector4_t *v)
 {

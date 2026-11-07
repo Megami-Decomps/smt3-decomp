@@ -262,7 +262,7 @@ void fldDrawPos(const f32 *pos);
 
 extern void fldStatusSet(void);
 
-f32 fldVecDot(sdfVector4_t *a, sdfVector4_t *b);
+f32 fldVecDot(const sdfVector4Unaligned_t *a, const sdfVector4Unaligned_t *b);
 
 extern s32 datAddHp(datUnitWork_t *work, s32 hp);
 
