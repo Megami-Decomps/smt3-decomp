@@ -1336,8 +1336,6 @@ s32 fldEsutoMaChk(void)
     return 0;
 }
 
-/* NON_MATCHING: 10 of 30 words differ (first at +0x2C). */
-#ifdef NON_MATCHING
 void fldAnahoriSelectInit(void)
 {
     s32 n = 0;
@@ -1361,14 +1359,15 @@ void fldAnahoriSelectInit(void)
             continue;
         }
         if (DDS3_GBWK->akuma[i].hp != 0) {
-            n++;
+            /* The real next count occupies the native conditional-move
+             * input. A local binding preserves that value's allocation;
+             * the ordinary spelling omits retail's comparison copy. */
+            FAKEMATCH_ASM_REG(s32, next, "$4") = n + 1;
+            n = next;
         }
     }
     gFldAnahoriAkumaIdxMax = n;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldMain", fldAnahoriSelectInit);
-#endif
 
 s32 fldAnahoriSelectGet(void)
 {

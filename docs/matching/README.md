@@ -37,7 +37,6 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
-| 5 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
@@ -45,6 +44,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
+| 4 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
@@ -81,6 +81,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
+| 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
@@ -134,7 +135,6 @@ both native and emitted sizes when they differ.
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
-| 1 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc-destroy.md](facility/fclEncyc-destroy.md) |
