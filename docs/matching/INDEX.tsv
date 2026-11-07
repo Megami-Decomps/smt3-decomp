@@ -147,6 +147,7 @@ DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	728 bytes		docs/matching/facility/fclShare.md	67
+fclDrawPhaseValue	facility/fclShare	380 bytes	95 of 95 words match	docs/matching/facility/fclShare.md	124
 shop_Process	facility/fclShopCalc	0x100	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	41
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3

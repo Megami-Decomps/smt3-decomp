@@ -120,3 +120,55 @@ nonzero versus direct flag tests; and hoisting the order-table pointer. Their
 old scores describe their historical compiler contexts, not fresh acceptance.
 Do not repeat that grid or infer original source spelling from a positional
 score. Any later live-X constraint must be isolated and independently qualified.
+
+## fclDrawPhaseValue (facility/fclShare, 380 bytes)
+
+95 of 95 words match in ordinary C. The function brackets two corner gradients
+with panel sprites 0x48 and 0x44. Real coordinate backing is u32 points[2][3],
+with three X values followed by three Y values. The separate three-color array
+contains the original color and its low byte twice. Every coordinate is set
+before its draw, while the same colors remain live across both draw calls.
+The actual cmpDrawTriG provider consumes exactly three elements from each row
+and color array without retaining their pointers. Matched fclDrawPanelType0Grad
+corroborates this genuine two-row layout; no fabricated bounds or padding
+ownership is introduced.
+
+The panel keeps signed 32-bit X/Y/Z and unsigned halfword width/height. Explicit
+u32 coordinate conversions preserve native modulo-32 add/subtract behavior for
+all signed coordinate patterns, including wrap at the endpoints. Real halfword
+storage bounds the dimension arithmetic: height*80 is at most 5,242,800 and
+width*16 at most 1,048,560. These signed products and positive quotients cannot
+overflow. A real signed height snapshot after the first triangle preserves
+native signed division by five. It does not move a read across that callback
+or invent negative heights.
+
+Geometry is read after the opening sprite callback and reloaded after the first
+triangle. Coordinates, height and depth therefore observe callback changes;
+color and ordering-table arguments remain original inputs. Call order, actual
+field widths, stack lifetimes and provider signatures are unchanged. No binding,
+empty operand, volatile qualifier, compiler option or dummy use is added.
+
+The target-active old draft emits 376 bytes. Genuine row backing establishes the
+native 12-byte row offset; direct geometry expressions reach 94/95 at 380 bytes.
+Capturing the actual signed height fixes the sole DIVU/DIV difference. Explicit
+unsigned coordinate arithmetic leaves exact output unchanged while removing
+signed-overflow exposure. These comparisons establish the source/output
+relation, not original spelling or an unobserved compiler-internal decision.
+
+Independent actual-body fixtures pass 363,516 cases each in optimized and
+ASan/UBSan builds, covering every u16 height, signed-word coordinate/depth
+extremes, colors, arguments and callback mutation. The fixture checks real rows,
+full draw arguments, call order and canaries. It models geometry and callback
+behavior, not PS2 rendering. Actual providers still require a valid ordering
+table and live runtime allocation; arbitrary argument bits in fixtures do not
+claim otherwise.
+
+Complete owner checks report 21 match, 0 differ. All 23 production, 20 SKIP_ASM
+and 23 retained peers, owned data and resolved call contracts remain unchanged,
+including prior sprite coordinate/depth repairs. Five controls across three
+modes have 15 strict whole-assembly and raw-ELF plain/dump parity pairs, with
+canonical-wrapper equality apart from the source filename. Resolved compiler,
+assembler, QEMU and loader/runtime inputs are included in the corrected
+334-file stable closure. Current-base integration additionally verifies unchanged
+provider bodies and compilation inputs, fresh final three-mode parity, and
+complete artifact identity before full repository gates.

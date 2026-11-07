@@ -496,48 +496,33 @@ typedef struct
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
-#ifdef NON_MATCHING
 void fclDrawPhaseValue(void *work, s32 color, s32 ot)
 {
     fclPhasePanel_t *panel = work;
-    u32 xs[3];
-    u32 ys[3];
+    u32 points[2][3];
     u32 colors[3];
-    s32 depth;
-    s32 right;
-    s32 y;
     s32 height;
-
     fclDrawPanelSprite2(0x48, ot);
-    height = panel->height;
-    depth = height * 80 / 100;
-    right = panel->x + panel->width * 16;
-    y = panel->y;
     colors[0] = color;
     colors[1] = color & 0xFF;
     colors[2] = color & 0xFF;
-    xs[0] = right;
-    xs[1] = right;
-    xs[2] = right - depth * 16;
-    ys[0] = y;
-    ys[1] = y + depth * 8;
-    ys[2] = y;
-    cmpDrawTriG(xs, ys, panel->z, colors, ot);
-
+    points[0][0] = (u32)panel->x + panel->width * 16;
+    points[1][0] = panel->y;
+    points[0][1] = (u32)panel->x + panel->width * 16;
+    points[1][1] = (u32)panel->y + (panel->height * 80 / 100) * 8;
+    points[0][2] = (u32)panel->x + panel->width * 16 - (panel->height * 80 / 100) * 16;
+    points[1][2] = panel->y;
+    cmpDrawTriG(points[0], points[1], panel->z, colors, ot);
     height = panel->height;
-    y = panel->y;
-    xs[0] = panel->x;
-    xs[1] = panel->x + (height * 80 / 100) * 16;
-    xs[2] = panel->x;
-    ys[0] = y + height * 8;
-    ys[1] = y + height * 8;
-    ys[2] = y + (height / 5) * 8;
-    cmpDrawTriG(xs, ys, panel->z, colors, ot);
+    points[0][0] = panel->x;
+    points[1][0] = (u32)panel->y + height * 8;
+    points[0][1] = (u32)panel->x + (height * 80 / 100) * 16;
+    points[1][1] = (u32)panel->y + height * 8;
+    points[0][2] = panel->x;
+    points[1][2] = (u32)panel->y + (height / 5) * 8;
+    cmpDrawTriG(points[0], points[1], panel->z, colors, ot);
     fclDrawPanelSprite2(0x44, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseValue);
-#endif
 
 
 extern s32 D_00345D88[];
