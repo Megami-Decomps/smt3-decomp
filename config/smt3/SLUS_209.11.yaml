@@ -388,6 +388,8 @@ segments:
       # .ctors + .dtors (both ffffffff 00000000) + .reginfo, then zeros to .data.
       - [0x1F6600, databin, ctors_dtors_reginfo]
       - [0x1F6680, data, data]
+      - [0x218380, .data, effect/polyManager]
+      - [0x2186C0, data, data_003176C0]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
