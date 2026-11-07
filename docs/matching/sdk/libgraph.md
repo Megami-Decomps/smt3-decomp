@@ -53,7 +53,8 @@ moves.
 
 ## sceGsSetDefDispEnv (0x374)
 
-892 bytes against retail's 888, with the first 64 words exact. The assembler
+892 bytes against retail's 884 instruction bytes, with the first 64 words exact.
+The four-byte nop after the native extent is alignment, not target code. The assembler
 pin does not touch this one: it has no unfilled delay slot. Matched: the
 `sceGsGetGParam` call kept external, the `mode == 2 || mode == 3` range test,
 the `checkModelVersion` path, the `_GetGsDxDyOffset` call with the four frame
@@ -170,3 +171,35 @@ rejected: native has one switch with branch-local calculations. Native
 entry initialization improves code correspondence, but does not close the
 remaining register allocation. Do not add volatile scratch storage or
 instruction shims to force the already reproduced quadword operations.
+
+### Display product/base lifetime controls (closed negative)
+
+The native constructor truncates format, width, height and both offsets to
+signed 16 bits on entry. Its width quotient feeds two real signed 32-bit
+products before becoming magnification minus one. Separately, the signed
+32-bit syscall output is sign-extended before the native 64-bit horizontal
+base addition. The four syscall output addresses still name four-byte words;
+this is not a widened memory-output ABI.
+
+Explicit product phases emit 916 bytes; a constraint on the initialized
+wide base emits 892. Binding the real quotient within its no-call branch
+emits 900. The best tested corrected-base binding emits 892 bytes with
+84 of 221 native-position words equal. All ten matching peers remain exact.
+The diagnostic string must be restored as its native literal when the target
+is activated, because the removed fallback had owned it; corrected complete
+owner checks have no data diagnostic. These controls are private negatives.
+
+The actual DISPLAY consumer transfers the entire 64-bit word to the GS.
+Native assembly combines pack terms with whole-word OR, without masking each
+hardware field individually. C bitfields would lose native spill bits and
+are not a truthful replacement. An arithmetic model covers all 65,535 nonzero
+signed-16 widths and 3,932,100 horizontal edge cases, including full signed-32
+syscall offsets. It proves the tested horizontal low-12-bit equivalence, not
+actual syscall outputs or the whole constructor. Width zero remains native's
+division-trap case.
+
+Unchanged vertical and mode-80 expressions still need an explicit overflow
+audit for arbitrary syscall outputs; no unsupported range assumption makes
+these candidates semantically qualified. No source, provider, flags or
+ownership changes are promoted. A new control needs evidence beyond this
+product/base/quotient family.

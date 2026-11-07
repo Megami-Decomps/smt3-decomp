@@ -54,6 +54,7 @@ cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_
 cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1525
 cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1565
 cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1625
+cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1691
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -187,6 +188,7 @@ fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md
 fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
+fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	68
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
 fldSetupDoorScenes	field/fldWap	0xBC8	754 of 754 words match	docs/matching/field/fldWap.md	3
 fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
@@ -312,6 +314,7 @@ nbDrawKoukaSprite	newbattle/nbMisc	0x108	66 of 66 words	docs/matching/newbattle/
 nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/matching/newbattle/nbNegoProcess.md	3
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76
+nbGetQuestionType	newbattle/nbNegoProcess	0x25C	100 of 151 words match	docs/matching/newbattle/nbNegoProcess.md	122
 nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
@@ -449,13 +452,14 @@ _sceCd_scmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/
 _sceCd_ncmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	209
 sceDmaPutEnv			15 of 118 words differ	docs/matching/sdk/libdma.md	3
 __do_global_ctors	sdk/libgcc	0xC0		docs/matching/sdk/libgcc.md	3
+__muldi3	sdk/libgcc	0x74	0 of 29 words match	docs/matching/sdk/libgcc.md	65
 __umoddi3	sdk/libgcc_longlong	0x568	130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	3
 __moddi3	sdk/libgcc_longlong	0x690		docs/matching/sdk/libgcc_longlong.md	33
 __errno_8	sdk/libgcc_longlong_tail	0xC	3 of 3 words match	docs/matching/sdk/libgcc_longlong.md	67
 sceGsResetPath	sdk/libgraph	0x68		docs/matching/sdk/libgraph.md	3
 sceGsSyncPath	sdk/libgraph	0x314		docs/matching/sdk/libgraph.md	23
 sceGsSetDefDispEnv (0x374)				docs/matching/sdk/libgraph.md	54
-sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	87
+sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	88
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	43
 sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59

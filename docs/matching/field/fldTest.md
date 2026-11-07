@@ -64,3 +64,26 @@ allocation differences. A one-pass timer block does not improve the two-word
 residual and is not retained. Those ordinary-C trials used no artificial
 dependency or compiler flag. The map-cell fields and target-coordinate/pointer
 view are corroborated by `fldFindMapCell` and `fldRunAiCng`.
+
+## fldRunEffTask (field/fldTest, 0x220)
+
+A private native-sized control represents the actual two-table traversal
+with an independent typed cursor and remaining-table countdown. It retains
+21 of 136 words matching, the same as the target-active baseline. One
+localized constraint on the initialized, genuinely consumed countdown reaches
+22 words. Both remain 544 bytes and both reproduce the known two-load
+fldRunDantePatr peer regression. Production output independently confirms
+that regression: a target score alone cannot qualify this owner.
+
+Seven declaration corrections to the actual effect/part providers were
+isolated in a separate guarded control. Complete assembly and ELF objects
+are unchanged in production, SKIP_ASM and retained contexts, after the sole
+equal-length source-filename normalization; the guarded owner remains 38/0.
+These private corrections are not a new allocation premise or a publication
+of the nonmatching loop. Canonical source is unchanged.
+
+The private compiler harness was checked at the canonical relative source
+and output filename lengths. Changing those lengths can change this old
+compiler's output, so an absolute-path diagnostic is not production proof.
+Further work needs evidence beyond the closed cursor/countdown controls and
+the unrelated already-studied TamaFree scheduling family.

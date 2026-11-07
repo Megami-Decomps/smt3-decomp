@@ -61,3 +61,30 @@ corroborates the two-width count/index idiom, and
 [libgcc2.c](https://github.com/gcc-mirror/gcc/blob/releases/gcc-2.95/gcc/libgcc2.c#L2715-L2720)
 corroborates the void wrapper and exit registration. Those references are
 historical leads, not proof of Sony's exact patched source or original spelling.
+
+## __muldi3 (sdk/libgcc, 0x74)
+
+The assembly-only helper returns the low 64 bits of the product of its two
+64-bit arguments. A private ordinary-C reconstruction uses four unsigned
+16-by-16 partial products for the low-word product, two unsigned 32-bit
+cross products, and unsigned carry propagation. It never multiplies two
+64-bit C operands. This matters because that apparent simplification lowers
+to a recursive call to the very helper being reconstructed.
+
+The limb control is a call-free leaf under the configured compiler, but emits
+136 bytes against 116 native bytes: 0 of 29 words match within the native
+extent, with 20 excess bytes.
+All 37 existing matching peers and 240 bytes of owned rodata are preserved.
+The source remains private and the assembly fallback remains unchanged.
+
+Independent arithmetic review proves the modulo-2^64 result for all input
+bits and bounds both carry stages. Native dpmul and _strtol_r consume the
+full-width result. Actual-body tests pass 1,000,100 cases in each optimized
+and ASan/UBSan run; an independent UBSan oracle passes 1,008,388 cases. Leak
+checking was disabled for the ASan run because of the execution environment.
+These are source-semantic checks, not native execution or a matching claim.
+
+The remaining problem is a justified nonrecursive widening lowering. The
+native insertion sequence also carries dead incoming register bits that the
+ordinary body does not fabricate. Do not repeat the closed recursive widening
+control, invent that state, or replay scalar instructions to claim a match.

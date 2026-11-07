@@ -118,3 +118,38 @@ all 43 peers and owned data. Retail checksum, 427 tests, 148 guarded owners /
 `f6985edbf85ccfed618748bc1a327ac6094fdde0`. Exact-source CI
 [41070334139](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41070334139)
 completed successfully, with every actual step passing and none skipped.
+
+## nbGetQuestionType (newbattle/nbNegoProcess, 0x25C)
+
+A private ordinary-C control reaches the native 604-byte extent.
+100 of 151 words match, up from 612 bytes and 13 matching words.
+Its real private-selection sum is initialized before the RNG call; the two
+ordinary RNG arms converge on one acceptance Boolean, and the final weighted
+selection shares its result return. Unsupported volatile pointer reads are
+removed. All 44 matching peers and owned data remain exact. Canonical source
+and its fallback are unchanged; these counts describe the private control.
+
+Native access order was checked independently against a fresh target compile.
+The private row is captured before RNG, but its weights are read afterward.
+The ordinary accepted path reloads DDS3_GBWK after its first RNG call. Signed
+roll comparisons, byte reads, peculiar index exchanges, stack-weight stores
+and both return paths are preserved. Do not replace the exchange logic with
+a conventional sort: it swaps indices differently from that algorithm.
+
+D_003E2508 occupies 48 bytes, twelve four-byte slots including the final zero
+slot. All initialized private records in the 384-entry master_text select
+row zero. Final actual-body fixtures use those exact retail table bytes and
+records, exercise callback mutations, and pass 200,000 cases in each optimized
+and ASan/UBSan run. Earlier enlarged synthetic tables are not evidence of a
+valid native row domain. Supplemental reviewer stress covers the actual
+twelve-slot extent and arbitrary RNG bit patterns, not additional retail
+rows. Leak checking is disabled for the environment; target access/ABI proof
+comes from the emitted EE code rather than host pointer behavior.
+
+The remaining 51 words concern allocation and private-loop/swap scheduling.
+Binding the actual sum to its native saved register worsens the result and
+is rejected. No dummy use, artificial bound, extra initializer or opcode
+replay is justified. Strict SKIP_ASM checking encounters the inherited
+nbPlayMotionSe block-scope declaration issue in both target-active and
+unchanged owners. A separate true NON_MATCHING plus SKIP_ASM check of the
+canonical owner passes; do not conflate those compilation contexts.

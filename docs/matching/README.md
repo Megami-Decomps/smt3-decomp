@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 42 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 43 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 21 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
@@ -42,6 +42,7 @@ both native and emitted sizes when they differ.
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
+| 4 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -54,7 +55,6 @@ both native and emitted sizes when they differ.
 | 3 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 3 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
-| 3 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 3 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
@@ -73,6 +73,7 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 2 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
@@ -85,6 +86,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
+| 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
@@ -98,7 +100,6 @@ both native and emitted sizes when they differ.
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
-| 1 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
@@ -133,7 +134,6 @@ both native and emitted sizes when they differ.
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
-| 1 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |

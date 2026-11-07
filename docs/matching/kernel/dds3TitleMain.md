@@ -43,3 +43,43 @@ this is reported as needing a dedicated word-by-word pass per case body rather
 than fixed outright. The assembly fallback remains production in the matching
 build either way; this note exists so the next pass does not have to re-derive
 the jump-table grouping check from scratch.
+
+### Current-owner follow-up (2026-11-07)
+
+A fresh check on `a8e279a` reproduces the current guarded draft at 3336 bytes,
+307 matching and 527 differing overlap words. The historical claim reporting
+839/840 words is not reproduced: its private source is absent from the restored
+workspace. Do not use that score as the current baseline.
+
+Native mode 28 is an explicit no-op handoff state: the unsigned bound is 29,
+and table entry 28 targets the common return at `0x228638`. Case 21 writes 28
+after the administrative sequence calls. An explicit case restores the table's
+29-entry extent. Separating cases 18 and 22 also removes the saved dispatch-mode
+lifetime while preserving their different post-callback transitions. Case 18
+increments the freshly observed mode; case 22 writes literal 19. Their draw
+callback can change the work pointer or mode, so they must not both assign 19.
+The current merged draft already preserves this distinction.
+
+The provider audit found three inherited declaration discrepancies:
+`dds3PlayMovieByIndex` and `p2sdPlayBGM` are `void(s32)` in their canonical
+providers, not `s32(s32)`, and `dds3AdminiCallSequence` takes an unsigned 32-bit
+size. The title calls ignore both returns and pass zero sizes. Correcting the
+movie declaration changes scheduling substantially: a private case-local
+reconstruction with the old declaration emits 3368 bytes, but the truthful
+version emits 3328 bytes, with 286 matching/546 differing overlap words and
+32 uncovered native bytes. All 11 peers remain exact. Its 29-entry table still
+has 20 differing destination addresses; it is not an exact owner/data result.
+No source change was promoted, and production retains assembly.
+
+All current title helpers are external to this owner. The older visibility
+experiment therefore does not establish a current same-unit dependency, even
+under the newer conservative ABI-view allowance. No false return declaration,
+provider move, or owner change is justified by that historical score.
+
+The reconstruction retains signed fields and pad tests, modular timer/alpha
+arithmetic, frame-count capture before movie-wait calls, and fresh observations
+after callbacks. A bounded comparison of the actual baseline and reconstructed
+bodies passed 200000 callback-mutating cases in optimized and ASan/UBSan builds.
+This checks baseline equivalence and callback order, not exhaustive native
+execution or callback arguments. Broad register, store and tail-sharing
+residuals remain; further work needs a new native/control premise.
