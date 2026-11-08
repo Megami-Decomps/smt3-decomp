@@ -358,7 +358,7 @@ void ragDrawHeartsList(s8 mode)
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel(&ragDrawWork->panel[2]);
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8B8),
+    trmDrawListText(&pos, ragExchangeTitle[0],
                     ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawHeartsRows(&ragDrawWork->list.heartWindow,
                       0, rows, mode, 0x47);
@@ -380,7 +380,6 @@ void ragDrawHeartsList(s8 mode)
 
 extern void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot);
 
-extern char *D_003305E8[];
 
 extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 extern void fclUpdatePanel(fclPanel_t *pPanel);
@@ -396,7 +395,7 @@ void ragDrawList2(s8 mode)
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, *(char **)(ragHeartsTable + 0x8BC), ragDrawWork->texHandle, D_003306B8, 0x47);
+    trmDrawListText(&pos, ragExchangeTitle[1], ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x2314), 1, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
@@ -417,7 +416,7 @@ void ragDrawList3(s8 mode)
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_003305E8[0], ragDrawWork->texHandle, D_003306B8, 0x47);
+    trmDrawListText(&pos, ragExchangeTitle[2], ragDrawWork->texHandle, D_003306B8, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x34AC), 2, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),

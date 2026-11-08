@@ -489,7 +489,7 @@ void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
     s32 i;
 
     ragCreateAllList(0, type, work);
-    fclInitCursorWindow((u8 *)work + 0x13C, ragHeartsTable + 0x8A0, 5);
+    fclInitCursorWindow((u8 *)work + 0x13C, ragMenuText, 5);
     fclSetCursorList((u8 *)work + 0x13C, 0x19);
     memset(ragListFlags, 0, sizeof(ragListFlags));
     printf(D_0054FB88);

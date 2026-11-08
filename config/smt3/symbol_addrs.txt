@@ -293,7 +293,8 @@ codefunc = 0x002FA528; // type:u32 size:0xa0
 dds3BasicFuncTablePtr = 0x002FA5C8; // type:u32 size:0x44
 fldInfTable = 0x002FF420; // type:u8 size:0x3b80
 EffMajorTable = 0x00316EF0; // size:0xf0
-BillboardTable = 0x00316FF4; // type:u16 size:0x3c
+D_00316FF0 = 0x00316FF0; // type:u32 size:0x4
+BillboardTable = 0x00316FF4; // type:u32 size:0x3c
 dds3BillboardFuncTable = 0x00317080; // size:0x2c
 dds3ParticleAllBuffInitTable = 0x00317310; // type:u32 size:0x34
 dds3ParticleSetScaleTable = 0x00317348; // type:u32 size:0x34
@@ -683,10 +684,10 @@ sdfSndTransBuf = 0x00592840; // type:u32 size:0x10
 
 // words3
 fldSdwTriIndices = 0x002FBDC0; // type:u16 size:0x40
-D_00320420 = 0x00320420; // type:u8 size:0x138
-D_00320598 = 0x00320598; // type:u8 size:0x198
-D_00320870 = 0x00320870; // type:u8 size:0x100
-D_003209B0 = 0x003209B0; // type:u8 size:0x198
+D_00320420 = 0x00320420; // type:u32 size:0x138
+D_00320598 = 0x00320598; // type:u32 size:0x198
+D_00320870 = 0x00320870; // type:u32 size:0x100
+D_003209B0 = 0x003209B0; // type:u32 size:0x198
 datDevilTable = 0x003497C0; // type:u8 size:0x5A00
 datSkillTable = 0x003D7998; // type:u8 size:0x4B00
 
@@ -1085,9 +1086,9 @@ D_00317380 = 0x317380; // type:u8 size:0x80
 D_003176A0 = 0x3176A0; // type:u32 size:0x10
 
 // narrow WORDS
-D_0032C4E0 = 0x0032C4E0; // type:u16 size:0x30
-D_0032C548 = 0x0032C548; // type:u16 size:0x10
-D_0032C5B8 = 0x0032C5B8; // type:u16 size:0x30
+D_0032C4E0 = 0x0032C4E0; // type:u32 size:0x30
+D_0032C548 = 0x0032C548; // type:u32 size:0x10
+D_0032C5B8 = 0x0032C5B8; // type:u32 size:0x30
 D_00531040 = 0x00531040; // type:u8 size:0x10
 D_005317B0 = 0x005317B0; // type:u8 size:0x10
 fldItemBoxAddScale = 0x005326F0; // type:u8 size:0x10
@@ -1096,17 +1097,16 @@ D_0053D6E8 = 0x0053D6E8; // type:u8 size:0x20
 D_0053D828 = 0x0053D828; // type:u8 size:0x10
 D_0053DA18 = 0x0053DA18; // type:u8 size:0x10
 D_0053F408 = 0x0053F408; // type:u8 size:0x10
-D_005431F0 = 0x005431F0; // type:u8 size:0x10
+D_005431F0 = 0x005431F0; // type:u32 size:0x10
 D_005438B0 = 0x005438B0; // type:u8 size:0x10
 D_00544E38 = 0x00544E38; // type:u8 size:0x10
-D_00545698 = 0x00545698; // type:u8 size:0x18
+D_00545698 = 0x00545698; // type:u32 size:0x18
 D_005487E8 = 0x005487E8; // type:asciz size:0x10
 D_005487F8 = 0x005487F8; // type:u32 size:0x10
 D_00548910 = 0x00548910; // type:u8 size:0x10
 D_0054FD18 = 0x0054FD18; // type:u8 size:0x8
 
 // IN_GAP chained gap words
-D_003305E8 = 0x003305E8; // size:0x4
 D_0054FD20 = 0x0054FD20; // size:0x4
 D_0054FD24 = 0x0054FD24; // size:0x4
 
@@ -10752,7 +10752,7 @@ effBTLSysReturnTable = 0x0031C360; // size:0x38
 effBTLSysAttackTable = 0x0031C440; // size:0x38
 effBTLSysAttackCTable = 0x0031C478; // size:0x38
 effBTLSysEncountTable = 0x0031C4B0; // size:0x38
-effBTLSystemCut1Data = 0x0031C590; // type:u8 size:0x1F4
+effBTLSystemCut1Data = 0x0031C590; // type:u32 size:0x1F4
 dds3EffectFuncTable = 0x0031DE40; // size:0x118
 EffectPCPFuncTable = 0x0031DF90; // size:0x28
 effPCPThunderPolyTable = 0x0031DFB8; // size:0x28
@@ -10896,7 +10896,9 @@ D_0032FA98 = 0x0032FA98; // type:u16 size:0xB8
 D_0032FB50 = 0x0032FB50; // type:u16 size:0x70
 shopSpriteTable = 0x0032FBC0; // size:0x8
 gCommandFlag_0 = 0x0032FC30;
-ragHeartsTable = 0x0032FD28; // type:u8 size:0x8C0
+ragHeartsTable = 0x0032FD28; // type:u8 size:0x8A0
+ragMenuText = 0x003305C8; // type:u32 size:0x18
+ragExchangeTitle = 0x003305E0; // type:u32 size:0x10
 D_003305F0 = 0x003305F0; // type:u16 size:0x80
 D_00330670 = 0x00330670; // type:u16 size:0x48
 rcv_data = 0x003306D0; // type:u32 size:0x1C
