@@ -87,7 +87,7 @@ void fldMakeEveHitPlanes(f32 *vertices, f32 *normalX, f32 *normalY, f32 *normalZ
     *normalX = (secondPoint.y - firstPoint.y) * (thirdPoint.z - secondPoint.z) - (secondPoint.z - firstPoint.z) * (thirdPoint.y - secondPoint.y);
     *normalY = (secondPoint.z - firstPoint.z) * (thirdPoint.x - secondPoint.x) - (secondPoint.x - firstPoint.x) * (thirdPoint.z - secondPoint.z);
     *normalZ = (secondPoint.x - firstPoint.x) * (thirdPoint.y - secondPoint.y) - (secondPoint.y - firstPoint.y) * (thirdPoint.x - secondPoint.x);
-    inverseLength = 1.0f / fsqrtf(*normalX * *normalX + *normalY * *normalY + *normalZ * *normalZ);
+    inverseLength = ffdivf(1.0f, fsqrtf(*normalX * *normalX + *normalY * *normalY + *normalZ * *normalZ));
     *normalX = *normalX * inverseLength;
     *normalY = *normalY * inverseLength;
     *normalZ = *normalZ * inverseLength;
