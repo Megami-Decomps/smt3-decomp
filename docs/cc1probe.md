@@ -70,6 +70,77 @@ supplies that property. Follow the [canonical matching policy](CONTRIBUTING.md#m
 The complete-unit check and full retail checksum remain necessary after a
 source change; a neutral observation is not a matching result.
 
+## Stock dumps and exact-binary inspection
+
+Stock dumps can settle a compiler question without an execution observer.
+Capture the wrapper's actual source/output paths and resolved compiler and
+assembler commands, then replay plain, dump and strict retained-C builds at
+those paths. Compare complete assembly and raw assembled objects within each
+context. Preserve production, `SKIP_ASM` and retained-C contexts separately;
+do not normalize away differing instructions, data or relocations. Freeze the
+source, generated inputs, compiler and actual runtime before and after.
+
+The pinned 2.96 executable also retains STABS source lines, local names and
+structure information. Static disassembly can identify an exact branch or
+field in that executable. It cannot establish a runtime argument, cache hit
+or intermediate instruction order. Correlate it with qualified stock output,
+and state which facts remain unobserved rather than substituting a nearby
+upstream GCC implementation.
+
+### Empty constraints still spend scheduler issue slots
+
+In the qualified `ActionZMotion` reconstruction, the first-product empty
+operand has no functional unit and emits no opcode, but consumes the second
+issue slot in a two-slot scheduler cycle. The already-ready offset store must
+wait. In the next cycle the Y product's arithmetic critical-path priority
+beats the store, leaving the two native instructions exchanged.
+
+The pinned `schedule_block` decrements `can_issue_more` for that scheduled RTL
+instruction. Its lack of emitted bytes does not exempt it from the issue
+budget. Before adding another operand constraint, inspect the actual ready
+queue, release times, issue budget and consumer priorities. A constraint can
+fix one ordering and introduce another. Removing an operand that has become
+redundant is a useful paired control; adding fabricated dependencies is not.
+
+### Equal priority does not identify the deciding tie-break
+
+The shaped-model packet's post-call return copy and VIF constant can be ready
+together with equal priorities and successor sets. In the pinned comparator,
+their dependence classes relative to the last scheduled call decide the
+order before successor count or final instruction order: the true cost-one
+return edge outranks the zero-cost anti-dependence. Post-reload comparison
+skips the register-weight tier.
+
+An actual return-value operand changed this case's release/issue sequence and
+recovered the native VIF-before-copy order, while introducing other scheduling
+differences. It remained nonmatching. This is a causal source lead, not a
+general remedy or evidence of the original spelling. Similarly, work released
+within a cycle can issue before the next sorted ready-list boundary; do not
+infer a sorted tie from the final instruction order alone.
+
+### Delay-resource masks need their actual provenance
+
+The pinned call-resource collector can omit a call argument `USE` when its own
+delay slot has a `SET` to an equal destination, subject to the compiler's full
+RTL equality test. However, its forward dead/set scan checks `can_throw`
+first. A call without `REG_EH_REGION` can stop that scan before either the
+argument use or the slot definition is processed, including inside a
+`SEQUENCE`.
+
+The live-resource helper also uses cached masks and barrier-based block
+discovery followed by simulation. A displayed basic-block live-in set alone
+does not establish the mask used by an annul decision. The `frAnalyzeTag`
+audit identifies these exact-binary paths but leaves the deciding mask,
+cache state and intermediate order unobserved. It does not justify fake
+liveness, a `nothrow` declaration, or moving a provider into the caller's unit.
+
+For a different class of residual, the SDK compiler's first CSE changes
+`sceCdStRead`'s literal-zero early return to a copy of the tested hard register
+known to contain zero. That wrong native word exists before scheduling.
+Paired stock dumps qualify this SDK observation independently; the 2.96
+probe's hooks do not apply to the SDK compiler. Locate the first differing
+pass before trying another scheduling control.
+
 ## Wrapper qualification
 
 On `src/smt3/kernel/dds3Randomize.c`, all decision families ran with identical
