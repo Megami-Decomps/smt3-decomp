@@ -956,18 +956,16 @@ s32 frGetYShiftLev(s8 Style, s32 FontNo) {
     return 0x18;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 12 PCSX2 call vectors give the same return and memory,
- * battle unknown realm, field underground facility, field unknown realm, menu main savestates, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-extern s32 D_0054F414;
+extern u32 D_0054F414;
 
 void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
 {
     frFontData_t *entry;
-    s32 fontIndex;
+    s32 entryIndex;
+    u8 fontIndex;
     u8 flags;
-    s32 defaultSlot = 0;
+    /* Local target allocation aid for the live mode across the two calls. */
+    FAKEMATCH_ASM_REG(s32, defaultSlot, "s2") = 0;
     s32 baseWidth;
     s32 metricCodeIndex;
     s32 leftOffset;
@@ -976,15 +974,15 @@ void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
     s8 right;
     f32 scale = 1.0f;
 
-    fontIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
-    switch (fontIndex) {
+    entryIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
+    switch (entryIndex) {
     case 0:
     case 1:
         defaultSlot = 1;
         break;
     }
-    entry = &gFT.entries[fontIndex];
-    glyph->cellDimensions.cellWidth = frGetDefaultFontWidth(fontIndex);
+    entry = &gFT.entries[entryIndex];
+    glyph->cellDimensions.cellWidth = frGetDefaultFontWidth(entryIndex);
     glyph->cellDimensions.cellHeight = frGetDefaultFontHeight(
         glyph->renderValueOrSetupOrShade.setupBytes.fontIndex);
 
@@ -997,17 +995,44 @@ void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
     }
 
     flags = glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags;
-    if (defaultSlot != 0 && glyph->glyphCodeOrContext.glyphCode < 0x80) {
-        glyph->advance = baseWidth >> 1;
+    /* Mechanistic reconstruction, not recovered original branch spelling:
+     * the qualified cc1 trace deletes these equal arms in jump2 while retaining
+     * the native flags & 2 mask; dbr places it in the defaultSlot delay slot.
+     * Exactly one copy of the same real half-width calculation executes. */
+    if ((flags & 2) != 0) {
+        if (defaultSlot != 0 && glyph->glyphCodeOrContext.glyphCode < 0x80) {
+            glyph->advance = baseWidth >> 1;
+        }
+    } else {
+        if (defaultSlot != 0 && glyph->glyphCodeOrContext.glyphCode < 0x80) {
+            glyph->advance = baseWidth >> 1;
+        }
     }
 
     if (glyph->glyphCodeOrContext.glyphCode == 0x20) {
-        fontIndex = ((volatile frTextHandle_t *)glyph)->renderValueOrSetupOrShade.setupBytes.fontIndex;
-        if (fontIndex == 1 || fontIndex == 0) {
-            glyph->advance = (glyph->advance >> 1) + D_0054F414;
-            return;
+        /* Keep the actual reloaded width and wrapped result in the native
+         * registers. These values are local to this path and cross no call. */
+        FAKEMATCH_ASM_REG(s32, spaceWidth, "v0");
+        FAKEMATCH_ASM_REG(s32, spaceAdvance, "v1");
+        /* Native reload and load-before-constant scheduling on the real byte;
+         * the memory operand is not a general memory barrier. */
+        FAKEMATCH_ASM_LIVE_MEM(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex);
+        fontIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
+        FAKEMATCH_ASM_LIVE_VOLATILE(fontIndex);
+        if (fontIndex == 1) {
+            spaceWidth = glyph->advance;
+        } else if (fontIndex == 0) {
+            spaceWidth = glyph->advance;
+        } else {
+            goto notSpace;
         }
+        /* The provider stores an arbitrary u32; preserve native wrapping. */
+        spaceAdvance = (spaceWidth >> 1) + D_0054F414;
+        FAKEMATCH_ASM_LIVE(spaceAdvance);
+        glyph->advance = spaceAdvance;
+        return;
     }
+notSpace:
 
     if (shiftIndex == 0x2C1) {
         glyph->advance -= 7;
@@ -1038,11 +1063,6 @@ void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
     glyph->advance = advance;
     glyph->x = -leftOffset;
 }
-
-
-#else
-INCLUDE_ASM(const s32, "interface/frFont", frGetXShiftLev);
-#endif
 
 /* Create a glyph wrapper for source and append it to an optional destination chain. */
 frFontHandle_t *frSetUserImage(GsFont_t *pFont, frFontHandle_t *pFRQ) {
