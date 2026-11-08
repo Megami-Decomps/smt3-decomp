@@ -1045,9 +1045,16 @@ notSpace:
     }
 
     shiftIndex = (s32)((u32)shiftIndex << 1);
+#ifdef FIX_BUGS
+    /* BUG: a control code below 0x20 gives a negative index that passes the signed check. */
+    if ((u32)shiftIndex >= (u32)entry->metricByteCount) {
+        return;
+    }
+#else
     if (shiftIndex >= entry->metricByteCount) {
         return;
     }
+#endif
     right = entry->prop[shiftIndex + 1];
     if (right == 0) {
         return;
@@ -1146,6 +1153,12 @@ u8 *frDecodeFontImage(u8 Style, s32 FontNo) {
     u8 *clonedResource = sdfChipAllocDirect(FR_FONT_RESOURCE_CLONE_BYTES);
     frFontImage_t segments;
 
+#ifdef FIX_BUGS
+    /* BUG: a glyph the font lacks reads its bit range from past the offset table. */
+    if ((u32)FontNo >= entry->resourceHeader->widthCount) {
+        FontNo = 0;
+    }
+#endif
     frGetFontImagePtrs(entry->resource, &segments);
     frDecodeFontRow(clonedResource, FontNo, entry->resource, &segments);
     return clonedResource;
@@ -1155,9 +1168,17 @@ u8 *frDecodeFontImage(u8 Style, s32 FontNo) {
  * New records start with one reference; itemIndex is not bounds-checked. */
 GsFont_t *frTranslateFont2GS(frTextHandle_t *pText, s32 FontNo) {
     frFontData_t *entry = &gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex];
-    GsFont_t *cachedItem = entry->trans[FontNo];
+    GsFont_t *cachedItem;
     u8 *clonedResource;
 
+#ifdef FIX_BUGS
+    /* BUG: a glyph the font lacks (the untranslated debug text's kanji) reads
+     * past trans[] and increments a word of glyph data as a GsFont_t. Draw a space. */
+    if ((u32)FontNo >= entry->resourceHeader->widthCount) {
+        FontNo = 0;
+    }
+#endif
+    cachedItem = entry->trans[FontNo];
     if (cachedItem != NULL) {
         cachedItem->used_count++;
         return cachedItem;
