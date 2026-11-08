@@ -1693,32 +1693,41 @@ u32 frGetStrWidth2(frFontHandle_t *pFRQ) {
     return totalAdvance;
 }
 
-/* NON_MATCHING: 6 of 62 words differ (first at +0x2C). */
-#ifdef NON_MATCHING
+/* Measure encoded glyph advances, retaining native modulo-2^32 accumulation. */
 u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode) {
     frTextHandle_t glyph;
     s32 i = 0;
-    s32 totalWidth = 0;
+    u32 totalWidth = 0;
     u32 length;
 
     glyph.renderValueOrSetupOrShade.setupBytes.sharedFlags = Mode;
     glyph.renderValueOrSetupOrShade.setupBytes.fontIndex = Style;
     glyph.advance = 0;
-    glyph.cellDimensions.cellWidth = frGetDefaultFontWidth(Style);
-    glyph.cellDimensions.cellHeight = frGetDefaultFontHeight(glyph.renderValueOrSetupOrShade.setupBytes.fontIndex);
+    /* Read the seeded state: the qualified compiler trace preserves this load
+     * through sched1, then forwards the byte store to the width-call argument. */
+    glyph.cellDimensions.cellWidth = frGetDefaultFontWidth(
+        glyph.renderValueOrSetupOrShade.setupBytes.fontIndex);
+    glyph.cellDimensions.cellHeight = frGetDefaultFontHeight(
+        glyph.renderValueOrSetupOrShade.setupBytes.fontIndex);
     length = strlen((const char *)pStr);
     if (length != 0) {
         do {
             u32 code = (u8)pStr[i];
             s32 shiftIndex;
+            /* Local target allocation aid for the live range predicate. Keep
+             * the narrow-path result; only combining a wide code changes it.
+             * This value dies before frGetXShiftLev reuses the argument register. */
+            FAKEMATCH_ASM_REG(s32, singleByte, "a0");
 
-            if (code >= 0x80) {
+            singleByte = code < 0x80;
+            if (!singleByte) {
                 shiftIndex = code << FR_FONT_BYTE_SHIFT;
                 i++;
                 code = shiftIndex | (u8)pStr[i];
+                singleByte = code < 0x80;
             }
             glyph.glyphCodeOrContext.glyphCode = code;
-            if (code < 0x80) {
+            if (singleByte) {
                 shiftIndex = code - 0x20;
             } else {
                 u32 relative = code - 0x8080;
@@ -1727,14 +1736,12 @@ u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode) {
             }
             frGetXShiftLev(&glyph, shiftIndex, i == 0);
             i++;
-            totalWidth += glyph.advance + 3;
+            totalWidth += (u32)glyph.advance + 3;
         } while (i < length);
     }
     return totalWidth;
 }
-#else
-INCLUDE_ASM(const s32, "interface/frFont", frPreCalcStrWidth);
-#endif
+
 
 /* Slots 0/1 use the shared default size; later slots read their resource width.
  * Retain the nested signed check and the absence of upper-bound validation. */

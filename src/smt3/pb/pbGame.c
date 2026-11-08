@@ -1983,12 +1983,20 @@ void pbFreeGroupHandles(pbBlockDB_t *db) {
     db->count = 0;
 }
 
-/* NON_MATCHING: 60 of 68 words, 272 bytes against retail's 288; the first test is not if-converted and x and y land in the wrong registers. */
-#ifdef NON_MATCHING
 u8 pbGetBlockAt(s16 x, s16 y, s16 grp) {
     u8 ret = 0;
-    if ((x + 1 >= 20) || ((D_0054F5C4->area.map.blk[y][x + 1] & 0x7FF) != grp)) {
+    if (x + 1 >= 20) {
         ret = 4;
+    } else {
+        /* Target-specific scheduling/allocation aids, not original spelling:
+         * both mask alternatives are initialized and consumed below, and
+         * the bound map pointer is live only through this neighbor read. */
+        FAKEMATCH_ASM_REG(pbMapWork_t *, work, "a0") = D_0054F5C4;
+        u8 boundary = 4;
+        FAKEMATCH_ASM_LIVE_PAIR(ret, boundary);
+        if ((work->area.map.blk[y][x + 1] & 0x7FF) != grp) {
+            ret = boundary;
+        }
     }
     if ((x - 1 < 0) || ((D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF) != grp)) {
         ret |= 8;
@@ -2001,9 +2009,6 @@ u8 pbGetBlockAt(s16 x, s16 y, s16 grp) {
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", pbGetBlockAt);
-#endif
 
 typedef struct { sdfVector4_t v[4]; } pbMatrix_t;
 extern void pbAddGroupEntry(pbBlockDB_t *db);
