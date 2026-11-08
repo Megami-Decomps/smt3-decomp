@@ -632,8 +632,6 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
 }
 
 /* One textured quad over the source rectangle, tinted by its own RGBA. */
-/* NON_MATCHING: 22 of 110 words differ (first at +0xC8). */
-#ifdef NON_MATCHING
 void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHandle_t *texture) {
     sdfDrawTag_t *list;
     u64 *packet;
@@ -644,6 +642,7 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     s32 y0;
     s32 x1;
     s32 y1;
+    u32 *rgba;
 
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
@@ -661,34 +660,29 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
 
     primPacket = effPkt2DAllocTriStrip(1, 0x200);
     prim = effPkt2DGetPrimPtr(primPacket);
+    /* Access the actual packed member: direct union access has universal
+     * aliasing in ee-gcc, preventing the native byte/float-store interleave. */
+    rgba = &source->rgba;
+    prim->r = *rgba & 0xff;
+    prim->g = (*rgba >> 8) & 0xff;
+    prim->b = (*rgba >> 16) & 0xff;
+    prim->a = *rgba >> 24;
     prim->vtx[0].s = 0.0f;
-    prim->vtx[1].s = 0.0f;
-    prim->vtx[2].s = 1.0f;
-    prim->vtx[3].s = 1.0f;
     prim->vtx[0].t = 0.0f;
-    prim->vtx[1].t = 1.0f;
-    prim->vtx[2].t = 0.0f;
-    prim->vtx[3].t = 1.0f;
-    prim->vtx[0].s = 0.0f;
     prim->vtx[1].s = 0.0f;
-    prim->vtx[2].s = 1.0f;
-    prim->vtx[3].s = 1.0f;
-    prim->vtx[0].t = 0.0f;
     prim->vtx[1].t = 1.0f;
+    prim->vtx[2].s = 1.0f;
     prim->vtx[2].t = 0.0f;
+    prim->vtx[3].s = 1.0f;
     prim->vtx[3].t = 1.0f;
-    prim->r = source->color[0];
-    prim->g = source->color[1];
-    prim->b = source->color[2];
-    prim->a = source->color[3];
-    x0 = (source->bounds.left << 4) + 0x7000;
+    x0 = (s32)(((u32)source->bounds.left << 4) + 0x7000U);
     prim->vtx[0].x = x0;
-    y0 = (source->bounds.top << 3) + 0x7900;
+    y0 = (s32)(((u32)source->bounds.top << 3) + 0x7900U);
     prim->vtx[0].y = y0;
     prim->vtx[1].x = x0;
-    y1 = (source->bounds.bottom << 3) + 0x7900;
+    y1 = (s32)(((u32)source->bounds.bottom << 3) + 0x7900U);
     prim->vtx[1].y = y1;
-    x1 = (source->bounds.right << 4) + 0x7000;
+    x1 = (s32)(((u32)source->bounds.right << 4) + 0x7000U);
     prim->vtx[2].x = x1;
     prim->vtx[2].y = y0;
     prim->vtx[3].x = x1;
@@ -705,9 +699,6 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     ot = &sdfGrOtTable[57];
     ot->regFunc(ot, list);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectFilterDrawTexQuad);
-#endif
 
 /* Clone rectangle parameters and select a fresh source handle. */
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam) {
