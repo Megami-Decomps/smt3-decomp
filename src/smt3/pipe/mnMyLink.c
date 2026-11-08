@@ -321,9 +321,9 @@ void vecScale(f32 *v, f32 scale)
 float vecNormalize(float *vector) {
     float length = vecLength(vector);
 
-    vector[0] = vector[0] / length;
-    vector[1] = vector[1] / length;
-    vector[2] = vector[2] / length;
+    vector[0] = ffdivf(vector[0], length);
+    vector[1] = ffdivf(vector[1], length);
+    vector[2] = ffdivf(vector[2], length);
     return length;
 }
 

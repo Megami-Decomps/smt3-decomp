@@ -190,6 +190,33 @@ static inline float frsqrtf(float numerator, float x)
 }
 #endif
 
+/* div.s for a quotient whose divisor can be zero. Retail is the plain C
+ * division, which ee-gcc emits as div.s; a host division by zero gives NaN or
+ * infinity where the EE saturates. */
+#ifndef NATIVE_FPU
+static inline float ffdivf(float numerator, float denominator)
+{
+    return numerator / denominator;
+}
+#else
+/* div.s: a zero or denormal divisor returns 0x7FFFFFFF/0xFFFFFFFF signed by
+ * the XOR of both operands' signs, and an overflowing quotient saturates the
+ * same way (edge.expected's div.s: table). +/-FLT_MAX stands in for those
+ * bits, as in frsqrtf. */
+static inline float ffdivf(float numerator, float denominator)
+{
+    eeFpuWord_t fs, ft, out;
+    fs.f = numerator;
+    ft.f = denominator;
+    if ((ft.u & EE_FPU_EXP) == 0) {
+        out.u = ((fs.u ^ ft.u) & EE_FPU_SIGN) | EE_FPU_FMAX;
+        return out.f;
+    }
+    out.u = EeFpuEncodeExtended(EeFpuLiteralValue(fs.u) / EeFpuLiteralValue(ft.u));
+    return out.f;
+}
+#endif
+
 /* Preserve the SDK inline-asm scheduling boundary around abs.s. Independent
  * constant loads and argument moves may cross builtin fabsf calls, but stay
  * ordered around this helper. */
