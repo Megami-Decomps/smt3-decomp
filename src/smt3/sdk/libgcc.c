@@ -752,7 +752,7 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
  * use retail assembly until its original erroneous ABI can be represented
  * without a conflicting declaration. */
 #ifdef FIX_BUGS
-u32 dptofp(double x) {
+f32 dptofp(double x) {
     fp_number_type_df u;
     u32 m;
 

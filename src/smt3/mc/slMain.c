@@ -2592,7 +2592,7 @@ INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 s32 slCalc(dds3ProcessID_t *id) {
     s32 next;
     u32 job;
-    s32 (*cur)(void);
+    s32 (*cur)(dds3ProcessID_t *);
     gslAnimCnt++;
     slDraw(EE_ADDR_S(id));
     next = proc_func_ans(id);

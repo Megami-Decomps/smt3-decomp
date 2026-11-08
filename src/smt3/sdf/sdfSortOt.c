@@ -347,7 +347,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -366,7 +366,7 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long __pack_df(const fp_number_type_df *u);
+extern f64 __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 

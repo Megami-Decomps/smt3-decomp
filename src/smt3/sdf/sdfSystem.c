@@ -9,7 +9,7 @@
 /* Native 0x30-byte EE thread descriptor passed to CreateThread. */
 typedef struct {
     s32 status;
-    void (*entry)(void);
+    void (*entry)(void *);
     void *stack;
     s32 stackSize;
     void *gp;
