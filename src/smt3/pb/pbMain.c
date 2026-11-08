@@ -170,6 +170,15 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
             return -1;
         }
         pbMoveChar = create((pbProcHandle_t *)pbMapEditorState);
+#ifdef FIX_BUGS
+        /* The editor's constructor, func_001D4B28, returns NULL in retail, and
+         * the switch below reads low memory through it. Halt as for no constructor. */
+        if (pbMoveChar == NULL) {
+            printf("********* Puzzle boy process halted (0).\n");
+            dds3AdminiCallSequence(0, NULL, 0, 0);
+            return -1;
+        }
+#endif
         pbEditWork = 1;
     }
     switch (pbMoveChar->state) {
