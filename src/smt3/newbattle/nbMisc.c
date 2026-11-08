@@ -384,7 +384,8 @@ void nbSetNextOrder(void)
             break;
         }
     } while (data->order[data->orderindex] < 0);
-    data->activeunit = data->order[data->orderindex];
+    /* nbSetOrder can leave -1: retail observes the byte before order[0]. */
+    data->activeunit = *(s8 *)((u8 *)data + 0x48 + data->orderindex);
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNextOrder);

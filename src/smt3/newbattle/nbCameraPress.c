@@ -6,6 +6,7 @@
 #include "nb.h"
 #include "model.h"
 #include "motion.h"
+#include "effect.h"
 
 /* 128-byte party records; this unit only reads the formation index. */
 
@@ -18,23 +19,21 @@ extern u32 nbCameraPressFrame;
 
 void nbCameraPressStart(void);
 
-extern u32 D_00325970[];
+/* Native 0x28-byte inline blur parameter bodies, corroborated by the HD
+ * player/enemy blur names. Access the primary abgr member, not a scalar
+ * array: this lets ee-gcc keep the independent frame reload before the store. */
+extern dds3Effect_Blur_t D_00325970;
 
-extern u32 D_00325998[];
+extern dds3Effect_Blur_t D_00325998;
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 
-/* NON_MATCHING: 2 of 61 words differ, at the exact 244-byte size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void nbCameraPressProcessRun(void)
 {
     nbMainProcessData_t *data;
-    u32 *target;
+    dds3Effect_Blur_t *target;
     s32 frame;
     f32 rate;
 
@@ -44,9 +43,9 @@ void nbCameraPressProcessRun(void)
             if (nbCameraPressFrame < SDF_FRAMES(0xA)) {
                 frame = SDF_FRAME_TICK(nbCameraPressFrame);
                 if ((data->stat & 8) != 0) {
-                    target = D_00325998;
+                    target = &D_00325998;
                 } else {
-                    target = D_00325970;
+                    target = &D_00325970;
                 }
                 if (frame < 3) {
                     rate = frame / 3.0f;
@@ -55,7 +54,7 @@ void nbCameraPressProcessRun(void)
                 } else {
                     rate = 1.0f;
                 }
-                *target = effColorBlend(0x808080, 0x60808080, rate);
+                target->abgr = effColorBlend(0x808080, 0x60808080, rate);
             }
             frame = nbCameraPressFrame + 1;
             nbCameraPressFrame = frame;
@@ -65,9 +64,7 @@ void nbCameraPressProcessRun(void)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraPress", nbCameraPressProcessRun);
-#endif
+
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * battle_0_1, capture_006, capture_010, covering only the paths those calls took.
