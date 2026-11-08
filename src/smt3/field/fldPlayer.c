@@ -1415,7 +1415,7 @@ s32 fldPlayerCalc_Wm2(void)
     f32 pitch;
 
     if (step > 0) {
-        if (step == 60) {
+        if (step == SDF_FRAMES(60)) {
             fldSePlay(0x22);
             dds3FadeIn(0x80, 0x20, 0x20, 6);
             dds3PadVibrationSet(0, 1, 8);
@@ -1635,8 +1635,8 @@ s32 fldPlayerCalc_Wm2(void)
         fldWmapPosTo.z = fldMatterTable[fldHitChkMatter].normal[2];
         fldWmapBlendStep = 0;
     }
-    if (fldWmapBlendStep < 8) {
-        f32 fraction = (f32)fldWmapBlendStep;
+    if (fldWmapBlendStep < SDF_FRAMES(8)) {
+        f32 fraction = SDF_FRAME_STEP((f32)fldWmapBlendStep);
         fldWmapBlendStep++;
         fldWmapPlayerPos.z = fldWmapPosFrom.z + (fldWmapPosTo.z - fldWmapPosFrom.z) * fraction * 0.125f;
         fldWmapPlayerPos.x = fldWmapPosFrom.x + (fldWmapPosTo.x - fldWmapPosFrom.x) * fraction * 0.125f;
@@ -2037,6 +2037,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     if (amount < 2.0f) {
         amount = 2.0f;
     }
+    amount = SDF_FRAME_STEP(amount);
     {
         f32 result;
         if (delta >= 0.0f && delta <= amount) {
@@ -2063,21 +2064,21 @@ s32 fldPlayerCalc_Nml_syukan(void)
         fldCamPitch = target;
         if (lookLeft || quickLeft) {
             target = fldPlayerCalc360_4(target - 50.0f);
-            fldSyukanState = 2;
+            fldSyukanState = SDF_FRAMES(2);
             fldCamPitchTarget = target;
         } else if (lookRight || quickRight) {
             target = fldPlayerCalc360_4(target + 50.0f);
-            fldSyukanState = 2;
+            fldSyukanState = SDF_FRAMES(2);
             fldCamPitchTarget = target;
         } else if (turnAround) {
             target = fldPlayerCalc360_4(target + 140.0f);
-            fldSyukanState = 2;
+            fldSyukanState = SDF_FRAMES(2);
             fldCamPitchTarget = target;
             delta = R360_LR(fldCamPitch, target);
             if ((s32)delta == -180) {
                 delta = 180.0f;
             }
-            amount = 10.0f;
+            amount = SDF_FRAME_STEP(10.0f);
             {
                 f32 result;
                 if (delta >= 0.0f && delta <= amount) {
@@ -2105,7 +2106,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     } else {
         f32 result;
         delta = R360_LR(fldCamPitch, target);
-        amount = 10.0f;
+        amount = SDF_FRAME_STEP(10.0f);
         if (delta >= 0.0f && delta <= amount) {
             result = target;
         } else if (delta <= 0.0f && -amount <= delta) {

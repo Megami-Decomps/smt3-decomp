@@ -371,7 +371,7 @@ s32 ProcRandomEncountCheck(void)
     SDF_VU0_STOREVECTOR(&D_002FC490);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
-    if (distance < 0.1999999881f) distance = 0.0f;
+    if (distance < SDF_FRAME_STEP(0.1999999881f)) distance = 0.0f;
     fldGlobalBase.playerMoveDistance = distance;
     oldMoon = evtGetAgeOfMoon16();
     if (fldGlobalBase.word5C > 0) {

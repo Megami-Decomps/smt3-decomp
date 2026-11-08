@@ -1318,12 +1318,12 @@ void fldCamElvTask(void) {
         if (fldElvCameraScene == 2 || fldElvCameraScene == -2) {
             phase += 11.0f;
             if (phase > 0.0f) {
-                phase -= 1.0f;
+                phase -= SDF_FRAME_STEP(1.0f);
             } else if (phase > -3.14f) {
-                phase -= 0.2f;
+                phase -= SDF_FRAME_STEP(0.2f);
                 camera->poseset->pos.y = D_0055DB10[1] + sdfSin(phase * direction) * 2.0f;
             } else {
-                phase -= 0.01f;
+                phase -= SDF_FRAME_STEP(0.01f);
             }
             phase -= 11.0f;
         }

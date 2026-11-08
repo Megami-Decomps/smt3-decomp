@@ -15,6 +15,9 @@
 #include "newdata.h"
 #include "event.h"
 #include "effect.h"
+#include "sdfFrame.h"
+
+extern u32 dds3GetKernelCount(void);
 
 
 typedef struct devState_t devState_t;
@@ -1600,37 +1603,41 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
                 s32 count = e->cnt1;
                 s32 limit = e->cntmax;
                 if (count < limit) {
-                    if (limit == 0x28) {
-                        f32 step = steps[count];
-                        e->x1 += e->mx1 * step;
-                        e->y1 += e->my1 * step;
-                        e->z1 += e->mz1 * step;
-                    } else {
-                        e->x1 += e->mx1;
-                        e->y1 += e->my1;
-                        e->z1 += e->mz1;
-                        if (evtBitCheck(0xAF3) != 0) {
+                    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                        if (limit == 0x28) {
+                            f32 step = steps[count];
+                            e->x1 += e->mx1 * step;
+                            e->y1 += e->my1 * step;
+                            e->z1 += e->mz1 * step;
+                        } else {
                             e->x1 += e->mx1;
                             e->y1 += e->my1;
                             e->z1 += e->mz1;
+                            if (evtBitCheck(0xAF3) != 0) {
+                                e->x1 += e->mx1;
+                                e->y1 += e->my1;
+                                e->z1 += e->mz1;
+                            }
                         }
+                        e->cnt1 = e->cnt1 + 1;
                     }
-                    e->cnt1 = e->cnt1 + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
                     e->stat = 3;
                     e->cnt1 = 0;
                 }
             } else if (e->stat == 3) {
                 if (e->cnt1 < 0x14) {
-                    e->x1 -= e->mx1;
-                    e->y1 -= e->my1;
-                    e->z1 -= e->mz1;
-                    if (evtBitCheck(0xAF3) != 0) {
+                    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
                         e->x1 -= e->mx1;
                         e->y1 -= e->my1;
                         e->z1 -= e->mz1;
+                        if (evtBitCheck(0xAF3) != 0) {
+                            e->x1 -= e->mx1;
+                            e->y1 -= e->my1;
+                            e->z1 -= e->mz1;
+                        }
+                        e->cnt1 = e->cnt1 + 1;
                     }
-                    e->cnt1 = e->cnt1 + 1;
                 } else {
                     e->cnt1 = 0;
                     e->stat = 1;
@@ -1648,26 +1655,30 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
                 s32 count = e->cnt2;
                 s32 limit = e->cntmax;
                 if (count < limit) {
-                    if (limit == 0x28) {
-                        f32 step = steps[count];
-                        e->x2 += e->mx2 * step;
-                        e->y2 += e->my2 * step;
-                        e->z2 += e->mz2 * step;
-                    } else {
-                        e->x2 += e->mx2;
-                        e->y2 += e->my2;
-                        e->z2 += e->mz2;
+                    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                        if (limit == 0x28) {
+                            f32 step = steps[count];
+                            e->x2 += e->mx2 * step;
+                            e->y2 += e->my2 * step;
+                            e->z2 += e->mz2 * step;
+                        } else {
+                            e->x2 += e->mx2;
+                            e->y2 += e->my2;
+                            e->z2 += e->mz2;
+                        }
+                        e->cnt2 = count + 1;
                     }
-                    e->cnt2 = count + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
                     e->cnt2 = 0;
                 }
             } else if (e->stat == 3) {
                 if (e->cnt2 < 0x14) {
-                    e->x2 -= e->mx2;
-                    e->y2 -= e->my2;
-                    e->z2 -= e->mz2;
-                    e->cnt2 = e->cnt2 + 1;
+                    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+                        e->x2 -= e->mx2;
+                        e->y2 -= e->my2;
+                        e->z2 -= e->mz2;
+                        e->cnt2 = e->cnt2 + 1;
+                    }
                 } else {
                     e->cnt2 = 0;
                 }

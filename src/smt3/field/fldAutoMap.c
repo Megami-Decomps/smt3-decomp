@@ -25,6 +25,7 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
+extern u32 dds3GetKernelCount(void);
 extern sdfMemHandle_t *fldAutoMapBuf;
 
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
@@ -683,7 +684,7 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     if (index == 1) {
         color = (u32)(s32)(sdfSin(D_0054EE70) * 64.0f) << 24;
         color += 0x80000000;
-        D_0054EE70 = D_0054EE70 + 0.2f;
+        D_0054EE70 = D_0054EE70 + SDF_FRAME_STEP(0.2f);
     } else {
         color = 0x80000000;
     }
@@ -1031,13 +1032,13 @@ void fldAutoMapDrawOneArea(void)
     }
     state = fldAutoMapDrawState;
     if (state < 0) {
-        state += SDF_FRAME_STEP(4);
+        state += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
         fldAutoMapDrawState = state;
-        D_0054EE90 += SDF_FRAME_STEP(4);
+        D_0054EE90 += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
     }
     if (state > 0) {
-        fldAutoMapDrawState = state - SDF_FRAME_STEP(4);
-        D_0054EE90 -= SDF_FRAME_STEP(4);
+        fldAutoMapDrawState = state - SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        D_0054EE90 -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
     }
     if (!(D_0054EE80 < 1000.0f) || !(D_0054EE80 > -1000.0f)) {
         if (D_0054EE80 > 0.0f) {
@@ -1153,7 +1154,7 @@ void fldAutoMapDrawOneArea(void)
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
     D_0054EE98 += D_0054C4AC;
-    D_0054EE9C += D_0054C4B0;
+    D_0054EE9C += SDF_FRAME_STEP(D_0054C4B0);
     SDF_VU0_COPYVECTOR(&rect, &fldAutoMapRect);
     if (fldAutoMapDrawY >= 0x80) {
         s32 currentFloor = fldAutoMapFloorCur;
@@ -1264,7 +1265,7 @@ void fldAutoMapDrawOneArea(void)
         DrwSprite2D(0x84, 0x36, 0x3D, 0x13, 0x40, 0x1A, 0x3D, 0x13, 0x80808080, fldAutoMapSpriteTex[1]);
     }
     blink = (s32)(((u32)(s32)(sdfSin(D_0054EE94) * 32.0f) << 24) + 0x60909090u);
-    D_0054EE94 += D_0054C4C0;
+    D_0054EE94 += SDF_FRAME_STEP(D_0054C4C0);
     fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
     minX = (f32)((s32)((minX - 1000.0f) / 1000.0f) * 1000);
     minZ = (f32)((s32)((minZ + 1000.0f) / 1000.0f) * 1000);
@@ -1495,7 +1496,7 @@ void fldAutoMapSeqEnd(void) {
     fldAutoMapSeqClearFlag(1);
     fldRegistUnitPad();
     evtEnableMoonDraw();
-    fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
     frSetFontDrawOT(0x48);
     dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
 }
@@ -1552,7 +1553,7 @@ void fldAutoMapCalc(void) {
         fldAutoMapSeqState = 0;
     }
 
-    if (fldAutoMapSeqStep >= 11) {
+    if (fldAutoMapSeqStep >= SDF_FRAMES(11)) {
         if ((s8)dds3PadStickStatusState[0][1] != 0) {
             if (dds3PadStickStatusState[0][1] & 2) {
                 if ((s8)dds3PadButtonState[0x25] != 0 &&

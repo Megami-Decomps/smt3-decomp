@@ -540,7 +540,7 @@ void fldElvDrawFloorNum(void)
         if (distance >= 6) {
             distance = 5;
         }
-        if (delays[distance] < *timer) {
+        if (SDF_FRAMES(delays[distance]) < *timer) {
             *timer = 0;
             if (floor < targetFloor) {
                 floor = (s32)((u32)floor + 1);
@@ -870,7 +870,7 @@ void fldSdwDraw(dds3Basic_t *basic)
         if (work->EL_serialID != -1) {
             if (fldSdwLightTracking == 0) {
                 if (fldSdwBoxAlpha >= 21) {
-                    fldSdwBoxAlpha -= SDF_FRAME_STEP(2);
+                    fldSdwBoxAlpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
                 } else {
                     fldSdwLightTracking = 1;
                     fldSdwBoxAlpha = 8;
@@ -898,7 +898,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                     fldSdwDrawVec.x /= distance;
                 }
                 if (fldSdwBoxAlpha < 48) {
-                    fldSdwBoxAlpha += 2;
+                    fldSdwBoxAlpha += 2 * SDF_FRAME_DUE(dds3GetKernelCount());
                 }
             }
             length = 200.0f;
@@ -924,11 +924,11 @@ void fldSdwDraw(dds3Basic_t *basic)
             fldSdwDrawVec.x += extra;
             alpha = fldSdwBoxAlpha;
             if (alpha >= 21) {
-                alpha -= 2;
+                alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
                 fldSdwBoxAlpha = alpha;
             }
             if (alpha < 20) {
-                fldSdwBoxAlpha = alpha + 2;
+                fldSdwBoxAlpha = alpha + SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
             }
             length = 200.0f;
         } else {
@@ -936,7 +936,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                 fldSdwLightTracking = 0;
                 fldSdwBoxAlpha = 6;
             } else {
-                fldSdwBoxAlpha -= 4;
+                fldSdwBoxAlpha -= 4 * SDF_FRAME_DUE(dds3GetKernelCount());
             }
             length = 200.0f;
         }

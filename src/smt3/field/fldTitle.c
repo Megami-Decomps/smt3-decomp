@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "basic.h"
 #include "model.h"
@@ -18,6 +19,7 @@ extern char D_005327B0[];
 #include "sdk_libc.h"
 
 extern s32 fldTitleState, D_0054EF8C, D_0054EF90, D_0054EF94;
+extern u32 dds3GetKernelCount(void);
 extern sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *texture);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,
@@ -163,7 +165,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             rsetAlpha(0);
         }
 
-        if (++fldTitleState >= 61) {
+        if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
             D_0054EF8C++;
         }
@@ -199,7 +201,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
                     color, D_0054EF98);
 
-        if (++fldTitleState >= 61) {
+        if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
             D_0054EF8C++;
         }
@@ -265,7 +267,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
                     0x00808080 | ((u32)alpha << 24), D_0054EF98);
 
-        if (++fldTitleState >= 61) {
+        if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
             D_0054EF8C++;
         }
@@ -305,7 +307,7 @@ void fldTitleStart(s32 fld, s32 waittime)
     sdfMemHandle_t *allocation;
 
     D_0054EF90 = fld;
-    D_0054EF94 = waittime;
+    D_0054EF94 = SDF_FRAMES(waittime);
     fldTitleState = 0;
     D_0054EF8C = 0;
     sprintf(path, "/fld/f/pnl/df%03d.tmx", fld);
@@ -395,7 +397,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
                             fldTitleMiniTex);
             }
 
-            if (++fldTitleMiniState >= 21) {
+            if ((fldTitleMiniState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 21) {
                 fldTitleMiniState = 0;
                 fldSnowActive++;
             }
@@ -418,7 +420,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, flatColor,
                         fldTitleMiniTex);
 
-            if (++fldTitleMiniState >= 31) {
+            if ((fldTitleMiniState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 31) {
                 fldTitleMiniState = 0;
                 fldSnowActive++;
             }
@@ -481,7 +483,7 @@ s32 fldTitleMini_Process(dds3ProcessID_t *id)
             DrwSprite2D(128, 313, 256, 128, 0, 0, 256, 128, 0x00808080 | ((u32)alpha << 24),
                         fldTitleMiniTex);
 
-            if (++fldTitleMiniState >= 31) {
+            if ((fldTitleMiniState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 31) {
                 fldTitleMiniState = 0;
                 fldSnowActive++;
             }
