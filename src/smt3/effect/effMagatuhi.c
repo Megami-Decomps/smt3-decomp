@@ -29,11 +29,22 @@ extern effHandler_t D_00320044[];
 
 extern effHandler_t D_00320048[];
 
-extern effHandler_t D_0032004C[];
+/* The set-vector, set-colour and set-matrix slots also take an argument. */
+typedef struct effVectorHandler_t {
+    void (*handler)(void *, void *);
+    u8 unk4[0x14];
+} effVectorHandler_t;
 
-extern effHandler_t D_00320050[];
+typedef struct effColorHandler_t {
+    void (*handler)(void *, u32);
+    u8 unk4[0x14];
+} effColorHandler_t;
 
-extern effHandler_t D_00320054[];
+extern effVectorHandler_t D_0032004C[];
+
+extern effColorHandler_t D_00320050[];
+
+extern effVectorHandler_t D_00320054[];
 
 extern char *dds3EffectFileNameTable[];
 
@@ -2176,7 +2187,7 @@ u32 dds3MagatuhiParIsActive(void) {
 
 /* Node set-vector slot: invoke optional subtype callback A with the position. */
 void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos) {
-    void (*handler)(void *, void *) = (void (*)(void *, void *))D_0032004C[work->type].handler;
+    void (*handler)(void *, void *) = D_0032004C[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, pPos);
@@ -2185,7 +2196,7 @@ void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos) {
 
 /* Node set-matrix slot: invoke optional subtype callback B with the matrix. */
 void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix) {
-    void (*handler)(void *, void *) = (void (*)(void *, void *))D_00320054[work->type].handler;
+    void (*handler)(void *, void *) = D_00320054[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, pMatrix);
@@ -2194,7 +2205,7 @@ void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix) {
 
 /* Node parameter-word slot: invoke optional subtype callback C with the colour. */
 void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work, u32 abgr) {
-    void (*handler)(void *, u32) = (void (*)(void *, u32))D_00320050[work->type].handler;
+    void (*handler)(void *, u32) = D_00320050[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, abgr);
