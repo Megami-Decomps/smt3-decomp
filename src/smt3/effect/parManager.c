@@ -2622,7 +2622,7 @@ void dds3Particle_SpiralRandomize(effParticleOverlay_t *effect) {
     func_00162270(effect);
 }
 
-void func_001621A0(f32 factor, effEmitterHead_t *head) {
+void func_001621A0(effEmitterHead_t *head, f32 factor) {
     head->scale[0] *= factor;
     head->scale[1] *= factor;
     head->scale[2] *= factor;
