@@ -1271,9 +1271,18 @@ frFontHandle_t *frSetFontString(u8 *text, s8 style, s8 firstOption, s8 secondOpt
     if (style >= 0) {
         frSetFontString_style = style;
     }
+#ifdef FIX_BUGS
+    /* BUG: message text selects any style (event 501 asks for style 4, which only
+     * name entry loads). Returning NULL drops the caller's chain, and the message
+     * analyzers then write through it. Skip the text and keep the chain. */
+    if (frSetFontString_style >= FR_FONT_ENTRY_CAPACITY || gFT.entries[frSetFontString_style].resource == NULL) {
+        return chain;
+    }
+#else
     if (gFT.entries[frSetFontString_style].resource == NULL) {
         return NULL;
     }
+#endif
     if (text != NULL) {
         length = strlen((const char *)text);
     }
