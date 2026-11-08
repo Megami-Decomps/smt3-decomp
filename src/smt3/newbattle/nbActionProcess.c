@@ -2485,7 +2485,7 @@ s32 CheckAction_BADWAIT(nbActionProcessData_t *a)
     case 1:
     case 4:
     case 7:
-        if ((u16)a->seqtime == 5 && a->jyokyomes > 0) {
+        if ((u16)a->seqtime == SDF_FRAMES(5) && a->jyokyomes > 0) {
             nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
         }
         break;
@@ -2497,7 +2497,7 @@ s32 CheckAction_BADWAIT(nbActionProcessData_t *a)
     case 9:
     case 10:
     default:
-        if ((u16)a->seqtime == 5 && a->jyokyomes > 0) {
+        if ((u16)a->seqtime == SDF_FRAMES(5) && a->jyokyomes > 0) {
             nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
         }
         break;
@@ -2505,7 +2505,7 @@ s32 CheckAction_BADWAIT(nbActionProcessData_t *a)
     switch (a->work->nowcommand) {
     case 8:
     case 10:
-        if ((u16)a->seqtime >= 0x1F) {
+        if ((u16)a->seqtime >= SDF_FRAMES(0x1F)) {
             ret = 1;
         }
         break;
@@ -2519,7 +2519,7 @@ s32 CheckAction_BADWAIT(nbActionProcessData_t *a)
     case 7:
     case 9:
     default:
-        if ((u16)a->seqtime >= 0x29 || a->jyokyomes == 0) {
+        if ((u16)a->seqtime >= SDF_FRAMES(0x29) || a->jyokyomes == 0) {
             ret = 1;
         }
         break;
@@ -3192,7 +3192,7 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
         }
         break;
     case 5:
-        if (a->timer && (u16)a->seqtime < a->timer) {
+        if (a->timer && (u16)a->seqtime < SDF_FRAMES(a->timer)) {
             break;
         }
         complete = 1;
@@ -4019,7 +4019,7 @@ void SetAction_ESCAPE(nbActionProcessData_t *a)
  * reproduces retail; it does not establish the original source spelling. */
 s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
 {
-    switch ((u16)((u16)a->seqtime / 15)) {
+    switch ((u16)((u16)a->seqtime / SDF_FRAMES(15))) {
     case 1:
         if (a->data->endtype == 3) {
             goto out;

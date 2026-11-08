@@ -816,7 +816,7 @@ nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, saddr_t uniqueid, nbForm
         return p;
     }
     p->data2.p = effBTLSystemCreate(form, sysid);
-    p->framelength = effBTLSystemGetLength(p->data2.p);
+    p->framelength = SDF_FRAMES(effBTLSystemGetLength(p->data2.p));
     printf("length = %d\n", p->framelength);
     if (seid != 0) {
         nbAddSePacket(startframe, uniqueid, seid);

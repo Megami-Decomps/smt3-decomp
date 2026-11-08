@@ -9,6 +9,8 @@
 #include "motion.h"
 #include "field.h"
 
+extern u32 dds3GetKernelCount(void);
+
 extern char *text1[];
 
 extern char *text2[];
@@ -767,7 +769,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     } else {
         if (s->helpa > 0) {
-            s->helpa -= SDF_FRAME_STEP(21);
+            s->helpa -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 21);
             if (s->helpa < 0) {
                 s->helpa = 0;
             }
@@ -777,7 +779,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 128) {
             s->animeflag &= ~1;
         } else {
-            s->alpha += SDF_FRAME_STEP(20);
+            s->alpha += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 20);
             if (s->alpha > 128) {
                 s->alpha = 128;
             }
@@ -787,7 +789,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 0) {
             s->animeflag &= ~2;
         } else {
-            s->alpha -= SDF_FRAME_STEP(12);
+            s->alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 12);
             if (s->alpha < 0) {
                 s->alpha = 0;
             }
@@ -802,7 +804,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             if (d == 0) {
                 d = -1;
             }
-            s->ox -= d;
+            SDF_FRAME_WHEN(dds3GetKernelCount(), s->ox -= d);
         }
     }
     if (s->animeflag & 4) {
@@ -818,7 +820,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             if (d < endpoint) {
                 d = endpoint;
             }
-            s->smritu -= d;
+            SDF_FRAME_WHEN(dds3GetKernelCount(), s->smritu -= d);
             if (s->smritu < 0.0f) {
                 s->smritu = 0.0f;
             }

@@ -1148,7 +1148,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     if (DDS3_GBWK->akuma[j].hp < nbPnlWork[i].OldHp) {
         q = 50 * nbPnlWork[i].OldHp /
             *(u16 *)&DDS3_GBWK->akuma[j].unk0C[0];
-        anm = nbPnlWork[i].HpAnmCnt << 28;
+        anm = (u32)SDF_FRAME_STEP(nbPnlWork[i].HpAnmCnt * 16) << 24;
         nbPnl_rsetAlpha(1);
         c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
         nbPnlSprite(x + w + 0xA4, yb, q - w, 6, w + 1, 0xD, q - w, 6, c, p->pnltex[0]);
@@ -1173,7 +1173,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     if (*(u16 *)&DDS3_GBWK->akuma[j].unk0C[2] < nbPnlWork[i].OldMp) {
         q = 50 * nbPnlWork[i].OldMp /
             *(u16 *)&DDS3_GBWK->akuma[j].unk0C[4];
-        anm = nbPnlWork[i].MpAnmCnt << 28;
+        anm = (u32)SDF_FRAME_STEP(nbPnlWork[i].MpAnmCnt * 16) << 24;
         nbPnl_rsetAlpha(1);
         c = effMagaCylinderCalcColor(anm | 0xFFFFFF, nbPanelBaseABGR);
         nbPnlSprite(x + w + 0xDA, yb, q - w, 6, w + 1, 0x1B, q - w, 6, c, p->pnltex[0]);
@@ -2033,7 +2033,7 @@ void nbPanelPressTurnGaugeAnimStart(void)
 
 void nbPanelPressTurnGaugeAnimStart2(void)
 {
-    nbPanelPTAFrame = 4;
+    nbPanelPTAFrame = SDF_FRAMES(4);
     nbPanelPTAProcess = 3;
     nbPanelPT_1_Process = 0;
     nbPanelPT_2_Process = 0;
@@ -2521,7 +2521,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
         }
         frame = nbPanelPTP_1_Frame++;
         if (frame >= SDF_FRAMES(8)) {
-            nbPanelPTP_1_Frame = 1;
+            nbPanelPTP_1_Frame = SDF_FRAMES(1);
             nbPanelPTP_1_Rate = 1.0f;
             nbPanelPTP_1_Process = 3;
         }
@@ -3712,7 +3712,7 @@ void nbPanelPartyDraw(void)
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                nbPnlWork[i].OfsX += ofs;
+                SDF_FRAME_WHEN(dds3GetKernelCount(), nbPnlWork[i].OfsX += ofs);
                 if (nbPnlWork[i].OfsX >= 17) {
                     nbPnlWork[i].OfsX = 16;
                 }
@@ -3722,7 +3722,7 @@ void nbPanelPartyDraw(void)
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                nbPnlWork[i].OfsX -= ofs;
+                SDF_FRAME_WHEN(dds3GetKernelCount(), nbPnlWork[i].OfsX -= ofs);
                 if (nbPnlWork[i].OfsX < 0) {
                     nbPnlWork[i].OfsX = 0;
                 }
@@ -4019,7 +4019,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
         nbPnl_rsetAlpha(1);
         rate = (f32)pFlash->PT_2_Frame / SDF_FRAMES_F(5.0f);
         rate *= pFlash->PT_2_Rate;
-        pFlash->PT_2_Rate *= 1.35f;
+        pFlash->PT_2_Rate *= SDF_FRAME_DECAY(1.35f);
         if (pFlash->PT_2_Rate > 1.0f) {
             pFlash->PT_2_Rate = 1.0f;
         }
@@ -4067,7 +4067,7 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
     case 1:
         nbPnl_rsetAlpha(1);
         rate = (f32)pFlash->PT_3_Frame / SDF_FRAMES_F(10.0f);
-        pFlash->PT_3_Rate *= 1.35f;
+        pFlash->PT_3_Rate *= SDF_FRAME_DECAY(1.35f);
         if (pFlash->PT_3_Rate > 1.0f) {
             pFlash->PT_3_Rate = 1.0f;
         }

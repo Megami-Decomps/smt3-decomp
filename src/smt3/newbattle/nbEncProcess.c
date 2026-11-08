@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -451,7 +452,7 @@ void *nbEncProcess2_5(dds3ProcessID_t *id)
         }
         return nbEncProcess2_55;
     }
-    if ((dds3GetProcessRunTime(id) & 7) == 0) {
+    if ((dds3GetProcessRunTime(id) % SDF_FRAMES(8)) == 0) {
         party = &data->party[4];
         for (i = 4; i < 14; i++, party++) {
             if (party->flag & 9) {
