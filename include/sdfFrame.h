@@ -31,6 +31,13 @@
 #define SDF_FRAME_STEP(d) (d)
 #endif
 
+/* An advance per tick added to an integer, given a count of host ticks from
+ * 0. A host splits d into whole steps that add up to exactly d over each
+ * retail tick, where a rounded SDF_FRAME_STEP would stall or run fast. */
+#ifndef SDF_FRAME_STEP_INT
+#define SDF_FRAME_STEP_INT(age, d) (d)
+#endif
+
 /* Runs where a floor face's edge band reached a sphere, before the sphere is
  * moved to that clearance. Below retail's step the move pulls a sphere above
  * the floor into the next face, which pushes it back each tick, so a host

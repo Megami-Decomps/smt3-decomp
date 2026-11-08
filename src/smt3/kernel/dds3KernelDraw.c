@@ -5,6 +5,8 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 /* One A+D register command with its standard DMA/GIF header. */
 typedef struct
 {
@@ -537,8 +539,8 @@ void dds3RunQuake(void)
     }
     if (dds3QuakeFrame > 0) {
         s32 divisor = SDF_FRAME_TICK(dds3QuakeFrame) + 5;
-        dds3QuakeXRange -= SDF_FRAME_STEP(dds3QuakeXRange / divisor);
-        dds3QuakeYRange -= SDF_FRAME_STEP(dds3QuakeYRange / divisor);
+        dds3QuakeXRange -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), dds3QuakeXRange / divisor);
+        dds3QuakeYRange -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), dds3QuakeYRange / divisor);
         dds3QuakeFrame--;
     }
 }

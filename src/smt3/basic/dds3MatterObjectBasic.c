@@ -7,6 +7,8 @@
 
 
 
+extern u32 dds3GetKernelCount(void);
+
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
@@ -173,7 +175,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 5: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha < 0x80) {
-            alpha += SDF_FRAME_STEP(4);
+            alpha += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
         }
         if (alpha >= 0x81) {
             alpha = 0x80;
@@ -183,7 +185,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     }
     case 6: {
         alpha = ((u8 *)&basic->color)[3];
-        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP(4) : 0;
+        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4) : 0;
         if (alpha < 0) {
             alpha = 0;
         }
@@ -193,7 +195,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     case 7: {
         alpha = ((u8 *)&basic->color)[3];
         if (alpha < 0x80) {
-            alpha += SDF_FRAME_STEP(2);
+            alpha += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
         }
         if (alpha >= 0x81) {
             alpha = 0x80;
@@ -203,7 +205,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     }
     case 8: {
         alpha = ((u8 *)&basic->color)[3];
-        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP(2) : 0;
+        alpha = alpha != 0 ? alpha - SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2) : 0;
         if (alpha <= 0) {
             alpha = 0;
         }

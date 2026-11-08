@@ -8,6 +8,7 @@
 #include "sdfFrame.h"
 
 extern void sdfChipFreeDirect(void *aPtr);
+extern u32 dds3GetKernelCount(void);
 
 extern void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
@@ -23,7 +24,7 @@ void fclDrawPanelTypeDef(fclPanel_t *pPanel, s32 OtNo)
 
 void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
 {
-    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
+    pPanel->Timer += SDF_FRAME_STEP_INT(dds3GetKernelCount(), pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -167,7 +168,7 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0);
 
 void fclUpdatePanelType0(fclPanel_t *pPanel)
 {
-    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
+    pPanel->Timer += SDF_FRAME_STEP_INT(dds3GetKernelCount(), pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -211,7 +212,7 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
 
 void fclUpdatePanelType1(fclPanel_t *pPanel)
 {
-    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
+    pPanel->Timer += SDF_FRAME_STEP_INT(dds3GetKernelCount(), pPanel->Spd);
     if (pPanel->Timer > 0x200) {
         pPanel->Timer = 0;
     }
@@ -231,7 +232,7 @@ void fclDrawPanelType2(fclPanel_t *panel, s32 ot)
 
 void fclUpdatePanelType2(fclPanel_t *pPanel)
 {
-    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
+    pPanel->Timer += SDF_FRAME_STEP_INT(dds3GetKernelCount(), pPanel->Spd);
     if (pPanel->Timer > 0x100) {
         pPanel->Timer = 0x100;
     }
@@ -338,7 +339,7 @@ void fclDrawPanelType3(fclPanel_t *panel, s32 ot)
 
 void fclUpdatePanelType3(fclPanel_t *pPanel)
 {
-    pPanel->Timer += SDF_FRAME_STEP(pPanel->Spd);
+    pPanel->Timer += SDF_FRAME_STEP_INT(dds3GetKernelCount(), pPanel->Spd);
     if (pPanel->Timer >= 0x201) {
         pPanel->Timer = 0;
     }

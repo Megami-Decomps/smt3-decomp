@@ -8,6 +8,7 @@
 #include "sdfFrame.h"
 
 extern void sdfMemFreeDirect(void *aHandle);
+extern u32 dds3GetKernelCount(void);
 
 
 
@@ -436,13 +437,13 @@ s32 fclRunPanelAnim(void *work)
     case 0:
         break;
     case 1:
-        anim->state.phase += SDF_FRAME_STEP(anim->state.phaseStep);
+        anim->state.phase += SDF_FRAME_STEP_INT(dds3GetKernelCount(), anim->state.phaseStep);
         if (anim->state.phase > 0x200) {
             anim->state.phase = 0x200;
         }
         break;
     case 2:
-        anim->state.phase -= SDF_FRAME_STEP(anim->state.phaseStep);
+        anim->state.phase -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), anim->state.phaseStep);
         if (anim->state.phase < 0) {
             anim->state.phase = 0;
         }

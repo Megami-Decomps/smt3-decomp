@@ -3,6 +3,7 @@
 #include "nme.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
 extern s32 nmeGetInputMode(nmeWork_t *work);
 extern s8 nmeGetModeFlag(nmeWork_t *work);
 extern void cmpSetCursorRow(s32 row, cmpCursorInfo_t *cursor);
@@ -664,7 +665,7 @@ void nmeUpdateInput(void)
 void nmeAdvanceAnim(void)
 {
     nmeWork_t *work = nmeUpdateWork;
-    work->animation += SDF_FRAME_STEP(2);
+    work->animation += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
     if (work->animation >= 0x900) {
         work->animation = 0;
     }

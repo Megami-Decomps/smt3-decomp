@@ -466,7 +466,7 @@ void nbMakaStep(nbMakaProcessData_t *w)
             return;
         }
         if (w->alpha > 0) {
-            w->alpha -= SDF_FRAME_STEP(0x14);
+            w->alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 0x14);
             if (w->alpha < 0) {
                 w->alpha = 0;
             }
