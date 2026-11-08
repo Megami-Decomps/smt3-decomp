@@ -409,8 +409,12 @@ s32 nmeDestroyName(dds3ProcessID_t *processId) {
         dds3KernelDebugSign = dds3KernelDebugSignOrg;
         dds3FadeClear();
         /* KillProcess discards the shutdown result. The supported GNU EE bare
-         * return keeps the native tail call without inventing a return value. */
+         * return keeps the native tail call; host compilers reject it. */
+#ifdef NON_MATCHING
+        return 0;
+#else
         return;
+#endif
     }
 }
 
