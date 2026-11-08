@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1114 members, 504 adopted constants.
+# 0 types, 1115 members, 504 adopted constants.
 
 
 member _FRQ.unk00
@@ -952,6 +952,8 @@ member sceMidiWork_t.unk08
 member sceMidiWork_t.unk0C
 member sceMidiWork_t.unk10
 member sceMidiWork_t.unk14
+# libmrpc now uses its public tag; the unchanged offset 0xC was rpcClient.unk_C.
+member sceSifMClientData.unk_C
 member sceSmgHead_t.unk10
 member sceSmgProgEnt_t.unk05
 member sceSmgProgEnt_t.unk06

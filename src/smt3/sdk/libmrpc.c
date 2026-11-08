@@ -1,7 +1,8 @@
 #include "common.h"
+#include "sdk_libmrpc.h"
 extern void *memcpy(void *, const void *, size_t);
 
-typedef struct rpcClient rpcClient;
+typedef struct sceSifMClientData rpcClient;
 /* The unbind request prefix after its 16-byte SIF command header. */
 typedef struct rpcUnbindPacket {
     u32 commandHeader[4];
@@ -118,7 +119,7 @@ void _sceRpcFreePacket(rpcPacket *p)
 
 /* The M-RPC client extends the shared client prefix. Packet addresses are
  * opaque, as in SifRpcClientData_t in include/irx/iop.h. */
-struct rpcClient {
+struct sceSifMClientData {
     void *packet;
     u32 sequence;
     s32 sema;
@@ -315,6 +316,87 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
     return result;
 }
 
+extern void sceSifWriteBackDCache(void *address, s32 size);
+
 INCLUDE_RODATA(const s32, "sdk/libmrpc", D_0054ADD8);
 
-INCLUDE_ASM(const s32, "sdk/libmrpc", sceSifMCallRpc);
+s32 sceSifMCallRpc(rpcClient *client, u32 function, u32 mode,
+                   void *send, s32 sendSize, void *receive, s32 receiveSize,
+                   void (*endFunction)(void *), void *endParam)
+{
+    sdfSemaParam_t param;
+    rpcPacket *packet;
+    s32 sema;
+
+    if (mode != 0) {
+        scePrintf(D_0054ADD8);
+        return -1;
+    }
+    WaitSema(client->completionSema);
+    if (EE_ADDR(send) & 63) {
+        scePrintf("%s: send buffer addr is not 64 byte align. %08x=n", "sceSifMCallRpc", EE_ADDR(send));
+        return -1;
+    }
+    if (EE_ADDR(receive) & 63) {
+        scePrintf("%s: receive buffer addr is not 64 byte align. %08x=n", "sceSifMCallRpc", EE_ADDR(receive));
+        return -1;
+    }
+    packet = _sceRpcGetPacket(&D_00599700);
+    if (packet == NULL) {
+        return -1;
+    }
+    client->sequence = packet->w[6];
+    client->packet = packet;
+    client->endFunction = endFunction;
+    client->endParam = endParam;
+    packet->w[8] = function;
+    packet->w[5] = EE_ADDR(packet);
+    packet->w[9] = sendSize;
+    packet->w[10] = EE_ADDR(receive);
+    packet->w[11] = receiveSize;
+    packet->w[7] = EE_ADDR(client);
+    packet->w[13] = EE_ADDR(client->server);
+    if (send == receive) {
+        sceSifWriteBackDCache(send, sendSize < receiveSize ? receiveSize : sendSize);
+    } else {
+        if (sendSize > 0) {
+            sceSifWriteBackDCache(send, sendSize);
+        }
+        if (receiveSize > 0) {
+            sceSifWriteBackDCache(receive, receiveSize);
+        }
+    }
+    /* The entry check rejects nonzero modes, but retail retains this
+     * unreachable asynchronous-request arm. Keep its native call shape. */
+    if (mode & 1) {
+        if (endFunction == NULL) {
+            packet->w[12] = 0;
+        } else {
+            packet->w[12] = 1;
+        }
+        client->sema = -1;
+        if (sceSifSendCmd(0x8000001A, packet, 64, send, client->buffer, sendSize) == 0) {
+            _sceRpcFreePacket(packet);
+            return -2;
+        }
+        return 0;
+    }
+    param.maxCount = 1;
+    param.initCount = 0;
+    param.option = 0;
+    sema = CreateSema(&param);
+    client->sema = sema;
+    if (sema < 0) {
+        _sceRpcFreePacket(packet);
+        return -3;
+    }
+    packet->w[12] = 1;
+    if (sceSifSendCmd(0x8000001A, packet, 64, send, client->buffer, sendSize) == 0) {
+        _sceRpcFreePacket(packet);
+        DeleteSema(sema);
+        return -2;
+    }
+    WaitSema(sema);
+    DeleteSema(sema);
+    return 0;
+}

@@ -102,7 +102,9 @@ extern void pbBuildMapBaseVerts(pbProcHandle_t *panel);
 
 extern pbProcHandle_t *blockDB;
 
-extern sdfVector4_t D_0056CB30[], D_0056C8F0[], D_00326C70[], D_00326CD0[];
+extern sdfVector4_t D_0056CB30[], D_0056C8F0[], D_00326C70[];
+typedef struct QWORD_ALIGNED { f32 component[4]; } pbMapVertex_t;
+extern pbMapVertex_t D_00326CD0[];
 
 extern u8 D_00326D50[];
 
@@ -642,7 +644,6 @@ extern sdfVector2_t D_00326D78[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 
-#ifdef NON_MATCHING
 void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)
 {
     sdfVector4_t vertices[6];
@@ -651,27 +652,25 @@ void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)
     f32 y = base->y;
     f32 z = base->z;
     f32 w = base->w;
+    sdfVector4_t *out;
     u32 i;
 
-    for (i = 0; i < 6; i++) {
-        sdfVector4_t *vertex = &D_00326CD0[D_00326D50[i]];
-        vertices[i].x = vertex->x + x;
-        vertices[i].y = vertex->y + y;
-        vertices[i].z = vertex->z + z;
-        vertices[i].w = vertex->w + w;
+    for (i = 0, out = vertices; i < 6; i++) {
+        out->x = D_00326CD0[D_00326D50[i]].component[0] + x;
+        out->y = D_00326CD0[D_00326D50[i]].component[1] + y;
+        out->z = D_00326CD0[D_00326D50[i]].component[2] + z;
+        out->w = D_00326CD0[D_00326D50[i]].component[3] + w;
+        out++;
     }
     memset(&request, 0, sizeof(request));
+    request.color = 0x80808080;
     request.faceCount = 2;
     request.pointCount = 6;
-    request.color = 0x80808080;
-    request.vertex = vertices;
     request.normal = D_0056CB30;
     request.uv = D_00326D78;
+    request.vertex = vertices;
     sdfDrawTagLink(tag, EE_ADDR(sdf3DPrimMakePoly(&request)));
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPoly);
-#endif
 
 extern void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag);
 
@@ -705,7 +704,8 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
     sdfVector4_t vertices[36] __attribute__((aligned(16)));
     sdfVector4_t normals[36] __attribute__((aligned(16)));
     sdf3DPrimPolyParm_t request;
-    sdfVector4_t *source, *vertex;
+    pbMapVertex_t *source;
+    sdfVector4_t *vertex;
     f32 x, y, z, w, sourceX, sourceY, sourceZ, sourceW;
     u32 side, corner, count = 0, index, color;
 
@@ -746,10 +746,10 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
                 index = D_00326D50[side * 6 + corner];
                 source = &D_00326CD0[index];
                 vertex = &vertices[count + corner];
-                sourceW = source->w;
-                sourceX = source->x;
-                sourceY = source->y;
-                sourceZ = source->z;
+                sourceW = source->component[3];
+                sourceX = source->component[0];
+                sourceY = source->component[1];
+                sourceZ = source->component[2];
                 vertex->x = sourceX + x;
                 vertex->y = sourceY + y;
                 vertex->z = sourceZ + z;
