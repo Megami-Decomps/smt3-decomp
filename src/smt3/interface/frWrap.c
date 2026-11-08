@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "libsdf.h"
 #include "kernel.h"
 #include "font.h"
@@ -341,7 +342,7 @@ frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index)
         D_0054F458 = frCalcStringHash((s8 *)text);
     }
     frHelpPosX++;
-    if (frHelpPosX >= 31) {
+    if (frHelpPosX >= SDF_FRAMES(31)) {
         frHelpPosX = 0;
         frHelpPosY++;
         if (frHelpPosY >= D_0054F458) {

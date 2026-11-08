@@ -9,6 +9,8 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
+extern u32 dds3GetKernelCount(void);
+
 typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
@@ -1332,14 +1334,16 @@ s32 viewModeCamera(dds3ProcessID_t *id)
     if (!(scale < 1.025)) {
         return -1;
     }
-    work->scale = scale + 0.005;
-    for (i = 0; i < 4; i++) {
-        f32 current = work->eye[i];
-        f32 destination = work->target[i];
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        work->scale = scale + 0.005;
+        for (i = 0; i < 4; i++) {
+            f32 current = work->eye[i];
+            f32 destination = work->target[i];
 
-        (&step.x)[i] = current - destination;
-        (&step.x)[i] *= work->scale;
-        work->eye[i] = (&step.x)[i] + work->target[i];
+            (&step.x)[i] = current - destination;
+            (&step.x)[i] *= work->scale;
+            work->eye[i] = (&step.x)[i] + work->target[i];
+        }
     }
     SDF_VU0_COPYVECTOR(&aViewEye, &work->eye[0]);
     SDF_VU0_COPYVECTOR(&aViewTarget, &work->target[0]);

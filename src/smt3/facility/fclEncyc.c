@@ -2591,13 +2591,13 @@ s32 CalcFadeAlpha(s16 *pval, s32 mode, s32 max_alpha, s32 speed)
     s32 more = 1;
 
     if (mode != 0) {
-        v = v + speed;
+        v = v + SDF_FRAME_STEP(speed);
         if (v > max_alpha) {
             v = max_alpha;
             more = 0;
         }
     } else {
-        v = v - speed;
+        v = v - SDF_FRAME_STEP(speed);
         if (v < 0) {
             v = 0;
             more = 0;

@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "ps2asm.h"
 #include "basic.h"
@@ -77,7 +78,7 @@ s32 pipeResultSection(void)
         pipeResultFlag = 0;
         break;
     case 0xFF:
-        if (pipeResultFlag < 0x1F) {
+        if (pipeResultFlag < SDF_FRAMES(0x1F)) {
             pipeResultFlag++;
             break;
         }

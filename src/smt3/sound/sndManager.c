@@ -15,6 +15,8 @@
 
 extern dds3TitleWork_t *titleWork;
 
+extern u32 dds3GetKernelCount(void);
+
 extern void p2sdStopAllSe(void);
 
 extern void sdfMemFreeDirect(void *aHandle);
@@ -284,7 +286,7 @@ void dds3TitleDrawFade(void)
     rsetAlpha(1);
     work = titleWork;
     count = work->unk_30;
-    work->unk_30 = (s32)((u32)count + 1);
+    work->unk_30 = (s32)((u32)count + SDF_FRAME_DUE(dds3GetKernelCount()));
     if ((s32)((u32)count + 1) >= 0x3C) {
         age = count - 0x3B;
         if (age >= 0x11) {
@@ -446,7 +448,7 @@ void dds3TitleUpdateFade(void)
     if (frame >= 13) {
         dds3TitleDrawFade();
     }
-    titleWork->unk_34 = (s32)((u32)titleWork->unk_34 + 1);
+    titleWork->unk_34 = (s32)((u32)titleWork->unk_34 + SDF_FRAME_DUE(dds3GetKernelCount()));
 }
 
 

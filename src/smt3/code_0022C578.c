@@ -2948,7 +2948,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if (campWork->RootTimer < 0x100) {
-            campWork->RootTimer += 0x2A;
+            campWork->RootTimer += 0x2A * SDF_FRAME_DUE(dds3GetKernelCount());
         }
         if (campWork->RootTimer > 0x100) {
             campWork->RootTimer = 0x100;
@@ -2958,7 +2958,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if ((u32)(campWork->RootTimer - 0x100) < 0x100) {
-            campWork->RootTimer += 0x2A;
+            campWork->RootTimer += 0x2A * SDF_FRAME_DUE(dds3GetKernelCount());
         }
         if (campWork->RootTimer > 0x200) {
             campWork->RootTimer = 0x200;
@@ -3387,7 +3387,7 @@ void cmpUpdateProcessStatus(void)
     u8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
 
     if ((s8)campWork->statusPhase != 0 && (s8)campWork->statusPhase < 3) {
-        campWork->statusPhase++;
+        campWork->statusPhase += SDF_FRAME_DUE(dds3GetKernelCount());
     }
     switch (button) {
     case 1:
@@ -4155,12 +4155,12 @@ void cmpInitHeartsIcon(campInfoWork_t *work)
         icon->MoveType = moveType;
         icon->Axis = 0;
         icon->AxisChg = -1;
-        icon->Wait1st = dds3GetRandA(NULL) & 0x1F;
+        icon->Wait1st = SDF_FRAMES(dds3GetRandA(NULL) & 0x1F);
         {
             u32 wait = dds3GetRandA(NULL) & 0x1F;
 
             icon->Angle = 0.0f;
-            icon->Wait = wait;
+            icon->Wait = SDF_FRAMES(wait);
         }
         icon->DefCnt = 0;
         icon->DefAng = 0.0f;
@@ -5445,13 +5445,13 @@ void campDhFadeAlpha(void)
     s32 alpha;
 
     if ((work->flags & 1) == 0) {
-        alpha = work->fadeAlpha + 0x20;
+        alpha = work->fadeAlpha + SDF_FRAME_STEP(0x20);
         work->fadeAlpha = alpha;
         if (alpha >= 0x101) {
             work->fadeAlpha = 0x100;
         }
     } else {
-        alpha = work->fadeAlpha - 0x20;
+        alpha = work->fadeAlpha - SDF_FRAME_STEP(0x20);
         if (alpha < 0) {
             alpha = 0;
         }
@@ -5465,7 +5465,7 @@ void campDhUpdateIcons(void)
 
     for (i = 0; i < 64; i++) {
         if (campDhTimerWork->iconTimer[i] > 0) {
-            campDhTimerWork->iconTimer[i] -= 0x10;
+            campDhTimerWork->iconTimer[i] -= SDF_FRAME_STEP(0x10);
         }
         if (campDhTimerWork->iconTimer[i] < 0) {
             campDhTimerWork->iconTimer[i] = 0;
@@ -5562,7 +5562,7 @@ void campDhScanEntries(void)
             entry->unk_10 -= 1;
             continue;
         }
-        if ((entry->unk_2C = entry->unk_2C + entry->unk_30) >= 0x201) {
+        if ((entry->unk_2C = entry->unk_2C + entry->unk_30 * SDF_FRAME_DUE(dds3GetKernelCount())) >= 0x201) {
             entry->unk_2C = 0;
         }
     }
@@ -5586,21 +5586,21 @@ void campDhFindVisibleIcon(void)
     }
     if (gauge->visible != 0) {
         if (gauge->alpha < 0x100) {
-            gauge->alpha = gauge->alpha + gauge->step;
+            gauge->alpha = gauge->alpha + SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->step);
         }
         if (gauge->alpha >= 0x101) {
             gauge->alpha = 0x100;
         }
     } else {
         if (gauge->alpha > 0) {
-            gauge->alpha = gauge->alpha - gauge->step;
+            gauge->alpha = gauge->alpha - SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->step);
         }
         if (gauge->alpha < 0) {
             gauge->alpha = 0;
         }
     }
     if (gauge->fade < 0x100) {
-        gauge->fade = gauge->fade + gauge->fadeStep;
+        gauge->fade = gauge->fade + SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->fadeStep);
     }
     if (gauge->fade >= 0x101) {
         gauge->fade = 0x100;
@@ -6071,7 +6071,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
             raceColor = fclBlendColor(0x80C08080, textColor, cmpHeartsMasterPhase);
             phase = cmpHeartsMasterPhase;
             if (phase > 0) {
-                phase -= 8;
+                phase -= SDF_FRAME_STEP(8);
                 cmpHeartsMasterPhase = phase;
             }
             if (phase < 0) {
@@ -11024,7 +11024,7 @@ void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor)
                 value = (s32 *)(valueBase + byteOffset);
                 update = value;
                 if (*update < 0x100) {
-                    *update += entry->param;
+                    *update += SDF_FRAME_STEP_INT(dds3GetKernelCount(), entry->param);
                 } else {
                     entry->state = 0;
                 }
@@ -11367,7 +11367,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
 
 void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
 {
-    cursor->unk_34 += 6;
+    cursor->unk_34 += 6 * SDF_FRAME_DUE(dds3GetKernelCount());
     if (cursor->unk_34 > 0x200) {
         cursor->unk_34 -= 0x200;
     }

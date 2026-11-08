@@ -354,7 +354,7 @@ s32 scrCommand_SCR_TIME(void)
     }
     else
     {
-        scrSetIntReturnValue(dds3GetProcessRunTime(id));
+        scrSetIntReturnValue(SDF_FRAME_TICK(dds3GetProcessRunTime(id)));
     }
     return 1;
 }

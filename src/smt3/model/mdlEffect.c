@@ -5,9 +5,11 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "motion.h"
+#include "sdfFrame.h"
 
 /* Declared here because no header carries these. */
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern u32 dds3GetKernelCount(void);
 
 
 typedef struct mdlBillboard_t mdlBillboard_t;
@@ -1061,7 +1063,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
                               0.0f, 2.0f, 0.1f, 0.01f);
         }
     }
-    state->blinkTick++;
+    state->blinkTick += SDF_FRAME_DUE(dds3GetKernelCount());
     if (state->blinkTick == 30) {
         state->blinkTick = 0;
     }
@@ -1220,7 +1222,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     }
     state->pad = (mdlDebugPad_t *)pad;
     mdlDebugScaleWork.packetList = dds3FontReqAllocDrawTag();
-    if (++mdlDebugScaleWork.blinkTick == 30) {
+    if ((mdlDebugScaleWork.blinkTick += SDF_FRAME_DUE(dds3GetKernelCount())) == 30) {
         mdlDebugScaleWork.blinkTick = 0;
     }
     if (mdlDebugScaleWork.editing == 0) {
@@ -1317,7 +1319,7 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     softenBiasWork.value = value;
     softenBiasWork.adjustment = adjustment;
     softenBiasWork.packetList = dds3FontReqAllocDrawTag();
-    softenBiasWork.control.fields.blink++;
+    softenBiasWork.control.fields.blink += SDF_FRAME_DUE(dds3GetKernelCount());
     if (softenBiasWork.control.fields.blink == 30) {
         softenBiasWork.control.fields.blink = 0;
     }

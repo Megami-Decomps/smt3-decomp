@@ -2378,7 +2378,7 @@ s32 slFileSelDraw(s32 id)
         return 0;
     }
     gSlSelCnt = gSlSelCnt < SDF_FRAMES(30) ? gSlSelCnt + 1 : SDF_FRAMES(30);
-    D_0054F074 += D_0054C58C;
+    D_0054F074 += SDF_FRAME_STEP(D_0054C58C);
     pulse = sdfSin(D_0054F074) * 0.5f + 0.5f;
     slFileSelWork = pulse < 0.0f ? 0.0f : pulse;
     if (slFileSelWork > 1.0f) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "model.h"
 #include "motion.h"
@@ -718,13 +719,13 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                     control->MotSpeed = 1.0f;
                     break;
                 case 1:
-                    control->MotSpeed += 0.05f;
+                    control->MotSpeed += SDF_FRAME_STEP(0.05f);
                     if (1.0f < control->MotSpeed) {
                         control->MotSpeed = 1.0f;
                     }
                     break;
                 case 2:
-                    control->MotSpeed += 0.025f;
+                    control->MotSpeed += SDF_FRAME_STEP(0.025f);
                     if (1.0f < control->MotSpeed) {
                         control->MotSpeed = 1.0f;
                     }
@@ -761,13 +762,13 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                     control->MotSpeed = 0.0f;
                     break;
                 case 4:
-                    control->MotSpeed -= 0.05f;
+                    control->MotSpeed -= SDF_FRAME_STEP(0.05f);
                     if (control->MotSpeed < 0.0f) {
                         control->MotSpeed = 0.0f;
                     }
                     break;
                 case 5:
-                    control->MotSpeed -= 0.02f;
+                    control->MotSpeed -= SDF_FRAME_STEP(0.02f);
                     if (control->MotSpeed < 0.0f) {
                         control->MotSpeed = 0.0f;
                     }
@@ -791,13 +792,13 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                 control->MotSpeed = 1.0f;
                 break;
             case 1:
-                control->MotSpeed += 0.05f;
+                control->MotSpeed += SDF_FRAME_STEP(0.05f);
                 if (1.0f < control->MotSpeed) {
                     control->MotSpeed = 1.0f;
                 }
                 break;
             case 2:
-                control->MotSpeed += 0.025f;
+                control->MotSpeed += SDF_FRAME_STEP(0.025f);
                 if (1.0f < control->MotSpeed) {
                     control->MotSpeed = 1.0f;
                 }
@@ -806,13 +807,13 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                 control->MotSpeed = 0.0f;
                 break;
             case 4:
-                control->MotSpeed -= 0.05f;
+                control->MotSpeed -= SDF_FRAME_STEP(0.05f);
                 if (control->MotSpeed < 0.0f) {
                     control->MotSpeed = 0.0f;
                 }
                 /* fallthrough */
             case 5:
-                control->MotSpeed -= 0.02f;
+                control->MotSpeed -= SDF_FRAME_STEP(0.02f);
                 if (control->MotSpeed < 0.0f) {
                     control->MotSpeed = 0.0f;
                 }

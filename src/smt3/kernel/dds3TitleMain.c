@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "mviManager.h"
 #include "facility.h"
 #include "fpu.h"
@@ -11,6 +12,8 @@
 #include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
+
+extern u32 dds3GetKernelCount(void);
 
 extern dds3ProcessID_t *titleAllocWork(s32 arg);
 
@@ -133,7 +136,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         DrwSprite2D(0x5A, 0x90, 0x13C, 0x81, 0x7C, 0, 0x13C, 0x81, 0x80808080, titleWork->texHandle[0]);
         if (TITLE_BUTTON_ACTIVE()) titleWork->unk_20 = 50;
         counter = titleWork->unk_20;
-        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             titleWork->unk_20 = 0;
             titleWork->mode = (s32)((u32)titleWork->mode + 1);
@@ -145,7 +148,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
             DrwSprite2D(0x5A, 0x90, 0x13C, 0x81, 0x7C, 0, 0x13C, 0x81,
                         ((u32)alpha << 24) | 0x808080, titleWork->texHandle[0]);
         counter = titleWork->unk_20;
-        if (counter < 22) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 22) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             titleWork->unk_20 = 0;
             titleWork->mode = (s32)((u32)titleWork->mode + 1);
@@ -158,7 +161,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
             DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE,
                         ((u32)alpha << 24) | 0x808080, titleWork->texHandle[0]);
         counter = titleWork->unk_20;
-        if (counter < 20) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 20) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             titleWork->unk_20 = 0;
             titleWork->mode = (s32)((u32)titleWork->mode + 1);
@@ -168,7 +171,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE, 0x80808080, titleWork->texHandle[0]);
         if (TITLE_BUTTON_ACTIVE()) titleWork->unk_20 = 50;
         counter = titleWork->unk_20;
-        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 50) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             dds3FadeOut(0, 0, 0, 20);
             titleWork->unk_20 = 0;
@@ -178,7 +181,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
     case 8:
         if (titleWork->unk_20 < 22) {
             DrwSprite2D(0xA4, 0x5E, 0xB8, 0x104, 0, 0, 0x7B, 0xAE, 0x80808080, titleWork->texHandle[0]);
-            titleWork->unk_20 = (s32)((u32)titleWork->unk_20 + 1);
+            titleWork->unk_20 = (s32)((u32)titleWork->unk_20 + SDF_FRAME_DUE(dds3GetKernelCount()));
         } else {
             titleWork->unk_34 = -1;
             dds3FadeIn(0, 0, 0, 30);
@@ -228,7 +231,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         break;
     case 12:
         counter = titleWork->unk_20;
-        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             dds3FadeIn2(15);
             dds3PlayMovieByIndex(13);
@@ -242,7 +245,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
     case 13:
         dds3TitleUpdateFade();
         counter = titleWork->unk_20;
-        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else if (dds3WaitMovieEnd() != 0) {
             movieStop();
             titleWork->mode = 2;
@@ -289,19 +292,19 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         dds3TitleUpdateFade();
         if (titleWork->unk_20 == 16) movieStop();
         counter = titleWork->unk_20;
-        if (counter < 18) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 18) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             titleWork->unk_20 = 0;
             titleWork->mode = 12;
         }
         break;
     case 18: case 22:
-        titleWork->unk_2C = (s32)((u32)titleWork->unk_2C + 1);
+        titleWork->unk_2C = (s32)((u32)titleWork->unk_2C + SDF_FRAME_DUE(dds3GetKernelCount()));
         dds3TitleDrawMenu();
         counter = titleWork->unk_20;
         if (counter < 24) {
-            titleWork->unk_20 = (s32)((u32)counter + 1);
-            alpha = (s32)((u32)titleWork->unk_28 - 5U);
+            titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
+            alpha = (s32)((u32)titleWork->unk_28 - 5U * SDF_FRAME_DUE(dds3GetKernelCount()));
             titleWork->unk_28 = alpha;
             if (alpha < 0) titleWork->unk_28 = 0;
         } else {
@@ -340,7 +343,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         break;
     case 21:
         counter = titleWork->unk_20;
-        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 4) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             switch (titleWork->cursor) {
             case 0:
@@ -349,7 +352,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
                 titleWork->mode = 28;
                 break;
             case 1:
-                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + 1);
+                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
                 else {
                     dds3FadeIn(0, 0, 0, 10);
                     dds3AdminiCallSequence(41, NULL, 0, 0);
@@ -363,7 +366,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
                 titleWork->mode = 28;
                 break;
             case 3:
-                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + 1);
+                if (counter < 30) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
                 else {
                     titleWork->unk_20 = 0;
                     titleWork->mode = 26;
@@ -375,7 +378,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         }
         break;
     case 24:
-        counter = (s32)((u32)titleWork->unk_20 + 1);
+        counter = (s32)((u32)titleWork->unk_20 + SDF_FRAME_DUE(dds3GetKernelCount()));
         titleWork->unk_20 = counter;
         if (counter >= 6) {
             dds3PlayMovieByIndex(18);
@@ -386,7 +389,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
     case 25:
         dds3TitleDrawMenu();
         counter = titleWork->unk_20;
-        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter < 15) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else {
             movieStop();
             titleWork->mode = 24;
@@ -395,7 +398,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         break;
     case 26:
         counter = titleWork->unk_20;
-        if (counter > 0) titleWork->unk_20 = (s32)((u32)counter + 1);
+        if (counter > 0) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE(dds3GetKernelCount()));
         else if (dds3WaitMovieEnd() != 0 || (movieDecodeWork.frameIndex >= 31 && TITLE_BUTTON_PRESSED())) {
             dds3FadeOut(255, 255, 255, 60);
             titleWork->unk_20 = 1;
@@ -407,7 +410,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         }
         break;
     case 27:
-        counter = (s32)((u32)titleWork->unk_20 + 1);
+        counter = (s32)((u32)titleWork->unk_20 + SDF_FRAME_DUE(dds3GetKernelCount()));
         titleWork->unk_20 = counter;
         if (counter >= 5) {
             dds3FadeIn(255, 255, 255, 15);
@@ -501,7 +504,7 @@ void mselDrawTitleAnim(void)
     eglLinkSprite(0, 0, 512, 448, 0, 0, 512, 448,
                   0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   gGlobal->unk_40);
-    gGlobal->cur_alphacnt = (gGlobal->cur_alphacnt + 10) % 360;
+    gGlobal->cur_alphacnt = (gGlobal->cur_alphacnt + 10 * SDF_FRAME_DUE(dds3GetKernelCount())) % 360;
     gGlobal->cur_alpha = (u32)((sdfSin((f32)((gGlobal->cur_alphacnt + 90) % 360) /
                                      180.0f * 0x1.921f9ep+1f) + 1.0f) *
                               0.5f * 88.0f + 104.0f);
@@ -563,7 +566,7 @@ void mselDrawTitleAnim2(s32 animate)
     if (animate == 0) {
         mselMakeSaveText(gGlobal->tover, gGlobal->Z_RGBA, gGlobal->Z_RGBA);
     } else {
-        gGlobal->ZNalpha_cnt = (gGlobal->ZNalpha_cnt + 10) % 360;
+        gGlobal->ZNalpha_cnt = (gGlobal->ZNalpha_cnt + 10 * SDF_FRAME_DUE(dds3GetKernelCount())) % 360;
         gGlobal->ZNalpha_cnt = gGlobal->ZNalpha_cnt <= 0 ? 0 :
             (gGlobal->ZNalpha_cnt <= 180 ? gGlobal->ZNalpha_cnt : 180);
         gGlobal->ZN_RGBA = (u32)((sdfSin((f32)((gGlobal->ZNalpha_cnt + 90) % 360) /
@@ -584,11 +587,11 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
     if (dir == 0) {
         level = *value;
         v = level;
-        level = (v & 0xFF) + 0x10;
+        level = (v & 0xFF) + 0x10 * SDF_FRAME_DUE(dds3GetKernelCount());
     } else {
         level = *value;
         v = level;
-        level = (v & 0xFF) - 0x10;
+        level = (v & 0xFF) - 0x10 * SDF_FRAME_DUE(dds3GetKernelCount());
     }
     level = level <= 0 ? 0 : (level <= 0x80 ? level : 0x80);
     *value = (v & ~0xFF) | level;
