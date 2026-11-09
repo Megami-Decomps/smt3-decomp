@@ -1498,6 +1498,13 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
         return 0;
     }
     form = nbGetEventForm();
+    /* BUG: with no enemy form left nbGetEventForm returns NULL and retail reads
+     * formindex from kernel memory at 0x92. */
+#ifdef FIX_BUGS
+    if (form == NULL) {
+        return 0;
+    }
+#endif
     if (CheckTimeListDead(a, form->formindex) != 0) {
         return 0;
     }
