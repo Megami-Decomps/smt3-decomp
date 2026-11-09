@@ -65,6 +65,14 @@
 #define SDF_FRAME_DUE(age) 1
 #endif
 
+/* The random state for a draw that code retail runs once per tick makes each
+ * host tick, such as a jitter drawn while drawing. A host answers the shared
+ * stream on one host tick of each retail tick and a stream of its own on the
+ * rest, so the shared stream advances at the retail rate. */
+#ifndef SDF_FRAME_RAND
+#define SDF_FRAME_RAND(age) ((void *)0)
+#endif
+
 /* Runs one statement on the first host tick of each retail tick. */
 #ifndef SDF_FRAME_WHEN
 #define SDF_FRAME_WHEN(age, stmt) stmt

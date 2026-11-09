@@ -3697,8 +3697,8 @@ void nbPanelPartyDraw(void)
             x = 230;
             yy = y + 0x153;
         } else {
-            x = dds3GetRandIntA(NULL, 6) + 227;
-            yy = yb + dds3GetRandIntA(NULL, 6) - 3;
+            x = dds3GetRandIntA(SDF_FRAME_RAND(dds3GetKernelCount()), 6) + 227;
+            yy = yb + dds3GetRandIntA(SDF_FRAME_RAND(dds3GetKernelCount()), 6) - 3;
         }
         if (partyindex[i] != -1) {
 #ifdef FIX_BUGS
