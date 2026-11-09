@@ -2862,7 +2862,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     } else {
         ret = -1;
     }
-    cx = nbPanelStockShiftX + 0xE6;
+    cx = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &nbPanelStockShiftX, nbPanelStockShiftX) + 0xE6;
     if (nbPanelStockFrame > 0) {
         s32 frame;
         u32 col;

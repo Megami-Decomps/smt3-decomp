@@ -276,7 +276,7 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
     s32 blink;
 
     if (type == 3) {
-        margin = 0x2B - (s32)(s->smritu * 43.0f);
+        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
     }
     listCount = GetCommListCnt(s, type);
     blink = SDF_FRAME_TICK(s->data->battletime) % 0x19 < 0xE;
@@ -308,7 +308,7 @@ void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 col
 
     nbGetUnitWorkPointer(s->data, s->my);
     if (type == 3) {
-        margin = 0x2B - (s32)(s->smritu * 43.0f);
+        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
     }
     count = 0;
     rank = 0;
@@ -698,7 +698,7 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
     DispPanelSitaji(s, type, originalX, originalY, color);
     DispPanelCursor(s, type, originalX, originalY, color);
     count = GetCommListCnt(s, type);
-    motion = s->smritu * 43.0f;
+    motion = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f;
 
     if ((u32)type < 6) {
         switch (type) {
@@ -1038,7 +1038,7 @@ void DispCommandList2(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
     s32 id;
     s32 color = 0;
     s32 oz = s->oz;
-    s32 slide = (s32)(s->smritu * 43.0f);
+    s32 slide = (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
 
     /* Keep the normalized X in its live coordinate; allocation evidence:
      * docs/levers/cross-block-locals.md. */
@@ -1427,7 +1427,7 @@ void *nbCommSelProcess1(dds3ProcessID_t *id)
     if ((actstat & 0x80) != 0 && animation == 0) {
         return NULL;
     }
-    ox = s->ox;
+    ox = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->ox, s->ox);
     oy = s->oy;
     alpha = s->alpha;
     s->animeflag = animeFlags & ~0x20;

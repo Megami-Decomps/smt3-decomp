@@ -94,6 +94,13 @@
 #define SDF_FRAME_INTERPOLATE(age, key, value) (value)
 #endif
 
+/* SDF_FRAME_INTERPOLATE of a value read before its owner updates it in the
+ * same retail tick, so the value changes between that tick's host ticks. A
+ * host samples it on the first host tick of each retail tick only. */
+#ifndef SDF_FRAME_INTERPOLATE_DUE
+#define SDF_FRAME_INTERPOLATE_DUE(age, key, value) (value)
+#endif
+
 /* Forgets what SDF_FRAME_INTERPOLATE drew for key, where its owner starts the
  * value over, so the next draw starts at the new value instead of moving from
  * the old one. Expands to nothing here. */

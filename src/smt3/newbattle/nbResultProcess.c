@@ -275,6 +275,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
         }
         drawX = nbResultScoreTable[scoreIndex].ofsx * 0x46 / 100;
         SDF_FRAME_WHEN(dds3GetKernelCount(), nbResultScoreTable[scoreIndex].ofsx = drawX);
+        drawX = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &nbResultScoreTable[scoreIndex].ofsx, drawX);
         spriteColor = ((u32)alpha << 24) | baseColor;
         nbPnlSprite(x + drawX, y, 0x25, 0x22, 0xBF, 1, 0x25, 0x22, spriteColor, nbResultTex1);
         nbPnlSprite(x + drawX + 0x25, y, 0x11F, 0x22, 0xE3, 1, 1, 0x22, spriteColor, nbResultTex1);
