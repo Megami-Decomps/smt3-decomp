@@ -496,7 +496,7 @@ void trmUpdateSave(void)
     }
 }
 
-extern void slSetTmnlID(s8 type, u16 id);
+extern void slSetTmnlID(s16 type, u16 id);
 
 extern void fmProcTrigSequence(s32 mode);
 

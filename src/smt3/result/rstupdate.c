@@ -56,7 +56,7 @@ void rstOverWriteSkill(u16 *pSkill, u16 NewSkillID)
     rstSetMaxHpMp(1, startPos->pCurrentStock);
 }
 
-extern s32 rstAddSkillToSlot(u16 skill, cmbUnit_t *unit);
+extern s8 rstAddSkillToSlot(u16 skill, cmbUnit_t *unit);
 
 void rstAddSkill(void)
 {

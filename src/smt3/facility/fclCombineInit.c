@@ -4578,7 +4578,7 @@ s32 cmbActionExists(void *work)
     return result;
 }
 
-extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
+extern void mdlGetFilebase(s32 aMajor, s32 aMinor, char *aName, s32 aNameLeng);
 
 extern char fclCombineDevilModelFmt[];
 

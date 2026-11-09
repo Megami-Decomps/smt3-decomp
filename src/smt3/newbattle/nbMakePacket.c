@@ -267,7 +267,7 @@ extern s32 nbCheckSePacket(s32 start, s32 se, s32 frame);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
-extern void *effBTLSystemCreate(nbFormation_t *pFormation, u16 id);
+extern void *effBTLSystemCreate(nbFormation_t *pFormation, s32 id);
 
 extern s32 effBTLSystemGetLength(void *hEffBTLSys);
 
@@ -815,7 +815,7 @@ nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, saddr_t uniqueid, nbForm
     default:
         return p;
     }
-    p->data2.p = effBTLSystemCreate(form, sysid);
+    p->data2.p = effBTLSystemCreate(form, (u16)sysid);
     p->framelength = SDF_FRAMES(effBTLSystemGetLength(p->data2.p));
     printf("length = %d\n", p->framelength);
     if (seid != 0) {

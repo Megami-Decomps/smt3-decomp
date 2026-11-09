@@ -70,7 +70,7 @@ extern s32 dds3GetConfigFlag(u32 index, s32 *table);
 
 extern void *fclLoadTexture(char *pFileName);
 
-extern void fclSetPanelAnimState(u8 *panel, s8 state);
+extern void fclSetPanelAnimState(u8 *panel, u8 state);
 
 extern s32 fclRunPanelAnim(void *work);
 

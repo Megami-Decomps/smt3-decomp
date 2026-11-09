@@ -3101,7 +3101,7 @@ u32 slGetExitMode(void) {
     return gSlExitMode;
 }
 
-void slSetTmnlID(s16 type, s16 id) {
+void slSetTmnlID(s16 type, u16 id) {
     dds3GlobalWork_t *state = DDS3_GBWK;
 
     state->previewX = type;

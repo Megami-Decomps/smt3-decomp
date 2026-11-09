@@ -955,7 +955,7 @@ s32 Flow1_30(nbNegoProcessData_t *n)
 
 extern s32 nbGetMotionNo(nbFormation_t *form, s32 motion);
 extern s32 nbMakeUnitMovePacket(s32 startframe, saddr_t uniqueid,
-                                nbFormation_t *form, u16 targetMask, s32 type,
+                                nbFormation_t *form, u32 targetMask, s32 type,
                                 f32 speed);
 extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
 extern void nbResetFormPosRot(nbFormation_t *form);

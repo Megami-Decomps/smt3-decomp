@@ -455,7 +455,7 @@ extern frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firs
 
 extern frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 
-extern frFontHandle_t *frGetCNameFRQ(s8 nameIndex, s8 fontIndex, frFontHandle_t *chain, s8 firstOption);
+extern frFontHandle_t *frGetCNameFRQ(s8 nameIndex, s8 fontIndex, frFontHandle_t *chain, s32 firstOption);
 
 extern s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi);
 
@@ -1997,7 +1997,7 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         *offset = pos + 2;
         nameIndex = text[pos] - 1;
         frCreateNewHandle(mi);
-        mi->pFRQ = frGetCNameFRQ(nameIndex, mi->Style, mi->pFRQ, firstOption);
+        mi->pFRQ = frGetCNameFRQ(nameIndex, mi->Style, mi->pFRQ, (s8)firstOption);
         frEnableMode(1);
         frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         frSetDrawSpeed(mi->pFRQ, mi->Spd);

@@ -10281,7 +10281,7 @@ s32 cmpLoadStatusModel(void)
 
 #include "motion.h"
 
-extern void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s8 aNumber);
+extern void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 void cmpGetStatusModelMotion(mdlObj_t *model)
 {

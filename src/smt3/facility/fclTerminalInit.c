@@ -499,7 +499,7 @@ trmTerminalWork_t *fclAllocTerminalWork(s32 type, s32 no, s32 mode)
 }
 
 extern void sdfMemFreeDirect(void *handle);
-extern void fldProcSetTerminal(s8 type, u16 id);
+extern void fldProcSetTerminal(s32 type, s32 id);
 extern void fldProc_CallSisetuReturn(void);
 extern s32 evtBitCheck(s32 eventNo);
 

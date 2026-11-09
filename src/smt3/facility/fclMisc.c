@@ -39,7 +39,7 @@ extern void fclFilterOFF(void);
 
 extern void sdfFileCmdReadFile(const char *aFileName, s32 aBuffer, s32 aLength, void *aCallback, void *aUserData);
 
-extern void itfMesMngSetVarImmediate(s32 id, s8 index, s32 pstr);
+extern void itfMesMngSetVarImmediate(s32 id, u32 index, s32 pstr);
 
 extern s16 itfMesMngGetSelectNo(s32 msgid);
 

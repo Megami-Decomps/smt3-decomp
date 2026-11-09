@@ -2221,12 +2221,12 @@ s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record)
     return 0;
 }
 
-extern s32 datAddDevil(u16 id, s32 sw);
+extern s32 datAddDevil(s32 id, s32 sw);
 
 void ExecSummon(s32 recindex)
 {
     fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
-    s32 slot = datAddDevil(record->id, 0);
+    s32 slot = datAddDevil((u16)record->id, 0);
 
     SetRecordToUnitCore(&DDS3_GBWK->party[slot].unit, record);
 }

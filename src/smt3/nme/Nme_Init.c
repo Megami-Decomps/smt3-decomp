@@ -32,7 +32,7 @@ u32 nmeDecodeChar(s8 code)
     return ((u32)nmeAsciiCodeTable[index][0] << 8) | nmeAsciiCodeTable[index][1];
 }
 
-extern void frDelFontStyle(u8 styleNo);
+extern void frDelFontStyle(s32 styleNo);
 extern void nmeBuildNameFont(s8 mode, nmeWork_t *work);
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);

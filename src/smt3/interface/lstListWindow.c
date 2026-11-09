@@ -17,7 +17,7 @@ extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 extern void fclInitPanel(fclPanel_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 color, s8 type,
                          s8 speed);
 
-extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, u16 W, u16 H, s32 Work, void *pPanelPos);
+extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Work, void *pPanelPos);
 
 extern void fclDrawPanel(fclPanel_t *pPanel, s32 OtNo);
 
@@ -37,7 +37,7 @@ void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, lst
     } else {
         fclInitPanel(&work->panel, X, Y, Z, W, H, 0, 3, 0x10);
     }
-    fclInitPanelPos(X, Y, Z, W, H, 0, work->panelPos);
+    fclInitPanelPos(X, Y, Z, (u16)W, (u16)H, 0, work->panelPos);
     work->unk_58 = 0;
     work->unk_54 = Col;
     memset(work->slotFlags, 1, sizeof(work->slotFlags));
