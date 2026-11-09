@@ -22,10 +22,11 @@ STRING = re.compile(
 ROW = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);(.*)$", re.M)
 DLABEL = re.compile(r"^dlabel (\w+)$", re.M)
 D_NAME = re.compile(r"D_[0-9A-F]{8}")
+ONE_BYTE = re.compile(r"\bsize:0x1\b")
 
 
 def named_bytes(version):
-    """u8-sized symbols from symbol_addrs.txt, plus splat's own D_ auto-names
+    """One-byte symbols from symbol_addrs.txt, plus splat's own D_ auto-names
     for the same addresses (from undefined_syms_auto.txt), that have no
     dlabel anywhere in the generated asm yet."""
     defined = {m.group(1) for m in DLABEL.finditer(
@@ -33,7 +34,7 @@ def named_bytes(version):
     candidates = {}
     sa = ROOT / "config" / version / "symbol_addrs.txt"
     for name, addr, attrs in ROW.findall(sa.read_text()):
-        if "type:u8" in attrs and "size:0x1" in attrs and name not in defined:
+        if ONE_BYTE.search(attrs) and name not in defined:
             candidates[int(addr, 16)] = name
     auto = ROOT / "config" / version / "undefined_syms_auto.txt"
     if auto.exists():
