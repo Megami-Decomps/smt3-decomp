@@ -476,11 +476,11 @@ void calcCamNormal(void) {
         }
     }
     if (fldCamFastFlag) {
-        divisorX = 3.0f;
-        divisorY = 4.0f;
+        divisorX = SDF_FRAME_DIVISOR(3.0f);
+        divisorY = SDF_FRAME_DIVISOR(4.0f);
     } else {
-        divisorX = 4.0f;
-        divisorY = 8.0f;
+        divisorX = SDF_FRAME_DIVISOR(4.0f);
+        divisorY = SDF_FRAME_DIVISOR(8.0f);
     }
     nearPoint.x = fldCamEye[0] + (nearPoint.x - fldCamEye[0]) / divisorX;
     nearPoint.y = fldCamEye[1] + (nearPoint.y - fldCamEye[1]) / divisorY;
@@ -551,13 +551,13 @@ void calcCamNormal(void) {
         farPoint.z = fz;
     }
     if (fldCamFastFlag) {
-        divisorX = 3.0f;
-        divisorY = 4.0f;
-        divisorZ = 3.0f;
+        divisorX = SDF_FRAME_DIVISOR(3.0f);
+        divisorY = SDF_FRAME_DIVISOR(4.0f);
+        divisorZ = SDF_FRAME_DIVISOR(3.0f);
     } else {
-        divisorX = 8.0f;
-        divisorY = 8.0f;
-        divisorZ = 8.0f;
+        divisorX = SDF_FRAME_DIVISOR(8.0f);
+        divisorY = SDF_FRAME_DIVISOR(8.0f);
+        divisorZ = SDF_FRAME_DIVISOR(8.0f);
     }
     fx = fldCamTarget[0] + (fx - fldCamTarget[0]) / divisorX;
     farPoint.x = fx;
@@ -1082,7 +1082,7 @@ void fldCamSetChase(void)
 
 void fldCamUpdateDefault(void)
 {
-    fldCamSetChaseCore(8.0f);
+    fldCamSetChaseCore(SDF_FRAME_DIVISOR(8.0f));
 }
 
 extern u8 dds3PadStickState[2][2][2];
@@ -1167,9 +1167,9 @@ void calcCamSyukan(void) {
         divisorY = 1.0f;
         divisorZ = 1.0f;
     } else {
-        divisorX = 2.0f;
-        divisorY = 4.0f;
-        divisorZ = 2.0f;
+        divisorX = SDF_FRAME_DIVISOR(2.0f);
+        divisorY = SDF_FRAME_DIVISOR(4.0f);
+        divisorZ = SDF_FRAME_DIVISOR(2.0f);
     }
     fldGlobalBase.wordF8 = 0;
     dds3GetPosPoseSet(unit->handle);
