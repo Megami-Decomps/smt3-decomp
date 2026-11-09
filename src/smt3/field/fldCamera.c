@@ -16,6 +16,7 @@
 #include "event.h"
 #include "effect.h"
 #include "sdfFrame.h"
+#include "sdfAspect.h"
 
 extern void *memset(void *, int, size_t);
 
@@ -996,12 +997,7 @@ void fldCamSetChaseCore(f32 divisor)
     }
     switch (fldGlobalBase.area) {
     case 1:
-        if (x < -950.0f) {
-            x = -950.0f;
-        }
-        if (x > 850.0f) {
-            x = 850.0f;
-        }
+        SDF_ASPECT_CLAMP_X(x, -950.0f, 850.0f);
         if (z < -1100.0f) {
             z = -1100.0f;
         }
@@ -1010,12 +1006,7 @@ void fldCamSetChaseCore(f32 divisor)
         }
         break;
     case 4:
-        if (x < -3800.0f) {
-            x = -3800.0f;
-        }
-        if (x > 2600.0f) {
-            x = 2600.0f;
-        }
+        SDF_ASPECT_CLAMP_X(x, -3800.0f, 2600.0f);
         if (z < -4000.0f) {
             z = -4000.0f;
         }
@@ -1025,12 +1016,7 @@ void fldCamSetChaseCore(f32 divisor)
         break;
     case 6:
     case 7:
-        if (x < -2400.0f) {
-            x = -2400.0f;
-        }
-        if (x > 2100.0f) {
-            x = 2100.0f;
-        }
+        SDF_ASPECT_CLAMP_X(x, -2400.0f, 2100.0f);
         if (z < -2348.0f) {
             z = -2348.0f;
         }
@@ -1039,12 +1025,7 @@ void fldCamSetChaseCore(f32 divisor)
         }
         break;
     case 8:
-        if (x < -3000.0f) {
-            x = -3000.0f;
-        }
-        if (x > 2400.0f) {
-            x = 2400.0f;
-        }
+        SDF_ASPECT_CLAMP_X(x, -3000.0f, 2400.0f);
         if (z < -3100.0f) {
             z = -3100.0f;
         }
