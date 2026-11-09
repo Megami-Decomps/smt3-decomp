@@ -14,6 +14,10 @@
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
+
+/* A slide or fade value its Calc function steps once per tick, drawn after it. */
+#define FCL_ENCYC_DRAWN(v) SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &(v), (v))
+
 extern s32 fclEncycGetRatio(void);
 extern void ReleaseWork(fclEncyc_instance_tag *pinst);
 extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
@@ -918,14 +922,14 @@ extern void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst);
 void DrawPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
 {
     fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
-    s32 alpha = work->phase.statusAlpha;
+    s32 alpha = FCL_ENCYC_DRAWN(work->phase.statusAlpha);
 
     if (alpha < 0x80) {
-        cmpDrawStatusComEx2(&work->units[0], work->phase.xRecord, 0,
+        cmpDrawStatusComEx2(&work->units[0], FCL_ENCYC_DRAWN(work->phase.xRecord), 0,
             (u8)(0x80 - alpha), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
     }
     if (alpha > 0x20) {
-        cmpDrawStatusComEx2(&work->units[1], work->phase.xNow, 0,
+        cmpDrawStatusComEx2(&work->units[1], FCL_ENCYC_DRAWN(work->phase.xNow), 0,
             (u8)(alpha - 0x20), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
     }
     cmpDrawStatusModel(D_002F69B8);
@@ -1403,8 +1407,8 @@ void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
     }
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
-               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY), 0xFFFFF0,
+               FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 5, 0x3A0, 0x47);
     if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
@@ -1489,8 +1493,8 @@ void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
     }
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
-               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY), 0xFFFFF0,
+               FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 5, 0x3A0, 0x47);
     if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
@@ -1579,8 +1583,8 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0,
                        0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
-               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY),
+               0xFFFFF0, FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 4, 0x3A0, 0x47);
     DrawReadMainHelp(pinst);
     func_001C7E38(work->explainFont, 0, 0x47);
 }
@@ -1688,8 +1692,8 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
                            0, 0, 0, 0xA09DC380, 1, 0, 0);
     }
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
-               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY),
+               0xFFFFF0, FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 4, 0x3A0, 0x47);
     DrawReadMainHelp(pinst);
 }
 
@@ -3595,9 +3599,9 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
 
     draw.color = fclEncycMoneyBaseColor;
     work = pinst->pwork;
-    x = work->phase.ribbonWidth;
+    x = FCL_ENCYC_DRAWN(work->phase.ribbonWidth);
     y = work->phase.ribbonHeight;
-    draw.color.components[3] = 0x80 - work->phase.ribbonAlpha;
+    draw.color.components[3] = 0x80 - FCL_ENCYC_DRAWN(work->phase.ribbonAlpha);
     tag = sdfGrAllocPacketBuff(sizeof(*tag));
     sdfDrawTagInit(tag);
     draw.pos[0].x = x + 0x12F0;
@@ -3769,8 +3773,8 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     }
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    x = work->registX;
-    y = work->registY;
+    x = FCL_ENCYC_DRAWN(work->registX);
+    y = FCL_ENCYC_DRAWN(work->registY);
     prim.pos[0].x = x;
     prim.pos[0].y = y;
     prim.pos[1].x = x + 0xC90;
@@ -3778,7 +3782,7 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     prim.color.components[0] = 0x80;
     prim.color.components[1] = 0x80;
     prim.color.components[2] = 0x80;
-    prim.color.components[3] = work->registAlpha;
+    prim.color.components[3] = FCL_ENCYC_DRAWN(work->registAlpha);
     itfMiscDrawSpritePrim(prim.pos, fclEncycHelpPanelUv, &prim.color, 0xFFFFF0,
                           pinst->texHandle[3], 0, tag);
     prim.pos[0].x = x + 0x720;
@@ -3806,12 +3810,12 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
     if (work->help[1].alpha > 0) {
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
-        x = work->help[1].x;
-        y = work->help[1].y;
+        x = FCL_ENCYC_DRAWN(work->help[1].x);
+        y = FCL_ENCYC_DRAWN(work->help[1].y);
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
-        color.components[3] = work->help[1].alpha;
+        color.components[3] = FCL_ENCYC_DRAWN(work->help[1].alpha);
         pos[0].x = x; pos[0].y = y;
         pos[1].x = x + 0xC90; pos[1].y = y + 0xF0;
         itfMiscDrawSpritePrim(pos, fclEncycHelpPanelUv, &color, 0xFFFFF0,
@@ -3824,12 +3828,12 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
     if (work->help[0].alpha > 0) {
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
-        x = work->help[0].x;
-        y = work->help[0].y;
+        x = FCL_ENCYC_DRAWN(work->help[0].x);
+        y = FCL_ENCYC_DRAWN(work->help[0].y);
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
-        color.components[3] = work->help[0].alpha;
+        color.components[3] = FCL_ENCYC_DRAWN(work->help[0].alpha);
         uv.components[0] = 0x930; uv.components[1] = 0x1E0;
         uv.components[2] = 0xFD0; uv.components[3] = 0x430;
         pos[0].x = x; pos[0].y = y;

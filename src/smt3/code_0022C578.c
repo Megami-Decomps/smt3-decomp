@@ -2913,6 +2913,7 @@ void campDrawNumber(void)
             timer %= 0x100;
             fade = (0x100 - timer) / 2;
         }
+        fade = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &campWork->RootTimer, fade);
         colors[0] = 0x80808000 | fade;
         colors[1] = 0x80808000 | fade;
         colors[2] = 0x80808000 | fade;
@@ -4600,7 +4601,7 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
         f32 angle = entry->unk_18;
         fclDrawArrowCursorBox(x - inset, y - (inset >> 1), 0,
             (inset >> 3) + 35, (inset >> 3) + 36, entry->color, entry->unk_01,
-            1, entry->unk_2C, angle);
+            1, SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &entry->unk_2C, entry->unk_2C), angle);
     }
 }
 
@@ -5564,6 +5565,7 @@ void campDhScanEntries(void)
         }
         if ((entry->unk_2C = entry->unk_2C + entry->unk_30 * SDF_FRAME_DUE(dds3GetKernelCount())) >= 0x201) {
             entry->unk_2C = 0;
+            SDF_FRAME_INTERPOLATE_RESET(&entry->unk_2C);
         }
     }
 }
@@ -8848,7 +8850,8 @@ s32 campGetCursorColorAlt2(s32 color, cmpCursorSlot_t *slot)
 
 s32 campGetStockAlpha(s8 index, s8 row)
 {
-    return campWork->stockAlpha[index + row * 4];
+    return SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &campWork->stockAlpha[index + row * 4],
+                                     campWork->stockAlpha[index + row * 4]);
 }
 
 s32 campCalcStockScale(s8 index, s8 row)
