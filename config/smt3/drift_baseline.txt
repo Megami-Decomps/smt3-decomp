@@ -308,6 +308,7 @@ member effBattleLight_effBTLPointLight_Base_tag.unknown10
 member effBattleLight_effBTLPointLight_Base_tag.unknown14
 member effBlurPrimVertex_t.unk0C
 member effBlurPrimVertex_t.unk1E
+member effColorHandler_t.unk4
 member effCrackModel_t.unk00
 member effCrackMotion_t.unk00
 member effCrackMotion_t.unk24
@@ -375,6 +376,7 @@ member effSub_t.unk0
 member effSub_t.unk21
 member effSub_t.unk41
 member effTrackPolyParams_t.unk1C
+member effVectorHandler_t.unk4
 member evtStartWork_t.unk_1299
 member evtStartWork_t.unk_129D
 member evtStartWork_t.unk_170
