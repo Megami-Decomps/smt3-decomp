@@ -1386,14 +1386,14 @@ void DeleteClearProc(dds3ProcessID_t *id) {
 void CalcDegreeMode(void) {
     f32 d;
     if (degree_mode & 2) {
-        d = cameraDegree + 0.15f;
+        d = cameraDegree + SDF_FRAME_STEP(0.15f);
         if (d > 1.560796142f) {
             cameraDegree = 1.560796142f;
             degree_mode = degree_mode & 0xFE;
             return;
         }
     } else {
-        d = cameraDegree - 0.15f;
+        d = cameraDegree - SDF_FRAME_STEP(0.15f);
         if (d < cameraDegreeInit) {
             cameraDegree = cameraDegreeInit;
             degree_mode = degree_mode & 0xFE;
