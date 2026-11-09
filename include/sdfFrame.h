@@ -133,7 +133,15 @@
 #define SDF_FRAME_INTERPOLATE_POSE(age, basic, pos) dds3SetPosPoseSet((basic), (pos))
 #endif
 
-/* Sets again each position SDF_FRAME_INTERPOLATE_POSE set in this retail tick.
+/* Sets basic's rotation to the angles in radians at rot, which its owner sets
+ * once per retail tick. A host interpolates each angle the short way round,
+ * keyed by rot, as SDF_FRAME_INTERPOLATE_POSE does positions. */
+#ifndef SDF_FRAME_INTERPOLATE_ROT
+#define SDF_FRAME_INTERPOLATE_ROT(age, basic, rot) dds3SetRotPoseSet((basic), (rot))
+#endif
+
+/* Sets again each position SDF_FRAME_INTERPOLATE_POSE and each rotation
+ * SDF_FRAME_INTERPOLATE_ROT set in this retail tick.
  * Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_POSES
 #define SDF_FRAME_INTERPOLATE_POSES(age)
