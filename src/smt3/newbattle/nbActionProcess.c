@@ -3118,6 +3118,10 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
     void *buffer;
     sdfMemHandle_t *handle;
 
+    /* Each setup step costs one retail tick. */
+    if (!SDF_FRAME_DUE(dds3GetKernelCount())) {
+        return 0;
+    }
     switch (a->seqcnt) {
     case 0:
         a->skilltime++;

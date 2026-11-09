@@ -6,6 +6,8 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
+extern u32 dds3GetKernelCount(void);
+
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
     EFF_BATTLE_MINIMUM_RAMP_END_FRAME = 1,
@@ -474,7 +476,10 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         effBTLPointLightSet(list->colorKeys, formation);
         effBTLModelColorSet(list->rgbKeys, formation);
     }
-    if (list->shake != 0 && SDF_FRAMES(list->shakeFrame) == frame) {
+    /* A cut made by a battle step starts counting on the next host tick, so the
+     * quake, which draws from the shared random stream, waits for a retail tick. */
+    if (list->shake != 0 && list->shakeFrame == SDF_FRAME_TICK(frame) &&
+        SDF_FRAME_DUE(dds3GetKernelCount())) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {
