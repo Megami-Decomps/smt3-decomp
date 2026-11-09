@@ -94,6 +94,13 @@
 #define SDF_FRAME_INTERPOLATE(age, key, value) (value)
 #endif
 
+/* Forgets what SDF_FRAME_INTERPOLATE drew for key, where its owner starts the
+ * value over, so the next draw starts at the new value instead of moving from
+ * the old one. Expands to nothing here. */
+#ifndef SDF_FRAME_INTERPOLATE_RESET
+#define SDF_FRAME_INTERPOLATE_RESET(key)
+#endif
+
 /* Sets lvalue to SDF_FRAME_INTERPOLATE(age, key, value). Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_SET
 #define SDF_FRAME_INTERPOLATE_SET(age, key, lvalue, value)

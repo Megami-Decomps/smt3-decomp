@@ -735,6 +735,7 @@ void nbRunKoukaType1(s32 partyindex, sdfVector4_t *pos, f32 time)
     SDF_VU0_COPYVECTOR(&form->tarpos, pos);
     form->shakePower = time;
     form->shakePhase = 0;
+    SDF_FRAME_INTERPOLATE_RESET(&form->range);
 }
 
 void nbRunKoukaType2(s32 partyindex, f32 time)
@@ -767,6 +768,7 @@ void nbRunKoukaType2(s32 partyindex, f32 time)
     SDF_VU0_COPYVECTOR(&form->tarpos, &form->orgpos);
     form->shakePower = time;
     form->shakePhase = 0;
+    SDF_FRAME_INTERPOLATE_RESET(&form->range);
 }
 
 void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
@@ -774,6 +776,7 @@ void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
     form->type = 2;
     form->damageRange = range;
     form->shakePhase = 0;
+    SDF_FRAME_INTERPOLATE_RESET(&form->damageRange);
     form->shakePower = power;
     form->addmovet = power;
 }
