@@ -341,7 +341,7 @@ void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB) {
     if ((packetBytes >> 3) != 0) {
         channelRegisters = aCB->dmaCh;
         sceDmaSync((sceDmaChan *)channelRegisters, 0, 0);
-        HW_WRITE((volatile u32 *)channelRegisters, HW_READ((volatile u32 *)channelRegisters) | 0x40); /* CHCR bit 6: tag-transfer enable */
+        *(volatile u32 *)channelRegisters = *(volatile u32 *)channelRegisters | 0x40; /* CHCR bit 6: tag-transfer enable */
         EE_SYNC_BARRIER();
         sceDmaSendN(channelRegisters, (void *)EE_PHYSICAL(EE_ADDR(aCB->start)), packetBytes >> 4);
         nextBufferIndex = aCB->dblBuffId ^ 1;
