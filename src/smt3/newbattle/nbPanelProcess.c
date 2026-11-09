@@ -1082,7 +1082,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    x -= SDF_FRAME_SMOOTH(dds3GetKernelCount(), &nbPnlWork[i].OfsX, nbPnlWork[i].OfsX);
+    x -= SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &nbPnlWork[i].OfsX, nbPnlWork[i].OfsX);
     if (act) {
         v = sdfSin(nbPnlCnt) * 48.0f;
         v += 0xB0;

@@ -1645,9 +1645,9 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
             } else {
                 continue;
             }
-            *x = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->x1, e->x1);
-            *y = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->y1, e->y1);
-            *z = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->z1, e->z1);
+            *x = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->x1, e->x1);
+            *y = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->y1, e->y1);
+            *z = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->z1, e->z1);
             return 1;
         }
         if (e->matter_resid2 == matter_resid) {
@@ -1685,9 +1685,9 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
             } else {
                 continue;
             }
-            *x = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->x2, e->x2);
-            *y = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->y2, e->y2);
-            *z = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &e->z2, e->z2);
+            *x = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->x2, e->x2);
+            *y = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->y2, e->y2);
+            *z = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &e->z2, e->z2);
             return 1;
         }
     }

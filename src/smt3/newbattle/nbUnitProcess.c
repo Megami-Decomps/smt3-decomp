@@ -997,7 +997,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
             }
         }
         SDF_VU0_LOADVECTOR(&form->startpos);
-        blend = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &form->range, form->range);
+        blend = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &form->range, form->range);
         interpolationBlend = blend;
         inversePhase = 1.0f - blend;
         PS2_FLOAT_BITS(phaseBits, inversePhase);
@@ -1016,7 +1016,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         if (form->basic != NULL) {
             dds3SetPosPoseSet(form->basic, &form->pos);
             anime = form->anime;
-            blend = SDF_FRAME_SMOOTH(dds3GetKernelCount(), &form->range, form->range);
+            blend = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &form->range, form->range);
         }
         if (blend >= 1.0f) {
             if ((anime & 0x40) != 0) {
@@ -1124,7 +1124,7 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
             return;
         }
     }
-    SDF_FRAME_SMOOTH_SET(dds3GetKernelCount(), &form->damageRange, x, form->damageRange * form->range);
+    SDF_FRAME_INTERPOLATE_SET(dds3GetKernelCount(), &form->damageRange, x, form->damageRange * form->range);
     SDF_VU0_COPYVECTOR(&pos, &form->pos);
     pos.x += x;
     dds3SetPosPoseSet(basic, &pos);
