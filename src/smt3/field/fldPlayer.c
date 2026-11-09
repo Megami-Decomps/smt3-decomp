@@ -501,7 +501,7 @@ void fldPlayerCalc_WarpRun(void)
             dds3OnPoseSetFlag(control->handle2->poseset, 8);
         }
         if (l_UseCollision != 0) {
-            fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+            fldGlobalBase.y = position.y + SDF_FRAME_STEP(fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
         }
     }
     pitch = fldCamPitch;
@@ -856,7 +856,7 @@ s32 fldPlayerCalc_Nml(void)
     fldGlobalBase.y = position.y;
     fldGlobalBase.z = position.z;
     if ((left || right || forward || back) && l_UseCollision != 0) {
-        fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+        fldGlobalBase.y = position.y + SDF_FRAME_STEP(fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
     }
     {
         f32 pitch = fldCamPitch;
@@ -1451,7 +1451,7 @@ s32 fldPlayerCalc_Wm2(void)
     fldGlobalBase.y = position.y;
     fldGlobalBase.z = position.z;
     if ((left || right || down || up) && l_UseCollision != 0) {
-        fldGlobalBase.y = position.y + 3.0f;
+        fldGlobalBase.y = position.y + SDF_FRAME_STEP(3.0f);
     }
     SDF_VU0_LOADMATRIX(&D_002FA240);
     InversMatrix();
@@ -1573,7 +1573,7 @@ s32 fldPlayerCalc_Wm2(void)
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR(&normal);
                 position.x = initial.x + normal.x * SDF_FRAME_STEP(16.0f);
-                position.y = (initial.y + normal.y * SDF_FRAME_STEP(16.0f)) + 3.0f;
+                position.y = (initial.y + normal.y * SDF_FRAME_STEP(16.0f)) + SDF_FRAME_STEP(3.0f);
                 position.z = initial.z + normal.z * SDF_FRAME_STEP(16.0f);
                 dds3SetPosPoseSet(basic, &position);
                 work.x = position.x;
@@ -1896,9 +1896,9 @@ s32 fldPlayerCalc_Nml_syukan(void)
     fldGlobalBase.z = position.z;
     if ((left || right || forward || back || turnLeft || turnRight) && l_UseCollision != 0) {
         if (fldGlobalBase.float130 > 0.0f) {
-            fldGlobalBase.y = position.y + 5.0f;
+            fldGlobalBase.y = position.y + SDF_FRAME_STEP(5.0f);
         } else {
-            fldGlobalBase.y = position.y + 10.0f;
+            fldGlobalBase.y = position.y + SDF_FRAME_STEP(10.0f);
         }
     }
     while (fldCamPitch >= 360.0f) {

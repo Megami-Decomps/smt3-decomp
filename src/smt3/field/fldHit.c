@@ -1139,7 +1139,7 @@ void fldHitChkUnit(f32 *position)
         index = fldGlobalBase.hitMatterIndex;
         if (fldMatterTable[index].matter != NULL) {
             movement.x = fldMatterTable[index].matter->poseset->pos.x - fldMatterTable[index].previousPosition[0];
-            movement.y = (fldMatterTable[index].matter->poseset->pos.y - fldMatterTable[index].previousPosition[1]) + 10.0f;
+            movement.y = (fldMatterTable[index].matter->poseset->pos.y - fldMatterTable[index].previousPosition[1]) + SDF_FRAME_STEP(10.0f);
             movement.z = fldMatterTable[index].matter->poseset->pos.z - fldMatterTable[index].previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
