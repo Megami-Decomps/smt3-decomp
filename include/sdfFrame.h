@@ -31,6 +31,16 @@
 #define SDF_FRAME_STEP(d) (d)
 #endif
 
+/* A float counter x raised or lowered by the step per tick d to a limit that
+ * retail's whole steps land on exactly. A host scales d and stops x at the
+ * limit. */
+#ifndef SDF_FRAME_STEP_UP
+#define SDF_FRAME_STEP_UP(x, d, max) ((x) + (d))
+#endif
+#ifndef SDF_FRAME_STEP_DOWN
+#define SDF_FRAME_STEP_DOWN(x, d, min) ((x) - (d))
+#endif
+
 /* An advance per tick added to an integer, given a count of host ticks from
  * 0. A host splits d into whole steps that add up to exactly d over each
  * retail tick, where a rounded SDF_FRAME_STEP would stall or run fast. */

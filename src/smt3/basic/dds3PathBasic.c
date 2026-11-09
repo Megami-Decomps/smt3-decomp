@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "ps2asm.h"
 
@@ -247,7 +248,7 @@ s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work)
     }
     if (work->direction == DDS3_PATHBASIC_CONTROL_FORWARD) {
         if (work->frameMax > work->frame) {
-            work->frame = work->frame + 1.0f;
+            work->frame = SDF_FRAME_STEP_UP(work->frame, 1.0f, work->frameMax);
         } else if (work->flag & DDS3_PATHBASIC_FLAG_LOOP) {
             work->frame = 0.0f;
         } else {
@@ -255,7 +256,7 @@ s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work)
         }
     } else if (work->direction == DDS3_PATHBASIC_CONTROL_BACK) {
         if (work->frame > 0.0f) {
-            work->frame = work->frame - 1.0f;
+            work->frame = SDF_FRAME_STEP_DOWN(work->frame, 1.0f, 0.0f);
         } else if (work->flag & DDS3_PATHBASIC_FLAG_LOOP) {
             work->frame = work->frameMax;
         } else {
