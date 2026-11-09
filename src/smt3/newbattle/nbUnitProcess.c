@@ -1192,13 +1192,16 @@ void RunDamage(nbMainProcessData_t *data, nbFormation_t *form)
         break;
     }
 
-    offset = dds3GetRandFloatA(0) * form->damageRange;
-    if ((form->time & 1) != 0) {
-        offset = -offset;
+    /* The shake draws from the shared random stream, so it moves once per retail tick. */
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        offset = dds3GetRandFloatA(0) * form->damageRange;
+        if ((form->time & 1) != 0) {
+            offset = -offset;
+        }
+        SDF_VU0_COPYVECTOR(&pos, &form->pos);
+        pos.x += offset;
+        dds3SetPosPoseSet(form->basic, &pos);
     }
-    SDF_VU0_COPYVECTOR(&pos, &form->pos);
-    pos.x += offset;
-    dds3SetPosPoseSet(form->basic, &pos);
 
     if (form->damageRange > 0.0f) {
         form->damageRange -= SDF_FRAME_STEP(0.7f);

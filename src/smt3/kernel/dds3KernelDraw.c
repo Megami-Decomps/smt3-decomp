@@ -516,7 +516,8 @@ void dds3RunQuake(void)
     }
     range.x = dds3QuakeXRange * 0.01f;
     range.y = dds3QuakeYRange * 0.01f;
-    for (i = 0; i < 2; i++) {
+    /* The jitter draws from the shared random stream, so it moves once per retail tick. */
+    for (i = 0; i < 2 && SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
         if ((&range.x)[i] != 0.0f) {
             amplitude = dds3GetRandFloatA(0) * (&range.x)[i] * 0.5f + (&range.x)[i] * 0.5f;
             if ((&range.x)[i] * gain.axis[i] <= fabsf(dds3QuakeOffset[i])) {
