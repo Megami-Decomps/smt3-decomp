@@ -131,10 +131,13 @@ extern s32 pipeSoundSection(void);
 
 extern void CalcCamera(void);
 
+extern u32 dds3GetKernelCount(void);
+
 s32 pipe_Section(void)
 {
     s32 ret = pipeMainSection();
 
+    SDF_FRAME_INTERPOLATE_POSES(dds3GetKernelCount());
     pipeDrawSection();
     pipeSoundSection();
     CalcCamera();

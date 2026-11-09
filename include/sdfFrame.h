@@ -112,6 +112,26 @@
 #define SDF_FRAME_INTERPOLATE_VEC(age, key, dst, src, n)
 #endif
 
+/* Four floats drawn each host tick from the four at src, which their owner
+ * updates once per retail tick: a host points at a copy whose first n lanes
+ * are SDF_FRAME_INTERPOLATE of src's, keyed by src. Retail points at src. */
+#ifndef SDF_FRAME_INTERPOLATE_PTR
+#define SDF_FRAME_INTERPOLATE_PTR(age, src, n) (src)
+#endif
+
+/* Sets basic's position to the vector at pos, which its owner sets once per
+ * retail tick. A host sets SDF_FRAME_INTERPOLATE of it, keyed by pos, and sets
+ * it again at each SDF_FRAME_INTERPOLATE_POSES on the rest of the retail tick. */
+#ifndef SDF_FRAME_INTERPOLATE_POSE
+#define SDF_FRAME_INTERPOLATE_POSE(age, basic, pos) dds3SetPosPoseSet((basic), (pos))
+#endif
+
+/* Sets again each position SDF_FRAME_INTERPOLATE_POSE set in this retail tick.
+ * Expands to nothing here. */
+#ifndef SDF_FRAME_INTERPOLATE_POSES
+#define SDF_FRAME_INTERPOLATE_POSES(age)
+#endif
+
 /* Brackets the reads of positions recorded once per retail tick by parts
  * that follow a moving mark: pos is the mark at the last retail tick and
  * posOld the one before. A host running more ticks than retail may move the

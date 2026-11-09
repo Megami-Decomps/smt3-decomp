@@ -5,6 +5,7 @@
 #include "basic.h"
 #include "dds3obj.h"
 #include "motion.h"
+#include "sdfFrame.h"
 
 
 /* The eye snapshot is read by aligned LD pairs at the native global base. */
@@ -36,6 +37,7 @@ extern s32 pipeCheckLevel(s32 level, s32 type);
 
 
 extern void CalcCamera(void);
+extern u32 dds3GetKernelCount(void);
 
 extern void *memset(void *, s32, size_t);
 extern void *memcpy(void *, const void *, size_t);
@@ -482,13 +484,14 @@ void CalcCamera(void) {
     dds3CameraObjectBasicWorkData_t *cameraData;
     dds3Basic_t *camera;
 
-    dds3CameraObjectBasicGetCameraTM(pipe_Camera, pipeCamShakeVec);
-    dds3SetPosPoseSet(pipe_Camera, pipeCamShake);
+    dds3CameraObjectBasicGetCameraTM(pipe_Camera,
+                                     SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), pipeCamShakeVec, 3));
+    dds3SetPosPoseSet(pipe_Camera, SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), pipeCamShake, 3));
     camera = pipe_Camera;
     ((void (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
     cameraData = pipe_Camera->workdata;
-    SDF_VU0_COPYVECTOR(&cameraData->vertical, pipeCameraPos);
-    SDF_VU0_COPYVECTOR(&cameraData->upVector, pipeCameraPos);
+    SDF_VU0_COPYVECTOR(&cameraData->vertical, SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), pipeCameraPos, 3));
+    SDF_VU0_COPYVECTOR(&cameraData->upVector, SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), pipeCameraPos, 3));
 }
 
 s32 pipeCheckLevel(s32 level, s32 type)

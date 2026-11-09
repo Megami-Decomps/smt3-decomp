@@ -5,6 +5,7 @@
 #include "dds3obj.h"
 #include "motion.h"
 #include "pipe.h"
+#include "sdfFrame.h"
 
 extern void (*D_00551828)(void);
 
@@ -28,6 +29,7 @@ extern void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value);
 extern void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize);
 
 extern void dds3DeleteUnitObjectBasic(void *aPtr);
+extern u32 dds3GetKernelCount(void);
 
 extern void DEBUG_PRINT(const char *str, ...);
 
@@ -124,7 +126,7 @@ void mymdlPosSet(tagpipeBasic *pWork, f32 x, f32 y, f32 z)
     pWork->pos[0] = x;
     pWork->pos[1] = y;
     pWork->pos[2] = z;
-    dds3SetPosPoseSet(pWork->base, pWork->pos);
+    SDF_FRAME_INTERPOLATE_POSE(dds3GetKernelCount(), pWork->base, pWork->pos);
     pWork = NULL;
 }
 
@@ -135,6 +137,7 @@ void SetMdlPosition(tagpipeBasic *pWork, s16 mdlSize)
     for (i = 0; i < mdlSize; i++) {
         if (pWork[i].base != NULL) {
             dds3DeleteUnitObjectBasic(pWork[i].base);
+            SDF_FRAME_INTERPOLATE_RESET(pWork[i].pos);
             pWork[i].base = NULL;
         }
     }
