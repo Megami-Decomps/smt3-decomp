@@ -23,8 +23,8 @@ extern void LookAtMatrix(const sdfVector4_t *aTarget, const sdfVector4_t *aEye,
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewTarget;
 extern sdfVector4_t aViewDown;
-extern sdfVector4Unaligned_t D_00530D38;
-extern sdfVector4Unaligned_t D_00530D48;
+extern sdfVector4Unaligned_t dds3CameraObjectBasicInitialUp;
+extern sdfVector4Unaligned_t dds3CameraObjectBasicInitialEye;
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
@@ -134,8 +134,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *
     dds3Basic_t *basic;
     dds3CameraObjectBasicWorkData_t *work;
 
-    initialUp = D_00530D38;
-    initialEye = D_00530D48;
+    initialUp = dds3CameraObjectBasicInitialUp;
+    initialEye = dds3CameraObjectBasicInitialEye;
     basic = dds3AllocCameraObjectBasic(serialID);
     work = basic->workdata;
     work->mode = 1;
@@ -277,7 +277,7 @@ void func_00112A18(dds3Basic_t *basic, u32 mode)
     }
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00530D38);
+INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", dds3CameraObjectBasicInitialUp);
 
-INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_00530D48);
+INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", dds3CameraObjectBasicInitialEye);
 

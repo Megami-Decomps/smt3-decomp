@@ -20,8 +20,8 @@ extern void dds3EffectPartSetScale(dds3EffectPart_t *hEffPart, f32 scale);
 extern void sdfChipFreeDirect(void *aPtr);
 #include "sdk_libc.h"
 
-extern f32 D_0031B8B0[4];
-extern f32 D_0031B8A0[4];
+extern f32 effBTLFadeColorFrom[4];
+extern f32 effBTLFadeColorTo[4];
 /* Non-GP BSS words: incomplete extern arrays preserve the native lui/lw
  * accesses (DDS idioms.md, "Declaring non-GP data"). */
 extern s8 effBTLSkillRun;
@@ -69,9 +69,9 @@ extern dds3ProcessID_t *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
-extern u16 D_0031B8C0[];
-extern sdfVector4_t D_00319FA0[];
-extern sdfVector4_t D_0031B8F0[];
+extern u16 effBTLCutCameraState[];
+extern sdfVector4_t effBTLStageColorTable[];
+extern sdfVector4_t effBTLDefaultColor[];
 extern s32 fldSkyGetAlpha(void);
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -120,16 +120,16 @@ typedef struct effBTLLightWork_t {
     u16 switchFrame;
 } effBTLLightWork_t;
 
-extern f32 D_00569970[4];
-extern f32 D_00569980[4];
-extern f32 D_00569990[4];
-extern f32 D_005699A0[4];
-extern fldResourceLight_t D_005699B0;
+extern f32 effBTLFieldColor[4];
+extern f32 effBTLSavedLight1[4];
+extern f32 effBTLSavedLight0[4];
+extern f32 effBTLSavedAmbient[4];
+extern fldResourceLight_t effBTLFieldLight;
 extern u32 abgr;
-extern u32 D_00551D84;
-extern u32 D_0054F18C;
+extern u32 effBTLFieldColorId;
+extern u32 effBTLLightColor;
 extern u32 D_0054F190;
-extern u32 D_0031CA90[];
+extern u32 effBTLFieldFilter[];
 extern s32 effBTLFieldColorIsOn(void);
 extern void effBTLFieldColorGetBaseColor(void);
 extern void effBTLFieldColorStart(void);
@@ -149,10 +149,10 @@ typedef struct effBTLColorRow_t {
     u32 word;
 } effBTLColorRow_t;
 
-extern effBTLColorRow_t D_00317750[];
-extern f32 D_00532EA0[4];
-extern f32 D_00532EB0[4];
-extern f32 D_00532EC0[4];
+extern effBTLColorRow_t effBTLFieldColorTable[];
+extern f32 effBTLCutBaseRotate[4];
+extern f32 effBTLCutRotateA[4];
+extern f32 effBTLCutRotateB[4];
 extern void effBTLPointLightSet(void *pLight, void *pFormation);
 extern void effBTLModelColorSet(void *pModel, void *pFormation);
 extern void effBTLPartGetPositionPtr(void *pFormation, effBTLAimParams_t *pPosPtr, sdfVector4_t *pPos);
@@ -415,8 +415,8 @@ u32 effBTLCutGetAllPartColor(u32 frame, u32 frame_end) {
             ratio = (f32)(frame_end - frame) / SDF_FRAMES_F(6.0f);
         }
     }
-    SDF_VU0_LOADVECTOR(D_0031B8B0);
-    SDF_VU0_LOADVECTOR_B(D_0031B8A0);
+    SDF_VU0_LOADVECTOR(effBTLFadeColorFrom);
+    SDF_VU0_LOADVECTOR_B(effBTLFadeColorTo);
     SDF_VU0_SCALEVECTOR(1.0f - ratio);
     SDF_VU0_SCALEVECTOR_B(ratio);
     SDF_VU0_ADDVECTOR();
@@ -431,22 +431,22 @@ void effBTLCutSetCameraState(effBTLCut_t *hBTLCutEffect) {
 
     if ((nbGetMainProcessData()->stat & 0x1000) == 0) {
         if (hBTLCutEffect->kind < 3) {
-            nbCameraSetState(D_0031B8C0[hBTLCutEffect->kind]);
+            nbCameraSetState(effBTLCutCameraState[hBTLCutEffect->kind]);
         }
     }
 }
 
 /* Canonical declaration of the provider defined below. */
-extern char D_00532ED0[];
+extern char effBTLShakeFormat[];
 u32 effBTLSkillGetInvokeParty(void);
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
+INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutBaseRotate);
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EB0);
+INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutRotateA);
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
+INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutRotateB);
 
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532ED0);
+INCLUDE_RODATA(const s32, "effect/effBattle", effBTLShakeFormat);
 
 void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfVector4_t position;
@@ -478,27 +478,27 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {
-            printf(D_00532ED0, list->shake);
+            printf(effBTLShakeFormat, list->shake);
             dds3SetQuake(list->shakeFade, 0x12C);
         }
     }
     SDF_VU0_LOADVECTOR(&formation->rot);
-    SDF_VU0_LOADVECTOR_B(D_00532EA0);
+    SDF_VU0_LOADVECTOR_B(effBTLCutBaseRotate);
     Mult();
     ToMatrix();
     SDF_VU0_STOREMATRIX(&base);
     if (effBTLSkillGetInvokeParty() == 0x100) {
-        SDF_VU0_LOADVECTOR(D_00532EB0);
+        SDF_VU0_LOADVECTOR(effBTLCutRotateA);
         ToMatrix();
         SDF_VU0_STOREMATRIX(&rotA);
-        SDF_VU0_LOADVECTOR(D_00532EC0);
+        SDF_VU0_LOADVECTOR(effBTLCutRotateB);
         ToMatrix();
         SDF_VU0_STOREMATRIX(&rotB);
     } else {
-        SDF_VU0_LOADVECTOR(D_00532EC0);
+        SDF_VU0_LOADVECTOR(effBTLCutRotateB);
         ToMatrix();
         SDF_VU0_STOREMATRIX(&rotA);
-        SDF_VU0_LOADVECTOR(D_00532EB0);
+        SDF_VU0_LOADVECTOR(effBTLCutRotateA);
         ToMatrix();
         SDF_VU0_STOREMATRIX(&rotB);
     }
@@ -782,13 +782,13 @@ void effBTLFieldColorON(u32 id) {
     f64 bg;
     f64 bb;
 
-    D_00551D84 = id;
-    if (D_00317750[id].color[0] != 0.0f &&
-        (effBTLFieldColorIsOn() == 0 || D_00551D84 == 0x200)) {
+    effBTLFieldColorId = id;
+    if (effBTLFieldColorTable[id].color[0] != 0.0f &&
+        (effBTLFieldColorIsOn() == 0 || effBTLFieldColorId == 0x200)) {
         effBTLFieldColorGetBaseColor();
-        work.r = D_00317750[id].color[1];
-        work.g = D_00317750[id].color[2];
-        work.b = D_00317750[id].color[3];
+        work.r = effBTLFieldColorTable[id].color[1];
+        work.g = effBTLFieldColorTable[id].color[2];
+        work.b = effBTLFieldColorTable[id].color[3];
         SDF_VU0_LOADVECTOR_B_MEMOPS(work);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
@@ -796,21 +796,21 @@ void effBTLFieldColorON(u32 id) {
         ar = fptodp(work.r);
         ag = fptodp(work.g);
         ab = fptodp(work.b);
-        br = fptodp(D_00317750[id].color[1]);
-        bg = fptodp(D_00317750[id].color[2]);
-        bb = fptodp(D_00317750[id].color[3]);
+        br = fptodp(effBTLFieldColorTable[id].color[1]);
+        bg = fptodp(effBTLFieldColorTable[id].color[2]);
+        bb = fptodp(effBTLFieldColorTable[id].color[3]);
         printf(format, ar, ag, ab, br, bg, bb);
-        D_00569970[1] = work.r;
-        D_00569970[2] = work.g;
-        D_00569970[3] = work.b;
-        abgr = D_00317750[id].word;
+        effBTLFieldColor[1] = work.r;
+        effBTLFieldColor[2] = work.g;
+        effBTLFieldColor[3] = work.b;
+        abgr = effBTLFieldColorTable[id].word;
         effBTLFieldColorStart();
     } else if (effBTLFieldColorIsOn() != 0 && id != 0) {
         color = D_0054F190;
         scale.r = (f32)(color & 0xFF) * 0.0078125f;
         scale.g = (f32)((color >> 8) & 0xFF) * 0.0078125f;
         scale.b = (f32)((color >> 16) & 0xFF) * 0.0078125f;
-        color = D_0054F18C;
+        color = effBTLLightColor;
         work.r = (f32)(color & 0xFF) / 255.0f;
         work.g = (f32)((color >> 8) & 0xFF) / 255.0f;
         work.b = (f32)((color >> 16) & 0xFF) / 255.0f;
@@ -818,10 +818,10 @@ void effBTLFieldColorON(u32 id) {
         SDF_VU0_LOADVECTOR_B_MEMOPS(work);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
-        D_00569970[1] = work.r;
-        D_00569970[2] = work.g;
-        D_00569970[3] = work.b;
-        abgr = D_0031CA90[0];
+        effBTLFieldColor[1] = work.r;
+        effBTLFieldColor[2] = work.g;
+        effBTLFieldColor[3] = work.b;
+        abgr = effBTLFieldFilter[0];
         effBTLFieldColorStart();
     }
     effBTLFieldLightAnimFrame = 0;
@@ -939,26 +939,26 @@ void effBTLFieldColorRun(void) {
     switch (effBTLFieldColorProcess) {
     case 1:
         source = dds3LightParam.sources[0];
-        SDF_VU0_COPYVECTOR(D_00569980, source + 4);
-        SDF_VU0_COPYVECTOR(D_00569990, source);
-        SDF_VU0_COPYVECTOR(D_005699A0, effBTLSceneAmbient);
+        SDF_VU0_COPYVECTOR(effBTLSavedLight1, source + 4);
+        SDF_VU0_COPYVECTOR(effBTLSavedLight0, source);
+        SDF_VU0_COPYVECTOR(effBTLSavedAmbient, effBTLSceneAmbient);
         /* fallthrough */
     case 2:
         data = nbGetMainProcessData();
-        D_005699B0.DiffuseR = D_00569970[1];
-        D_005699B0.DiffuseG = D_00569970[2];
-        D_005699B0.DiffuseB = D_00569970[3];
-        D_005699B0.AmbientR = D_00569970[1];
-        D_005699B0.AmbientG = D_00569970[2];
-        D_005699B0.AmbientB = D_00569970[3];
-        D_005699B0.InsideR = 0.0f;
-        D_005699B0.OutsideR = 0.0f;
-        D_005699B0.Soften = 0.0f;
-        D_005699B0.Bias = 0.0f;
-        D_005699B0.resv = 0;
-        D_005699B0.Flag = 0;
-        D_005699B0.AnimeType = 0;
-        dds3SetLightObjectResoruce(data->light[1], &D_005699B0);
+        effBTLFieldLight.DiffuseR = effBTLFieldColor[1];
+        effBTLFieldLight.DiffuseG = effBTLFieldColor[2];
+        effBTLFieldLight.DiffuseB = effBTLFieldColor[3];
+        effBTLFieldLight.AmbientR = effBTLFieldColor[1];
+        effBTLFieldLight.AmbientG = effBTLFieldColor[2];
+        effBTLFieldLight.AmbientB = effBTLFieldColor[3];
+        effBTLFieldLight.InsideR = 0.0f;
+        effBTLFieldLight.OutsideR = 0.0f;
+        effBTLFieldLight.Soften = 0.0f;
+        effBTLFieldLight.Bias = 0.0f;
+        effBTLFieldLight.resv = 0;
+        effBTLFieldLight.Flag = 0;
+        effBTLFieldLight.AnimeType = 0;
+        dds3SetLightObjectResoruce(data->light[1], &effBTLFieldLight);
         dds3LinkSceneLight(data->light[1], 0xC);
         dds3LightParam.sources[0][4] = -0.73f;
         dds3LightParam.sources[0][5] = 1.55f;
@@ -979,15 +979,15 @@ void effBTLFieldColorRun(void) {
         break;
     case 4:
         data = nbGetMainProcessData();
-        D_005699B0.DiffuseR = D_00569990[0];
-        D_005699B0.DiffuseG = D_00569990[1];
-        D_005699B0.DiffuseB = D_00569990[2];
-        D_005699B0.AmbientR = D_005699A0[0];
-        D_005699B0.AmbientG = D_005699A0[1];
-        D_005699B0.AmbientB = D_005699A0[2];
-        dds3SetLightObjectResoruce(data->light[1], &D_005699B0);
+        effBTLFieldLight.DiffuseR = effBTLSavedLight0[0];
+        effBTLFieldLight.DiffuseG = effBTLSavedLight0[1];
+        effBTLFieldLight.DiffuseB = effBTLSavedLight0[2];
+        effBTLFieldLight.AmbientR = effBTLSavedAmbient[0];
+        effBTLFieldLight.AmbientG = effBTLSavedAmbient[1];
+        effBTLFieldLight.AmbientB = effBTLSavedAmbient[2];
+        dds3SetLightObjectResoruce(data->light[1], &effBTLFieldLight);
         dds3LinkSceneLight(data->light[1], 0xC);
-        SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, D_00569980);
+        SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, effBTLSavedLight1);
         effBTLSkyFilterOFF(0xC);
         effBTLFieldFilterOFF(0xC);
         effBTLFieldColorProcess = 5;
@@ -1025,10 +1025,10 @@ void effBTLFieldColorGetBaseColor(void) {
     minor = data->StageMinor;
     if ((u16)major >= 0x28 || minor <= 0 || minor >= 0xB) {
         printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
-        SDF_VU0_LOADVECTOR(D_0031B8F0);
+        SDF_VU0_LOADVECTOR(effBTLDefaultColor);
         return;
     }
-    table = D_00319FA0;
+    table = effBTLStageColorTable;
     table--;
     SDF_VU0_LOADVECTOR(&table[major * 10 + minor]);
 }

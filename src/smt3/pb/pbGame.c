@@ -148,7 +148,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern pbLevel_t *pbLevelTable[];
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbGoal_t *goal;
 
@@ -168,7 +168,7 @@ extern pbProcHandle_t *blockDB;
 
 extern u32 current_char;
 
-extern f32 D_00327370[];
+extern f32 pbDirVectorTable[];
 
 extern s32 pbPopRecord(pbProcHandle_t *p, pbProcHandle_t **c, pbProcHandle_t *blkDB);
 
@@ -198,9 +198,9 @@ extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
 
 extern void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id);
 
-extern char D_005361B0[];
+extern char pbDrawMapCursorProcName[];
 
-extern char D_00536040[], D_00535CE8[], D_00535FA8[];
+extern char pbBlockDbProcName[], pbDrawMapbaseProcName[], pbViewCameraProcName[];
 
 extern s32 pb_proc_block_DB_Process(dds3ProcessID_t *id);
 
@@ -212,7 +212,7 @@ extern s32 moveChar(dds3ProcessID_t *id);
 
 extern void deleteMoveChar(dds3ProcessID_t *id);
 
-extern char D_00535F60[], D_00535F78[], D_00535F50[], D_00535F90[];
+extern char pbMoveCharProcName[], pbMoveBlockProcName[], pbGameProcName[], pbMoveCameraProcName[];
 
 extern s32 roundBlock(dds3ProcessID_t *id);
 
@@ -228,7 +228,7 @@ extern void pbRoundCamera(s32 dir);
 
 extern s16 pbMyCharPosX, pbMyCharPosY;
 
-extern sdfVector4_t D_0056CDD0[2];
+extern sdfVector4_t pbSavedViewCamera[2];
 
 extern void pbSetMapCursorFlag(pbProcHandle_t *p, s32 flag);
 
@@ -262,7 +262,7 @@ extern s32 roundAutoCamera(dds3ProcessID_t *id);
 
 extern u8 pbGetKeyMode(void);
 
-extern char D_00535F08[];
+extern char pbGameDebugOwnerName[];
 
 extern void deleteGame(dds3ProcessID_t *id);
 
@@ -282,7 +282,7 @@ extern pbProcHandle_t *bmap, *mapCursor;
 
 extern s32 D_0054F5F0;
 
-extern pbMapBlock_t D_00327458;
+extern pbMapBlock_t pbMapSnapshot;
 
 extern s32 moveBlock(dds3ProcessID_t *id);
 
@@ -298,7 +298,7 @@ extern u32 pbAddRecord_blk(pbProcHandle_t *p, pbGroupData_t *grp);
 
 extern void deleteViewModeCamera(dds3ProcessID_t *id);
 
-extern char D_00535E10[], D_00535EC8[], D_00535FC8[];
+extern char pbDrawBgProcName[], pbLoadMapDataProcName[], pbClearProcName[];
 
 extern void updateMotion(void);
 
@@ -322,7 +322,7 @@ extern pbProcHandle_t *moveB;
 
 extern pbProcHandle_t *roundCamera;
 
-extern char D_00535EF8[];
+extern char pbRootProcName[];
 
 extern u32 pbPushRecord(pbProcHandle_t *p);
 
@@ -364,7 +364,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 s32 getCharacterNum(void) {
     s32 count = 0;
     u32 i;
-    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+    for (i = 0; i < pbMapWork->pcharNum; i++) {
         if (pbMyCharacterDispStat(mychar[i]) != 0) {
             count++;
         }
@@ -374,17 +374,17 @@ s32 getCharacterNum(void) {
 
 void pbNextCharacter(void) {
     do {
-        current_char = (current_char + D_0054F5C4->pcharNum + 1) % D_0054F5C4->pcharNum;
+        current_char = (current_char + pbMapWork->pcharNum + 1) % pbMapWork->pcharNum;
     } while (pbMyCharacterDispStat(mychar[current_char]) == 0);
     updateMotion();
-    if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
-        pbCharacterTable[D_0054F5C4->charIndex]();
+    if (pbCharacterTable[pbMapWork->charIndex] != NULL) {
+        pbCharacterTable[pbMapWork->charIndex]();
     }
 }
 
 void updateMotion(void) {
     u32 i;
-    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+    for (i = 0; i < pbMapWork->pcharNum; i++) {
         func_001D2D00(mychar[i], 0);
     }
 }
@@ -415,7 +415,7 @@ s32 hitCheck(s32 direction, pbGroupData_t **pGroup)
     if (pbFindProcHandle(targetX, targetY) == 1) {
         return 1;
     }
-    block = D_0054F5C4->area.map.blk[targetY][targetX];
+    block = pbMapWork->area.map.blk[targetY][targetX];
     if ((block & 0x800) != 0) {
         return 1;
     }
@@ -430,13 +430,13 @@ s32 hitCheck(s32 direction, pbGroupData_t **pGroup)
         break;
     case 2:
     case 3:
-        status = pushCheck(direction, D_0054F5C4->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
+        status = pushCheck(direction, pbMapWork->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
         break;
     case 4:
         status = 2;
         break;
     case 5:
-        status = roundCheck(direction, D_0054F5C4->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
+        status = roundCheck(direction, pbMapWork->area.map.blk[targetY][targetX] & 0x7FF, pGroup);
         break;
     default:
         break;
@@ -473,7 +473,7 @@ u32 pushCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup)
                 status = 2;
                 break;
             }
-            block = D_0054F5C4->area.map.blk[y][x];
+            block = pbMapWork->area.map.blk[y][x];
             if ((block >> 13) == 1) {
                 status = 2;
             } else if ((block >> 13) >= 2) {
@@ -513,7 +513,7 @@ s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
     for (i = 0; i <= stepCount; i++) {
         /* Signed: a step off the map reads the cell before it, as retail's
          * 32-bit addition does. */
-        if (D_0054F5C4->area.map.blk[(s32)(y + pbKeyTable[direction][1] * i)]
+        if (pbMapWork->area.map.blk[(s32)(y + pbKeyTable[direction][1] * i)]
                                       [(s32)(x + pbKeyTable[direction][0] * i)] & 0x800) {
             return 1;
         }
@@ -536,7 +536,7 @@ s32 roundCheck(s32 direction, u32 groupID, pbGroupData_t **pGroup)
             if (pbFindProcHandle(centerX + rotatedX + x, centerY + rotatedY + y) == 1) {
                 return 2;
             }
-            map = D_0054F5C4;
+            map = pbMapWork;
             firstCell = map->area.map.blk[centerY + rotatedY][centerX + rotatedX];
             secondCell = map->area.map.blk[centerY + rotatedY + y][centerX + rotatedX + x];
             firstKind = firstCell >> 13;
@@ -601,19 +601,19 @@ s32 roundDirCheck(s32 direction, u32 groupID, u32 *stepCount)
     switch (direction) {
     case 0:
     case 2:
-        if (x + 1 < 20 && groupID == (D_0054F5C4->area.map.blk[y][x + 1] & 0x7FF)) {
+        if (x + 1 < 20 && groupID == (pbMapWork->area.map.blk[y][x + 1] & 0x7FF)) {
             *stepCount = 2;
         }
-        if (x - 1 >= 0 && groupID == (D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF)) {
+        if (x - 1 >= 0 && groupID == (pbMapWork->area.map.blk[y][x - 1] & 0x7FF)) {
             *stepCount = 2;
         }
         break;
     case 1:
     case 3:
-        if (y + 1 < 20 && groupID == (D_0054F5C4->area.map.blk[y + 1][x] & 0x7FF)) {
+        if (y + 1 < 20 && groupID == (pbMapWork->area.map.blk[y + 1][x] & 0x7FF)) {
             *stepCount = 2;
         }
-        if (y - 1 >= 0 && groupID == (D_0054F5C4->area.map.blk[y - 1][x] & 0x7FF)) {
+        if (y - 1 >= 0 && groupID == (pbMapWork->area.map.blk[y - 1][x] & 0x7FF)) {
             *stepCount = 2;
         }
     }
@@ -625,7 +625,7 @@ s8 hallCheck(pbGroupData_t *grp) {
     s32 cx = grp->cellX;
     s32 cy = grp->cellY;
     for (i = 0; i < grp->num; i++) {
-        if ((D_0054F5C4->area.map.blk[cy + grp->blk[i].y][cx + grp->blk[i].x] & 0x800) == 0) {
+        if ((pbMapWork->area.map.blk[cy + grp->blk[i].y][cx + grp->blk[i].x] & 0x800) == 0) {
             break;
         }
     }
@@ -639,7 +639,7 @@ s32 pbFindProcHandle(s16 px, s16 py) {
     s16 i;
     s32 found = 0;
     s16 x, y;
-    for (i = 0; (u32)i < D_0054F5C4->pcharNum; i++) {
+    for (i = 0; (u32)i < pbMapWork->pcharNum; i++) {
         if (i == current_char) {
             continue;
         }
@@ -701,13 +701,13 @@ s32 gameKey1(void) {
         p2sdPlaySE(0x340009, 0x7F, 0x3F);
         if (pbGameKeyState == 0) {
             pbGetMyCharcterPos2(mychar[current_char], &pbMyCharPosX, &pbMyCharPosY);
-            SDF_VU0_COPYVECTOR(&D_0056CDD0[0], &aViewEye);
-            SDF_VU0_COPYVECTOR(&D_0056CDD0[1], &aViewTarget);
+            SDF_VU0_COPYVECTOR(&pbSavedViewCamera[0], &aViewEye);
+            SDF_VU0_COPYVECTOR(&pbSavedViewCamera[1], &aViewTarget);
             pbGameKeyState = 1;
         } else {
             pbSetMapCursorFlag(mapCursor, 0);
-            SDF_VU0_COPYVECTOR(&aViewEye, &D_0056CDD0[0]);
-            SDF_VU0_COPYVECTOR(&aViewTarget, &D_0056CDD0[1]);
+            SDF_VU0_COPYVECTOR(&aViewEye, &pbSavedViewCamera[0]);
+            SDF_VU0_COPYVECTOR(&aViewTarget, &pbSavedViewCamera[1]);
             pbGameKeyState = 0;
             if (moveViewCamera != NULL) {
                 moveViewCamera->flags = 0x50000;
@@ -811,7 +811,7 @@ extern s32 fclGetFlag(s8 index);
 extern s32 (*keyFunc[])(void);
 extern u32 pbGameState, pbMoveCharList;
 extern pbProcHandle_t *moveC;
-extern s32 D_00551EF4;
+extern s32 pbMoveCharCooldown;
 extern s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar, pbProcHandle_t **characters);
 extern void pbSetPanelModel(pbProcHandle_t *panel, s32 index);
 extern pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 direction, u32 scale);
@@ -840,7 +840,7 @@ s32 game(dds3ProcessID_t *id)
         if (fclChkMessageDraw(message) != 0) {
             return 0;
         }
-        dds3ResetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+        dds3ResetProcessFlag(dds3SearchProcessName(pbRootProcName), 0x10, 2);
         scr_msg = NULL;
         if (fclGetFlag(0) == 0) {
             pbMoveCharList = 0;
@@ -878,13 +878,13 @@ s32 game(dds3ProcessID_t *id)
         return 0;
     }
     movingCharacter = mychar[current_char];
-    map = D_0054F5C4;
+    map = pbMapWork;
     if (movingCharacter == NULL || map->menuProc != NULL || map->helpProc != NULL) {
         return 0;
     }
-    cooldown = D_00551EF4;
+    cooldown = pbMoveCharCooldown;
     if (cooldown > 0) {
-        D_00551EF4 = cooldown - 1;
+        pbMoveCharCooldown = cooldown - 1;
         return 0;
     }
     if (pbMoveCharList != 0) {
@@ -948,11 +948,11 @@ s32 game(dds3ProcessID_t *id)
                         p2sdPlaySE(0x340005, 0x7F, 0x3F);
                         menu = pbStartMenu(panel, 1);
                         dds3SetProcessFlag(menu->id, 0x10, 1);
-                        process = dds3SearchProcessName(D_00535F08);
+                        process = dds3SearchProcessName(pbGameDebugOwnerName);
                         if (process != NULL) {
                             dds3ResetProcessFlag(process, 0x10, 2);
                         }
-                        D_0054F5C4->menuProc = menu;
+                        pbMapWork->menuProc = menu;
                         degreeFlag = *(volatile u8 *)&degree_mode;
                     }
                 }
@@ -968,16 +968,16 @@ s32 game(dds3ProcessID_t *id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535EF8);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbRootProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbGameDebugOwnerName);
 
 INCLUDE_ASM(const s32, "pb/pbGame", game);
 #endif
 
 void deleteGame(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
-    D_0054F5C4->area.map = D_00327458;
+    pbMapWork->area.map = pbMapSnapshot;
     sdfChipFreeDelayedDirect(panel);
 }
 
@@ -991,7 +991,7 @@ typedef struct
     pbMapBlock_t map;
 } pbMapWorkInitView_t;
 
-extern s32 D_00551EF4;
+extern s32 pbMoveCharCooldown;
 extern u32 pbMoveCharList;
 extern u32 pbMapIsValid(void);
 extern void dds3FadeIn2(s32 frame);
@@ -1019,18 +1019,18 @@ void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
     s32 scriptLabel;
     pbCharacterFunc_t characterFunc;
 
-    D_00551EF4 = 2;
+    pbMoveCharCooldown = 2;
     pbMoveCharList = 1;
     current_char = 0;
     pbSetViewRotation(cameraAngle, cameraRadius, cameraDegree);
     pbGameKeyState = 0;
-    ((pbMapWorkInitView_t *)D_0054F5C4)->map = D_00327458;
+    ((pbMapWorkInitView_t *)pbMapWork)->map = pbMapSnapshot;
     if (pbMapIsValid()) {
         return;
     }
 
     dds3FadeIn2(0x1E);
-    pbSetExitPos((pbProcHandle_t *)goal, ((pbMapWorkInitView_t *)D_0054F5C4)->exitX, ((pbMapWorkInitView_t *)D_0054F5C4)->exitY);
+    pbSetExitPos((pbProcHandle_t *)goal, ((pbMapWorkInitView_t *)pbMapWork)->exitX, ((pbMapWorkInitView_t *)pbMapWork)->exitY);
     pbSetExitDisp((pbProcHandle_t *)goal, 1);
     slots = mychar;
     write = slots;
@@ -1039,16 +1039,16 @@ void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
             slots[i]->flags = 0x50000;
             slots[i] = NULL;
         }
-        if (((pbMapWorkInitView_t *)D_0054F5C4)->pcharReg[i] != 0) {
+        if (((pbMapWorkInitView_t *)pbMapWork)->pcharReg[i] != 0) {
             *write = pbInitMyCharacterDraw(panel, (u32)i, 0);
             pbSetPanelValue(*write, 1);
-            pbGetCellY(*write, ((pbMapWorkInitView_t *)D_0054F5C4)->pcharPos[i][0],
-                       ((pbMapWorkInitView_t *)D_0054F5C4)->pcharPos[i][1]);
+            pbGetCellY(*write, ((pbMapWorkInitView_t *)pbMapWork)->pcharPos[i][0],
+                       ((pbMapWorkInitView_t *)pbMapWork)->pcharPos[i][1]);
             write++;
         }
     }
     updateMotion();
-    characterFunc = pbCharacterTable[D_0054F5C4->charIndex];
+    characterFunc = pbCharacterTable[pbMapWork->charIndex];
     if (characterFunc != NULL) {
         characterFunc();
     }
@@ -1057,7 +1057,7 @@ void pbInitGame(pbProcHandle_t *panel, dds3ProcessID_t *id)
     if (scriptLabel >= 0) {
         fclClearFlag(0);
         fclSetWorkValue(0, scriptLabel);
-        scr_msg = scrStartScript2(0x3EE, D_0054F5C4->giveupScript, 0);
+        scr_msg = scrStartScript2(0x3EE, pbMapWork->giveupScript, 0);
         dds3SetProcessFlag(id, 0x10, 2);
     } else {
         pbMoveCharList = 0;
@@ -1069,11 +1069,11 @@ s32 moveChar(dds3ProcessID_t *id) {
     u32 step;
     if (work->step < SDF_FRAMES(4)) {
         s32 dir = work->dir;
-        pbMoveMyCharcter(mychar[current_char], D_00327370[dir * 3] * SDF_FRAME_STEP(work->speed),
-                         D_00327370[dir * 3 + 2] * SDF_FRAME_STEP(work->speed));
+        pbMoveMyCharcter(mychar[current_char], pbDirVectorTable[dir * 3] * SDF_FRAME_STEP(work->speed),
+                         pbDirVectorTable[dir * 3 + 2] * SDF_FRAME_STEP(work->speed));
     }
-    if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
-        pbCharacterTable[D_0054F5C4->charIndex]();
+    if (pbCharacterTable[pbMapWork->charIndex] != NULL) {
+        pbCharacterTable[pbMapWork->charIndex]();
     }
     step = work->step + 1;
     work->step = step;
@@ -1092,7 +1092,7 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
 extern pbProcHandle_t *pbGetMoveChar(void);
 extern pbProcHandle_t *moveC;
 extern u32 pbMoveCharList;
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 extern pbProcHandle_t *record;
 
 void deleteMoveChar(dds3ProcessID_t *id)
@@ -1108,8 +1108,8 @@ void deleteMoveChar(dds3ProcessID_t *id)
     if (goalHitCheck(position[0], position[1])) {
         p2sdPlaySE(0x34000A, 0x7F, 0x3F);
         if ((u32)getCharacterNum() < 2) {
-            if (D_0054F5C4->menuProc != NULL) {
-                dds3KillProcess(D_0054F5C4->menuProc->id, 0);
+            if (pbMapWork->menuProc != NULL) {
+                dds3KillProcess(pbMapWork->menuProc->id, 0);
             }
             pbMoveCharList = 1;
             func_001D2D00(mychar[current_char], 0);
@@ -1130,7 +1130,7 @@ void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     grp->cellX += pbKeyTable[dir][0];
     grp->cellY += pbKeyTable[dir][1];
     if (grp->num != 0) {
-        pbMapArea_t *a = &D_0054F5C4->area;
+        pbMapArea_t *a = &pbMapWork->area;
         do {
             s16 y = grp->cellY + grp->blk[i].y;
             s16 x = grp->cellX + grp->blk[i].x;
@@ -1152,7 +1152,7 @@ s32 moveBlock(dds3ProcessID_t *id) {
         return -1;
     }
     {
-        f32 *delta = &D_00327370[work->index * 3];
+        f32 *delta = &pbDirVectorTable[work->index * 3];
         pbGroupData_t *obj = work->block;
         obj->x = obj->x + SDF_FRAME_STEP(delta[0]);
         obj->y = obj->y + SDF_FRAME_STEP(delta[1]);
@@ -1188,7 +1188,7 @@ void deleteMoveBlock(dds3ProcessID_t *id) {
         block = work->block;
         i = 0;
         if (block->num != 0) {
-            pbMapArea_t *a = &D_0054F5C4->area;
+            pbMapArea_t *a = &pbMapWork->area;
             do {
                 s16 y = block->cellY + (block->blk + i)->y;
                 s16 x = block->cellX + (block->blk + i)->x;
@@ -1234,10 +1234,10 @@ void setRoundBlockData(pbGroupData_t *grp, s32 dir) {
             rotXY(&grp->blk[i].x, &grp->blk[i].y, dir);
             y = grp->cellY + grp->blk[i].y;
             x = grp->cellX + grp->blk[i].x;
-            D_0054F5C4->area.map.blk[y][x] &= 0xF800;
-            D_0054F5C4->area.map.blk[y][x] =
-                (D_0054F5C4->area.map.blk[y][x] | (grp->grpID & 0x7FF)) & 0x1FFF;
-            D_0054F5C4->area.map.blk[y][x] |= grp->blk[i].kind << 13;
+            pbMapWork->area.map.blk[y][x] &= 0xF800;
+            pbMapWork->area.map.blk[y][x] =
+                (pbMapWork->area.map.blk[y][x] | (grp->grpID & 0x7FF)) & 0x1FFF;
+            pbMapWork->area.map.blk[y][x] |= grp->blk[i].kind << 13;
             i++;
         } while (i < grp->num);
     }
@@ -1367,7 +1367,7 @@ s32 ClearProc(dds3ProcessID_t *id) {
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
-                D_0054F5C4->tex34C);
+                pbMapWork->tex34C);
     work->value = work->value - 1;
     if (work->value < 0) {
         return -1;
@@ -1379,7 +1379,7 @@ void DeleteClearProc(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
-    D_0054F5C4->stage = (u16)D_0054F5C4->stage + 1;
+    pbMapWork->stage = (u16)pbMapWork->stage + 1;
     pbGotoNewStage();
 }
 
@@ -1404,22 +1404,22 @@ void CalcDegreeMode(void) {
 }
 
 s16 GetStageNumber(void) {
-    return (pbLevelTable[D_0054F5C4->level]->stage + D_0054F5C4->stage)->number;
+    return (pbLevelTable[pbMapWork->level]->stage + pbMapWork->stage)->number;
 }
 
 s16 GetStageScriptLabel(void) {
-    return (pbLevelTable[D_0054F5C4->level]->stage + D_0054F5C4->stage)->label;
+    return (pbLevelTable[pbMapWork->level]->stage + pbMapWork->stage)->label;
 }
 
 s16 GetAllStageClearBit(void) {
-    return pbLevelTable[D_0054F5C4->level]->clearBit;
+    return pbLevelTable[pbMapWork->level]->clearBit;
 }
 
 pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     u32 i;
     pbLoadSystemData(GetStageNumber());
-    panel->id = dds3StartProcess(D_00535F50, 0x3EE, 1, 1, game,
+    panel->id = dds3StartProcess(pbGameProcName, 0x3EE, 1, 1, game,
                                       (dds3ProcessFunc_t)deleteGame, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1443,7 +1443,7 @@ pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
     goal = (pbGoal_t *)pbInitExitDraw(panel);
     record = pbStartRecord(panel);
     mapCursor = pbStartDrawMapCursor(panel);
-    D_00327458 = D_0054F5C4->area.map;
+    pbMapSnapshot = pbMapWork->area.map;
     cameraDegree = 1.1f;
     cameraRadius = 700.0f;
     cameraDegreeInit = 1.1f;
@@ -1455,7 +1455,7 @@ pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
 pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 dir, u32 scl) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbMoveCharWork_t *work;
-    panel->id = dds3StartProcess(D_00535F60, 0x3EE, 0, 0, moveChar,
+    panel->id = dds3StartProcess(pbMoveCharProcName, 0x3EE, 0, 0, moveChar,
                                       (dds3ProcessFunc_t)deleteMoveChar, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1476,7 +1476,7 @@ pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
-    panel->id = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, moveBlock,
+    panel->id = dds3StartProcess(pbMoveBlockProcName, 0x3EE, 0, 0, moveBlock,
                                       (dds3ProcessFunc_t)deleteMoveBlock, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1503,7 +1503,7 @@ pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32
             s16 x = grp->cellX + grp->blk[i].x;
             s16 y = grp->cellY + grp->blk[i].y;
             i++;
-            D_0054F5C4->area.map.blk[y][x] &= 0x1800;
+            pbMapWork->area.map.blk[y][x] &= 0x1800;
         } while (i < grp->num);
     }
     return panel;
@@ -1513,7 +1513,7 @@ pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s3
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
-    panel->id = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, roundBlock,
+    panel->id = dds3StartProcess(pbMoveBlockProcName, 0x3EE, 0, 0, roundBlock,
                                       (dds3ProcessFunc_t)deleteRoundBlock, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1534,7 +1534,7 @@ pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s3
             s16 x = grp->cellX + grp->blk[i].x;
             s16 y = grp->cellY + grp->blk[i].y;
             i++;
-            D_0054F5C4->area.map.blk[y][x] &= 0x1800;
+            pbMapWork->area.map.blk[y][x] &= 0x1800;
         } while (i < grp->num);
     }
     return panel;
@@ -1544,7 +1544,7 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundCamWork_t *work;
     dds3ProcessID_t *id;
-    panel->id = dds3StartProcess(D_00535F90, 0x3EE, 0, 0, roundAutoCamera,
+    panel->id = dds3StartProcess(pbMoveCameraProcName, 0x3EE, 0, 0, roundAutoCamera,
                                       (dds3ProcessFunc_t)deleteRoundAutoCamera, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1588,7 +1588,7 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
     }
     dds3SetProcessData(panel->id, panel);
     dds3SetProcessFlag(panel->id, 0x10, 1);
-    id = dds3SearchProcessName(D_00535F08);
+    id = dds3SearchProcessName(pbGameDebugOwnerName);
     if (id != NULL) {
         dds3ResetProcessFlag(id, 0x10, 2);
     }
@@ -1598,7 +1598,7 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
 pbProcHandle_t *pbStartViewModeCamera(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbViewCamWork_t *work;
-    panel->id = dds3StartProcess(D_00535FA8, 0x3EE, 0, 0, viewModeCamera,
+    panel->id = dds3StartProcess(pbViewCameraProcName, 0x3EE, 0, 0, viewModeCamera,
                                       (dds3ProcessFunc_t)deleteViewModeCamera, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1716,7 +1716,7 @@ void pbSetGameCamera4(s16 x, s16 y)
 }
 
 void pbInitGameCamera(void) {
-    u32 type = D_0054F5C4->charIndex;
+    u32 type = pbMapWork->charIndex;
     switch (type) {
     case 0:
         pbSetGameCamera0();
@@ -1751,8 +1751,8 @@ void pbPreviousRecord(void) {
         }
         current_char = r;
         updateMotion();
-        if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
-            pbCharacterTable[D_0054F5C4->charIndex]();
+        if (pbCharacterTable[pbMapWork->charIndex] != NULL) {
+            pbCharacterTable[pbMapWork->charIndex]();
         }
     }
 }
@@ -1760,7 +1760,7 @@ void pbPreviousRecord(void) {
 pbProcHandle_t *pbStartClear(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
-    panel->id = dds3StartProcess(D_00535FC8, 0x3EE, 1, 1, ClearProc,
+    panel->id = dds3StartProcess(pbClearProcName, 0x3EE, 1, 1, ClearProc,
                                       (dds3ProcessFunc_t)DeleteClearProc, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -1775,8 +1775,8 @@ pbProcHandle_t *pbStartClear(pbProcHandle_t *parent) {
 
 dds3ProcessID_t *pbStartGiveupConfirm(void) {
     fclClearFlag(0);
-    scr_msg = scrStartScript2(0x3EE, D_0054F5C4->giveupScript, 1);
-    dds3SetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+    scr_msg = scrStartScript2(0x3EE, pbMapWork->giveupScript, 1);
+    dds3SetProcessFlag(dds3SearchProcessName(pbRootProcName), 0x10, 2);
     return scr_msg;
 }
 
@@ -1812,17 +1812,17 @@ extern void evtBitOn(s32 no);
 
 extern pbProcHandle_t *pbGetMoveChar(void);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F50);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbGameProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F60);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveCharProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F78);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveBlockProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F90);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveCameraProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FA8);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbViewCameraProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FC8);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbClearProcName);
 
 void pbGotoNewStage(void)
 {
@@ -1830,7 +1830,7 @@ void pbGotoNewStage(void)
 
     if (scr_msg != NULL) {
         dds3KillProcess(scr_msg, 0);
-        dds3ResetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+        dds3ResetProcessFlag(dds3SearchProcessName(pbRootProcName), 0x10, 2);
         scr_msg = NULL;
     }
     if (number < 0) {
@@ -1904,7 +1904,7 @@ void pbAddGroupEntry(pbBlockDB_t *db)
 
     for (index = 0; index < 20; index++) {
         for (column = 0; column < 20; column++) {
-            cell = D_0054F5C4->area.map.blk[index][column];
+            cell = pbMapWork->area.map.blk[index][column];
             kind = cell >> 13;
             if (kind < 5) {
                 if (kind >= 3) {
@@ -1915,8 +1915,8 @@ void pbAddGroupEntry(pbBlockDB_t *db)
                         group = (pbGroupData_t *)db->entry[db->count];
                         if (kind == 3) {
                             kind = 2;
-                            D_0054F5C4->area.map.blk[index][column] =
-                                (D_0054F5C4->area.map.blk[index][column] & 0x1FFF) | 0x4000;
+                            pbMapWork->area.map.blk[index][column] =
+                                (pbMapWork->area.map.blk[index][column] & 0x1FFF) | 0x4000;
                         }
                         group->grpID = id;
                         group->z = (s16)index * 40 - 380;
@@ -1939,7 +1939,7 @@ void pbAddGroupEntry(pbBlockDB_t *db)
     for (index = 0; index < 20; index++) {
         for (column = 0; column < 20; column++) {
             s32 cellKind;
-            cell = D_0054F5C4->area.map.blk[index][column];
+            cell = pbMapWork->area.map.blk[index][column];
             cellKind = cell >> 13;
             if (cellKind < 6) {
                 if (cellKind >= 2) {
@@ -1952,7 +1952,7 @@ void pbAddGroupEntry(pbBlockDB_t *db)
     for (index = 0; index < 20; index++) {
         for (column = 0; column < 20; column++) {
             u32 blockKind;
-            u16 blockCell = D_0054F5C4->area.map.blk[index][column];
+            u16 blockCell = pbMapWork->area.map.blk[index][column];
             blockKind = blockCell >> 13;
             if (blockKind < 6) {
                 if (blockKind >= 2) {
@@ -1997,20 +1997,20 @@ u8 pbGetBlockAt(s16 x, s16 y, s16 grp) {
         /* Target-specific scheduling/allocation aids, not original spelling:
          * both mask alternatives are initialized and consumed below, and
          * the bound map pointer is live only through this neighbor read. */
-        FAKEMATCH_ASM_REG(pbMapWork_t *, work, "a0") = D_0054F5C4;
+        FAKEMATCH_ASM_REG(pbMapWork_t *, work, "a0") = pbMapWork;
         u8 boundary = 4;
         FAKEMATCH_ASM_LIVE_PAIR(ret, boundary);
         if ((work->area.map.blk[y][x + 1] & 0x7FF) != grp) {
             ret = boundary;
         }
     }
-    if ((x - 1 < 0) || ((D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF) != grp)) {
+    if ((x - 1 < 0) || ((pbMapWork->area.map.blk[y][x - 1] & 0x7FF) != grp)) {
         ret |= 8;
     }
-    if ((y + 1 >= 20) || ((D_0054F5C4->area.map.blk[y + 1][x] & 0x7FF) != grp)) {
+    if ((y + 1 >= 20) || ((pbMapWork->area.map.blk[y + 1][x] & 0x7FF) != grp)) {
         ret |= 1;
     }
-    if ((y - 1 < 0) || ((D_0054F5C4->area.map.blk[y - 1][x] & 0x7FF) != grp)) {
+    if ((y - 1 < 0) || ((pbMapWork->area.map.blk[y - 1][x] & 0x7FF) != grp)) {
         ret |= 2;
     }
     return ret;
@@ -2081,7 +2081,7 @@ s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
             position.z = group->blk[j].y * 40;
             drawn = pbDrawMapPolyTransformed(&position, slot, group->blk[j].kind,
                                              mapTag);
-            D_0054F5C4->drawCount += drawn;
+            pbMapWork->drawCount += drawn;
             SetRotateMatrixXYZ((const sdfVector3_t *)&group->rotation);
             StoreMatrix(&matrix);
             matrix.v[3].x = group->x;
@@ -2116,8 +2116,8 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-extern s32 D_00536000[4][4];
-extern s32 D_00327800[4][4], D_00327840[4][4], D_00327880[4][4];
+extern s32 pbMapCursorOffsetTable[4][4];
+extern s32 pbMapCursorBaseTable[4][4], pbMapCursorUvTable[4][4], pbMapCursorColorTable[4][4];
 extern f32 pbMapCursorWork;
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern f32 sdfSin(f32 angle);
@@ -2135,7 +2135,7 @@ s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id)
     s32 side, component;
     u16 state;
 
-    __builtin_memcpy(offsets, D_00536000, sizeof(offsets));
+    __builtin_memcpy(offsets, pbMapCursorOffsetTable, sizeof(offsets));
     panel = id->workdata;
     state = panel->state;
     work = panel->data.value;
@@ -2154,19 +2154,19 @@ s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id)
         if (work->value & mask) {
             for (component = 0; component < 4; component++) {
                 offset = offsets[side][component];
-                base = D_00327800[side][component];
-                c0 = D_00327880[component][0];
-                c1 = D_00327880[component][1];
-                c2 = D_00327880[component][2];
-                c3 = D_00327880[component][3];
+                base = pbMapCursorBaseTable[side][component];
+                c0 = pbMapCursorColorTable[component][0];
+                c1 = pbMapCursorColorTable[component][1];
+                c2 = pbMapCursorColorTable[component][2];
+                c3 = pbMapCursorColorTable[component][3];
                 positions[component] = base + amplitude * offset;
                 colors[component][0] = c0 - amplitude;
                 colors[component][1] = c1 - amplitude;
                 colors[component][2] = c2 - amplitude;
                 colors[component][3] = c3 - amplitude;
             }
-            itfMiscDrawSpritePrim(positions, D_00327840[side], colors[side], 0xFF000000,
-                                  D_0054F5C4->tex348, 0, tag);
+            itfMiscDrawSpritePrim(positions, pbMapCursorUvTable[side], colors[side], 0xFF000000,
+                                  pbMapWork->tex348, 0, tag);
         }
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -2183,5 +2183,5 @@ void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00536000);
+INCLUDE_RODATA(const s32, "pb/pbGame", pbMapCursorOffsetTable);
 

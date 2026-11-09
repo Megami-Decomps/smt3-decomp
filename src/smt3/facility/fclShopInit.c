@@ -29,7 +29,7 @@ typedef struct
 
 extern void p2sdStopBGM(s32 id);
 
-extern cmbWork_t *D_0054FB20;
+extern cmbWork_t *shpWork;
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -46,7 +46,7 @@ typedef struct
     /* 0x2244 */ u16 sellPrice[0x22];
 } shopProcWork_t;
 
-extern char D_0053CF70[];
+extern char shpEventProcName[];
 
 extern shopProcWork_t *shopProcWork;
 
@@ -54,11 +54,11 @@ extern shopProcWork_t *shopProcWork;
 
 extern void sdfTexFree(s32 aHandle);
 
-extern char D_0054FB48[];
+extern char shpProcName[];
 
-extern char D_0053D028[];
+extern char shpDrawProcName[];
 
-extern char D_0053D038[];
+extern char shpUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -105,16 +105,16 @@ extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 
 void fclShopEventEnd(void)
 {
-    dds3KillProcessName(D_0053CF70, 1);
+    dds3KillProcessName(shpEventProcName, 1);
     fclFreeStage();
 }
 
 s32 func_00206BA8(void)
 {
-    if (D_0054FB20 == NULL) {
+    if (shpWork == NULL) {
         return 0;
     }
-    return D_0054FB20->unk_1C;
+    return shpWork->unk_1C;
 }
 
 void fclShopInitItemList(void *list)
@@ -124,9 +124,9 @@ void fclShopInitItemList(void *list)
     cmpInitCursorRange((u8 *)list + 0x15C, 6, 6, 0);
 }
 
-extern char D_0053CF80[];
+extern char shpTexLoadMsg[];
 
-extern char *D_0032F638[];
+extern char *shpTmxPathTable[];
 extern s32 fclLoadTexture(char *pFileName);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
 
@@ -136,15 +136,15 @@ void fclShopTexLoad(void *workp)
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {
-        work->texHandle[i] = fclLoadTexture(D_0032F638[i]);
+        work->texHandle[i] = fclLoadTexture(shpTmxPathTable[i]);
     }
     fclSetPanelTex((u8 *)work + 0x23DC, 0, 0, 0x100, 0x80, work->texHandle[1]);
-    printf(D_0053CF80);
+    printf(shpTexLoadMsg);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CF70);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpEventProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CF80);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpTexLoadMsg);
 
 void fclShopTexFree(shpUpdateWork_t *pData)
 {
@@ -168,21 +168,21 @@ void fclShopInitRagTex(u8 *work)
     }
 }
 
-extern char D_0053CFD0[]; /* "/facility/scr/shop/mes_f.bf" */
+extern char shpMessagePathF[]; /* "/facility/scr/shop/mes_f.bf" */
 
-extern char D_0053CFF0[]; /* "/facility/scr/shop/mes_g.bf" */
+extern char shpMessagePathG[]; /* "/facility/scr/shop/mes_g.bf" */
 
 void fclShopGetTexPath(void *work, s32 mode)
 {
     char *path;
 
     if (mode != 1) {
-        path = D_0053CFF0;
+        path = shpMessagePathG;
         if (mode != 5) {
             path = "/facility/scr/shop/message.bf";
         }
     } else if (evtBitCheck(0x931) == 0) {
-        path = D_0053CFD0;
+        path = shpMessagePathF;
     } else {
         path = "/facility/scr/shop/message.bf";
     }
@@ -199,7 +199,7 @@ extern void fclInitPanel(void *panel, s32 x, s32 y, s32 z, s32 width,
 extern void evtDisableMoonCalc(void);
 extern void p2sdPlayBGM(s32 id);
 extern s32 fclSetWorkValue(s8 index, s32 value);
-extern char D_0032F640[];
+extern char shpCommandTable[];
 
 cmbWork_t *fclAllocShopWork(s8 type, void *parent)
 {
@@ -216,7 +216,7 @@ cmbWork_t *fclAllocShopWork(s8 type, void *parent)
     work->unk_0004 = 1;
     work->unk_0003 = 0;
     work->scriptArg = 0;
-    fclInitCursorWindow((u8 *)work + 0x28, D_0032F640, 4);
+    fclInitCursorWindow((u8 *)work + 0x28, shpCommandTable, 4);
     fclSetCursorList((u8 *)work + 0x28, 0x19);
     fclShopInitItemList((u8 *)work + 0x1068);
     fclInitPanel((u8 *)work + 0x239C, 0x13E0, 0x388, 0xFFFFF, 0xBD, 0x62,
@@ -235,21 +235,21 @@ cmbWork_t *fclAllocShopWork(s8 type, void *parent)
 
 void shop_update_Shutdown(void)
 {
-    if (D_0054FB20 == NULL) {
+    if (shpWork == NULL) {
         return;
     }
-    fclShopTexFree((shpUpdateWork_t *)D_0054FB20);
-    fclScriptForcedEnd(EE_ADDR_AS(u8 *, ((shpUpdateWork_t *)D_0054FB20)->scriptArg));
-    sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->unk_2388);
+    fclShopTexFree((shpUpdateWork_t *)shpWork);
+    fclScriptForcedEnd(EE_ADDR_AS(u8 *, ((shpUpdateWork_t *)shpWork)->scriptArg));
+    sdfMemFreeDirect(((shpUpdateWork_t *)shpWork)->unk_2388);
     fclShopEventEnd();
-    sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->allocation);
-    D_0054FB20 = NULL;
+    sdfMemFreeDirect(((shpUpdateWork_t *)shpWork)->allocation);
+    shpWork = NULL;
     shpProcessStat = 2;
     evtDisableMoonDraw();
     p2sdStopBGM(0x310000);
 }
 
-extern char D_0053D010[];
+extern char shpPlaceLogFmt[];
 extern cmbWork_t *fclAllocShopWork(s8 type, void *parent);
 extern s8 FclDebug(s8 mode, void *work);
 extern s32 shop_Process(dds3ProcessID_t *id);
@@ -263,23 +263,23 @@ void fclShopProcessStart(s8 *argument)
 {
     s8 type = 0;
     if (argument != NULL) type = *argument;
-    printf(D_0053D010, type);
-    if (D_0054FB20 == NULL) {
-        D_0054FB20 = fclAllocShopWork(type, 0);
-        FclDebug(3, D_0054FB20);
-        dds3StartProcess(D_0054FB48, 0x402, 1, 1, shop_Process, NULL, D_0054FB20);
-        dds3StartProcess(D_0053D028, 0x2B12, 1, 1, shop_draw_Process, NULL, D_0054FB20);
-        dds3StartProcess(D_0053D038, 0x520E, 1, 1, shop_update_Process,
-                        (dds3ProcessFunc_t)shop_update_Shutdown, D_0054FB20);
+    printf(shpPlaceLogFmt, type);
+    if (shpWork == NULL) {
+        shpWork = fclAllocShopWork(type, 0);
+        FclDebug(3, shpWork);
+        dds3StartProcess(shpProcName, 0x402, 1, 1, shop_Process, NULL, shpWork);
+        dds3StartProcess(shpDrawProcName, 0x2B12, 1, 1, shop_draw_Process, NULL, shpWork);
+        dds3StartProcess(shpUpdateProcName, 0x520E, 1, 1, shop_update_Process,
+                        (dds3ProcessFunc_t)shop_update_Shutdown, shpWork);
         shpProcessStat = 1;
     }
 }
 
 void fclShopProcessEnd(void)
 {
-    dds3KillProcessName(D_0054FB48, 1);
-    dds3KillProcessName(D_0053D028, 1);
-    dds3KillProcessName(D_0053D038, 1);
+    dds3KillProcessName(shpProcName, 1);
+    dds3KillProcessName(shpDrawProcName, 1);
+    dds3KillProcessName(shpUpdateProcName, 1);
 }
 
 s32 shpCheckProcessStat(void)
@@ -299,8 +299,8 @@ s32 shpCheckProcessStat(void)
 
 void func_00207178(void)
 {
-    if (D_0054FB20 != NULL) {
-        D_0054FB20->flags |= 0x10;
+    if (shpWork != NULL) {
+        shpWork->flags |= 0x10;
     }
 }
 
@@ -339,19 +339,19 @@ typedef struct
     /* 0x4 */ u8 state[2];
 } shpItemEntry_t;
 
-extern shpItemEntry_t D_0032F650[];
+extern shpItemEntry_t shpUnlockTable[];
 
 s32 shpItemIsUnlocked(id)
 s32 id;
 {
     s32 on;
 
-    if (D_0032F650[id].flag >= 0) {
-        on = evtBitCheck(D_0032F650[id].flag) != 0;
+    if (shpUnlockTable[id].flag >= 0) {
+        on = evtBitCheck(shpUnlockTable[id].flag) != 0;
     } else {
         on = 0;
     }
-    return D_0032F650[id].state[on];
+    return shpUnlockTable[id].state[on];
 }
 
 extern u16 D_0032F682[];
@@ -420,7 +420,7 @@ typedef struct
     } items[32];
 } shpPriceRow_t;
 
-extern shpPriceRow_t D_0032F680[];
+extern shpPriceRow_t shpPriceTable[];
 
 s32 shpGetSellPrice(s32 index, s8 sell)
 {
@@ -429,8 +429,8 @@ s32 shpGetSellPrice(s32 index, s8 sell)
 
     if (sell == 0) {
         s32 row = (u8)shpItemIsUnlocked(shopProcWork->itemType);
-        u16 fallback = D_0032F680[row].base;
-        u32 price = D_0032F680[row].items[index].price;
+        u16 fallback = shpPriceTable[row].base;
+        u32 price = shpPriceTable[row].items[index].price;
         u32 base = datItemTable[item].price;
         s32 div = 100;
 
@@ -447,33 +447,33 @@ s32 shpGetSellPrice(s32 index, s8 sell)
     return ret;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFD0);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpMessagePathF);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFF0);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpMessagePathG);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053D010);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpPlaceLogFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053D028);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpDrawProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053D038);
+INCLUDE_RODATA(const s32, "facility/fclShopInit", shpUpdateProcName);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB20);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpWork);
 
 INCLUDE_SDATA(const s32, "facility/fclShopInit", shpProcessStat);
 
 INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB25);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB28);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdLeave);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB30);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdTalk);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB38);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdSell);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB40);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdBuy);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB48);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpProcName);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB50);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpSellText);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB58);
+INCLUDE_SDATA(const s32, "facility/fclShopInit", shpBuyText);
 

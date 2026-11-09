@@ -673,15 +673,15 @@ effPCPWhirlwind3Poly_tag *effPCPWhirlwind3PolyCreate(
 
 extern effDebugPolyParams_t effDebugPoly;
 
-extern sdfGrOt_t *D_0031F440[];
+extern sdfGrOt_t *effPCPScatterSurfaceByQueue[];
 
-extern effDebugPolyParams_t D_0056AD28[];
+extern effDebugPolyParams_t effPCPScatterDrawParams[];
 
-extern sdfGrOt_t *D_0031F3D0[];
+extern sdfGrOt_t *effPCPScatterSurfaceByPool[];
 
-extern u32 D_0031F310[];
+extern u32 effPCPScatterTexcoords[];
 
-extern u32 D_0031F2C0[];
+extern u32 effPCPScatterParams[];
 
 extern u8 D_0031F3E0[];
 
@@ -1762,8 +1762,8 @@ dds3ScatterPolyList_tag *dds3ScatterPolyListCreate(s32 face) {
     pool->sharedResource = 0;
     pool->drawAsset = sdfMatNew();
     sdfMatSetConstant(pool->drawAsset, 1.0f);
-    memset(D_0056AD28, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
-    D_0056AD28->primitive = 0x4000;
+    memset(effPCPScatterDrawParams, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
+    effPCPScatterDrawParams->primitive = 0x4000;
     return pool;
 }
 
@@ -1791,30 +1791,30 @@ void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     sdf3DPrimLinkTm(packet, 0);
     if (hPoly->sharedResource != NULL) {
         sdfMatSetTex(hPoly->drawAsset, hPoly->sharedResource->textureHandle);
-        D_0056AD28->texcoords = (f32 *)D_0031F310;
+        effPCPScatterDrawParams->texcoords = (f32 *)effPCPScatterTexcoords;
     } else {
-        D_0056AD28->texcoords = NULL;
+        effPCPScatterDrawParams->texcoords = NULL;
     }
     sdf3DPrimLinkMat(packet, hPoly->drawAsset, 0);
     remainingVertices = hPoly->secondWordCount;
-    D_0056AD28->colors = (u32 *)hPoly->auxRecordBase;
-    D_0056AD28->positions = (u128 *)hPoly->recordBase;
-    D_0056AD28->color = hPoly->color;
-    D_0056AD28->parameterCount = 0x10;
-    D_0056AD28->vertexCount = 24;
-    D_0056AD28->parameters = D_0031F2C0;
+    effPCPScatterDrawParams->colors = (u32 *)hPoly->auxRecordBase;
+    effPCPScatterDrawParams->positions = (u128 *)hPoly->recordBase;
+    effPCPScatterDrawParams->color = hPoly->color;
+    effPCPScatterDrawParams->parameterCount = 0x10;
+    effPCPScatterDrawParams->vertexCount = 24;
+    effPCPScatterDrawParams->parameters = effPCPScatterParams;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(D_0056AD28)));
-        D_0056AD28->positions += 24;
-        D_0056AD28->colors += 24;
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(effPCPScatterDrawParams)));
+        effPCPScatterDrawParams->positions += 24;
+        effPCPScatterDrawParams->colors += 24;
     }
     if (remainingVertices >= 6) {
-        D_0056AD28->parameterCount = remainingVertices / 6 * 4;
-        D_0056AD28->vertexCount = remainingVertices;
-        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(D_0056AD28)));
+        effPCPScatterDrawParams->parameterCount = remainingVertices / 6 * 4;
+        effPCPScatterDrawParams->vertexCount = remainingVertices;
+        sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(effPCPScatterDrawParams)));
     }
-    surface = D_0031F3D0[hPoly->poolMode];
+    surface = effPCPScatterSurfaceByPool[hPoly->poolMode];
     surface->regFunc(surface, packet);
 }
 
@@ -3002,7 +3002,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
             }
         }
     }
-    surface = D_0031F440[object->packetQueueIndex];
+    surface = effPCPScatterSurfaceByQueue[object->packetQueueIndex];
     surface->regFunc(surface, packet);
 }
 

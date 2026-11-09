@@ -20,11 +20,11 @@ extern void dds3DeleteBasic(dds3Basic_t *basic);
 
 extern dds3BasicFunction_t *dds3BasicFuncTablePtr[];
 
-extern char D_0054E9A8[];
+extern char dds3BasicPosLabel[];
 
-extern char D_0054E9B0[];
+extern char dds3BasicRotLabel[];
 
-extern char D_0054E9B8[];
+extern char dds3BasicSclLabel[];
 
 dds3Basic_t *dds3AllocBasic(u32 type)
 {

@@ -35,11 +35,11 @@ typedef struct {
 } sceDmaEnv;
 
 extern sceDmaChan *sceDmaChanRegs[10];
-extern sceDmaEnv D_00598940;
-extern const int D_0054A908[10];
-extern const u8 D_0054A930[16];
-extern const u8 D_0054A940[16];
-extern const u8 D_0054A950[16];
+extern sceDmaEnv sceDmaSavedEnv;
+extern const int sceDmaChanResetFlag[10];
+extern const u8 sceDmaStsBits[16];
+extern const u8 sceDmaStdBits[16];
+extern const u8 sceDmaMfdBits[16];
 
 extern int scePrintf(const char *fmt, ...);
 extern int DIntr(void);
@@ -109,7 +109,7 @@ int sceDmaReset(int enable)
     int i;
 
     for (i = 0; i < 10; i++) {
-        if (D_0054A908[i]) {
+        if (sceDmaChanResetFlag[i]) {
             sceDmaChan *chan = sceDmaChanRegs[i];
 
             chan->chcr = 0;
@@ -163,9 +163,9 @@ int sceDmaPutEnv(sceDmaEnv *env)
     if (env->rcyc >= 7) {
         return -4;
     }
-    ctrl = (ctrl & ~0x30) | (D_0054A930[env->sts] << 4);
-    ctrl = (ctrl & ~0xC0) | (D_0054A940[env->std] << 6);
-    ctrl = (ctrl & ~0xC) | (D_0054A950[env->mfd] << 2);
+    ctrl = (ctrl & ~0x30) | (sceDmaStsBits[env->sts] << 4);
+    ctrl = (ctrl & ~0xC0) | (sceDmaStdBits[env->std] << 6);
+    ctrl = (ctrl & ~0xC) | (sceDmaMfdBits[env->mfd] << 2);
     if (env->rcyc != 0) {
         ctrl |= 2;
         ctrl = (ctrl & ~0x300) | ((env->rcyc - 1) << 8);
@@ -181,7 +181,7 @@ int sceDmaPutEnv(sceDmaEnv *env)
     *VD_SQWC = sqwc;
     *VD_RBOR = rbor;
     *VD_RBSR = rbsr;
-    D_00598940 = *env;
+    sceDmaSavedEnv = *env;
     return 0;
 }
 #else
@@ -190,7 +190,7 @@ INCLUDE_ASM(const s32, "sdk/libdma", sceDmaPutEnv);
 
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *env)
 {
-    *env = D_00598940;
+    *env = sceDmaSavedEnv;
     return env;
 }
 
@@ -323,11 +323,11 @@ int sceDmaRestart(sceDmaChan *chan, u32 chcr)
     return (old >> 8) & 1;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libdma", D_0054A908);
+INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaChanResetFlag);
 
-INCLUDE_RODATA(const s32, "sdk/libdma", D_0054A930);
+INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaStsBits);
 
-INCLUDE_RODATA(const s32, "sdk/libdma", D_0054A940);
+INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaStdBits);
 
-INCLUDE_RODATA(const s32, "sdk/libdma", D_0054A950);
+INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaMfdBits);
 

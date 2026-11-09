@@ -15,10 +15,10 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-extern char D_005327B0[];
+extern char fldTitleProcName[];
 #include "sdk_libc.h"
 
-extern s32 fldTitleState, D_0054EF8C, D_0054EF90, D_0054EF94;
+extern s32 fldTitleState, fldTitlePhase, fldTitleFld, fldTitleWaitFrames;
 extern u32 dds3GetKernelCount(void);
 extern sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *texture);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
@@ -28,7 +28,7 @@ extern s32 fldTitle_Process(dds3ProcessID_t *id);
 
 dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
-extern char D_00532820[];
+extern char fldTitleMiniProcName[];
 
 extern sdfTexHandle_t *fldTitleMiniTex;
 
@@ -40,19 +40,19 @@ extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
 extern void fldTitleStart(s32 fld, s32 waittime);
 
-extern sdfTexHandle_t *D_0054EF98;
+extern sdfTexHandle_t *fldTitleFldTex;
 
-extern sdfTexHandle_t *D_0054EF9C;
+extern sdfTexHandle_t *fldTitleDun1Tex;
 
-extern sdfTexHandle_t *D_0054EFA0;
+extern sdfTexHandle_t *fldTitleDun2Tex;
 
-extern sdfTexHandle_t *D_0054EFA4;
+extern sdfTexHandle_t *fldTitleDun3Tex;
 
 
 extern char fldNpcPlFormat[];
 
 s32 fldTitleChk(void) {
-    return dds3SearchProcessName(D_005327B0) != 0;
+    return dds3SearchProcessName(fldTitleProcName) != 0;
 }
 
 extern s32 fldProcCampChk(void);
@@ -78,11 +78,11 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(0);
     nextPhase = 1;
-    switch (D_0054EF8C) {
+    switch (fldTitlePhase) {
     case 0: {
-        D_0054EF94--;
-        if (D_0054EF94 <= 0) {
-            D_0054EF8C = nextPhase;
+        fldTitleWaitFrames--;
+        if (fldTitleWaitFrames <= 0) {
+            fldTitlePhase = nextPhase;
             fldTitleState = 0;
         }
         break;
@@ -94,7 +94,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         height = 448 - fldTitleState * 12;
         if (height < 106) height = 106;
         DrwSprite2D(0, 180 - (height >> 1), 512, height, 0, 0, 256, 128,
-                    0x10808080, D_0054EFA0);
+                    0x10808080, fldTitleDun2Tex);
         rsetAlpha(0);
 
         if (fldTitleState >= 19) {
@@ -103,13 +103,13 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             alpha = (s32)((u32)alpha << 24);
             alpha |= 0x00808080;
             DrwSprite2D(0x1B, 0x5F, 0x1CA, 0xAC, 0, 0, 0x80, 0x40,
-                        alpha, D_0054EF9C);
+                        alpha, fldTitleDun1Tex);
             DrwSprite2D(0x4B, 0x96, 0x64, 0x3A, 2, 5, 0x64, 0x3A,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(0xAF, 0x96, 0xA2, 0x3A, 0x65, 5, 1, 0x3A,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(0x151, 0x96, 0x64, 0x3A, 0x65, 5, -0x64, 0x3A,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
         }
 
         if (fldTitleState >= 19) {
@@ -120,27 +120,27 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             x = fldTitleState * 56 - 0x530;
             if (x > 0) x = 0;
             DrwSprite2D(x + 0x11, 0x81, 0x7E, 2, 1, 2, 0x7E, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(x + 0x8F, 0x81, 0xE2, 2, 0x7E, 2, 1, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(x + 0x171, 0x81, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
 
             x = 0x530 - fldTitleState * 56;
             if (x < 0) x = 0;
             DrwSprite2D(x + 0x11, 0xE5, 0x7E, 2, 1, 2, 0x7E, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(x + 0x8F, 0xE5, 0xE2, 2, 0x7E, 2, 1, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
             DrwSprite2D(x + 0x171, 0xE5, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                        alpha, D_0054EFA4);
+                        alpha, fldTitleDun3Tex);
         }
 
         if (fldTitleState >= 20) {
             alpha = (fldTitleState * 128 - 2432) / 15;
             if (alpha > 128) alpha = 128;
             DrwSprite2D(129, 115, 254, 69, 1, 1, 254, 69,
-                        0x00808080 | ((u32)alpha << 24), D_0054EF98);
+                        0x00808080 | ((u32)alpha << 24), fldTitleFldTex);
         }
 
         if ((u32)(fldTitleState - 20) < 10) {
@@ -150,7 +150,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             if (alpha > 128) alpha = 128;
             if (alpha < 0) alpha = 0;
             DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                        0x00807060 | ((u32)alpha << 24), D_0054EF98);
+                        0x00807060 | ((u32)alpha << 24), fldTitleFldTex);
             rsetAlpha(0);
         }
 
@@ -161,13 +161,13 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             if (alpha > 128) alpha = 128;
             if (alpha < 0) alpha = 0;
             DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                        0x00807060 | ((u32)alpha << 24), D_0054EF98);
+                        0x00807060 | ((u32)alpha << 24), fldTitleFldTex);
             rsetAlpha(0);
         }
 
         if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
-            D_0054EF8C++;
+            fldTitlePhase++;
         }
         break;
     }
@@ -175,35 +175,35 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         s32 color;
         rsetAlpha(2);
         DrwSprite2D(0, 0x7F, 0x200, 0x6A, 0, 0, 0x100, 0x80,
-                    0x10808080, D_0054EFA0);
+                    0x10808080, fldTitleDun2Tex);
         rsetAlpha(0);
         color = 0x80808080;
         DrwSprite2D(0x1B, 0x5F, 0x1CA, 0xAC, 0, 0, 0x80, 0x40,
-                    color, D_0054EF9C);
+                    color, fldTitleDun1Tex);
         DrwSprite2D(0x4B, 0x96, 0x64, 0x3A, 2, 5, 0x64, 0x3A,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0xAF, 0x96, 0xA2, 0x3A, 0x65, 5, 1, 0x3A,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x151, 0x96, 0x64, 0x3A, 0x65, 5, -0x64, 0x3A,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x11, 0x81, 0x7E, 2, 1, 2, 0x7E, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x8F, 0x81, 0xE2, 2, 0x7E, 2, 1, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x11, 0xE5, 0x7E, 2, 1, 2, 0x7E, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x8F, 0xE5, 0xE2, 2, 0x7E, 2, 1, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x171, 0x81, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x171, 0xE5, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                    color, D_0054EFA4);
+                    color, fldTitleDun3Tex);
         DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                    color, D_0054EF98);
+                    color, fldTitleFldTex);
 
         if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
-            D_0054EF8C++;
+            fldTitlePhase++;
         }
         break;
     }
@@ -215,7 +215,7 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (alpha < 0) alpha = 0;
         if (alpha > 128) alpha = 128;
         DrwSprite2D(0, 0x7F, 0x200, 0x6A, 0, 0, 0x100, 0x80,
-                    0x00808080 | ((u32)alpha << 24), D_0054EFA0);
+                    0x00808080 | ((u32)alpha << 24), fldTitleDun2Tex);
         rsetAlpha(0);
 
         {
@@ -225,24 +225,24 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
             if (alpha > 128) alpha = 128;
             color = 0x00808080 | ((u32)alpha << 24);
             DrwSprite2D(0x1B, 0x5F, 0x1CA, 0xAC, 0, 0, 0x80, 0x40,
-                        color, D_0054EF9C);
+                        color, fldTitleDun1Tex);
             DrwSprite2D(0x4B, 0x96, 0x64, 0x3A, 2, 5, 0x64, 0x3A,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(0xAF, 0x96, 0xA2, 0x3A, 0x65, 5, 1, 0x3A,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(0x151, 0x96, 0x64, 0x3A, 0x65, 5, -0x64, 0x3A,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
 
         }
         x = fldTitleState < 5 ? 0 : fldTitleState * 72 - 0x120;
         if (x < 0x190) {
             s32 color = 0x80808080;
             DrwSprite2D(x + 0x11, 0x81, 0x7E, 2, 1, 2, 0x7E, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(x + 0x8F, 0x81, 0xE2, 2, 0x7E, 2, 1, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(x + 0x171, 0x81, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
         }
 
         if (fldTitleState >= 5) {
@@ -254,22 +254,22 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
         if (x >= -0x18F) {
             s32 color = 0x80808080;
             DrwSprite2D(x + 0x11, 0xE5, 0x7E, 2, 1, 2, 0x7E, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(x + 0x8F, 0xE5, 0xE2, 2, 0x7E, 2, 1, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
             DrwSprite2D(x + 0x171, 0xE5, 0x7E, 2, 0x7E, 2, -0x7E, 2,
-                        color, D_0054EFA4);
+                        color, fldTitleDun3Tex);
         }
 
         alpha = (20 - fldTitleState) * 128 / 20;
         if (alpha < 0) alpha = 0;
         if (alpha > 128) alpha = 128;
         DrwSprite2D(0x81, 0x73, 0xFE, 0x45, 1, 1, 0xFE, 0x45,
-                    0x00808080 | ((u32)alpha << 24), D_0054EF98);
+                    0x00808080 | ((u32)alpha << 24), fldTitleFldTex);
 
         if ((fldTitleState += SDF_FRAME_DUE(dds3GetKernelCount())) >= 61) {
             fldTitleState = 0;
-            D_0054EF8C++;
+            fldTitlePhase++;
         }
         break;
     }
@@ -280,25 +280,25 @@ s32 fldTitle_Process(dds3ProcessID_t *id)
 }
 
 void fldTitle_Shutdown(void) {
-    if (D_0054EF98 != NULL) {
-        sdfTexFreeDelayed(D_0054EF98);
-        D_0054EF98 = NULL;
+    if (fldTitleFldTex != NULL) {
+        sdfTexFreeDelayed(fldTitleFldTex);
+        fldTitleFldTex = NULL;
     }
-    if (D_0054EF9C != NULL) {
-        sdfTexFreeDelayed(D_0054EF9C);
-        D_0054EF9C = NULL;
+    if (fldTitleDun1Tex != NULL) {
+        sdfTexFreeDelayed(fldTitleDun1Tex);
+        fldTitleDun1Tex = NULL;
     }
-    if (D_0054EFA0 != NULL) {
-        sdfTexFreeDelayed(D_0054EFA0);
-        D_0054EFA0 = NULL;
+    if (fldTitleDun2Tex != NULL) {
+        sdfTexFreeDelayed(fldTitleDun2Tex);
+        fldTitleDun2Tex = NULL;
     }
-    if (D_0054EFA4 != NULL) {
-        sdfTexFreeDelayed(D_0054EFA4);
-        D_0054EFA4 = NULL;
+    if (fldTitleDun3Tex != NULL) {
+        sdfTexFreeDelayed(fldTitleDun3Tex);
+        fldTitleDun3Tex = NULL;
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldTitle", D_005327B0);
+INCLUDE_RODATA(const s32, "field/fldTitle", fldTitleProcName);
 
 void fldTitleStart(s32 fld, s32 waittime)
 {
@@ -306,35 +306,35 @@ void fldTitleStart(s32 fld, s32 waittime)
     u32 data;
     sdfMemHandle_t *allocation;
 
-    D_0054EF90 = fld;
-    D_0054EF94 = SDF_FRAMES(waittime);
+    fldTitleFld = fld;
+    fldTitleWaitFrames = SDF_FRAMES(waittime);
     fldTitleState = 0;
-    D_0054EF8C = 0;
+    fldTitlePhase = 0;
     sprintf(path, "/fld/f/pnl/df%03d.tmx", fld);
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx(path, &data, NULL);
-    D_0054EF98 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
+    fldTitleFldTex = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_01.tmx", &data, NULL);
-    D_0054EF9C = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
+    fldTitleDun1Tex = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_02.tmx", &data, NULL);
-    D_0054EFA0 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
+    fldTitleDun2Tex = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     allocation = (sdfMemHandle_t *)sdfDevLoadFileEx("/fld/f/pnl/dun_03.tmx", &data, NULL);
-    D_0054EFA4 = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
+    fldTitleDun3Tex = sdfTexSet(EE_ADDR_AS(const TMX_HEADER_t *, data));
     sdfMemFreeDirect(allocation);
 
     if (!fldTitleChk()) {
-        dds3StartProcess(D_005327B0, 0x2B0A, 0, 1, fldTitle_Process,
+        dds3StartProcess(fldTitleProcName, 0x2B0A, 0, 1, fldTitle_Process,
                          (dds3ProcessFunc_t)fldTitle_Shutdown, NULL);
     }
 }
 
 s32 fldTitleMiniChk(void) {
-    return dds3SearchProcessName(D_00532820) != 0;
+    return dds3SearchProcessName(fldTitleMiniProcName) != 0;
 }
 
 
@@ -507,10 +507,10 @@ void fldTitleMini_Shutdown(void) {
     }
 }
 
-extern s32 D_0054EFB0;
+extern s32 fldTitleMiniFld;
 extern s32 evtBitCheck(s32 no);
 
-INCLUDE_RODATA(const s32, "field/fldTitle", D_00532820);
+INCLUDE_RODATA(const s32, "field/fldTitle", fldTitleMiniProcName);
 
 void fldTitleMiniStart(s32 fld)
 {
@@ -566,7 +566,7 @@ void fldTitleMiniStart(s32 fld)
         fld = 0x20;
     }
 
-    D_0054EFB0 = fld;
+    fldTitleMiniFld = fld;
     fldTitleMiniState = 0;
     fldSnowActive = 0;
     sprintf(path, "/fld/f/pnl/ds%03d.tmx", fld);
@@ -579,7 +579,7 @@ void fldTitleMiniStart(s32 fld)
     sdfMemFreeDirect((sdfMemHandle_t *)allocation);
 
     if (fldTitleChk() == 0) {
-        dds3StartProcess(D_00532820, 0x2B0A, 0, 1, fldTitleMini_Process,
+        dds3StartProcess(fldTitleMiniProcName, 0x2B0A, 0, 1, fldTitleMini_Process,
                          (dds3ProcessFunc_t)fldTitleMini_Shutdown, NULL);
     }
 }

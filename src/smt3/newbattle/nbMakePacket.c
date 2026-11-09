@@ -246,7 +246,7 @@ typedef struct nbKoukaProcessData_t
 
 
 
-extern char D_00544890[]; /* "カット長 = %d\n" */
+extern char nbCutLengthFormat[]; /* "カット長 = %d\n" */
 
 extern nbKoukaProcessData_t *nbGetKoukaProcessData(void);
 
@@ -385,7 +385,7 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
     hbtl = effBTLCreate(bed);
     cut = effBTLCutCreate(hbtl, cutno, form, 1);
     endframe = effBTLGetCutEndFrame(hbtl, cutno);
-    printf(D_00544890, endframe);
+    printf(nbCutLengthFormat, endframe);
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, endframe, uniqueid);
     p->type = 43;
     p->data1.p = hbtl;
@@ -433,7 +433,7 @@ struct effBTLCut_t;
 extern void effBTLCutSetCutEndFrame(struct effBTLCut_t *cut, s32 frame);
 extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, saddr_t uniqueid, s32 se);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544890);
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", nbCutLengthFormat);
 
 nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
     saddr_t uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)

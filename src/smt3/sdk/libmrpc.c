@@ -32,13 +32,13 @@ typedef struct rpcQueue {
     u32 unk_10; /* Cleared during initialization. */
 } rpcQueue;
 
-extern s32 D_0052BA88 __attribute__((section(".data")));
-extern rpcQueue D_00599700 __attribute__((section(".data")));
+extern s32 sceSifMRpcInitialized __attribute__((section(".data")));
+extern rpcQueue sceSifMRpcQueue __attribute__((section(".data")));
 
 extern s32 DIntr(void);
 extern s32 EIntr(void);
 
-extern rpcPacket D_00598F00[32];
+extern rpcPacket sceSifMRpcPackets[32];
 extern void _request_end(void *packet, void *queue);
 extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument);
 extern u32 sceSifGetSreg(s32 index);
@@ -50,13 +50,13 @@ void sceSifMInitRpc(s32 mode)
     rpcPacket *packet;
     rpcQueue *queue;
 
-    if (D_0052BA88 != 0) {
+    if (sceSifMRpcInitialized != 0) {
         return;
     }
-    D_0052BA88 = 1;
+    sceSifMRpcInitialized = 1;
     DIntr();
-    packets = D_00598F00;
-    queue = &D_00599700;
+    packets = sceSifMRpcPackets;
+    queue = &sceSifMRpcQueue;
     queue->base = EE_ADDR_AS(rpcPacket *, (EE_ADDR(packets) | 0x20000000));
     queue->count = 32;
     queue->seq = 1;
@@ -74,7 +74,7 @@ void sceSifMInitRpc(s32 mode)
 
 void sceSifMExitRpc(void)
 {
-    D_0052BA88 = 0;
+    sceSifMRpcInitialized = 0;
 }
 
 rpcPacket *_sceRpcGetPacket(rpcQueue *queue)
@@ -203,7 +203,7 @@ extern s32 WaitSema(s32 sema);
 extern s32 DeleteSema(s32 sema);
 extern s32 scePrintf(const char *format, ...);
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 length);
-extern char D_0054ADD8[];
+extern char sceSifMModeErrorString[];
 
 s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32 arg1, u32 arg2);
 
@@ -219,7 +219,7 @@ s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32
     s32 sema;
 
     if (mode != 0) {
-        scePrintf(D_0054ADD8);
+        scePrintf(sceSifMModeErrorString);
         return -1;
     }
     param.option = 0;
@@ -235,7 +235,7 @@ s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32
     client->parameters[0] = arg0;
     client->parameters[1] = arg1;
     client->parameters[2] = arg2;
-    packet = _sceRpcGetPacket(&D_00599700);
+    packet = _sceRpcGetPacket(&sceSifMRpcQueue);
     if (packet == NULL) {
         DeleteSema(client->completionSema);
         return -1;
@@ -281,11 +281,11 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
     s32 result;
 
     if (mode != 0) {
-        scePrintf(D_0054ADD8);
+        scePrintf(sceSifMModeErrorString);
         return -1;
     }
     WaitSema(client->completionSema);
-    packet = _sceRpcGetPacket(&D_00599700);
+    packet = _sceRpcGetPacket(&sceSifMRpcQueue);
     result = -1;
     if (packet != NULL) {
         client->sequence = packet->unbind.sequence;
@@ -318,7 +318,7 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
 
 extern void sceSifWriteBackDCache(void *address, s32 size);
 
-INCLUDE_RODATA(const s32, "sdk/libmrpc", D_0054ADD8);
+INCLUDE_RODATA(const s32, "sdk/libmrpc", sceSifMModeErrorString);
 
 s32 sceSifMCallRpc(rpcClient *client, u32 function, u32 mode,
                    void *send, s32 sendSize, void *receive, s32 receiveSize,
@@ -329,7 +329,7 @@ s32 sceSifMCallRpc(rpcClient *client, u32 function, u32 mode,
     s32 sema;
 
     if (mode != 0) {
-        scePrintf(D_0054ADD8);
+        scePrintf(sceSifMModeErrorString);
         return -1;
     }
     WaitSema(client->completionSema);
@@ -341,7 +341,7 @@ s32 sceSifMCallRpc(rpcClient *client, u32 function, u32 mode,
         scePrintf("%s: receive buffer addr is not 64 byte align. %08x=n", "sceSifMCallRpc", EE_ADDR(receive));
         return -1;
     }
-    packet = _sceRpcGetPacket(&D_00599700);
+    packet = _sceRpcGetPacket(&sceSifMRpcQueue);
     if (packet == NULL) {
         return -1;
     }

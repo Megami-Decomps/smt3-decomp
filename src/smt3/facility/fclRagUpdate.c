@@ -728,15 +728,15 @@ void fclStartRecoverEvent(s8 value)
     evtStartEvent(0x321);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D2E8);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath03);
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D310);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath02);
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D338);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath01);
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D360);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdRemoveCurse);
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D370);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdCureStatus);
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", D_0053D380);
+INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdHealHpMp);
 

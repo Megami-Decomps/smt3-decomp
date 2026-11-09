@@ -34,7 +34,7 @@ typedef struct
 } frFontRing_t;
 
 extern u32 frFontRowBuf;
-extern char D_0054F448[]; /* Shared empty font-chain seed. */
+extern char frWrapEmptyString[]; /* Shared empty font-chain seed. */
 extern frFontHandle_t *frSetFontString(const char *, s8, s8, s8, frFontHandle_t *, s32);
 extern void frSetFontSize(frFontHandle_t *, s32, s32);
 extern frFontHandle_t *frCombineFontRequestEx(frFontHandle_t *, frFontHandle_t *, s32);
@@ -234,7 +234,7 @@ frFontHandle_t *frwGetSmallFontNoPropFRQ(s32 x, s32 y, s32 depth, u32 colors,
 frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                         const char *text, frFontHandle_t *previous)
 {
-    frFontHandle_t *request = frLinkFontString(D_0054F448, 0, 0, 0, previous);
+    frFontHandle_t *request = frLinkFontString(frWrapEmptyString, 0, 0, 0, previous);
     frDisableMode(2);
     request = frSetFontString(text, 2, 0, 0, request, 0);
     frEnableMode(2);
@@ -247,7 +247,7 @@ frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
 frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                         const char *text, frFontHandle_t *previous)
 {
-    frFontHandle_t *request = frLinkFontString(D_0054F448, 0, 0, 0, previous);
+    frFontHandle_t *request = frLinkFontString(frWrapEmptyString, 0, 0, 0, previous);
     frDisableMode(2);
     request = frSetFontString(text, 3, 0, 0, request, 0);
     frEnableMode(2);
@@ -315,8 +315,8 @@ frFontHandle_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8
     return request;
 }
 
-extern s32 D_0054F44C, D_0054F458, frHelpPosX, frHelpPosY;
-extern s8 D_0056BD60[];
+extern s32 frHelpLastIndex, D_0054F458, frHelpPosX, frHelpPosY;
+extern s8 frHelpText[];
 extern s32 frCalcStringHash(s8 *text);
 extern void frCopyTagArgs(s8 *text, s8 *destination, s32 line);
 
@@ -335,8 +335,8 @@ frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index)
         text = MessageNumSearch(index, &itfMesEmbedded_3F7350, 0);
         break;
     }
-    if (index != D_0054F44C) {
-        D_0054F44C = index;
+    if (index != frHelpLastIndex) {
+        frHelpLastIndex = index;
         frHelpPosX = 0;
         frHelpPosY = 0;
         D_0054F458 = frCalcStringHash((s8 *)text);
@@ -349,8 +349,8 @@ frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index)
             frHelpPosY = 0;
         }
     }
-    frCopyTagArgs((s8 *)text, D_0056BD60, frHelpPosY);
-    return MessageRequestNS(x, y, priority, 1, 0, 0, 0x80, (u8 *)D_0056BD60, NULL);
+    frCopyTagArgs((s8 *)text, frHelpText, frHelpPosY);
+    return MessageRequestNS(x, y, priority, 1, 0, 0, 0x80, (u8 *)frHelpText, NULL);
 }
 
 s32 fr_1CA990(void) {
@@ -499,36 +499,36 @@ u32 frFreeFontTable(frFontNode_t *ringBase) {
     return 1;
 }
 
-extern s32 D_0054F460, D_0054F464;
-extern s8 D_0054F468;
+extern s32 frTestFontX, frTestFontY;
+extern s8 frTestFontAlpha;
 extern s8 dds3PadBitTable[];
 extern frFontHandle_t *frTestFontHandle;
-extern char D_005359F8[];
+extern char frTestFontText[];
 extern void frSetDrawSpeed(frFontHandle_t *request, s32 speed);
 
 void fr_1CAC50(void)
 {
     frFontHandle_t *request;
 
-    request = frwGetSmallFontFRQ((D_0054F460 + 64) << 4,
-                               (D_0054F464 + 32) << 3,
-                               0xFFFFFF, 0x80808000, D_005359F8,
+    request = frwGetSmallFontFRQ((frTestFontX + 64) << 4,
+                               (frTestFontY + 32) << 3,
+                               0xFFFFFF, 0x80808000, frTestFontText,
                                frTestFontHandle);
     frTestFontHandle = request;
     frSetDrawSpeed(request, 6);
     if (dds3PadBitTable[6] != 0) {
-        if (D_0054F468 >= 0) {
-            D_0054F468++;
+        if (frTestFontAlpha >= 0) {
+            frTestFontAlpha++;
         }
     }
     if (dds3PadBitTable[7] != 0) {
-        u8 *alpha = (u8 *)&D_0054F468;
+        u8 *alpha = (u8 *)&frTestFontAlpha;
         if (*alpha != 0) {
             (*alpha)--;
         }
     }
-    frSetFontColor(frTestFontHandle, 0x80808000 | (u8)D_0054F468);
+    frSetFontColor(frTestFontHandle, 0x80808000 | (u8)frTestFontAlpha);
 }
 
-INCLUDE_RODATA(const s32, "interface/frWrap", D_005359F8);
+INCLUDE_RODATA(const s32, "interface/frWrap", frTestFontText);
 

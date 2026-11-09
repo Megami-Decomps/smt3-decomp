@@ -24,7 +24,7 @@ extern s32 nbCheckEventEntries(nbMainProcessData_t *data);
 extern s32 nbCheckEventPackLoaded(nbMainProcessData_t *data);
 extern void nbStartEventPacks(nbMainProcessData_t *data);
 extern void nbLoadDefaultModelPack(nbMainProcessData_t *data);
-extern char D_005510C0[]; /* "nb_mae" */
+extern char nbMaeProcessName[]; /* "nb_mae" */
 
 s32 nbMaeProcess02Wait(void)
 {
@@ -90,7 +90,7 @@ void nbInitMaeProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *process;
 
-    process = dds3StartProcess(D_005510C0, 0x3F9, 1, 1,
+    process = dds3StartProcess(nbMaeProcessName, 0x3F9, 1, 1,
                                (dds3ProcessFunc_t)nbMaeProcess0,
                                (dds3ProcessFunc_t)nbMaeShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, process);

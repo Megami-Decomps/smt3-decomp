@@ -252,7 +252,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern u32 f;
 
-extern dds3Basic_t *D_005515B4;
+extern dds3Basic_t *nbE901Basic;
 
 
 
@@ -306,7 +306,7 @@ extern void dds3SetQuake(s32 frame, s32 range);
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
-extern s32 D_005515BC;
+extern s32 nbE901Encno;
 
 extern void nbSetMainPhase(s32 encno);
 
@@ -368,7 +368,7 @@ void nbUpdateEventProcessData(dds3ProcessID_t *id);
 void nbSetModelHandleOnce(nbFormation_t *form, NB_FILEHANDLE_T *packh);
 
 extern s32 nbCameraBoss_Sp_DOUTYO_TP_Set(u8 *pNbCamera);
-extern s32 D_005515C0;
+extern s32 nbE901ModelPackNo;
 extern char *text1[];
 extern void nbPanelAllShow(void);
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
@@ -394,14 +394,14 @@ s32 RunUgou(nbEventProcessData_t *e)
     }
     lead = &e->data->form[list[count / 2]];
     if (count < 4) {
-        D_005515BC = 0x112;
-        D_005515C0 = 0x128;
+        nbE901Encno = 0x112;
+        nbE901ModelPackNo = 0x128;
     } else if (count < 6) {
-        D_005515BC = 0x111;
-        D_005515C0 = 0x127;
+        nbE901Encno = 0x111;
+        nbE901ModelPackNo = 0x127;
     } else {
-        D_005515BC = 0x110;
-        D_005515C0 = 0x126;
+        nbE901Encno = 0x110;
+        nbE901ModelPackNo = 0x126;
     }
     tmp = list[0];
     list[0] = list[count / 2];
@@ -416,9 +416,9 @@ s32 RunUgou(nbEventProcessData_t *e)
     nbCameraBoss_Sp_DOUTYO_TP_Set(pNbCamera);
     nbDispText(text1[0xE8], NULL, 0, 0x5A, 0x89FEFF80);
     if (evtBitCheck(0xC0F) != 0) {
-        e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(D_005515C0));
+        e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(nbE901ModelPackNo));
     } else {
-        mdlPrepare(1, D_005515C0, 0);
+        mdlPrepare(1, nbE901ModelPackNo, 0);
     }
     nbFreeEffectSlot(e);
     return 0;
@@ -446,12 +446,12 @@ s32 SetUp1(nbEventProcessData_t *ed)
     rot.w = 1.0f;
     h = evtInitMotionSeProcess(ed->eventrid, 1);
     basic = dds3SearchSceneBasic(dds3GetActiveScene(), h, 5);
-    D_005515B4 = basic;
+    nbE901Basic = basic;
     pos.x = 0.0f;
     pos.y = 85.0f;
     pos.z = 0.0f;
     dds3SetPosPoseSet(basic, &pos);
-    evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515B4), 0, 0, 0, 2);
+    evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE901Basic), 0, 0, 0, 2);
     bedbasic = nbCreateBasicEffect(evtGetResorceData(0x385, 2), &pos, &rot);
     nbFreeEffectSlot(ed);
     return 0;
@@ -482,7 +482,7 @@ s32 SyuGo(nbEventProcessData_t *e)
     if (e->seqtime >= 0x38) {
         nbFreeEffectSlot(e);
     }
-    h = dds3GetUnitHandleObjectBasic(D_005515B4);
+    h = dds3GetUnitHandleObjectBasic(nbE901Basic);
     i = 0;
     mark = 5;
     ofs = 0;
@@ -543,8 +543,8 @@ s32 Daisupe(nbEventProcessData_t *ed)
     nbFormation_t *form;
     sdfVector4_t pos;
 
-    nbSetMainPhase(D_005515BC);
-    nbSetupBattleUnits(ed->data, D_005515BC);
+    nbSetMainPhase(nbE901Encno);
+    nbSetupBattleUnits(ed->data, nbE901Encno);
     nbLoadUnitGroup(1, 0, 1);
     if (evtBitCheck(0xC0F) != 0) {
         nbSetModelHandleOnce(nbGetEventForm(), ed->pfile);
@@ -647,11 +647,11 @@ s32 nbE901Process_1(dds3ProcessID_t *id)
     nbUpdateEventProcessData(id);
     return 0;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbE901", D_005515B4);
+INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901Basic);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE901", bedbasic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE901", D_005515BC);
+INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901Encno);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE901", D_005515C0);
+INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901ModelPackNo);
 

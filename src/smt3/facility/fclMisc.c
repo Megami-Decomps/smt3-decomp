@@ -621,21 +621,21 @@ INCLUDE_SDATA(const s32, "facility/fclMisc", gSelMsgPos);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC5D);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC60);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrFee);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC68);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC70);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrOwn);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC78);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC80);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC88);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrTotal);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC90);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrMoney);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC98);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrNo);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FCA0);
+INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrYes);
 

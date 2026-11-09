@@ -217,7 +217,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
-extern char D_00545CE0[];
+extern char nbBgmStopFormat[];
 
 typedef struct { s32 step; s32 weight; } nbBadCurseEntry_t;
 
@@ -256,7 +256,7 @@ extern s32 readtime;
 
 extern void nbEncShutdown(dds3ProcessID_t *id);
 
-extern char D_00551550[];
+extern char nbEncProcessName[];
 
 extern s32 nbCheckLoadGroup(s32 side);
 
@@ -264,7 +264,7 @@ extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
 extern void *nbEncProcess3(dds3ProcessID_t *id);
 
-extern char D_00545CF8[];
+extern char nbUnitLoadTimeFormat[];
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -372,7 +372,7 @@ void *nbEncProcess2_6(dds3ProcessID_t *id)
         }
         party++;
     }
-    printf(D_00545CF8, readtime);
+    printf(nbUnitLoadTimeFormat, readtime);
     return nbEncProcess3;
 }
 
@@ -509,7 +509,7 @@ void nbInitEncProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_00551550, 0x3F9, 1, 1, nbEncProcess1, nbEncShutdown, NULL);
+    id = dds3StartProcess(nbEncProcessName, 0x3F9, 1, 1, nbEncProcess1, nbEncShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->encproc = id;
 }
@@ -603,7 +603,7 @@ zero:
 
 /* NON_MATCHING: native 396-byte size; 41 of 99 words differ. */
 #ifdef NON_MATCHING
-extern datDevilAIData_t D_003989E0[];
+extern datDevilAIData_t datDevilAIDataTable[];
 extern s32 nbSkillIsInRange(s32 skill, s32 type);
 
 s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
@@ -627,7 +627,7 @@ s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
     } else {
         aiId = a->work->id;
         for (i = 0; i < 3; i++) {
-            datDevilAITbl_t *entry = D_003989E0[aiId].table[i];
+            datDevilAITbl_t *entry = datDevilAIDataTable[aiId].table[i];
             for (j = 0; j < 5; j++, entry++) {
                 skill = entry->skill;
                 if (skill != 0 && (skill & 0x8000) == 0 && nbSkillIsInRange(skill, step) != 0) {
@@ -861,7 +861,7 @@ INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbSetBadCurseTimer);
 
 extern u32 nbGetBadStat(s32 formindex);
 extern void nbSetBadCurseTimer(s32 step, s32 weight);
-extern char D_00545D40[];
+extern char nbBadCurseDebugFormat[];
 
 void nbInitBadCurseState(nbActionProcessData_t *a)
 {
@@ -926,7 +926,7 @@ void nbInitBadCurseState(nbActionProcessData_t *a)
         }
     }
     for (i = 0; i < nbBadCurseTimer; i++) {
-        printf(D_00545D40, nbBadCurseTable[i].step, nbBadCurseTable[i].weight);
+        printf(nbBadCurseDebugFormat, nbBadCurseTable[i].step, nbBadCurseTable[i].weight);
     }
 }
 
@@ -996,7 +996,7 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", D_00545D40);
+INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", nbBadCurseDebugFormat);
 
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbApplyBadCurse);
 #endif
@@ -1004,7 +1004,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readbasetime);
 
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readtime);
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", D_00551550);
+INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbEncProcessName);
 
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbBadCurseTimer);
 

@@ -24,17 +24,17 @@ typedef struct devState_t devState_t;
 
 
 
-extern u32 D_0054EC44;
+extern u32 fldDrawInitDone;
 
 extern addr_t fldDrawEnv;
 
-extern sdfTexHandle_t *D_0054EC60;
+extern sdfTexHandle_t *fldDrawSpriteTex;
 
 extern void *memset(void *, int, size_t);
 
-extern u8 D_0054EC50[];
+extern u8 fldDbgFmtDec[];
 
-extern u8 D_0054EC58[];
+extern u8 fldDbgFmtHex[];
 
 extern s32 fldCamPhokanState;
 
@@ -105,9 +105,9 @@ extern addr_t fldItemBoxObjBuf;
 
 extern addr_t fldMatterTable;
 
-extern addr_t D_0054EDA8;
+extern addr_t fldItemBoxObjBufHandle;
 
-extern addr_t D_0054EDAC;
+extern addr_t fldMatterTableHandle;
 
 extern s32 fldValueRecordCount;
 
@@ -243,7 +243,7 @@ extern s32 gFldWapPanel;
 extern s32 gFldKyouseiTalk;
 
 
-extern u8 D_00303020[];
+extern u8 fldWarpLabel[];
 
 extern s32 gFldWap_after_nextidx;
 
@@ -280,13 +280,13 @@ extern doormovework_s fldDoorEventTable[256];
 
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
 
-extern f32 D_0054ECB4;
+extern f32 fldCamOrbitAngle;
 
-extern f32 D_0054ECB8;
+extern f32 fldCamPadHeight;
 
 void fldPlayerCalc_WarpStart(void);
 
-extern s32 D_0054ED90;
+extern s32 fldHitMatterIndex;
 
 extern s32 fldHitChkMatter;
 
@@ -300,21 +300,21 @@ void fldClearDoorEvents(void);
 
 const char *fldEveHitResName_Find(addr_t pid);
 
-extern u8 D_00302FA0[];
+extern u8 fldDoorWarpLabel[];
 
-extern u8 D_00302FB0[];
+extern u8 fldRunWarpLabel[];
 
-extern u8 D_00302FC0[];
+extern u8 fldAnaWarpLabel[];
 
-extern u8 D_00302FD0[];
+extern u8 fldTobiWarpLabel[];
 
-extern u8 D_00302FF0[];
+extern u8 fldHasigoLabel[];
 
-extern u8 D_00303000[];
+extern u8 fldDexitWarpLabel[];
 
-extern u8 D_00303010[];
+extern u8 fldDinWarpLabel[];
 
-extern u8 D_00303030[];
+extern u8 fldTobiWarpHighLabel[];
 
 u8 *fldDoor_Find2(const char *evename) {
     s32 i;
@@ -332,33 +332,33 @@ u8 *fldDoor_Find2(const char *evename) {
             if (fldGlobalBase.area < 10) {
                 if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 11) {
                     gFldWapPanel = 7;
-                    return D_00303010;
+                    return fldDinWarpLabel;
                 }
                 gFldWapPanel = 7;
-                return D_00303010;
+                return fldDinWarpLabel;
             }
             if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 10) {
                 gFldWapPanel = 6;
-                return D_00303000;
+                return fldDexitWarpLabel;
             }
             gFldWapPanel = 0;
-            return D_00302FA0;
+            return fldDoorWarpLabel;
         case 2:
             gFldWapPanel = 1;
-            return D_00302FB0;
+            return fldRunWarpLabel;
         case 3:
             gFldWapPanel = 2;
-            return D_00302FC0;
+            return fldAnaWarpLabel;
         case 4:
             if (fldGlobalBase.area >= 40) {
                 gFldWapPanel = 9;
-                return D_00303030;
+                return fldTobiWarpHighLabel;
             }
             gFldWapPanel = 3;
-            return D_00302FD0;
+            return fldTobiWarpLabel;
         case 5:
             gFldWapPanel = 5;
-            return D_00302FF0;
+            return fldHasigoLabel;
         case 6:
         case 7:
         case 8:
@@ -366,7 +366,7 @@ u8 *fldDoor_Find2(const char *evename) {
             break;
         case 10:
             gFldWapPanel = 0;
-            return D_00303020;
+            return fldWarpLabel;
         }
     }
     return NULL;
@@ -380,7 +380,7 @@ u8 *fldDoor_Find3(void) {
         if (entry->kind == 10) {
             scriptlabel = idx;
             gFldWapPanel = 8;
-            return D_00303020;
+            return fldWarpLabel;
         }
     }
     return NULL;
@@ -865,14 +865,14 @@ void fldDoor_WarpEx(s32 ex_no) {
 }
 
 
-extern s16 D_002FC1A0[][2];
+extern s16 fldTerminalTable[][2];
 extern s16 fldAllCnt[][2];
 
 void fldSetTerminalState(s32 type, s32 idx)
 {
     if (type == 0) {
         fldDoorSiseZone = 3;
-        fldDoorSiseArea = D_002FC1A0[idx][0];
+        fldDoorSiseArea = fldTerminalTable[idx][0];
         fldDoorSiseSub = idx;
     } else {
         fldDoorSiseSub = idx;
@@ -966,7 +966,7 @@ void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
     s32 nextKind;
 
     if (tmnltype == 0) {
-        field = D_002FC1A0[tmnlid][0];
+        field = fldTerminalTable[tmnlid][0];
         zone = 3;
     } else {
         zone = 4;

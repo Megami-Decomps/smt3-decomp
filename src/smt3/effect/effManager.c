@@ -72,7 +72,7 @@ effNode_t *dds3EffectCreate(u16 type, u16 arg, saddr_t param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
 extern u8 dds3EffectBase[];
-extern char D_0054F0B0[];
+extern char dds3EffectProcessName[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void sdfRandomizeByTime(void *aCB);
 extern void dds3BillboardManagerInit(void);
@@ -96,7 +96,7 @@ void dds3EffectManagerInit(void) {
     dds3PolygonManagerInit();
     dds3ParticleManagerInit();
     dds3StartProcess("effect_f", 0x2B04, 0, 0, dds3EffectManagerRunF, NULL, NULL);
-    dds3StartProcess(D_0054F0B0, 0x2B18, 0, 0, dds3EffectManagerRun, (dds3ProcessFunc_t)dds3EffectManagerExit, NULL);
+    dds3StartProcess(dds3EffectProcessName, 0x2B18, 0, 0, dds3EffectManagerRun, (dds3ProcessFunc_t)dds3EffectManagerExit, NULL);
     effDebugInit();
     Eve_EffectInit();
 }
@@ -373,21 +373,21 @@ effMajorEntry_t EffMajorTable[5] = {
     { dds3EffectPartCreate, dds3EffectPartDraw, dds3EffectPartDelete, (void (*)(s32 instance))dds3EffectPCFReset, (s32 (*)(s32 instance))dds3EffectPCFGetState, dds3EffectPartSetPosition, dds3EffectPartSetRotateMatrix, dds3EffectPartSetColor, (void (*)(s32 instance, s32 loop))dds3EffectPCFSetLoop, (s32 (*)(s32 instance))dds3EffectPCFGetLoop, dds3EffectPartCopy, dds3EffectPartSetScale },
 };
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532B70);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke12);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532B88);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke10);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532BA0);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke08);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532BB8);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke07);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532BD0);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathMblur8_3);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532BE8);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathMblur8);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532C00);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke16);
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532C18);
+INCLUDE_RODATA(const s32, "effect/effManager", billPathBil00);
 
-INCLUDE_SDATA(const s32, "effect/effManager", D_0054F0B0);
+INCLUDE_SDATA(const s32, "effect/effManager", dds3EffectProcessName);
 

@@ -213,19 +213,19 @@ typedef struct nbNegoProcessData_t
 
 #include "sdk_libc.h"
 
-extern datDevilAIData_t D_003989E0[];
+extern datDevilAIData_t datDevilAIDataTable[];
 
-extern s32 D_00551500;
+extern s32 nbBattleDummyCount;
 
 extern u32 f;
 
-extern datUnitWork_t D_005269D0;
+extern datUnitWork_t nbTest8Dummy;
 
-extern u8 D_00526AC0[];
+extern u8 nbTest8DevilIds[];
 
-extern u8 D_00526AD0[];
+extern u8 nbTest8DevilSkills[];
 
-extern u8 D_00526B48[];
+extern u8 nbTest8PassiveSkills[];
 
 extern u8 test_devilIds[];
 
@@ -241,7 +241,7 @@ extern u16 test2_dvllist[];
 
 extern s32 test_phearts;
 
-extern char D_00545B78[];
+extern char nbTestHeartsMessage[];
 
 extern void datAddHearts(s32 id);
 
@@ -273,7 +273,7 @@ extern void nbCallNewBattle(s32 encpack, s32 code);
 
 extern s32 pack;
 
-extern char D_00545B90[];
+extern char nbTestProcessName[];
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -351,20 +351,20 @@ extern void *memcpy(void *dest, const void *src, size_t size);
 
 void SetBossDummy(void)
 {
-    memcpy(&D_003989E0[257], &D_00526B50, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[269], &D_00526BF4, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[278], &D_00526C98, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[279], &D_00526D3C, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[280], &D_00526D3C, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[281], &D_00526D3C, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[282], &D_00526D3C, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[288], &D_00526DE0, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[292], &D_00526E84, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[259], &D_00526F28, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[291], &D_00526FCC, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[258], &D_00527070, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[293], &D_00527114, sizeof(datDevilAIData_t));
-    memcpy(&D_003989E0[264], &D_005271B8, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[257], &D_00526B50, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[269], &D_00526BF4, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[278], &D_00526C98, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[279], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[280], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[281], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[282], &D_00526D3C, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[288], &D_00526DE0, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[292], &D_00526E84, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[259], &D_00526F28, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[291], &D_00526FCC, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[258], &D_00527070, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[293], &D_00527114, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[264], &D_005271B8, sizeof(datDevilAIData_t));
     evtBitOn(0xC0B);
     evtBitOff(0xC01);
     evtBitOff(0xC07);
@@ -454,7 +454,7 @@ INCLUDE_ASM(const s32, "newbattle/nbTest", nbSetBattleDummy);
 
 void nbInitPlayer(void)
 {
-    nbSetBattleDummy(D_00551500, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
+    nbSetBattleDummy(nbBattleDummyCount, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
     evtBitOn(0xC04);
 }
 
@@ -484,7 +484,7 @@ void *TestProcess5(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
+    nbSetBattleDummy(nbBattleDummyCount, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
 
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))[7].hp = 0;
     DDS3_GBWK->maka = 0x15F90;
@@ -526,7 +526,7 @@ void *TestProcess4(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
+    nbSetBattleDummy(nbBattleDummyCount, test2_devilIds, test2_devilSkills, test2_dvllist, &test2_pdummy);
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
     DDS3_GBWK->maka = 0x15F90;
     DDS3_GBWK->akuma[7].badstatus = 0x800;
@@ -558,9 +558,9 @@ void *TestProcess8(void)
     evtBitOff(0xC12);
     evtBitOn(0xC0F);
     evtBitOn(0xC11);
-    nbSetBattleDummy(D_00551500, D_00526AC0, D_00526AD0, D_00526B48, &D_005269D0);
+    nbSetBattleDummy(nbBattleDummyCount, nbTest8DevilIds, nbTest8DevilSkills, nbTest8PassiveSkills, &nbTest8Dummy);
     ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
-    ai = (u8 *)D_003989E0;
+    ai = (u8 *)datDevilAIDataTable;
     f = 0xC;
     *(s16 *)(ai + 0x3C38) = 0;
     *(s16 *)(ai + 0x3C62) = 0x62;
@@ -587,9 +587,9 @@ void *TestProcess3(void)
     evtBitOff(0xC0D);
     evtBitOff(0xC10);
     evtBitOff(0xC12);
-    nbSetBattleDummy(D_00551500, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
+    nbSetBattleDummy(nbBattleDummyCount, test_devilIds, test_devilSkills, test_pskill, &test_skilllist);
     if (test_phearts > 0) {
-        printf(D_00545B78);
+        printf(nbTestHeartsMessage);
         datAddHearts(test_phearts);
         datEquipHearts(test_phearts);
     } else {
@@ -637,7 +637,7 @@ void TestShutdown(void) {
 void nbExitBattleTest(void)
 {
     nbExit();
-    dds3KillProcessName(D_00545B90, 1);
+    dds3KillProcessName(nbTestProcessName, 1);
 }
 
 void nbInitBattleTest(void)
@@ -653,14 +653,14 @@ void nbInitBattleTest(void)
     work->encountCount = 0;
     work->encountkyori = 0.0f;
     *(s32 *)((u8 *)work + 0x11AB8) |= 0xC;
-    dds3StartProcess(D_00545B90, 0x2B0C, 1, 1, TestProcess1, TestShutdown, NULL);
+    dds3StartProcess(nbTestProcessName, 0x2B0C, 1, 1, TestProcess1, TestShutdown, NULL);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbTest", D_00545B78);
+INCLUDE_RODATA(const s32, "newbattle/nbTest", nbTestHeartsMessage);
 
-INCLUDE_RODATA(const s32, "newbattle/nbTest", D_00545B90);
+INCLUDE_RODATA(const s32, "newbattle/nbTest", nbTestProcessName);
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551500);
+INCLUDE_SDATA(const s32, "newbattle/nbTest", nbBattleDummyCount);
 
 INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551504);
 

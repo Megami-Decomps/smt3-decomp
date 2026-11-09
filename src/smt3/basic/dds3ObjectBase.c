@@ -59,12 +59,12 @@ extern const dds3UnitPartTable_t dds3Model113Parts;
 extern const dds3UnitPartTable_t dds3TiakiBParts;
 extern const dds3UnitPartTable_t dds3MajyoParts;
 extern const dds3UnitPartTable_t dds3HutomimiParts;
-extern char D_0054E9D0[];
-extern char D_0054E9D8[];
-extern char D_0054E9E0[];
-extern char D_0054E9E8[];
-extern char D_0054E9F0[];
-extern char D_0054E9F8[];
+extern char dds3ObjectBaseHijBNodeName[];
+extern char dds3ObjectBaseIsamFNodeName[];
+extern char dds3ObjectBaseAradiaNodeName[];
+extern char dds3ObjectBaseYuukoPNodeName[];
+extern char dds3ObjectBaseChiakiNodeName[];
+extern char dds3ObjectBaseTiakiANodeName[];
 extern mdlObj_t *mdlLoad(s32 aMajor, s32 aMinor);
 extern void mdlGetScale(mdlObj_t *aHandle);
 extern void mdlSetRotate(mdlObj_t *aHandle);
@@ -333,7 +333,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
     majyoParts = dds3MajyoParts;
     hutomimiParts = dds3HutomimiParts;
     nodeName = sdfModelGetNodeName(obj->inner, 0);
-    if (sdfModelGetNodeIndexByName(obj->inner, D_0054E9D0) > 0) {
+    if (sdfModelGetNodeIndexByName(obj->inner, dds3ObjectBaseHijBNodeName) > 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hijBParts.parts[i]);
             if (index > 0) {
@@ -397,7 +397,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
                 control->modelParts[i] = index;
             }
         }
-    } else if (strcmp(nodeName, D_0054E9D8) == 0) {
+    } else if (strcmp(nodeName, dds3ObjectBaseIsamFNodeName) == 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, isamuParts.parts[i]);
             if (index > 0) {
@@ -421,7 +421,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
                 control->modelParts[i] = index;
             }
         }
-    } else if (strcmp(nodeName, D_0054E9E0) == 0) {
+    } else if (strcmp(nodeName, dds3ObjectBaseAradiaNodeName) == 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
             if (index > 0) {
@@ -429,7 +429,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
                 control->modelParts[i] = index;
             }
         }
-    } else if (strcmp(nodeName, D_0054E9E8) == 0) {
+    } else if (strcmp(nodeName, dds3ObjectBaseYuukoPNodeName) == 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
             if (index > 0) {
@@ -445,7 +445,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
                 control->modelParts[i] = index;
             }
         }
-    } else if (strcmp(nodeName, D_0054E9F0) == 0) {
+    } else if (strcmp(nodeName, dds3ObjectBaseChiakiNodeName) == 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
             if (index > 0) {
@@ -453,7 +453,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
                 control->modelParts[i] = index;
             }
         }
-    } else if (strcmp(nodeName, D_0054E9F8) == 0) {
+    } else if (strcmp(nodeName, dds3ObjectBaseTiakiANodeName) == 0) {
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
             if (index > 0) {
@@ -899,17 +899,17 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *pObjectBasic, u32 svs)
     control->svs = svs;
 }
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D0);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseHijBNodeName);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D8);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseIsamFNodeName);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9E0);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseAradiaNodeName);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9E8);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseYuukoPNodeName);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9F0);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseChiakiNodeName);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9F8);
+INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseTiakiANodeName);
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", frMessageCode);
 

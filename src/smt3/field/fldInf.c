@@ -147,7 +147,7 @@ extern doormovetbl_s fldDoorTable[256];
 
 extern s32 gFldWapPanel;
 
-extern u8 D_00303020[];
+extern u8 fldWarpLabel[];
 
 const char *fldInf_FindTypeEveNpc(const char *evename) {
     s32 packOrSetIndex;
@@ -454,21 +454,21 @@ void fldInfToWAP(void) {
 /* The native format slot includes twelve trailing zero bytes. */
 const char fldInfPathFormat[24] = "%sF%03d.INF";
 
-extern u8 D_00302FA0[];
+extern u8 fldDoorWarpLabel[];
 
-extern u8 D_00302FB0[];
+extern u8 fldRunWarpLabel[];
 
-extern u8 D_00302FC0[];
+extern u8 fldAnaWarpLabel[];
 
-extern u8 D_00302FD0[];
+extern u8 fldTobiWarpLabel[];
 
-extern u8 D_00302FF0[];
+extern u8 fldHasigoLabel[];
 
-extern u8 D_00303000[];
+extern u8 fldDexitWarpLabel[];
 
-extern u8 D_00303010[];
+extern u8 fldDinWarpLabel[];
 
-extern u8 D_00303030[];
+extern u8 fldTobiWarpHighLabel[];
 
 u8 *fldFindEventEntry(const char *name) {
     s32 i;
@@ -484,32 +484,32 @@ u8 *fldFindEventEntry(const char *name) {
         case 1:
             if (fldGlobalBase.area < 10) {
                 if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 11) {
-                    return D_00303010;
+                    return fldDinWarpLabel;
                 }
-                return D_00303010;
+                return fldDinWarpLabel;
             }
             if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 10) {
-                return D_00303000;
+                return fldDexitWarpLabel;
             }
-            return D_00302FA0;
+            return fldDoorWarpLabel;
         case 2:
-            return D_00302FB0;
+            return fldRunWarpLabel;
         case 3:
-            return D_00302FC0;
+            return fldAnaWarpLabel;
         case 4:
             if (fldGlobalBase.area >= 40) {
-                return D_00303030;
+                return fldTobiWarpHighLabel;
             }
-            return D_00302FD0;
+            return fldTobiWarpLabel;
         case 5:
-            return D_00302FF0;
+            return fldHasigoLabel;
         case 6:
         case 7:
         case 8:
         case 9:
             break;
         case 10:
-            return D_00303020;
+            return fldWarpLabel;
         }
     }
     return NULL;

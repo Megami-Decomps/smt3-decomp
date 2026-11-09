@@ -309,25 +309,25 @@ extern s32 btl_ai_rot_cnt;
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern char D_005514F0[];
+extern char nbHelpProcessName[];
 
-extern s32 D_00551500;
+extern s32 nbBattleDummyCount;
 
 extern u32 f;
 
 extern s32 test_phearts;
 
-extern char D_005467C0[];
+extern char nbBossModelPathFmt[];
 
-extern char D_00546800[];
+extern char nbBossPackPathFormat[];
 
-extern char D_00546840[];
+extern char nbE908ModelPathFormat[];
 
-extern dds3Basic_t *D_005515B4;
+extern dds3Basic_t *nbE901Basic;
 
 extern void effBTLSkillStart(s32 id, s32 stat);
 
-extern f32 D_005514F8;
+extern f32 nbFormPartyInterval;
 
 extern s32 pack;
 
@@ -343,17 +343,17 @@ extern s32 nbBgmFadeState;
 
 extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
-extern char D_00546820[];
+extern char nbE907EndMessage[];
 
-extern char D_00546880[];
+extern char nbE911EndMsg[];
 
-extern char D_00551560[];
+extern char nbMakaProcessName[];
 
 extern s32 nbBadCurseTimer;
 
 
 
-extern char D_00551160[];
+extern char nbNegoProcessName[];
 
 extern u32 menucur;
 
@@ -363,29 +363,29 @@ extern s32 readbasetime;
 
 extern s32 readtime;
 
-extern char D_00551550[];
+extern char nbEncProcessName[];
 
 extern char D_005467E0[];
 
 extern char D_00546860[];
 
-extern char D_00546898[];
+extern char nbE912EndText[];
 
-extern char D_005468B0[];
+extern char nbE913EndText[];
 
 extern char D_005468C8[];
 
 extern char D_005468D8[];
 
-extern char D_005467F0[];
+extern char nbE906EndMessage[];
 
-extern char D_00546830[];
+extern char nbE908EndMessage[];
 
-extern char D_00546870[];
+extern char nbE910EndMsg[];
 
 extern void *bedbasic;
 
-extern s32 D_005515BC;
+extern s32 nbE901Encno;
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 

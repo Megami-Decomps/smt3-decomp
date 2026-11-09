@@ -56,7 +56,7 @@ extern void *memcpy(void *, const void *, size_t);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-extern char D_00549878[];
+extern char sdfDev9ResidentFailMsg[];
 
 extern u8 sdfDev9LoadFlag;
 
@@ -77,7 +77,7 @@ void sdfDev9LoadModule(void) {
             return;
         }
         if (resident != 0) {
-            printf(D_00549878);
+            printf(sdfDev9ResidentFailMsg);
             return;
         }
         sdfDev9Ready = 1;
@@ -187,5 +187,5 @@ s32 sdf_2BFE08(s32 number) {
     return packedDigits;
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfDev9", D_00549878);
+INCLUDE_RODATA(const s32, "sdf/sdfDev9", sdfDev9ResidentFailMsg);
 

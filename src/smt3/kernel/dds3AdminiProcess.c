@@ -22,14 +22,14 @@ extern s32 fclEncycTail;
 extern s32 fclEncycCount;
 extern s32 fclEncycFree;
 
-extern char D_0052DF78[];  /* "DebugOwner" */
+extern char dds3DebugOwnerProcessName[];  /* "DebugOwner" */
 
-extern char D_0054E8C8[];  /* "Admini" */
-extern char D_0054E8D0[];  /* "[" */
-extern char D_0054E8D8[];  /* "*" */
-extern char D_0054E8E0[];  /* "\n" */
-extern char D_0052DF50[];  /* "%d,0x%02X]" */
-extern char D_0052DF60[];  /* "restore sequence!!\n" */
+extern char dds3AdminiProcessName[];  /* "Admini" */
+extern char dds3AdminiHistoryOpenStr[];  /* "[" */
+extern char dds3AdminiHistoryCursorStr[];  /* "*" */
+extern char dds3AdminiHistoryEndStr[];  /* "\n" */
+extern char dds3AdminiHistoryEntryFmt[];  /* "%d,0x%02X]" */
+extern char dds3AdminiRestoreMsg[];  /* "restore sequence!!\n" */
 
 #include "sdk_libc.h"
 
@@ -55,7 +55,7 @@ s32 fclEncycFreeEntry(const char *name);
 
 dds3AdminiData_t *GetAdminiProcessData(void)
 {
-    return dds3GetProcessData(dds3SearchProcessName(D_0054E8C8));
+    return dds3GetProcessData(dds3SearchProcessName(dds3AdminiProcessName));
 }
 
 u32 dds3_102828(void)
@@ -195,13 +195,13 @@ saddr_t dds3AdminiStartSequence(dds3ProcessID_t *id)
                 startfunc(restored, work->CallData);
             }
             for (i = 0; i < 8; i++) {
-                printf(D_0054E8D0);
+                printf(dds3AdminiHistoryOpenStr);
                 if (work->HistoryPointer == i) {
-                    printf(D_0054E8D8);
+                    printf(dds3AdminiHistoryCursorStr);
                 }
-                printf(D_0052DF50, work->SequenceHistory[i], work->FlagHistory[i]);
+                printf(dds3AdminiHistoryEntryFmt, work->SequenceHistory[i], work->FlagHistory[i]);
             }
-            printf(D_0054E8E0);
+            printf(dds3AdminiHistoryEndStr);
         }
     }
     return EE_ADDR_S(dds3AdminiNeoProcess);
@@ -250,7 +250,7 @@ saddr_t dds3AdminiNeoProcess(dds3ProcessID_t *id)
         if (work->NowSequence >= 0) {
             index = (work->HistoryPointer + 7) & 7;
             if (work->SequenceHistory[index] >= 0 && (work->FlagHistory[index] & 1)) {
-                printf(D_0052DF60);
+                printf(dds3AdminiRestoreMsg);
                 work->Stat |= 0x10001;
                 work->NextSequence = work->SequenceHistory[index];
                 work->CallCount = 2;
@@ -298,7 +298,7 @@ void dds3InitAdmini(void)
     dds3AdminiData_t *work;
     s32 i;
 
-    if (dds3SearchProcessName(D_0054E8C8) == NULL) {
+    if (dds3SearchProcessName(dds3AdminiProcessName) == NULL) {
         work = sdfChipAllocDirect(sizeof(dds3AdminiData_t));
         work->Stat = 0;
         work->RunTimer = 0;
@@ -311,7 +311,7 @@ void dds3InitAdmini(void)
         }
         work->CallData = NULL;
         work->CallDataSize = 0;
-        dds3StartProcess(D_0054E8C8, DDS3_PRIORITY_ADMINI, 0, 1, dds3AdminiNeoProcess,
+        dds3StartProcess(dds3AdminiProcessName, DDS3_PRIORITY_ADMINI, 0, 1, dds3AdminiNeoProcess,
                          (dds3ProcessFunc_t)dds3AdminiNeoShutdown, work);
     }
 }
@@ -324,7 +324,7 @@ s32 fclEncycFindFreeSlot(const char *name)
     s32 i;
     s32 tail;
 
-    if (dds3SearchProcessName(D_0052DF78) == NULL) {
+    if (dds3SearchProcessName(dds3DebugOwnerProcessName) == NULL) {
         return -1;
     }
     if (fclEncycFreeEntry(name) >= 0) {
@@ -401,7 +401,7 @@ s32 fclEncycFreeEntries(const char *name)
     s32 previous;
     s32 next;
 
-    if (dds3SearchProcessName(D_0052DF78) == NULL) {
+    if (dds3SearchProcessName(dds3DebugOwnerProcessName) == NULL) {
         return 0;
     }
     slot = fclEncycFreeEntry(name);
@@ -695,19 +695,19 @@ dds3AdminiList_t dds3AdminiList[43] = {
     { CallTgs, ExitTgs, CheckTgs },
 };
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF50);
+INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryEntryFmt);
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF60);
+INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiRestoreMsg);
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF78);
+INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3DebugOwnerProcessName);
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8C8);
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiProcessName);
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8D0);
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryOpenStr);
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8D8);
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryCursorStr);
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8E0);
+INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryEndStr);
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycHead);
 

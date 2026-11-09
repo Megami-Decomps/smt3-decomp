@@ -68,7 +68,7 @@ extern s32 sceSifLoadModule(const char *path, s32 argSize, const char *args);
 extern s32 sceMcInit(void);
 #include "sdk_libc.h"
 
-extern const char D_0054F600[];
+extern const char pbMCardInitFormat[];
 
 extern pbProcHandle_t *record;
 
@@ -97,7 +97,7 @@ void pbInitMCard(void)
     while (sceSifLoadModule("host0:/usr/local/sce/iop/modules/mcserv.irx", 0, NULL) < 0) {
         printf("Can't load module mcserv\n");
     }
-    printf(D_0054F600, sceMcInit());
+    printf(pbMCardInitFormat, sceMcInit());
 }
 
 s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
@@ -145,17 +145,17 @@ s32 pbMkdirMCard(s32 port, s32 slot, const char *dirName) {
     return result;
 }
 
-extern const char D_0054F608[];
-extern const char D_00536498[];
-extern const char D_005364C0[];
-INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536498);
+extern const char pbMCardNewline[];
+extern const char pbMCardOpenLog[];
+extern const char pbMCardOpenErrLog[];
+INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardOpenLog);
 
-INCLUDE_RODATA(const s32, "pb/pbMCard", D_005364C0);
+INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardOpenErrLog);
 
-const char D_005364E8[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
-const char D_00536510[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
-extern const char D_00536538[];
-extern const char D_00536560[];
+const char pbMCardReadLog[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
+const char pbMCardReadErrLog[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
+extern const char pbMCardCloseLog[];
+extern const char pbMCardCloseErrLog[];
 extern s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flags);
 extern s32 sceMcClose(s32 fd);
 extern s32 sceMcRead(s32 fd, void *buffer, s32 size);
@@ -166,39 +166,39 @@ s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
     s32 readResult;
     s32 commandResult;
 
-    printf(D_0054F608);
+    printf(pbMCardNewline);
     commandResult = sceMcOpen(port, slot, fileName, 3);
-    printf(D_00536498, commandResult);
+    printf(pbMCardOpenLog, commandResult);
     sceMcSync(0, NULL, &fd);
     if (fd < 0) {
-        printf(D_005364C0, fileName, fd);
+        printf(pbMCardOpenErrLog, fileName, fd);
         return fd;
     }
 
     commandResult = sceMcRead(fd, buffer, size);
-    printf(D_005364E8, commandResult);
+    printf(pbMCardReadLog, commandResult);
     sceMcSync(0, NULL, &readResult);
     if (readResult < 0) {
-        printf(D_00536510, fileName, readResult);
+        printf(pbMCardReadErrLog, fileName, readResult);
     }
 
     commandResult = sceMcClose(fd);
-    printf(D_00536538, commandResult);
+    printf(pbMCardCloseLog, commandResult);
     sceMcSync(0, NULL, &commandResult);
     if (commandResult < 0) {
-        printf(D_00536560, fileName, commandResult);
+        printf(pbMCardCloseErrLog, fileName, commandResult);
     }
-    printf(D_0054F608);
+    printf(pbMCardNewline);
     return readResult;
 }
 
 extern s32 sceMcWrite(s32 fd, const void *buffer, s32 size);
-INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536538);
+INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardCloseLog);
 
-INCLUDE_RODATA(const s32, "pb/pbMCard", D_00536560);
+INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardCloseErrLog);
 
-const char D_00536588[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
-const char D_005365B0[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
+const char pbMCardWriteLog[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
+const char pbMCardWriteErrLog[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
 
 s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
                  void *buffer, s32 size)
@@ -207,29 +207,29 @@ s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
     s32 writeSync;
     s32 commandResult;
 
-    printf(D_0054F608);
+    printf(pbMCardNewline);
     commandResult = sceMcOpen(port, slot, fileName, flags);
-    printf(D_00536498, commandResult);
+    printf(pbMCardOpenLog, commandResult);
     sceMcSync(0, NULL, &fd);
     if (fd < 0) {
-        printf(D_005364C0, fileName, fd);
+        printf(pbMCardOpenErrLog, fileName, fd);
         return fd;
     }
 
     commandResult = sceMcWrite(fd, buffer, size);
-    printf(D_00536588, commandResult);
+    printf(pbMCardWriteLog, commandResult);
     sceMcSync(0, NULL, &writeSync);
     if (writeSync < 0) {
-        printf(D_005365B0, fileName, writeSync);
+        printf(pbMCardWriteErrLog, fileName, writeSync);
     }
 
     commandResult = sceMcClose(fd);
-    printf(D_00536538, commandResult);
+    printf(pbMCardCloseLog, commandResult);
     sceMcSync(0, NULL, &commandResult);
     if (commandResult < 0) {
-        printf(D_00536560, fileName, commandResult);
+        printf(pbMCardCloseErrLog, fileName, commandResult);
     }
-    printf(D_0054F608);
+    printf(pbMCardNewline);
     return writeSync;
 }
 
@@ -252,7 +252,7 @@ typedef struct
     sdfTexHandle_t *tex344;
 } pbMapWork_t;
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -298,7 +298,7 @@ s32 pb_draw_error_Process(dds3ProcessID_t *id)
             rsetAlpha(0);
             rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
             DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
-                        D_0054F5C4->tex344);
+                        pbMapWork->tex344);
         } else {
             len = (s32)strlen(pbErrorTable[error->code].text);
             pixelCenter = (0x200 - len * 12) >> 1;

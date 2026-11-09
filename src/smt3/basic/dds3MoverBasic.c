@@ -32,7 +32,7 @@ typedef struct dds3MoverBasicWorkData_t
 } dds3MoverBasicWorkData_t;
 
 extern s32 dds3MoverCount;
-extern char D_002FA670[10][16]; /* "MOVER00".."MOVER09" */
+extern char dds3MoverNameTable[10][16]; /* "MOVER00".."MOVER09" */
 
 extern void *memset(void *a, s32 b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
@@ -132,7 +132,7 @@ dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *pObjectBasic)
     work = basic->workdata;
     basic->serialID = dds3AllocObjectId();
     work->pObjectBasic = pObjectBasic;
-    basic->name = D_002FA670[dds3MoverCount];
+    basic->name = dds3MoverNameTable[dds3MoverCount];
     dds3MoverCount++;
     dds3MoverCount %= 10;
     return basic;

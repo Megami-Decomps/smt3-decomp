@@ -63,7 +63,7 @@ void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
 
 saddr_t slHeadLoadProc_openFile(void);
 
-extern s32 D_00551D50;
+extern s32 slMcFd;
 
 slMcResult_t sdfMcFuncOpen1(s32 *resultOut);
 
@@ -137,7 +137,7 @@ extern char slIconPath[];
 
 fileRequest_t *fileLoad(const char *filename);
 
-extern sdfMemHandle_t *D_00551D44;
+extern sdfMemHandle_t *slBaseIconMemHandle;
 
 extern addr_t baseIconFileHandle;
 
@@ -175,7 +175,7 @@ void sdfMcSetSlotFlags(s32 request, s32 slot, s32 mask);
 
 extern char slIconSysName[];
 
-extern u8 D_005696C0[];
+extern u8 slDirEntries[];
 
 void sdfMcFuncGetDir(u32 context, const char *path, void *directoryEntries, s32 entryLimit);
 
@@ -215,9 +215,9 @@ extern char slBaseIconName[];
 
 extern s32 slSaveWriteEnd_baseIcon(void);
 
-extern addr_t D_00551D48;
+extern addr_t slBaseIconBuff;
 
-extern u32 D_00551D4C;
+extern u32 slBaseIconBuffSize;
 
 saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr);
 
@@ -267,7 +267,7 @@ saddr_t slLoadProc_closeFile(void);
 
 void slVersionConvert_Step3(void);
 
-extern s8 D_005516C1;
+extern s8 slLoadDoneFlag;
 
 extern s32 dds3ConfigChanged(void);
 
@@ -329,11 +329,11 @@ extern s8 D_00569743[];
 
 extern s32 version_convert_ver;
 
-extern u8 D_00316B00[];
+extern u8 slIconSysBuf[];
 
-extern u32 D_0054F06C;
+extern u32 slIconSysSaveBuff;
 
-extern u32 D_0054F070;
+extern u32 slIconSysSaveSize;
 
 extern void dds3AdminiCallSequence(s32 sequence, s32 *data, s32 datasize, s32 restore);
 
@@ -416,10 +416,10 @@ typedef struct slFileRec_t {
 
 
 
-#define SL_REC ((u8 (*)[52])D_00569740)
+#define SL_REC ((u8 (*)[52])slFileRecs)
 #define SL_FILE_HEAD ((GameFileInfo_t *)DDS3_GBWK)
 
-extern slFileRec_t D_00569740[];
+extern slFileRec_t slFileRecs[];
 
 
 extern sdfTexHandle_t *_saveUI;
@@ -447,9 +447,9 @@ extern s32 evtBitCheck(s32 no);
 
 extern s32 gSlSaveMode;
 
-extern addr_t D_00551D30;
+extern addr_t slSaveDataBuff;
 
-extern u32 D_00551D34;
+extern u32 slSaveDataSize;
 
 
 extern char slCheckingMsg0[];
@@ -1080,7 +1080,7 @@ saddr_t slHeadLoad(void) {
 }
 
 saddr_t slHeadLoadProc_openFile(void) {
-    slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
+    slMcResult_t status = sdfMcFuncOpen1(&slMcFd);
 
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -1088,7 +1088,7 @@ saddr_t slHeadLoadProc_openFile(void) {
     if (status == SL_MC_RESULT_SUCCESS) {
         slLoadFileFd = sdfMemAllocDirect(0x34);
         slLoadFileHandle = sdfMemLock(slLoadFileFd);
-        sdfMcFuncRead(D_00551D50, EE_ADDR(slLoadFileHandle), 0x34);
+        sdfMcFuncRead(slMcFd, EE_ADDR(slLoadFileHandle), 0x34);
         return EE_ADDR_S(slHeadLoadProc_readFile);
     }
     return slNoCard();
@@ -1100,7 +1100,7 @@ saddr_t slHeadLoadProc_readFile(void) {
         return 0;
     }
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcFuncClose(D_00551D50);
+        sdfMcFuncClose(slMcFd);
         return EE_ADDR_S(slHeadLoadProc_closeFile);
     }
     sdfMemFreeDirect(slLoadFileFd);
@@ -1117,11 +1117,11 @@ s32 slHeadLoadProc_closeFile(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         index = slChooseSaveIndex;
-        head = &D_00569740[index];
+        head = &slFileRecs[index];
         *head = *(slFileRec_t *)slLoadFileHandle;
         if (head->ver == 1) {
-            memset(&D_00569740[index].name, 0, 0x14);
-            D_00569740[index].mapOpen = 0;
+            memset(&slFileRecs[index].name, 0, 0x14);
+            slFileRecs[index].mapOpen = 0;
         }
         sdfMemFreeDirect(slLoadFileFd);
         return slChooseData_getCardInfoNext();
@@ -1317,7 +1317,7 @@ s32 slCancel(void) {
 }
 
 s32 slSaveProc1st(void) {
-    D_00551D44 = 0;
+    slBaseIconMemHandle = 0;
     baseIconFileHandle = EE_ADDR(fileLoad(slIconPath));
     return slTop();
 }
@@ -1327,7 +1327,7 @@ s32 slLoadProc1st(void) {
 }
 
 s32 slEndingProc1st(void) {
-    D_00551D44 = 0;
+    slBaseIconMemHandle = 0;
     baseIconFileHandle = EE_ADDR(fileLoad(slIconPath));
     return slEndingTop();
 }
@@ -1734,7 +1734,7 @@ saddr_t slChooseData_getCardInfo2(void) {
     }
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(mccb, slIconSysName, D_005696C0, 1);
+        sdfMcFuncGetDir(mccb, slIconSysName, slDirEntries, 1);
         return EE_ADDR_S(slChooseData_getCardInfo3);
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1828,7 +1828,7 @@ saddr_t slChooseData_getCardInfo2_B(void) {
     }
     if (t == SL_MC_RESULT_SUCCESS) {
         sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(mccb, slIconSysName, D_005696C0, 1);
+        sdfMcFuncGetDir(mccb, slIconSysName, slDirEntries, 1);
         return EE_ADDR_S(slChooseData_getCardInfo3_B);
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1993,15 +1993,15 @@ saddr_t slSaveWriteEnd_iconSys(void) {
 }
 
 s32 slSaveWriteEnd_baseIcon(void) {
-    D_00316B00[0xE2] = -0x7E;
-    D_00316B00[0xE3] = slFileSelError + 0x50;
-    D_00316B00[0xE4] = 0;
-    D_00316B00[0xE5] = 0;
-    return slSaveWriteFile(slIconSysName, &D_0054F06C, &D_0054F070, slSaveWriteEnd_iconSys, 0);
+    slIconSysBuf[0xE2] = -0x7E;
+    slIconSysBuf[0xE3] = slFileSelError + 0x50;
+    slIconSysBuf[0xE4] = 0;
+    slIconSysBuf[0xE5] = 0;
+    return slSaveWriteFile(slIconSysName, &slIconSysSaveBuff, &slIconSysSaveSize, slSaveWriteEnd_iconSys, 0);
 }
 
 s32 slSaveWriteEnd_saveData(void) {
-    return slSaveWriteFile(slBaseIconName, &D_00551D48, &D_00551D4C,
+    return slSaveWriteFile(slBaseIconName, &slBaseIconBuff, &slBaseIconBuffSize,
                           slSaveWriteEnd_baseIcon, &baseIconFileHandle);
 }
 
@@ -2044,12 +2044,12 @@ s32 slSaveData_writeFile(void) {
     rec[7] = hdr->mode;
     *(slFileName_t *)&SL_REC[slot][0x10] = *(slFileName_t *)&hdr->work;
     SL_REC[slot][0x24] = hdr->autoMapOpen;
-    D_00551D30 = EE_ADDR(DDS3_GBWK);
-    D_00551D34 = 0x1A510;
+    slSaveDataBuff = EE_ADDR(DDS3_GBWK);
+    slSaveDataSize = 0x1A510;
     if (gSlSaveMode == 0 || gSlSaveMode == 2) {
-        return slSaveWriteFile(path, &D_00551D30, &D_00551D34, slSaveWriteEnd_saveData, 0);
+        return slSaveWriteFile(path, &slSaveDataBuff, &slSaveDataSize, slSaveWriteEnd_saveData, 0);
     }
-    return slSaveWriteFile(path, &D_00551D30, &D_00551D34, slSaveWriteEnd_baseIcon, 0);
+    return slSaveWriteFile(path, &slSaveDataBuff, &slSaveDataSize, slSaveWriteEnd_baseIcon, 0);
 }
 #else
 INCLUDE_ASM(const s32, "mc/slMain", slSaveData_writeFile);
@@ -2076,7 +2076,7 @@ saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFun
 }
 
 saddr_t slSaveProc_openFile(void) {
-    slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
+    slMcResult_t status = sdfMcFuncOpen1(&slMcFd);
 
     if (status == SL_MC_RESULT_PENDING) {
         return 0;
@@ -2085,7 +2085,7 @@ saddr_t slSaveProc_openFile(void) {
         if (slSaveWriteFile_dataWaitPtr != NULL && *slSaveWriteFile_dataWaitPtr != 0) {
             return EE_ADDR_S(slSaveProc_waitDataReady);
         }
-        sdfMcFuncWrite(D_00551D50, *slSaveWriteFile_buff, *slSaveWriteFile_size);
+        sdfMcFuncWrite(slMcFd, *slSaveWriteFile_buff, *slSaveWriteFile_size);
         return EE_ADDR_S(slSaveProc_writeFile);
     }
     if (status == SL_MC_RESULT_ERROR) {
@@ -2102,7 +2102,7 @@ saddr_t slSaveProc_writeFile(void) {
         return 0;
     }
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcFuncClose(D_00551D50);
+        sdfMcFuncClose(slMcFd);
         return EE_ADDR_S(slSaveProc_closeFile);
     }
     if (status == SL_MC_RESULT_ERROR) {
@@ -2133,7 +2133,7 @@ saddr_t slSaveProc_waitDataReady(void) {
     if (baseIconFileHandle != 0) {
         return 0;
     }
-    sdfMcFuncWrite(D_00551D50, *slSaveWriteFile_buff, *slSaveWriteFile_size);
+    sdfMcFuncWrite(slMcFd, *slSaveWriteFile_buff, *slSaveWriteFile_size);
     return EE_ADDR_S(slSaveProc_writeFile);
 }
 
@@ -2191,7 +2191,7 @@ saddr_t slLoadData(void) {
 }
 
 saddr_t slLoadProc_openFile(void) {
-    slMcResult_t status = sdfMcFuncOpen1(&D_00551D50);
+    slMcResult_t status = sdfMcFuncOpen1(&slMcFd);
     u32 size;
 
     if (status == SL_MC_RESULT_PENDING) {
@@ -2201,7 +2201,7 @@ saddr_t slLoadProc_openFile(void) {
     slLoadFileFd = sdfMemAllocDirect(size);
     slLoadFileHandle = sdfMemLock(slLoadFileFd);
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcFuncRead(D_00551D50, EE_ADDR(slLoadFileHandle), size);
+        sdfMcFuncRead(slMcFd, EE_ADDR(slLoadFileHandle), size);
         return EE_ADDR_S(slLoadProc_readFile);
     }
     slSetInfo(0);
@@ -2215,7 +2215,7 @@ saddr_t slLoadProc_readFile(void) {
         return 0;
     }
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcFuncClose(D_00551D50);
+        sdfMcFuncClose(slMcFd);
         return EE_ADDR_S(slLoadProc_closeFile);
     }
     sdfMemFreeDirect(slLoadFileFd);
@@ -2232,7 +2232,7 @@ saddr_t slLoadProc_closeFile(void) {
     if (status == SL_MC_RESULT_SUCCESS) {
         slVersionConvert_Step3();
         sdfMemFreeDirect(slLoadFileFd);
-        D_005516C1 = 1;
+        slLoadDoneFlag = 1;
         slKillLoadProcess();
         if (dds3ConfigChanged() == 0) {
             dds3ConfigSaveBackup();
@@ -2358,9 +2358,9 @@ no_action:
     return 0;
 }
 
-extern f32 D_0054F074, D_0054C58C, slFileSelWork;
+extern f32 slFileSelPulsePhase, slFileSelPulseStep, slFileSelWork;
 extern char slNewFileLabel[], slCorruptedFileLabel[], slNewCycleLabel[];
-extern char slNoFileLabel[], D_005516E8[];
+extern char slNoFileLabel[], slCycleLabel[];
 extern char slNum2dFmt[], D_0054F088[], D_0054F090[], D_0054F098[], D_0054F0A0[];
 extern char D_00311450[][0x20], D_00311850[][0x20];
 extern void cmpSetSkillListRows(s32 rows);
@@ -2378,8 +2378,8 @@ s32 slFileSelDraw(s32 id)
         return 0;
     }
     gSlSelCnt = gSlSelCnt < SDF_FRAMES(30) ? gSlSelCnt + 1 : SDF_FRAMES(30);
-    D_0054F074 += SDF_FRAME_STEP(D_0054C58C);
-    pulse = sdfSin(D_0054F074) * 0.5f + 0.5f;
+    slFileSelPulsePhase += SDF_FRAME_STEP(slFileSelPulseStep);
+    pulse = sdfSin(slFileSelPulsePhase) * 0.5f + 0.5f;
     slFileSelWork = pulse < 0.0f ? 0.0f : pulse;
     if (slFileSelWork > 1.0f) {
         slFileSelWork = 1.0f;
@@ -2427,7 +2427,7 @@ s32 slFileSelDraw(s32 id)
             s32 selected;
             s32 spriteV;
             u32 color = 0xA09DC380;
-            slFileRec_t *record = &D_00569740[row];
+            slFileRec_t *record = &slFileRecs[row];
             GameFileInfo_t *info = (GameFileInfo_t *)(void *)record;
             char number[16];
             u8 name[18];
@@ -2540,7 +2540,7 @@ s32 slFileSelDraw(s32 id)
                     sprintf(number, slNum2dFmt, cycle);
                     slKanjiDrawN(0x1D9, (y + 0x21) / 2, color, number);
                     slKanjiDraw(0x1AE, (y + 0x1E) / 2,
-                                slFileSelError == row ? color : 0x50505080, D_005516E8);
+                                slFileSelError == row ? color : 0x50505080, slCycleLabel);
                 }
             }
             {
@@ -2607,9 +2607,9 @@ s32 slCalc(dds3ProcessID_t *id) {
     proc_func_ans = cur;
     if (job != 0 && pacFileCheckEnd(EE_ADDR_AS(fileRequest_t *, job)) != 0) {
         baseIconFileHandle = 0;
-        D_00551D44 = fileGetMemHandle((fileRequest_t *)EE_ADDR_PTR(job));
-        D_00551D48 = EE_ADDR(fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job)));
-        D_00551D4C = fileGetLoadSize((fileRequest_t *)EE_ADDR_PTR(job));
+        slBaseIconMemHandle = fileGetMemHandle((fileRequest_t *)EE_ADDR_PTR(job));
+        slBaseIconBuff = EE_ADDR(fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job)));
+        slBaseIconBuffSize = fileGetLoadSize((fileRequest_t *)EE_ADDR_PTR(job));
         fileHandleFree((fileRequest_t *)EE_ADDR_PTR(job));
     }
     return 0;
@@ -2759,11 +2759,11 @@ void func_00157058(void) {
     }
     if (baseIconFileHandle != 0) {
         fileSync(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
-        D_00551D44 = fileGetMemHandle(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
+        slBaseIconMemHandle = fileGetMemHandle(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
         fileHandleFree(EE_ADDR_AS(fileRequest_t *, baseIconFileHandle));
         baseIconFileHandle = 0;
     }
-    sdfMemFreeHandleDirect(&D_00551D44);
+    sdfMemFreeHandleDirect(&slBaseIconMemHandle);
     dds3KillProcessName(slCalcName, 1);
     dds3SoftResetOn();
 }
@@ -2960,7 +2960,7 @@ extern char slNoSpaceStartMsg5[];
 extern char slNoSpaceStartMsg6[];
 extern char slYesLabel[];
 extern char slNoLabel[];
-extern char D_005516E0[];
+extern char slNewCycleMsg3[];
 
 INCLUDE_RODATA(const s32, "mc/slMain", slCalcName);
 
@@ -3017,7 +3017,7 @@ void slQueryYesNoDraw(void)
                 slKanjiDrawH(0x28, 0x4C, 0x64618780, slNewCycleMsg0);
                 slKanjiDrawH(0x28, 0x58, 0x64618780, slNewCycleMsg1);
                 slKanjiDrawH(0x28, 0x64, 0x64618780, slNewCycleMsg2);
-                slKanjiDrawH(0x28, 0x70, 0x64618780, D_005516E0);
+                slKanjiDrawH(0x28, 0x70, 0x64618780, slNewCycleMsg3);
             }
         }
         if (slQueryYesNoMsg == 5) {

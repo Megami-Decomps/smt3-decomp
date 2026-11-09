@@ -19,7 +19,7 @@ extern sdfDelayedResrcCB_t sdfMatDelayedResrcCB2;
 extern s32 sdfMatAllocCount;
 
 /* The GS ALPHA_2 value per multi-texture method, indexed by sdfMat_t.multiTexMethod. */
-extern u16 D_00529438[];
+extern u16 sdfMatMultiTexAlphaTable[];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *aHandle);
@@ -529,7 +529,7 @@ void sdfMatUpdatePacketMultiTex(sdfMat_t *aMat, sdfMatPacket_t *aPacket)
     aPacket->mtexDiffuse = aMat->multiTexDiffuse;
     method = aMat->multiTexMethod;
     aPacket->mtexAlgo = method;
-    aPacket->mtexAlpha = D_00529438[method];
+    aPacket->mtexAlpha = sdfMatMultiTexAlphaTable[method];
     if (handle != NULL) {
         aPacket->mtexTex1Data = sdfTexGetTex1Reg(handle);
         aPacket->mtexTex0Data = sdfTexGetTex0Reg(handle);

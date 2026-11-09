@@ -88,7 +88,7 @@ extern void FromEuler(f32 x, f32 y, f32 z);
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbProcHandle_t *record;
 
@@ -102,11 +102,11 @@ extern void pbBuildMapBaseVerts(pbProcHandle_t *panel);
 
 extern pbProcHandle_t *blockDB;
 
-extern sdfVector4_t D_0056CB30[], D_0056C8F0[], D_00326C70[];
+extern sdfVector4_t pbMapBaseNormals[], pbMapBaseVerts[], pbMapSideNormals[];
 typedef struct QWORD_ALIGNED { f32 component[4]; } pbMapVertex_t;
-extern pbMapVertex_t D_00326CD0[];
+extern pbMapVertex_t pbMapCubeVerts[];
 
-extern u8 D_00326D50[];
+extern u8 pbMapCubeIndex[];
 
 extern s32 pb_draw_mapbase_Process(dds3ProcessID_t *id);
 
@@ -130,11 +130,11 @@ extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 
 extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
 
-extern f32 D_00326C60[];
+extern f32 pbPanelAngleTable[];
 
 extern u32 pbMyCharacterDispStat(pbProcHandle_t *p);
 
-extern s32 (*D_0054F5B0[])(s16 x, s16 y, s32 mode);
+extern s32 (*pbMapCallbacks[])(s16 x, s16 y, s32 mode);
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 
@@ -184,19 +184,19 @@ extern void pb_draw_mycharacter_Shutdown(dds3ProcessID_t *id);
 extern mdlObj_t *mdlLoad(u32 major, u32 minor);
 extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 number);
 extern void mdlSetScale(mdlObj_t *model);
-extern const sdfVector4Unaligned_t D_00535C58;
-extern char D_00535C68[];
+extern const sdfVector4Unaligned_t pbMyCharScale;
+extern char pbDrawMyCharacterProcName[];
 
 /* The USA constructor ignores the color and motion arguments supplied by its caller. */
 pbProcHandle_t *pbInitMyCharacterDraw(pbProcHandle_t *parent, u32 color, u32 motion)
 {
     /* Only the bare-address VU0 load observes this scale vector. */
-    volatile sdfVector4_t scale __attribute__((aligned(16))) = D_00535C58;
+    volatile sdfVector4_t scale __attribute__((aligned(16))) = pbMyCharScale;
     pbProcHandle_t *panel;
     pbMyChar_t *chara;
 
     panel = sdfChipAllocDirect(sizeof(*panel));
-    panel->id = dds3StartProcess(D_00535C68, 0x2AFD, 1, 1,
+    panel->id = dds3StartProcess(pbDrawMyCharacterProcName, 0x2AFD, 1, 1,
         pb_draw_mycharacter_Process, (dds3ProcessFunc_t)pb_draw_mycharacter_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -309,13 +309,13 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
 void pbSetPanelModel(pbProcHandle_t *panel, s32 index) {
     pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        pbSetModelRotate(EE_ADDR_AS(mdlObj_t *, pbGetPanelField(panel)), 0.0f, D_00326C60[index], 0.0f);
+        pbSetModelRotate(EE_ADDR_AS(mdlObj_t *, pbGetPanelField(panel)), 0.0f, pbPanelAngleTable[index], 0.0f);
         chara->dir = index;
     }
 }
 
 
-extern sdfVector4Unaligned_t D_00327248;
+extern sdfVector4Unaligned_t pbExitRotation;
 extern const f64 D_00535C80[];
 extern f32 D_0054E2AC, D_0054E2B0, D_0054E2B4, D_0054E2B8;
 extern void pbSetPrimMatrix(sdfVector4_t *rotation, f32 *position, void *packet);
@@ -347,17 +347,17 @@ s32 pb_draw_exit_Process(dds3ProcessID_t *id)
         tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(tag);
         sdf3DPrimLinkMat(tag, work->mat, NULL);
-        angle = (f64)D_00327248.y + 0.02;
-        D_00327248.y = angle;
+        angle = (f64)pbExitRotation.y + 0.02;
+        pbExitRotation.y = angle;
         if (3.141592503f < angle) {
-            D_00327248.y = angle - 6.28318500518798828125f;
+            pbExitRotation.y = angle - 6.28318500518798828125f;
         } else if (angle < -3.141592503f) {
-            D_00327248.y = angle + 6.28318500518798828125f;
+            pbExitRotation.y = angle + 6.28318500518798828125f;
         }
         position.x = panel->x * 40 - 380;
         position.y = -20.0f;
         position.z = panel->y * 40 - 380;
-        pbSetPrimMatrix(&D_00327248, &position.x, tag);
+        pbSetPrimMatrix(&pbExitRotation, &position.x, tag);
         pbDrawMapPolyTransformed(&vertices, 0x1F, 6, tag);
         ot = &sdfGrOtTable[40];
         ot->regFunc(ot, tag);
@@ -387,7 +387,7 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
     s32 row;
     u16 state;
 
-    __builtin_memcpy(callbacks, D_0054F5B0, sizeof(callbacks));
+    __builtin_memcpy(callbacks, pbMapCallbacks, sizeof(callbacks));
     panel = id->workdata;
     state = panel->state;
     work = panel->data.mat;
@@ -409,7 +409,7 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
     for (row = 0; row < 20; row++) {
         s32 col;
         for (col = 0; col < 20; col++) {
-            u16 tile = D_0054F5C4->map[row][col];
+            u16 tile = pbMapWork->map[row][col];
 
             if ((tile & 0x800) == 0) {
                 if (work->flg == 0) {
@@ -418,19 +418,19 @@ s32 pb_draw_mapbase_Process(dds3ProcessID_t *id)
                 {
                     s32 drawCount = pbDrawMapBlock(col, row,
                                                    callbackResult, 0, tag);
-                    pbMapWork_t *mapWork = D_0054F5C4;
+                    pbMapWork_t *mapWork = pbMapWork;
                     mapWork->drawCount = mapWork->drawCount + drawCount;
                 }
             }
 
-            if ((D_0054F5C4->map[row][col] >> 13) == 1) {
+            if ((pbMapWork->map[row][col] >> 13) == 1) {
                 if (work->flg == 0) {
                     callbackResult = callbacks[work->value]((s16)col, (s16)row, 2);
                 }
                 {
                     s32 drawCount = pbDrawMapBlock(col, row,
                                                    callbackResult, 1, tag);
-                    pbMapWork_t *mapWork = D_0054F5C4;
+                    pbMapWork_t *mapWork = pbMapWork;
                     mapWork->drawCount = mapWork->drawCount + drawCount;
                 }
             }
@@ -455,7 +455,7 @@ void pbInitMapBaseMat(pbProcHandle_t *panel) {
     pbExit_t *work = panel->data.mat;
     pbBuildMapBaseVerts(panel);
     work->mat = sdfMatNew();
-    sdfMatSetTex(work->mat, D_0054F5C4->baseTex);
+    sdfMatSetTex(work->mat, pbMapWork->baseTex);
 }
 
 void pbBuildMapBaseVerts(pbProcHandle_t *panel) {
@@ -463,8 +463,8 @@ void pbBuildMapBaseVerts(pbProcHandle_t *panel) {
     for (row = 0; row < 6; row++) {
         for (col = 0; col < 6; col++) {
             u32 i = col + row * 6;
-            SDF_VU0_COPYVECTOR(&D_0056CB30[i], &D_00326C70[row]);
-            SDF_VU0_COPYVECTOR(&D_0056C8F0[i], &D_00326CD0[D_00326D50[i]]);
+            SDF_VU0_COPYVECTOR(&pbMapBaseNormals[i], &pbMapSideNormals[row]);
+            SDF_VU0_COPYVECTOR(&pbMapBaseVerts[i], &pbMapCubeVerts[pbMapCubeIndex[i]]);
         }
     }
 }
@@ -484,23 +484,23 @@ void pbSetPrimMatrix(sdfVector4_t *rot, f32 *pos, void *prim) {
  * seq38, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-extern s8 D_0054F5B8[4][2];
-extern s32 D_00535C88[];
+extern s8 pbNeighborOffsets[4][2];
+extern s32 pbNeighborBitIndex[];
 
 u8 pbFindBlockSlot(s16 x, s16 y, s32 mode)
 {
     s8 offsets[4][2];
     s32 bits[4];
-    pbMapWork_t *map = D_0054F5C4;
+    pbMapWork_t *map = pbMapWork;
     u16 cell;
     u32 kind, neighborKind, i;
     s32 nx, ny, outside;
     s16 result = 0;
     u16 neighbor, blocked;
 
-    __builtin_memcpy(offsets, D_0054F5B8, sizeof(offsets));
+    __builtin_memcpy(offsets, pbNeighborOffsets, sizeof(offsets));
     cell = map->map[y][x];
-    __builtin_memcpy(bits, D_00535C88, sizeof(bits));
+    __builtin_memcpy(bits, pbNeighborBitIndex, sizeof(bits));
     kind = cell >> 13;
     if (mode == 0) {
         if (cell & 0x800) {
@@ -549,7 +549,7 @@ INCLUDE_ASM(const s32, "pb/pbModel", pbFindBlockSlot);
 #ifdef NON_MATCHING
 s32 func_001D35F0(s16 x, s16 y, s32 mode)
 {
-    pbMapWork_t *map = D_0054F5C4;
+    pbMapWork_t *map = pbMapWork;
     u16 cell = map->map[y][x];
     u32 kind;
     s32 result;
@@ -640,7 +640,7 @@ s32 func_001D35F0(s16 x, s16 y, s32 mode)
 INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 #endif
 
-extern sdfVector2_t D_00326D78[];
+extern sdfVector2_t pbMapUvSpecial0[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 
@@ -656,18 +656,18 @@ void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag)
     u32 i;
 
     for (i = 0, out = vertices; i < 6; i++) {
-        out->x = D_00326CD0[D_00326D50[i]].component[0] + x;
-        out->y = D_00326CD0[D_00326D50[i]].component[1] + y;
-        out->z = D_00326CD0[D_00326D50[i]].component[2] + z;
-        out->w = D_00326CD0[D_00326D50[i]].component[3] + w;
+        out->x = pbMapCubeVerts[pbMapCubeIndex[i]].component[0] + x;
+        out->y = pbMapCubeVerts[pbMapCubeIndex[i]].component[1] + y;
+        out->z = pbMapCubeVerts[pbMapCubeIndex[i]].component[2] + z;
+        out->w = pbMapCubeVerts[pbMapCubeIndex[i]].component[3] + w;
         out++;
     }
     memset(&request, 0, sizeof(request));
     request.color = 0x80808080;
     request.faceCount = 2;
     request.pointCount = 6;
-    request.normal = D_0056CB30;
-    request.uv = D_00326D78;
+    request.normal = pbMapBaseNormals;
+    request.uv = pbMapUvSpecial0;
     request.vertex = vertices;
     sdfDrawTagLink(tag, EE_ADDR(sdf3DPrimMakePoly(&request)));
 }
@@ -695,9 +695,9 @@ void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
  * seq38, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-extern sdfVector2_t D_00326E68[], D_00326F58[], D_00327048[], D_00327138[];
-extern u32 D_00327228[];
-extern const f64 D_00535CB8, D_00535CC0, D_00535CC8, D_00535CD0;
+extern sdfVector2_t pbMapUvSpecial23[], pbMapUvSpecial5[], pbMapUvSpecial4[], pbMapUvSpecial1[];
+extern u32 pbMapSpecialColorTable[];
+extern const f64 pbMapOffsetXNeg, pbMapOffsetXPos, pbMapOffsetZNeg, pbMapOffsetZPos;
 
 s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfDrawTag_t *tag)
 {
@@ -713,27 +713,27 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
         return 0;
     }
     memset(&request, 0, sizeof(request));
-    color = D_00327228[special];
+    color = pbMapSpecialColorTable[special];
     request.attr = 0x4000;
     request.color = color;
     request.vertex = vertices;
     request.normal = normals;
     switch (special) {
     case 0:
-        request.uv = D_00326D78;
+        request.uv = pbMapUvSpecial0;
         break;
     case 1:
-        request.uv = D_00327138;
+        request.uv = pbMapUvSpecial1;
         break;
     case 2:
     case 3:
-        request.uv = D_00326E68;
+        request.uv = pbMapUvSpecial23;
         break;
     case 4:
-        request.uv = D_00327048;
+        request.uv = pbMapUvSpecial4;
         break;
     case 5:
-        request.uv = D_00326F58;
+        request.uv = pbMapUvSpecial5;
         break;
     }
     for (side = 0; side < 5; side++) {
@@ -743,8 +743,8 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
             z = base->z;
             w = base->w;
             for (corner = 0; corner < 6; corner++) {
-                index = D_00326D50[side * 6 + corner];
-                source = &D_00326CD0[index];
+                index = pbMapCubeIndex[side * 6 + corner];
+                source = &pbMapCubeVerts[index];
                 vertex = &vertices[count + corner];
                 sourceW = source->component[3];
                 sourceX = source->component[0];
@@ -763,19 +763,19 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
                         vertex->y = vertex->y - 20.0f;
                     }
                     if (drawFlags & 8) {
-                        vertex->x = (f32)((f64)vertex->x - D_00535CB8);
+                        vertex->x = (f32)((f64)vertex->x - pbMapOffsetXNeg);
                     }
                     if (drawFlags & 0x10) {
-                        vertex->x = (f32)((f64)vertex->x + D_00535CC0);
+                        vertex->x = (f32)((f64)vertex->x + pbMapOffsetXPos);
                     }
                     if (drawFlags & 2) {
-                        vertex->z = (f32)((f64)vertex->z - D_00535CC8);
+                        vertex->z = (f32)((f64)vertex->z - pbMapOffsetZNeg);
                     }
                     if (drawFlags & 4) {
-                        vertex->z = (f32)((f64)vertex->z + D_00535CD0);
+                        vertex->z = (f32)((f64)vertex->z + pbMapOffsetZPos);
                     }
                 }
-                SDF_VU0_COPYVECTOR(&normals[count + corner], &D_00326C70[side]);
+                SDF_VU0_COPYVECTOR(&normals[count + corner], &pbMapSideNormals[side]);
             }
             request.faceCount += 2;
             count += 6;
@@ -786,7 +786,7 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
     return request.pointCount;
 }
 #else
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C88);
+INCLUDE_RODATA(const s32, "pb/pbModel", pbNeighborBitIndex);
 
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
 #endif
@@ -826,11 +826,11 @@ s32 pbDrawMapBlock(s32 x, s32 y, s32 flags, s32 special,
     return result;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CB8);
+INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetXNeg);
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC0);
+INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetXPos);
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CC8);
+INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetZNeg);
 
-INCLUDE_RODATA(const s32, "pb/pbModel", D_00535CD0);
+INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetZPos);
 

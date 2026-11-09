@@ -206,7 +206,7 @@ typedef struct nbNegoProcessData_t
 
 #include "sdk_libc.h"
 
-extern char D_00546880[];
+extern char nbE911EndMsg[];
 
 
 
@@ -284,7 +284,7 @@ typedef struct
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern s32 (*D_00527520[])(nbEventProcessData_t *e);
+extern s32 (*nbE911Table[])(nbEventProcessData_t *e);
 
 extern void dds3DeleteSceneBasicData(void *basic);
 
@@ -316,13 +316,13 @@ extern void effPadVibeFadeOUT(s32 mode, s32 power, s32 frame);
 
 extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-extern dds3Basic_t *D_00551620;
+extern dds3Basic_t *nbE911UnitCur;
 
-extern dds3Basic_t *D_00551624;
+extern dds3Basic_t *nbE911Unit0;
 
-extern dds3Basic_t *D_00551628;
+extern dds3Basic_t *nbE911Unit1;
 
-extern dds3Basic_t *D_0055162C;
+extern dds3Basic_t *nbE911Unit2;
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -330,9 +330,9 @@ extern void nbPanelAllHide(void);
 
 extern char *text1[];
 
-extern s8 D_00527530[];
+extern s8 nbE911FormIndex[];
 
-extern sdfVector4_t D_00527640;
+extern sdfVector4_t nbE911FormPos;
 
 extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
@@ -357,8 +357,8 @@ typedef struct { u8 unk_00[0x2C]; u32 color; } nbE911Prim_t;
 typedef struct { u8 unk_00[0x28]; nbE911Prim_t *prim; } nbE911Work_t;
 typedef struct { u8 unk_00[0x18]; nbE911Work_t *work; } nbE911Light_t;
 
-extern nbE911Light_t *D_00551618;
-extern nbE911Light_t *D_0055161C;
+extern nbE911Light_t *nbE911Light0;
+extern nbE911Light_t *nbE911Light1;
 
 extern s32 nbCheckLoad(nbFormation_t *form);
 extern void nbFormDispOn(s32 formindex);
@@ -411,8 +411,8 @@ s32 Effect2(nbEventProcessData_t *e)
         s32 div = 12;
         s32 alpha = ((0x48 - t) << 7) / div;
 
-        if (D_00551618 != NULL) {
-            nbE911Prim_t *prim = D_00551618->work->prim;
+        if (nbE911Light0 != NULL) {
+            nbE911Prim_t *prim = nbE911Light0->work->prim;
 
             prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
             t = e->seqtime;
@@ -422,8 +422,8 @@ s32 Effect2(nbEventProcessData_t *e)
         s32 div = 12;
         s32 alpha = ((0x50 - t) << 7) / div;
 
-        if (D_0055161C != NULL) {
-            nbE911Prim_t *prim = D_0055161C->work->prim;
+        if (nbE911Light1 != NULL) {
+            nbE911Prim_t *prim = nbE911Light1->work->prim;
 
             prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
         }
@@ -438,7 +438,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
 s32 nbE911_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 2) {
-        printf(D_00546880);
+        printf(nbE911EndMsg);
         return 1;
     }
     return 0;
@@ -455,25 +455,25 @@ s32 nbE911Process_1(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_00527520[e->seq](e) != 0) {
-        D_00551620 = NULL;
-        if (D_00551624 != NULL) {
-            dds3DeleteSceneBasicData(D_00551624);
-            D_00551624 = NULL;
+    if (nbE911Table[e->seq](e) != 0) {
+        nbE911UnitCur = NULL;
+        if (nbE911Unit0 != NULL) {
+            dds3DeleteSceneBasicData(nbE911Unit0);
+            nbE911Unit0 = NULL;
         }
-        if (D_00551628 != NULL) {
-            dds3DeleteSceneBasicData(D_00551628);
-            D_00551628 = NULL;
+        if (nbE911Unit1 != NULL) {
+            dds3DeleteSceneBasicData(nbE911Unit1);
+            nbE911Unit1 = NULL;
         }
-        if (D_0055162C != NULL) {
-            dds3DeleteSceneBasicData(D_0055162C);
-            D_0055162C = NULL;
+        if (nbE911Unit2 != NULL) {
+            dds3DeleteSceneBasicData(nbE911Unit2);
+            nbE911Unit2 = NULL;
         }
         effBTLSkillEnd();
         return -1;
     }
-    if (e->time > 0 && D_00551620 != NULL) {
-        unit = dds3GetUnitHandleObjectBasic(D_00551620);
+    if (e->time > 0 && nbE911UnitCur != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(nbE911UnitCur);
         if (unit->basic != NULL) {
             nbCameraHelperModelSet(unit->basic);
         }
@@ -481,26 +481,26 @@ s32 nbE911Process_1(dds3ProcessID_t *id)
     switch (e->time) {
     case 0:
         nbCameraSetState(0x17);
-        D_00551620 = NULL;
-        D_00551624 = NULL;
-        D_00551628 = NULL;
-        D_0055162C = NULL;
+        nbE911UnitCur = NULL;
+        nbE911Unit0 = NULL;
+        nbE911Unit1 = NULL;
+        nbE911Unit2 = NULL;
         serial = evtInitMotionSeProcess(e->eventrid, 2);
-        D_00551624 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551624), 0, 0, 0, 2);
-        D_00551620 = D_00551624;
+        nbE911Unit0 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE911Unit0), 0, 0, 0, 2);
+        nbE911UnitCur = nbE911Unit0;
         break;
     case 0x28:
         serial = evtInitMotionSeProcess(e->eventrid, 3);
-        D_00551628 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551628), 0, 0, 0, 2);
-        D_00551620 = D_00551628;
+        nbE911Unit1 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE911Unit1), 0, 0, 0, 2);
+        nbE911UnitCur = nbE911Unit1;
         break;
     case 0x4B:
         serial = evtInitMotionSeProcess(e->eventrid, 4);
-        D_0055162C = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_0055162C), 0, 0, 0, 2);
-        D_00551620 = D_0055162C;
+        nbE911Unit2 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE911Unit2), 0, 0, 0, 2);
+        nbE911UnitCur = nbE911Unit2;
         break;
     }
     switch (e->time) {
@@ -569,15 +569,15 @@ s32 nbE912_Hatudo(nbEventProcessData_t *e)
     rot.w = 1.0f;
     nbPanelAllHide();
     for (i = 0; i < 4; i++) {
-        if (e->data->form[D_00527530[i]].stat & 1) {
-            nbAddMotionKoukaPacket(0, 0, &e->data->form[D_00527530[i]], 4);
-            form = &e->data->form[D_00527530[i]];
+        if (e->data->form[nbE911FormIndex[i]].stat & 1) {
+            nbAddMotionKoukaPacket(0, 0, &e->data->form[nbE911FormIndex[i]], 4);
+            form = &e->data->form[nbE911FormIndex[i]];
             nbSetFormRot(form, &form->orgrot);
         }
     }
     nbDispText(text1[0xFB], NULL, 0, 0x5A, 0x89FEFF80);
     form = &e->data->form[6];
-    nbSetFormPosRot(form, &D_00527640, &rot);
+    nbSetFormPosRot(form, &nbE911FormPos, &rot);
     stockno = nbAppendEnemyDevilWork(e->data, 0x116, form->formindex);
     nbAddUnitStock(e->data, 1, stockno, form->formindex);
     nbInitUnitEffect(form, 0, 0);
@@ -593,17 +593,17 @@ s32 nbE912_Wait1(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE911", D_00546880);
+INCLUDE_RODATA(const s32, "newbattle/nbE911", nbE911EndMsg);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_00551618);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Light0);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_0055161C);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Light1);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_00551620);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911UnitCur);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_00551624);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit0);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_00551628);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit1);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", D_0055162C);
+INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit2);
 

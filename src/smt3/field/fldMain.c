@@ -135,7 +135,7 @@ extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern fldSceneParam_t fldSceneParam;
 
-extern u8 D_002FC480[];
+extern u8 fldRandomBuf[];
 
 extern s32 gFldNowDZone;
 
@@ -183,9 +183,9 @@ extern void fldPlayerCalc_Hit(void);
 
 extern void fldHitChkUnit(sdfVector4_t *phys_pos);
 
-extern sdfVector4_t D_00531830;
+extern sdfVector4_t fldCameraLookAt;
 
-extern sdfVector4_t D_00531840;
+extern sdfVector4_t fldCameraInitTm;
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(u32 id, sdfVector4_t *campos, sdfVector4_t *tm, sdfVector4_t *lookat);
 
@@ -297,7 +297,7 @@ void fldFirstInit(void)
     fldDrawInit();
     fldInitAllValue();
     fldSe_Init();
-    sdfRandomize(D_002FC480, 0x1E240);
+    sdfRandomize(fldRandomBuf, 0x1E240);
     fldInitPacLoader();
     fldSkyDefaultLoad();
     fldAutoMapLoad();
@@ -467,7 +467,7 @@ typedef struct __attribute__((packed, aligned(1))) {
 } fldPackedVector_t;
 
 extern fldEncounterFloorTable_t fldEncounterFloorTable[];
-extern const fldPackedVector_t D_005316A0;
+extern const fldPackedVector_t fldDefaultRotation;
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *basic);
 extern void dds3SetActiveScene(dds3Basic_t *scene);
@@ -509,7 +509,7 @@ void fldReadyScene(void)
     memset(&adjustedPoint, 0, sizeof(adjustedPoint));
     adjustedPoint.pos.w = 1.0f;
     adjustedPoint.rot.w = 1.0f;
-    rotation.packed = D_005316A0;
+    rotation.packed = fldDefaultRotation;
     if (param->loadMode == 1)
         fldWap_Load(DDS3_GBWK->previewX, DDS3_GBWK->previewY, param);
     reused = fldGlobalBase.reuseAreaResources;
@@ -781,7 +781,7 @@ void fldReleaseUnitPad(void)
 }
 
 #ifdef NON_MATCHING
-extern const fldPackedVector_t D_00531770, D_00531780, D_00531790, D_005317A0, D_005317B0;
+extern const fldPackedVector_t fldUnitAxis, fldUnitScale, fldMirrorUnitScale, fldDantePosition, fldDanteScale;
 extern s32 l_UseCollision;
 extern dds3Basic_t *fldUnitControlHandle, *fldDanteUnit, *fldPlayerUnit;
 extern char fldPlayerPosName[];
@@ -827,11 +827,11 @@ void fldSetUnit(fldResourcePoint_t *point)
     zeroPosition.w = 1.0f;
     memset(&rotation, 0, sizeof(rotation));
     rotation.w = 1.0f;
-    axis.packed = D_00531770;
-    scale.packed = D_00531780;
-    mirrorScale.packed = D_00531790;
-    dantePosition.packed = D_005317A0;
-    danteScale.packed = D_005317B0;
+    axis.packed = fldUnitAxis;
+    scale.packed = fldUnitScale;
+    mirrorScale.packed = fldMirrorUnitScale;
+    dantePosition.packed = fldDantePosition;
+    danteScale.packed = fldDanteScale;
     SDF_VU0_LOADVECTOR(&axis.vector);
     FromRotation(3.141592503f);
     SDF_VU0_LOADVECTOR_B(&point->rot);
@@ -989,7 +989,7 @@ void fldSetUnit(fldResourcePoint_t *point)
 #else
 INCLUDE_RODATA(const s32, "field/fldMain", fldProcSequenceName);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005316A0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldDefaultRotation);
 
 INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerAPath);
 
@@ -1005,15 +1005,15 @@ INCLUDE_RODATA(const s32, "field/fldMain", fldWavePath);
 
 INCLUDE_RODATA(const s32, "field/fldMain", fldWave02Path);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531770);
+INCLUDE_RODATA(const s32, "field/fldMain", fldUnitAxis);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531780);
+INCLUDE_RODATA(const s32, "field/fldMain", fldUnitScale);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531790);
+INCLUDE_RODATA(const s32, "field/fldMain", fldMirrorUnitScale);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005317A0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldDantePosition);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_005317B0);
+INCLUDE_RODATA(const s32, "field/fldMain", fldDanteScale);
 
 INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
 #endif
@@ -1113,10 +1113,10 @@ void fldSetUnitFollowCamera(void)
     sdfVector4_t tm;
     fldFollowCameraControl_t *ctrl;
 
-    lookat = D_00531830;
+    lookat = fldCameraLookAt;
     memset(&campos, 0, sizeof(campos));
     campos.w = 1.0f;
-    tm = D_00531840;
+    tm = fldCameraInitTm;
     ctrl = &fldFollowCameraControl;
     ctrl->handle =
         dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), &campos, &tm, &lookat);
@@ -1133,9 +1133,9 @@ s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic)
 
 INCLUDE_RODATA(const s32, "field/fldMain", fldWaveUnitName);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531830);
+INCLUDE_RODATA(const s32, "field/fldMain", fldCameraLookAt);
 
-INCLUDE_RODATA(const s32, "field/fldMain", D_00531840);
+INCLUDE_RODATA(const s32, "field/fldMain", fldCameraInitTm);
 
 s32 fldChkVortex(void)
 {

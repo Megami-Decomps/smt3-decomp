@@ -300,7 +300,7 @@ extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern fclSpriteTbl_t fclSpriteTable[];
 extern s32 D_00345D88[];
-extern char D_0054FC40[];
+extern char fclFmtItemCount[];
 extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                          const char *text, frFontHandle_t *previous);
 
@@ -329,14 +329,14 @@ void fclDrawPriceText(fclPanelPos_t *pos, u16 item, s32 ot)
     } else {
         quantity = ((fclInventoryView_t *)DDS3_GBWK)->itemQuantity[item];
     }
-    sprintf(text, D_0054FC40, quantity);
+    sprintf(text, fclFmtItemCount, quantity);
     request = frwGetNumFontFRQ(x + 0x7B0, y + 0x218, pos->unk_08,
                                0xA0F0EB80, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
-extern char D_0054FC48[]; /* Shared, padded "%7d" format. */
+extern char fclFmtMaka[]; /* Shared, padded "%7d" format. */
 
 void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 ot)
 {
@@ -359,7 +359,7 @@ void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 ot)
                         fclSpriteTable, ot);
 
     color = (color & 0xFF) | 0xA09DC300;
-    sprintf(text, D_0054FC48, DDS3_GBWK->maka);
+    sprintf(text, fclFmtMaka, DDS3_GBWK->maka);
     /* The numeric baseline uses the X coordinate. */
     request = frwGetNumFontFRQ(pos->unk_00 + 0x1840, pos->unk_00 + 0x90,
                                pos->unk_08, color, text, NULL);
@@ -511,7 +511,7 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
     }
     qsort(list, count, sizeof(*list), cmbSetEvoResult);
 }
-INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC40);
+INCLUDE_SDATA(const s32, "facility/fclDraw", fclFmtItemCount);
 
-INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC48);
+INCLUDE_SDATA(const s32, "facility/fclDraw", fclFmtMaka);
 

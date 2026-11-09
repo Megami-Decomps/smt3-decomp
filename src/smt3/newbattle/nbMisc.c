@@ -141,7 +141,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern u32 effBTLSystemGetRGBA(s32 id);
 
-extern char D_00544120[]; /* "nb_action" */
+extern char nbActionProcessName[]; /* "nb_action" */
 
 extern void ToMatrix(void);
 
@@ -177,9 +177,9 @@ extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
 
 extern datUnitVisual_t datModelParamTable[];
 
-extern datUnitVisual_t D_003494B0;
+extern datUnitVisual_t nbDefaultUnitVisual;
 
-extern datDevilAIData_t D_003989E0[];
+extern datDevilAIData_t datDevilAIDataTable[];
 
 extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
@@ -505,12 +505,12 @@ void nbMakeUnitDrawMatrix(nbFormation_t *form)
     SDF_VU0_ADDVECTOR();
 }
 
-extern const f32 D_003FA880[][4];
-extern const u32 D_003FACA0[];
-extern const f32 D_003FAF20[][4];
-extern const u32 D_003FB220[];
-extern const f32 D_003FADB0[][4];
-extern const u32 D_003FAED0[];
+extern const f32 nbRotatedModelXVerts[][4];
+extern const u32 nbRotatedModelXColors[];
+extern const f32 nbRotatedModelVerts30[][4];
+extern const u32 nbRotatedModelColors30[];
+extern const f32 nbRotatedModelVerts12[][4];
+extern const u32 nbRotatedModelColors12[];
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                 s32 vertexCount, u32 primitiveFlags);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
@@ -541,11 +541,11 @@ void nbDrawRotatedModelX(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     SDF_VU0_COPYMATRIX_A_TO_C();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x42, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelXVerts, nbRotatedModelXColors, 0x42, 0x80)));
     SDF_VU0_COPYMATRIX_C_TO_A();
     SetRotateMatrixX_B(3.1415926f);
     MultMatrixNoArg();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FA880, D_003FACA0, 0x40, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelXVerts, nbRotatedModelXColors, 0x40, 0x80)));
 }
 
 /* vu0 routine: transform and submit the two battle-marker models. */
@@ -572,7 +572,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FAF20, D_003FB220, 0x30, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelVerts30, nbRotatedModelColors30, 0x30, 0x80)));
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
@@ -589,7 +589,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(D_003FADB0, D_003FAED0, 0x12, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelVerts12, nbRotatedModelColors12, 0x12, 0x80)));
 }
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag)
@@ -1024,7 +1024,7 @@ datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work)
     s32 id = nbGetUnitID(work);
 
     if (id == 0) {
-        return &D_003494B0;
+        return &nbDefaultUnitVisual;
     }
     return &datModelParamTable[id];
 }
@@ -1037,7 +1037,7 @@ s32 nbCheckEventDead(nbFormation_t *form)
     if (id == 0) {
         return 0;
     }
-    p = &D_003989E0[id].death;
+    p = &datDevilAIDataTable[id].death;
     if (p->script != 0) {
         return 1;
     }
@@ -1052,7 +1052,7 @@ s32 nbCheckDeadScript(nbFormation_t *form)
     if (id == 0) {
         return 0;
     }
-    p = &D_003989E0[id].death;
+    p = &datDevilAIDataTable[id].death;
     if (p->script != 0) {
         return p->script;
     }
@@ -1067,7 +1067,7 @@ s32 nbCheckDeadEvent(nbFormation_t *form)
     if (id == 0) {
         return 0;
     }
-    p = &D_003989E0[id].death;
+    p = &datDevilAIDataTable[id].death;
     if (p->event != 0) {
         return p->event;
     }

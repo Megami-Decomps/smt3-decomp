@@ -3,15 +3,15 @@
 #include "kernel.h"
 #include "libsdf.h"
 
-extern u32 D_0054E8BC;
+extern u32 sdfDefaultCdMode;
 
 extern u32 sdfCdTrayMode;
 
 extern u8 sdfPadManagerMode;
 
-extern sdfThCB_t D_00551B88;
+extern sdfThCB_t dds3KernelThread;
 
-extern u8 D_00552310[];
+extern u8 dds3KernelStack[];
 
 extern void __main(void);
 
@@ -67,7 +67,7 @@ s32 sdfDefaultMain(void)
     __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
-    sdfCdTrayMode = D_0054E8BC;
+    sdfCdTrayMode = sdfDefaultCdMode;
     sdfCdInit();
     while (sceSifRebootIop("cdrom0:\\IRX\\IOPRP250.IMG;1") == 0) {
     }
@@ -78,7 +78,7 @@ s32 sdfDefaultMain(void)
     sceSifLoadFileReset();
     sceFsReset();
     sceCdInit(0);
-    sceCdMmode(D_0054E8BC);
+    sceCdMmode(sdfDefaultCdMode);
     sdfCdImageInit("\\DDS3.IMG;1", "cdrom0:\\DDS3.DDT;1");
     while (sceSifLoadModule("cdrom0:\\IRX\\SIO2MAN.IRX;1", 0, NULL) < 0) {
     }
@@ -95,12 +95,12 @@ s32 sdfDefaultMain(void)
     sdfFileCmdStartThread(0);
     SdfIopInit("cdrom0:\\USERIRX\\SDFIOP.IRX;1", "cdrom0:\\IRX\\MSIFRPC.IRX;1");
     sdfStartFileRpcServer();
-    sdfStartThreadAndWait(&D_00551B88, dds3KernelMain, D_00552310, 0x4000, 0x60, 0);
+    sdfStartThreadAndWait(&dds3KernelThread, dds3KernelMain, dds3KernelStack, 0x4000, 0x60, 0);
     sdfSetMainThreadPriority();
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", D_0054E8BC);
+INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", sdfDefaultCdMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", dds3ClosedDrawTag);
 

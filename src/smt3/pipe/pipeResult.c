@@ -33,7 +33,7 @@ extern u32 dds3GetRandA(void *name);
 
 extern char *pStr[];
 
-extern s32 D_00529240[][10];
+extern s32 pipeRandomMessTable[][10];
 
 extern s8 pipeMessMax;
 
@@ -147,25 +147,25 @@ extern void *pipeMessData;
 extern s8 pipeMessCount, messCount, pipeMessMax;
 extern u8 messIdx;
 extern s32 mapIndex, pipeObjList, pipeObjTail, myMaka;
-extern u32 D_00551810;
-extern s32 D_00551818;
+extern u32 pipeMessDataAddr;
+extern s32 pipeExpectedMaka;
 extern s8 fclInitMessage(void *data);
 extern void DEBUG_PRINT(const char *format, ...);
 
-const char D_00548F18[24] = "/pipe/pipemes.bmd";
-const char D_00548F30[24] = "MAKA ALL Complete!!\n";
+const char pipeMessFileName[24] = "/pipe/pipemes.bmd";
+const char pipeMakaCompleteMsg[24] = "MAKA ALL Complete!!\n";
 
 void pipeMessInit(void) {
-    pipeMessData = sdfDevLoadFileEx(D_00548F18, &D_00551810, NULL);
-    fclInitMessage(EE_ADDR_AS(void *, D_00551810));
+    pipeMessData = sdfDevLoadFileEx(pipeMessFileName, &pipeMessDataAddr, NULL);
+    fclInitMessage(EE_ADDR_AS(void *, pipeMessDataAddr));
     if (pipeObjTail < 8) {
-        D_00551818 = pipeObjList * 5 + (100 << pipeObjTail) - 100;
+        pipeExpectedMaka = pipeObjList * 5 + (100 << pipeObjTail) - 100;
     } else {
         s32 value = 9999;
-        D_00551818 = value * pipeObjTail + pipeObjList * 5 - 57293;
+        pipeExpectedMaka = value * pipeObjTail + pipeObjList * 5 - 57293;
     }
-    if (D_00551818 == myMaka) {
-        DEBUG_PRINT(D_00548F30);
+    if (pipeExpectedMaka == myMaka) {
+        DEBUG_PRINT(pipeMakaCompleteMsg);
         pipeMessCount = 1;
         messIdx = 0;
     } else {
@@ -228,7 +228,7 @@ s32 pipeMessDraw(void) {
 
 s32 pipeGetRandomMessage(void)
 {
-    return D_00529240[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
+    return pipeRandomMessTable[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
 }
 INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
 
@@ -238,11 +238,11 @@ INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551808);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551810);
+INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessDataAddr);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551815);
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551818);
+INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeExpectedMaka);
 

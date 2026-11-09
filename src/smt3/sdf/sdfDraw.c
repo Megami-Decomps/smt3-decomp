@@ -980,7 +980,7 @@ void sdfGrInitDraw(void) {
 }
 
 /* The draw worker publishes this to the kernel process, which clears it. */
-extern volatile u8 D_00551888;
+extern volatile u8 sdfDrawPublishFlag;
 
 extern volatile u8 sdfDrawFrameFlag;
 extern volatile u8 sdfDispThreadFlag;
@@ -1118,7 +1118,7 @@ void sdfGrDrawFrame(void)
         break;
     }
     firstFlag = sdfGrDrawFirstFlag;
-    D_00551888 = 1;
+    sdfDrawPublishFlag = 1;
     if (firstFlag != 0) sdfDevConsDrawAll();
     sdfDelayedResrcProc();
 }

@@ -138,7 +138,7 @@ extern s8 gProcessStat_3;
 
 extern cmpInfoWindow_t *cmpInfoWindow;
 
-extern cmbWork_t *D_0054FB20;
+extern cmbWork_t *shpWork;
 
 extern saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
@@ -193,11 +193,11 @@ typedef struct
     /* 0x003C */ u8 unk_3C[0x2A8];
 } cmpPanelEff_t;
 
-extern cmpHeartsIconTableEntry_t D_00345E58[];
+extern cmpHeartsIconTableEntry_t cmpHeartsIconTable[];
 
 extern campStatusPanel_t *campStatusPanel;
 
-extern s32 D_00574A48[6];
+extern s32 cmpGaugeTimers[6];
 
 extern void campUpdateEffectStep(void);
 
@@ -344,7 +344,7 @@ extern s8 cmpStatusWindowHidden;
 
 extern s8 cmpModelInitFlag;
 
-extern u16 D_0054FEEE;
+extern u16 cmpStatusGroup;
 
 extern s32 cmpModelHandle;
 
@@ -357,11 +357,11 @@ extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
 extern f32 dds3ScreenParam[];
 
-extern s32 D_0054FEE0;
+extern s32 cmpStatusModelResult;
 
-extern s8 D_00349380[];
+extern s8 cmpParamGaugeColors[];
 
-extern char *D_00349388[];
+extern char *cmpParamNames[];
 
 extern s8 dds3PadButtonState[];
 
@@ -511,13 +511,13 @@ extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
-extern char D_0054FB48[];
+extern char shpProcName[];
 
-extern char D_0054FB98[];
+extern char ragCalcProcName[];
 
-extern char D_0054FBD8[];
+extern char rcvCalcProcName[];
 
-extern char D_0054FCF0[];
+extern char rstProcName[];
 
 typedef struct
 {
@@ -581,9 +581,9 @@ typedef struct
     /* 0x04 */ u16 unk_04;
 } cmpMsgEntry_t;
 
-extern cmpMsgEntry_t D_00345DD0[];
+extern cmpMsgEntry_t cmpItemMsgTable[];
 
-extern cmpMsgEntry_t D_00345DA0[];
+extern cmpMsgEntry_t cmpSkillMsgTable[];
 
 extern campStatusPanel_t *campDhUpdateWork;
 
@@ -622,7 +622,7 @@ extern s32 D_00345D88[];
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
-extern char D_0054FB60[];
+extern char shpFmtCount7[];
 
 extern void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
                                    s8 mode, s32 alpha, s32 ot);
@@ -633,11 +633,11 @@ extern s32 cmpChkPadPressUpDown(void);
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern char D_0054FBF0[];
+extern char rcvNumFormat[];
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern char D_0054FC20[];
+extern char trmProcessNameTrmFmt[];
 
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                                const char *text, frFontHandle_t *previous);
@@ -680,9 +680,9 @@ extern s32 cmpModelSetup(u16 a, s32 b);
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 
-extern char D_0054FD18[]; /* "/sound/" */
+extern char sndPathPrefix[]; /* "/sound/" */
 
-extern s8 D_0054FD10;
+extern s8 sndInitDone;
 
 extern s32 D_0054FD20;
 
@@ -698,11 +698,11 @@ void rstClearResultWork(void)
     D_00345D9C[0] = NULL;
 }
 
-extern char D_0053F478[];
+extern char cmpCampTmxPath[];
 
 void cmpTexLoad(void)
 {
-    D_00345D88[0] = fclLoadTexture(D_0053F478);
+    D_00345D88[0] = fclLoadTexture(cmpCampTmxPath);
     D_00345D88[1] = fclLoadTexture("/camp/tmx/camp_02.tmx");
     D_00345D88[2] = fclLoadTexture("/camp/tmx/camp_03.tmx");
     D_00345D88[3] = fclLoadTexture("/camp/tmx/camp_04.tmx");
@@ -855,12 +855,12 @@ void cmpInitStockTable(void)
 }
 
 extern u8 itfMesEmbedded_345160[];
-extern char *D_00343F08[];
-extern char *D_00343F28[];
-extern char *D_00343F38[];
-extern char *D_00343F48[];
+extern char *cmpCursorCells[];
+extern char *cmpPage0Cells[];
+extern char *cmpPage1Cells[];
+extern char *cmpPage2Cells[];
 /* Four-byte cursor-flag storage in small BSS. */
-extern u8 D_00551F98[4];
+extern u8 cmpPage2CursorFlags[4];
 extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
 extern s8 fclInitMessage(void *data);
 extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
@@ -882,15 +882,15 @@ void cmpinit(void)
     fclSetSelMessagePos(1);
     campWork->unk_0001 = 0;
     campWork->unk_0004 = 1;
-    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, EE_ADDR_S(D_00343F08));
+    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, EE_ADDR_S(cmpCursorCells));
     cmpInitCursorLayout((u8 *)campWork + 0x1C, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, EE_ADDR_S(D_00343F28));
+    cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, EE_ADDR_S(cmpPage0Cells));
     cmpInitCursorLayout(&campWork->page[0].cursor, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, EE_ADDR_S(D_00343F38));
+    cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, EE_ADDR_S(cmpPage1Cells));
     cmpInitCursorLayout(&campWork->page[1].cursor, 0, 0, 0, 0, 0x17);
-    cmpInitCursorRange(&campWork->page[2].cursor, 2, 2, EE_ADDR_S(D_00343F48));
+    cmpInitCursorRange(&campWork->page[2].cursor, 2, 2, EE_ADDR_S(cmpPage2Cells));
     cmpInitCursorLayout(&campWork->page[2].cursor, 0, 0, 0, 0, 0x17);
-    cmpSetCursorFlag(&campWork->page[2].cursor, EE_ADDR_S(D_00551F98));
+    cmpSetCursorFlag(&campWork->page[2].cursor, EE_ADDR_S(cmpPage2CursorFlags));
     cmpDebugDumpCount();
     camp_H_cmpGlobalWork_t__ctor();
     campWork->effectStep = SDF_FRAMES(0x2B3);
@@ -919,11 +919,11 @@ void camp_update_Shutdown(void)
     }
 }
 
-extern char D_0054FE38[];
+extern char cmpCalcProcName[];
 
-extern char D_0053F4F0[];
+extern char campDrawProcName[];
 
-extern char D_0053F500[];
+extern char campUpdateProcName[];
 
 extern void cmpinit();
 
@@ -942,9 +942,9 @@ extern void *cmpStartProcessStock(cmpLocalStock_t *stock, s32 value);
 void cmpProcessStart(void)
 {
     cmpinit();
-    dds3StartProcess(D_0054FE38, 0x3F2, 1, 0, cmpCalcSequence, NULL, NULL);
-    dds3StartProcess(D_0053F4F0, 0x2B07, 1, 0, camp_draw_Process, NULL, NULL);
-    dds3StartProcess(D_0053F500, 0x520B, 1, 0, camp_update_Process, camp_update_Shutdown, NULL);
+    dds3StartProcess(cmpCalcProcName, 0x3F2, 1, 0, cmpCalcSequence, NULL, NULL);
+    dds3StartProcess(campDrawProcName, 0x2B07, 1, 0, camp_draw_Process, NULL, NULL);
+    dds3StartProcess(campUpdateProcName, 0x520B, 1, 0, camp_update_Process, camp_update_Shutdown, NULL);
     cmpStartProcessStock(&campWork->stock[0], 0);
     cmpInitLocalStock();
     cmpInitDrawList();
@@ -952,17 +952,17 @@ void cmpProcessStart(void)
     campExitState = 1;
 }
 
-extern char D_0054FE38[];
+extern char cmpCalcProcName[];
 
-extern char D_0053F4F0[];
+extern char campDrawProcName[];
 
-extern char D_0053F500[];
+extern char campUpdateProcName[];
 
 void campKillProcesses(void)
 {
-    dds3KillProcessName(D_0054FE38, 0);
-    dds3KillProcessName(D_0053F4F0, 0);
-    dds3KillProcessName(D_0053F500, 0);
+    dds3KillProcessName(cmpCalcProcName, 0);
+    dds3KillProcessName(campDrawProcName, 0);
+    dds3KillProcessName(campUpdateProcName, 0);
 }
 
 s32 campCheckExitState(void)
@@ -1226,7 +1226,7 @@ s32 cmpGetItSkErrSelFlag(u16 skillId)
 
 s32 cmpFindSkillMsgIndex(s32 which, u16 id)
 {
-    cmpMsgEntry_t *entry = D_00345DA0;
+    cmpMsgEntry_t *entry = cmpSkillMsgTable;
     u32 i;
 
     for (i = 0; i < 7; i++, entry++) {
@@ -1242,7 +1242,7 @@ s32 cmpFindSkillMsgIndex(s32 which, u16 id)
 
 s32 cmpFindItemMsgIndex(s32 which, u16 id)
 {
-    cmpMsgEntry_t *entry = D_00345DD0;
+    cmpMsgEntry_t *entry = cmpItemMsgTable;
     u32 i;
 
     for (i = 0; i < 7; i++, entry++) {
@@ -1848,9 +1848,9 @@ extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
 extern void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor,
                              datUnitWork_t *unit, s8 mode, s32 alpha);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F4F0);
+INCLUDE_RODATA(const s32, "code_0022C578", campDrawProcName);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F500);
+INCLUDE_RODATA(const s32, "code_0022C578", campUpdateProcName);
 
 void cmpCalcSkill(void)
 {
@@ -1951,7 +1951,7 @@ void cmpCalcSkill(void)
 
 extern char *D_00330914[];
 
-extern char D_0054FE40[];
+extern char cmpFmtNameCount[];
 
 extern char *pStr[];
 
@@ -1974,7 +1974,7 @@ s32 cmpCalcDestroyItem(void)
     }
     campWork->stockMessagePhase = 0;
     fclSetMessageVar_20743088(2, EE_ADDR_S(pStr[id]));
-    sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
+    sprintf(buf, cmpFmtNameCount, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
     fclSetMessageVar_20743088(0xB, EE_ADDR_S(buf));
     fclSetMessageInvalid(0);
     fclStartMessage(9);
@@ -2420,7 +2420,7 @@ void nmeMakeGradColors(s32 *xs, s32 *ys, s32 delta0, s32 delta1, s32 delta2)
     }
 }
 
-extern const s32 D_0053F6E8[];
+extern const s32 nmeQuadPanelCoords[];
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 
 void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
@@ -2430,7 +2430,7 @@ void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
     s32 xOffset = alpha << 4;
     s32 yOffset = alpha << 3;
 
-    memcpy(coords, D_0053F6E8, sizeof(coords));
+    memcpy(coords, nmeQuadPanelCoords, sizeof(coords));
     colors[0] = color0;
     colors[1] = 0;
     colors[2] = 0;
@@ -2449,9 +2449,9 @@ void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
 }
 
 #ifdef NON_MATCHING
-extern const s32 D_0053F718[26][10];
-extern const u32 D_0053FB28[];
-extern const f32 D_0053FB50[];
+extern const s32 nmeGradFaces[26][10];
+extern const u32 nmeGradBaseColors[];
+extern const f32 nmeGradWeights[];
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
 void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
@@ -2467,9 +2467,9 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
     s32 strength;
     f32 scale;
 
-    memcpy(faces, D_0053F718, sizeof(faces));
-    memcpy(baseColors, D_0053FB28, sizeof(baseColors));
-    memcpy(weights, D_0053FB50, sizeof(weights));
+    memcpy(faces, nmeGradFaces, sizeof(faces));
+    memcpy(baseColors, nmeGradBaseColors, sizeof(baseColors));
+    memcpy(weights, nmeGradWeights, sizeof(weights));
     for (i = 0; i < 26; i++) {
         strength = amount;
         offset = 0;
@@ -2552,14 +2552,14 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6B8);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6D8);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6E8);
+INCLUDE_RODATA(const s32, "code_0022C578", nmeQuadPanelCoords);
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
 #endif
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
+INCLUDE_RODATA(const s32, "code_0022C578", nmeGradBaseColors);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB50);
+INCLUDE_RODATA(const s32, "code_0022C578", nmeGradWeights);
 
 void nmeDrawBlendQuad(s32 alpha, s32 ot)
 {
@@ -2893,7 +2893,7 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
                              fclSpriteTbl_t *table, s32 ot);
 extern frFontRequest_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                          const char *text, frFontRequest_t *previous);
-extern char D_0054FE70[];
+extern char cmpFmtMaka[];
 
 void campDrawNumber(void)
 {
@@ -2920,7 +2920,7 @@ void campDrawNumber(void)
         fclDrawSpriteRes(0, 0, 0, colors, 0, 0x1A,
                          D_00345D88, fclSpriteTable, 0x47);
         fontColor = 0xA09DC300 | fade;
-        sprintf(text, D_0054FE70, DDS3_GBWK->maka);
+        sprintf(text, cmpFmtMaka, DDS3_GBWK->maka);
         font = frwGetNumFontFRQ(0x3C0, 0xC90, 0xFFFFF,
                                 fontColor, text, NULL);
         func_001C7E38(font, 1, 0x47);
@@ -3801,13 +3801,13 @@ u8 cmpClearStatusFlags(void)
 INCLUDE_ASM(const s32, "code_0022C578", cmpClearStatusFlags);
 #endif
 
-extern cmpInfoWindow_t *D_00551F9C;
+extern cmpInfoWindow_t *campCalcStockWindow;
 
 s32 camp_calc_stock_Process(s32 id)
 {
     cmpInfoWindow_t *window = dds3GetProcessData(id);
 
-    D_00551F9C = window;
+    campCalcStockWindow = window;
     if ((window->flags & 0x10) != 0) {
         cmpUpdateTerminate(window);
         return -1;
@@ -3873,13 +3873,13 @@ void campDrawStockPanel(cmpLocalStock_t *stock, s32 mode)
     campDrawStockSlots(indices, cmpStockEffIsActive((u8 *)stock), flags, stock);
 }
 
-extern cmpInfoWindow_t *D_00551FA0;
+extern cmpInfoWindow_t *campDrawStockWindow;
 
 s32 camp_draw_stock_Process(s32 id)
 {
     cmpInfoWindow_t *window = dds3GetProcessData(id);
 
-    D_00551FA0 = window;
+    campDrawStockWindow = window;
     if ((window->flags & 0x20) != 0) {
         cmpUpdateTerminate(window);
         return -1;
@@ -3953,17 +3953,17 @@ void cmpInitHeartsIconTable(campInfoWork_t *work)
 
 s8 cmpGetHeartsIconId(s8 index)
 {
-    return D_00345E58[index].id;
+    return cmpHeartsIconTable[index].id;
 }
 
 s8 cmpGetHeartsIconType(s8 index)
 {
-    return D_00345E58[index].type;
+    return cmpHeartsIconTable[index].type;
 }
 
 s32 cmpGetHeartsIconColor(s8 index)
 {
-    return D_00345E58[index].color;
+    return cmpHeartsIconTable[index].color;
 }
 
 s32 campDhCheckReady(void)
@@ -4036,7 +4036,7 @@ s32 cmpLoadDHTextures(cmpDhWork_t *work)
     return printf("Read hearts tex.\n");
 }
 
-extern char D_0053FD60[];
+extern char campDhFreeTexMsg[];
 
 void campDhFreeTexture(campInfoWork_t *work)
 {
@@ -4052,14 +4052,14 @@ void campDhFreeTexture(campInfoWork_t *work)
         sdfTexFree(work->unk_1168);
         work->unk_1168 = 0;
     }
-    printf(D_0053FD60);
+    printf(campDhFreeTexMsg);
 }
 
 extern void campDhFreeTexture(campInfoWork_t *work);
 
 extern void sdfMemFreePtrDirect(void *aPtr);
 
-extern char D_0053FD78[];
+extern char campDhFreeDataMsg[];
 
 void campDhFreeResources(campInfoWork_t *work)
 {
@@ -4073,7 +4073,7 @@ void campDhFreeResources(campInfoWork_t *work)
         sdfMemFreePtrDirect(EE_ADDR_AS(void *, tex[i]));
         tex[i] = 0;
     }
-    printf(D_0053FD78);
+    printf(campDhFreeDataMsg);
 }
 
 s32 func_00232C08(void)
@@ -4241,9 +4241,9 @@ extern s32 camp_draw_dh_Process();
 
 extern s32 camp_update_dh_Process();
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD60);
+INCLUDE_RODATA(const s32, "code_0022C578", campDhFreeTexMsg);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD78);
+INCLUDE_RODATA(const s32, "code_0022C578", campDhFreeDataMsg);
 
 void *cmpStartProcessDH(cmpSeqInfo_t *parent)
 {
@@ -4761,16 +4761,16 @@ void campDhDrawPanel(s32 x, s32 y, s32 unused, s32 alpha)
     }
 }
 
-extern const u32 D_0053FDC0[];
-extern const u32 D_0053FDD8[];
+extern const u32 campDhQuadGaugeCoords[];
+extern const u32 campDhQuadGaugeColors[];
 
 void campDhDrawQuadGauge(s32 ratio)
 {
     u32 coordinates[6];
     u32 colors[3];
 
-    memcpy(coordinates, D_0053FDC0, sizeof(coordinates));
-    memcpy(colors, D_0053FDD8, sizeof(colors));
+    memcpy(coordinates, campDhQuadGaugeCoords, sizeof(coordinates));
+    memcpy(colors, campDhQuadGaugeColors, sizeof(colors));
     coordinates[1] -= (0x100 - ratio) << 5;
     colors[0] = fclBlendColor(colors[0], 0, 0x100);
     cmpDrawTriG(coordinates, coordinates + 3, 0, colors, 0x47);
@@ -4840,8 +4840,8 @@ void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
 #endif
 
-extern const u32 D_0053FDE8[];
-extern char D_0054FE80[];
+extern const u32 campDhGaugePalette[];
+extern char campDhFmtAmount[];
 extern s8 cmpGetParamGaugeColor(s8 index);
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
@@ -4879,7 +4879,7 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
     s32 y;
     s32 i;
 
-    memcpy(palette, D_0053FDE8, sizeof(palette));
+    memcpy(palette, campDhGaugePalette, sizeof(palette));
 
     fclDrawSpriteRes(0, 0x28, 0, NULL, 0xB, 0, (s32 *)((u8 *)campDhDrawWork + 0x1160),
                      table, baseOt);
@@ -4920,7 +4920,7 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
             fclDrawSpriteRes(0, y, 0, NULL, 0xB,
                              sprite,
                              (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
-            sprintf(text, D_0054FE80, amount);
+            sprintf(text, campDhFmtAmount, amount);
             font = (frFontHandle_t *)frwGetSmallNumFontFRQ(0x5E0, y + 0x910, 0, (u32)color, text, NULL);
             func_001C7E38(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
@@ -4990,11 +4990,11 @@ void campDhDrawHearts(void)
 
 extern void campDhDrawIcon(void);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDC0);
+INCLUDE_RODATA(const s32, "code_0022C578", campDhQuadGaugeCoords);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDD8);
+INCLUDE_RODATA(const s32, "code_0022C578", campDhQuadGaugeColors);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDE8);
+INCLUDE_RODATA(const s32, "code_0022C578", campDhGaugePalette);
 
 s32 camp_draw_dh_Process(s32 id)
 {
@@ -5698,13 +5698,13 @@ s32 cmpStatSetTimer(s32 kind, s8 index)
     cmpStatusAnimCount[index] = kind;
     cmpParamGaugeState[index] = 1;
     cmpStatTimer = 0;
-    memset(D_00574A48, 0, 0x14);
+    memset(cmpGaugeTimers, 0, 0x14);
     return cmpStatusAnimCount[index];
 }
 
 void func_00235E40(s8 index)
 {
-    D_00574A48[index] = 1;
+    cmpGaugeTimers[index] = 1;
 }
 
 s32 func_00235E60(void)
@@ -5712,7 +5712,7 @@ s32 func_00235E60(void)
     s32 i;
 
     for (i = 0; i < 5; i++) {
-        if (D_00574A48[i] != 0) {
+        if (cmpGaugeTimers[i] != 0) {
             return 1;
         }
     }
@@ -5777,7 +5777,7 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority,
                                                u32 color, const char *text,
                                                frFontHandle_t *previous);
-extern char D_0054FE98[];
+extern char cmpFmtDec2[];
 
 void rstDrawNumber(s32 x, s32 y, s8 number)
 {
@@ -5803,14 +5803,14 @@ void rstDrawNumber(s32 x, s32 y, s8 number)
         fclDrawSpriteRes(x << 4, spriteY, 0, (s32 *)colors,
                          6, 1, D_00345D88, fclSpriteTable, 0x47);
     }
-    sprintf(text, D_0054FE98, number);
+    sprintf(text, cmpFmtDec2, number);
     font = frwGetSmallNumFontFRQ(x + 0x7B0, yBase + 0x420, 0xFFFF,
                                  0xA09DC380, text, NULL);
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 
-extern char D_0054FEA0[];
+extern char cmpFmtValMax[];
 extern void fclDrawSpriteRect(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 page, s32 spriteId, s32 *texList,
                               fclSpriteTbl_t *table, s32 ot);
@@ -5877,9 +5877,9 @@ void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
         fclDrawSpriteRect(x, y, z * 16, ratio, 1000, colors, 2, sprite,
                           D_00345D88, fclSpriteTable, ot);
     }
-    sprintf(text, D_0054FEA0, value);
+    sprintf(text, cmpFmtValMax, value);
     font = frwGetSmallNumFontFRQ(x + 0x50, y, z, textColor, text, NULL);
-    sprintf(text, D_0054FEA0, maximum);
+    sprintf(text, cmpFmtValMax, maximum);
     font = frwGetSmallNumFontFRQ(x + 0x2C0, y, z, textColor, text, font);
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
@@ -6014,7 +6014,7 @@ extern s32 datAdvanceDevilLevel(datUnitWork_t *unit);
 extern frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 extern datDevilTableEntry_t datDevilTable[];
 extern char *datExplainTable[];
-extern char D_0054FEA8[];
+extern char cmpFmtExpNext[];
 extern s16 cmpHeartsMasterPhase FAKEMATCH_ASM_NAME("rstHeartsMasterPhase");
 extern datUnitWork_t *volatile cmpStatusBirthLive FAKEMATCH_ASM_NAME("cmbBirthPanel");
 extern void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused);
@@ -6122,12 +6122,12 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 0, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 1, D_00345D88, fclSpriteTable, 0x47);
     fclDrawSpriteRes(spriteX, spriteY, 0, colors, 2, 2, D_00345D88, fclSpriteTable, 0x47);
-    sprintf(text, D_0054FE98, datGetLevelForDraw(unit));
+    sprintf(text, cmpFmtDec2, datGetLevelForDraw(unit));
     number = frwGetSmallNumFontFRQ((x + 0x2C) * 16, (y + 0x62) * 8,
                                    0xFFFF, levelColor, text, NULL);
     func_001C7E38(number, 1, 0x47);
     frDestroyFontRequestAfter(number);
-    sprintf(text, D_0054FEA8, datAdvanceDevilLevel(unit) - live->exp);
+    sprintf(text, cmpFmtExpNext, datAdvanceDevilLevel(unit) - live->exp);
     number = frwGetSmallNumFontFRQ((x + 0x7C) * 16, (y + 0x62) * 8,
                                    0xFFFF, textColor, text, NULL);
     func_001C7E38(number, 1, 0x47);
@@ -6241,7 +6241,7 @@ void cmpDrawParamGauge(s32 x, s32 y, s32 *colors, s32 rowHeight,
     }
     case 3: {
         s32 position = hearts >= 0 ? value - hearts : value + hearts;
-        s32 *timer = &D_00574A48[index];
+        s32 *timer = &cmpGaugeTimers[index];
         s32 frame = *timer;
 
         if (frame != 0) {
@@ -6316,7 +6316,7 @@ void cmpDrawParamPanel(s32 x, s32 y, s32 *colors, s8 *bonuses, datUnitWork_t *un
         }
         fclDrawSpriteFilter(spriteX, spriteY + i * 0xA0, 0, 0, colors, 4, 0,
                             D_00345D88, fclSpriteTable, 0x47);
-        sprintf(text, D_0054FE98, value);
+        sprintf(text, cmpFmtDec2, value);
         font = frwGetSmallNumFontFRQ(numberX, numberY, 0xFFFF, textColor, text, NULL);
         func_001C7E38(font, 1, 0x47);
         numberY += 0xA0;
@@ -6827,7 +6827,7 @@ extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
 extern s32 fclChkMessage(void);
 extern s32 D_00345D88[5];
 extern fclSpriteTbl_t fclSpriteTable[];
-extern const char D_0054FEB0[];
+extern const char cmpFmtItemQty[];
 
 void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                       s32 callbackContext, s8 callbackFlag, s32 alpha,
@@ -6923,11 +6923,11 @@ void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                     item = campWork->itemId[row];
                     quantity = DDS3_GBWK->itemQuantity[item];
                     if ((s8)campWork->itemMode != 2) {
-                        sprintf(numberText, D_0054FEB0, quantity);
+                        sprintf(numberText, cmpFmtItemQty, quantity);
                     } else if (quantity < 2) {
-                        sprintf(numberText, D_0054FEB0, 1);
+                        sprintf(numberText, cmpFmtItemQty, 1);
                     } else {
-                        sprintf(numberText, D_0054FEB0, quantity);
+                        sprintf(numberText, cmpFmtItemQty, quantity);
                     }
 
                     font = frwGetSmallNumFontFRQ(x + 0x810,
@@ -7034,7 +7034,7 @@ u16 cmpGetSkillCost(u16 skill, u16 *work)
 }
 
 extern u8 D_0053FEB8[];
-extern char D_0054FEB8[];
+extern char cmpFmtSkillCost[];
 
 #ifdef NON_MATCHING
 void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
@@ -7072,7 +7072,7 @@ void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
         fclDrawSpriteRes(x + 0x120, y + 0x38, 0x10, colors, 7, sprite,
                          D_00345D88, fclSpriteTable, 0x47);
     } else {
-        sprintf(buffer, D_0054FEB8, cmpGetSkillCost(skill, work));
+        sprintf(buffer, cmpFmtSkillCost, cmpGetSkillCost(skill, work));
         font = (frFontHandle_t *)frwGetSmallNumFontFRQ(x, y + 0x10, 0x10, (u32)textColor, buffer, NULL);
         func_001C7E38(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
@@ -7186,11 +7186,11 @@ void cmpExpandColor(u64 *dst, u32 color)
 }
 
 
-extern sdfDrawTag_t D_00574A60[2];
-extern sdf3DInitPacket_t D_00574AA0[2];
-extern sdfDrawTag_t D_00574AE0[2];
-extern sdf3DLightParallelPacket_t D_00574B20[2];
-extern sdf3DViewportPacket_t D_00574CE0[2];
+extern sdfDrawTag_t cmpViewTag[2];
+extern sdf3DInitPacket_t cmpViewInitPacket[2];
+extern sdfDrawTag_t cmpLightTag[2];
+extern sdf3DLightParallelPacket_t cmpLightPacket[2];
+extern sdf3DViewportPacket_t cmpViewportPacket[2];
 extern sdfMatrix4_t D_002FA240;
 extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
@@ -7210,13 +7210,13 @@ void cmpDrawSetup3DView(void)
     LookAtMatrix(aViewTarget, aViewEye, aViewDown);
     SDF_VU0_STOREMATRIX(&D_002FA240);
     for (i = 0; i < 2; i++) {
-        sdfDrawTagInit(&D_00574A60[i]);
-        sdf3DLinkInitPacket(&D_00574A60[i], &D_00574AA0[i]);
-        sdf3DMakeViewportPacket(&D_00574CE0[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
-        sdfDrawTagLink(&D_00574A60[i], EE_ADDR(&D_00574CE0[i]));
-        sdfDrawTagInit(&D_00574AE0[i]);
-        sdf3DMakeLightParallelPacket(&D_00574B20[i], dds3LightParam.parallel, &dds3AmbientColor);
-        sdfDrawTagLink(&D_00574AE0[i], EE_ADDR(&D_00574B20[i]));
+        sdfDrawTagInit(&cmpViewTag[i]);
+        sdf3DLinkInitPacket(&cmpViewTag[i], &cmpViewInitPacket[i]);
+        sdf3DMakeViewportPacket(&cmpViewportPacket[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+        sdfDrawTagLink(&cmpViewTag[i], EE_ADDR(&cmpViewportPacket[i]));
+        sdfDrawTagInit(&cmpLightTag[i]);
+        sdf3DMakeLightParallelPacket(&cmpLightPacket[i], dds3LightParam.parallel, &dds3AmbientColor);
+        sdfDrawTagLink(&cmpLightTag[i], EE_ADDR(&cmpLightPacket[i]));
     }
 }
 
@@ -8760,8 +8760,8 @@ void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags, s32 unused)
     }
 }
 
-extern char D_0054FED0[]; /* padded eight-byte "%3d" object */
-extern char D_0054FED8[];
+extern char cmpFmtHpMp[]; /* padded eight-byte "%3d" object */
+extern char cmpFmtLevel[];
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
 void campDrawStatusRow2(s32 inputX, s32 y, u32 color, datUnitWork_t *unit)
@@ -8777,15 +8777,15 @@ void campDrawStatusRow2(s32 inputX, s32 y, u32 color, datUnitWork_t *unit)
     u16 level;
 
     drawX = x + 0xA40;
-    sprintf(text, D_0054FED0, (u16)unit->hp);
+    sprintf(text, cmpFmtHpMp, (u16)unit->hp);
     font = frwGetSmallNumFontFRQ(drawX, y, 0xFFFFF, color, text, NULL);
     drawX = x + 0xDD0;
-    sprintf(text, D_0054FED0, (u16)unit->mp);
+    sprintf(text, cmpFmtHpMp, (u16)unit->mp);
     font = frwGetSmallNumFontFRQ(drawX, y, 0xFFFFF, color, text, font);
     level = datGetLevelForDraw(unit);
     drawX = x + 0x10A0;
     drawY = y + 0x28;
-    sprintf(text, D_0054FED8, level);
+    sprintf(text, cmpFmtLevel, level);
     font = frwGetSmallNumFontFRQ(drawX, drawY, 0xFFFFF, color, text, font);
     func_001C7E38(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
@@ -9746,7 +9746,7 @@ void cmpDrawPanelEffRing(cmpPanelEffState_t *state, s32 ot)
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 128 of 131 words match at the native 524-byte size. */
-extern const s32 D_0053FF60[];
+extern const s32 cmpPanelEffCoords[];
 
 void cmpDrawPanelEffQuad(cmpPanelEffState_t *state, s32 ot)
 {
@@ -9759,7 +9759,7 @@ void cmpDrawPanelEffQuad(cmpPanelEffState_t *state, s32 ot)
     u32 corners[3];
     s32 radius;
 
-    memcpy(coords, D_0053FF60, sizeof(coords));
+    memcpy(coords, cmpPanelEffCoords, sizeof(coords));
     colorA = state->color8;
     colorB = state->color4;
     if (frame >= 0x21) {
@@ -9796,7 +9796,7 @@ extern void cmpDrawPanelEffBox(void *entry, s32 arg);
 extern void cmpDrawPanelEffRing(cmpPanelEffState_t *entry, s32 arg);
 extern void cmpDrawPanelEffQuad(cmpPanelEffState_t *entry, s32 arg);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FF60);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpPanelEffCoords);
 
 void cmpFindPanelEffSlot(s32 arg)
 {
@@ -10041,10 +10041,10 @@ void cmpModelInitCore2(void)
     func_0023FCC0();
 }
 
-extern u8 D_0053FFE8[];
-extern u8 D_0053FFF8[];
-extern u8 D_00540008[];
-extern u8 D_00540018[];
+extern u8 cmpDefaultLightColor[];
+extern u8 cmpDefaultLightDir[];
+extern u8 cmpDefaultAmbientColor[];
+extern u8 cmpDefaultFogColor[];
 extern f32 D_00345F60[];
 extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
 extern void dds3SetLightColor(s32 frame, s32 number, f32 *color);
@@ -10061,10 +10061,10 @@ void func_0023FCC0(void)
     sdfVector4_t ambientColor;
     sdfVector4_t fogColor;
 
-    memcpy(&lightColor, D_0053FFE8, sizeof(lightColor));
-    memcpy(&lightDirection, D_0053FFF8, sizeof(lightDirection));
-    memcpy(&ambientColor, D_00540008, sizeof(ambientColor));
-    memcpy(&fogColor, D_00540018, sizeof(fogColor));
+    memcpy(&lightColor, cmpDefaultLightColor, sizeof(lightColor));
+    memcpy(&lightDirection, cmpDefaultLightDir, sizeof(lightDirection));
+    memcpy(&ambientColor, cmpDefaultAmbientColor, sizeof(ambientColor));
+    memcpy(&fogColor, cmpDefaultFogColor, sizeof(fogColor));
     dds3SetSoftenBias(0, 5.0f, 0.0f);
     dds3SetLightColor(0, 0, &lightColor.x);
     dds3SetLightDir(0, 0, &lightDirection.x);
@@ -10082,7 +10082,7 @@ void func_0023FCC0(void)
 void cmpModelInit(void)
 {
     cmpModelInitFlag = 0;
-    D_0054FEEE = 6;
+    cmpStatusGroup = 6;
     cmpStatusModelId = 0;
     cmpModelHandle = 0;
     cmpModelInitCore2();
@@ -10098,13 +10098,13 @@ extern void mdlFree(mdlObj_t *aHandle);
 
 extern void cmpFreeBadEffect(void);
 
-extern char D_00540028[];
+extern char cmpModelFreeMsg[];
 
 void cmpModelFreeResource(void)
 {
     if (cmpEncycWork != 0)
     {
-        printf(D_00540028, D_0054FEEE, cmpStatusModelId);
+        printf(cmpModelFreeMsg, cmpStatusGroup, cmpStatusModelId);
         mdlFree(cmpEncycWork);
         cmpEncycWork = 0;
         cmpFreeBadEffect();
@@ -10115,7 +10115,7 @@ s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
     /* mdlPrepare's result, which retail returns in v0 (cmpLoadStatusModel
      * reads it); the store after the call keeps it no sibling call. */
-    return D_0054FEE0 = mdlPrepare(group, id, blocking);
+    return cmpStatusModelResult = mdlPrepare(group, id, blocking);
 }
 
 typedef struct
@@ -10154,7 +10154,7 @@ extern void *hCAMPBadEffect;
 
 extern u8 D_00349300[];
 
-extern char D_00540040[];
+extern char cmpBadEffReadyMsg[];
 
 extern void *effCAMPBadCreate(u8 *work, s32 kind);
 
@@ -10185,7 +10185,7 @@ s32 cmpBadEffSetup(u16 id, u32 flag)
     }
     cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
     hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
-    printf(D_00540040);
+    printf(cmpBadEffReadyMsg);
     return 1;
 }
 
@@ -10193,7 +10193,7 @@ extern void *hCAMPBadEffect;
 
 extern void effCAMPBadDelete(void *hCAMPBadEffect);
 
-extern char D_00540058[];
+extern char cmpBadEffFreeMsg[];
 
 void cmpFreeBadEffect(void)
 {
@@ -10201,16 +10201,16 @@ void cmpFreeBadEffect(void)
     {
         effCAMPBadDelete(hCAMPBadEffect);
         hCAMPBadEffect = NULL;
-        printf(D_00540058);
+        printf(cmpBadEffFreeMsg);
     }
 }
 
-extern char D_00540070[];
+extern char cmpModelPrepareMsg[];
 
 void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
     cmpPrepareStatusModel(group, id, blocking);
-    printf(D_00540070, group, id);
+    printf(cmpModelPrepareMsg, group, id);
 }
 
 s32 cmpModelSetup(u16 id, s32 blocking)
@@ -10232,15 +10232,15 @@ s32 cmpModelSetup(u16 id, s32 blocking)
         group = 6;
         model = id;
     }
-    if ((group == D_0054FEEE) && (model == cmpStatusModelId) && (cmpEncycWork != 0))
+    if ((group == cmpStatusGroup) && (model == cmpStatusModelId) && (cmpEncycWork != 0))
     {
         return 2;
     }
     cmpModelFreeResource();
-    D_0054FEEE = group;
+    cmpStatusGroup = group;
     cmpStatusModelId = model;
     cmpModelHandle = blocking;
-    cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle);
+    cmpPrepareStatusModel(cmpStatusGroup, cmpStatusModelId, cmpModelHandle);
     cmpModelInitFlag = 1;
     if (blocking == 1)
     {
@@ -10249,7 +10249,7 @@ s32 cmpModelSetup(u16 id, s32 blocking)
     return 1;
 }
 
-extern char D_00540090[];
+extern char cmpModelReadyMsg[];
 
 extern mdlObj_t *mdlLoad(u32 group, u32 id);
 
@@ -10259,14 +10259,14 @@ s32 cmpLoadStatusModel(void)
 {
     if (cmpModelInitFlag != 0)
     {
-        if (cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle) != 0)
+        if (cmpPrepareStatusModel(cmpStatusGroup, cmpStatusModelId, cmpModelHandle) != 0)
         {
-            if (cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle) != -1)
+            if (cmpPrepareStatusModel(cmpStatusGroup, cmpStatusModelId, cmpModelHandle) != -1)
             {
                 cmpModelFreeResource();
-                cmpEncycWork = mdlLoad(D_0054FEEE, cmpStatusModelId);
+                cmpEncycWork = mdlLoad(cmpStatusGroup, cmpStatusModelId);
                 cmpGetStatusModelMotion(cmpEncycWork);
-                printf(D_00540090, D_0054FEEE, cmpStatusModelId);
+                printf(cmpModelReadyMsg, cmpStatusGroup, cmpStatusModelId);
                 cmpModelInitFlag = 0;
                 return 2;
             }
@@ -10489,10 +10489,10 @@ void cmpSetMaxHPMP(datUnitWork_t *unit)
 
 s8 cmpGetParamGaugeColor(s8 index)
 {
-    return D_00349380[index];
+    return cmpParamGaugeColors[index];
 }
 
-extern char D_005400E0[];
+extern char cmpDebugIdFmt[];
 
 extern s32 datExecSkill(s32 skill, datUnitWork_t *user, datUnitWork_t *target);
 
@@ -10504,7 +10504,7 @@ void cmpExecRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
     cmbCopyCustomDevilToStock(&saveUser, user);
     cmbCopyCustomDevilToStock(&saveTarget, target);
     datExecSkill(skill, user, target);
-    printf(D_005400E0, skill, target->flag);
+    printf(cmpDebugIdFmt, skill, target->flag);
     if ((target->badstatus & 0x800) != 0)
     {
         cmbCopyCustomDevilToStock(user, &saveUser);
@@ -10597,33 +10597,33 @@ s32 cmpGetSkillTargetArea(u16 skillId)
 
 extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultLightColor);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultLightDir);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultAmbientColor);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultFogColor);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpModelFreeMsg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpBadEffReadyMsg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540058);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpBadEffFreeMsg);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540070);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpModelPrepareMsg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540090);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpModelReadyMsg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_005400B0);
 
@@ -10631,7 +10631,7 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_005400C0);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400E0);
+INCLUDE_RODATA(const s32, "code_0022C578", cmpDebugIdFmt);
 
 s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
 {
@@ -10746,7 +10746,7 @@ void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
 
 char *cmpGetParamName(s8 index)
 {
-    return D_00349388[index];
+    return cmpParamNames[index];
 }
 
 s32 cmpGetPressedButton(s32 mask)
@@ -13075,9 +13075,9 @@ INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE28);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE30);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE38);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpCalcProcName);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE40);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtNameCount);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE48);
 
@@ -13089,7 +13089,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE60);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE68);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE70);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtMaka);
 
 INCLUDE_SDATA(const s32, "code_0022C578", campStatusPanel);
 
@@ -13097,7 +13097,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", campInfoWork);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE7C);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE80);
+INCLUDE_SDATA(const s32, "code_0022C578", campDhFmtAmount);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpStatTimer);
 
@@ -13109,15 +13109,15 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmbBirthPanel);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE94);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE98);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtDec2);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEA0);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtValMax);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEA8);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtExpNext);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEB0);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtItemQty);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEB8);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtSkillCost);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEBC);
 
@@ -13131,13 +13131,13 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmpInfoWindow);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FECC);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FED0);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtHpMp);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FED8);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtLevel);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpPanelEffList);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEE0);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelResult);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpEncycWork);
 
@@ -13147,7 +13147,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelReady);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpModelInitFlag);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEEE);
+INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusGroup);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelId);
 
@@ -13167,7 +13167,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF14);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmbRaceTable);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF1C);
+INCLUDE_SDATA(const s32, "code_0022C578", nbEncountMaxBase);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF20);
 

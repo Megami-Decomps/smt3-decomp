@@ -34,7 +34,7 @@ extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 extern rstData_t *EventStart;
 
-extern datRaceEntry_t D_00339E00[];
+extern datRaceEntry_t datRaceTable[];
 
 extern s8 D_00339E06[];
 
@@ -65,11 +65,11 @@ typedef struct
     /* 0x03 */ u8 unk_03;
 } datCommentEntry_t;
 
-extern datCommentEntry_t D_00339DF8[];
+extern datCommentEntry_t datCommentTable[];
 
-extern char D_0053DA90[];
+extern char rstDrawProcName[];
 
-extern char D_0053DAA0[];
+extern char rstUpdateProcName[];
 
 extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
 
@@ -103,14 +103,14 @@ typedef struct
     /* 0x02 */ u8 unk_02;
 } rstMotionReq_t;
 
-extern rstMotionReq_t D_00332458[];
+extern rstMotionReq_t rstMotionReqTable[];
 
 void rstSetMotionReqFromTbl(s8 Type)
 {
     s32 i = EventStart->unit->id * 7 + Type;
 
-    func_0021FE30(D_00332458[i].unk_00, 0, (f32)D_00332458[i].unk_01,
-                  (f32)D_00332458[i].unk_02);
+    func_0021FE30(rstMotionReqTable[i].unk_00, 0, (f32)rstMotionReqTable[i].unk_01,
+                  (f32)rstMotionReqTable[i].unk_02);
 }
 
 extern s8 cmbChkSkillOwner(u16 skillId, datUnitWork_t *unit);
@@ -132,7 +132,7 @@ extern u32 datGetMaxHp(datUnitWork_t *work);
 extern u32 datGetMaxMp(datUnitWork_t *work);
 #include "sdk_libc.h"
 
-extern char D_0053DAB0[];
+extern char rstDestroySkillFormat[];
 
 void rstSetDestroySkillMaxHpMp(void)
 {
@@ -153,7 +153,7 @@ void rstSetDestroySkillMaxHpMp(void)
     mpChange = datGetMaxMp(&work) - mpChange;
     unit->maxhp += hpChange;
     unit->maxmp += mpChange;
-    printf(D_0053DAB0, skill, hpChange, mpChange);
+    printf(rstDestroySkillFormat, skill, hpChange, mpChange);
 }
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
@@ -299,7 +299,7 @@ void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
             return;
         }
         for (i = datGetDevilSlotState((u8)heartsId); i < 8; i++) {
-            datRaceEntry_t *race = &D_00339E00[heartsId];
+            datRaceEntry_t *race = &datRaceTable[heartsId];
 
             skill = race->heartConditions[i].skill;
             level = (s8)race->heartConditions[i].condition;
@@ -915,7 +915,7 @@ s32 rstFindRegisteredDevil(void)
     if (dds3GetRandA(NULL) % 3 < 2) {
         roll = dds3GetRandA(NULL) % 255;
         for (i = 0; i < 8; i++) {
-            if (roll < D_00339E00[id].probabilities[i]) {
+            if (roll < datRaceTable[id].probabilities[i]) {
                 return (s8)i;
             }
         }
@@ -976,7 +976,7 @@ extern char *text1[];
 extern s32 fclStartSelMessage(s32 id);
 extern void rstAddAsignParam(void);
 
-INCLUDE_RODATA(const s32, "result/rstcalc", D_0053DAB0);
+INCLUDE_RODATA(const s32, "result/rstcalc", rstDestroySkillFormat);
 
 s32 rstCalc(dds3ProcessID_t *id)
 {
@@ -1179,7 +1179,7 @@ s32 cmbGetParam(datUnitWork_t *unit, s32 index)
 
 s8 func_00221DB0(s8 index)
 {
-    return D_00339E00[index].unk_19;
+    return datRaceTable[index].unk_19;
 }
 
 s32 cmbChkGetHearts(s32 rawId)
@@ -1197,7 +1197,7 @@ s32 cmbChkGetHearts(s32 rawId)
 
 s32 datFindCommentEntry(u16 devilId)
 {
-    datCommentEntry_t *entry = D_00339DF8;
+    datCommentEntry_t *entry = datCommentTable;
     u32 i;
 
     for (i = 0; i < 1; i++, entry++) {
@@ -1233,7 +1233,7 @@ s32 datGetPlayerLNDLevel(datUnitWork_t *unit)
 
 s32 datGetDevilRace(s8 index)
 {
-    return D_00339E00[index].race & 7;
+    return datRaceTable[index].race & 7;
 }
 
 extern void *memset(void *dst, s32 value, size_t size);
@@ -1300,7 +1300,7 @@ s8 datGetDevilSlotIndex(u8 devilId)
         return 0;
     }
     for (i = 0; i < 8; i++) {
-        if (D_00339E00[devilId].heartsSkill[i].skill != 0) {
+        if (datRaceTable[devilId].heartsSkill[i].skill != 0) {
             count++;
         }
     }
@@ -1353,7 +1353,7 @@ u16 rstGetHeartsSkillAt(u8 race, s8 index)
     if (index >= 8) {
         return 0;
     }
-    return D_00339E00[race].heartsSkill[index].skill;
+    return datRaceTable[race].heartsSkill[index].skill;
 }
 
 extern s8 D_00339E1A[];
@@ -1372,7 +1372,7 @@ s16 datGetDevilParam(u8 devilId)
     if (devilId == 0) {
         return 0;
     }
-    return D_00339E00[devilId].param;
+    return datRaceTable[devilId].param;
 }
 
 /* Target-specific allocation aid: each live table offset occupies $2, so
@@ -1462,7 +1462,7 @@ s32 datAddHeartsEntry(u8 id, datUnitWork_t *work)
 
     if (id > 0) {
         for (i = 0; i < 8; i++) {
-            datRaceEntry_t *race = &D_00339E00[id];
+            datRaceEntry_t *race = &datRaceTable[id];
             u16 skill = race->heartConditions[i].skill;
 
             if (skill != 0 && race->heartConditions[i].condition == 0) {
@@ -1481,14 +1481,14 @@ s32 func_00222610(u8 id, u8 limit, datUnitWork_t *unit)
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        u8 condition = D_00339E00[id].heartConditions[i].condition;
-        u16 skill = D_00339E00[id].heartConditions[i].skill;
+        u8 condition = datRaceTable[id].heartConditions[i].condition;
+        u16 skill = datRaceTable[id].heartConditions[i].skill;
 
         if (condition != 0 && skill != 0) {
             if (count++ >= limit) {
                 return 0;
             }
-            if (unit->level >= D_00339E00[id].heartConditions[i].condition) {
+            if (unit->level >= datRaceTable[id].heartConditions[i].condition) {
                 unit->skill[unit->skillcnt++] = skill;
             }
         }
@@ -1608,11 +1608,11 @@ typedef struct
     /* 0x2 */ u16 flag;
 } cmbEvoFlagEntry_t;
 
-extern cmbEvoFlagEntry_t D_00339640[];
+extern cmbEvoFlagEntry_t cmbEvoNeedFlagTable[];
 
 s32 cmbChkEvoNeedFlag(u16 devilId)
 {
-    cmbEvoFlagEntry_t *entry = D_00339640;
+    cmbEvoFlagEntry_t *entry = cmbEvoNeedFlagTable;
     u32 i;
 
     for (i = 0; i < 6; i++, entry++) {
@@ -1715,11 +1715,11 @@ typedef struct
     /* 0x03 */ u8 unk_03;
 } cmbEvoEntry_t;
 
-extern cmbEvoEntry_t D_00339658[];
+extern cmbEvoEntry_t cmbEvoEntryTable[];
 
 s32 cmbFindEvoEntry(u16 devilId)
 {
-    cmbEvoEntry_t *entry = D_00339658;
+    cmbEvoEntry_t *entry = cmbEvoEntryTable;
     u32 i;
 
     for (i = 0; i < 0xE3; i++, entry++) {
@@ -1753,11 +1753,11 @@ s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill)
     return result;
 }
 
-extern u16 D_00339BA8[];
+extern u16 cmbEvoDevilList[];
 
 s32 cmbEvoEntryExists(u16 devilId)
 {
-    u16 *entry = D_00339BA8;
+    u16 *entry = cmbEvoDevilList;
     u32 i;
 
     for (i = 0; i < 0x25; i++, entry++) {
@@ -1831,7 +1831,7 @@ s8 cmbAddLevelUpParamEx(datUnitWork_t *unit, s8 mode)
     for (i = 0; i < 6; i++) {
         dds3GlobalWork_t *global = *(dds3GlobalWork_t *volatile *)&DDS3_GBWK;
         u8 rate = id != 0 ? datLevelUpTable[id].head[i] :
-                              D_00339E00[global->heartsequip].growthRate[i];
+                              datRaceTable[global->heartsequip].growthRate[i];
         s32 current;
         if (i == 1) {
             rate = 0;
@@ -2040,11 +2040,11 @@ typedef struct
     /* 0x02 */ u16 result;
 } rstPowerUpEntry_t;
 
-extern rstPowerUpEntry_t D_00339C20[];
+extern rstPowerUpEntry_t rstPowerUpTable[];
 
 s32 rstFindPowerUpSkill(u16 skillId)
 {
-    rstPowerUpEntry_t *entry = D_00339C20;
+    rstPowerUpEntry_t *entry = rstPowerUpTable;
     u32 i;
 
     for (i = 0; i < 0x37; i++, entry++) {
@@ -2060,7 +2060,7 @@ s32 rstRollPowerUpSkill(u16 skill, datUnitWork_t *unit)
     s32 i;
 
     for (i = 0; i < 0x40; i++) {
-        u16 candidate = D_00339658[dds3GetRandA(0) % 0xE3].devilId;
+        u16 candidate = cmbEvoEntryTable[dds3GetRandA(0) % 0xE3].devilId;
         s32 candidatePower = cmbFindEvoEntry(candidate);
 
         if (cmbChkSkillOwner(candidate, unit) < 0 &&
@@ -2116,11 +2116,11 @@ typedef struct
     /* 0x05 */ s8 unk_05;
 } cmbMitamaEntry_t;
 
-extern cmbMitamaEntry_t D_00339D10[];
+extern cmbMitamaEntry_t cmbMitamaTable[];
 
 s32 func_00223748(u16 devilId)
 {
-    cmbMitamaEntry_t *entry = D_00339D10;
+    cmbMitamaEntry_t *entry = cmbMitamaTable;
     u32 i;
 
     for (i = 0; i < 0x26; i++, entry++) {
@@ -2133,7 +2133,7 @@ s32 func_00223748(u16 devilId)
 
 s32 func_00223788(u16 devilId)
 {
-    cmbMitamaEntry_t *entry = D_00339D10;
+    cmbMitamaEntry_t *entry = cmbMitamaTable;
     u32 i;
 
     for (i = 0; i < 0x26; i++, entry++) {
@@ -2152,8 +2152,8 @@ s32 rstRollComment(void)
     cmbMitamaEntry_t *entry;
 
     for (attempt = 0; attempt < 16; attempt++) {
-        draw = dds3GetRandA(NULL) % D_00339D10[37].unk_02;
-        for (i = 0, entry = D_00339D10; i < 38; i++, entry++) {
+        draw = dds3GetRandA(NULL) % cmbMitamaTable[37].unk_02;
+        for (i = 0, entry = cmbMitamaTable; i < 38; i++, entry++) {
             if (draw < entry->unk_02) {
                 u16 id = entry->devilId;
                 if (DDS3_GBWK->party[0].unit.level >= entry->unk_04 &&
@@ -2163,7 +2163,7 @@ s32 rstRollComment(void)
             }
         }
     }
-    return D_00339D10[0].devilId;
+    return cmbMitamaTable[0].devilId;
 }
 
 s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)

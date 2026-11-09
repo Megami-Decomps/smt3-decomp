@@ -1,14 +1,14 @@
 #include "common.h"
 #include "kernel.h"
 
-extern char D_0054F908[];
+extern char evtSkyProcName[];
 
-extern char D_0054F9B8[];
-
-
+extern char evtFmtStr[];
 
 
-extern char D_0054FAB0[];
+
+
+extern char evtPackNameFormat[];
 
 extern u16 skyanime;
 
@@ -147,6 +147,6 @@ s32 func_001FA158(s32 eventId, s32 variation)
 
 void evtMakeEventPackName(s32 index, char *buffer)
 {
-    sprintf(buffer, D_0054FAB0, index);
+    sprintf(buffer, evtPackNameFormat, index);
 }
 

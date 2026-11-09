@@ -45,11 +45,11 @@ typedef struct { u8 unk00[0x20]; u64 value, registerCode; } itfGsState_t;
 
 extern frFontRequest_t *frTestFontHandle;
 
-extern u64 D_003263C0[];
+extern u64 itfAlphaValueTable[];
 
-extern u8 D_0054F470[8], D_0054F478[8], D_003263D8[], D_003263E0[];
+extern u8 itfGaugeQuadVertexIndex[8], itfGaugeQuadColorIndex[8], itfGaugeHighlightVertexIndex[], itfGaugeHighlightColorIndex[];
 
-extern itfColorVector_t D_003263E8[];
+extern itfColorVector_t itfGaugeHighlightVectors[];
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
@@ -497,7 +497,7 @@ void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context) {
     s32 packet = sdfGrAllocPacketBuff(ITF_STATE_PACKET_BYTES);
     itfGsState_t *dst = EE_ADDR_AS(itfGsState_t *, sdf2DMakeStdPacket(packet, ITF_STATE_PACKET_BYTES));
 
-    dst->value = D_003263C0[tp];
+    dst->value = itfAlphaValueTable[tp];
     dst->registerCode = context ? ITF_ALPHA_SECOND_CONTEXT : ITF_ALPHA_FIRST_CONTEXT;
     sdfDrawTagLink(pdrawtag, packet);
 }
@@ -541,16 +541,16 @@ void itfMiscDrawGauge(s32 portion, s32 entire, s32 shadow,
     vertices[4].y = pos[1].y;
     vertices[5].x = right;
     vertices[5].y = pos[1].y;
-    itfMiscDrawRectanglePrim(vertices, pcolor_portion, D_0054F470, D_0054F478, z, pdrawtag);
-    itfMiscDrawRectanglePrim(vertices, pcolor_entire, D_0054F470 + 4, D_0054F478, z, pdrawtag);
+    itfMiscDrawRectanglePrim(vertices, pcolor_portion, itfGaugeQuadVertexIndex, itfGaugeQuadColorIndex, z, pdrawtag);
+    itfMiscDrawRectanglePrim(vertices, pcolor_entire, itfGaugeQuadVertexIndex + 4, itfGaugeQuadColorIndex, z, pdrawtag);
     if (shadow != 0 && filledWidth >= 3) {
         itfMiscSetRatioRGB(highlightColors, pcolor_portion->components[0],
                         pcolor_portion->components[1], pcolor_portion->components[2],
-                        pcolor_portion->components[3], D_003263E8, 4);
+                        pcolor_portion->components[3], itfGaugeHighlightVectors, 4);
         itfMiscDrawLineStripPrim(vertices, (itfColor_t *)highlightColors,
-                        D_003263D8, D_003263E0, 3, z, pdrawtag);
+                        itfGaugeHighlightVertexIndex, itfGaugeHighlightColorIndex, 3, z, pdrawtag);
         itfMiscDrawLineStripPrim(vertices, (itfColor_t *)highlightColors,
-                        D_003263D8 + 3, D_003263E0 + 3, 3, z, pdrawtag);
+                        itfGaugeHighlightVertexIndex + 3, itfGaugeHighlightColorIndex + 3, 3, z, pdrawtag);
     }
 }
 

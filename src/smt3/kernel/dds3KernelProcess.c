@@ -13,7 +13,7 @@ extern void dds3CallBasicDrawProc(dds3Basic_t *basic);
 
 typedef struct sdfPreDrawChain_t sdfPreDrawChain_t;
 extern dds3DrawBank_t dds3DrawEnv[2];
-extern sdfPreDrawChain_t D_002F6A70;
+extern sdfPreDrawChain_t dds3PreDrawChain;
 extern sdfGrOt_t sdfGrOtTable[85];
 extern u32 dds3GetFrameID(void);
 extern void sdfGrInitNewFrame(void);
@@ -30,7 +30,7 @@ s32 dds3FirstProcess(dds3ProcessID_t *id)
 
     sdfGrInitNewFrame();
     sdfGrOtInit(sdfGrOtTable, 85);
-    sdfPreDrawChainInit(&D_002F6A70);
+    sdfPreDrawChainInit(&dds3PreDrawChain);
     dds3InitDrawEnvSub(frame);
     env = dds3DrawEnv[frame].modelEnv;
     for (count = 10; count >= 0; --count, ++env) {
@@ -44,13 +44,13 @@ s32 dds3FirstProcess(dds3ProcessID_t *id)
 #ifdef NON_MATCHING
 extern u32 dds3RenderTex, dds3RenderDrawEnv, dds3BackColor;
 extern dds3LightState_t dds3LightParam, dds3LightParam2;
-extern sdf3DLight_t *D_002F5D10[];
-extern sdfVector4_t D_002F5D20, D_002F5C20, D_002F5C30, effPCPBossTexRect;
-extern sdfVector4_t fldAutoMapRect, D_002F5E00, D_002F5E10, aViewTarget, aViewEye, aViewDown;
+extern sdf3DLight_t *dds3RenderLightParallel[];
+extern sdfVector4_t dds3RenderAmbientColor, D_002F5C20, D_002F5C30, effPCPBossTexRect;
+extern sdfVector4_t fldAutoMapRect, fldAutoMapEye, fldAutoMapUp, aViewTarget, aViewEye, aViewDown;
 extern f32 dds3QuakeOffset[4];
-extern sdf3DScreenParam_t D_002F5B80, dds3ScreenParam, dds3ScreenParam2;
-extern sdfMatrix4_t D_002FA2A0, aProjMatrix, D_002FA240;
-extern sdf3DFogParam_t D_002F5D30;
+extern sdf3DScreenParam_t dds3RenderScreenParam, dds3ScreenParam, dds3ScreenParam2;
+extern sdfMatrix4_t dds3RenderViewportMatrix, aProjMatrix, D_002FA240;
+extern sdf3DFogParam_t dds3RenderFogParam;
 extern sdfModelOt_t D_002F69B8[];
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor2, dds3LightParam2, 0x10);
@@ -84,19 +84,19 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     dds3RunQuake();
     dds3SceneLightUpdateFirst();
     if (dds3RenderTex != 0) {
-        sdf3DMakeLightParallelPacket(&dds3DrawEnv[frame].renderLight, D_002F5D10, &D_002F5D20);
+        sdf3DMakeLightParallelPacket(&dds3DrawEnv[frame].renderLight, dds3RenderLightParallel, &dds3RenderAmbientColor);
         dds3DrawEnv[frame].renderEnv.clear.clearColor = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
             sdfDrawTag_t *renderTag;
             sdf3DFogPacket_t *renderFog;
-            sdf3DMakeScreenParam(&D_002F5B80);
+            sdf3DMakeScreenParam(&dds3RenderScreenParam);
             LookAtMatrix(&D_002F5C20, &D_002F5C30, &effPCPBossTexRect);
-            SDF_VU0_STOREMATRIX(&D_002FA2A0);
-            sdf3DMakeViewportPacket(&dds3DrawEnv[frame].renderViewport, &D_002F5B80, &D_002FA2A0);
+            SDF_VU0_STOREMATRIX(&dds3RenderViewportMatrix);
+            sdf3DMakeViewportPacket(&dds3DrawEnv[frame].renderViewport, &dds3RenderScreenParam, &dds3RenderViewportMatrix);
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], &dds3DrawEnv[frame].renderTag);
             renderTag = dds3FontReqAllocDrawTag();
             renderFog = EE_ADDR_AS(sdf3DFogPacket_t *, sdfGrAllocPacketBuff(0x50));
-            sdf3DMakeFogPacket(renderFog, &D_002F5D30);
+            sdf3DMakeFogPacket(renderFog, &dds3RenderFogParam);
             sdfDrawTagLink(renderTag, EE_ADDR(renderFog));
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], renderTag);
         }
@@ -106,7 +106,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
         sdf3DFogPacket_t *subFog;
         sdf3DMakeLightParallelPacket(&dds3DrawEnv[frame].subLight, dds3LightParam2.parallel, &dds3AmbientColor2);
         sdf3DMakeScreenParam(&dds3ScreenParam2);
-        LookAtMatrix(&fldAutoMapRect, &D_002F5E00, &D_002F5E10);
+        LookAtMatrix(&fldAutoMapRect, &fldAutoMapEye, &fldAutoMapUp);
         SDF_VU0_STOREMATRIX(&aProjMatrix);
         sdf3DMakeViewportPacket(&dds3DrawEnv[frame].subViewport, &dds3ScreenParam2, &aProjMatrix);
         sdfGrOtTable[73].regFunc(&sdfGrOtTable[73], &dds3DrawEnv[frame].subTag);
@@ -141,7 +141,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     sdf3DMakeFogPacket(sceneFog, &dds3FogParamMain);
     sdfDrawTagLink(sceneTag, EE_ADDR(sceneFog));
     sdfGrOtTable[7].regFunc(&sdfGrOtTable[7], sceneTag);
-    sdfPreDrawChainLink(&D_002F6A70, &dds3DrawEnv[frame].preDrawTag);
+    sdfPreDrawChainLink(&dds3PreDrawChain, &dds3DrawEnv[frame].preDrawTag);
     sdfModelOtInit(&D_002F69B8[0], &sdfGrOtTable[39], &sdfGrOtTable[40], &sdfGrOtTable[44], &sdfGrOtTable[45]);
     fldOtInit();
     sdfModelOtInit(&D_002F69B8[7], &sdfGrOtTable[51], &sdfGrOtTable[52], &sdfGrOtTable[53], &sdfGrOtTable[54]);
@@ -189,7 +189,7 @@ extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
 extern s32 dds3ScreenBlurOfsX[2];
 extern sdfDrawTag_t *dds3ClosedDrawTag;
 extern u32 dds3DrawFlag;
-extern s8 D_00551888;
+extern s8 sdfDrawPublishFlag;
 extern void dds3DrawDistRipOverError(void);
 extern void dds3FadeUpdate(void);
 extern void dds3DrawFade(void);
@@ -292,11 +292,11 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         dds3DrawProcessFlag = 0;
     }
     if (!(dds3DrawFlag & 0x2000000)) {
-        sdfGrReqDraw(poolHead, &D_002F6A70);
+        sdfGrReqDraw(poolHead, &dds3PreDrawChain);
     } else {
         dds3DrawFlag &= 0xFDFFFFFF;
     }
-    D_00551888 = 0;
+    sdfDrawPublishFlag = 0;
     return 0;
 }
 

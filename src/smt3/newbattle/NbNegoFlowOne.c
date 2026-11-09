@@ -213,7 +213,7 @@ extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern datDevilFormat_t datDevilTable[];
 
-extern nbNegoSkillEntry_t D_003E1338[];
+extern nbNegoSkillEntry_t nbNegoSkillTable[];
 
 extern s32 datGetPlayerLevel(void);
 
@@ -1025,7 +1025,7 @@ s32 Flow1_34(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x10023);
     nbAddNegoIdKouho(n, 0x10026);
-    if (D_003E1338[n->negoskillid - 0x180].requestmode == 0) {
+    if (nbNegoSkillTable[n->negoskillid - 0x180].requestmode == 0) {
         n->nextnegoid = n->nextkouho[0];
     } else {
         n->nextnegoid = n->nextkouho[1];

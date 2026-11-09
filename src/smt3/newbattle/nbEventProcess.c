@@ -248,7 +248,7 @@ extern void nbFreeEventEntry(nbMainProcessData_t *data);
 
 extern void fileSyncAll(void);
 
-extern char D_00545DC8[];
+extern char nbEventProcessName[];
 
 extern void *nbEventProcess1(dds3ProcessID_t *id);
 
@@ -262,7 +262,7 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 extern void nbGetEventEntry(nbMainProcessData_t *data);
 
-extern char D_00545DB0[];
+extern char nbEventNoFormat[];
 
 extern void pacFileHandleFree_(void *pacHandle);
 
@@ -469,7 +469,7 @@ void *nbEventProcess1(dds3ProcessID_t *id)
 
     data = nbGetMainProcessData();
     e = dds3GetProcessData(id);
-    printf(D_00545DB0, data->eventno);
+    printf(nbEventNoFormat, data->eventno);
     rid = nbEventEntryTable[data->eventno].rid;
     data->eventrid = rid;
     if (rid > 0) {
@@ -523,7 +523,7 @@ void nbInitEventProcess(nbMainProcessData_t *data)
     e->data = data;
     data->stat |= 0x1000;
     data->endtype = 0;
-    id = dds3StartProcess(D_00545DC8, 0x3F9, 1, 1, nbEventProcess1, nbEventShutdown, e);
+    id = dds3StartProcess(nbEventProcessName, 0x3F9, 1, 1, nbEventProcess1, nbEventShutdown, e);
     dds3LinkProcess(data->MainProcessID, id);
     data->eventproc = id;
 }
@@ -597,7 +597,7 @@ s32 cmpFindButtonGuideByFlag(datUnitWork_t **list, s32 cnt, s32 mask)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", D_00545DB0);
+INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", nbEventNoFormat);
 
-INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", D_00545DC8);
+INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", nbEventProcessName);
 

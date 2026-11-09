@@ -85,7 +85,7 @@ void getViewPortMatrix(sdfMatrix4_t *matrix)
 
 
 extern s32 offsetCount;
-extern tagPipePosTable D_00528F58;
+extern tagPipePosTable pipePosData;
 
 extern tagPipeObject *objMyData(void);
 extern void getPosTranslate(tagPipeObject *object, f32 *position);
@@ -106,15 +106,15 @@ void PipeCamera(void)
         return;
     }
     getPosTranslate(object, &position.x);
-    difference.x = position.x - D_00528F58.points[offset].position[0];
-    difference.y = position.y - D_00528F58.points[offset].position[1];
-    difference.z = position.z - D_00528F58.points[offset].position[2] - 0.01f;
+    difference.x = position.x - pipePosData.points[offset].position[0];
+    difference.y = position.y - pipePosData.points[offset].position[1];
+    difference.z = position.z - pipePosData.points[offset].position[2] - 0.01f;
     vecSet(&forward.x,
-           D_00528F58.points[offset + 1].position[0] - D_00528F58.points[offset].position[0],
-           D_00528F58.points[offset + 1].position[1] - D_00528F58.points[offset].position[1],
-           D_00528F58.points[offset + 1].position[2] - D_00528F58.points[offset].position[2]);
-    vecSet(&up.x, D_00528F58.points[offset].direction[0],
-           D_00528F58.points[offset].direction[1], D_00528F58.points[offset].direction[2]);
+           pipePosData.points[offset + 1].position[0] - pipePosData.points[offset].position[0],
+           pipePosData.points[offset + 1].position[1] - pipePosData.points[offset].position[1],
+           pipePosData.points[offset + 1].position[2] - pipePosData.points[offset].position[2]);
+    vecSet(&up.x, pipePosData.points[offset].direction[0],
+           pipePosData.points[offset].direction[1], pipePosData.points[offset].direction[2]);
     pipeCamShakeVec[0] = position.x;
     pipeCamShakeVec[1] = position.y;
     pipeCamShakeVec[2] = position.z;
@@ -125,9 +125,9 @@ void PipeCamera(void)
     pipeCamShake[0] = position.x + forward.x + up.x;
     pipeCamShake[1] = position.y + forward.y + up.y;
     pipeCamShake[2] = position.z + forward.z + up.z;
-    pipeCameraPos[0] = D_00528F58.points[offset].direction[0];
-    pipeCameraPos[1] = D_00528F58.points[offset].direction[1];
-    pipeCameraPos[2] = D_00528F58.points[offset].direction[2];
+    pipeCameraPos[0] = pipePosData.points[offset].direction[0];
+    pipeCameraPos[1] = pipePosData.points[offset].direction[1];
+    pipeCameraPos[2] = pipePosData.points[offset].direction[2];
 }
 
 
@@ -156,20 +156,20 @@ void PipeCameraAction(void)
     getPosTranslate(object, &position.x);
 
     /* The six XYZ vectors occupy native 0x10-byte stack slots. */
-    difference.x = position.x - D_00528F58.points[pathIndex].position[0];
-    difference.y = position.y - D_00528F58.points[pathIndex].position[1];
-    difference.z = position.z - D_00528F58.points[pathIndex].position[2];
+    difference.x = position.x - pipePosData.points[pathIndex].position[0];
+    difference.y = position.y - pipePosData.points[pathIndex].position[1];
+    difference.z = position.z - pipePosData.points[pathIndex].position[2];
     vecSet(&forward.x,
-           D_00528F58.points[pathIndex + 10].position[0] -
-               D_00528F58.points[pathIndex].position[0],
-           D_00528F58.points[pathIndex + 10].position[1] -
-               D_00528F58.points[pathIndex].position[1],
-           D_00528F58.points[pathIndex + 10].position[2] -
-               D_00528F58.points[pathIndex].position[2]);
+           pipePosData.points[pathIndex + 10].position[0] -
+               pipePosData.points[pathIndex].position[0],
+           pipePosData.points[pathIndex + 10].position[1] -
+               pipePosData.points[pathIndex].position[1],
+           pipePosData.points[pathIndex + 10].position[2] -
+               pipePosData.points[pathIndex].position[2]);
     vecSet(&up.x,
-           D_00528F58.points[pathIndex].direction[0],
-           D_00528F58.points[pathIndex].direction[1],
-           D_00528F58.points[pathIndex].direction[2]);
+           pipePosData.points[pathIndex].direction[0],
+           pipePosData.points[pathIndex].direction[1],
+           pipePosData.points[pathIndex].direction[2]);
 
     pipeCamShakeVec[0] = position.x;
     pipeCamShakeVec[1] = position.y;
@@ -180,11 +180,11 @@ void PipeCameraAction(void)
     if (pathIndex < 480) {
         vecNormalize(&up.x);
         vecScale(&up.x, 400.0f);
-        pipeCamShake[0] = D_00528F58.points[480].position[0] +
+        pipeCamShake[0] = pipePosData.points[480].position[0] +
                           forward.x + up.x;
-        pipeCamShake[1] = D_00528F58.points[480].position[1] +
+        pipeCamShake[1] = pipePosData.points[480].position[1] +
                           forward.y + up.y;
-        pipeCamShake[2] = D_00528F58.points[480].position[2] +
+        pipeCamShake[2] = pipePosData.points[480].position[2] +
                           forward.z + up.z;
     } else if (pathIndex < 680) {
         scale = (f32)(pathIndex - 480);
@@ -196,9 +196,9 @@ void PipeCameraAction(void)
         sum.y = forward.y + up.y;
         sum.z = forward.z + up.z;
         index = (s32)(ease * scale + 480.0f);
-        pipeCamShake[0] = D_00528F58.points[index].position[0] + sum.x;
-        pipeCamShake[1] = D_00528F58.points[index].position[1] + sum.y;
-        pipeCamShake[2] = D_00528F58.points[index].position[2] + sum.z;
+        pipeCamShake[0] = pipePosData.points[index].position[0] + sum.x;
+        pipeCamShake[1] = pipePosData.points[index].position[1] + sum.y;
+        pipeCamShake[2] = pipePosData.points[index].position[2] + sum.z;
     } else if (pathIndex < 800) {
         f32 radius;
         f32 target;
@@ -265,48 +265,48 @@ void PipeCameraAction2(void)
         return;
     }
     getPosTranslate(object, &position.x);
-    difference.x = position.x - D_00528F58.points[offsetCount].position[0];
-    difference.y = position.y - D_00528F58.points[offsetCount].position[1];
-    difference.z = position.z - D_00528F58.points[offsetCount].position[2];
+    difference.x = position.x - pipePosData.points[offsetCount].position[0];
+    difference.y = position.y - pipePosData.points[offsetCount].position[1];
+    difference.z = position.z - pipePosData.points[offsetCount].position[2];
     vecSet(&forward.x,
-           D_00528F58.points[offsetCount + 10].position[0] - D_00528F58.points[offsetCount].position[0],
-           D_00528F58.points[offsetCount + 10].position[1] - D_00528F58.points[offsetCount].position[1],
-           D_00528F58.points[offsetCount + 10].position[2] - D_00528F58.points[offsetCount].position[2]);
-    vecSet(&up.x, D_00528F58.points[offsetCount].direction[0],
-           D_00528F58.points[offsetCount].direction[1], D_00528F58.points[offsetCount].direction[2]);
+           pipePosData.points[offsetCount + 10].position[0] - pipePosData.points[offsetCount].position[0],
+           pipePosData.points[offsetCount + 10].position[1] - pipePosData.points[offsetCount].position[1],
+           pipePosData.points[offsetCount + 10].position[2] - pipePosData.points[offsetCount].position[2]);
+    vecSet(&up.x, pipePosData.points[offsetCount].direction[0],
+           pipePosData.points[offsetCount].direction[1], pipePosData.points[offsetCount].direction[2]);
     vecNormalize(&forward.x);
     vecScale(&forward.x, -600.0f);
 
     offset = offsetCount;
     if (offset < 340) {
-        pipeCamShakeVec[0] = D_00528F58.points[offset].position[0];
-        pipeCamShakeVec[1] = D_00528F58.points[offset].position[1] - 100.0f;
-        pipeCamShakeVec[2] = D_00528F58.points[offset].position[2];
+        pipeCamShakeVec[0] = pipePosData.points[offset].position[0];
+        pipeCamShakeVec[1] = pipePosData.points[offset].position[1] - 100.0f;
+        pipeCamShakeVec[2] = pipePosData.points[offset].position[2];
         vecNormalize(&up.x);
         vecScale(&up.x, 600.0f);
-        pipeCamShake[0] = D_00528F58.points[offsetCount].position[0] + up.x;
-        pipeCamShake[1] = D_00528F58.points[offsetCount].position[1] + up.y;
-        pipeCamShake[2] = D_00528F58.points[offsetCount].position[2] + up.z;
+        pipeCamShake[0] = pipePosData.points[offsetCount].position[0] + up.x;
+        pipeCamShake[1] = pipePosData.points[offsetCount].position[1] + up.y;
+        pipeCamShake[2] = pipePosData.points[offsetCount].position[2] + up.z;
         pipeCameraPos[0] = blend;
         pipeCameraPos[1] = 1.0f;
         pipeCameraPos[2] = blend;
     } else if (offset < 800) {
         blend = (f32)(offset - 340) / 460.0f;
-        pipeCamShakeVec[0] = D_00528F58.points[offset].position[0] + difference.x * blend;
-        pipeCamShakeVec[1] = (D_00528F58.points[offset].position[1] - 100.0f) +
+        pipeCamShakeVec[0] = pipePosData.points[offset].position[0] + difference.x * blend;
+        pipeCamShakeVec[1] = (pipePosData.points[offset].position[1] - 100.0f) +
                               (difference.y + 100.0f) * blend;
-        pipeCamShakeVec[2] = D_00528F58.points[offset].position[2] + difference.z * blend;
+        pipeCamShakeVec[2] = pipePosData.points[offset].position[2] + difference.z * blend;
         vecNormalize(&up.x);
         vecScale(&up.x, 600.0f - blend * 650.0f);
-        sum.x = (D_00528F58.points[offsetCount].position[0] + up.x) + forward.x * blend;
-        sum.y = (D_00528F58.points[offsetCount].position[1] + up.y) + forward.y * blend;
-        sum.z = (D_00528F58.points[offsetCount].position[2] + up.z) + forward.z * blend;
+        sum.x = (pipePosData.points[offsetCount].position[0] + up.x) + forward.x * blend;
+        sum.y = (pipePosData.points[offsetCount].position[1] + up.y) + forward.y * blend;
+        sum.z = (pipePosData.points[offsetCount].position[2] + up.z) + forward.z * blend;
         pipeCamShake[0] = sum.x;
         pipeCamShake[1] = sum.y;
         pipeCamShake[2] = sum.z;
-        pipeCameraPos[0] = D_00528F58.points[offsetCount].direction[0] * blend;
-        pipeCameraPos[1] = (D_00528F58.points[offsetCount].direction[1] + -1.0f) * blend + 1.0f;
-        pipeCameraPos[2] = D_00528F58.points[offsetCount].direction[2] * blend;
+        pipeCameraPos[0] = pipePosData.points[offsetCount].direction[0] * blend;
+        pipeCameraPos[1] = (pipePosData.points[offsetCount].direction[1] + -1.0f) * blend + 1.0f;
+        pipeCameraPos[2] = pipePosData.points[offsetCount].direction[2] * blend;
     }
 }
 
@@ -338,20 +338,20 @@ void PipeCameraAction3(void)
     getPosTranslate(object, &position.x);
 
     /* The six XYZ vectors occupy native 0x10-byte stack slots. */
-    difference.x = position.x - D_00528F58.points[pathIndex].position[0];
-    difference.y = position.y - D_00528F58.points[pathIndex].position[1];
-    difference.z = position.z - D_00528F58.points[pathIndex].position[2];
+    difference.x = position.x - pipePosData.points[pathIndex].position[0];
+    difference.y = position.y - pipePosData.points[pathIndex].position[1];
+    difference.z = position.z - pipePosData.points[pathIndex].position[2];
     vecSet(&forward.x,
-           D_00528F58.points[pathIndex + 10].position[0] -
-               D_00528F58.points[pathIndex].position[0],
-           D_00528F58.points[pathIndex + 10].position[1] -
-               D_00528F58.points[pathIndex].position[1],
-           D_00528F58.points[pathIndex + 10].position[2] -
-               D_00528F58.points[pathIndex].position[2]);
+           pipePosData.points[pathIndex + 10].position[0] -
+               pipePosData.points[pathIndex].position[0],
+           pipePosData.points[pathIndex + 10].position[1] -
+               pipePosData.points[pathIndex].position[1],
+           pipePosData.points[pathIndex + 10].position[2] -
+               pipePosData.points[pathIndex].position[2]);
     vecSet(&up.x,
-           D_00528F58.points[pathIndex].direction[0],
-           D_00528F58.points[pathIndex].direction[1],
-           D_00528F58.points[pathIndex].direction[2]);
+           pipePosData.points[pathIndex].direction[0],
+           pipePosData.points[pathIndex].direction[1],
+           pipePosData.points[pathIndex].direction[2]);
 
     pipeCamShakeVec[0] = position.x;
     pipeCamShakeVec[1] = position.y;
@@ -362,11 +362,11 @@ void PipeCameraAction3(void)
     if (pathIndex < 480) {
         vecNormalize(&up.x);
         vecScale(&up.x, -400.0f);
-        pipeCamShake[0] = D_00528F58.points[480].position[0] +
+        pipeCamShake[0] = pipePosData.points[480].position[0] +
                           forward.x + up.x;
-        pipeCamShake[1] = D_00528F58.points[480].position[1] +
+        pipeCamShake[1] = pipePosData.points[480].position[1] +
                           forward.y + up.y;
-        pipeCamShake[2] = D_00528F58.points[480].position[2] +
+        pipeCamShake[2] = pipePosData.points[480].position[2] +
                           forward.z + up.z;
     } else if (pathIndex < 680) {
         scale = (f32)(pathIndex - 480);
@@ -375,9 +375,9 @@ void PipeCameraAction3(void)
         vecNormalize(&up.x);
         vecScale(&up.x, -400.0f - ease * -300.0f);
         index = (s32)(ease * scale + 480.0f);
-        pipeCamShake[0] = D_00528F58.points[index].position[0] + forward.x + up.x;
-        pipeCamShake[1] = D_00528F58.points[index].position[1] + forward.y + up.y;
-        pipeCamShake[2] = D_00528F58.points[index].position[2] + forward.z + up.z;
+        pipeCamShake[0] = pipePosData.points[index].position[0] + forward.x + up.x;
+        pipeCamShake[1] = pipePosData.points[index].position[1] + forward.y + up.y;
+        pipeCamShake[2] = pipePosData.points[index].position[2] + forward.z + up.z;
     } else if (pathIndex < 800) {
         f32 radius;
         f32 target;
@@ -431,7 +431,7 @@ offsetReady:
 typedef struct tagPipeQuakeWeights { s8 values[6]; } tagPipeQuakeWeights;
 extern s8 CameraAction;
 extern s32 offsetCount;
-extern tagPipePosTable D_00528F58;
+extern tagPipePosTable pipePosData;
 extern void vecSet(f32 *, f32, f32, f32);
 extern f32 vecNormalize(f32 *);
 extern void vecScale(f32 *, f32);
@@ -445,7 +445,7 @@ void CamActionQuake(void)
         /* Preserve the index-first EE address sum; see
          * docs/levers/addressing-and-types.md. */
         tagPipePosData *node = (tagPipePosData *)(
-            (u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(D_00528F58.points));
+            (u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(pipePosData.points));
         s32 action;
 
         vecSet(vector, node->direction[0], node->direction[1], node->direction[2]);

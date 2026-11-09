@@ -100,7 +100,7 @@ struct pbProcHandle_t
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 #include "sdk_libc.h"
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbProcHandle_t *record;
 
@@ -159,7 +159,7 @@ pbProcHandle_t *pbStartBlockDataBase(pbProcHandle_t *parent) {
     dds3SetProcessData(panel->id, panel);
     mat = sdfMatNew();
     panel->data.blockDB->mat = mat;
-    sdfMatSetTex(mat, D_0054F5C4->baseTex);
+    sdfMatSetTex(mat, pbMapWork->baseTex);
     return panel;
 }
 
@@ -211,7 +211,7 @@ typedef struct {
     f32 to[4];
 } pbOutlineEdge_t;
 
-extern pbOutlineEdge_t D_00327780[];
+extern pbOutlineEdge_t pbOutlineEdgeTable[];
 extern u8 pbGetBlockAt(s16 x, s16 y, s16 group);
 
 /* Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
@@ -239,12 +239,12 @@ void pbRebuildOutline(pbGroupData_t *group)
                 pbBlockEntry_t *destination = EE_ADDR_AS(pbBlockEntry_t *, (u32)i * sizeof(pbBlockEntry_t) + EE_ADDR(group->blk));
                 n = destination->outline_num;
                 destination->outline_num += 2;
-                destination->outline[n][0] = D_00327780[side].from[0] + x;
-                destination->outline[n][1] = D_00327780[side].from[1];
-                destination->outline[n][2] = D_00327780[side].from[2] + z;
-                destination->outline[n + 1][0] = D_00327780[side].to[0] + x;
-                destination->outline[n + 1][1] = D_00327780[side].to[1];
-                destination->outline[n + 1][2] = D_00327780[side].to[2] + z;
+                destination->outline[n][0] = pbOutlineEdgeTable[side].from[0] + x;
+                destination->outline[n][1] = pbOutlineEdgeTable[side].from[1];
+                destination->outline[n][2] = pbOutlineEdgeTable[side].from[2] + z;
+                destination->outline[n + 1][0] = pbOutlineEdgeTable[side].to[0] + x;
+                destination->outline[n + 1][1] = pbOutlineEdgeTable[side].to[1];
+                destination->outline[n + 1][2] = pbOutlineEdgeTable[side].to[2] + z;
             }
         }
     }

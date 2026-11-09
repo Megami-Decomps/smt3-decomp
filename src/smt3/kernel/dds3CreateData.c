@@ -70,61 +70,61 @@ extern s32 evtBitCheck(s32 eventNo);
 extern char *stfMpicFileTable[];
 extern char *stfPicFileTable[];
 /* Padded shared asset-path pool remains in its native data owner. */
-extern char D_0053EFB8[], D_0053EFD0[], D_0053EFE8[], D_0053F000[];
-extern char D_0053F078[], D_0053F090[], D_0053F0A8[], D_0053F0C0[];
-extern char D_0053F018[], D_0053F030[], D_0053F048[], D_0053F060[];
+extern char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
+extern char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
+extern char stfMPath01[], stfMPath02[], stfMPath03[], stfMPath04[];
 extern void frwLoadStaffFont(void);
 
 /* Load the selected staff-roll texture set and shared font resources. */
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFB8);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath01);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFD0);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath02);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFE8);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath03);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F000);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath04);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F018);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath01);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F030);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath02);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F048);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath03);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F060);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath04);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F078);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath01);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F090);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath02);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F0A8);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath03);
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F0C0);
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath04);
 
 void stfFreeFiles(void)
 {
     s32 i;
 
     if (evtBitCheck(0x12C)) {
-        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(D_0053EFB8, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
-        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(D_0053EFD0, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
-        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(D_0053EFE8, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
-        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(D_0053F000, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
-        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(D_0053F018, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
-        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(D_0053F030, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
-        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(D_0053F048, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
-        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(D_0053F060, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
+        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(stfMlinePath01, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
+        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(stfMlinePath02, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
+        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(stfMlinePath03, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
+        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(stfMlinePath04, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
+        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(stfMPath01, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
+        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(stfMPath02, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
+        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(stfMPath03, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
+        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(stfMPath04, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
         for (i = 0; i < 15; i++) {
             oStaff_UI->fontMemoryC[i] = sdfDevLoadFileEx(stfMpicFileTable[i], (u32 *)&oStaff_UI->uiTextureInputsC[i], NULL);
         }
     } else {
-        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(D_0053F078, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
-        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(D_0053F090, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
-        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(D_0053F0A8, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
-        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(D_0053F0C0, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
-        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(D_0053F018, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
-        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(D_0053F030, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
-        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(D_0053F048, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
-        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(D_0053F060, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
+        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(stfLinePath01, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
+        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(stfLinePath02, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
+        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(stfLinePath03, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
+        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(stfLinePath04, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
+        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(stfMPath01, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
+        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(stfMPath02, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
+        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(stfMPath03, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
+        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(stfMPath04, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
         for (i = 0; i < 15; i++) {
             oStaff_UI->fontMemoryC[i] = sdfDevLoadFileEx(stfPicFileTable[i], (u32 *)&oStaff_UI->uiTextureInputsC[i], NULL);
         }

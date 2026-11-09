@@ -14,7 +14,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern saddr_t stfShutDown(void);
 
-extern char D_0053F100[];
+extern char stfProcName[];
 
 extern u16 dds3VblanksPerFrame;
 extern u32 dds3GetKernelCount(void);
@@ -59,8 +59,8 @@ typedef struct
     /* 0x000C */ s32 y;
 } stfStaffRoll_t;
 
-extern stfStaffRoll_t D_00343018[0xB5];
-extern char D_0054FD90[];
+extern stfStaffRoll_t stfStaffRollTable[0xB5];
+extern char stfTextFormat[];
 #include "sdk_libc.h"
 
 extern u32 stfDrawText(s32 style, u32 color, const char *text);
@@ -83,7 +83,7 @@ s32 stfMain2(dds3ProcessID_t *id)
     s32 state;
 
     for (i = 0; i < 0xB5; i++) {
-        y = (s32)((u32)D_00343018[i].y
+        y = (s32)((u32)stfStaffRollTable[i].y
                   - (u32)(oStaff_UI->scrollY / 2) + 0x1C0u);
         if (i == 0xB4) {
             if (y < 0xE0) {
@@ -91,20 +91,20 @@ s32 stfMain2(dds3ProcessID_t *id)
             }
         }
         if (y >= -0x1E && y <= 0x1C0) {
-            if (D_00343018[i].text0 != NULL) {
-                if (D_00343018[i].text1 == NULL) {
-                    sprintf(buf, D_0054FD90, D_00343018[i].text0);
+            if (stfStaffRollTable[i].text0 != NULL) {
+                if (stfStaffRollTable[i].text1 == NULL) {
+                    sprintf(buf, stfTextFormat, stfStaffRollTable[i].text0);
                     w = stfDrawText(1, 0x80808080, buf);
-                    stfDrawStaffText(0x100 - w / 2, y, D_00343018[i].style0, 0x80808080, buf);
+                    stfDrawStaffText(0x100 - w / 2, y, stfStaffRollTable[i].style0, 0x80808080, buf);
                     continue;
                 }
-                sprintf(buf, D_0054FD90, D_00343018[i].text0);
+                sprintf(buf, stfTextFormat, stfStaffRollTable[i].text0);
                 w = stfDrawText(1, 0x80808080, buf);
-                stfDrawStaffText((s32)(0xF1u - (u32)w), y, D_00343018[i].style0, 0x80808080, buf);
+                stfDrawStaffText((s32)(0xF1u - (u32)w), y, stfStaffRollTable[i].style0, 0x80808080, buf);
             }
-            if (D_00343018[i].text1 != NULL) {
-                sprintf(buf, D_0054FD90, D_00343018[i].text1);
-                stfDrawStaffText(271.0f, y, D_00343018[i].style1, 0x80808080, buf);
+            if (stfStaffRollTable[i].text1 != NULL) {
+                sprintf(buf, stfTextFormat, stfStaffRollTable[i].text1);
+                stfDrawStaffText(271.0f, y, stfStaffRollTable[i].style1, 0x80808080, buf);
             }
         }
     }
@@ -133,11 +133,11 @@ scroll:
     oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + SDF_FRAME_DUE(dds3GetKernelCount()));
     GetoStaffUI();
     if (oStaff_UI->scrollY ==
-        (s32)((u32)((s32)((u32)D_00343018[0xB4].y + 0xE0u) / 0x1E)
+        (s32)((u32)((s32)((u32)stfStaffRollTable[0xB4].y + 0xE0u) / 0x1E)
               * 0x3Cu + 0x12Cu)) {
         dds3FadeOut(0, 0, 0, 0x28);
     }
-    if ((s32)((u32)D_00343018[0xB4].y + 0xE0u) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
+    if ((s32)((u32)stfStaffRollTable[0xB4].y + 0xE0u) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
         arg = 0x2B4;
         dds3AdminiCallSequence(7, &arg, 4, 0);
     }
@@ -381,7 +381,7 @@ saddr_t stfShutDown(void) {
     stfFreeFiles();
     p2sdLoadPcmFile("STAFF.ADB", 0x7F);
     dds3VblanksPerFrame = 1;
-    return EE_ADDR_S(dds3StartProcess(D_0053F100, 0x2B19, 0, 0,
+    return EE_ADDR_S(dds3StartProcess(stfProcName, 0x2B19, 0, 0,
                                  stfMain2, (dds3ProcessFunc_t)stfDestroy, NULL));
 }
 
@@ -393,11 +393,11 @@ s32 stfExit(void)
 
 s32 stfInit(void)
 {
-    dds3KillProcessName(D_0053F100, 1);
+    dds3KillProcessName(stfProcName, 1);
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F100);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfProcName);
 
 INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F110);
 
@@ -449,5 +449,5 @@ INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F390);
 
 INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F3B0);
 
-INCLUDE_SDATA(const s32, "staff/stfMain", D_0054FD90);
+INCLUDE_SDATA(const s32, "staff/stfMain", stfTextFormat);
 

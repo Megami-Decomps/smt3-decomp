@@ -310,7 +310,7 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
 
-extern s32 (*D_00527690[])(nbEventProcessData_t *e);
+extern s32 (*nbE914Table[])(nbEventProcessData_t *e);
 
 extern void dds3DeleteSceneBasicData(void *basic);
 
@@ -371,9 +371,9 @@ extern void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *
 
 extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-extern dds3Basic_t *D_0055163C;
+extern dds3Basic_t *nbE914TargetBasic;
 
-extern dds3Basic_t *D_00551640;
+extern dds3Basic_t *nbE914Basic;
 
 s32 nbE914Process_1(dds3ProcessID_t *id)
 {
@@ -387,16 +387,16 @@ s32 nbE914Process_1(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_00527690[e->seq](e) != 0) {
-        D_0055163C = NULL;
-        if (D_00551640 != NULL) {
-            dds3DeleteSceneBasicData(D_00551640);
-            D_00551640 = NULL;
+    if (nbE914Table[e->seq](e) != 0) {
+        nbE914TargetBasic = NULL;
+        if (nbE914Basic != NULL) {
+            dds3DeleteSceneBasicData(nbE914Basic);
+            nbE914Basic = NULL;
         }
         return -1;
     }
-    if (e->time > 0 && D_0055163C != NULL) {
-        unit = dds3GetUnitHandleObjectBasic(D_0055163C);
+    if (e->time > 0 && nbE914TargetBasic != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(nbE914TargetBasic);
         if (unit->basic != NULL) {
             nbCameraHelperModelSet(unit->basic);
         }
@@ -406,16 +406,16 @@ s32 nbE914Process_1(dds3ProcessID_t *id)
         nbSingleFormExceptedDispOff(nbGetEventForm());
         nbCameraSetState(0x17);
         serial = evtInitMotionSeProcess(e->eventrid, 2);
-        D_00551640 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551640), 0, 0, 0, 2);
-        D_0055163C = D_00551640;
+        nbE914Basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE914Basic), 0, 0, 0, 2);
+        nbE914TargetBasic = nbE914Basic;
         nbSetEnemyFormation(e->data);
         nbSetPlayerFormation(e->data, 0);
         break;
     case 0x6E:
         dds3CrossfadeStart(0xC);
         nbCameraBoss_BSMETA_E914_1_Set();
-        D_0055163C = NULL;
+        nbE914TargetBasic = NULL;
         break;
     }
     switch (e->time) {
@@ -475,9 +475,9 @@ s32 nbE915_End(nbEventProcessData_t *e)
 
 INCLUDE_RODATA(const s32, "newbattle/nbE914", D_005468D8);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE914", D_0055163C);
+INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914TargetBasic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE914", D_00551640);
+INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914Basic);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE914", D_00551644);
 

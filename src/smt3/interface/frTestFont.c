@@ -5,7 +5,7 @@
 #include "font.h"
 
 extern frFontHandle_t *frTestFontHandle;
-extern void *D_0054F46C;
+extern void *frTestFontTexture;
 
 extern void fclDestroyMessage(void);
 extern void *fclLoadTexture(char *pFileName);
@@ -20,7 +20,7 @@ void test_font_Shutdown(void);
 s32 test_font_Process(void);
 
 void frTestFontInit(void) {
-    D_0054F46C = fclLoadTexture("/camp/test00.tmx");
+    frTestFontTexture = fclLoadTexture("/camp/test00.tmx");
     frwLoadStaffFont();
     dds3StartProcess("test_font", 0x2EE0, 0, 0, (dds3ProcessFunc_t)test_font_Process,
                      (dds3ProcessFunc_t)test_font_Shutdown, NULL);

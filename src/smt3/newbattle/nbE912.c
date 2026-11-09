@@ -255,9 +255,9 @@ extern void nbDelAllKoukaPacketType(s32 type);
 
 extern void MoveSub(nbEventProcessData_t *ed);
 
-extern char D_00546898[];
+extern char nbE912EndText[];
 
-extern char D_005468B0[];
+extern char nbE913EndText[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -309,11 +309,11 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
-extern s8 D_00527530[];
+extern s8 nbE911FormIndex[];
 
-extern sdfVector4_t D_00527540[4][4];
+extern sdfVector4_t nbE912MoveOffset[4][4];
 
-extern sdfVector4_t D_00527640;
+extern sdfVector4_t nbE911FormPos;
 
 extern sdfVector4_t D_00527650;
 
@@ -335,13 +335,13 @@ extern u32 effBTLCutGetFrame(effBTLCutHandle_t *hBTLCutEffect);
 
 extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *hBTLCutEffect, u32 frame);
 
-extern nbKoukaPacket_t *D_00527660[];
+extern nbKoukaPacket_t *nbE912CutPacket[];
 
 extern nbKoukaPacket_t *D_00527664[];
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern s32 (*D_00527670[])(nbEventProcessData_t *e);
+extern s32 (*nbE912Table[])(nbEventProcessData_t *e);
 
 extern void dds3DeleteSceneBasicData(void *basic);
 
@@ -367,11 +367,11 @@ extern void nbCameraBoss_BSALBI_E912_Run(void);
 
 extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-extern dds3Basic_t *D_00551630;
+extern dds3Basic_t *nbE912Unit;
 
-extern dds3Basic_t *D_00551634;
+extern dds3Basic_t *nbE912UnitA;
 
-extern dds3Basic_t *D_00551638;
+extern dds3Basic_t *nbE912UnitB;
 
 
 void MoveSub(nbEventProcessData_t *ed)
@@ -389,7 +389,7 @@ void MoveSub(nbEventProcessData_t *ed)
 
     cnt = 0;
     for (i = 0; i < 4; i++) {
-        no = D_00527530[i];
+        no = nbE911FormIndex[i];
         if (ed->data->form[no].stat & 1) {
             list[cnt] = no;
             cnt++;
@@ -398,8 +398,8 @@ void MoveSub(nbEventProcessData_t *ed)
     for (i = 0; i < cnt; i++) {
         form = &ed->data->form[list[i]];
         h = form->hunit;
-        SDF_VU0_LOADVECTOR(&D_00527540[cnt - 1][i]);
-        SDF_VU0_LOADVECTOR_B(&D_00527640);
+        SDF_VU0_LOADVECTOR(&nbE912MoveOffset[cnt - 1][i]);
+        SDF_VU0_LOADVECTOR_B(&nbE911FormPos);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_LOADVECTOR_B(&D_00527650);
         SDF_VU0_ADDVECTOR();
@@ -413,7 +413,7 @@ void MoveSub(nbEventProcessData_t *ed)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(len2);
         if (len2 <= 20.0f) {
-            evtUnitRotationTarget(h, (f32 *)&D_00527640, 0.1f);
+            evtUnitRotationTarget(h, (f32 *)&nbE911FormPos, 0.1f);
         } else {
             if (len2 <= 50.0f) {
                 frames = frames * len2 / 50.0f;
@@ -442,7 +442,7 @@ s32 nbE912_Effect1(nbEventProcessData_t *e)
     switch (e->seqtime) {
     case 1:
         for (i = 0; i < 4; i++) {
-            no = D_00527530[i];
+            no = nbE911FormIndex[i];
             if (e->data->form[no].stat & 1) {
                 nbAddMotionKoukaPacket(0, 0, &e->data->form[no], 0x10);
             }
@@ -451,7 +451,7 @@ s32 nbE912_Effect1(nbEventProcessData_t *e)
         nbAddUnitAKoukaPacket(0, 0, form, 0, 0);
         break;
     case 2:
-        D_00527660[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 1), 2, form);
+        nbE912CutPacket[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 1), 2, form);
         break;
     case 0x27:
         D_00527664[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 2), 2, form);
@@ -461,10 +461,10 @@ s32 nbE912_Effect1(nbEventProcessData_t *e)
         evtSetUnitMotion(form->hunit, 0x11, 0, 0, 0);
         break;
     case 0x6D:
-        effBTLCutSetDrawEndFrame(D_00527660[0]->cuteff,
-                                 effBTLCutGetFrame(D_00527660[0]->cuteff) + 0x20);
-        effBTLCutSetDrawEndFrame(D_00527660[1]->cuteff,
-                                 effBTLCutGetFrame(D_00527660[1]->cuteff) + 0x20);
+        effBTLCutSetDrawEndFrame(nbE912CutPacket[0]->cuteff,
+                                 effBTLCutGetFrame(nbE912CutPacket[0]->cuteff) + 0x20);
+        effBTLCutSetDrawEndFrame(nbE912CutPacket[1]->cuteff,
+                                 effBTLCutGetFrame(nbE912CutPacket[1]->cuteff) + 0x20);
         nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 3), 2, form);
         nbFreeEffectSlot(e);
         break;
@@ -475,7 +475,7 @@ s32 nbE912_Effect1(nbEventProcessData_t *e)
 s32 nbE912_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0x10) {
-        printf(D_00546898);
+        printf(nbE912EndText);
         e->data->stat &= ~8;
         return 1;
     }
@@ -490,20 +490,20 @@ s32 nb_295D98(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_00527670[e->seq](e) != 0) {
-        D_00551630 = NULL;
-        if (D_00551634 != NULL) {
-            dds3DeleteSceneBasicData(D_00551634);
-            D_00551634 = NULL;
+    if (nbE912Table[e->seq](e) != 0) {
+        nbE912Unit = NULL;
+        if (nbE912UnitA != NULL) {
+            dds3DeleteSceneBasicData(nbE912UnitA);
+            nbE912UnitA = NULL;
         }
-        if (D_00551638 != NULL) {
-            dds3DeleteSceneBasicData(D_00551638);
-            D_00551638 = NULL;
+        if (nbE912UnitB != NULL) {
+            dds3DeleteSceneBasicData(nbE912UnitB);
+            nbE912UnitB = NULL;
         }
         return -1;
     }
-    if (e->time > 0 && D_00551630 != NULL) {
-        unit = dds3GetUnitHandleObjectBasic(D_00551630);
+    if (e->time > 0 && nbE912Unit != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(nbE912Unit);
         if (unit->basic != NULL) {
             nbCameraHelperModelSet(unit->basic);
         }
@@ -513,23 +513,23 @@ s32 nb_295D98(dds3ProcessID_t *id)
         nbCameraSetState(0x17);
         nbAllFormDispOn();
         nbGroupFormDispOff(0);
-        D_00551630 = NULL;
-        D_00551634 = NULL;
-        D_00551638 = NULL;
+        nbE912Unit = NULL;
+        nbE912UnitA = NULL;
+        nbE912UnitB = NULL;
         nbCameraBoss_BSALBI_E912_Set();
         break;
     case 0x3C:
         nbCameraSetState(0x17);
         serial = evtInitMotionSeProcess(e->eventrid, 4);
-        D_00551634 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551634), 0, 0, 0, 2);
-        D_00551630 = D_00551634;
+        nbE912UnitA = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE912UnitA), 0, 0, 0, 2);
+        nbE912Unit = nbE912UnitA;
         break;
     case 0xD2:
         serial = evtInitMotionSeProcess(e->eventrid, 5);
-        D_00551638 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551638), 0, 0, 0, 2);
-        D_00551630 = D_00551638;
+        nbE912UnitB = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE912UnitB), 0, 0, 0, 2);
+        nbE912Unit = nbE912UnitB;
         break;
     default:
         if (e->time < 0x3C) {
@@ -558,7 +558,7 @@ s32 nbE913_Test(nbEventProcessData_t *e)
 s32 nbE913_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0xD3) {
-        printf(D_005468B0);
+        printf(nbE913EndText);
         nbDelAllKoukaPacketType(0x2B);
         e->data->endtype = 1;
         return 1;
@@ -566,13 +566,13 @@ s32 nbE913_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE912", D_00546898);
+INCLUDE_RODATA(const s32, "newbattle/nbE912", nbE912EndText);
 
-INCLUDE_RODATA(const s32, "newbattle/nbE912", D_005468B0);
+INCLUDE_RODATA(const s32, "newbattle/nbE912", nbE913EndText);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", D_00551630);
+INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912Unit);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", D_00551634);
+INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912UnitA);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", D_00551638);
+INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912UnitB);
 

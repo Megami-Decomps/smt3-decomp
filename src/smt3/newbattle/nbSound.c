@@ -208,11 +208,11 @@ extern nbMainProcessData_t *nbGetMainProcessData(void);
 
 extern void *memset(void *a, s32 b, size_t c);
 
-extern char D_00545B78[];
+extern char nbTestHeartsMessage[];
 
 extern void nbPlaySe(s32 no);
 
-extern char D_00545B90[];
+extern char nbTestProcessName[];
 
 extern void p2sdPlaySE(s32 seno, s32 vol, s32 pan);
 
@@ -234,13 +234,13 @@ extern void p2sdStopBGM(s32 no);
 
 extern void func_002C1E70(s32 no);
 
-extern char D_00545CE0[];
+extern char nbBgmStopFormat[];
 
 
 
 extern u8 datModelParamTable[];
 
-extern u8 D_003494B0[];
+extern u8 nbDefaultUnitVisual[];
 
 extern void nbFreeFormResources(nbMainProcessData_t *data, s32 index);
 
@@ -268,11 +268,11 @@ extern void p2sdSetPcmBuffer(void *buf, u32 size);
 
 extern void datDebugPrintf(const char *format, ...);
 
-extern char D_00545BC0[];
+extern char nbNegoSeOkMsg[];
 
-extern char D_00545BD0[];
+extern char nbMidiDebugFmt[];
 
-extern char D_00545BE0[];
+extern char nbMotSeOkMsg[];
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -350,14 +350,14 @@ s32 nbGetMotionTable(s32 unitid, s32 index)
     u8 *p;
 
     if (unitid == 0) {
-        p = D_003494B0;
+        p = nbDefaultUnitVisual;
     } else {
         p = datModelParamTable + unitid * 784;
     }
     return *(s8 *)(p + index * 28 + 0x31);
 }
 
-extern u16 D_003E7028[];
+extern u16 nbUnitMotionIdTable[];
 extern s32 evtBitCheck(s32 no);
 
 s32 nbLoadMotionByIndex(s32 unitid, s32 index)
@@ -365,7 +365,7 @@ s32 nbLoadMotionByIndex(s32 unitid, s32 index)
     s32 id;
     s32 motion;
 
-    id = D_003E7028[unitid];
+    id = nbUnitMotionIdTable[unitid];
     motion = nbGetMotionTable(id, index);
     if (motion < 0) {
         return 0;
@@ -405,7 +405,7 @@ s32 nbMemoryLoadNegoSe(nbFormation_t *form)
 
     data = nbGetMainProcessData();
     if (p2sdLoadCheckMidi(nbPlayMotionSe(form)) != 0) {
-        datDebugPrintf(D_00545BC0);
+        datDebugPrintf(nbNegoSeOkMsg);
         return 1;
     }
     index = nbFindFormIndex(nbGetUnitWorkFromAction(form));
@@ -437,9 +437,9 @@ s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 mot)
     if (unitid == 0) {
         return 0;
     }
-    printf(D_00545BD0, unitid);
+    printf(nbMidiDebugFmt, unitid);
     if (p2sdLoadCheckMidi(unitid) != 0) {
-        datDebugPrintf(D_00545BE0);
+        datDebugPrintf(nbMotSeOkMsg);
         return 1;
     }
     formindex = nbFindFormIndex(nbGetUnitWorkFromAction(form));
@@ -491,15 +491,15 @@ nbStatWork_t *nbSetFormEntry(s32 id)
     return stat;
 }
 
-extern char D_00575450[];
+extern char nbMidiPath[];
 
 extern fileRequest_t *fileLoad(const char *path);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BC0);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbNegoSeOkMsg);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BD0);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMidiDebugFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BE0);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMotSeOkMsg);
 
 s32 nbLoadMidiFile(s32 no)
 {
@@ -515,14 +515,14 @@ s32 nbLoadMidiFile(s32 no)
     for (i = 0; i < 0x1A; i++) {
         id = nbLoadMotionByIndex(no, i);
         if (id != 0) {
-            sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
-            stat->file[i] = fileLoad(D_00575450);
-            datDebugPrintf("load %s\n", D_00575450);
+            sprintf(nbMidiPath, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+            stat->file[i] = fileLoad(nbMidiPath);
+            datDebugPrintf("load %s\n", nbMidiPath);
         }
     }
     id = nbMakeSeId(no);
-    sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
-    stat->motfile = fileLoad(D_00575450);
+    sprintf(nbMidiPath, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+    stat->motfile = fileLoad(nbMidiPath);
     return 1;
 }
 
@@ -836,11 +836,11 @@ void nbSetMaeFlag(s32 code)
 }
 
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C38);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMaeMidiTable1);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C58);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C78);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMaeMidiTable2);
 
 INCLUDE_ASM(const s32, "newbattle/nbSound", nbSetMaeFlag);
 #endif
@@ -871,7 +871,7 @@ void nbBgmFadeOut(void)
 
 void nbBgmStop(void)
 {
-    printf(D_00545CE0, nbBgmSaved, nbBgmFadeState);
+    printf(nbBgmStopFormat, nbBgmSaved, nbBgmFadeState);
     p2sdStopBGM(bgmno);
     p2sdStopBGM(nbBgmFadeState);
     p2sdStopBGM(0x2B0000);
@@ -887,9 +887,9 @@ void nb_28DE28(void)
     func_002C1E70(0);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545CE0);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbBgmStopFormat);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545CF8);
+INCLUDE_RODATA(const s32, "newbattle/nbSound", nbUnitLoadTimeFormat);
 
 INCLUDE_SDATA(const s32, "newbattle/nbSound", bgmno);
 

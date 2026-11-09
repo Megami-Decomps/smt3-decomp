@@ -24,9 +24,9 @@ extern s32 shopUpdateItemList(s32 mode);
 
 
 
-extern char D_0053D028[];
+extern char shpDrawProcName[];
 
-extern char D_0053D038[];
+extern char shpUpdateProcName[];
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
@@ -201,9 +201,9 @@ extern u8 *shopDrawWork;
 
 extern fclSpriteTbl_t shopSpriteTable[];
 
-extern char *D_0032FA90[];
+extern char *shopBuyTitle[];
 
-extern char *D_0032FA94[];
+extern char *shopSellTitle[];
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
@@ -228,7 +228,7 @@ extern fclSpriteTbl_t fclSpriteTable[];
 
 extern s32 D_00345D88[];
 
-extern char D_0054FB60[];
+extern char shpFmtCount7[];
 
 void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
 {
@@ -254,14 +254,14 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
                         colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
     color = (color & 0xFF) | 0xA09DC300;
-    sprintf(buf, D_0054FB60, num);
+    sprintf(buf, shpFmtCount7, num);
     frq = frwGetNumFontFRQ(pos->unk_00 + target + 0x1840, pos->unk_04 + 0x1A0, pos->unk_08, color,
                            buf, 0);
     func_001C7E38(frq, 1, ot);
     frDestroyFontRequestAfter(frq);
 }
 
-extern char D_0054FB68[];
+extern char shpFmtCount2[];
 
 #ifdef NON_MATCHING
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
@@ -277,7 +277,7 @@ void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot)
         return;
     }
 
-    sprintf(text, D_0054FB68, count);
+    sprintf(text, shpFmtCount2, count);
     if (drawMode == 0) {
         request = frwGetSmallNumFontFRQ(pos->unk_00 + 0x10A0, pos->unk_04 + 0xA0,
                                         pos->unk_08, 0x89FEFF80, text, NULL);
@@ -339,7 +339,7 @@ void shopDrawRowBox(fclPanelPos_t *panel, s32 mode, s32 ot)
 }
 
 extern char *pStr[];
-extern char D_0054FB60[];
+extern char shpFmtCount7[];
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 z, u32 color, const char *text, frFontHandle_t *chain);
 extern void fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 blend, s32 ot);
@@ -352,7 +352,7 @@ void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot
     request = frwGetSmallFontFRQ2(x + 0x240, y + 0x68, z, color, pStr[item], NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
-    sprintf(text, D_0054FB60, count);
+    sprintf(text, shpFmtCount7, count);
     request = frwGetSmallNumFontFRQ(x + 0x9C0, y + 0x80, z, color, text, NULL);
     func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
@@ -523,7 +523,7 @@ s32 shopDrawPanelMode0(s8 mode)
     fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
     fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_0032FA90[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
+    trmDrawListText(&pos, shopBuyTitle[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
                     shopSpriteTable, 0x47);
     fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     shopDrawItemCount(&pos, 0x80808080, 0x47);
@@ -538,7 +538,7 @@ s32 shopDrawPanelMode1(s8 mode)
     fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
     fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, D_0032FA94[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
+    trmDrawListText(&pos, shopSellTitle[0], ((shopDrawWork_t *)shopDrawWork)->texHandle,
                     shopSpriteTable, 0x47);
     fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     shopDrawItemCount(&pos, 0x80808080, 0x47);
@@ -648,7 +648,7 @@ s32 shop_draw_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "facility/fclShopCalc", D_0054FB60);
+INCLUDE_SDATA(const s32, "facility/fclShopCalc", shpFmtCount7);
 
-INCLUDE_SDATA(const s32, "facility/fclShopCalc", D_0054FB68);
+INCLUDE_SDATA(const s32, "facility/fclShopCalc", shpFmtCount2);
 

@@ -291,7 +291,7 @@ extern s32 evtBitCheck(s32 no);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_00546500[];
+extern char nbE902EndMessage[];
 
 extern u8 pNbCamera[];
 
@@ -497,7 +497,7 @@ s32 Hontai(nbEventProcessData_t *ed)
 s32 nbE902_End(nbEventProcessData_t *e)
 {
     if (e->seqtime > 0) {
-        printf(D_00546500);
+        printf(nbE902EndMessage);
         effBTLSkillEnd();
         if (evtBitCheck(0xBF0) != 0) {
             e->data->stat &= ~8;
@@ -551,5 +551,5 @@ s32 nbE903_Wait1(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE902", D_00546500);
+INCLUDE_RODATA(const s32, "newbattle/nbE902", nbE902EndMessage);
 

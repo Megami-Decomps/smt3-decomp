@@ -41,14 +41,14 @@ void *sdfChipAllocDirect(u32 aSize);
 void sdfChipFreeDirect(void *aPtr);
 #include "sdk_libc.h"
 
-extern char D_0054E878[];
-extern char D_0054E880[];
-extern char D_0054E888[];
-extern char D_0054E890[];
-extern char D_0054E898[];
-extern char D_0054E8A0[];
-extern char D_0054E8A8[];
-extern char D_0054E8B0[];
+extern char dds3DebugMesFmt[];
+extern char dds3DebugStatOpen[];
+extern char dds3DebugFlagCharDot[];
+extern char dds3DebugFlagCharP[];
+extern char dds3DebugFlagCharS[];
+extern char dds3DebugFieldClose[];
+extern char dds3DebugBlockEnd[];
+extern char dds3DebugTreeLineFmt[];
 extern char dds3ProcessTreeDepth[];
 void DebugProcess(dds3ProcessID_t *pro, const char *mes);
 
@@ -515,22 +515,22 @@ dds3ProcessID_t *dds3SearchProcessNumber(u32 type, s32 n)
 
 void DebugProcess(dds3ProcessID_t *pro, const char *mes)
 {
-    printf(D_0054E878, mes);
+    printf(dds3DebugMesFmt, mes);
     while (pro != NULL) {
         printf("NAME:(%-24s) ", pro->name);
         printf("PID:(0x%08X) ", pro);
-        printf(D_0054E880);
+        printf(dds3DebugStatOpen);
         if (pro->flag & 0x10) {
-            printf(D_0054E888);
+            printf(dds3DebugFlagCharDot);
         } else {
-            printf(D_0054E890);
+            printf(dds3DebugFlagCharP);
         }
         if (pro->flag & 0x20) {
-            printf(D_0054E898);
+            printf(dds3DebugFlagCharS);
         } else {
-            printf(D_0054E888);
+            printf(dds3DebugFlagCharDot);
         }
-        printf(D_0054E8A0);
+        printf(dds3DebugFieldClose);
         printf("PRIO:(%5d) ", pro->priority);
         printf("RUNTIME:(%d) ", pro->runtime);
         printf("TIMER:(%d, %d)\n", pro->starttimer, pro->shutdowntimer);
@@ -549,12 +549,12 @@ void dds3PrintProcessList(void)
     printf(countFormat, runninglistcnt);
     DebugProcess(endinglistf, "*** ending *****************************");
     printf(countFormat, endinglistcnt);
-    printf(D_0054E8A8);
+    printf(dds3DebugBlockEnd);
 }
 
 void DebugProcessTree(dds3ProcessID_t *ps, s32 level)
 {
-    printf(D_0054E8B0, dds3ProcessTreeDepth, ps);
+    printf(dds3DebugTreeLineFmt, dds3ProcessTreeDepth, ps);
     if (ps->child != NULL) {
         if (ps->parent == NULL) {
             dds3ProcessTreeDepth[0] = ' ';
@@ -607,7 +607,7 @@ void dds3PrintProcessTree(void)
         }
         p = p->next;
     }
-    printf(D_0054E8A8);
+    printf(dds3DebugBlockEnd);
 }
 
 s32 dds3ProcessMain(void)
@@ -926,19 +926,19 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", runninglistcnt);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", runprocess);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E878);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugMesFmt);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E880);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugStatOpen);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E888);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugFlagCharDot);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E890);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugFlagCharP);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E898);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugFlagCharS);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A0);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugFieldClose);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A8);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugBlockEnd);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8B0);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugTreeLineFmt);
 

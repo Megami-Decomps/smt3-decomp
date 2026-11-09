@@ -52,8 +52,8 @@ extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
 extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
 typedef struct polyMovieObject_t polyMovieObject_t;
 extern s32 evtStopMover(polyMovieObject_t *mover, s32 sw, s32 baseframe, s32 nowframe);
-extern char D_0053B4A8[];
-extern s8 D_0032C9E2[];
+extern char evtViewerPathLinkMsg[];
+extern s8 evtFrameListFieldTable[];
 extern s32 PopMenu(void);
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
@@ -97,21 +97,21 @@ extern void Eve_FilterOFF(void);
 extern void evtMakeViewerPath(s32 kind);
 extern void evtViewerShutdown(s32 kind);
 extern u16 evt_file_minor;
-extern u16 D_0054F824;
+extern u16 evtFileMajor;
 extern void evtViewerStopFrame(void);
 #include "sdk_libc.h"
 
 extern void mdlUnRegist(s32 aMajor, s32 aMinor);
-extern s32 D_0032C6E0[];
+extern s32 evtViewerFrameSetMenuTable[];
 extern s32 capwait;
 extern void DrawEffect(void);
 extern void FrameSelect(void);
 extern dds3Basic_t *dds3GetActiveScene(void);
-extern char *D_0054F830;
-extern char *D_0054F834;
-extern char D_0054F838[];
+extern char *evtViewerFreeCameraName;
+extern char *evtViewerGameCameraName;
+extern char evtViewerCameraNameFormat[];
 extern sdfGrOt_t sdfGrOtTable[];
-SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, sdfDebugGrOt, sdfGrOtTable, 0xA60);
 extern void *dds3FontReqAllocDrawTag(void);
 extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
@@ -629,7 +629,7 @@ void *SearchBasicFromNameIndex_evtEventViewer(s32 index)
     return dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, viewerinfo->nametable[index]);
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B4A8);
+INCLUDE_RODATA(const s32, "event/evtEventViewer", evtViewerPathLinkMsg);
 
 void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 baseframe)
 {
@@ -666,7 +666,7 @@ void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 basefram
     case 16:
         evtPathLinkAndMake(owner, eff);
         mover = dds3GetBaseControlWorkData(eff)->pBasic[1];
-        printf(D_0053B4A8, baseframe, currentFrame);
+        printf(evtViewerPathLinkMsg, baseframe, currentFrame);
         if ((viewerinfo->flags & 1) != 0) {
             evtStopMover(mover, 0, baseframe, currentFrame);
         } else {
@@ -910,7 +910,7 @@ void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame
         }
         break;
     case 5:
-        evtPlaySe(D_0054F824, (s16)frameInfo->param.sh[0]);
+        evtPlaySe(evtFileMajor, (s16)frameInfo->param.sh[0]);
         return;
     case 7:
         if (frameInfo->index == 0 && (s16)frameInfo->param.sh[0] == 0) {
@@ -953,14 +953,14 @@ extern s8 dds3ScreenBlurFlag;
 extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
 extern dds3LightState_t dds3LightParam;
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
-extern pmdSceneLightTable_t D_0056CE90;
-extern evtBlendVecColor_t D_0056CEC0;
-extern dds3Effect_Blur_t D_0056CEE0;
-extern dds3Effect_PartialMultiBlurParam_t D_0056CF10;
-extern dds3Effect_Filter_t D_0056CF40;
-extern dds3Effect_PartialMultiFilterParam_t D_0056CF60;
-extern dds3Effect_DistortionBlurParam_t D_0056CF90;
-extern dds3Effect_RippleBlurParam_t D_0056CFC0;
+extern pmdSceneLightTable_t evtViewerLightParam;
+extern evtBlendVecColor_t evtViewerFogParam;
+extern dds3Effect_Blur_t evtViewerBlurParam;
+extern dds3Effect_PartialMultiBlurParam_t evtViewerMultiBlurParam;
+extern dds3Effect_Filter_t evtViewerFilterParam;
+extern dds3Effect_PartialMultiFilterParam_t evtViewerMultiFilterParam;
+extern dds3Effect_DistortionBlurParam_t evtViewerDistBlurParam;
+extern dds3Effect_RippleBlurParam_t evtViewerRippleBlurParam;
 extern void evtSetBokasi(s32 enabled);
 extern void fldSkySetFilter(s32 index, s32 mode, s32 hokan);
 extern void evtSetSkyAlpha(s32 frame, s32 alpha);
@@ -1086,10 +1086,10 @@ void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next, evtFrameInfo_t *p
             nextBias = 0.0f;
         }
         if (first != NULL || second != NULL) {
-            evtHokanSceneLight(hokan, ratio, first, second, D_0056CE90.color);
-            dds3SetLightColor(0, 0, D_0056CE90.color);
-            dds3SetLightDir(0, 0, D_0056CE90.direction);
-            dds3SetAmbientColor(0, D_0056CE90.ambient);
+            evtHokanSceneLight(hokan, ratio, first, second, evtViewerLightParam.color);
+            dds3SetLightColor(0, 0, evtViewerLightParam.color);
+            dds3SetLightDir(0, 0, evtViewerLightParam.direction);
+            dds3SetAmbientColor(0, evtViewerLightParam.ambient);
             sdfFaceDivSoften = evtHokanFloat(hokan, ratio, firstSoften, nextSoften);
             sdfFaceDivBias = evtHokanFloat(hokan, ratio, firstBias, nextBias);
         }
@@ -1115,38 +1115,38 @@ void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next, evtFrameInfo_t *p
         }
         switch (type) {
         case 11:
-            evtHokanSceneFog(hokan, ratio, first, second, &D_0056CEC0);
-            dds3SetFogPara(0, D_0056CEC0.vec[1], D_0056CEC0.vec[0], D_0056CEC0.vec[2], D_0056CEC0.vec[3]);
-            dds3LightParam.fog.color = D_0056CEC0.color;
+            evtHokanSceneFog(hokan, ratio, first, second, &evtViewerFogParam);
+            dds3SetFogPara(0, evtViewerFogParam.vec[1], evtViewerFogParam.vec[0], evtViewerFogParam.vec[2], evtViewerFogParam.vec[3]);
+            dds3LightParam.fog.color = evtViewerFogParam.color;
             break;
         case 13:
-            evtHokanBlur2(hokan, ratio, first, second, &D_0056CEE0);
-            evtSetUnityCalcArea(&D_0056CEE0);
+            evtHokanBlur2(hokan, ratio, first, second, &evtViewerBlurParam);
+            evtSetUnityCalcArea(&evtViewerBlurParam);
             viewerinfo->drawblur2 = 1;
             break;
         case 14:
-            evtHokanMultBlur(hokan, ratio, first, second, &D_0056CF10);
-            Eve_PartialMultiBlurSetParam(&D_0056CF10);
+            evtHokanMultBlur(hokan, ratio, first, second, &evtViewerMultiBlurParam);
+            Eve_PartialMultiBlurSetParam(&evtViewerMultiBlurParam);
             viewerinfo->drawmblur = 1;
             break;
         case 15:
-            evtHokanDistBlur(hokan, ratio, first, second, &D_0056CF90);
-            Eve_DistortionBlurSetParam(&D_0056CF90);
+            evtHokanDistBlur(hokan, ratio, first, second, &evtViewerDistBlurParam);
+            Eve_DistortionBlurSetParam(&evtViewerDistBlurParam);
             viewerinfo->drawdblur = 1;
             break;
         case 23:
-            evtHokanRipBlur(hokan, ratio, first, second, &D_0056CFC0);
-            Eve_RippleBlurSetParam(&D_0056CFC0);
+            evtHokanRipBlur(hokan, ratio, first, second, &evtViewerRippleBlurParam);
+            Eve_RippleBlurSetParam(&evtViewerRippleBlurParam);
             viewerinfo->drawrblur = 1;
             break;
         case 16:
-            evtHokanFilter(hokan, ratio, first, second, &D_0056CF40);
-            Eve_FilterSetParam(&D_0056CF40);
+            evtHokanFilter(hokan, ratio, first, second, &evtViewerFilterParam);
+            Eve_FilterSetParam(&evtViewerFilterParam);
             viewerinfo->filter = 1;
             break;
         case 17:
-            evtHokanMultFilter(hokan, ratio, first, second, &D_0056CF60);
-            Eve_PartialMultiFilterSetParam(&D_0056CF60);
+            evtHokanMultFilter(hokan, ratio, first, second, &evtViewerMultiFilterParam);
+            Eve_PartialMultiFilterSetParam(&evtViewerMultiFilterParam);
             viewerinfo->drawmfilter = 1;
             break;
         }
@@ -1412,17 +1412,17 @@ void DrawActiveCameraName(void)
         if (cameraName != NULL) {
             name = cameraName;
         } else {
-            name = D_0054F830;
+            name = evtViewerFreeCameraName;
         }
     } else {
         if (viewer->gamecamera == NULL) {
             return;
         }
-        name = D_0054F834;
+        name = evtViewerGameCameraName;
     }
     tag = dds3FontReqAllocDrawTag();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0xFEFFFF, 5, D_0054F838, name)));
-    D_002F6978.regFunc(&D_002F6978, tag);
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0xFEFFFF, 5, evtViewerCameraNameFormat, name)));
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, tag);
 }
 
 void SelectActiveCamera(void)
@@ -1679,7 +1679,7 @@ s32 EnterMain(void)
         viewer->select_y = 0;
         viewer->menuItemCount = 2;
         viewer->select_header = "FRAME SET.OK? ";
-        viewer->menuTable = D_0032C6E0;
+        viewer->menuTable = evtViewerFrameSetMenuTable;
         PushMenu(2, 0xE4, 0x3C);
         break;
     case EVT_VIEWER_MENU_FRAMECHANGE:
@@ -1791,9 +1791,9 @@ s32 EnterObjList(void)
 }
 
 #ifdef NON_MATCHING
-extern char *D_0032C6E8[], *D_0032C6F8[], *D_0032C738[];
+extern char *evtViewerDeleteConfirmNames[], *evtViewerTransModeNames[], *evtViewerUnitControlNames[];
 extern char *evtFrameListTable[], *evtFrameFadeNames[];
-extern char D_0054F8B8[], D_0054F8C0[], D_0054F8C8[], D_0054F8D0[];
+extern char evtViewerProcNameSlight[], evtViewerProcNameSfog[], evtViewerProcNameFilter[], evtViewerProcNameMfilter[];
 extern s32 mdlDebugPrintEffectScale(dds3ProcessID_t *id);
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *id);
 extern s32 soften_bias_Process(dds3ProcessID_t *id);
@@ -1823,7 +1823,7 @@ s32 EnterFrameList(s32 action)
         return 0;
     }
     if (action == -2) {
-        viewerinfo->itemNames = D_0032C6E8;
+        viewerinfo->itemNames = evtViewerDeleteConfirmNames;
         viewerinfo->framelist_type = -1;
         viewerinfo->menuItemCount = 2;
         viewerinfo->select_header = "DELETE FRAME.OK? ";
@@ -1831,7 +1831,7 @@ s32 EnterFrameList(s32 action)
         PushMenu(2, 0xD8, 0x78);
         return 0;
     }
-    viewerinfo->framelist_type = D_0032C9E2[viewerinfo->framelist_x + track->type * 10];
+    viewerinfo->framelist_type = evtFrameListFieldTable[viewerinfo->framelist_x + track->type * 10];
     frame = evtGetSelectFrameInfo();
     field = viewerinfo->framelist_type;
     switch (field) {
@@ -1934,12 +1934,12 @@ s32 EnterFrameList(s32 action)
         } else if (type == 1) {
             viewerinfo->select_y = frame->param.sb[0];
             viewerinfo->menuItemCount = 5;
-            viewerinfo->itemNames = D_0032C738;
+            viewerinfo->itemNames = evtViewerUnitControlNames;
             viewerinfo->select_header = "UNIT CONTROL TYPE ";
         } else if (type == 12) {
             viewerinfo->select_y = (s16)frame->param.sh[0];
             viewerinfo->menuItemCount = 3;
-            viewerinfo->itemNames = D_0032C6F8;
+            viewerinfo->itemNames = evtViewerTransModeNames;
             viewerinfo->select_header = "TRANS MODE ";
         } else if (type == 19) {
             viewerinfo->select_y = (s16)frame->param.sh[0];
@@ -2013,14 +2013,14 @@ s32 EnterFrameList(s32 action)
             dds3SetLightColor(0, 0, light->color);
             dds3SetLightDir(0, 0, light->direction);
             dds3SetAmbientColor(0, light->ambient);
-            processName = D_0054F8B8;
+            processName = evtViewerProcNameSlight;
             callback = mdlDebugPrintEffectScale;
             break;
         case 11:
             fog = frame->work;
             dds3SetFogPara(0, fog->fog.vec[1], fog->fog.vec[0], fog->fog.vec[2], fog->fog.vec[3]);
             dds3LightParam.fog.color = fog->fog.color;
-            processName = D_0054F8C0;
+            processName = evtViewerProcNameSfog;
             callback = mdlDebugPrintEffectScale2;
             break;
         case 13:
@@ -2042,13 +2042,13 @@ s32 EnterFrameList(s32 action)
         case 16:
             dblurSetParam2(frame->work);
             viewerinfo->filter = 0;
-            processName = D_0054F8C8;
+            processName = evtViewerProcNameFilter;
             callback = (dds3ProcessFunc_t)evtViewerExit;
             break;
         case 17:
             mfilterSetParam(frame->work);
             viewerinfo->drawmfilter = 0;
-            processName = D_0054F8D0;
+            processName = evtViewerProcNameMfilter;
             callback = (dds3ProcessFunc_t)mfilter_Process;
             break;
         default:
@@ -2101,7 +2101,7 @@ s32 EnterFrameChange(void)
         viewer = viewerinfo;
         group = viewer->framelist_target;
         type = group->type;
-        switch (D_0032C9E2[viewer->framelist_x + type * 10]) {
+        switch (evtFrameListFieldTable[viewer->framelist_x + type * 10]) {
         case 0:
             node->frame = viewer->value;
             SortFrameInfo(group);
@@ -2146,7 +2146,7 @@ s32 EnterIntFloatChange(void)
     if (node == NULL) {
         return 0;
     }
-    switch (D_0032C9E2[viewerinfo->framelist_x + viewerinfo->framelist_target->type * 10]) {
+    switch (evtFrameListFieldTable[viewerinfo->framelist_x + viewerinfo->framelist_target->type * 10]) {
     case 1:
         node->index = value;
         break;
@@ -2204,7 +2204,7 @@ s32 EnterFilename2(void)
 
     if (mode < 3) {
         if (mode >= 0) {
-            sprintf(viewerinfo->filename, "E%3d_%03d", D_0054F824, evt_file_minor);
+            sprintf(viewerinfo->filename, "E%3d_%03d", evtFileMajor, evt_file_minor);
             mode = viewerinfo->fileMode;
             if (mode == 0) {
                 evtMakeViewerPath(0);
@@ -2256,7 +2256,7 @@ s32 EnterBasicList(s32 action, s32 previousMenu)
         }
     }
     type = viewerinfo->framelist_target->type;
-    field = D_0032C9E2[viewerinfo->framelist_x + type * 10];
+    field = evtFrameListFieldTable[viewerinfo->framelist_x + type * 10];
     switch (field) {
     case 13:
         if (type >= 22) {
@@ -2400,7 +2400,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
 extern s16 winoff_x;
 extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
-extern s32 (*D_0032C750[])(s32 action, s32 previousMenu);
+extern s32 (*evtViewerMenuHandlers[])(s32 action, s32 previousMenu);
 
 saddr_t evtEventViewerProcess4(void)
 {
@@ -2426,7 +2426,7 @@ saddr_t evtEventViewerProcess4(void)
             if (action == -1) {
                 goto pop_menu;
             }
-            result = D_0032C750[viewerinfo->menuStack[index].mode](action, previousMenu);
+            result = evtViewerMenuHandlers[viewerinfo->menuStack[index].mode](action, previousMenu);
             switch (result) {
             case -1:
                 done = 1;
@@ -2579,7 +2579,7 @@ s32 evtKillEventViewer(void)
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", viewerinfo);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F824);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtFileMajor);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_file_minor);
 
@@ -2589,11 +2589,11 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F82A);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_camera);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F830);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerFreeCameraName);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F834);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerGameCameraName);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F838);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerCameraNameFormat);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", capwait);
 
@@ -2627,11 +2627,11 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8A8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8B0);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8B8);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameSlight);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C0);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameSfog);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C8);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameFilter);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8D0);
+INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameMfilter);
 

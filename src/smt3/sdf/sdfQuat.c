@@ -56,13 +56,13 @@ enum sdf_stream_playback {
 
 typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
 
-extern sdfMathConstants_t D_00529BB0;
+extern sdfMathConstants_t sdfMathConstants;
 
-extern f32 D_00529B90[4];
+extern f32 sdfQuatPoleDown[4];
 
-extern f32 D_00529BA0[4];
+extern f32 sdfQuatPoleUp[4];
 
-extern f32 D_00529620[4];
+extern f32 sdfUnitXVector[4];
 
 extern s32 (*p2sdSmgBuf)(void);
 
@@ -215,9 +215,9 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            SDF_VU0_LOADVECTOR(D_00529B90);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleDown);
         } else {
-            SDF_VU0_LOADVECTOR(D_00529BA0);
+            SDF_VU0_LOADVECTOR(sdfQuatPoleUp);
         }
         return;
     }
@@ -239,7 +239,7 @@ void LookAt(f32 aFrontX, f32 aFrontZ) {
     t = x + aFrontX;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        SDF_VU0_LOADVECTOR_B(D_00529BB0.quaternion);
+        SDF_VU0_LOADVECTOR_B(sdfMathConstants.quaternion);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
         quaternion.x = 0.0f;
@@ -305,7 +305,7 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    SDF_VU0_LOADVECTOR_BARRIER(D_00529620);
+    SDF_VU0_LOADVECTOR_BARRIER(sdfUnitXVector);
     SDF_VU0_APPLYMATRIX_XYZ();
     VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);

@@ -46,7 +46,7 @@ extern sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 a
 extern volatile u8 sdfFrameId;
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
-extern const char D_00529428[];
+extern const char sdfModelDefaultName[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, addr_t aHeadPacket, addr_t aTailPacket);
@@ -1457,7 +1457,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex) {
     const u8 *name;
     const u8 *end;
     if (chunk == NULL) {
-        return D_00529428;
+        return sdfModelDefaultName;
     }
     name = (const u8 *)(chunk + 1);
     end = (const u8 *)chunk + chunk->size;
@@ -1472,7 +1472,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex) {
         }
         name = (const u8 *)(id + 1);
         if (name >= end) {
-            return D_00529428;
+            return sdfModelDefaultName;
         }
     } while (1);
 }

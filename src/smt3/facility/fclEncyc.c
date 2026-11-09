@@ -431,7 +431,7 @@ void fclEncycDebugRegist(void)
 
 typedef s32 (*fclEncycDebugStep_t)(fclEncyc_instance_tag *, fclEncycDebugWork_t *, sdfDrawTag_t *);
 
-extern fclEncycDebugStep_t D_00332218[];
+extern fclEncycDebugStep_t fclEncycDebugStepTable[];
 
 void InitializeDebug_fclEncyc(void);
 extern void *sdfGrAllocPacketBuff(s32 size);
@@ -452,7 +452,7 @@ s32 fclEncycDebugProc(void)
     }
     tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    result = D_00332218[g_pdebug->state](g_pinst, g_pdebug, tag);
+    result = fclEncycDebugStepTable[g_pdebug->state](g_pinst, g_pdebug, tag);
     fclEncycDebugOt81.regFunc(&fclEncycDebugOt81, tag);
     return result != 0 ? -1 : 0;
 }
@@ -511,7 +511,7 @@ void ReleaseWork(fclEncyc_instance_tag *pinst)
     }
 }
 
-extern void (*D_00332228[])(fclEncyc_instance_tag *);
+extern void (*fclEncycInitPhaseTable[])(fclEncyc_instance_tag *);
 extern void (*CalcPhaseTable[])(fclEncyc_instance_tag *);
 extern s32 cmpModelSetup(u16 id, s32 blocking);
 extern mdlObj_t *cmpGetEncycWork(void);
@@ -525,7 +525,7 @@ s32 CALC_ENCYC_Process(void)
 
     if (pinst == NULL) return 0;
     if (!(pinst->stat & 1)) {
-        phase = D_00332228[(s16)pinst->unk_58];
+        phase = fclEncycInitPhaseTable[(s16)pinst->unk_58];
         if (phase != NULL) phase(pinst);
         pinst->stat |= 1;
     }
@@ -636,7 +636,7 @@ extern void InitListWindow(lstListWindow_t *work, fclPanel_t *panel,
 extern void PopListwinCursor(fclEncyc_instance_tag *, lstListWindow_t *, s32);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 z, u32 color,
     const char *text, frFontHandle_t *previous);
-extern const char *D_00330A10[];
+extern const char *fclEncycRegistTitleText[];
 extern void drawRegistList(fclEncyc_instance_tag *pinst);
 extern void fclClearFlag(s8 index);
 extern s32 fclScriptStart(s32 script, s32 start, void *pid);
@@ -672,7 +672,7 @@ void InitPhaseRegistTop(fclEncyc_instance_tag *pinst)
     work->request = NULL;
     for (i = 6; i >= 0; i--) work->fonts[i] = NULL;
     work->request = frwGetSmallFontFRQ2(0x290, 0x90, 0xFFFFF0, 0xA09DC380,
-                                      D_00330A10[0], NULL);
+                                      fclEncycRegistTitleText[0], NULL);
     drawRegistList(pinst);
     work->flags = 0;
     fclClearFlag(0);
@@ -988,7 +988,7 @@ typedef struct fclEncycReadTopWork_t {
     u8 groupStart[8]; /* 0x1208: CreateFontListRead marks race/level groups. */
 } fclEncycReadTopWork_t;
 
-extern const char *D_00330A14[];
+extern const char *fclEncycReadTitleText[];
 extern void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious);
 extern void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious);
 extern void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices);
@@ -1051,7 +1051,7 @@ void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
 
     for (i = 7; i >= 0; i--) work->fontList[i] = NULL;
     work->requests[0] = frwGetSmallFontFRQ2(0x290, 0x90, 0xFFFFF0,
-                         0xA09DC380, D_00330A14[0], NULL);
+                         0xA09DC380, fclEncycReadTitleText[0], NULL);
     work->requests[1] = NULL;
     drawSummonCount((void **)&work->requests[1], 0x1840, 0x130, 0);
     work->requests[2] = NULL;
@@ -2182,7 +2182,7 @@ void SetRecordToUnitCore(datUnitWork_t *punit, fclencyceelem_t *pelem)
     punit->hensinmaeexp = pelem->hensinmaeexp;
 }
 
-extern s8 D_003322C0[];
+extern s8 fclEncycCompareIndex[];
 
 s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record)
 {
@@ -2197,7 +2197,7 @@ s32 CompareUnitToRecord(datUnitWork_t *unit, fclencyceelem_t *record)
     if (record->exp != unit->exp) return 4;
     if (record->level != unit->level) return 5;
     for (i = 0; i < 5; i++) {
-        index = D_003322C0[i];
+        index = fclEncycCompareIndex[i];
         if (record->param[index] != unit->param[index]) return 6;
         if (record->skillparam[index] != unit->skillparam[index]) return 7;
         if (record->mitamaparam[index] != unit->mitamaparam[index]) return 8;
@@ -2765,8 +2765,8 @@ extern void Mult(void);
 extern f32 sdfSin(f32 angle);
 extern f32 sdfCos(f32 angle);
 extern f32 D_00529630[4];
-extern f32 D_00332310[4];
-extern f32 D_00332320[4];
+extern f32 fclEncycPanStepX[4];
+extern f32 fclEncycPanStepY[4];
 
 void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 {
@@ -2829,20 +2829,20 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 
     mdlGetPosition(model);
     if ((SDF_FRAME_MASK(dds3GetKernelCount(), key) & 0x20) != 0 && work->viewOffsetX > work->positionMinX) {
-        SDF_VU0_LOADVECTOR_B(D_00332310);
+        SDF_VU0_LOADVECTOR_B(fclEncycPanStepX);
         SDF_VU0_SUBVECTOR();
         work->viewOffsetX--;
     } else if ((SDF_FRAME_MASK(dds3GetKernelCount(), key) & 0x40) != 0 && work->viewOffsetX < work->positionMaxX) {
-        SDF_VU0_LOADVECTOR_B(D_00332310);
+        SDF_VU0_LOADVECTOR_B(fclEncycPanStepX);
         SDF_VU0_ADDVECTOR();
         work->viewOffsetX++;
     }
     if ((SDF_FRAME_MASK(dds3GetKernelCount(), key) & 0x80) != 0 && work->viewOffsetY > work->positionMinY) {
-        SDF_VU0_LOADVECTOR_B(D_00332320);
+        SDF_VU0_LOADVECTOR_B(fclEncycPanStepY);
         SDF_VU0_SUBVECTOR();
         work->viewOffsetY--;
     } else if ((SDF_FRAME_MASK(dds3GetKernelCount(), key) & 0x100) != 0 && work->viewOffsetY < work->positionMaxY) {
-        SDF_VU0_LOADVECTOR_B(D_00332320);
+        SDF_VU0_LOADVECTOR_B(fclEncycPanStepY);
         SDF_VU0_ADDVECTOR();
         work->viewOffsetY++;
     }
@@ -3001,25 +3001,25 @@ typedef struct
     s16 offsetY;
 } fclEncycViewParam_t;
 
-extern fclEncycViewParam_t D_00331218[];
+extern fclEncycViewParam_t fclEncycViewParamTable[];
 extern datUnitVisual_t datModelParamTable[];
 
 void SetBoundControl(fclEncyc_instance_tag *pinst)
 {
     fclEncycBoundWork_t *work = (fclEncycBoundWork_t *)pinst->pwork;
     u16 id = *(u16 *)((u8 *)DDS3_GBWK + work->phase.recordIndex * (s32)sizeof(fclencyceelem_t) + 0x11E90);
-    work->rotationMin = -D_00331218[id].rotation;
-    work->rotationMax = D_00331218[id].rotation;
-    work->radiusMin = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + D_00331218[id].radius;
-    if (D_00331218[id].farRadius > 0.0f) {
-        work->radiusMax = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + D_00331218[id].farRadius;
+    work->rotationMin = -fclEncycViewParamTable[id].rotation;
+    work->rotationMax = fclEncycViewParamTable[id].rotation;
+    work->radiusMin = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + fclEncycViewParamTable[id].radius;
+    if (fclEncycViewParamTable[id].farRadius > 0.0f) {
+        work->radiusMax = pinst->camera[1].w + datModelParamTable[id].formsize + 80.0f + fclEncycViewParamTable[id].farRadius;
     } else {
         work->radiusMax = work->phase.cameraRadius + work->phase.cameraRadius;
     }
-    work->positionMinX = -D_00331218[id].offsetX;
-    work->positionMinY = -D_00331218[id].offsetY;
-    work->positionMaxX = D_00331218[id].offsetX;
-    work->positionMaxY = D_00331218[id].offsetY;
+    work->positionMinX = -fclEncycViewParamTable[id].offsetX;
+    work->positionMinY = -fclEncycViewParamTable[id].offsetY;
+    work->positionMaxX = fclEncycViewParamTable[id].offsetX;
+    work->positionMaxY = fclEncycViewParamTable[id].offsetY;
 }
 
 
@@ -3067,7 +3067,7 @@ typedef struct {
     f32 speed;
 } fclEncycMotionParam_t;
 
-extern fclEncycMotionParam_t D_00330A18[];
+extern fclEncycMotionParam_t fclEncycMotionParamTable[];
 extern u8 cmpGetModelMotionId(u16 id);
 extern f32 cmpGetModelScale(u16 id);
 extern void mdlLoopMotion(mdlObj_t *model, s32 group, s32 motion);
@@ -3080,8 +3080,8 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     f32 speed;
 
     if (flags & 0x80) {
-        motion = D_00330A18[id].motion;
-        speed = D_00330A18[id].speed;
+        motion = fclEncycMotionParamTable[id].motion;
+        speed = fclEncycMotionParamTable[id].speed;
         if (flags & 0x400) {
             if (motion != cmpGetModelMotionId((u16)id)) {
                 mdlSmoothLoopMotion(model, 0, motion, 16.0f, 16.0f);
@@ -3094,7 +3094,7 @@ void ChangeModelMotion(s32 id, mdlObj_t *model, s32 flags)
     } else {
         motion = cmpGetModelMotionId((u16)id);
         speed = cmpGetModelScale((u16)id);
-        if (motion != D_00330A18[id].motion) {
+        if (motion != fclEncycMotionParamTable[id].motion) {
             mdlLoopMotion(model, 0, motion);
         }
     }
@@ -3299,8 +3299,8 @@ void DrawListWindowBack(void *obj, fclPanel_t *plistwin)
 }
 
 typedef struct { s32 left, right; } fclEncycStrip_t;
-extern itfColor_t D_00332330;
-extern fclEncycStrip_t D_00332340[5];
+extern itfColor_t fclEncycRegistStripColor;
+extern fclEncycStrip_t fclEncycRegistStrips[5];
 extern itfColor_t g_uv_summon_back[];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *, itfColor_t *, u32, s32, sdfDrawTag_t *);
@@ -3319,11 +3319,11 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
     sdfDrawTagInit(tag);
     pos[0].y = 0x218;
     pos[1].y = 0x260;
-    strip = D_00332340;
+    strip = fclEncycRegistStrips;
     for (i = 4; i >= 0; i--, strip++) {
         pos[0].x = strip->left;
         pos[1].x = strip->right;
-        itfMiscDrawSpritePlanePrim(pos, &D_00332330, 0xFFFFF0, 0, tag);
+        itfMiscDrawSpritePlanePrim(pos, &fclEncycRegistStripColor, 0xFFFFF0, 0, tag);
     }
 
     pos[0].x = 0x690; pos[0].y = 0x1F8;
@@ -3355,9 +3355,9 @@ void drawRegistSprites(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern itfColor_t D_00330930;
-extern itfColor_t D_00330940;
-extern itfColor_t D_00330950;
+extern itfColor_t fclEncycListRowUv;
+extern itfColor_t fclEncycListIconLeftUv;
+extern itfColor_t fclEncycListIconRightUv;
 extern itfColor_t g_uv_summon_back[];
 void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
 {
@@ -3378,7 +3378,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
         pos[0].y = y + 0x98;
         pos[1].x = 0x1C40;
         pos[1].y = y + 0xB0;
-        itfMiscDrawSpritePrim(pos, &D_00330930, g_uv_summon_back, 0x000FFFFF,
+        itfMiscDrawSpritePrim(pos, &fclEncycListRowUv, g_uv_summon_back, 0x000FFFFF,
                               pinst->texHandle[0], 0, tag);
 
         request = work->fonts[i];
@@ -3387,12 +3387,12 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
             pos[0].y = y + 0x48;
             pos[1].x = 0x1560;
             pos[1].y = y + 0x90;
-            itfMiscDrawSpritePrim2(pos, &D_00330940, g_uv_summon_back,
+            itfMiscDrawSpritePrim2(pos, &fclEncycListIconLeftUv, g_uv_summon_back,
                                    0x00FFFFF0, 0, tag);
 
             pos[0].x = 0x1880;
             pos[1].x = 0x19A0;
-            itfMiscDrawSpritePrim2(pos, &D_00330950, g_uv_summon_back,
+            itfMiscDrawSpritePrim2(pos, &fclEncycListIconRightUv, g_uv_summon_back,
                                    0x00FFFFF0, 0, tag);
             func_001C7E38(request, 0, 0x47);
         }
@@ -3401,9 +3401,9 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
 }
 
 
-extern itfColor_t D_00332368;
-extern itfColor_t D_00332378;
-extern fclEncycStrip_t D_00332388[4];
+extern itfColor_t fclEncycCaptionStripColor;
+extern itfColor_t fclEncycCaptionLastStripColor;
+extern fclEncycStrip_t fclEncycCaptionStrips[4];
 extern sdfTexHandle_t *D_00345D88[];
 
 void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
@@ -3418,11 +3418,11 @@ void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
     sdfDrawTagInit(tag);
     pos[0].y = 0x3B0;
     pos[1].y = 0x3F8;
-    strip = D_00332388;
+    strip = fclEncycCaptionStrips;
     for (i = 0; i < 4; i++, strip++) {
         pos[0].x = strip->left;
         pos[1].x = strip->right;
-        itfMiscDrawSpritePlanePrim(pos, i == 3 ? &D_00332378 : &D_00332368,
+        itfMiscDrawSpritePlanePrim(pos, i == 3 ? &fclEncycCaptionLastStripColor : &fclEncycCaptionStripColor,
                                   0xFFFFF0, 0, tag);
     }
 
@@ -3517,12 +3517,12 @@ void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern itfColor_t D_00330930;
-extern itfColor_t D_00330960;
-extern itfColor_t D_00330970;
-extern itfColor_t D_00330980;
-extern itfColor_t D_00330990;
-extern itfColor_t D_003309A0;
+extern itfColor_t fclEncycListRowUv;
+extern itfColor_t fclEncycReadMarkerOffUv;
+extern itfColor_t fclEncycReadMarkerOnUv;
+extern itfColor_t fclEncycReadSelectOffUv;
+extern itfColor_t fclEncycReadSelectOnUv;
+extern itfColor_t fclEncycReadGroupSeparatorUv;
 
 void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
 {
@@ -3540,7 +3540,7 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
         pos[0].y = y + 0x98;
         pos[1].x = 0x1BA0;
         pos[1].y = y + 0xB0;
-        itfMiscDrawSpritePrim(pos, &D_00330930, g_uv_summon_back, 0xFFFFF,
+        itfMiscDrawSpritePrim(pos, &fclEncycListRowUv, g_uv_summon_back, 0xFFFFF,
                             pinst->texHandle[0], 0, tag);
         request = work->fontList[i];
         if (request != NULL) {
@@ -3550,24 +3550,24 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
                 pos[0].y = y + 0x70;
                 pos[1].x = 0x5D0;
                 pos[1].y = y + 0xD8;
-                itfMiscDrawSpritePrim2(pos, &D_003309A0, g_uv_summon_back,
+                itfMiscDrawSpritePrim2(pos, &fclEncycReadGroupSeparatorUv, g_uv_summon_back,
                                       0xFFFFF0, 0, tag);
                 pos[0].x = 0x1C80;
                 pos[1].x = 0x1B80;
-                itfMiscDrawSpritePrim2(pos, &D_003309A0, g_uv_summon_back,
+                itfMiscDrawSpritePrim2(pos, &fclEncycReadGroupSeparatorUv, g_uv_summon_back,
                                       0xFFFFF0, 0, tag);
             }
             pos[0].x = 0x14B0;
             pos[0].y = y + 0x40;
             pos[1].x = 0x1540;
             pos[1].y = y + 0x78;
-            itfMiscDrawSpritePrim2(pos, selected == i ? &D_00330970 : &D_00330960,
+            itfMiscDrawSpritePrim2(pos, selected == i ? &fclEncycReadMarkerOnUv : &fclEncycReadMarkerOffUv,
                                   g_uv_summon_back, 0xFFFFF, 0, tag);
             pos[0].x = 0x1A70;
             pos[0].y = y + 0x20;
             pos[1].x = 0x1B20;
             pos[1].y = y + 0x90;
-            itfMiscDrawSpritePrim(pos, selected == i ? &D_00330990 : &D_00330980,
+            itfMiscDrawSpritePrim(pos, selected == i ? &fclEncycReadSelectOnUv : &fclEncycReadSelectOffUv,
                                 g_uv_summon_back, 0xFFFFF0,
                                 pinst->texHandle[1], 0, tag);
             func_001C7E38(request, 0, 0x47);
@@ -3576,9 +3576,9 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern itfColor_t D_0053D828;
-extern itfColor_t D_003309E0;
-extern itfColor_t D_003309F0;
+extern itfColor_t fclEncycMoneyBaseColor;
+extern itfColor_t fclEncycMoneyBoxUv;
+extern itfColor_t fclEncycMoneyOverlayUv;
 
 void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
 {
@@ -3593,7 +3593,7 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
     s32 y;
     sdfDrawTag_t *tag;
 
-    draw.color = D_0053D828;
+    draw.color = fclEncycMoneyBaseColor;
     work = pinst->pwork;
     x = work->phase.ribbonWidth;
     y = work->phase.ribbonHeight;
@@ -3604,21 +3604,21 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
     draw.pos[0].y = y;
     draw.pos[1].x = x + 0x16B0;
     draw.pos[1].y = y + 0xA0;
-    itfMiscDrawSpritePrim(draw.pos, &D_003309E0, &draw.color, 0xFFFFF0,
+    itfMiscDrawSpritePrim(draw.pos, &fclEncycMoneyBoxUv, &draw.color, 0xFFFFF0,
                           pinst->texHandle[2], 0, tag);
     draw.pos[0].x = x + 0x1D00;
     draw.pos[0].y = y - 8;
     draw.pos[1].x = x + 0x1DD0;
     draw.pos[1].y = y + 0xA8;
-    itfMiscDrawSpritePrim2(draw.pos, &D_003309F0, &draw.color, 0xFFFFF0, 0, tag);
+    itfMiscDrawSpritePrim2(draw.pos, &fclEncycMoneyOverlayUv, &draw.color, 0xFFFFF0, 0, tag);
     D_002F67F8.regFunc(&D_002F67F8, tag);
     frSetDrawPosition(work->countFont, x + 0x1700, y + 8);
     frSetFontColor(work->countFont, 0x80808000 | draw.color.components[3]);
     func_001C7E38(work->countFont, 1, 0x47);
 }
 
-extern u8 D_003323A8[];
-extern u8 D_003323B0[];
+extern u8 fclEncycRectVertexIndex[];
+extern u8 fclEncycRectColorIndex[];
 extern sdfGrOt_t D_002F67F8;
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color,
@@ -3664,7 +3664,7 @@ void DrawExplainBack(s32 alpha)
         pos[1].x = 0x1760; pos[1].y = 0x280;
         pos[2].x = 0x1760; pos[2].y = 0xBD8;
         pos[3].x = 0x1110; pos[3].y = 0xBD8;
-        itfMiscDrawRectanglePrim(pos, draw.colors, D_003323A8, D_003323B0, 0xFFFFF, tag);
+        itfMiscDrawRectanglePrim(pos, draw.colors, fclEncycRectVertexIndex, fclEncycRectColorIndex, 0xFFFFF, tag);
         itfMiscDrawAlphaPrim(tag, 1, 0);
         draw.colors[0].components[0] = 0x10; draw.colors[0].components[1] = 0xE;
         draw.colors[0].components[2] = 0xF; draw.colors[0].components[3] = 0;
@@ -3674,7 +3674,7 @@ void DrawExplainBack(s32 alpha)
         pos[1].x = 0xDE0; pos[1].y = 0x2B8;
         pos[2].x = 0xDE0; pos[2].y = 0x3A8;
         pos[3].x = 0; pos[3].y = 0x3A8;
-        itfMiscDrawRectanglePrim(pos, draw.colors, D_003323A8, D_003323B0, 0xFFFFF, tag);
+        itfMiscDrawRectanglePrim(pos, draw.colors, fclEncycRectVertexIndex, fclEncycRectColorIndex, 0xFFFFF, tag);
     }
     itfMiscDrawAlphaPrim(tag, 0, 0);
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -3682,8 +3682,8 @@ void DrawExplainBack(s32 alpha)
 
 
 
-extern sdfIVector2_t D_003323B8[2];
-extern itfColor_t D_003323C8[1];
+extern sdfIVector2_t fclEncycBackBoardPos[2];
+extern itfColor_t fclEncycBackBoardColor[1];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
@@ -3700,15 +3700,15 @@ void DrawBackBlackBoard(s32 y, s32 ratio)
     }
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    D_003323B8[1].y = y;
-    D_003323C8[0].components[3] = (ratio * 0x33) >> 7;
-    itfMiscDrawSpritePlanePrim(D_003323B8, D_003323C8, 1, 0, tag);
+    fclEncycBackBoardPos[1].y = y;
+    fclEncycBackBoardColor[0].components[3] = (ratio * 0x33) >> 7;
+    itfMiscDrawSpritePlanePrim(fclEncycBackBoardPos, fclEncycBackBoardColor, 1, 0, tag);
     ot = &sdfGrOtTable[8];
     ot->regFunc(ot, tag);
 }
 
 extern itfColor_t g_uv_summon_back[];
-extern itfColor_t D_003309B0[];
+extern itfColor_t fclEncycHelpPanelUv[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv,
@@ -3723,7 +3723,7 @@ void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
     sdfDrawTagInit(tag);
     pos[0].x = 0x1370; pos[0].y = 0xA0;
     pos[1].x = 0x2000; pos[1].y = 0x190;
-    itfMiscDrawSpritePrim(pos, D_003309B0, g_uv_summon_back, 0xFFFFF0,
+    itfMiscDrawSpritePrim(pos, fclEncycHelpPanelUv, g_uv_summon_back, 0xFFFFF0,
                          pinst->texHandle[3], 0, tag);
     uv.components[0] = 0x60; uv.components[1] = 0x4B0;
     uv.components[2] = 0x190; uv.components[3] = 0x5F0;
@@ -3747,8 +3747,8 @@ typedef struct {
     sdfIVector2_t pos[2];
     itfColor_t color;
 } fclEncycDrawPrim_t;
-extern itfColor_t D_003309B0[];
-extern itfColor_t D_003309D0[];
+extern itfColor_t fclEncycHelpPanelUv[];
+extern itfColor_t fclEncycHelpOverlayUv[];
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
                                   sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv,
@@ -3779,18 +3779,18 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     prim.color.components[1] = 0x80;
     prim.color.components[2] = 0x80;
     prim.color.components[3] = work->registAlpha;
-    itfMiscDrawSpritePrim(prim.pos, D_003309B0, &prim.color, 0xFFFFF0,
+    itfMiscDrawSpritePrim(prim.pos, fclEncycHelpPanelUv, &prim.color, 0xFFFFF0,
                           pinst->texHandle[3], 0, tag);
     prim.pos[0].x = x + 0x720;
     prim.pos[0].y = y + 0x28;
     prim.pos[1].x = x + 0xAD0;
     prim.pos[1].y = y + 0xC8;
-    itfMiscDrawSpritePrim2(prim.pos, D_003309D0, &prim.color, 0xFFFFF0, 0, tag);
+    itfMiscDrawSpritePrim2(prim.pos, fclEncycHelpOverlayUv, &prim.color, 0xFFFFF0, 0, tag);
     ot = &sdfGrOtTable[0x47];
     ot->regFunc(ot, tag);
 }
 
-extern itfColor_t D_003309C0;
+extern itfColor_t fclEncycMainHelpOverlayUv;
 
 #ifdef NON_MATCHING
 void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
@@ -3814,11 +3814,11 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         color.components[3] = work->help[1].alpha;
         pos[0].x = x; pos[0].y = y;
         pos[1].x = x + 0xC90; pos[1].y = y + 0xF0;
-        itfMiscDrawSpritePrim(pos, D_003309B0, &color, 0xFFFFF0,
+        itfMiscDrawSpritePrim(pos, fclEncycHelpPanelUv, &color, 0xFFFFF0,
                               pinst->texHandle[3], 0, tag);
         pos[0].x = x + 0x720; pos[0].y = y + 0x28;
         pos[1].x = x + 0xAD0; pos[1].y = y + 0xC8;
-        itfMiscDrawSpritePrim2(pos, &D_003309C0, &color, 0xFFFFF0, 0, tag);
+        itfMiscDrawSpritePrim2(pos, &fclEncycMainHelpOverlayUv, &color, 0xFFFFF0, 0, tag);
         D_002F67F8.regFunc(&D_002F67F8, tag);
     }
     if (work->help[0].alpha > 0) {
@@ -3909,7 +3909,7 @@ extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 width, s32 height);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
-extern const char *D_003323D8[4];
+extern const char *fclEncycDebugMenuLabels[4];
 extern char fclEncycMarkerOn[];
 
 s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
@@ -3950,7 +3950,7 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
 
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 5);
     y = 0x7A00;
-    label = D_003323D8;
+    label = fclEncycDebugMenuLabels;
     for (i = 2; i >= 0; i--) {
         /* Keep the real zero attribute in its argument register through this
          * print only. This localized compiler constraint restores native
@@ -3965,9 +3965,9 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
     return 0;
 }
 
-extern char D_0053D868[];
-extern char D_0053D878[];
-extern char D_0053D888[];
+extern char fclEncycStatusMissing[];
+extern char fclEncycStatusFound[];
+extern char fclEncycRowFmt[];
 extern void DebugRemoveRecord(s32 id);
 extern void DebugUpdateListwin(fclEncyc_instance_tag *pinst);
 
@@ -4045,16 +4045,16 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
     }
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 0x12);
     for (i = 0; i < 16; i++) {
-        const char *status = fclEncycSearch(work->firstId + i) < 0 ? D_0053D868 : D_0053D878;
+        const char *status = fclEncycSearch(work->firstId + i) < 0 ? fclEncycStatusMissing : fclEncycStatusFound;
         const char *marker = work->row == i ? fclEncycMarkerOn : fclEncycBlank;
 
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
-                                               0, D_0053D888, marker, work->firstId + i, status)));
+                                               0, fclEncycRowFmt, marker, work->firstId + i, status)));
     }
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D828);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycMoneyBaseColor);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D838);
 
@@ -4071,7 +4071,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
-extern char D_0053D898[];
+extern char fclEncycViewKeyFmt[];
 
 s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                      sdfDrawTag_t *tag)
@@ -4096,13 +4096,13 @@ s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
 
     dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 3);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
-                                          D_0053D898, (s8)pinst->unk_6D)));
+                                          fclEncycViewKeyFmt, (s8)pinst->unk_6D)));
     return 0;
 }
 
-extern const char D_0053D8B0[];
-extern const char D_0053D8C0[];
-extern const char D_0053D8D0[];
+extern const char fclEncycBoundDevilIdFmt[];
+extern const char fclEncycBoundRadiusFmt[];
+extern const char fclEncycBoundAngleFmt[];
 extern const char D_0053D8E0[];
 extern const char D_0053D8F0[];
 
@@ -4129,11 +4129,11 @@ s32 DebugProcDispBound(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *debugW
         radius -= 80.0f;
 
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00, 0x00FFFFF0, 0,
-                                               D_0053D8B0, devilId)));
+                                               fclEncycBoundDevilIdFmt, devilId)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A60, 0x00FFFFF0, 0,
-                                               D_0053D8C0, radius)));
+                                               fclEncycBoundRadiusFmt, radius)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7AC0, 0x00FFFFF0, 0,
-                                               D_0053D8D0, work->phase.cameraAngle)));
+                                               fclEncycBoundAngleFmt, work->phase.cameraAngle)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7B20, 0x00FFFFF0, 0,
                                                D_0053D8E0, work->reserved040)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7B80, 0x00FFFFF0, 0,
@@ -4188,13 +4188,13 @@ void DebugUpdateListwin(fclEncyc_instance_tag *pinst)
                       ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
     drawEncycRatio(&work->requests[2], 1);
 }
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D898);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycViewKeyFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8B0);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundDevilIdFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8C0);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundRadiusFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8D0);
+INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundAngleFmt);
 
 INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8E0);
 

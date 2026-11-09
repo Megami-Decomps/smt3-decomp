@@ -161,7 +161,7 @@ extern s32 fldEncountTestFlag(s32 flag);
 
 extern void *dds3EffectPartCreate(s32 type, void *pData);
 
-extern void *D_0054EF2C;
+extern void *fldItemBoxEffectData;
 
 extern const sdfVector4_t fldItemBoxCalcAxis;
 
@@ -496,7 +496,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 #endif
 
-extern u8 D_003129D8[];
+extern u8 fldNpcLightTbl[];
 
 
 extern struct effNode_t *fldTakaraSlotCount;
@@ -515,7 +515,7 @@ extern const u8 *fldTakara3Data;
 
 extern s32 fldTakara3Size;
 
-extern void *D_0054EF40;
+extern void *fldItemBoxTexData;
 
 extern const char fldTakaraUnitName[];
 
@@ -627,7 +627,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
         break;
     }
     if (hEffPart == NULL) {
-        hEffPart = sdfTexSet(D_0054EF40);
+        hEffPart = sdfTexSet(fldItemBoxTexData);
     }
     axis = fldItemBoxAddAxis;
     SDF_VU0_LOADVECTOR(&axis);
@@ -659,7 +659,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldTakaraSlotTable[fldTakaraCount].tableIndex = id;
     fldTakaraCount = fldTakaraCount + 1;
     fldAddItemBoxObject(-1, x, y, z, 20.0f, 100.0f);
-    row = &D_003129D8[fldGlobalBase.floor * 8];
+    row = &fldNpcLightTbl[fldGlobalBase.floor * 8];
     SDF_VU0_LOADVECTOR(&rotation);
     dir = EulerAngleAxisY() * 180.0f / 3.14f + 80.0f;
     unit = evtGetUnitHandle2(object);
@@ -771,7 +771,7 @@ void fldItemBoxCalcTask(void) {
                 mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].object), 0, 1);
                 fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
                 if (fldItemBoxCount == NULL) {
-                    fldItemBoxCount = dds3EffectPartCreate(6, D_0054EF2C);
+                    fldItemBoxCount = dds3EffectPartCreate(6, fldItemBoxEffectData);
                 }
                 dds3EffectReset(fldTDmgEffect);
             } else {
@@ -1365,7 +1365,7 @@ extern sdfVector4_t fldNpcWorkVec;
 
 extern f32 fldWaveDistance;
 
-extern s32 D_0054EF68;
+extern s32 fldWaveFrames;
 
 extern f32 fldNpcCamPosX;
 
@@ -1422,7 +1422,7 @@ void fldNpcCalc(void)
                     fldWaveDistance = 0.0f;
                     fldWaveStart(vec.x, vec.y, vec.z);
                 }
-                D_0054EF68++;
+                fldWaveFrames++;
             } else {
                 fldNpcBlurHandle = 0;
             }

@@ -15,7 +15,7 @@ extern s32 fldWmapEnabled;
 
 extern dds3ProcessID_t *mselShutDown(u32 mode);
 
-extern const char D_0053DF08[];
+extern const char mselProcName[];
 
 extern void mselFreeResources(s32 arg);
 
@@ -179,15 +179,15 @@ void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse)
     }
 }
 
-extern char D_0053DEC0[];
+extern char mselBgTexPath[];
 
-extern char D_0053DED8[];
+extern char mselDevilSelectTexPath[];
 
 void mselLoadBackground(void)
 {
-    gGlobal->unk_40 = fclLoadTexture(D_0053DEC0);
+    gGlobal->unk_40 = fclLoadTexture(mselBgTexPath);
     gGlobal->unk_44 = 0;
-    gGlobal->unk_48 = fclLoadTexture(D_0053DED8);
+    gGlobal->unk_48 = fclLoadTexture(mselDevilSelectTexPath);
 }
 
 extern void sdfTexFreeDelayed(s32 aHandle);
@@ -208,11 +208,11 @@ void mselFreeTextures(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DEC0);
+INCLUDE_RODATA(const s32, "kernel/ModeSelect", mselBgTexPath);
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DED8);
+INCLUDE_RODATA(const s32, "kernel/ModeSelect", mselDevilSelectTexPath);
 
-const char D_0053DEF0[] = "/title/mseldata.bmd";
+const char mselDataFilePath[] = "/title/mseldata.bmd";
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
@@ -243,11 +243,11 @@ dds3ProcessID_t *mselShutDown(u32 mode)
     gGlobal->unk_A8 = mode;
     gGlobal->unk_04 = sdfMemAllocDirect(0x1A510);
     gGlobal->unk_08 = sdfMemAllocDirect(0x7E90);
-    fileHandle = sdfDevLoadFileEx(D_0053DEF0, (u32 *)&gGlobal->unk_5C, NULL);
+    fileHandle = sdfDevLoadFileEx(mselDataFilePath, (u32 *)&gGlobal->unk_5C, NULL);
     gGlobal->unk_58 = fileHandle;
     fclInitMessage(gGlobal->unk_5C);
     dds3BackColor = 0x80000000;
-    return dds3StartProcess((char *)D_0053DF08, 0x2B19, 0, 0, mselMain, NULL, NULL);
+    return dds3StartProcess((char *)mselProcName, 0x2B19, 0, 0, mselMain, NULL, NULL);
 }
 
 extern void mselFreeTextures(void);
@@ -265,7 +265,7 @@ void mselFreeResources(s32 arg)
     gGlobal = NULL;
 }
 
-const char D_0053DF08[] = "mselProc";
+const char mselProcName[] = "mselProc";
 
 extern void *memcpy(void *dest, const void *src, size_t size);
 extern s8 dds3PadButtonState[];
@@ -638,7 +638,7 @@ s32 mselExit(u32 mode)
 s32 mselInit(void)
 {
     mselFreeResources(0);
-    dds3KillProcessName((char *)D_0053DF08, 1);
+    dds3KillProcessName((char *)mselProcName, 1);
     return 0;
 }
 

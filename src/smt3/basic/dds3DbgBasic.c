@@ -31,11 +31,11 @@ extern s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *tag);
 
 
 
-extern char D_0054E9A8[];
+extern char dds3BasicPosLabel[];
 
-extern char D_0054E9B0[];
+extern char dds3BasicRotLabel[];
 
-extern char D_0054E9B8[];
+extern char dds3BasicSclLabel[];
 
 s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
     dds3PoseSet_t *transform;
@@ -58,7 +58,7 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
         y++;
         positionY = (y * 6 << 4) + 0x7900;
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
-            positionY, 0xFEFFFF, 0, D_0054E9A8)));
+            positionY, 0xFEFFFF, 0, dds3BasicPosLabel)));
         valueX = ((x + 84) << 4) + 0x7000;
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             positionY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f",
@@ -66,14 +66,14 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
         y += 2;
         rotationY = (y * 6 << 4) + 0x7900;
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
-            rotationY, 0xFEFFFF, 0, D_0054E9B0)));
+            rotationY, 0xFEFFFF, 0, dds3BasicRotLabel)));
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             rotationY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f %3.2f",
             transform->rot.x, transform->rot.y, transform->rot.z, transform->rot.w)));
         y += 2;
         scaleY = (y * 6 << 4) + 0x7900;
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(labelX,
-            scaleY, 0xFEFFFF, 0, D_0054E9B8)));
+            scaleY, 0xFEFFFF, 0, dds3BasicSclLabel)));
         sdfDrawTagLink(list, EE_ADDR(sdfDevPrintf(valueX,
             scaleY, 0xFEFFFF, 0xE, "%3.1f %3.1f %3.1f",
             transform->scl.x, transform->scl.y, transform->scl.z)));
@@ -130,9 +130,9 @@ saddr_t dds3DebugBasic(dds3ProcessID_t *id) {
     }
     return 0;
 }
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", D_0054E9A8);
+INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicPosLabel);
 
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", D_0054E9B0);
+INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicRotLabel);
 
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", D_0054E9B8);
+INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicSclLabel);
 

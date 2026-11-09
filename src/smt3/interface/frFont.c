@@ -484,7 +484,7 @@ u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode);
 
 s32 frCalcStringHash(s8 *text);
 
-extern u8 D_0054F430[];
+extern u8 frEmptyString[];
 
 extern frFontHandle_t *frSetFontString(u8 *text, s8 fontIndex, s8 firstOption, s8 secondOption, frFontHandle_t *chain, s32 flag);
 
@@ -956,7 +956,7 @@ s32 frGetYShiftLev(s8 Style, s32 FontNo) {
     return 0x18;
 }
 
-extern u32 D_0054F414;
+extern u32 frSpaceAdvanceOffset;
 
 void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
 {
@@ -1027,7 +1027,7 @@ void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
             goto notSpace;
         }
         /* The provider stores an arbitrary u32; preserve native wrapping. */
-        spaceAdvance = (spaceWidth >> 1) + D_0054F414;
+        spaceAdvance = (spaceWidth >> 1) + frSpaceAdvanceOffset;
         FAKEMATCH_ASM_LIVE(spaceAdvance);
         glyph->advance = spaceAdvance;
         return;
@@ -1528,10 +1528,10 @@ s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode) {
 }
 
 /* Nocturne's ASCII bearing adjustments are separate 26-entry X/Y tables. */
-extern s32 D_00326210[26];
-extern s32 D_00326278[26];
-extern s32 D_003262E0[26];
-extern s32 D_00326348[26];
+extern s32 frFontUpperYOffset[26];
+extern s32 frFontUpperXOffset[26];
+extern s32 frFontLowerXOffset[26];
+extern s32 frFontLowerYOffset[26];
 extern u32 frDrawFontWork;
 
 /* DDS1 frFontDrawGlyphChain supplies the shared child/parent traversal;
@@ -1563,11 +1563,11 @@ s32 func_001C7E38(frFontHandle_t *glyph, s8 mode, u32 renderFlags) {
 
                         if (child->renderValueOrSetupOrShade.setupBytes.fontIndex < 2) {
                             if ((u16)(child->glyphCodeOrContext.glyphCode - 'A') < 26) {
-                                xOffset += D_00326278[child->glyphCodeOrContext.glyphCode - 'A'];
-                                yOffset = D_00326210[child->glyphCodeOrContext.glyphCode - 'A'];
+                                xOffset += frFontUpperXOffset[child->glyphCodeOrContext.glyphCode - 'A'];
+                                yOffset = frFontUpperYOffset[child->glyphCodeOrContext.glyphCode - 'A'];
                             } else if ((u16)(child->glyphCodeOrContext.glyphCode - 'a') < 26) {
-                                xOffset += D_003262E0[child->glyphCodeOrContext.glyphCode - 'a'];
-                                yOffset = D_00326348[child->glyphCodeOrContext.glyphCode - 'a'];
+                                xOffset += frFontLowerXOffset[child->glyphCodeOrContext.glyphCode - 'a'];
+                                yOffset = frFontLowerYOffset[child->glyphCodeOrContext.glyphCode - 'a'];
                             }
                         }
                         if (child->sourceItem == NULL) {
@@ -1871,11 +1871,11 @@ void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {
 
             if (chain != NULL) {
                 if (chain->firstChild != NULL) {
-                    pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
+                    pMsgInfo->pFRQ = frLinkFontString(frEmptyString, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
                     chain = pMsgInfo->pFRQ;
                 }
             } else {
-                pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, NULL);
+                pMsgInfo->pFRQ = frLinkFontString(frEmptyString, 0, pMsgInfo->ColNo, pMsgInfo->Tp, NULL);
                 chain = pMsgInfo->pFRQ;
             }
             frSetDrawSpeed(chain, pMsgInfo->Spd);
@@ -1896,7 +1896,7 @@ void frCreateNewHandle(frMsgInfo_t *pMsgInfo) {
         }
     }
     if (pMsgInfo->FrqFlag != 0) {
-        pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
+        pMsgInfo->pFRQ = frLinkFontString(frEmptyString, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
         frSetDrawSpeed(pMsgInfo->pFRQ, pMsgInfo->Spd);
         pMsgInfo->FrqFlag = 0;
     }
@@ -2284,9 +2284,9 @@ typedef struct
 } frFontDumpSlot_t;
 SIZE_CHECK(frFontDumpSlotSizeCheck, frFontDumpSlot_t, 0x110);
 
-extern sdfDrawTag_t D_0056B690[2];
-extern frFontGsPacket_t D_0056B6D0[2];
-extern sdfDrawTag_t D_0056B7D0[2];
+extern sdfDrawTag_t frDumpDrawEnvTag[2];
+extern frFontGsPacket_t frDumpDrawEnvPacket[2];
+extern sdfDrawTag_t frDumpTextureTag[2];
 extern frFontDumpSlot_t frDumpFontTexturePacket[2];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
@@ -2343,9 +2343,9 @@ void frDumpFontTexture(s32 x, s32 y, s32 depth)
     slot = &frDumpFontTexturePacket[frame];
     words = slot->words;
     {
-        frFontGsPacket_t *drawEnv = &D_0056B6D0[frame];
-        drawEnvTag = &D_0056B690[frame];
-        textureTag = &D_0056B7D0[frame];
+        frFontGsPacket_t *drawEnv = &frDumpDrawEnvPacket[frame];
+        drawEnvTag = &frDumpDrawEnvTag[frame];
+        textureTag = &frDumpTextureTag[frame];
 
         slot->header[3] = 0x50000010;
         slot->header[0] = 0x70000010;
@@ -2413,7 +2413,7 @@ INCLUDE_SDATA(const s32, "interface/frFont", gMessageStepY);
 
 INCLUDE_SDATA(const s32, "interface/frFont", frDefaultFontHandle);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F414);
+INCLUDE_SDATA(const s32, "interface/frFont", frSpaceAdvanceOffset);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gModeFlag);
 
@@ -2429,7 +2429,7 @@ INCLUDE_SDATA(const s32, "interface/frFont", frDrawFontWork);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0054F42C);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F430);
+INCLUDE_SDATA(const s32, "interface/frFont", frEmptyString);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0054F438);
 

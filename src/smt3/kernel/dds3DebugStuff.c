@@ -7,9 +7,9 @@
 #include "newdata.h"
 #include "field.h"
 
-extern u8 D_002FA930[];
+extern u8 dds3PrimDebugTextBoxAttrs[];
 
-extern char *D_002FA938[];
+extern char *dds3PrimDebugTextBoxLabels[];
 
 extern char dds3DebugLabelB[], dds3DebugLabelG[], dds3DebugLabelR[], dds3DebugFmtInt3[], dds3DebugFmtFloat3[];
 
@@ -301,7 +301,7 @@ void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *val
                      0xFF0080, 0x240, 0xF0, color, 0x40806020)));
     for (i = 0; i != 3; i++) {
         sdfDrawTagLink(packetList, EE_ADDR(sdfDevPrintf(x, y,
-                        0xFF0080, D_002FA930[i], D_002FA938[i])));
+                        0xFF0080, dds3PrimDebugTextBoxAttrs[i], dds3PrimDebugTextBoxLabels[i])));
         style = selected == i ? 6 : 0;
         if (values == NULL) {
             text[0] = '-';

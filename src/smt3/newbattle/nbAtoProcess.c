@@ -15,7 +15,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTime
                                          dds3ProcessFunc_t shutdownFunc, void *workData);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern dds3ProcessFunc_t nbAtoProcess1(dds3ProcessID_t *id);
-extern char D_005510C8[];
+extern char nbAtoProcessName[];
 extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 extern void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work);
@@ -143,26 +143,26 @@ void nbInitAtoProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_005510C8, 0x3F9, 1, 1, (dds3ProcessFunc_t)nbAtoProcess1,
+    id = dds3StartProcess(nbAtoProcessName, 0x3F9, 1, 1, (dds3ProcessFunc_t)nbAtoProcess1,
                           (dds3ProcessFunc_t)nbAtoShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->AtoProcessID = id;
 }
 
-extern sdfMemHandle_t *D_00551FC4, *D_00551FC8, *D_00551FCC;
-extern void *D_00551FD0, *D_00551FD4, *D_00551FD8;
-extern char D_00543598[], D_005435B8[], D_005435D8[];
+extern sdfMemHandle_t *nbResultFileHandle1, *nbResultFileHandle2, *nbResultFileHandle3;
+extern void *nbResultTmxData1, *nbResultTmxData2, *nbResultTmxData3;
+extern char nbResultTmxPath1[], nbResultTmxPath2[], nbResultTmxPath3[];
 
 void dds3LoadBootFile(void)
 {
-    D_00551FC4 = sdfDevLoadFileEx(D_00543598, (u32 *)&D_00551FD0, NULL);
-    D_00551FC8 = sdfDevLoadFileEx(D_005435B8, (u32 *)&D_00551FD4, NULL);
-    D_00551FCC = sdfDevLoadFileEx(D_005435D8, (u32 *)&D_00551FD8, NULL);
+    nbResultFileHandle1 = sdfDevLoadFileEx(nbResultTmxPath1, (u32 *)&nbResultTmxData1, NULL);
+    nbResultFileHandle2 = sdfDevLoadFileEx(nbResultTmxPath2, (u32 *)&nbResultTmxData2, NULL);
+    nbResultFileHandle3 = sdfDevLoadFileEx(nbResultTmxPath3, (u32 *)&nbResultTmxData3, NULL);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", D_00543598);
+INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath1);
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", D_005435B8);
+INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath2);
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", D_005435D8);
+INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath3);
 

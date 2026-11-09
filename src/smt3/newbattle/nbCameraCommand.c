@@ -10,7 +10,7 @@
 
 #include "sdk_libc.h"
 
-extern char D_00534BB8[]; /* Padded ground-collision diagnostic. */
+extern char nbCameraGroundChkFormat[]; /* Padded ground-collision diagnostic. */
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -121,7 +121,7 @@ extern f32 effBTLModelGetHeight(nbFormation_t *formation);
 extern void effBTLGetGroupPos(nbFormation_t *formation, f32 *position);
 extern void effBTLModelSetPosition(nbFormation_t *formation, sdfVector4_t *position);
 extern void nbCameraShot_GroundCollision(nbCamera_t *camera);
-extern sdfVector4_t D_00325960;
+extern sdfVector4_t nbCameraUnitAxisX;
 
 extern s32 nbCameraBoss_Command_Init(nbCamera_t *camera);
 extern void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *formation);
@@ -141,7 +141,7 @@ typedef struct nbCamera_AllTable_t {
 
 extern nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[];
 
-extern nbCamera_AllTable_t D_00325950;
+extern nbCamera_AllTable_t nbCameraModelAllDefault;
 
 extern nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation);
 
@@ -150,14 +150,14 @@ nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation)
     datUnitWork_t *pWork;
 
     if (pFormation == NULL) {
-        return &D_00325950;
+        return &nbCameraModelAllDefault;
     }
     if ((pFormation->stat & 1) == 0) {
-        return &D_00325950;
+        return &nbCameraModelAllDefault;
     }
     pWork = nbGetUnitWorkFromFormindex(pFormation->formindex);
     if (effBTLDebug_CameraAllTableCheck() == 0) {
-        return &D_00325950;
+        return &nbCameraModelAllDefault;
     }
     if ((pWork->flag & 4) != 0) {
         return nbCameraGetModelAllTable_Dummy;
@@ -595,7 +595,7 @@ void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera)
     length -= playerRadius * 0.5f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(&D_00325960);
+    SDF_VU0_LOADVECTOR_B(&nbCameraUnitAxisX);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_COPYVECTOR_C_TO_B();
     VU0_LERP_VF10_VF11(blend);
@@ -695,7 +695,7 @@ void nbCameraCommand_GroundCollision(nbCamera_t *pNbCamera)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&point);
     if (point.y > -20.0f) {
-        printf(D_00534BB8, point.y);
+        printf(nbCameraGroundChkFormat, point.y);
         height = point.y - -20.0f;
         distance = ffabsf(height / pNbCamera->direction.y);
         pNbCamera->distance -= fsqrtf(height * height + distance * distance);
@@ -821,5 +821,5 @@ void nbCameraState_Command_KORONZCheck(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraCommand", D_00534BB8);
+INCLUDE_RODATA(const s32, "newbattle/nbCameraCommand", nbCameraGroundChkFormat);
 

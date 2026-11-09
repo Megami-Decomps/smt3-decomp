@@ -19,9 +19,9 @@
 
 
 
-extern char D_0053D1F0[];
+extern char ragDrawProcName[];
 
-extern char D_0053D200[];
+extern char ragUpdateProcName[];
 
 extern u8 ragHeartsTable[];
 
@@ -129,7 +129,7 @@ s32 ragCalc(dds3ProcessID_t *id)
 
 
 
-extern fclSpriteTbl_t D_003306B8[];
+extern fclSpriteTbl_t ragSpriteTable[];
 
 
 extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
@@ -150,8 +150,8 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
 extern void fclDrawListSprite(s32 x, s32 y, s32 color, s32 width, s32 height,
                              s32 arg6, s32 blend, s32 ot);
 extern char *pStr[];
-extern char D_0054FBA0[];
-extern char D_0054FBA8[] __attribute__((section(".sdata")));
+extern char ragNameFormat[];
+extern char ragCountFormat[] __attribute__((section(".sdata")));
 
 void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
 {
@@ -169,22 +169,22 @@ void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
             frFontHandle_t *font;
             s32 numberY = rowY + 0x18;
 
-            sprintf(text, D_0054FBA0, pStr[id]);
+            sprintf(text, ragNameFormat, pStr[id]);
             font = frwGetSmallFontFRQ2(x, rowY + 0x38, pos->unk_08,
                                        0x75A8EB80, text, NULL);
             func_001C7E38(font, 1, ot);
             frDestroyFontRequestAfter(font);
             fclDrawSpriteRes(x + 0x650, rowY + 0x60,
                              pos->unk_08 << 4, NULL, 0, 1,
-                             ragDrawWork->texHandle, D_003306B8, ot);
+                             ragDrawWork->texHandle, ragSpriteTable, ot);
 
-            sprintf(text, D_0054FBA8, entries[i].count);
+            sprintf(text, ragCountFormat, entries[i].count);
             font = frwGetNumFontFRQ(x + 0x740, numberY,
                                     pos->unk_08, 0x75A8EB80, text, NULL);
             func_001C7E38(font, 1, ot);
             frDestroyFontRequestAfter(font);
 
-            sprintf(text, D_0054FBA8, DDS3_GBWK->stockRemainder[id]);
+            sprintf(text, ragCountFormat, DDS3_GBWK->stockRemainder[id]);
             font = frwGetNumFontFRQ(x + 0xB10, numberY,
                                     pos->unk_08, 0x6C81BB80, text, NULL);
             func_001C7E38(font, 1, ot);
@@ -192,7 +192,7 @@ void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
 
             fclDrawSpriteFilter(x + 0xCC0, rowY + 0x48,
                                 pos->unk_08 << 4, 1, NULL, 0, 2,
-                                ragDrawWork->texHandle, D_003306B8, ot);
+                                ragDrawWork->texHandle, ragSpriteTable, ot);
             fclDrawListSprite(x + 0xC0, rowY + 0xE0, pos->unk_08,
                               0xD8, 2, 0x152480, 0, ot);
             rowY += 0xC8;
@@ -205,10 +205,10 @@ void ragDrawListFrame(fclPanelPos_t *pos, s8 kind, u8 item, s32 ot)
 {
     cmpDrawBoxF(0xEA0, 0x660, pos->unk_08, 0x9A, 9, 0x0B192C6E, ot);
     fclDrawSpriteRes(0, 0, pos->unk_08 << 4, NULL, 0, 5,
-                     ragDrawWork->texHandle, D_003306B8, ot);
+                     ragDrawWork->texHandle, ragSpriteTable, ot);
     cmpDrawBoxF(0x18C0, 0x660, pos->unk_08, 0x4F, 9, 0x0B192C6E, ot);
     fclDrawSpriteRes(0, 0, pos->unk_08 << 4, NULL, 0, 6,
-                     ragDrawWork->texHandle, D_003306B8, ot);
+                     ragDrawWork->texHandle, ragSpriteTable, ot);
     ragDrawFrameEdge(pos, kind, item, ot);
 }
 
@@ -216,20 +216,20 @@ void ragDrawHeartsFooter(fclPanelPos_t *panel, s32 id)
 {
     cmpDrawBoxF(0x520, 0x200, panel->unk_08, 0x7b, 9, 0x19191e59, id);
     fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 3,
-                     ragDrawWork->texHandle, D_003306B8, id);
+                     ragDrawWork->texHandle, ragSpriteTable, id);
     cmpDrawBoxF(0xf60, 0x200, panel->unk_08, 0xe5, 9, 0x161e276e, id);
     fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 4,
-                     ragDrawWork->texHandle, D_003306B8, id);
+                     ragDrawWork->texHandle, ragSpriteTable, id);
 }
 
 void ragDrawListFooter(fclPanelPos_t *panel, s32 id)
 {
     cmpDrawBoxF(0x490, 0x200, panel->unk_08, 0x6a, 9, 0x19191e59, id);
     fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 7,
-                     ragDrawWork->texHandle, D_003306B8, id);
+                     ragDrawWork->texHandle, ragSpriteTable, id);
     cmpDrawBoxF(0xbb0, 0x200, panel->unk_08, 0x20, 9, 0x19191e59, id);
     fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 8,
-                     ragDrawWork->texHandle, D_003306B8, id);
+                     ragDrawWork->texHandle, ragSpriteTable, id);
 }
 
 extern ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index);
@@ -325,7 +325,7 @@ void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
         if (!disabled && datDevilTable[devil].level < level) {
             color = 0xFFBD8380;
         }
-        sprintf(text, D_0054FBA8, level);
+        sprintf(text, ragCountFormat, level);
         font = frwGetSmallNumFontFRQ(x + 0x9B0, y + 0xD8, z, color, text, NULL);
         func_001C7E38(font, 1, ot);
         frDestroyFontRequestAfter(font);
@@ -359,7 +359,7 @@ void ragDrawHeartsList(s8 mode)
     fclUpdatePanel(&ragDrawWork->panel[2]);
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
     trmDrawListText(&pos, ragExchangeTitle[0],
-                    ragDrawWork->texHandle, D_003306B8, 0x47);
+                    ragDrawWork->texHandle, ragSpriteTable, 0x47);
     ragDrawHeartsRows(&ragDrawWork->list.heartWindow,
                       0, rows, mode, 0x47);
     fclDrawPanel(&ragDrawWork->panel[1], 0x47);
@@ -395,7 +395,7 @@ void ragDrawList2(s8 mode)
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, ragExchangeTitle[1], ragDrawWork->texHandle, D_003306B8, 0x47);
+    trmDrawListText(&pos, ragExchangeTitle[1], ragDrawWork->texHandle, ragSpriteTable, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x2314), 1, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
@@ -416,7 +416,7 @@ void ragDrawList3(s8 mode)
     fclDrawPanel(&work->panel[2], 0x47);
     fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
     fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
-    trmDrawListText(&pos, ragExchangeTitle[2], ragDrawWork->texHandle, D_003306B8, 0x47);
+    trmDrawListText(&pos, ragExchangeTitle[2], ragDrawWork->texHandle, ragSpriteTable, 0x47);
     ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x34AC), 2, rows, mode, 0x47);
     fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
     fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
@@ -426,13 +426,13 @@ void ragDrawList3(s8 mode)
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x34AC, 0x80808080, 0, 0x47);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", D_0053D240);
+INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleMitama);
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", D_0053D250);
+INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleSoul);
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", D_0053D260);
+INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleItem);
 
-INCLUDE_SDATA(const s32, "facility/fclRagCalc", D_0054FBA0);
+INCLUDE_SDATA(const s32, "facility/fclRagCalc", ragNameFormat);
 
-INCLUDE_SDATA(const s32, "facility/fclRagCalc", D_0054FBA8);
+INCLUDE_SDATA(const s32, "facility/fclRagCalc", ragCountFormat);
 

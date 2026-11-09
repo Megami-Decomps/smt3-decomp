@@ -136,7 +136,7 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern char D_0054FAC8[];
+extern char evtLoadDoneMessage[];
 
 s32 evtCheckScriptDone(dds3ProcessID_t *task);
 
@@ -176,9 +176,9 @@ dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId);
 
 struct FileRequest *fileLoad(const char *filename);
 
-extern char D_0054FAC0[];
+extern char evtLoadStartMessage[];
 
-extern char D_0056D148[];
+extern char evtEventPackScriptPath[];
 
 
 dds3ProcessID_t *evtSearchEventPack(u32 eventno) {
@@ -436,14 +436,14 @@ void evtFreeScriptProcessData(dds3ProcessID_t *task)
     sdfChipFreeDirect(EE_ADDR_PTR(dds3GetProcessData(task)));
 }
 
-const char D_0053C668[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
+const char evtMotionSeNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
 dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     evtMotionSeTaskParams_t *params;
 
-    sprintf(taskName, D_0053C668, eventTaskId, resourceId);
+    sprintf(taskName, evtMotionSeNameFormat, eventTaskId, resourceId);
     params = sdfChipAllocDirect(0xC);
     memset(params, 0, 0xC);
     params->modelKey = modelKey;
@@ -452,7 +452,7 @@ dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     return dds3StartProcess(taskName, 0x3EC, 0, 0, evtMotionSeProcess1, (dds3ProcessFunc_t)evtFreeScriptProcessData, params);
 }
 
-const char D_0053C678[0x28] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
+const char evtEventScriptPathFormat[0x28] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtLoadEventScript(evtPackProcessData_t *state) {
@@ -460,11 +460,11 @@ void evtLoadEventScript(evtPackProcessData_t *state) {
     s32 eventDirectoryId;
     struct FileRequest *request;
 
-    printf(D_0054FAC0);
+    printf(evtLoadStartMessage);
     eventId = state->eventno;
     eventDirectoryId = eventId - eventId % 10;
-    sprintf(D_0056D148, D_0053C678, eventDirectoryId, eventId, eventId);
-    request = fileLoad(D_0056D148);
+    sprintf(evtEventPackScriptPath, evtEventScriptPathFormat, eventDirectoryId, eventId, eventId);
+    request = fileLoad(evtEventPackScriptPath);
     state->pendingRequest = request;
     state->stat = 1;
 }
@@ -493,7 +493,7 @@ void evtCheckEventScriptLoaded(evtPackProcessData_t *state) {
             }
         }
     } else {
-        printf(D_0054FAC8);
+        printf(evtLoadDoneMessage);
         state->stat = EVT_PACK_LOAD_COMPLETE;
     }
 }
@@ -663,9 +663,9 @@ INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FABC);
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC0);
+INCLUDE_SDATA(const s32, "event/evtEventPack", evtLoadStartMessage);
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC8);
+INCLUDE_SDATA(const s32, "event/evtEventPack", evtLoadDoneMessage);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", CMB_GBWK);
 

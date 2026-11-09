@@ -9,7 +9,7 @@
 #include "sdfFrame.h"
 
 
-extern sdfGrOt_t *D_00320030[4];
+extern sdfGrOt_t *effMagaGrOtBuckets[4];
 
 /* Creation-table entries return the newly allocated type-specific work. */
 typedef struct effCreateHandler_t {
@@ -17,7 +17,7 @@ typedef struct effCreateHandler_t {
     u8 unk4[0x14];
 } effCreateHandler_t;
 
-extern effCreateHandler_t D_00320040[];
+extern effCreateHandler_t dds3MagatuhiCreateTable[];
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct effHandler_t {
@@ -25,9 +25,9 @@ typedef struct effHandler_t {
     u8 unk4[0x14];
 } effHandler_t;
 
-extern effHandler_t D_00320044[];
+extern effHandler_t dds3MagatuhiDrawTable[];
 
-extern effHandler_t D_00320048[];
+extern effHandler_t dds3MagatuhiDeleteTable[];
 
 /* The set-vector, set-colour and set-matrix slots also take an argument. */
 typedef struct effVectorHandler_t {
@@ -40,21 +40,21 @@ typedef struct effColorHandler_t {
     u8 unk4[0x14];
 } effColorHandler_t;
 
-extern effVectorHandler_t D_0032004C[];
+extern effVectorHandler_t dds3MagatuhiSetPositionTable[];
 
-extern effColorHandler_t D_00320050[];
+extern effColorHandler_t dds3MagatuhiSetRGBATable[];
 
-extern effVectorHandler_t D_00320054[];
+extern effVectorHandler_t dds3MagatuhiSetRotateMatrixTable[];
 
 extern char *dds3EffectFileNameTable[];
 
-extern s8 D_0054F220;
+extern s8 effDebugEnabled;
 
-extern char D_0054F260[];
+extern char dds3EffectDirPathFormat[];
 
-extern u32 D_00551DDC;
+extern u32 effDebugAttr;
 
-extern s16 D_0056AF30[15][8];
+extern s16 effMagaBillboardTexCoords[15][8];
 
 /* Shared 0x20-byte DMA/VIF reference header. Unrecovered bytes stay opaque. */
 typedef struct dmaPacketHeader_t {
@@ -415,7 +415,7 @@ effArrHdr_t *dds3Bezier4PCreate(s32 number);
 /* vu0 routine: blend two RGBA8888 colours by t (lerp in float, packed back to RGBA8888) */
 u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 
-extern u32 D_00551DE4;
+extern u32 dds3EffectBuiltinNameIndex;
 
 extern u8 dds3EffectBase[];
 
@@ -438,19 +438,19 @@ f32 dds3GetRandFloatA(u8 *name);
    Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */
 u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
 
-extern s8 D_0054F221;
+extern s8 effDebugActive;
 
-extern s8 D_0054F222;
+extern s8 effDebugCameraAllowed;
 
 extern s8 dds3PadBitTable[];
 
 extern f32 aViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern f32 D_0056B020[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 effMagaSavedViewTarget[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern f32 D_0056B030[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 effMagaSavedViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern f32 D_0056B040[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+extern f32 effMagaSavedViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern s32 D_002F56C0[2][2][16];
 
@@ -468,10 +468,10 @@ extern s8 dds3PadStickStatusPrev[2][2];
 
 extern s8 dds3PadStickStatusState[2][2];
 
-extern effDebugMenu_t *D_0054F224;
+extern effDebugMenu_t *effDebugMenu;
 
 extern sdfGrOt_t sdfGrOtTable[];
-SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, sdfDebugGrOt, sdfGrOtTable, 0xA60);
 
 extern struct sdfDrawTag_t *effDebugDrawTag;
 
@@ -795,7 +795,7 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     resource->allocationHandle = allocation;
     resource->texture = dds3BillboardGetGeneralTex(0);
 
-    defaults = &D_0056AF30[0][0];
+    defaults = &effMagaBillboardTexCoords[0][0];
     i = 0;
     do {
         i++;
@@ -915,7 +915,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
                     pendingCount++;
                     if (pendingCount == 15) {
                         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-                            colors, D_0056AF30, offsets, 15, 0);
+                            colors, effMagaBillboardTexCoords, offsets, 15, 0);
                         sdfDrawTagLink(list, EE_ADDR(vertexPacket));
                         pendingCount = 0;
                     }
@@ -926,10 +926,10 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     }
     if (pendingCount != 0) {
         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-            colors, D_0056AF30, offsets, pendingCount, 0);
+            colors, effMagaBillboardTexCoords, offsets, pendingCount, 0);
         sdfDrawTagLink(list, EE_ADDR(vertexPacket));
     }
-    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00320030[work->drawBucket]->regFunc)(D_00320030[work->drawBucket], list);
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))effMagaGrOtBuckets[work->drawBucket]->regFunc)(effMagaGrOtBuckets[work->drawBucket], list);
 }
 
 void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const sdfVector4_t *vector) {
@@ -2149,7 +2149,7 @@ s32 effMagaRandomize(effMagatuhiCallback_t *hEffect) {
 /* Allocate the dispatch owner before calling the selected payload constructor. */
 dds3MagatuhiPar_tag *dds3MagatuhiParCreate(s32 type, void *params) {
     dds3MagatuhiPar_tag *work = sdfChipAllocDirect(sizeof(*work));
-    void *payload = D_00320040[type].handler(params);
+    void *payload = dds3MagatuhiCreateTable[type].handler(params);
 
     work->type = type;
     work->pHandle = payload;
@@ -2158,12 +2158,12 @@ dds3MagatuhiPar_tag *dds3MagatuhiParCreate(s32 type, void *params) {
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
 void dds3MagatuhiParDraw(dds3MagatuhiPar_tag *hData) {
-    D_00320044[hData->type].handler(hData->pHandle);
+    dds3MagatuhiDrawTable[hData->type].handler(hData->pHandle);
 }
 
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
 void dds3MagatuhiParDelete(dds3MagatuhiPar_tag *hData) {
-    D_00320048[hData->type].handler(hData->pHandle);
+    dds3MagatuhiDeleteTable[hData->type].handler(hData->pHandle);
     sdfChipFreeDirect(hData);
 }
 
@@ -2187,7 +2187,7 @@ u32 dds3MagatuhiParIsActive(void) {
 
 /* Node set-vector slot: invoke optional subtype callback A with the position. */
 void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos) {
-    void (*handler)(void *, void *) = D_0032004C[work->type].handler;
+    void (*handler)(void *, void *) = dds3MagatuhiSetPositionTable[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, pPos);
@@ -2196,7 +2196,7 @@ void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work, void *pPos) {
 
 /* Node set-matrix slot: invoke optional subtype callback B with the matrix. */
 void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix) {
-    void (*handler)(void *, void *) = D_00320054[work->type].handler;
+    void (*handler)(void *, void *) = dds3MagatuhiSetRotateMatrixTable[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, pMatrix);
@@ -2205,7 +2205,7 @@ void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work, void *pMatrix) {
 
 /* Node parameter-word slot: invoke optional subtype callback C with the colour. */
 void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work, u32 abgr) {
-    void (*handler)(void *, u32) = D_00320050[work->type].handler;
+    void (*handler)(void *, u32) = dds3MagatuhiSetRGBATable[work->type].handler;
 
     if (handler != NULL) {
         handler(work->pHandle, abgr);
@@ -2529,7 +2529,7 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
             }
             type = item->type;
         }
-        D_0054F222 = type != 16;
+        effDebugCameraAllowed = type != 16;
         if (changed == 1 && menu->recreate != NULL) {
             if (menu->destroy != NULL && menu->param != NULL) {
                 menu->destroy(*menu->param);
@@ -2637,8 +2637,8 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectLine);
 #endif
 
-extern u32 D_0054F228, D_0054F22C;
-extern char D_0054F230[], D_0054F238[], D_0054F240[], D_0054F248[], D_0054F250[];
+extern u32 effDebugStopTimer, effDebugRunTimer;
+extern char effDebugTitleFormat[], effDebugLabelFormat[], effDebugTrueText[], effDebugFalseText[], effDebugHeaderFormat[];
 
 void effDebugDrawMenu(effDebugMenu_t *menu)
 {
@@ -2661,32 +2661,32 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
     x = menu->x;
     y = menu->y;
     if (menu->mode != 1 && menu->update != NULL) {
-        D_0054F228++;
-        if (D_0054F228 >= 16) {
+        effDebugStopTimer++;
+        if (effDebugStopTimer >= 16) {
             effDebugSetAttr(6);
             effDebugSetPos(0x20, 0x1A0);
             effDebugPrintf("EFFECT STOP");
-            D_0054F228 = D_0054F228 >= 31 ? 0 : D_0054F228;
+            effDebugStopTimer = effDebugStopTimer >= 31 ? 0 : effDebugStopTimer;
         }
     }
-    if (D_0054F221 == 0) {
+    if (effDebugActive == 0) {
         if (menu->mode == 1) {
-            D_0054F22C++;
-            if (D_0054F22C >= 16) {
+            effDebugRunTimer++;
+            if (effDebugRunTimer >= 16) {
                 effDebugSetAttr(0);
                 effDebugSetPos(0x20, 0x1A0);
                 effDebugPrintf("EFFECT RUN");
-                D_0054F22C = D_0054F22C >= 31 ? 0 : D_0054F22C;
+                effDebugRunTimer = effDebugRunTimer >= 31 ? 0 : effDebugRunTimer;
             }
         }
-        if (D_0054F221 == 0) {
+        if (effDebugActive == 0) {
             return;
         }
     }
     effDebugSetAttr(5);
     effDebugDrawRect4(x, y, 0xC4, 0x10);
     effDebugSetPos(x + 2, y + 2);
-    sprintf(text, D_0054F230, menu->title);
+    sprintf(text, effDebugTitleFormat, menu->title);
     effDebugPrintf(text);
     y += 0x14;
     effDebugDrawRect4(x, y, 0xC4, menu->itemCount * 0xC + 4);
@@ -2754,41 +2754,41 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
             break;
         case 9:
             effDebugDrawRect3(effDebugPosX + 0x1A, effDebugPosY + 8, *(u32 *)item->value);
-            oldAttr = D_00551DDC;
+            oldAttr = effDebugAttr;
             effDebugSetAttr(2);
-            sprintf(text, D_0054F238, item->label);
+            sprintf(text, effDebugLabelFormat, item->label);
             effDebugPrintf(text);
-            D_00551DDC = oldAttr;
+            effDebugAttr = oldAttr;
             effDebugPosY -= 0xC;
             sprintf(text, "        %-d", ((u8 *)item->value)[0]);
             effDebugPrintf(text);
             break;
         case 10:
-            oldAttr = D_00551DDC;
+            oldAttr = effDebugAttr;
             effDebugSetAttr(4);
-            sprintf(text, D_0054F238, item->label);
+            sprintf(text, effDebugLabelFormat, item->label);
             effDebugPrintf(text);
-            D_00551DDC = oldAttr;
+            effDebugAttr = oldAttr;
             effDebugPosY -= 0xC;
             sprintf(text, "        %-d", ((u8 *)item->value)[1]);
             effDebugPrintf(text);
             break;
         case 11:
-            oldAttr = D_00551DDC;
+            oldAttr = effDebugAttr;
             effDebugSetAttr(5);
-            sprintf(text, D_0054F238, item->label);
+            sprintf(text, effDebugLabelFormat, item->label);
             effDebugPrintf(text);
-            D_00551DDC = oldAttr;
+            effDebugAttr = oldAttr;
             effDebugPosY -= 0xC;
             sprintf(text, "        %-d", ((u8 *)item->value)[2]);
             effDebugPrintf(text);
             break;
         case 12:
-            oldAttr = D_00551DDC;
+            oldAttr = effDebugAttr;
             effDebugSetAttr(6);
-            sprintf(text, D_0054F238, item->label);
+            sprintf(text, effDebugLabelFormat, item->label);
             effDebugPrintf(text);
-            D_00551DDC = oldAttr;
+            effDebugAttr = oldAttr;
             effDebugPosY -= 0xC;
             sprintf(text, "        %-d", ((u8 *)item->value)[3]);
             effDebugPrintf(text);
@@ -2800,12 +2800,12 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
                 effDebugDrawRect2(xy[0], xy[1]);
                 oldX = effDebugPosX;
                 oldY = effDebugPosY;
-                oldAttr = D_00551DDC;
+                oldAttr = effDebugAttr;
                 effDebugSetAttr(0);
                 effDebugSetPos(0x20, 0x1A0);
                 sprintf(text, "XY[%d:%d]", xy[0], xy[1]);
                 effDebugPrintf(text);
-                D_00551DDC = oldAttr;
+                effDebugAttr = oldAttr;
                 effDebugPosY = oldY;
                 effDebugPosX = oldX;
             }
@@ -2819,18 +2819,18 @@ void effDebugDrawMenu(effDebugMenu_t *menu)
             }
             break;
         case 8:
-            sprintf(text, "%-7s:%-s", item->label, *(u8 *)item->value ? D_0054F240 : D_0054F248);
+            sprintf(text, "%-7s:%-s", item->label, *(u8 *)item->value ? effDebugTrueText : effDebugFalseText);
             effDebugPrintf(text);
             break;
         case 18:
             effDebugDrawRectFull();
             break;
         case 19:
-            oldAttr = D_00551DDC;
-            D_00551DDC = 5;
-            sprintf(text, D_0054F250, item->label);
+            oldAttr = effDebugAttr;
+            effDebugAttr = 5;
+            sprintf(text, effDebugHeaderFormat, item->label);
             effDebugPrintf(text);
-            D_00551DDC = oldAttr;
+            effDebugAttr = oldAttr;
             break;
         case 17:
         case 21:
@@ -2848,7 +2848,7 @@ void effDebugAllocDrawTag(void) {
 }
 
 void effDebugLinkDrawTag(void) {
-    D_002F6978.regFunc(&D_002F6978, (sdfDrawTag_t *)effDebugDrawTag);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, (sdfDrawTag_t *)effDebugDrawTag);
 }
 
 void effDebugSetPos(s32 x, s32 y) {
@@ -2857,12 +2857,12 @@ void effDebugSetPos(s32 x, s32 y) {
 }
 
 void effDebugSetAttr(u32 attributes) {
-    D_00551DDC = attributes;
+    effDebugAttr = attributes;
 }
 
 void effDebugPrintf(const char *text) {
     sdfDrawTagLink(effDebugDrawTag,
-                   EE_ADDR(sdfDevPrintf(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7900, 0xFF0000, D_00551DDC, text)));
+                   EE_ADDR(sdfDevPrintf(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7900, 0xFF0000, effDebugAttr, text)));
     effDebugPosY += 0xC;
 }
 
@@ -2916,48 +2916,48 @@ void effDebugInit(void) {
 
 s32 eff_1AA3B0(void) {
     if (dds3PadBitTable[0xF] < 0) {
-        if ((u8)D_0054F220 != 0 && D_0054F221 == 0) {
-            D_0054F221 = 1;
+        if ((u8)effDebugEnabled != 0 && effDebugActive == 0) {
+            effDebugActive = 1;
         } else {
-            D_0054F220 = (u8)D_0054F220 ^ 1;
+            effDebugEnabled = (u8)effDebugEnabled ^ 1;
         }
     }
-    if ((u8)D_0054F220 != 0) {
+    if ((u8)effDebugEnabled != 0) {
         if (dds3PadBitTable[0xE] < 0) {
-            D_0054F221 ^= 1;
+            effDebugActive ^= 1;
         }
-        if (D_0054F221 != 0) {
-            D_0054F224 = dblurUpdateHandle(D_0054F224);
+        if (effDebugActive != 0) {
+            effDebugMenu = dblurUpdateHandle(effDebugMenu);
         }
         if (dds3PadBitTable[2] < 0) {
-            if (D_0054F224 != NULL) {
-                D_0054F224->mode ^= 1;
+            if (effDebugMenu != NULL) {
+                effDebugMenu->mode ^= 1;
             }
         }
-        if (D_0054F221 != 0) {
-            SDF_VU0_COPYVECTOR(aViewTarget, D_0056B020);
-            SDF_VU0_COPYVECTOR(aViewEye, D_0056B030);
-            SDF_VU0_COPYVECTOR(aViewDown, D_0056B040);
-            if (D_0054F222 == 1) {
+        if (effDebugActive != 0) {
+            SDF_VU0_COPYVECTOR(aViewTarget, effMagaSavedViewTarget);
+            SDF_VU0_COPYVECTOR(aViewEye, effMagaSavedViewEye);
+            SDF_VU0_COPYVECTOR(aViewDown, effMagaSavedViewDown);
+            if (effDebugCameraAllowed == 1) {
                 func_001AA6D0();
             }
         }
     }
-    SDF_VU0_COPYVECTOR(D_0056B040, aViewDown);
-    SDF_VU0_COPYVECTOR(D_0056B030, aViewEye);
-    SDF_VU0_COPYVECTOR(D_0056B020, aViewTarget);
+    SDF_VU0_COPYVECTOR(effMagaSavedViewDown, aViewDown);
+    SDF_VU0_COPYVECTOR(effMagaSavedViewEye, aViewEye);
+    SDF_VU0_COPYVECTOR(effMagaSavedViewTarget, aViewTarget);
     return 0;
 }
 
 s32 eff_1AA550(void) {
-    if (D_0054F220 == 0) {
+    if (effDebugEnabled == 0) {
         return 0;
     }
-    if (D_0054F224 == 0) {
+    if (effDebugMenu == 0) {
         return 0;
     }
     effDebugAllocDrawTag();
-    effDebugDrawMenu(D_0054F224);
+    effDebugDrawMenu(effDebugMenu);
     effDebugLinkDrawTag();
     return 0;
 }
@@ -2970,10 +2970,10 @@ s32 func_001AA5A0(void) {
     s32 j;
     s32 k;
 
-    if (D_0054F220 == 0) {
+    if (effDebugEnabled == 0) {
         return 0;
     }
-    if (D_0054F221 == 0) {
+    if (effDebugActive == 0) {
         return 0;
     }
     for (i = 0; i < 2; i++) {
@@ -3165,7 +3165,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA6D0);
 #endif
 
 s32 dds3_1AACF8(void) {
-    return D_0054F220;
+    return effDebugEnabled;
 }
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534090);
@@ -3272,27 +3272,27 @@ INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343B0);
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343C0);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F220);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugEnabled);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F221);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugActive);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F222);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugCameraAllowed);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F224);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugMenu);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F228);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugStopTimer);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F22C);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugRunTimer);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F230);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugTitleFormat);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F238);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugLabelFormat);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F240);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugTrueText);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F248);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugFalseText);
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F250);
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugHeaderFormat);
 
 INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F258);
 

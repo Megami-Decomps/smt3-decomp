@@ -246,9 +246,9 @@ typedef struct mdlPartTagRecord_t {
 
 
 struct mdlEffectDescriptor_t;
-extern const mdlPathPrefix_t D_0054F628[]; /* unit-owned eight-byte "/model/" copy */
-extern const char D_0054F630[]; /* padded unit-owned ".PB" suffix */
-extern const mdlWorkPrefix_t D_0054F640[]; /* padded unit-owned "work/" prefix */
+extern const mdlPathPrefix_t mdlModelPathPrefix[]; /* unit-owned eight-byte "/model/" copy */
+extern const char mdlPackedBundleExt[]; /* padded unit-owned ".PB" suffix */
+extern const mdlWorkPrefix_t mdlWorkPathPrefix[]; /* padded unit-owned "work/" prefix */
 extern mdlHddFileEntry_t *mdlHddFileCount; /* retail name: linked directory entries */
 extern u8 sdfHddValid;
 extern const char _ctype_[]; /* newlib character classes: EOF slot, then 256 bytes */
@@ -658,7 +658,7 @@ void AbLoadCallback(fileRequest_t *fileHandle, mdlManager_mdlTbMbAbLoadCb_t *par
 }
 
 char *mdlSetFileName(char *buff, const char *fname) {
-    *(mdlPathPrefix_t *)buff = *(mdlPathPrefix_t *)D_0054F628;
+    *(mdlPathPrefix_t *)buff = *(mdlPathPrefix_t *)mdlModelPathPrefix;
     return strcat(buff, fname);
 }
 
@@ -690,7 +690,7 @@ saddr_t mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode) {
     packedBundle = 0;
     extension = strrchr(paths->modelFile, '.');
     if (extension != NULL) {
-        packedBundle = strcasecmp(extension, D_0054F630) == 0;
+        packedBundle = strcasecmp(extension, mdlPackedBundleExt) == 0;
     }
     mdlRegLoading(aMajor, aMinor);
     SignalSema(mdlManagerWork);
@@ -1746,7 +1746,7 @@ void mdlMakeHddFileList(void) {
                     if (file->available[kind]) {
                         char *path = sdfChipAllocDirect(length + 8);
 
-                        *(mdlWorkPrefix_t *)path = D_0054F640[0];
+                        *(mdlWorkPrefix_t *)path = mdlWorkPathPrefix[0];
                         memcpy(path + 5, name, length);
                         path[end] = file->extension[kind][0];
                         path[end + 1] = file->extension[kind][1];
@@ -1776,13 +1776,13 @@ void mdlMakeHddFileList(void) {
     }
     mdlMakeHddFileListDummy();
 }
-INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F628);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlModelPathPrefix);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F630);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlPackedBundleExt);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileIndexHandle);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileListHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_0054F640);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlWorkPathPrefix);
 

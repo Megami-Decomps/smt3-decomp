@@ -41,7 +41,7 @@ extern s32 nbCameraStartState;
 extern u32 D_0054F37C;
 
 
-extern char D_00534630[];
+extern char nbCameraStartAnimWaitFormat[];
 
 #include "sdk_libc.h"
 
@@ -55,7 +55,7 @@ extern u32 D_0054F37C;
 
 extern nbCamera_t pNbCamera;
 
-extern s32 D_00551E08;
+extern s32 nbCameraStartFrame;
 
 extern void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera);
 
@@ -71,10 +71,10 @@ typedef struct dds3Bezier4PPart_t {
 extern dds3Bezier4PPart_t nbCameraBAState;
 extern dds3Bezier4PPart_t nbCameraStartBAState;
 extern s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out);
-extern f32 D_00551DFC;
-extern f32 D_00551E00;
+extern f32 nbCameraStepIncrement;
+extern f32 nbCameraStepLimit;
 extern s32 D_0054F380;
-extern sdfVector4_t D_00320EA0;
+extern sdfVector4_t nbCameraAxisX;
 extern f32 sdfAtan(f32 aX);
 extern f32 nbCameraGetBossDistance(void);
 extern f32 nbGetEnemyInterval(void);
@@ -89,8 +89,8 @@ extern void *memcpy(void *dst, const void *src, size_t size);
 extern dds3Bezier4PPart_t nbCameraStartTable[2];
 extern f32 effBTLModelGetRadius(nbFormation_t *pFormation);
 extern void SetRotateMatrixY(f32 angle);
-extern const volatile f32 D_0054CA8C, D_0054CA90, D_0054CA94, D_0054CA98;
-extern const volatile f32 D_0054CA9C, D_0054CAA0, D_0054CAA4, D_0054CAA8;
+extern const volatile f32 nbCameraWidthLimit, nbCameraAngleWide, nbCameraAngleScale, nbCameraAngleMin;
+extern const volatile f32 nbCameraFovySingle, nbCameraFovyGroup, nbCameraSampleStepTarget, nbCameraSampleStepStart;
 
 #ifdef NON_MATCHING
 void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
@@ -137,18 +137,18 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
         return;
     }
     width += nbGetEnemyInterval() * (f32)(count - 1);
-    widthLimit = D_0054CA8C;
-    angle = D_0054CA90;
+    widthLimit = nbCameraWidthLimit;
+    angle = nbCameraAngleWide;
     if (!(widthLimit <= width)) {
-        angle = (width / widthLimit) * D_0054CA94;
+        angle = (width / widthLimit) * nbCameraAngleScale;
     }
-    minAngle = D_0054CA98;
+    minAngle = nbCameraAngleMin;
     if (angle < minAngle) {
         angle = minAngle;
     }
-    fovy = D_0054CA9C;
+    fovy = nbCameraFovySingle;
     if (count >= 2) {
-        fovy = D_0054CAA0;
+        fovy = nbCameraFovyGroup;
     }
     projection = sdfAtan(fovy * 0.5f);
     if (width < maxHeight) {
@@ -188,7 +188,7 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
     destination.y = -160.0f;
     center.x = -width * 0.25f;
     t = 0.0f;
-    step = D_0054CAA4;
+    step = nbCameraSampleStepTarget;
     for (i = 0; i < 4; i++) {
         SDF_VU0_LOADVECTOR(&center);
         SDF_VU0_LOADVECTOR_B(&target);
@@ -200,7 +200,7 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
         nbCameraStartTable[0].controlPoints[i][2] = point.z;
     }
     t = 0.0f;
-    step = D_0054CAA8;
+    step = nbCameraSampleStepStart;
     for (i = 0; i < 4; i++) {
         SDF_VU0_LOADVECTOR(&start);
         SDF_VU0_LOADVECTOR_B(&destination);
@@ -212,7 +212,7 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
         nbCameraStartTable[1].controlPoints[i][2] = point.z;
     }
     nbCameraStartState = 0;
-    D_00551E08 = 0;
+    nbCameraStartFrame = 0;
     nbCameraState_Start_Animation(pNbCamera);
 }
 #else
@@ -234,8 +234,8 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
     case 0:
         nbCameraStartTable[0].step = 0.0027777777f;
         nbCameraStartTable[1].step = 0.0027777777f;
-        D_00551E00 = 0.03333333135f;
-        D_00551DFC = 0.0030555553f;
+        nbCameraStepLimit = 0.03333333135f;
+        nbCameraStepIncrement = 0.0030555553f;
         nbCameraStartState = 1;
         nbCameraStartTable[1].t = 0.0f;
         nbCameraStartTable[0].t = 0.0f;
@@ -258,11 +258,11 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
         }
         break;
     case 2:
-        nbCameraStartTable[0].step += D_00551DFC;
-        nbCameraStartTable[1].step += D_00551DFC;
-        if (nbCameraStartTable[0].step >= D_00551E00) {
-            nbCameraStartTable[0].step = D_00551E00;
-            nbCameraStartTable[1].step = D_00551E00;
+        nbCameraStartTable[0].step += nbCameraStepIncrement;
+        nbCameraStartTable[1].step += nbCameraStepIncrement;
+        if (nbCameraStartTable[0].step >= nbCameraStepLimit) {
+            nbCameraStartTable[0].step = nbCameraStepLimit;
+            nbCameraStartTable[1].step = nbCameraStepLimit;
             nbCameraStartState = 3;
         }
         break;
@@ -295,7 +295,7 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 
-    D_00551E08++;
+    nbCameraStartFrame++;
     if (D_0054F370 != 0) {
         D_0054F374++;
     }
@@ -432,7 +432,7 @@ void nbCameraState_Start_BA_Set(nbCamera_t *pNbCamera)
     groupCameraDistance = groupDistance * 0.5f - maxRadius * 0.5f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(&D_00320EA0);
+    SDF_VU0_LOADVECTOR_B(&nbCameraAxisX);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_COPYVECTOR_C_TO_B();
     SDF_VU0_INTERPOLATE(blendAngle);
@@ -560,8 +560,8 @@ void nbCameraState_Start_BA_Set(nbCamera_t *pNbCamera)
     nbCameraStartBAState.step = 0.0006944444031f;
     nbCameraBAState.t = 0.0f;
     nbCameraBAState.step = 0.0006944444031f;
-    D_00551E00 = 0.03333333135f;
-    D_00551DFC = 0.0030555553f;
+    nbCameraStepLimit = 0.03333333135f;
+    nbCameraStepIncrement = 0.0030555553f;
     nbCameraStartState = 0;
     D_0054F380 = 0;
     nbCameraState_Start_BA_Animation(pNbCamera);
@@ -591,11 +591,11 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
     }
 
     if (pending == 0) {
-        nbCameraStartBAState.step += D_00551DFC;
-        nbCameraBAState.step += D_00551DFC;
-        if (nbCameraStartBAState.step >= D_00551E00) {
-            nbCameraStartBAState.step = D_00551E00;
-            nbCameraBAState.step = D_00551E00;
+        nbCameraStartBAState.step += nbCameraStepIncrement;
+        nbCameraBAState.step += nbCameraStepIncrement;
+        if (nbCameraStartBAState.step >= nbCameraStepLimit) {
+            nbCameraStartBAState.step = nbCameraStepLimit;
+            nbCameraBAState.step = nbCameraStepLimit;
         }
     }
 
@@ -652,7 +652,7 @@ void nbCameraState_Start_Calc(void)
 
 s32 nb_1B33F0(void)
 {
-    return D_00551E08;
+    return nbCameraStartFrame;
 }
 
 s32 nbCameraStart(void)
@@ -664,7 +664,7 @@ s32 nbCameraStart(void)
     if (D_0054F378 != 0) {
         if (nbCameraStartState == 5) {
             D_0054F378 = 0;
-            printf(D_00534630, D_0054F37C);
+            printf(nbCameraStartAnimWaitFormat, D_0054F37C);
         }
     }
     return nbCameraStartState == 5;
@@ -691,5 +691,5 @@ void func_001B34B0(const void *src)
     memcpy(D_0056B270, src, 0x58);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", D_00534630);
+INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", nbCameraStartAnimWaitFormat);
 

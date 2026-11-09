@@ -44,7 +44,7 @@ extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, con
 
 extern s8 gProcessStat_1;
 
-extern char D_0053D140[];
+extern char ragEventProcName[];
 
 
 
@@ -58,11 +58,11 @@ extern void sdfTexFree(s32 aHandle);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
-extern char D_0054FB98[];
+extern char ragCalcProcName[];
 
-extern char D_0053D1F0[];
+extern char ragDrawProcName[];
 
-extern char D_0053D200[];
+extern char ragUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -91,7 +91,7 @@ void fclRagEventStart(s8 Signal)
 
 void fclRagEventEnd(void)
 {
-    dds3KillProcessName(D_0053D140, 1);
+    dds3KillProcessName(ragEventProcName, 1);
     fclFreeStage();
 }
 
@@ -137,17 +137,17 @@ s32 func_00209E18(u16 id)
     return 0;
 }
 
-extern u8 D_0032FC98[];
+extern u8 ragListItemTable2[];
 
-extern u8 D_0032FCE0[];
+extern u8 ragListItemTable3[];
 
 u8 ragGetListItem2(u8 index, s8 kind)
 {
     s32 row = index * 35;
-    u32 limit = D_0032FC98[row + 6] + 1;
+    u32 limit = ragListItemTable2[row + 6] + 1;
     s32 pick = (u32)dds3GetRandA(0) % limit;
-    u8 *weight = &D_0032FC98[row];
-    u8 *itemBase = &D_0032FC98[kind * 7];
+    u8 *weight = &ragListItemTable2[row];
+    u8 *itemBase = &ragListItemTable2[kind * 7];
     u8 *item;
     s32 i;
 
@@ -166,10 +166,10 @@ u8 ragGetListItem2(u8 index, s8 kind)
 u8 ragGetListItem3(u8 index, s8 kind)
 {
     s32 row = index * 35;
-    u32 limit = D_0032FCE0[row + 6] + 1;
+    u32 limit = ragListItemTable3[row + 6] + 1;
     s32 pick = (u32)dds3GetRandA(0) % limit;
-    u8 *weight = &D_0032FCE0[row];
-    u8 *itemBase = &D_0032FCE0[kind * 7];
+    u8 *weight = &ragListItemTable3[row];
+    u8 *itemBase = &ragListItemTable3[kind * 7];
     u8 *item;
     s32 i;
 
@@ -211,7 +211,7 @@ void ragInitList3(s32 count, lstWork_t *work)
 }
 
 extern ragHeartsEntry_t ragHeartEntries[] FAKEMATCH_ASM_NAME("ragHeartsTable");
-extern u8 D_0032FC58[][32];
+extern u8 ragHeartsIndexTable[][32];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern s32 cmpItemOrder(u8 *a, u8 *b);
@@ -224,7 +224,7 @@ s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
 
     work->hasUnregistered = 0;
     for (i = 0; i < 32; i++) {
-        u8 index = D_0032FC58[type][i];
+        u8 index = ragHeartsIndexTable[type][i];
         u16 item = ragHeartEntries[index].item;
         s32 slot = datGetItemSlotIndex(item);
 
@@ -247,9 +247,9 @@ extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
 extern s32 cmpItemOrder(u8 *a, u8 *b);
 
-extern u8 D_0032FC48[];
+extern u8 ragList2Fixed[];
 
-extern u8 D_0032FC50[];
+extern u8 ragList3Fixed[];
 
 /* NON_MATCHING: 22 of 93 words differ, a real divide where retail folded the
  * VLA size into an andi, and the register cascade that follows. */
@@ -275,7 +275,7 @@ s8 ragBuildList2(u8 index, u8 *work)
         *p-- = i;
     }
     shuffleIndices(pick, n, 0x10);
-    src = D_0032FC48;
+    src = ragList2Fixed;
     for (i = n - 1; i >= 0; i--) {
         dst[k++] = *src;
         src += 2;
@@ -315,7 +315,7 @@ s8 ragBuildList3(u8 index, u8 *work)
         *p-- = i;
     }
     shuffleIndices(pick, n, 0x10);
-    src = D_0032FC50;
+    src = ragList3Fixed;
     for (i = n - 1; i >= 0; i--) {
         dst[k++] = *src;
         src += 2;
@@ -396,9 +396,9 @@ typedef struct
     fclPanel_t panel[3];
 } ragLoadTextureWork_t;
 
-extern char *D_0032FC28[];
-extern char D_0053D150[];
-extern char D_0053D170[];
+extern char *ragTmxPathTable[];
+extern char ragBackgroundPath[];
+extern char ragMsgTexLoad[];
 extern s32 fclLoadTexture(char *filename);
 extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1,
                            s32 texture);
@@ -411,17 +411,17 @@ void fclRagLoadTextures(u8 *data)
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {
-        work->texture[i] = fclLoadTexture(D_0032FC28[i]);
+        work->texture[i] = fclLoadTexture(ragTmxPathTable[i]);
     }
     fclSetPanelTex(&work->panel[2], 0, 0, 0x100, 0x80, work->texture[1]);
-    work->backgroundTexture = fclLoadTexture(D_0053D150);
+    work->backgroundTexture = fclLoadTexture(ragBackgroundPath);
     fclSetSprite(&work->messageSprite, 0x200, 0x1C0, 0, 5, 5, 0x1FB, 0xFB,
                  0x80808080, work->backgroundTexture);
-    printf(D_0053D170);
+    printf(ragMsgTexLoad);
 }
 
 
-extern char D_0053D188[];
+extern char ragMsgTexFree[];
 
 void fclRagTexFree(u8 *pData)
 {
@@ -432,7 +432,7 @@ void fclRagTexFree(u8 *pData)
         sdfTexFree(*tex++);
     }
     sdfTexFree(*(s32 *)(GBWK_0 + 0x4650));
-    printf(D_0053D188);
+    printf(ragMsgTexFree);
 }
 
 void fclRagTexLoad(u8 *pData)
@@ -472,11 +472,11 @@ typedef struct fclRagWork
 
 extern void fclInitCursorWindow(void *work, void *data, u8 count);
 extern void fclSetCursorList(void *work, s32 mode);
-extern char D_0054FB88[];
-extern char D_0054FB90[];
-extern char D_0053D1A0[];
-extern char D_0053D1B0[];
-extern char D_0053D1C0[];
+extern char ragNewlineText[];
+extern char ragHexByteFormat[];
+extern char ragLabelItem[];
+extern char ragLabelSeirei[];
+extern char ragLabelMitama[];
 
 #ifdef NON_MATCHING
 extern void *memset(void *a, s32 b, size_t c);
@@ -492,34 +492,34 @@ void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
     fclInitCursorWindow((u8 *)work + 0x13C, ragMenuText, 5);
     fclSetCursorList((u8 *)work + 0x13C, 0x19);
     memset(ragListFlags, 0, sizeof(ragListFlags));
-    printf(D_0054FB88);
-    printf(D_0053D1A0);
+    printf(ragNewlineText);
+    printf(ragLabelItem);
     items = (u8 *)work->heartItems;
     for (i = 31; i >= 0; i--) {
-        printf(D_0054FB90, *items++);
+        printf(ragHexByteFormat, *items++);
     }
-    printf(D_0054FB88);
+    printf(ragNewlineText);
     i = 0;
-    printf(D_0053D1B0);
+    printf(ragLabelSeirei);
     if (work->list2Count > 0) {
         items = (u8 *)work->list2;
         do {
-            printf(D_0054FB90, *items++);
+            printf(ragHexByteFormat, *items++);
             i++;
         } while (i < work->list2Count);
     }
-    printf(D_0054FB88);
+    printf(ragNewlineText);
     i = 0;
-    printf(D_0053D1C0);
+    printf(ragLabelMitama);
     if (work->list3Count > 0) {
         items = (u8 *)work->list3;
         do {
-            printf(D_0054FB90, *items++);
+            printf(ragHexByteFormat, *items++);
             i++;
         } while (i < work->list3Count);
     }
-    printf(D_0054FB88);
-    printf(D_0054FB88);
+    printf(ragNewlineText);
+    printf(ragNewlineText);
 }
 
 extern void *sdfMemAllocDirect(s32 size);
@@ -534,7 +534,7 @@ extern void cmpResetDrawEnv(void);
 extern void fclRagLoadTextures(u8 *work);
 extern void fclRagTexLoad(u8 *work);
 extern void p2sdPlayBGM(s32 id);
-extern char D_0053D1D0[];
+extern char ragMessagePath[];
 
 fclRagWork_t *fclAllocRagWork(s8 type, s32 seq)
 {
@@ -556,7 +556,7 @@ fclRagWork_t *fclAllocRagWork(s8 type, s32 seq)
                  0x101E3159, 4, 0x10);
     fclInitPanel(&work->panel[2], 0, 0x190, 0xFFFFF, 0x200, 0x109,
                  0, 0, 0x1D);
-    work->messageFile = sdfDevLoadFileEx(D_0053D1D0, &work->messageData, NULL);
+    work->messageFile = sdfDevLoadFileEx(ragMessagePath, &work->messageData, NULL);
     evtDisableMoonCalc();
     fclRagLoadTextures((u8 *)work);
     cmpModelInit();
@@ -603,9 +603,9 @@ void fclRagProcessStart(s8 Signal)
     if (GBWK_0 == NULL) {
         GBWK_0 = (u8 *)fclAllocRagWork(Signal, 0);
         FclDebug(2, GBWK_0);
-        dds3StartProcess(D_0054FB98, 0x403, 1, 1, ragCalc, NULL, GBWK_0);
-        dds3StartProcess(D_0053D1F0, 0x2B13, 1, 1, ragDraw, NULL, GBWK_0);
-        dds3StartProcess(D_0053D200, 0x520F, 1, 1, ragUpdate,
+        dds3StartProcess(ragCalcProcName, 0x403, 1, 1, ragCalc, NULL, GBWK_0);
+        dds3StartProcess(ragDrawProcName, 0x2B13, 1, 1, ragDraw, NULL, GBWK_0);
+        dds3StartProcess(ragUpdateProcName, 0x520F, 1, 1, ragUpdate,
                          (dds3ProcessFunc_t)fclDestroyRag, GBWK_0);
         gProcessStat_1 = 1;
     }
@@ -613,9 +613,9 @@ void fclRagProcessStart(s8 Signal)
 
 void fclRagProcessEnd(void)
 {
-    dds3KillProcessName(D_0054FB98, 1);
-    dds3KillProcessName(D_0053D1F0, 1);
-    dds3KillProcessName(D_0053D200, 1);
+    dds3KillProcessName(ragCalcProcName, 1);
+    dds3KillProcessName(ragDrawProcName, 1);
+    dds3KillProcessName(ragUpdateProcName, 1);
 }
 
 s32 ragCheckProcessStat(void)
@@ -718,25 +718,25 @@ void ragUpdateScene(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragEventProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D150);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragBackgroundPath);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D170);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMsgTexLoad);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMsgTexFree);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1A0);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelItem);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1B0);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelSeirei);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1C0);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelMitama);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1D0);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMessagePath);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1F0);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragDrawProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D200);
+INCLUDE_RODATA(const s32, "facility/fclRagInit", ragUpdateProcName);
 
 INCLUDE_SDATA(const s32, "facility/fclRagInit", GBWK_0);
 
@@ -744,13 +744,13 @@ INCLUDE_SDATA(const s32, "facility/fclRagInit", gProcessStat_1);
 
 INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB75);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB78);
+INCLUDE_SDATA(const s32, "facility/fclRagInit", ragMenuTextLeave);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB80);
+INCLUDE_SDATA(const s32, "facility/fclRagInit", ragMenuTextTalk);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB88);
+INCLUDE_SDATA(const s32, "facility/fclRagInit", ragNewlineText);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB90);
+INCLUDE_SDATA(const s32, "facility/fclRagInit", ragHexByteFormat);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB98);
+INCLUDE_SDATA(const s32, "facility/fclRagInit", ragCalcProcName);
 

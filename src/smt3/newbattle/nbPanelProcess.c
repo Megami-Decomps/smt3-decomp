@@ -421,9 +421,9 @@ extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
 
 extern void nbPnl_rsetAlpha(s32 mode);
 
-extern char D_00545488[];
+extern char nbPanelProcName[];
 
-extern char D_00545498[];
+extern char nbPanelDrawProcName[];
 
 extern s32 nbPanelLayoutTable2[4][6];
 
@@ -486,13 +486,13 @@ extern addr_t hnbPnlFile3;
 
 extern addr_t hnbPnlFile4;
 
-extern char D_00545230[];
+extern char nbPnlTmxPath1[];
 
-extern char D_00545250[];
+extern char nbPnlTmxPath2[];
 
-extern char D_00545270[];
+extern char nbPnlTmxPath3[];
 
-extern char D_00545290[];
+extern char nbPnlTmxPath4[];
 
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
@@ -563,10 +563,10 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 void nbPnlLoad(void)
 {
-    hnbPnlFile1 = EE_ADDR(sdfDevLoadFileEx(D_00545230, (u32 *)&pnbPnlFile1, 0));
-    hnbPnlFile2 = EE_ADDR(sdfDevLoadFileEx(D_00545250, (u32 *)&pnbPnlFile2, 0));
-    hnbPnlFile3 = EE_ADDR(sdfDevLoadFileEx(D_00545270, (u32 *)&pnbPnlFile3, 0));
-    hnbPnlFile4 = EE_ADDR(sdfDevLoadFileEx(D_00545290, (u32 *)&pnbPnlFile4, 0));
+    hnbPnlFile1 = EE_ADDR(sdfDevLoadFileEx(nbPnlTmxPath1, (u32 *)&pnbPnlFile1, 0));
+    hnbPnlFile2 = EE_ADDR(sdfDevLoadFileEx(nbPnlTmxPath2, (u32 *)&pnbPnlFile2, 0));
+    hnbPnlFile3 = EE_ADDR(sdfDevLoadFileEx(nbPnlTmxPath3, (u32 *)&pnbPnlFile3, 0));
+    hnbPnlFile4 = EE_ADDR(sdfDevLoadFileEx(nbPnlTmxPath4, (u32 *)&pnbPnlFile4, 0));
 }
 
 void nbPnlTexSet(nbMainProcessData_t *p)
@@ -631,13 +631,13 @@ void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, 
     ot->regFunc(ot, list);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545230);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath1);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545250);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath2);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545270);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath3);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545290);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath4);
 
 void nbPnl_rsetAlpha(s32 mode)
 {
@@ -1045,12 +1045,12 @@ void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 }
 
 /* One 46-row array; the auto panel uses its final two rows. */
-extern nbPanelProcess_nbPanelXYZ_t D_004F0268[];
-#define D_004F05D8 (D_004F0268 + 44)
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPolyXYZ[];
+#define D_004F05D8 (nbPanelPolyXYZ + 44)
 extern f32 sdfSin(f32 angle);
 
 extern void cmpSetSkillListRows(s32 rows);
-extern char D_00551188[];
+extern char nbPanelNumFormat[];
 extern frFontHandle_t *gnbPnlWork;
 
 /* NON_MATCHING: 798 of 806 instruction words emitted against the native
@@ -1154,7 +1154,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
         nbPnlSprite(x + w + 0xA4, yb, q - w, 6, w + 1, 0xD, q - w, 6, c, p->pnltex[0]);
     }
     c = nbPanelHPColor((datUnitWork_t *)&DDS3_GBWK->akuma[j].flag);
-    sprintf(buf, D_00551188, DDS3_GBWK->akuma[j].hp);
+    sprintf(buf, nbPanelNumFormat, DDS3_GBWK->akuma[j].hp);
     c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
     gnbPnlWork = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0xB9) << 4, (y + 2) << 3, 0, c, buf, 0);
     func_001C7E38(gnbPnlWork, 1, 0x47);
@@ -1182,7 +1182,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     nbPnlSprite(x + 0xA8, y + 7, 0x10, 7, 0xE4, 1, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
     nbPnlSprite(x + 0xDE, y + 7, 0x10, 7, 0xE4, 9, 0x10, 7, nbPanelBaseABGR, p->pnltex[2]);
     c = nbPanelMPColor((datUnitWork_t *)&DDS3_GBWK->akuma[j].flag);
-    sprintf(buf, D_00551188, *(u16 *)&DDS3_GBWK->akuma[j].unk0C[2]);
+    sprintf(buf, nbPanelNumFormat, *(u16 *)&DDS3_GBWK->akuma[j].unk0C[2]);
     c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
     gnbPnlWork = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0xEF) << 4, (y + 2) << 3, 0, c, buf, 0);
     func_001C7E38(gnbPnlWork, 1, 0x47);
@@ -1263,7 +1263,7 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 #ifdef NON_MATCHING
 
 extern sdfTexHandle_t *D_00345D88[];
-extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPartXYZ[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
 extern nbPanelProcess_nbPanelTMXuv_t nbPanelParamTable[];
 
@@ -1285,7 +1285,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
     maxhp = 0;
     if (!(flag & 8)) {
         if (select == 0) {
-            nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[0];
+            nbPanelProcess_nbPanelXYZ_t *xyz0 = &nbPanelPartXYZ[0];
             nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[3];
             nbPanelProcess_nbPanelXYZ_t *xyz1;
             nbPanelProcess_nbPanelTMXuv_t *uv1;
@@ -1294,13 +1294,13 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
 
             nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
                         uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
-            xyz1 = &D_004EFE90[1];
+            xyz1 = &nbPanelPartXYZ[1];
             uv1 = &nbPanelParamTable[4];
             hTex1 = p->pnltex[0];
             nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
                         uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
         } else {
-            nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[12];
+            nbPanelProcess_nbPanelXYZ_t *xyz0 = &nbPanelPartXYZ[12];
             nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[3];
             nbPanelProcess_nbPanelXYZ_t *xyz1;
             nbPanelProcess_nbPanelTMXuv_t *uv1;
@@ -1315,19 +1315,19 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
 
             nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
                         uv0->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex0);
-            xyz1 = &D_004EFE90[13];
+            xyz1 = &nbPanelPartXYZ[13];
             uv1 = &nbPanelParamTable[4];
             hTex1 = p->pnltex[0];
             nbPnlSprite(xyz1->x + x, xyz1->y + y, xyz1->w, xyz1->h, uv1->u0, uv1->v0, uv1->u1,
                         uv1->v1, effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex1);
             col = (s32)(sdfSin((f32)SDF_FRAME_TICK(p->battletime) * 0.2f) * 48.0f) + 0xB0;
-            xyz2 = &D_004EFE90[15];
+            xyz2 = &nbPanelPartXYZ[15];
             uv2 = &nbPanelParamTable[17];
             col = col + ((col << 16) + (col << 8)) + 0x80000000;
             hTex2 = p->pnltex[3];
             nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w, xyz2->h, uv2->u0, uv2->v0, uv2->u1,
                         uv2->v1, effMagaCylinderCalcColor(col, nbPanelBaseABGR), hTex2);
-            xyz3 = &D_004EFE90[16];
+            xyz3 = &nbPanelPartXYZ[16];
             uv3 = &nbPanelParamTable[18];
             hTex3 = p->pnltex[3];
             nbPnlSprite(xyz3->x + x, xyz3->y + y, xyz3->w, xyz3->h, uv3->u0, uv3->v0, uv3->u1,
@@ -1338,7 +1338,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         x -= 0x10;
     }
     if (!(flag & 0x10)) {
-        nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFE90[14];
+        nbPanelProcess_nbPanelXYZ_t *xyz = &nbPanelPartXYZ[14];
         nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelParamTable[16];
         sdfTexHandle_t *hTex = p->pnltex[0];
 
@@ -1346,9 +1346,9 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
                     effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex);
     }
     if (!(flag & 2)) {
-        nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[6];
+        nbPanelProcess_nbPanelXYZ_t *xyz0 = &nbPanelPartXYZ[6];
         nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[5];
-        nbPanelProcess_nbPanelXYZ_t *xyz1 = &D_004EFE90[5];
+        nbPanelProcess_nbPanelXYZ_t *xyz1 = &nbPanelPartXYZ[5];
         nbPanelProcess_nbPanelTMXuv_t *uv1 = &nbPanelParamTable[2];
         sdfTexHandle_t *hTex0 = p->pnltex[2];
         sdfTexHandle_t *hTex1;
@@ -1366,7 +1366,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         hp = ak->hp;
         maxhp = *(u16 *)&ak->unk0C[0];
         if (hp != 0 && maxhp != 0) {
-            nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[4];
+            nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[4];
             nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[0];
             sdfTexHandle_t *hTex2;
 
@@ -1377,14 +1377,14 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
                         uv2->u1 * rate, uv2->v1,
                         effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
         }
-        sprintf(buf, D_00551188, hp);
+        sprintf(buf, nbPanelNumFormat, hp);
         col = nbPanelHPColor((datUnitWork_t *)&DDS3_GBWK->akuma[statindex].flag);
-        nbPanelSmallStringDraw(x, y, &D_004EFE90[3], col, buf);
+        nbPanelSmallStringDraw(x, y, &nbPanelPartXYZ[3], col, buf);
     }
     if (!(flag & 4)) {
-        nbPanelProcess_nbPanelXYZ_t *xyz0 = &D_004EFE90[10];
+        nbPanelProcess_nbPanelXYZ_t *xyz0 = &nbPanelPartXYZ[10];
         nbPanelProcess_nbPanelTMXuv_t *uv0 = &nbPanelParamTable[6];
-        nbPanelProcess_nbPanelXYZ_t *xyz1 = &D_004EFE90[9];
+        nbPanelProcess_nbPanelXYZ_t *xyz1 = &nbPanelPartXYZ[9];
         nbPanelProcess_nbPanelTMXuv_t *uv1 = &nbPanelParamTable[2];
         sdfTexHandle_t *hTex0 = p->pnltex[2];
         sdfTexHandle_t *hTex1;
@@ -1404,7 +1404,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         if (mp != 0 && maxmp != 0) {
             rate = (f32)mp / (f32)maxmp;
             if (hp == 0 || maxhp == 0) {
-                nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[8];
+                nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[8];
                 nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[56];
                 sdfTexHandle_t *hTex2 = D_00345D88[0];
 
@@ -1412,7 +1412,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
                             uv2->u1 * rate, uv2->v1,
                             effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
             } else {
-                nbPanelProcess_nbPanelXYZ_t *xyz2 = &D_004EFE90[8];
+                nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[8];
                 nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[1];
                 sdfTexHandle_t *hTex2 = p->pnltex[0];
 
@@ -1421,9 +1421,9 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
                             effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
             }
         }
-        sprintf(buf, D_00551188, mp);
+        sprintf(buf, nbPanelNumFormat, mp);
         col = nbPanelMPColor((datUnitWork_t *)&DDS3_GBWK->akuma[statindex].flag);
-        nbPanelSmallStringDraw(x, y, &D_004EFE90[7], col, buf);
+        nbPanelSmallStringDraw(x, y, &nbPanelPartXYZ[7], col, buf);
     }
     if (flag & 0x200000) {
         nbPanelProcess_nbPanelXYZ_t *xyz;
@@ -1441,11 +1441,11 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
     }
     if (!(flag & 1)) {
         if (flag & 0x100000) {
-            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0x89FEFF80, statindex);
+            nbPanelSmallNameStringDraw(x, y, &nbPanelPartXYZ[2], 0x89FEFF80, statindex);
         } else if (flag & 0x200000) {
-            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0x89FEFF80, statindex);
+            nbPanelSmallNameStringDraw(x, y, &nbPanelPartXYZ[2], 0x89FEFF80, statindex);
         } else {
-            nbPanelSmallNameStringDraw(x, y, &D_004EFE90[2], 0xA09DC380, statindex);
+            nbPanelSmallNameStringDraw(x, y, &nbPanelPartXYZ[2], 0xA09DC380, statindex);
         }
     }
     if (!(flag & 0x20)) {
@@ -1480,7 +1480,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
             idx = -1;
         }
         if (idx != -1) {
-            nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFE90[17];
+            nbPanelProcess_nbPanelXYZ_t *xyz = &nbPanelPartXYZ[17];
             nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelParamTable[idx];
             sdfTexHandle_t *hTex = p->pnltex[0];
 
@@ -1565,10 +1565,10 @@ extern void nbPanelPressTurnGaugeAnimStart(void);
 extern s32 nbPanelPressTurnGaugeRun(void);
 extern nbPanelProcess_nbPanelXYZ_t nbPressGaugeTable[], nbPressGaugeTable2[];
 extern nbPanelPoint_t D_00551178;
-extern s32 D_004F0070[], D_004F0088[];
-extern f32 D_004F0628[][4];
+extern s32 nbPanelUvIndexes0[], nbPanelUvIndexes1[];
+extern f32 nbPanelGlowTable[][4];
 extern const volatile f32 D_0054E5AC, D_0054E5B0;
-extern s32 D_00551FE4, D_00551FE8;
+extern s32 nbPanelPress4Count, nbPanelPressTurnCount;
 extern u32 nbPressGaugeState;
 
 void nbPanelPressGauge(nbMainProcessData_t *data)
@@ -1599,9 +1599,9 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
         nbPanelPGStart = 0;
     }
     if (nbPanelPGFrame == 0) {
-        D_00551FE4 = data->press4_p;
+        nbPanelPress4Count = data->press4_p;
         nbPressGaugeState = data->pressturn;
-        D_00551FE8 = data->pressturn;
+        nbPanelPressTurnCount = data->pressturn;
     }
     i = data->stat & 8;
     if (nbPanelPGTurn != i) {
@@ -1618,7 +1618,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
         nbPanelPGBaseColor = baseColor;
     }
     nbPanelBaseColorSet(baseColor);
-    uvIndexes = nbPanelPGPress ? D_004F0070 : D_004F0088;
+    uvIndexes = nbPanelPGPress ? nbPanelUvIndexes0 : nbPanelUvIndexes1;
     count = nbPanelPGNumber;
     if (nbPanelPressTurnGaugeRun() == 0) {
         uv = &nbPanelParamTable[uvIndexes[0]];
@@ -1734,7 +1734,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
         }
     } else {
         index = 0;
-        if (D_00551FE4 > 0) {
+        if (nbPanelPress4Count > 0) {
             do {
                 uv = &nbPanelParamTable[uvIndexes[2]];
                 texture = data->pnltex[2];
@@ -1750,10 +1750,10 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                             uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
                 x -= 0x2E;
                 index++;
-            } while ((s32)index < D_00551FE4);
+            } while ((s32)index < nbPanelPress4Count);
         }
         count = nbPanelPGNumber;
-        if ((s32)index < D_00551FE8) {
+        if ((s32)index < nbPanelPressTurnCount) {
             do {
                 s32 cycle;
                 f32 pulse;
@@ -1777,7 +1777,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                 cycle = SDF_FRAME_TICK(data->battletime) % 11;
                 if (cycle < 5) pulse = (f32)cycle / 5.0f;
                 else pulse = 1.0f - (f32)(cycle - 5) / 6.0f;
-                glow = ((D_004F0628[cycle][1] - 1.0f) * 1.25f) + 1.0f;
+                glow = ((nbPanelGlowTable[cycle][1] - 1.0f) * 1.25f) + 1.0f;
                 step = (glow - 1.0f) * 0.5f;
                 trailScale = pulse;
                 for (i = 0; i < 2; i++) {
@@ -1791,7 +1791,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                     nbPanelSpriteBlendDraw(x, 1, &nbPressGaugeTable[0],
                         &nbPanelParamTable[uvIndexes[2]], 0x30808080, &D_00551178, 1.25f, data->pnltex[2]);
                 }
-                glow = ((D_004F0628[cycle][0] - 1.0f) * 1.25f) + 1.0f;
+                glow = ((nbPanelGlowTable[cycle][0] - 1.0f) * 1.25f) + 1.0f;
                 step = (glow - 1.0f) * 0.5f;
                 trailScale = pulse;
                 for (i = 0; i < 2; i++) {
@@ -1810,7 +1810,7 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
                 x -= 0x2E;
                 index++;
                 nbPnl_rsetAlpha(0);
-            } while ((s32)index < D_00551FE8);
+            } while ((s32)index < nbPanelPressTurnCount);
             count = nbPanelPGNumber;
         }
         wanted = nbPressGaugeState;
@@ -2047,11 +2047,11 @@ void nbPanelPressTurnGaugeAnimStart2(void)
  * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
  * tests/funcvec.sh), unconfirmed. */
 #ifdef NON_MATCHING
-extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], D_004F000C[];
-extern s32 D_004F0180[], D_004F0190[];
-extern const volatile f32 D_0054E5BC, D_0054E5C0, D_0054E5C4, D_0054E5C8, D_0054E5CC;
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[], nbPanelPTSpriteXYZ[];
+extern s32 nbPanelTitleUvIndexes0[], nbPanelTitleUvIndexes1[];
+extern const volatile f32 D_0054E5BC, nbPanelPTARateDecay, D_0054E5C4, D_0054E5C8, D_0054E5CC;
 extern const volatile f32 D_0054E5D0, D_0054E5D4, D_0054E5D8, D_0054E5DC, D_0054E5E0, D_0054E5E4, D_0054E5E8, D_0054E5EC;
-extern u32 D_005511D8;
+extern u32 nbPanelPressTurnTint;
 extern f32 nbPanelPTP_1_Rate;
 extern u32 effColorBlend(u32 color0, u32 color1, f32 rate);
 extern void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 centerX, s32 centerY, s32 width, s32 height, u32 color0, u32 color1);
@@ -2078,16 +2078,16 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     if (stat & 8) {
         color = 0x71539F;
         flashColor = 0x31109F;
-        titleUV = D_004F0180;
-        oldUV = D_004F0088;
-        currentUV = D_004F0070;
+        titleUV = nbPanelTitleUvIndexes0;
+        oldUV = nbPanelUvIndexes1;
+        currentUV = nbPanelUvIndexes0;
         texture = data->pnltex[3];
     } else {
         color = 0x9F7153;
         flashColor = 0x9E2212;
-        titleUV = D_004F0190;
-        oldUV = D_004F0070;
-        currentUV = D_004F0088;
+        titleUV = nbPanelTitleUvIndexes1;
+        oldUV = nbPanelUvIndexes0;
+        currentUV = nbPanelUvIndexes1;
         texture = data->pnltex[2];
     }
     only = (u8)nbPanelPTAOnly;
@@ -2177,7 +2177,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
             if (frame < SDF_FRAMES(8)) {
                 value = nbPanelPTARate_E;
                 rate = (f32)(frame - SDF_FRAMES(4)) * SDF_FRAME_STEP(0.25f) * value;
-                nbPanelPTARate_E = value * SDF_FRAME_DECAY(D_0054E5C0);
+                nbPanelPTARate_E = value * SDF_FRAME_DECAY(nbPanelPTARateDecay);
                 shift = (s32)((1.0f - rate) * 40.0f);
                 if (shift >= 41) {
                     shift = 40;
@@ -2192,7 +2192,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                         spriteColor, spriteTexture);
             if (nbPanelPTAFrame >= SDF_FRAMES(4)) {
                 rate = nbPanelPTAFrame < SDF_FRAMES(8) ? (f32)(nbPanelPTAFrame - SDF_FRAMES(4)) * SDF_FRAME_STEP(0.25f) : 1.0f;
-                nbPanelSpriteScaleWHDraw(0x15D, 1, D_004F000C, &nbPanelParamTable[currentUV[1]],
+                nbPanelSpriteScaleWHDraw(0x15D, 1, nbPanelPTSpriteXYZ, &nbPanelParamTable[currentUV[1]],
                                          tint, 1.0f, rate, data->pnltex[2]);
             }
             frame = nbPanelPTAFrame;
@@ -2415,13 +2415,13 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                     uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
         if (nbPanelPTP_1_Process == 3) {
             nbPanelPTP_0_Process = 2;
-            D_005511D8 = 0x80808080;
+            nbPanelPressTurnTint = 0x80808080;
             nbPanelPTP_0_Frame = 0;
         }
         break;
     case 2:
         tint = effColorBlend(0x80808080, 0x80A0A0A0, (f32)nbPanelPTP_0_Frame / 18.0f);
-        D_005511D8 = tint;
+        nbPanelPressTurnTint = tint;
         uv = &nbPanelParamTable[titleUV[0]];
         spriteTexture = data->pnltex[3];
         tint = effMagaCylinderCalcColor(tint, nbPanelBaseABGR);
@@ -2429,7 +2429,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
                     nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
                     uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
         uv = &nbPanelParamTable[titleUV[1]];
-        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        tint = effMagaCylinderCalcColor(nbPanelPressTurnTint, nbPanelBaseABGR);
         nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57,
                     nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
                     uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
@@ -2438,19 +2438,19 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
             nbPanelPTP_0_Frame = frame;
         } else {
             nbPanelPTP_0_Process = 3;
-            D_005511D8 = 0x80A0A0A0;
+            nbPanelPressTurnTint = 0x80A0A0A0;
             nbPanelPTP_0_Frame = 0;
         }
         break;
     case 3:
         uv = &nbPanelParamTable[titleUV[0]];
         spriteTexture = data->pnltex[3];
-        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        tint = effMagaCylinderCalcColor(nbPanelPressTurnTint, nbPanelBaseABGR);
         nbPnlSprite(nbPanelPTPartList[0].x, nbPanelPTPartList[0].y + 0x57,
                     nbPanelPTPartList[0].w, nbPanelPTPartList[0].h,
                     uv->u0, uv->v0, uv->u1, uv->v1, tint, spriteTexture);
         uv = &nbPanelParamTable[titleUV[1]];
-        tint = effMagaCylinderCalcColor(D_005511D8, nbPanelBaseABGR);
+        tint = effMagaCylinderCalcColor(nbPanelPressTurnTint, nbPanelBaseABGR);
         nbPnlSprite(nbPanelPTPartList[1].x, nbPanelPTPartList[1].y + 0x57,
                     nbPanelPTPartList[1].w, nbPanelPTPartList[1].h,
                     uv->u0, uv->v0, uv->u1, uv->v1, tint, texture);
@@ -2560,7 +2560,7 @@ void nbPanelPressTurn(nbMainProcessData_t *data)
     case 5:
         nbPnl_rsetAlpha(0);
         rate = (f32)nbPanelPTP_1_Frame / SDF_FRAMES_F(14.0f);
-        color = D_005511D8 & 0xFFFFFF;
+        color = nbPanelPressTurnTint & 0xFFFFFF;
         alpha = (u32)((1.0f - rate) * 26.0f) << 24;
         tint = color | alpha;
         next = (s32)(rate * 26.0f);
@@ -2631,7 +2631,7 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPressTurn);
 
 extern nbPanelProcess_nbPanelXYZ_t nbStockSelectTable[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
-extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPartXYZ[];
 extern nbPanelProcess_nbPanelTMXuv_t nbPanelParamTable[];
 extern s32 D_005511FC;
 extern void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag);
@@ -2689,13 +2689,13 @@ void nbPanelPartySelect(nbMainProcessData_t *data)
                 nbPanelDrawPP(0xE6, y, selected, statindex, 0);
             }
         } else {
-            rect = &D_004EFE90[0];
+            rect = &nbPanelPartXYZ[0];
             uv = &nbPanelParamTable[3];
             texture = data->pnltex[0];
             color = effMagaCylinderCalcColor(0x80808080, base);
             nbPnlSprite(rect->x + 0xE6, rect->y + y, rect->w, rect->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
-            rect = &D_004EFE90[1];
+            rect = &nbPanelPartXYZ[1];
             uv = &nbPanelParamTable[4];
             texture = data->pnltex[0];
             color = effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR);
@@ -2839,11 +2839,11 @@ extern void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag);
 
 extern nbPanelProcess_nbPanelXYZ_t nbStockSelectTable[];
 
-extern nbPanelProcess_nbPanelXYZ_t D_004EFE90[];
+extern nbPanelProcess_nbPanelXYZ_t nbPanelPartXYZ[];
 
 extern nbPanelProcess_nbPanelXYZ_t D_004EFF6C[];
 
-extern nbPanelProcess_nbPanelTMXuv_t D_004EFB00[];
+extern nbPanelProcess_nbPanelTMXuv_t nbPanelPartUV[];
 
 u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
 {
@@ -2892,11 +2892,11 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
         nbPanelProcess_nbPanelTMXuv_t *uv0;
         nbPanelProcess_nbPanelTMXuv_t *uv1;
 
-        xyz0 = &D_004EFE90[0];
-        uv0 = &D_004EFB00[0];
+        xyz0 = &nbPanelPartXYZ[0];
+        uv0 = &nbPanelPartUV[0];
         cy = 0x153;
-        xyz1 = &D_004EFE90[1];
-        uv1 = &D_004EFB00[1];
+        xyz1 = &nbPanelPartXYZ[1];
+        uv1 = &nbPanelPartUV[1];
         for (i = 3; i >= 0; i--) {
             void *hTex0 = p->pnltex[0];
             void *hTex1;
@@ -2912,7 +2912,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     cy = 0x153;
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[0];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[6];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[6];
         void *hTex = p->pnltex[1];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2921,7 +2921,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     }
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[1];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[7];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[7];
         void *hTex = p->pnltex[1];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2930,7 +2930,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     }
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[6];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[4];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[4];
         void *hTex = p->pnltex[1];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2939,7 +2939,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     }
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[7];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[4];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[4];
         void *hTex = p->pnltex[1];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2948,7 +2948,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     }
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[2];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[5];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[5];
         void *hTex = p->pnltex[0];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2957,7 +2957,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     }
     {
         nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[3];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[5];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[5];
         void *hTex = p->pnltex[0];
 
         nbPnlSprite(xyz->x + cx, xyz->y + cy, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2968,7 +2968,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     if (blink == 0 || StockIDListTop == 0) {
         {
             nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[4];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[8];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[8];
             void *hTex = p->pnltex[0];
 
             nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2978,7 +2978,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     } else {
         {
             nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[4];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[9];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[9];
             void *hTex = p->pnltex[0];
 
             nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2989,7 +2989,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     if (blink == 0 || StockIDListTop >= StockIDListCount - 4) {
         {
             nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[5];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[8];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[8];
             void *hTex = p->pnltex[0];
 
             nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -2999,7 +2999,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     } else {
         {
             nbPanelProcess_nbPanelXYZ_t *xyz = &nbStockSelectTable[5];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[9];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[9];
             void *hTex = p->pnltex[0];
 
             nbPnlSprite(xyz->x + cx, xyz->y + 0x153, xyz->w, xyz->h, uv->u0, uv->v0, uv->u1,
@@ -3011,7 +3011,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     n = StockIDListTop;
     if (StockIDListCount > 0) {
         nbPanelProcess_nbPanelXYZ_t *xyz = &D_004EFF6C[0];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFB00[10];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelPartUV[10];
 
         u32 ppSelect = 0x200000;
 
@@ -3087,26 +3087,26 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 /* One 46-row array; the other panel tables are slices of it. */
-#define D_004F02A4 (D_004F0268 + 3)
-#define D_004F02E0 (D_004F0268 + 6)
-#define D_004F03A8 (D_004F0268 + 16)
-#define D_004F0420 (D_004F0268 + 22)
-#define D_004F045C (D_004F0268 + 25)
-#define D_004F0484 (D_004F0268 + 27)
-#define D_004F0498 (D_004F0268 + 28)
-#define D_004F04E8 (D_004F0268 + 32)
-#define D_004F0510 (D_004F0268 + 34)
-#define D_004F0574 (D_004F0268 + 39)
-#define D_004F0588 (D_004F0268 + 40)
+#define D_004F02A4 (nbPanelPolyXYZ + 3)
+#define D_004F02E0 (nbPanelPolyXYZ + 6)
+#define D_004F03A8 (nbPanelPolyXYZ + 16)
+#define D_004F0420 (nbPanelPolyXYZ + 22)
+#define D_004F045C (nbPanelPolyXYZ + 25)
+#define D_004F0484 (nbPanelPolyXYZ + 27)
+#define D_004F0498 (nbPanelPolyXYZ + 28)
+#define D_004F04E8 (nbPanelPolyXYZ + 32)
+#define D_004F0510 (nbPanelPolyXYZ + 34)
+#define D_004F0574 (nbPanelPolyXYZ + 39)
+#define D_004F0588 (nbPanelPolyXYZ + 40)
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFDD0[], D_004EFDE0[], D_004EFE00[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE10[], D_004EFE20[], D_004EFE30[], D_004EFE40[];
 extern datDevilFormat_t datDevilTable[];
 extern char *datExplainTable[], *text1[], *text2[];
-extern u8 D_003DC9B8[];
-extern char D_00551230[];
+extern u8 nbPanelAnalyzeHidden[];
+extern char nbPanelLevelFormat[];
 extern f32 nbPanelAnalyzeRate;
-extern const volatile f32 D_0054E5F0, D_0054E5F4, D_0054E5F8, D_0054E5FC;
-extern const volatile f32 D_0054E600, D_0054E604, D_0054E608, D_0054E60C;
+extern const volatile f32 D_0054E5F0, D_0054E5F4, nbPanelAnalyzeRateDecay, D_0054E5FC;
+extern const volatile f32 nbPanelSlide1Offset, nbPanelSlide2Offset, D_0054E608, D_0054E60C;
 extern const volatile f32 D_0054E610, D_0054E614, D_0054E618, D_0054E61C;
 extern const volatile f32 D_0054E620, D_0054E624, D_0054E628;
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
@@ -3127,7 +3127,7 @@ void nbPanelAnalyzeRun(void)
 
     if (unit == NULL) return;
     nbGetMainProcessData();
-    hidden = D_003DC9B8[pNbPanelAnalyzeUnitWork->id];
+    hidden = nbPanelAnalyzeHidden[pNbPanelAnalyzeUnitWork->id];
     nbPnl_rsetAlpha(0);
     nbPanelBaseColorSet(0x80808080);
     state = nbPanelAnalyzeProcess;
@@ -3165,11 +3165,11 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], black30, black30, 0, 0);
             red70 = ((u32)(s32)(rate * 70.0f * 128.0f * factor) << 24) | 0x230508;
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, red70, red70);
-            scaledY = (s32)((f32)D_004F0268[0].h * (1.0f - rate) * 0.5f) + 0xF6;
+            scaledY = (s32)((f32)nbPanelPolyXYZ[0].h * (1.0f - rate) * 0.5f) + 0xF6;
             black40 = (u32)(s32)(rate * 40.0f * 128.0f * factor) << 24;
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[0], 1.0f, rate, black40, black40, black40, black40);
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[1], 1.0f, rate, 0, black40, 0, black40);
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[2], 1.0f, rate, black40, 0, black40, 0);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[0], 1.0f, rate, black40, black40, black40, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[1], 1.0f, rate, 0, black40, 0, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[2], 1.0f, rate, black40, 0, black40, 0);
             red30 = ((u32)(s32)(rate * 30.0f * 128.0f * factor) << 24) | 0x711E39;
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[11], red30, 0x711E39, 0x711E39, 0x711E39);
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
@@ -3195,7 +3195,7 @@ void nbPanelAnalyzeRun(void)
         nbPanelPolygonDraw(slide1, 0xF6, &D_004F02E0[7], 0xFF6484, 0x4CFF6484, 0xFF6484, 0x4CFF6484);
         frame = nbPanelAnalyzeFrame;
         drawContent = frame >= SDF_FRAMES(12);
-        if (frame >= SDF_FRAMES(2)) nbPanelAnalyzeRate *= SDF_FRAME_DECAY(D_0054E5F8);
+        if (frame >= SDF_FRAMES(2)) nbPanelAnalyzeRate *= SDF_FRAME_DECAY(nbPanelAnalyzeRateDecay);
         frame = (s32)((u32)frame + 1);
         if (frame >= SDF_FRAMES(15)) {
             nbPanelAnalyzeFrame = 0;
@@ -3228,11 +3228,11 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], black30, black30, 0, 0);
             red70 = ((u32)(s32)(rate * 70.0f * 128.0f * factor) << 24) | 0x230508;
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, red70, red70);
-            scaledY = (s32)((f32)D_004F0268[0].h * (1.0f - rate) * 0.5f) + 0xF6;
+            scaledY = (s32)((f32)nbPanelPolyXYZ[0].h * (1.0f - rate) * 0.5f) + 0xF6;
             black40 = (u32)(s32)(rate * 40.0f * 128.0f * factor) << 24;
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[0], 1.0f, rate, black40, black40, black40, black40);
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[1], 1.0f, rate, 0, black40, 0, black40);
-            nbPanelPolygonScaleDraw(0, scaledY, &D_004F0268[2], 1.0f, rate, black40, 0, black40, 0);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[0], 1.0f, rate, black40, black40, black40, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[1], 1.0f, rate, 0, black40, 0, black40);
+            nbPanelPolygonScaleDraw(0, scaledY, &nbPanelPolyXYZ[2], 1.0f, rate, black40, 0, black40, 0);
             red30 = ((u32)(s32)(rate * 30.0f * 128.0f * factor) << 24) | 0x711E39;
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[11], red30, 0x711E39, 0x711E39, 0x711E39);
             nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[12], 0x711E39, 0x711E39, 0x711E39, red30);
@@ -3240,8 +3240,8 @@ void nbPanelAnalyzeRun(void)
         }
         fade = (f32)frame * SDF_FRAME_STEP(0.125f);
         if (fade >= 1.0f) fade = 1.0f;
-        slide1 = (s32)(fade * D_0054E600);
-        slide2 = (s32)(fade * D_0054E604);
+        slide1 = (s32)(fade * nbPanelSlide1Offset);
+        slide2 = (s32)(fade * nbPanelSlide2Offset);
         contentRate = 1.0f - fade;
         left1 = (s32)(0u - (u32)slide1);
         left2 = (s32)(0u - (u32)slide2);
@@ -3273,9 +3273,9 @@ void nbPanelAnalyzeRun(void)
         nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[0], 0x26000000, 0x26000000, 0x26000000, 0x26000000);
         nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[1], 0x26000000, 0x26000000, 0, 0);
         nbPanelPolygonDraw(0, 0xF6, &D_004F02A4[2], 0x230508, 0x230508, 0x59230508, 0x59230508);
-        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[0], 0x33000000, 0x33000000, 0x33000000, 0x33000000);
-        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[1], 0, 0x33000000, 0, 0x33000000);
-        nbPanelPolygonDraw(0, 0xF6, &D_004F0268[2], 0x33000000, 0, 0x33000000, 0);
+        nbPanelPolygonDraw(0, 0xF6, &nbPanelPolyXYZ[0], 0x33000000, 0x33000000, 0x33000000, 0x33000000);
+        nbPanelPolygonDraw(0, 0xF6, &nbPanelPolyXYZ[1], 0, 0x33000000, 0, 0x33000000);
+        nbPanelPolygonDraw(0, 0xF6, &nbPanelPolyXYZ[2], 0x33000000, 0, 0x33000000, 0);
         nbPnl_rsetAlpha(0);
         nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[0], 0x4CFF6484, 0x4CFF6484, 0x4CFF6484, 0x4CFF6484);
         nbPanelPolygonDraw(0, 0xF6, &D_004F02E0[1], 0x4CFF6484, 0xFF6484, 0x4CFF6484, 0xFF6484);
@@ -3319,7 +3319,7 @@ void nbPanelAnalyzeRun(void)
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
         } else {
-            sprintf(levelText, D_00551230, datGetLevelForDraw(pNbPanelAnalyzeUnitWork));
+            sprintf(levelText, nbPanelLevelFormat, datGetLevelForDraw(pNbPanelAnalyzeUnitWork));
             nbPanelSmallStringDraw(0, 0xF5, &D_004F03A8[1], textColor, levelText);
         }
         if (hidden & 2) {
@@ -3334,8 +3334,8 @@ void nbPanelAnalyzeRun(void)
         } else {
             cmpSetSkillListRows(19);
             color = effMagaCylinderCalcColor(textColor, nbPanelBaseRGBA);
-            font = (frFontHandle_t *)frwGetSmallFontFRQ2(D_004F0268[18].x * 16,
-                    (D_004F0268[18].y + 0xF8) * 8, 0, color,
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2(nbPanelPolyXYZ[18].x * 16,
+                    (nbPanelPolyXYZ[18].y + 0xF8) * 8, 0, color,
                     datExplainTable[datDevilTable[pNbPanelAnalyzeUnitWork->id].race], NULL);
             func_001C7E38(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
@@ -3352,16 +3352,16 @@ void nbPanelAnalyzeRun(void)
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
         } else if (pNbPanelAnalyzeUnitWork->flag & 4) {
             font = frGetCNameFRQ(0, 1, NULL, 0);
-            frSetDrawPosition(font, (D_004F0268[19].x + 15) * 16,
-                              (D_004F0268[19].y + 0xF6) * 8);
+            frSetDrawPosition(font, (nbPanelPolyXYZ[19].x + 15) * 16,
+                              (nbPanelPolyXYZ[19].y + 0xF6) * 8);
             frSetFontColor(font, effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA));
             func_001C7E38(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
         } else {
             cmpSetSkillListRows(19);
             color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
-            font = (frFontHandle_t *)frwGetSmallFontFRQ2((D_004F0268[19].x + 15) * 16,
-                    (D_004F0268[19].y + 0xF6) * 8, 0, color, text2[pNbPanelAnalyzeUnitWork->id], NULL);
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2((nbPanelPolyXYZ[19].x + 15) * 16,
+                    (nbPanelPolyXYZ[19].y + 0xF6) * 8, 0, color, text2[pNbPanelAnalyzeUnitWork->id], NULL);
             func_001C7E38(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
             cmpSetSkillListRows(-1);
@@ -3384,9 +3384,9 @@ void nbPanelAnalyzeRun(void)
                     color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
                     skill = datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[i];
                     i++;
-                    font = (frFontHandle_t *)frwGetSmallFontFRQ2((D_004F0268[23].x + px) * 16,
-                            (D_004F0268[23].y + 0xF6 + py) * 8, 0, color, text1[skill], NULL);
-                    nbCenterText(font, &D_004F0268[23]);
+                    font = (frFontHandle_t *)frwGetSmallFontFRQ2((nbPanelPolyXYZ[23].x + px) * 16,
+                            (nbPanelPolyXYZ[23].y + 0xF6 + py) * 8, 0, color, text1[skill], NULL);
+                    nbCenterText(font, &nbPanelPolyXYZ[23]);
                     func_001C7E38(font, 1, 0x47);
                     frDestroyFontRequestAfter(font);
                 } while (i < 8 && datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[i] != 0);
@@ -3406,7 +3406,7 @@ void nbPanelAnalyzeRun(void)
                 nbPanelPolygonDraw((i % 3) * 0x74, (i / 3) * 0x16 + 0xF6,
                                    &D_004F0588[0], shade, shade, shade, shade);
             }
-            nbPanelSpriteCenteringDraw(0, 0xF6, &D_004F0574[0], &D_004F0268[24],
+            nbPanelSpriteCenteringDraw(0, 0xF6, &D_004F0574[0], &nbPanelPolyXYZ[24],
                                        &D_004EFE30[0], spriteColor, D_00345D88[0]);
         }
         geometry = &D_004F045C[0];
@@ -3426,8 +3426,8 @@ void nbPanelAnalyzeRun(void)
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
         } else if (!(pNbPanelAnalyzeUnitWork->flag & 4)) {
             color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
-            font = (frFontHandle_t *)frwGetSmallFontFRQ2(D_004F0268[26].x * 16,
-                    (D_004F0268[26].y + 0xF6) * 8, 0, color,
+            font = (frFontHandle_t *)frwGetSmallFontFRQ2(nbPanelPolyXYZ[26].x * 16,
+                    (nbPanelPolyXYZ[26].y + 0xF6) * 8, 0, color,
                     datExplainTable[0x50 + datDevilTable[pNbPanelAnalyzeUnitWork->id].aisyoid], NULL);
             func_001C7E38(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
@@ -3448,8 +3448,8 @@ void nbPanelAnalyzeRun(void)
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
         } else {
-            cmpDrawStatusIconRow(D_004F0268[20].x * 16, (D_004F0268[20].y + 0xF6) * 8,
-                    D_004F0268[20].z, textColor, pNbPanelAnalyzeUnitWork, 1, 0x47);
+            cmpDrawStatusIconRow(nbPanelPolyXYZ[20].x * 16, (nbPanelPolyXYZ[20].y + 0xF6) * 8,
+                    nbPanelPolyXYZ[20].z, textColor, pNbPanelAnalyzeUnitWork, 1, 0x47);
         }
         geometry = &D_004F0498[0];
         uv = &D_004EFE20[0];
@@ -3467,8 +3467,8 @@ void nbPanelAnalyzeRun(void)
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
         } else {
-            cmpDrawStatusIconRow(D_004F0268[21].x * 16, (D_004F0268[21].y + 0xF6) * 8,
-                    D_004F0268[21].z, textColor, pNbPanelAnalyzeUnitWork, 2, 0x47);
+            cmpDrawStatusIconRow(nbPanelPolyXYZ[21].x * 16, (nbPanelPolyXYZ[21].y + 0xF6) * 8,
+                    nbPanelPolyXYZ[21].z, textColor, pNbPanelAnalyzeUnitWork, 2, 0x47);
         }
     }
 }
@@ -3500,8 +3500,8 @@ void nbPanelAutoInit(void)
     PanelAutoShow = 1;
 }
 
-extern nbPanelProcess_nbPanelXYZ_t D_004F0600[];
-extern nbPanelProcess_nbPanelTMXuv_t D_004EFE60[];
+extern nbPanelProcess_nbPanelXYZ_t nbPanelAutoGlowXYZ[];
+extern nbPanelProcess_nbPanelTMXuv_t nbPanelAutoUV[];
 extern void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *geometry,
                                u32 color0, u32 color1, u32 color2, u32 color3);
 
@@ -3534,7 +3534,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
     if ((p->stat & 0x40) != 0) {
         {
             nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[1];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[2];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelAutoUV[2];
             sdfTexHandle_t *texture = p->pnltex[1];
             u32 drawColor = effMagaCylinderCalcColor(color, nbPanelBaseABGR);
             nbPnlSprite(geometry->x + 0x1C1, geometry->y + 0x12,
@@ -3543,7 +3543,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
         }
         {
             f32 angle = (f32)SDF_FRAME_TICK(p->battletime) * 0.2f;
-            nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F0600[1];
+            nbPanelProcess_nbPanelXYZ_t *geometry = &nbPanelAutoGlowXYZ[1];
             s32 pulse = (s32)(sdfSin(angle) * 64.0f) + 0x50;
             u32 pulseColor = effMagaCylinderCalcColor(pulse, color >> 24);
             pulseColor = (pulseColor << 24) | 0x00483902;
@@ -3555,7 +3555,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
         {
             f32 angle = (f32)SDF_FRAME_TICK(p->battletime) * 0.2f;
             nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[0];
-            nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[1];
+            nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelAutoUV[1];
             s32 pulse = (s32)(sdfSin(angle) * 48.0f) + 0xA0;
             u32 pulseColor = (u32)pulse + (color & 0xFF000000);
             sdfTexHandle_t *texture;
@@ -3569,7 +3569,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
         }
     } else {
         nbPanelProcess_nbPanelXYZ_t *geometry = &D_004F05D8[1];
-        nbPanelProcess_nbPanelTMXuv_t *uv = &D_004EFE60[2];
+        nbPanelProcess_nbPanelTMXuv_t *uv = &nbPanelAutoUV[2];
         nbPanelProcess_nbPanelXYZ_t *lower;
         nbPanelProcess_nbPanelTMXuv_t *lowerUV;
         {
@@ -3846,10 +3846,10 @@ void nbInitPanelProcess(nbMainProcessData_t *data)
     dds3ProcessID_t *id;
     s32 i;
 
-    id = dds3StartProcess(D_00545488, 0x3F9, 1, 1, nbPanelRunProcess, nbPanelShutdown, NULL);
+    id = dds3StartProcess(nbPanelProcName, 0x3F9, 1, 1, nbPanelRunProcess, nbPanelShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->pnlproc = id;
-    dds3LinkProcess(id, dds3StartProcess(D_00545498, 0x2B0E, 1, 1, nbPanelDrawProcess, NULL,
+    dds3LinkProcess(id, dds3StartProcess(nbPanelDrawProcName, 0x2B0E, 1, 1, nbPanelDrawProcess, NULL,
                                          NULL));
     nbPnlTexSet(data);
     nbPnlDrawFlag = 1;
@@ -3911,9 +3911,9 @@ extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[];
 extern void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 centerX, s32 centerY,
                                     s32 width, s32 height, u32 color, u32 edgeColor);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545488);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPanelProcName);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545498);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPanelDrawProcName);
 
 void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
 {
@@ -4135,15 +4135,15 @@ INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_005455B8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugUnitLabelTable);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545658);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugIdFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545668);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugLevelFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545678);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugHpFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545688);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugMpFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545698);
+INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugMotionNames);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", gnbPnlOtOfs);
 
@@ -4159,7 +4159,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelBaseABGR);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelBaseRGBA);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551188);
+INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelNumFormat);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGPress);
 
@@ -4205,7 +4205,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Frame);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Process);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511D8);
+INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPressTurnTint);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Frame);
 
@@ -4255,7 +4255,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeRate);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", pNbPanelAnalyzeUnitWork);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551230);
+INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelLevelFormat);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", PanelAutoABGR);
 

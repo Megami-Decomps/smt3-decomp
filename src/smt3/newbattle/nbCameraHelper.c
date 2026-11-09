@@ -40,7 +40,7 @@ typedef struct
 } nbCameraHelper_effFLWinHandle_t;
 
 extern s8 dds3PadBitTable[];
-extern char D_0054F268[];
+extern char dds3EffectResourcePathFormat[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
@@ -111,8 +111,8 @@ extern s32 dds3EffectDirRead(s32 directory, dds3EffectDirEnt_t *entry);
 #define EFF_DIRECTORY_FLAG_CLEAR 0x1000
 #define EFF_DIRECTORY_PATH_BYTES 0x70
 extern char *dds3EffectFileNameTable[];
-extern char D_0054F260[];
-extern u32 D_00551DE4;
+extern char dds3EffectDirPathFormat[];
+extern u32 dds3EffectBuiltinNameIndex;
 extern s32 sceDopen(void *path);
 extern s32 sceDclose(s32 directory);
 extern s32 sceDread(s32 directory, dds3EffectDirEnt_t *entry);
@@ -123,10 +123,10 @@ s32 dds3EffectDirOpen(void *name) {
     u8 path[EFF_DIRECTORY_PATH_BYTES];
 
     if (sdfHddValid != 0) {
-        sprintf(path, D_0054F260, name);
+        sprintf(path, dds3EffectDirPathFormat, name);
         return sceDopen(path);
     } else {
-        D_00551DE4 = 0;
+        dds3EffectBuiltinNameIndex = 0;
         return 0;
     }
 }
@@ -144,12 +144,12 @@ s32 dds3EffectDirRead(s32 directory, dds3EffectDirEnt_t *entry) {
     if (sdfHddValid != 0) {
         return sceDread(directory, entry);
     }
-    if ((u32)D_00551DE4 >= EFF_BUILTIN_NAME_COUNT) {
+    if ((u32)dds3EffectBuiltinNameIndex >= EFF_BUILTIN_NAME_COUNT) {
         return 0;
     }
-    strcpy(entry->name, dds3EffectFileNameTable[D_00551DE4]);
+    strcpy(entry->name, dds3EffectFileNameTable[dds3EffectBuiltinNameIndex]);
     entry->flags &= ~EFF_DIRECTORY_FLAG_CLEAR;
-    D_00551DE4++;
+    dds3EffectBuiltinNameIndex++;
     return strlen(entry->name);
 }
 
@@ -342,7 +342,7 @@ s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
                 switch (category) {
                 case 1: {
                     char resourceName[0x70];
-                    sprintf(resourceName, D_0054F268,
+                    sprintf(resourceName, dds3EffectResourcePathFormat,
                         a->resourceList->directoryPath, selectedEntry->name);
                     dds3EffectListSetTexture(a, resourceName);
                     a->previewActive = category;
@@ -428,7 +428,7 @@ u32 dds3EffectFileListWindowGetState(nbCameraHelper_effFLWinHandle_t *a) {
 }
 
 u32 dds3EffectFileListWindowGetFilename(nbCameraHelper_effFLWinHandle_t *a, char *b) {
-    sprintf(b, D_0054F268, a->resourceList->directoryPath, a->selectedEntry->name);
+    sprintf(b, dds3EffectResourcePathFormat, a->resourceList->directoryPath, a->selectedEntry->name);
     return a->selectedEntry->type;
 }
 
@@ -511,7 +511,7 @@ void InitSpriteViewerProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", D_0054F260);
+INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", dds3EffectDirPathFormat);
 
-INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", D_0054F268);
+INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", dds3EffectResourcePathFormat);
 

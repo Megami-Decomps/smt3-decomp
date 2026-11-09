@@ -42,7 +42,7 @@ struct sdfDecompCb_t;
 /* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
 void MultMatrixRev(const void *aMatrix);
 
-extern const u8 *D_00594780[16];
+extern const u8 *sdfDecompHistory[16];
 
 /* sdf3DScreenParam + 0x70: the scale and trans rows. */
 /* Shared byte-storage view: the local screen structs are not compatible C types. */
@@ -69,7 +69,7 @@ s32 sdfGrOpenPacketBuff(void);
 
 void sdfGrClosePacketBuff(saddr_t aBuffPtr);
 
-extern s32 D_00552170;
+extern s32 sdfDecompHistoryIndex;
 
 extern void *memcpy(void *, const void *, size_t);
 
@@ -93,7 +93,7 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
         return 1;
     }
 
-    D_00552170 = 0;
+    sdfDecompHistoryIndex = 0;
     output = cb->dstPtr;
     if (length > 0) {
         do {
@@ -101,11 +101,11 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                 case SDF_DECOMP_STAT_IDLE: {
                     u8 command;
                     s32 commandBytes;
-                    s32 historyIndex = D_00552170;
+                    s32 historyIndex = sdfDecompHistoryIndex;
 
                     length--;
-                    D_00594780[historyIndex] = src;
-                    D_00552170 = (historyIndex + 1) & 0xF;
+                    sdfDecompHistory[historyIndex] = src;
+                    sdfDecompHistoryIndex = (historyIndex + 1) & 0xF;
                     command = *src++;
                     if (command >= SDF_DECOMP_DIRECTIVE_CMD) {
                         if (command == SDF_DECOMP_CMD_END) {

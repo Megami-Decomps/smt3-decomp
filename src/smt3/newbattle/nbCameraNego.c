@@ -43,7 +43,7 @@ extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
 
 extern s32 effBTLModelGetID(nbFormation_t *pFormation);
 
-extern u128 D_00324740;
+extern u128 nbCameraNegoTargetOffset;
 
 extern nbCamera_t pNbCamera;
 
@@ -257,7 +257,7 @@ void nbCameraState_NegoTarget_Calc(void)
 
     if ((pForm->stat & 3) == 3 && effBTLModelGetID(pForm) == 0x3E) {
         effBTLModelGetSphereCenter(pForm);
-        SDF_VU0_LOADVECTOR_B(&D_00324740);
+        SDF_VU0_LOADVECTOR_B(&nbCameraNegoTargetOffset);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(pCamera);
     }

@@ -81,13 +81,13 @@ extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 extern void dds3EffectFilter(dds3Effect_Filter_t *params);
 extern void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
 effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
-extern u8 D_00320228[];
-extern u8 D_003201F8[];
+extern u8 mblurDefaultParam[];
+extern u8 dblurDefaultParam[];
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
-extern u8 D_00320270[];
+extern u8 mfilterDefaultParam[];
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
-extern u8 D_00320298[];
+extern u8 rblurDefaultParam[];
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 D_0054F2C5;
 /* The result slot must be valid whenever the create callback is present. */
@@ -99,19 +99,19 @@ extern s8 dds3PadBitTable[];
 extern effScreenDrawParams_t evtUnityCalcArea;
 extern s8 mblurDone;
 extern effDebugMenu_t mblurDebugMenu;
-extern dds3Effect_PartialMultiBlurParam_t D_00320420;
+extern dds3Effect_PartialMultiBlurParam_t mblurParam;
 extern s8 dblurDone;
 extern effDebugMenu_t dblurDebugMenu;
-extern dds3Effect_DistortionBlurParam_t D_00320598;
+extern dds3Effect_DistortionBlurParam_t dblurParam;
 extern s8 evtViewerDirty;
 extern effDebugMenu_t filterDebugMenu;
 extern dds3Effect_Filter_t dblurParam2;
 extern s8 mfilterDone;
 extern effDebugMenu_t mfilterDebugMenu;
-extern dds3Effect_PartialMultiFilterParam_t D_00320870;
+extern dds3Effect_PartialMultiFilterParam_t mfilterParam;
 extern s8 rblurDone;
 extern effDebugMenu_t rblurDebugMenu;
-extern dds3Effect_RippleBlurParam_t D_003209B0;
+extern dds3Effect_RippleBlurParam_t rblurParam;
 extern sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 typedef struct dds3Billboard_t dds3Billboard_t;
@@ -250,7 +250,7 @@ typedef struct effChanSource_t {
 } effChanSource_t;
 
 
-extern f32 D_00320B88[];
+extern f32 effEveBEDModeScale[];
 extern f32 aViewEye[4];
 extern u8 aViewDown[];
 /* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
@@ -260,7 +260,7 @@ void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDown);
 void ReverseMatrix(void);
 /* Convert the quaternion in vf10 into the primary matrix bank vf28-vf31. */
 void ToMatrix(void);
-extern f32 D_00320BA0[];
+extern f32 effEveBEDDirAngle[];
 /* Load the secondary Y-axis rotation matrix into the primary VU0 matrix registers. */
 void SetRotateMatrixY_B(f32 aAngle);
 /* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
@@ -308,7 +308,7 @@ extern void ToMatrix(void);
 extern void MultMatrixNoArg(void);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *aRoot, s32 aId);
-extern sdfVector4_t D_005343D0;
+extern sdfVector4_t effUnitY;
 void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *pPosPtr);
 void dds3EffectPartSetPosition(dds3EffectPart_t *hEffPart, void *pPos);
 void dds3EffectPartDraw(dds3EffectPart_t *hEffPart);
@@ -462,10 +462,10 @@ void Eve_PartialMultiFilterSetDefTex(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
-    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)D_00320228);
-    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)D_003201F8);
-    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00320270);
-    hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)D_00320298);
+    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)mblurDefaultParam);
+    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)dblurDefaultParam);
+    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)mfilterDefaultParam);
+    hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)rblurDefaultParam);
     Eve_RippleBlurGetParams()->params.number = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
@@ -541,7 +541,7 @@ s32 mblurProcess(void) {
         effDebugMenu_t *state = &mblurDebugMenu;
 
         if (state->create != NULL) {
-            *state->param = state->create(&D_00320420);
+            *state->param = state->create(&mblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -565,12 +565,12 @@ s32 mblurProcess(void) {
 
 /* Expose the blur-template setup parameters by address. */
 dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void) {
-    return &D_00320420;
+    return &mblurParam;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
 void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
-    D_00320420 = *parameters;
+    mblurParam = *parameters;
 }
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
@@ -581,7 +581,7 @@ s32 dblurProcess(void) {
         effDebugMenu_t *state = &dblurDebugMenu;
 
         if (state->create != NULL) {
-            *state->param = state->create(&D_00320598);
+            *state->param = state->create(&dblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -605,12 +605,12 @@ s32 dblurProcess(void) {
 
 /* Expose the scatter-blur setup parameters by address. */
 dds3Effect_DistortionBlurParam_t *dblurGetParam(void) {
-    return &D_00320598;
+    return &dblurParam;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
 void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
-    D_00320598 = *parameters;
+    dblurParam = *parameters;
 }
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
@@ -661,7 +661,7 @@ s32 mfilterRun(void) {
         effDebugMenu_t *state = &mfilterDebugMenu;
 
         if (state->create != NULL) {
-            *state->param = state->create(&D_00320870);
+            *state->param = state->create(&mfilterParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -685,12 +685,12 @@ s32 mfilterRun(void) {
 
 /* Expose the resource-template setup body by address. */
 dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void) {
-    return &D_00320870;
+    return &mfilterParam;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
 void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
-    D_00320870 = *parameters;
+    mfilterParam = *parameters;
 }
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
@@ -701,7 +701,7 @@ s32 rblurProcess(void) {
         effDebugMenu_t *state = &rblurDebugMenu;
 
         if (state->create != NULL) {
-            *state->param = state->create(&D_003209B0);
+            *state->param = state->create(&rblurParam);
         }
         if (state->destination != NULL) {
             if (state->source != NULL) {
@@ -725,12 +725,12 @@ s32 rblurProcess(void) {
 
 /* Expose the scale-blur setup parameters by address. */
 dds3Effect_RippleBlurParam_t *rblurGetParam(void) {
-    return &D_003209B0;
+    return &rblurParam;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
 void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
-    D_003209B0 = *parameters;
+    rblurParam = *parameters;
 }
 
 effBTL_t *effEveBEDCreate(effBTL_t *pData) {
@@ -796,7 +796,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     u16 count;
 
     SDF_VU0_LOADVECTOR(hEveBEDCut->init.rot);
-    SDF_VU0_LOADVECTOR_B(&D_005343D0);
+    SDF_VU0_LOADVECTOR_B(&effUnitY);
     Mult();
     ToMatrix();
     SDF_VU0_STOREMATRIX(&base);
@@ -936,7 +936,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
             y = -1.0f;
         }
     } else {
-        y = position.y - D_00320B88[mode] * half;
+        y = position.y - effEveBEDModeScale[mode] * half;
         if (dir == 8 || dir == 0xA) {
             if (range != 0) {
                 y -= radius;
@@ -972,7 +972,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
         offset.y = 0.0f;
         SDF_VU0_LOADVECTOR(pParams->rot);
         ToMatrix();
-        SetRotateMatrixY_B(D_00320BA0[dir]);
+        SetRotateMatrixY_B(effEveBEDDirAngle[dir]);
         MultMatrixNoArg();
         SDF_VU0_LOADVECTOR(&offset);
         SDF_VU0_VECTOR_W_SET_ZERO();
@@ -985,7 +985,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
     SDF_VU0_LOADVECTOR(&out);
 }
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005343D0);
+INCLUDE_RODATA(const s32, "effect/effEvent", effUnitY);
 
 effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam) {
     u32 particleCount = pParam->number;
@@ -1823,51 +1823,51 @@ void effEveAPP4Randomize(effEmit_t *hEffect) {
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00534420);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534430);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScriptFix);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534440);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScriptBougai);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534450);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScript1Shot);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534460);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemyBad);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00534470);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534480);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemySide);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534490);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNamePlayerSide);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_005344A0);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344B0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoEnd);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344C0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoHojo);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344D0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoTarget);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344E0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoTaizi);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344F0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoBougai);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534500);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNamePressTurn);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534510);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillEnd);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534520);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut3);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534530);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut2);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534540);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut1);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534550);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillStart);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534560);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillAttack);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534570);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandTargetSelect);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534588);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandBad);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534598);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandRoot);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
@@ -1937,15 +1937,15 @@ INCLUDE_SDATA(const s32, "effect/effEvent", hEffEveCPSmokeBill02Tex);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F33C);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F340);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameEvent);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F348);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameEnd);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F350);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameResult);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F358);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameSummon);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F360);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameStart);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F368);
+INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameWait);
 

@@ -101,7 +101,7 @@ extern void InversMatrix(void);
 
 extern void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r);
 
-extern f32 D_0054EEA0;
+extern f32 fldAutoMapBgScroll;
 
 extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
@@ -194,11 +194,11 @@ extern void *fldTDmgEffect;
 
 extern void *dds3EffectLoad(void *pD3P);
 
-extern void *D_00551D08;
+extern void *fldDmgBlurEffectData;
 
-extern void *D_00551D10;
+extern void *fldBlurPacData;
 
-extern void *D_00551D18;
+extern void *fldTDmgEffectData;
 
 extern void *fldDmgBlurHandle;
 
@@ -206,17 +206,17 @@ extern void *fldNpcBlurHandle;
 
 extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
-extern void *D_00551CD0;
+extern void *fldUiTexData;
 
-extern void *D_00551CD8;
+extern void *fldVLTextureData;
 
-extern void *D_00551CE0;
+extern void *fldVLBlurTexData;
 
-extern void *D_00551CE8;
+extern void *fldUiTexAltData;
 
-extern void *D_00551CF0;
+extern void *fldEATextureData;
 
-extern void *D_00551CF8;
+extern void *fldSnowBlurTexData;
 
 extern void *fldModelResPtr[];
 
@@ -289,21 +289,21 @@ extern s32 fldAutoMapSeqStep;
 
 extern s32 fldAutoMapDrawArea;
 
-extern s32 D_0054EE58;
+extern s32 fldAutoMapStartFloor;
 
-extern s32 D_00551CAC;
+extern s32 fldAutoMapCamX;
 
-extern s32 D_00551CB0;
+extern s32 fldAutoMapCamZ;
 
-extern s32 D_00551CB4;
+extern s32 fldAutoMapHomeX;
 
-extern s32 D_00551CB8;
+extern s32 fldAutoMapHomeZ;
 
-extern sdfVector4_t D_00532230;
+extern sdfVector4_t fldAutoMapSeqUp;
 
-extern sdfVector4_t D_002F5E00;
+extern sdfVector4_t fldAutoMapEye;
 
-extern sdfVector4_t D_002F5E10;
+extern sdfVector4_t fldAutoMapUp;
 
 extern sdfVector4_t fldAutoMapRect;
 
@@ -353,25 +353,25 @@ extern struct effResourceHeader_t *fldNpcPacData;
 
 extern void *fldTakaraPacData;
 
-extern void *D_00551CCC;
+extern void *fldUiTexHandle;
 
-extern void *D_00551CD4;
+extern void *fldVLTextureHandle;
 
-extern void *D_00551CDC;
+extern void *fldVLBlurTexHandle;
 
-extern void *D_00551CE4;
+extern void *fldUiTexAltHandle;
 
-extern void *D_00551CEC;
+extern void *fldEATextureHandle;
 
-extern void *D_00551CF4;
+extern void *fldSnowBlurTexHandle;
 
-extern void *D_00551D04;
+extern void *fldDmgBlurEffectHandle;
 
-extern void *D_00551D0C;
+extern void *fldBlurPacHandle;
 
-extern void *D_00551D14;
+extern void *fldTDmgEffectHandle;
 
-extern void *D_00551D1C;
+extern void *fldTakaraPacHandle;
 
 extern void *fldTakara1Mem;
 
@@ -379,15 +379,15 @@ extern void *fldTakara3Mem;
 
 extern void *fldTakara2Mem;
 
-extern void *D_0054EF28;
+extern void *fldItemBoxEffectHandle;
 
-extern void *D_0054EF2C;
+extern void *fldItemBoxEffectData;
 
 extern s32 D_0054EF30;
 
-extern void *D_0054EF3C;
+extern void *fldItemBoxTexHandle;
 
-extern void *D_0054EF40;
+extern void *fldItemBoxTexData;
 
 
 extern s16 fldAutoMapIconOfsTable[][8];
@@ -654,7 +654,7 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
 
 extern f32 sdfSin(f32 aRadius);
 extern void SetRotateMatrixY(f32 aAngle);
-extern f32 D_0054EE70;
+extern f32 fldAutoMapPulsePhase;
 
 void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     sdfVector4_t v0;
@@ -682,9 +682,9 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
     f32 z1;
 
     if (index == 1) {
-        color = (u32)(s32)(sdfSin(D_0054EE70) * 64.0f) << 24;
+        color = (u32)(s32)(sdfSin(fldAutoMapPulsePhase) * 64.0f) << 24;
         color += 0x80000000;
-        D_0054EE70 = D_0054EE70 + SDF_FRAME_STEP(0.2f);
+        fldAutoMapPulsePhase = fldAutoMapPulsePhase + SDF_FRAME_STEP(0.2f);
     } else {
         color = 0x80000000;
     }
@@ -902,10 +902,10 @@ extern const char fldAutoMapFullOpenMsg[];
 extern s32 gFldNowDZone;
 extern s32 fldAutoMapDrawState, fldAutoMapDrawY;
 extern f32 fldAutoMapDrawX, fldCamPitch;
-extern s32 fldAutoMapFloorCur, fldAutoMapFloorOld, D_0054EE90;
-extern f32 D_0054EE80, D_0054EE94, D_0054EE98, D_0054EE9C;
-extern f32 D_0054C4A4, D_0054C4A8, D_0054C4AC, D_0054C4B0;
-extern f32 D_0054C4B4, D_0054C4B8, D_0054C4BC, D_0054C4C0;
+extern s32 fldAutoMapFloorCur, fldAutoMapFloorOld, fldAutoMapSlideCount;
+extern f32 fldAutoMapFloorOfsY, fldAutoMapBlinkPhase, D_0054EE98, fldAutoMapBobPhase;
+extern f32 fldAutoMapFloorNextOfs, fldAutoMapFloorPrevOfs, D_0054C4AC, fldAutoMapBobRate;
+extern f32 fldAutoMapBobStep, fldAutoMapIconRange, fldAutoMapPlayerRange, fldAutoMapBlinkRate;
 extern s32 evtBitCheck(s32 flag);
 extern s32 fldAutoMapGetFloorPrev(s32 floor);
 extern s32 fldAutoMapGetFloorNext(s32 floor);
@@ -1004,12 +1004,12 @@ void fldAutoMapDrawOneArea(void)
             p2sdPlaySE(2, 0x7F, 0x3F);
             fldAutoMapFloorOld = fldAutoMapFloorCur;
             floor = next;
-            D_0054EE80 = D_0054C4A4;
+            fldAutoMapFloorOfsY = fldAutoMapFloorNextOfs;
             fldAutoMapDrawState = -24;
             fldAutoMapFloorCur = floor;
             fldAutoMapDrawX = 0.0f;
             fldAutoMapDrawY = 0;
-            D_0054EE90 = 0;
+            fldAutoMapSlideCount = 0;
         }
     }
     if (dds3PadButtonState[0x2A] < 0 && floor >= 2) {
@@ -1022,34 +1022,34 @@ void fldAutoMapDrawOneArea(void)
             p2sdPlaySE(2, 0x7F, 0x3F);
             fldAutoMapFloorOld = fldAutoMapFloorCur;
             floor = previous;
-            D_0054EE80 = D_0054C4A8;
+            fldAutoMapFloorOfsY = fldAutoMapFloorPrevOfs;
             fldAutoMapDrawState = 24;
             fldAutoMapFloorCur = floor;
             fldAutoMapDrawX = 0.0f;
             fldAutoMapDrawY = 0;
-            D_0054EE90 = 0;
+            fldAutoMapSlideCount = 0;
         }
     }
     state = fldAutoMapDrawState;
     if (state < 0) {
         state += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
         fldAutoMapDrawState = state;
-        D_0054EE90 += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        fldAutoMapSlideCount += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
     }
     if (state > 0) {
         fldAutoMapDrawState = state - SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
-        D_0054EE90 -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        fldAutoMapSlideCount -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
     }
-    if (!(D_0054EE80 < 1000.0f) || !(D_0054EE80 > -1000.0f)) {
-        if (D_0054EE80 > 0.0f) {
+    if (!(fldAutoMapFloorOfsY < 1000.0f) || !(fldAutoMapFloorOfsY > -1000.0f)) {
+        if (fldAutoMapFloorOfsY > 0.0f) {
             fldAutoMapDrawX -= SDF_FRAME_STEP(500.0f);
-        } else if (D_0054EE80 < 0.0f) {
+        } else if (fldAutoMapFloorOfsY < 0.0f) {
             fldAutoMapDrawX += SDF_FRAME_STEP(500.0f);
         }
     }
     fldAutoMapDrawY = 0x80;
     fldAutoMapDrawArea = floor;
-    D_0054EE80 = 0.0f;
+    fldAutoMapFloorOfsY = 0.0f;
     sdf3DSetCamera(&dds3ScreenParam, aProjMatrix);
     rsetOtOfs(0x4A);
     rsetAlpha(0);
@@ -1079,7 +1079,7 @@ void fldAutoMapDrawOneArea(void)
                             s32 number = fldAutoMapIconNumber(entry->type, 1);
                             if (number >= 0) {
                                 fldPoint3To2H(&x, &y, entry->position->x + offsetX + 0.0f,
-                                              D_0054EE80, entry->position->z + offsetZ + 0.0f);
+                                              fldAutoMapFloorOfsY, entry->position->z + offsetZ + 0.0f);
                                 fldAutoMapDrawIconOfsR(number, 0, x, y);
                             }
                         }
@@ -1098,7 +1098,7 @@ void fldAutoMapDrawOneArea(void)
                 fldAutoMapNodeSet(fldAutoMapModels[room], item->nodeIndex, visible);
             }
             fldAutoMapModels[room]->color = 0x80808080;
-            fldAutoMapDrawMdl1(fldAutoMapModels[room], 0.0f, D_0054EE80, 0.0f);
+            fldAutoMapDrawMdl1(fldAutoMapModels[room], 0.0f, fldAutoMapFloorOfsY, 0.0f);
         }
         rsetFrameMaskRgbOff();
         rsetAlpha(0);
@@ -1116,7 +1116,7 @@ void fldAutoMapDrawOneArea(void)
     }
     for (room = 0; room < fldAutoMapData; room++) {
         fldAutoMapModels[room]->color = 0x80808080;
-        fldAutoMapDrawMdl1(fldAutoMapModels[room], 0.0f, D_0054EE80, 0.0f);
+        fldAutoMapDrawMdl1(fldAutoMapModels[room], 0.0f, fldAutoMapFloorOfsY, 0.0f);
     }
     rsetOtOfs(0x4A);
     rsetAlpha(0);
@@ -1133,17 +1133,17 @@ void fldAutoMapDrawOneArea(void)
         }
         model = fldAutoMapModels[room];
         model->color = 0x80808080;
-        fldAutoMapDrawMdl1(model, -50.0f, D_0054EE80, 50.0f);
-        fldAutoMapDrawMdl1(fldAutoMapModels[room], 50.0f, D_0054EE80, 50.0f);
-        fldAutoMapDrawMdl1(fldAutoMapModels[room], -50.0f, D_0054EE80, -50.0f);
-        fldAutoMapDrawMdl1(fldAutoMapModels[room], 50.0f, D_0054EE80, -50.0f);
+        fldAutoMapDrawMdl1(model, -50.0f, fldAutoMapFloorOfsY, 50.0f);
+        fldAutoMapDrawMdl1(fldAutoMapModels[room], 50.0f, fldAutoMapFloorOfsY, 50.0f);
+        fldAutoMapDrawMdl1(fldAutoMapModels[room], -50.0f, fldAutoMapFloorOfsY, -50.0f);
+        fldAutoMapDrawMdl1(fldAutoMapModels[room], 50.0f, fldAutoMapFloorOfsY, -50.0f);
         for (block = 0; block < area->nSB; block++) {
             s32 visible = fldAutoMapNodeVisible(&area->items[block], room, block, floor, 0, 1);
             fldAutoMapNodeSet(fldAutoMapModels[room], area->items[block].nodeIndex, visible);
         }
         model = fldAutoMapModels[room];
         model->color = 0x10808080;
-        fldAutoMapDrawMdl1(model, 0.0f, D_0054EE80, 0.0f);
+        fldAutoMapDrawMdl1(model, 0.0f, fldAutoMapFloorOfsY, 0.0f);
         fldAutoMapModels[room]->color = 0x80808080;
     }
     rsetOtOfs(0x4E);
@@ -1154,7 +1154,7 @@ void fldAutoMapDrawOneArea(void)
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
     D_0054EE98 += D_0054C4AC;
-    D_0054EE9C += SDF_FRAME_STEP(D_0054C4B0);
+    fldAutoMapBobPhase += SDF_FRAME_STEP(fldAutoMapBobRate);
     SDF_VU0_COPYVECTOR(&rect, &fldAutoMapRect);
     if (fldAutoMapDrawY >= 0x80) {
         s32 currentFloor = fldAutoMapFloorCur;
@@ -1174,15 +1174,15 @@ void fldAutoMapDrawOneArea(void)
                         s32 number = fldAutoMapIconNumber(entry->type, 0);
                         f32 bob = 0.0f;
                         if (entry->type == 11) {
-                            bob = sdfSin(D_0054EE9C + (f32)(room + (s32)icon) * D_0054C4B4) * 30.0f;
+                            bob = sdfSin(fldAutoMapBobPhase + (f32)(room + (s32)icon) * fldAutoMapBobStep) * 30.0f;
                         }
                         if (number >= 0) {
                             f32 px = entry->position->x + offsetX + 0.0f;
                             f32 pz = entry->position->z + offsetZ + bob;
                             f32 dx = sdfFabs(rect.x - px);
                             f32 dz = sdfFabs(rect.z - pz);
-                            if (dx < D_0054C4B8 && dz < D_0054C4B8) {
-                                fldPoint3To2H(&x, &y, px, D_0054EE80, pz);
+                            if (dx < fldAutoMapIconRange && dz < fldAutoMapIconRange) {
+                                fldPoint3To2H(&x, &y, px, fldAutoMapFloorOfsY, pz);
                                 fldAutoMapDrawIconOfsR(number, 0, x, y);
                             }
                         }
@@ -1200,9 +1200,9 @@ void fldAutoMapDrawOneArea(void)
             pz = fldGlobalBase.z + offsetZ;
             dx = sdfFabs(rect.x - px);
             dz = sdfFabs(rect.z - pz);
-            fldPoint3To2H(&x, &y, px, D_0054EE80, pz);
+            fldPoint3To2H(&x, &y, px, fldAutoMapFloorOfsY, pz);
             darkZone = gFldNowDZone;
-            if (dx < D_0054C4BC && dz < D_0054C4BC) {
+            if (dx < fldAutoMapPlayerRange && dz < fldAutoMapPlayerRange) {
                 rsetAlpha(1);
                 fldAutoMapDrawIconOfsRF(1, x, y, -fldCamPitch);
                 rsetAlpha(0);
@@ -1264,8 +1264,8 @@ void fldAutoMapDrawOneArea(void)
     if (fldAutoMapFloorCur != fldAutoMapGetFloorPrev(floor)) {
         DrwSprite2D(0x84, 0x36, 0x3D, 0x13, 0x40, 0x1A, 0x3D, 0x13, 0x80808080, fldAutoMapSpriteTex[1]);
     }
-    blink = (s32)(((u32)(s32)(sdfSin(D_0054EE94) * 32.0f) << 24) + 0x60909090u);
-    D_0054EE94 += SDF_FRAME_STEP(D_0054C4C0);
+    blink = (s32)(((u32)(s32)(sdfSin(fldAutoMapBlinkPhase) * 32.0f) << 24) + 0x60909090u);
+    fldAutoMapBlinkPhase += SDF_FRAME_STEP(fldAutoMapBlinkRate);
     fldAutoMapGetBBox(&minX, &maxZ, &maxX, &minZ);
     minX = (f32)((s32)((minX - 1000.0f) / 1000.0f) * 1000);
     minZ = (f32)((s32)((minZ + 1000.0f) / 1000.0f) * 1000);
@@ -1275,16 +1275,16 @@ void fldAutoMapDrawOneArea(void)
     DrwSprite2D(0xF5, 0x19B, 0x16, 0x19, 0x58, 1, 0x16, 0x19, 0x80808080, fldAutoMapSpriteTex[0]);
     DrwSprite2D(0xB, 0xEE, 0x1F, 0x1F, 1, 1, 0x1F, 0x1F, 0x80808080, fldAutoMapSpriteTex[0]);
     DrwSprite2D(0x1D6, 0xEE, 0x1F, 0x1F, 0x21, 1, 0x1F, 0x1F, 0x80808080, fldAutoMapSpriteTex[0]);
-    if ((f32)D_00551CB0 < maxZ) {
+    if ((f32)fldAutoMapCamZ < maxZ) {
         DrwSprite2D(0xFB, 0x45, 0xB, 0xC, 0x74, 0x38, 0xB, 0xC, blink, fldAutoMapSpriteTex[0]);
     }
-    if (minZ < (f32)D_00551CB0) {
+    if (minZ < (f32)fldAutoMapCamZ) {
         DrwSprite2D(0xFB, 0x1B4, 0xB, -0xC, 0x74, 0x38, 0xB, 0xC, blink, fldAutoMapSpriteTex[0]);
     }
-    if (minX < (f32)D_00551CAC) {
+    if (minX < (f32)fldAutoMapCamX) {
         DrwSprite2D(0x1A, 0xF7, -0xC, 0xD, 0x5E, 0x1B, 0xC, 0xD, blink, fldAutoMapSpriteTex[0]);
     }
-    if ((f32)D_00551CAC < maxX) {
+    if ((f32)fldAutoMapCamX < maxX) {
         DrwSprite2D(0x1E6, 0xF7, 0xC, 0xD, 0x5E, 0x1B, 0xC, 0xD, blink, fldAutoMapSpriteTex[0]);
     }
     DrwSprite2D(0xE3, 9, 0xFC, 0x51, 2, 0x2F, 0xFC, 0x51, 0x80808080, fldAutoMapSpriteTex[1]);
@@ -1310,14 +1310,14 @@ void fldAutoMapDrawOneArea(void)
     rsetTest(1, 0, 0x80, 2, 0, 0, 1, 2);
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     if (fldAutoMapDrawState != 0 && (u32)(fldAutoMapFloorOld - 1) < 40 && fldAutoMapFloorNameLen[fldAutoMapFloorOld] >= 2) {
-        s32 alpha = 0x80 - (D_0054EE90 < 0 ? -D_0054EE90 : D_0054EE90) * 8;
+        s32 alpha = 0x80 - (fldAutoMapSlideCount < 0 ? -fldAutoMapSlideCount : fldAutoMapSlideCount) * 8;
         s32 color = (alpha < 0 ? 0 : alpha) | 0x78759B00;
         text = fldAutoMapFloorTable[fldAutoMapFindFloor(fldGlobalBase.area % 100, fldAutoMapFloorOld)];
         request = frwGetSmallFontFRQ(0, 0, 0, color, text, NULL);
         font = (struct frFontHandle_t *)request;
         textX = (s32)((0x1ECu - frGetStrWidth2(font)) << 4);
         frDestroyFontRequestAfter(font);
-        request = frwGetSmallFontFRQ(textX, (D_0054EE90 + 0x3C) * 8, 0, color, text, NULL);
+        request = frwGetSmallFontFRQ(textX, (fldAutoMapSlideCount + 0x3C) * 8, 0, color, text, NULL);
         fldAutoMapFontReq = (struct frFontHandle_t *)request;
         frSetPriority(fldAutoMapFontReq, 0xFFFFFF);
         frDrawFontEx(fldAutoMapFontReq, 1);
@@ -1353,8 +1353,8 @@ void fldAutoMapDrawWindow(void) {
     aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
     DrwSprite2D(0x1A, 0x52, 0x1CC, 0x154, 0, 0, 0x100, 0x80, 0x80808080,
                 fldAutoMapWindowTex[0]);
-    D_0054EEA0 = D_0054EEA0 - 1.0f;
-    fldAutoMapDrawBgOfsRF(255.0f, 250.0f, D_0054EEA0);
+    fldAutoMapBgScroll = fldAutoMapBgScroll - 1.0f;
+    fldAutoMapDrawBgOfsRF(255.0f, 250.0f, fldAutoMapBgScroll);
     sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
     SDF_VU0_LOADMATRIX(D_002FA240);
     rsetOtOfs(0x51);
@@ -1403,15 +1403,15 @@ void fldAutoMapSeqStart(void) {
     fldAutoMapWindowTex[2] = sdfTexSet(fldGlobalBase.pacRes[5]);
     fldAutoMapSeqState = 0;
     fldAutoMapDrawArea = fldGlobalBase.amFloor;
-    D_0054EE58 = fldGlobalBase.amFloor;
+    fldAutoMapStartFloor = fldGlobalBase.amFloor;
     fldAutoMapAreaNo = fldGlobalBase.floor;
     AutoMapSeq = 1;
     fldAllIconDel(fldGlobalBase.floor, &px, &pz);
     fldAutoMapSeqStep = 0;
-    D_00551CB4 = (s32)((f32)(s32)fldGlobalBase.x + px);
-    D_00551CB8 = (s32)((f32)(s32)fldGlobalBase.z + pz);
-    D_00551CB0 = D_00551CB8;
-    D_00551CAC = D_00551CB4;
+    fldAutoMapHomeX = (s32)((f32)(s32)fldGlobalBase.x + px);
+    fldAutoMapHomeZ = (s32)((f32)(s32)fldGlobalBase.z + pz);
+    fldAutoMapCamZ = fldAutoMapHomeZ;
+    fldAutoMapCamX = fldAutoMapHomeX;
     fldAutoMapSeqSetFlag(1);
     fldReleaseUnitPad();
     evtDisableMoonDraw();
@@ -1424,16 +1424,16 @@ void fldAutoMapSeqStart(void) {
     fldAutoMapPosX.x = wx;
     fldAutoMapPosX.y = zero;
     fldAutoMapPosX.z = wz;
-    up = D_00532230;
-    target.x = (f32)D_00551CAC;
+    up = fldAutoMapSeqUp;
+    target.x = (f32)fldAutoMapCamX;
     target.y = zero;
-    target.z = (f32)D_00551CB0;
-    camera.x = (f32)D_00551CAC;
+    target.z = (f32)fldAutoMapCamZ;
+    camera.x = (f32)fldAutoMapCamX;
     camera.y = -24000.0f;
-    camera.z = (f32)D_00551CB0;
-    SDF_VU0_COPYVECTOR(&D_002F5E00, &camera);
+    camera.z = (f32)fldAutoMapCamZ;
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, &camera);
     SDF_VU0_COPYVECTOR(&fldAutoMapRect, &target);
-    SDF_VU0_COPYVECTOR(&D_002F5E10, &up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
     light->near = 255.0f;
     light->far = 255.0f;
@@ -1507,7 +1507,7 @@ u32 fldAutoMapChkMode(void) {
 
 /* These are the existing native .data flag and camera/vector records. */
 extern u8 dds3PadStickStatusState[2][2];
-extern sdfVector4_t D_00532240;
+extern sdfVector4_t fldAutoMapCalcUp;
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewTarget;
 extern sdfVector4_t aViewDown;
@@ -1518,7 +1518,7 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ);
 void fldAutoMapCalc(void) {
     sdfVector4_t focus;
     sdfVector4_t eye;
-    sdfVector4_t up = D_00532240;
+    sdfVector4_t up = fldAutoMapCalcUp;
     fldAmLightParam_t *light;
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
@@ -1547,9 +1547,9 @@ void fldAutoMapCalc(void) {
     }
     if ((s8)dds3PadButtonState[0x23] < 0) {
         p2sdPlaySE(10, 127, 63);
-        D_00551CAC = D_00551CB4;
-        D_00551CB0 = D_00551CB8;
-        fldAutoMapDrawArea = D_0054EE58;
+        fldAutoMapCamX = fldAutoMapHomeX;
+        fldAutoMapCamZ = fldAutoMapHomeZ;
+        fldAutoMapDrawArea = fldAutoMapStartFloor;
         fldAutoMapSeqState = 0;
     }
 
@@ -1559,35 +1559,35 @@ void fldAutoMapCalc(void) {
                 if ((s8)dds3PadButtonState[0x25] != 0 &&
                     (s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC += 1000;
-                    D_00551CB0 -= 1000;
+                    fldAutoMapCamX += 1000;
+                    fldAutoMapCamZ -= 1000;
                 } else if ((s8)dds3PadButtonState[0x25] != 0 &&
                            (s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC += 1000;
-                    D_00551CB0 += 1000;
+                    fldAutoMapCamX += 1000;
+                    fldAutoMapCamZ += 1000;
                 } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                            (s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC -= 1000;
-                    D_00551CB0 -= 1000;
+                    fldAutoMapCamX -= 1000;
+                    fldAutoMapCamZ -= 1000;
                 } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                            (s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC -= 1000;
-                    D_00551CB0 += 1000;
+                    fldAutoMapCamX -= 1000;
+                    fldAutoMapCamZ += 1000;
                 } else if ((s8)dds3PadButtonState[0x25] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC += 1000;
+                    fldAutoMapCamX += 1000;
                 } else if ((s8)dds3PadButtonState[0x24] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC -= 1000;
+                    fldAutoMapCamX -= 1000;
                 } else if ((s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CB0 -= 1000;
+                    fldAutoMapCamZ -= 1000;
                 } else if ((s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    D_00551CB0 += 1000;
+                    fldAutoMapCamZ += 1000;
                 }
             }
         } else {
@@ -1597,42 +1597,42 @@ void fldAutoMapCalc(void) {
                 (s8)dds3PadButtonState[0x27] != 0) {
                 if (dds3PadButtonState[0x27] & 2) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC += 1000;
-                    D_00551CB0 -= 1000;
+                    fldAutoMapCamX += 1000;
+                    fldAutoMapCamZ -= 1000;
                 }
             } else if ((s8)dds3PadButtonState[0x25] != 0 &&
                        (s8)dds3PadButtonState[0x26] != 0) {
                 if (dds3PadButtonState[0x26] & 2) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC += 1000;
-                    D_00551CB0 += 1000;
+                    fldAutoMapCamX += 1000;
+                    fldAutoMapCamZ += 1000;
                 }
             } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                        (s8)dds3PadButtonState[0x27] != 0) {
                 if (dds3PadButtonState[0x27] & 2) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC -= 1000;
-                    D_00551CB0 -= 1000;
+                    fldAutoMapCamX -= 1000;
+                    fldAutoMapCamZ -= 1000;
                 }
             } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                        (s8)dds3PadButtonState[0x26] != 0) {
                 if (dds3PadButtonState[0x26] & 2) {
                     fldAutoMapSeqState = 1;
-                    D_00551CAC -= 1000;
-                    D_00551CB0 += 1000;
+                    fldAutoMapCamX -= 1000;
+                    fldAutoMapCamZ += 1000;
                 }
             } else if (dds3PadButtonState[0x25] & 2) {
                 fldAutoMapSeqState = 1;
-                D_00551CAC += 1000;
+                fldAutoMapCamX += 1000;
             } else if (dds3PadButtonState[0x24] & 2) {
                 fldAutoMapSeqState = 1;
-                D_00551CAC -= 1000;
+                fldAutoMapCamX -= 1000;
             } else if (dds3PadButtonState[0x27] & 2) {
                 fldAutoMapSeqState = 1;
-                D_00551CB0 -= 1000;
+                fldAutoMapCamZ -= 1000;
             } else if (dds3PadButtonState[0x26] & 2) {
                 fldAutoMapSeqState = 1;
-                D_00551CB0 += 1000;
+                fldAutoMapCamZ += 1000;
             }
         }
     }
@@ -1644,31 +1644,31 @@ void fldAutoMapCalc(void) {
     maxZ = (s32)((maxZ - 1000.0f) / 1000.0f) * 1000;
     minZ = (s32)((minZ + 1000.0f) / 1000.0f) * 1000;
 
-    if ((f32)D_00551CAC < minX) {
-        D_00551CAC = (s32)minX;
+    if ((f32)fldAutoMapCamX < minX) {
+        fldAutoMapCamX = (s32)minX;
     }
-    if (maxX < (f32)D_00551CAC) {
-        D_00551CAC = (s32)maxX;
+    if (maxX < (f32)fldAutoMapCamX) {
+        fldAutoMapCamX = (s32)maxX;
     }
-    if ((f32)D_00551CB0 < minZ) {
-        D_00551CB0 = (s32)minZ;
+    if ((f32)fldAutoMapCamZ < minZ) {
+        fldAutoMapCamZ = (s32)minZ;
     }
-    if (maxZ < (f32)D_00551CB0) {
-        D_00551CB0 = (s32)maxZ;
+    if (maxZ < (f32)fldAutoMapCamZ) {
+        fldAutoMapCamZ = (s32)maxZ;
     }
 
-    focus.x = D_00551CAC;
+    focus.x = fldAutoMapCamX;
     focus.y = 0.0f;
-    focus.z = D_00551CB0;
-    eye.x = D_00551CAC;
+    focus.z = fldAutoMapCamZ;
+    eye.x = fldAutoMapCamX;
     eye.y = -24000.0f;
-    eye.z = D_00551CB0;
+    eye.z = fldAutoMapCamZ;
     if (dds3PadButtonState[0x2B] != 0) {
         eye.y = -60000.0f;
     }
-    SDF_VU0_COPYVECTOR(&D_002F5E00, &eye);
+    SDF_VU0_COPYVECTOR(&fldAutoMapEye, &eye);
     SDF_VU0_COPYVECTOR(&fldAutoMapRect, &focus);
-    SDF_VU0_COPYVECTOR(&D_002F5E10, &up);
+    SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
     light->near = 255.0f;
     light->scale = 1000.0f;
@@ -1965,9 +1965,9 @@ void fldAutoMapProc(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532230);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldAutoMapSeqUp);
 
-INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532240);
+INCLUDE_RODATA(const s32, "field/fldAutoMap", fldAutoMapCalcUp);
 
 void fldAutoMapDraw(void) {
     char buf[0x20];
@@ -2027,7 +2027,7 @@ void fldAutoMapClear(void) {
     }
 }
 
-extern f32 D_0054EEA4;
+extern f32 fldAreaFontAlpha;
 extern s32 fldAreaFontWork;
 extern void frPreCalcStrWidth(const char *pStr, s32 Style, s32 Mode);
 struct frFontHandle_t;
@@ -2053,17 +2053,17 @@ void fldDrawAreaBlockFont(void) {
     if (fldGlobalBase.area >= 200) {
         return;
     }
-    v = D_0054EEA4;
+    v = fldAreaFontAlpha;
     switch (*(s32 *)((u8 *)&fldGlobalBase + 0x90)) {
     case 0:
         v = 0.0f;
         fldAreaFontWork = 0;
-        D_0054EEA4 = v;
+        fldAreaFontAlpha = v;
         break;
     case 1:
         v = 1.0f;
         fldAreaFontWork = 0;
-        D_0054EEA4 = v;
+        fldAreaFontAlpha = v;
         break;
     case 2:
         if (v > 0.0f) {
@@ -2074,7 +2074,7 @@ void fldDrawAreaBlockFont(void) {
             } else {
                 fldAreaFontWork = -1;
             }
-            D_0054EEA4 = v;
+            fldAreaFontAlpha = v;
         }
         break;
     case 3:
@@ -2086,7 +2086,7 @@ void fldDrawAreaBlockFont(void) {
                 v = 1.0f;
                 fldAreaFontWork = 0;
             }
-            D_0054EEA4 = v;
+            fldAreaFontAlpha = v;
         }
         break;
     case 4:
@@ -2101,14 +2101,14 @@ void fldDrawAreaBlockFont(void) {
                         v = 0.0f;
                         fldAreaFontWork = 0;
                     }
-                    D_0054EEA4 = v;
+                    fldAreaFontAlpha = v;
                 } else if (fldAreaFontWork == 1) {
                     v += SDF_FRAME_STEP(0.1f);
                     if (v > 1.0f) {
                         v = 1.0f;
                         fldAreaFontWork = 0;
                     }
-                    D_0054EEA4 = v;
+                    fldAreaFontAlpha = v;
                 }
             }
         }
@@ -2168,8 +2168,8 @@ void fldInitPacLoader(void) {
         switch (i) {
     case 0:
         handle = work->resrc;
-        D_00551D04 = handle;
-        D_00551D08 = sdfMemGetPtr(handle);
+        fldDmgBlurEffectHandle = handle;
+        fldDmgBlurEffectData = sdfMemGetPtr(handle);
         break;
     case 1:
         handle = work->resrc;
@@ -2178,59 +2178,59 @@ void fldInitPacLoader(void) {
         break;
     case 2:
         handle = work->resrc;
-        D_00551D1C = handle;
+        fldTakaraPacHandle = handle;
         fldTakaraPacData = sdfMemGetPtr(handle);
         break;
     case 3:
         handle = work->resrc;
-        D_00551D0C = handle;
-        D_00551D10 = sdfMemGetPtr(handle);
+        fldBlurPacHandle = handle;
+        fldBlurPacData = sdfMemGetPtr(handle);
         break;
     case 4:
         handle = work->resrc;
-        D_00551CCC = handle;
-        D_00551CD0 = sdfMemGetPtr(handle);
+        fldUiTexHandle = handle;
+        fldUiTexData = sdfMemGetPtr(handle);
         break;
     case 5:
         handle = work->resrc;
-        D_00551CD4 = handle;
-        D_00551CD8 = sdfMemGetPtr(handle);
+        fldVLTextureHandle = handle;
+        fldVLTextureData = sdfMemGetPtr(handle);
         break;
     case 6:
         handle = work->resrc;
-        D_00551CDC = handle;
-        D_00551CE0 = sdfMemGetPtr(handle);
+        fldVLBlurTexHandle = handle;
+        fldVLBlurTexData = sdfMemGetPtr(handle);
         break;
     case 7:
         handle = work->resrc;
-        D_00551CE4 = handle;
-        D_00551CE8 = sdfMemGetPtr(handle);
+        fldUiTexAltHandle = handle;
+        fldUiTexAltData = sdfMemGetPtr(handle);
         break;
     case 8:
         handle = work->resrc;
-        D_00551CEC = handle;
-        D_00551CF0 = sdfMemGetPtr(handle);
+        fldEATextureHandle = handle;
+        fldEATextureData = sdfMemGetPtr(handle);
         break;
     case 9:
         handle = work->resrc;
-        D_00551CF4 = handle;
-        D_00551CF8 = sdfMemGetPtr(handle);
+        fldSnowBlurTexHandle = handle;
+        fldSnowBlurTexData = sdfMemGetPtr(handle);
         break;
     case 10:
         handle = work->resrc;
-        D_00551D14 = handle;
-        D_00551D18 = sdfMemGetPtr(handle);
+        fldTDmgEffectHandle = handle;
+        fldTDmgEffectData = sdfMemGetPtr(handle);
         break;
     case 11:
         handle = work->resrc;
-        D_0054EF28 = handle;
-        D_0054EF2C = sdfMemGetPtr(handle);
+        fldItemBoxEffectHandle = handle;
+        fldItemBoxEffectData = sdfMemGetPtr(handle);
         D_0054EF30 = 4;
         break;
     case 12:
         handle = work->resrc;
-        D_0054EF3C = handle;
-        D_0054EF40 = sdfMemGetPtr(handle);
+        fldItemBoxTexHandle = handle;
+        fldItemBoxTexData = sdfMemGetPtr(handle);
         break;
     case 13:
         handle = work->resrc;
@@ -2270,24 +2270,24 @@ void fldInitBlurEffect(void) {
     if (fldGlobalBase.area >= 0xC8) {
         return;
     }
-    fldTDmgEffect = dds3EffectLoad(D_00551D18);
+    fldTDmgEffect = dds3EffectLoad(fldTDmgEffectData);
     if (fldGlobalBase.area >= 0xB) {
-        fldDmgBlurEffect = dds3EffectLoad(D_00551D08);
+        fldDmgBlurEffect = dds3EffectLoad(fldDmgBlurEffectData);
         fldDmgBlurHandle = NULL;
-        fldBlurEffectId[0] = dds3EffectLoad(D_00551D10);
+        fldBlurEffectId[0] = dds3EffectLoad(fldBlurPacData);
         fldNpcBlurHandle = NULL;
     }
     if (fldGlobalBase.area < 0xA) {
-        fldUiTexture = sdfTexSet(D_00551CD0);
-        fldVLTexture = sdfTexSet(D_00551CD8);
-        fldVLBlurHandle = sdfTexSet(D_00551CE0);
+        fldUiTexture = sdfTexSet(fldUiTexData);
+        fldVLTexture = sdfTexSet(fldVLTextureData);
+        fldVLBlurHandle = sdfTexSet(fldVLBlurTexData);
     } else {
-        fldUiTexture = sdfTexSet(D_00551CE8);
+        fldUiTexture = sdfTexSet(fldUiTexAltData);
         fldVLTexture = NULL;
         fldVLBlurHandle = NULL;
     }
-    fldEATexture = sdfTexSet(D_00551CF0);
-    fldSnowBlurHandle = sdfTexSet(D_00551CF8);
+    fldEATexture = sdfTexSet(fldEATextureData);
+    fldSnowBlurHandle = sdfTexSet(fldSnowBlurTexData);
     /* The casts pin the store order; assigning the array elements directly
      * swaps the first two stores. */
     for (i = 0; i < 0x40; i++) {

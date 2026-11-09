@@ -11,9 +11,9 @@ extern u32 dds3GetKernelCount(void);
 #include "event.h"
 #include "motion.h"
 
-extern char D_00543FB8[]; /* "nego result = %d\n" */
+extern char nbNegoResultFmt[]; /* "nego result = %d\n" */
 
-extern char D_00544020[];
+extern char nbReturnDebugMsg[];
 
 #include "sdk_libc.h"
 
@@ -110,7 +110,7 @@ extern s32 datCheckTalk(datUnitWork_t *work);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern char D_00543FA8[]; /* "NEGO p:%d e:%d\n" */
+extern char nbNegoDebugFmt[]; /* "NEGO p:%d e:%d\n" */
 
 extern void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eformindex,
                               u32 negotype, s32 skillid);
@@ -136,17 +136,17 @@ extern s32 nbCheckSingleTargetSkill(s32 skillid);
 extern struct nbKoukaPacket_t *nbAddSakeKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                     nbFormation_t *form);
 
-extern char D_00544070[];
+extern char nbEndMsgBit10000[];
 
-extern char D_00544088[];
+extern char nbEndMsgBit20000[];
 
-extern char D_005440A0[];
+extern char nbEndMsgBit40000[];
 
-extern char D_005440B0[];
+extern char nbEndMsgBit80000[];
 
-extern char D_005440C0[];
+extern char nbEndMsgBit100000[];
 
-extern char D_005440D8[];
+extern char nbEndMsgBit200000[];
 
 extern void nbPlaySe(s32 no);
 
@@ -221,9 +221,9 @@ s32 CheckKoketaNego(nbActionProcessData_t *a);
 
 extern void *memset(void *a, s32 b, size_t c);
 
-extern char D_00543768[]; /* "nb_unitdraw" */
+extern char nbUnitDrawProcessName[]; /* "nb_unitdraw" */
 
-extern char D_00544120[]; /* "nb_action" */
+extern char nbActionProcessName[]; /* "nb_action" */
 
 void *nbActionProcess1(dds3ProcessID_t *id);
 
@@ -257,7 +257,7 @@ extern s32 p2sdGetPcmState(void);
 
 extern void p2sdSyncSound(void);
 
-extern char D_005440E8[];
+extern char nbPcmSyncDebugMsg[];
 
 extern s32 nbMakeSummonPacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 side, s32 stockno,
                               s32 formindex);
@@ -303,7 +303,7 @@ extern void nbCameraSetState(u16 state);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
-extern datDevilAIData_t D_003989E0[];
+extern datDevilAIData_t datDevilAIDataTable[];
 
 extern void nbAddFlareChargePacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 point);
 
@@ -1434,7 +1434,7 @@ void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32
     }
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005437F8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbKoukaListSelectFmt);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", GetKoukaList);
 #endif
@@ -2202,7 +2202,7 @@ s32 CheckAction_NON(nbActionProcessData_t *a)
             }
             if (dds3DebugSign == 1 && (a->data->stat & 0x10000000) != 0) {
                 SetNextActionSeq(a, 1);
-            } else if (D_003989E0[a->work->id].aiscript != 0) {
+            } else if (datDevilAIDataTable[a->work->id].aiscript != 0) {
                 SetNextActionSeq(a, 3);
             } else {
                 SetNextActionSeq(a, 2);
@@ -2362,7 +2362,7 @@ void SetAction_AISCR(nbActionProcessData_t *a)
 
     work->nowcommand = -1;
     work->nowindex = 0;
-    nbInitAiScript(a, D_003989E0[id].aiscript);
+    nbInitAiScript(a, datDevilAIDataTable[id].aiscript);
 }
 
 s32 CheckAction_AISCR(nbActionProcessData_t *a)
@@ -2690,7 +2690,7 @@ extern void datAddItem(s32 id, s32 num);
 extern char *effMakeBedFileName(u32 id);
 extern struct fileRequest *fileLoad(const char *filename);
 
-extern char D_00575360[];
+extern char nbMidiPathBuf[];
 extern void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form);
 extern struct nbKoukaPacket_t *nbAddFormFlagOnOffPacket(s32 startframe,
     saddr_t uniqueid, nbFormation_t *form, s32 sw, u32 flag);
@@ -2845,9 +2845,9 @@ void SetAction_READY(nbActionProcessData_t *a)
         }
         a->midifile = NULL;
         midi = skill + 0x200;
-        sprintf(D_00575360, "/sound/MIDI%04X.SMG", midi);
-        printf("MIDI :%s\n", D_00575360);
-        a->midifile = fileLoad(D_00575360);
+        sprintf(nbMidiPathBuf, "/sound/MIDI%04X.SMG", midi);
+        printf("MIDI :%s\n", nbMidiPathBuf);
+        a->midifile = fileLoad(nbMidiPathBuf);
         a->midino = midi << 16;
         break;
     case 2: break;
@@ -3097,7 +3097,7 @@ void SetAction_READY(nbActionProcessData_t *a)
     cmpSetSkillListRows(-1);
 }
 
-extern char D_00551128[];
+extern char nbDebugNewline[];
 extern void datDebugPrintf(const char *format, ...);
 extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
 extern s32 p2sdLoadCheckMidi(s32 midi);
@@ -3130,7 +3130,7 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
                 break;
             }
         }
-        datDebugPrintf(D_00551128);
+        datDebugPrintf(nbDebugNewline);
         a->hEffBTL = NULL;
         if (a->bedfile == NULL && a->midifile == NULL) {
             a->seqcnt = 5;
@@ -3752,7 +3752,7 @@ void SetAction_NEGO(nbActionProcessData_t *a)
     } else if ((a->form->stat & 0x200) != 0) {
         e = a->form->formindex;
     }
-    printf(D_00543FA8, p, e);
+    printf(nbNegoDebugFmt, p, e);
     nbPanelDraw(0);
     a->data->negopformindex = p;
     a->data->negoeformindex = e;
@@ -3762,7 +3762,7 @@ void SetAction_NEGO(nbActionProcessData_t *a)
 s32 CheckAction_NEGO(nbActionProcessData_t *a)
 {
     if (a->data->NegoProcessID == NULL) {
-        printf(D_00543FB8, a->data->negoresult);
+        printf(nbNegoResultFmt, a->data->negoresult);
         SetNextActionSeq(a, 10);
         nbPanelDraw(1);
         if (datCheckPlayerDead() != 0) {
@@ -3778,19 +3778,19 @@ extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
 extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
 extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E20);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaTypeFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E38);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillCut3TimeFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E58);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillHpMpFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E78);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaEndTimeFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543E98);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaUnlockTimeFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543EB8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillNoKoukaFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543EE8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbPressDebugFmt);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F00);
 
@@ -3798,9 +3798,9 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F40);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F80);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FA8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbNegoDebugFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543FB8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbNegoResultFmt);
 
 void SetAction_NEGORESULT(nbActionProcessData_t *a)
 {
@@ -4047,7 +4047,7 @@ out:
 
 void SetAction_RETURN(nbActionProcessData_t *a)
 {
-    printf(D_00544020);
+    printf(nbReturnDebugMsg);
     if ((a->data->stat & 8) != 0) {
         nbCameraSetState(0x15);
     }
@@ -4081,7 +4081,7 @@ extern void nbAddHatudoEffectEndPacket(s32 startframe, saddr_t uniqueid);
 extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
 extern void nbAddPanelStockEndPacket(s32 startframe, saddr_t uniqueid);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544020);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbReturnDebugMsg);
 
 void SetAction_CHECK1(nbActionProcessData_t *a)
 {
@@ -4265,22 +4265,22 @@ s32 CheckAction_ATO(nbActionProcessData_t *a)
 void SetAction_END(nbActionProcessData_t *a)
 {
     if ((a->stat & 0x10000) != 0) {
-        printf(D_00544070);
+        printf(nbEndMsgBit10000);
     }
     if ((a->stat & 0x20000) != 0) {
-        printf(D_00544088);
+        printf(nbEndMsgBit20000);
     }
     if ((a->stat & 0x40000) != 0) {
-        printf(D_005440A0);
+        printf(nbEndMsgBit40000);
     }
     if ((a->stat & 0x80000) != 0) {
-        printf(D_005440B0);
+        printf(nbEndMsgBit80000);
     }
     if ((a->stat & 0x100000) != 0) {
-        printf(D_005440C0);
+        printf(nbEndMsgBit100000);
     }
     if ((a->stat & 0x200000) != 0) {
-        printf(D_005440D8);
+        printf(nbEndMsgBit200000);
     }
 }
 
@@ -4330,19 +4330,19 @@ void SetNextActionSeq(nbActionProcessData_t *a, s32 nextseq)
     a->nextseq = nextseq;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544070);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit10000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544088);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit20000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005440A0);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit40000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005440B0);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit80000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005440C0);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit100000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005440D8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit200000);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_005440E8);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbPcmSyncDebugMsg);
 
 void *nbActionProcess1(dds3ProcessID_t *id)
 {
@@ -4367,7 +4367,7 @@ void *nbActionProcess1(dds3ProcessID_t *id)
         t = prev < 0x13;
         ok = t == 0;
         if (p2sdGetPcmState() != 0) {
-            printf(D_005440E8);
+            printf(nbPcmSyncDebugMsg);
             p2sdSyncSound();
         }
         break;
@@ -4468,7 +4468,7 @@ void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
 
     data->NowActionProcess = (data->NowActionProcess + 1) % 4;
     a = InitActionProcessData(data, type, from, to, d);
-    id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
+    id = dds3StartProcess(nbActionProcessName, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
     dds3LinkProcess(data->MainProcessID, id);
     data->ActionProcessID[data->NowActionProcess] = id;
 }
@@ -4504,11 +4504,11 @@ nbActionFunc_t ActionFuncTable[24] = {
     { NULL, NULL },
 };
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544120);
+INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbActionProcessName);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551124);
 
-INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551128);
+INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", nbDebugNewline);
 

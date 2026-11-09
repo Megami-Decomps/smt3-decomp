@@ -1091,7 +1091,7 @@ extern void FromRotation(f32 aAngle);
 
 void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
-extern sdfVector4_t D_0053A860;
+extern sdfVector4_t evtUnitUpAxis;
 
 /* vu0 routine: turn the unit toward dir, at most a tenth of a radian a frame. */
 s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
@@ -1101,7 +1101,7 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     f32 cross;
     f32 angle;
 
-    axis = D_0053A860;
+    axis = evtUnitUpAxis;
     evtGetUnitDirVector(h);
     SDF_VU0_COPYVECTOR_A_TO_C();
     evtVu0SubVectorXZAxis(pos, (f32 *)&h->effObj->poseset->pos);
@@ -1332,7 +1332,7 @@ extern s32 mdlChkMotionEndEx(mdlObj_t *model, s32 group);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
 
-INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A860);
+INCLUDE_RODATA(const s32, "event/evtUnitManager", evtUnitUpAxis);
 
 s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
     s32 moving = 0;

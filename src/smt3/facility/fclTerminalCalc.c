@@ -163,7 +163,7 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                              s32 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 ot);
 extern void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color,
                               s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 ot);
-extern fclSpriteTbl_t D_003308F8[];
+extern fclSpriteTbl_t trmSpriteTable[];
 
 void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
 {
@@ -176,9 +176,9 @@ void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
     width = frGetStrWidth2(font);
     center = ((0x1EC - width) << 4);
     fclDrawSpriteRes(center - 0x450, 0xC8, panel->z << 4, NULL, 0, 1,
-                     &trmDrawWork->texHandle, D_003308F8, ot);
+                     &trmDrawWork->texHandle, trmSpriteTable, ot);
     fclDrawSpriteSize(center + 0x450, 0xC8, panel->z << 4, width - 0x31, 0x21,
-                      NULL, 0, 2, &trmDrawWork->texHandle, D_003308F8, ot);
+                      NULL, 0, 2, &trmDrawWork->texHandle, trmSpriteTable, ot);
     frSetDrawPosition(font, center, 0xF8);
     func_001C7E38(font, 0, ot);
     frDestroyFontRequestAfter(font);
@@ -201,7 +201,7 @@ void trmDrawList(void)
     s32 z;
 
     fclInitPanelPos(0, 0xF8, 0xFFFFF, 0, 0, 0, &panel);
-    trmDrawListText(&panel, trmMenuTextTable[12], &trmDrawWork->texHandle, D_003308F8, 0x47);
+    trmDrawListText(&panel, trmMenuTextTable[12], &trmDrawWork->texHandle, trmSpriteTable, 0x47);
     fclInitPanelPos(0xC80, 0x100, 0xFFFFF, 0x80, 0, 0, &panel);
     trmDrawListRow(&panel, 0x47);
     lstDrawListWindow(&trmDrawWork->terminalList, 0, 0x47);

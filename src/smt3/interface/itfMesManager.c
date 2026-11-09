@@ -296,7 +296,7 @@ u16 itfMesMngGetStatManager(void);
 
 s32 itfMesMngDebugProc(void);
 
-extern debug_tag D_00326700;
+extern debug_tag itfMesDebug;
 
 itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow);
 
@@ -311,20 +311,20 @@ sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
                         s32 sx, s32 sy);
 
-extern char D_0054F4E8[];
+extern char itfMesDebugItemFormat[];
 
 extern char *itfMesSelectionMarkers[2];
 
-extern char D_0054F4F0[];
+extern char itfMesMarkerNone[];
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr,
                                   const char *aStr, ...);
 
-extern char *D_00326710[];
+extern char *itfMesDebugMenuLabels[];
 
-extern char D_0054F4F8[];
+extern char itfMesDebugFadeFormat[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -412,14 +412,14 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
-extern s32 D_00326728[8];
+extern s32 itfMesSelectRectVerts[8];
 
-extern itfColor_t D_00326748[2];
+extern itfColor_t itfMesSelectRectColors[2];
 
 
-extern u8 D_00326768[];
+extern u8 itfMesSelectRectIndex[];
 
-extern u8 D_00326770[];
+extern u8 itfMesSelectRectColorIndex[];
 
 extern void itfMiscDrawSpritePlanePrim(sdfIVector2_t *pos, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
@@ -427,9 +427,9 @@ extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors
 
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
-extern s32 D_00326778[4];
+extern s32 itfMesRetPageUv[4];
 
-extern s32 D_00326788[4];
+extern s32 itfMesRetPageColor[4];
 
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 z, sdfTexHandle_t *texhandle, s32 context, sdfDrawTag_t *pdrawtag);
 
@@ -437,9 +437,9 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
 extern s32 D_00326798[];
 
-extern u8 D_0054F500[5];
+extern u8 itfMesDebugLineVertIndex[5];
 
-extern u8 D_0054F508[5];
+extern u8 itfMesDebugLineColorIndex[5];
 
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
@@ -1119,7 +1119,7 @@ void itfMesMngGetVarLocalize(s32 id)
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngGetVarLocalize);
 #endif
 
-extern char D_0054F4C0[];
+extern char itfMesFmtInt[];
 
 extern char *text1[];
 
@@ -1145,7 +1145,7 @@ void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
     case 0: {
         char buf[16];
 
-        sprintf(buf, D_0054F4C0, num);
+        sprintf(buf, itfMesFmtInt, num);
         itfMesMngSetVarImmediate(id, index, buf);
         break;
     }
@@ -1354,13 +1354,13 @@ u16 itfMesMngGetStatManager(void) {
     return itfMesMngManager.flags;
 }
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535B40);
+INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelChange);
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535B50);
+INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelPosition);
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535B60);
+INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelRightBottom);
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535B70);
+INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelLeftTop);
 
 s32 itfMesMngDebugProc(void) {
     window_tag *panel;
@@ -1374,16 +1374,16 @@ s32 itfMesMngDebugProc(void) {
     const char *coordinateFormat;
     sdfGrOt_t *packetOwner;
 
-    if (D_00326700.pmesflow == NULL) {
+    if (itfMesDebug.pmesflow == NULL) {
         itfMesLink_t *window = DebugChangeInstance(NULL);
 
-        D_00326700.pmesflow = window;
+        itfMesDebug.pmesflow = window;
         if (window == NULL) {
             return 0;
         }
     }
     {
-        debug_tag *debug = &D_00326700;
+        debug_tag *debug = &itfMesDebug;
 
         panel = &debug->pmesflow->state->window;
         switch (debug->mode) {
@@ -1398,7 +1398,7 @@ s32 itfMesMngDebugProc(void) {
                 }
             }
             if (dds3PadButtonState.secondaryCross < 0) {
-                debug_tag *confirmDebug = &D_00326700;
+                debug_tag *confirmDebug = &itfMesDebug;
 
                 switch (confirmDebug->cursor) {
                 case 0:
@@ -1426,7 +1426,7 @@ s32 itfMesMngDebugProc(void) {
         case 2:
             DebugMoveWinAlpha((window_tag *)panel);
             if (dds3PadButtonState.secondaryCancel < 0) {
-                D_00326700.mode = 0;
+                itfMesDebug.mode = 0;
             }
             break;
         }
@@ -1434,17 +1434,17 @@ s32 itfMesMngDebugProc(void) {
 
     packetList = dds3FontReqAllocDrawTag();
     dds3ConsPanelTagLink(packetList, 0x10, 0x10, 0x1E, 9);
-    menuItemFormat = D_0054F4E8;
+    menuItemFormat = itfMesDebugItemFormat;
     menuItemY = 0x7A00;
     for (menuItemIndex = 0; menuItemIndex < 5; menuItemIndex++, menuItemY += 0x60) {
-        if (D_00326700.cursor == menuItemIndex) {
-            selectionMarker = itfMesSelectionMarkers[D_00326700.mode != 0];
+        if (itfMesDebug.cursor == menuItemIndex) {
+            selectionMarker = itfMesSelectionMarkers[itfMesDebug.mode != 0];
         } else {
-            selectionMarker = D_0054F4F0;
+            selectionMarker = itfMesMarkerNone;
         }
         sdfDrawTagLink(packetList,
                         EE_ADDR(sdfDevPrintf(0x7180, menuItemY, 0xFFFFF0, 0,
-                                                     menuItemFormat, selectionMarker, D_00326710[menuItemIndex])));
+                                                     menuItemFormat, selectionMarker, itfMesDebugMenuLabels[menuItemIndex])));
     }
 
     coordinateFormat = "( %3d, %3d )";
@@ -1460,8 +1460,8 @@ s32 itfMesMngDebugProc(void) {
                                                  bounds[3] >> 3)));
     sdfDrawTagLink(packetList,
                     EE_ADDR(sdfDevPrintf(0x7E00, 0x7B20, 0xFFFFF0, 0,
-                                                 D_0054F4F8, panel->fadeLimit)));
-    bounds = D_00326700.pmesflow->state->window.mes_offset;
+                                                 itfMesDebugFadeFormat, panel->fadeLimit)));
+    bounds = itfMesDebug.pmesflow->state->window.mes_offset;
     sdfDrawTagLink(packetList,
                     EE_ADDR(sdfDevPrintf(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d, %3d - %3d, %3d",
@@ -1476,9 +1476,9 @@ s32 itfMesMngDebugProc(void) {
 
 /* Reset the three otherwise unnamed message-state words. */
 void itfMesMngDebugShutdown(void) {
-    D_00326700.cursor = 0;
-    D_00326700.mode = 0;
-    D_00326700.pmesflow = NULL;
+    itfMesDebug.cursor = 0;
+    itfMesDebug.mode = 0;
+    itfMesDebug.pmesflow = NULL;
 }
 
 /* Tear down installed content/resources, return the pool record and decrement
@@ -2444,7 +2444,7 @@ void DrawWindow(instanceMes_tag *pinst) {
             itfPnlDraw(place->spk, &sdfGrOtTable[pinst->otindex]);
         }
     }
-    if (D_00326700.pmesflow != NULL && D_00326700.pmesflow->state == pinst && place != NULL) {
+    if (itfMesDebug.pmesflow != NULL && itfMesDebug.pmesflow->state == pinst && place != NULL) {
         DebugDrawWindowLine(place->mes);
     }
 }
@@ -2482,14 +2482,14 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     color.components[3] = 0x26;
     rect[0].y = y - 8;
     rect[0].x = x - 0xF0;
-    rect[1].x = D_00326728[0];
+    rect[1].x = itfMesSelectRectVerts[0];
     rect[1].y = y + 0xA8;
     itfMiscDrawSpritePlanePrim(rect, &color, pinst->z, 0, list);
-    D_00326728[1] = y - 8;
-    D_00326728[3] = y - 8;
-    D_00326728[5] = y + 0xA8;
-    D_00326728[7] = y + 0xA8;
-    itfMiscDrawRectanglePrim((sdfIVector2_t *)D_00326728, D_00326748, D_00326768, D_00326770, pinst->z, list);
+    itfMesSelectRectVerts[1] = y - 8;
+    itfMesSelectRectVerts[3] = y - 8;
+    itfMesSelectRectVerts[5] = y + 0xA8;
+    itfMesSelectRectVerts[7] = y + 0xA8;
+    itfMiscDrawRectanglePrim((sdfIVector2_t *)itfMesSelectRectVerts, itfMesSelectRectColors, itfMesSelectRectIndex, itfMesSelectRectColorIndex, pinst->z, list);
     uv.components[0] = 0x150;
     uv.components[1] = 0x2F0;
     uv.components[2] = 0x1B0;
@@ -2544,10 +2544,10 @@ void DrawRetPageCursor(instanceMes_tag *pinst) {
     rect[1] = 0xCA0;
     rect[2] = 0x1B60;
     rect[3] = 0xD28;
-    D_00326788[3] = fade->ctr0;
+    itfMesRetPageColor[3] = fade->ctr0;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, pinst->z, itfMesMngManager.windowTexture, 0, list);
+    itfMiscDrawSpritePrim(rect, itfMesRetPageUv, itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
     timer = fade->ctr1;
     if (timer > 0) {
         d = 0x80 - timer;
@@ -2555,9 +2555,9 @@ void DrawRetPageCursor(instanceMes_tag *pinst) {
         rect[1] -= d;
         rect[2] += d * 2;
         rect[3] += d;
-        D_00326788[3] = timer;
+        itfMesRetPageColor[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
-        itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, pinst->z, itfMesMngManager.windowTexture, 0, list);
+        itfMiscDrawSpritePrim(rect, itfMesRetPageUv, itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
     packetOwner = &sdfGrOtTable[pinst->otindex];
@@ -2612,7 +2612,7 @@ void DebugDrawWindowLine(itfpanel_t *meswin) {
 
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    itfMiscDrawLineStripPrim(vertices, D_00326798, D_0054F500, D_0054F508, 5, 0xFFFFFF, list);
+    itfMiscDrawLineStripPrim(vertices, D_00326798, itfMesDebugLineVertIndex, itfMesDebugLineColorIndex, 5, 0xFFFFFF, list);
     packetOwner = &sdfGrOtTable[81];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
 }
@@ -2715,23 +2715,23 @@ itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow) {
     }
     return pflow;
 }
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4C0);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesFmtInt);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4C8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLabelAlpha);
 
 INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesSelectionMarkers);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4D8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerEdit);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4E0);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerSelect);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4E8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugItemFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4F0);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerNone);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4F8);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugFadeFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F500);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLineVertIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F508);
+INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLineColorIndex);
 

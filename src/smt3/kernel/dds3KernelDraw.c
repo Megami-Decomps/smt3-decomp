@@ -229,7 +229,7 @@ extern f32 biasbase; extern f32 biastarget;
 extern u32 dds3RenderTex;
 extern sdfGsMemSlice_t *dds3RenderTexHandle;
 extern sdfTexHandle_t *dds3RenderTexture;
-extern sdfMat_t *D_00551BA8;
+extern sdfMat_t *eglMaterial;
 
 void sdfTexFree(sdfTexHandle_t *aHandle);
 sdfMat_t *sdfMatNew(void);
@@ -262,7 +262,7 @@ typedef struct
     f32 axis[2];
 } dds3QuakeGain_t;
 
-extern dds3QuakeGain_t D_0054E988[];
+extern dds3QuakeGain_t dds3QuakeGainTable[];
 f32 dds3GetRandFloatA(s32 name);
 void sdfGrSetScreen(s32 aMode);
 void sdf3DMakeScreenParam(sdf3DScreenParam_t *aParam);
@@ -283,15 +283,15 @@ extern u32 dds3BackColor;
 void eglInit(void);
 
 extern sdfGrOt_t sdfGrOtTable[];
-extern u64 D_002F5970[];
-extern sdfVector4_t D_002F5980[];
-extern u32 D_002F59A0[];
-extern sdf3DScreenParam_t D_002F5B80;
-extern sdf3DLight_t *D_002F5D10[];
-extern sdfVector4_t D_002F5D20;
+extern u64 eglPolyStripWord[];
+extern sdfVector4_t eglLineVerts[];
+extern u32 eglLineColors[];
+extern sdf3DScreenParam_t dds3RenderScreenParam;
+extern sdf3DLight_t *dds3RenderLightParallel[];
+extern sdfVector4_t dds3RenderAmbientColor;
 extern sdfMatrix4_t D_002FA240;
-extern sdfMatrix4_t D_002FA2A0;
-extern sdfGsMemSlice_t *D_00529398[];
+extern sdfMatrix4_t dds3RenderViewportMatrix;
+extern sdfGsMemSlice_t *dds3ZBuffHandles[];
 extern sdfGrFrameSet_t dds3RenderTexId;
 extern dds3DrawBank_t dds3DrawEnv[];
 extern dds3ZClearPacket_t dds3ZClearDrawTag[3][2];
@@ -304,21 +304,21 @@ extern u16 lightcolormax[4];
 extern u16 lightdirnow[4];
 extern u16 lightdirmax[3];
 extern u32 dds3LightColor[];
-extern u32 D_00557230[];
-extern f32 D_00557240[][4];
-extern f32 D_00557270[][4];
+extern u32 dds3LightTargetColor[];
+extern f32 dds3LightArcFrom[][4];
+extern f32 dds3LightArcTo[][4];
 extern u16 ambientnow, ambientmax;
 extern u32 ambientbase, ambienttarget;
 extern u16 fogrgbnow, fogrgbmax;
 extern u32 fogrgbbase, fogrgbtarget;
 extern dds3MultiBlurParam_t key2;
-extern dds3DistBlurParam_t D_00556BC0;
+extern dds3DistBlurParam_t dds3DistBlurCurrent;
 extern dds3RipBlurParam_t dds3BlurState;
 /* The rectangular frame body follows the ripple body in the same storage.
  * Bind its typed view without defining or extending the imported BSS symbol. */
 SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
 extern dds3Filter2Param_t dds3BlurParam;
-extern dds3MFilterParam_t D_00556C70;
+extern dds3MFilterParam_t dds3MFilterCurrent;
 
 void *memset(void *a, s32 b, size_t c);
 f32 fabsf(f32 value);
@@ -416,16 +416,16 @@ void dds3InitRenderDrawEnv(void)
     dds3RenderTexId.zbuffFormat = 0x30;
     dds3RenderTexId.frameHandle[0] = dds3RenderTexHandle;
     dds3RenderTexId.frameHandle[1] = NULL;
-    dds3RenderTexId.zbuffHandle = D_00529398[0];
-    sdf3DMakeScreenParam(&D_002F5B80);
+    dds3RenderTexId.zbuffHandle = dds3ZBuffHandles[0];
+    sdf3DMakeScreenParam(&dds3RenderScreenParam);
     for (i = 0; i != 2; i++) {
         sdfDrawTagInit(&dds3DrawEnv[i].renderTag);
         sdfGrSetDrawEnv(&dds3DrawEnv[i].renderEnv, &dds3RenderTexId, 0);
         dds3DrawEnv[i].renderEnv.clear.clearColor = dds3RenderDrawEnv;
         sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderEnv);
-        sdf3DMakeViewportPacket(&dds3DrawEnv[i].renderViewport, &D_002F5B80, &D_002FA2A0);
+        sdf3DMakeViewportPacket(&dds3DrawEnv[i].renderViewport, &dds3RenderScreenParam, &dds3RenderViewportMatrix);
         sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderViewport);
-        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].renderLight, D_002F5D10, &D_002F5D20);
+        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].renderLight, dds3RenderLightParallel, &dds3RenderAmbientColor);
         sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderLight);
     }
 }
@@ -453,9 +453,9 @@ s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect)
     dds3RenderTexture = texture;
     sdfTexSetWrapMode(texture, 5);
     sdfTexMakeGIFPacket(texture);
-    D_002F5B80.aspect = aspect;
-    D_002F5B80.width = sx;
-    D_002F5B80.height = sy;
+    dds3RenderScreenParam.aspect = aspect;
+    dds3RenderScreenParam.width = sx;
+    dds3RenderScreenParam.height = sy;
     dds3InitRenderDrawEnv();
     return 1;
 }
@@ -499,7 +499,7 @@ void *dds3GetRenderTexture(void)
 void dds3RunQuake(void)
 {
     sdfVector4_t range;
-    dds3QuakeGain_t gain = D_0054E988[0];
+    dds3QuakeGain_t gain = dds3QuakeGainTable[0];
     f32 amplitude;
     f32 kick;
     s32 i;
@@ -1341,9 +1341,9 @@ void dds3BlurUpdate(void)
             distblurswapnow++;
         }
         evtHokanDistBlur(1, (f32)distblurswapnow / (f32)distblurswapmax, &dds3DistBlurBuf,
-                        &distblurtarget, &D_00556BC0);
-        Eve_DistortionBlurSetParam(&D_00556BC0);
-        if (D_00556BC0.rgba[3] != 0) {
+                        &distblurtarget, &dds3DistBlurCurrent);
+        Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
+        if (dds3DistBlurCurrent.rgba[3] != 0) {
             Eve_DistortionBlurON();
         }
         else {
@@ -1357,12 +1357,12 @@ void dds3BlurUpdate(void)
         if (distblurnow < distblurmax) {
             distblurnow++;
         }
-        D_00556BC0 = distblurtarget;
+        dds3DistBlurCurrent = distblurtarget;
         alpha = distblurabase + distblurnow *
                 (distbluratarget - distblurabase) /
                 distblurmax;
-        D_00556BC0.color = (D_00556BC0.color & 0xFFFFFF) | (alpha << 24);
-        Eve_DistortionBlurSetParam(&D_00556BC0);
+        dds3DistBlurCurrent.color = (dds3DistBlurCurrent.color & 0xFFFFFF) | (alpha << 24);
+        Eve_DistortionBlurSetParam(&dds3DistBlurCurrent);
         if (alpha == 0) {
             Eve_DistortionBlurOFF();
         }
@@ -1454,9 +1454,9 @@ void dds3BlurUpdate(void)
             mfilterswapnow++;
         }
         evtHokanMultFilter(1, (f32)mfilterswapnow / (f32)mfilterswapmax, &dds3MFilterBuf,
-                        &mfiltertarget, &D_00556C70);
-        Eve_PartialMultiFilterSetParam(&D_00556C70);
-        if (D_00556C70.rgba[3] != 0) {
+                        &mfiltertarget, &dds3MFilterCurrent);
+        Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
+        if (dds3MFilterCurrent.rgba[3] != 0) {
             Eve_PartialMultiFilterON();
         }
         else {
@@ -1470,12 +1470,12 @@ void dds3BlurUpdate(void)
         if (mfilternow < mfiltermax) {
             mfilternow++;
         }
-        D_00556C70 = mfiltertarget;
+        dds3MFilterCurrent = mfiltertarget;
         alpha = mfilterabase + mfilternow *
                 (mfilteratarget - mfilterabase) /
                 mfiltermax;
-        D_00556C70.color = (D_00556C70.color & 0xFFFFFF) | (alpha << 24);
-        Eve_PartialMultiFilterSetParam(&D_00556C70);
+        dds3MFilterCurrent.color = (dds3MFilterCurrent.color & 0xFFFFFF) | (alpha << 24);
+        Eve_PartialMultiFilterSetParam(&dds3MFilterCurrent);
         if (alpha == 0) {
             Eve_PartialMultiFilterOFF();
         }
@@ -1573,7 +1573,7 @@ void dds3SetLightColor(s32 frame, s32 no, f32 *col)
             SDF_VU0_LOADVECTOR(col);
             SDF_VU0_VECTOR_W_SET_ZERO();
             MMI_RGBA_PACK_128(packedTargetColor);
-            D_00557230[no] = packedTargetColor;
+            dds3LightTargetColor[no] = packedTargetColor;
             targetColorWords[0] = packedTargetColor;
         }
     }
@@ -1603,9 +1603,9 @@ void dds3SetLightDir(s32 frame, s32 no, f32 *dir)
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
-            SDF_VU0_STOREVECTOR_NOMEM(D_00557240[no]);
+            SDF_VU0_STOREVECTOR_NOMEM(dds3LightArcFrom[no]);
             dds3RotationArc();
-            SDF_VU0_STOREVECTOR(D_00557270[no]);
+            SDF_VU0_STOREVECTOR(dds3LightArcTo[no]);
         }
     }
 }
@@ -1710,7 +1710,7 @@ void dds3SceneLightUpdateFirst(void) {
                 dds3UnpackLightColor(dds3LightColor[i], 0.0078125f);
                 SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
                 SDF_VU0_COPYVECTOR_A_TO_B();
-                dds3UnpackLightColor(D_00557230[i], 0.0078125f);
+                dds3UnpackLightColor(dds3LightTargetColor[i], 0.0078125f);
                 SDF_VU0_SCALEVECTOR_V0(ratio);
                 SDF_VU0_ADDVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(dds3LightParam.parallel[i]);
@@ -1723,10 +1723,10 @@ void dds3SceneLightUpdateFirst(void) {
                 ratio = (f32)lightdirnow[i] / lightdirmax[i];
                 SDF_VU0_LOADIDENTITYVECTOR();
                 SDF_VU0_VECTOR_W_SET_ONE();
-                SDF_VU0_LOADVECTOR_B(&D_00557270[i]);
+                SDF_VU0_LOADVECTOR_B(&dds3LightArcTo[i]);
                 Lerp(ratio);
                 ToMatrix();
-                SDF_VU0_LOADVECTOR(&D_00557240[i]);
+                SDF_VU0_LOADVECTOR(&dds3LightArcFrom[i]);
                 SDF_VU0_APPLYMATRIX();
                 SDF_VU0_STOREVECTOR_NOMEM(&dds3LightParam.parallel[i]->v);
                 if (lightdirnow[i] >= lightdirmax[i]) {
@@ -1816,9 +1816,9 @@ void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias)
 
 void eglInit(void)
 {
-    if (D_00551BA8 == NULL) {
-        D_00551BA8 = sdfMatNew();
-        D_00551BA8->constant = 1.0f;
+    if (eglMaterial == NULL) {
+        eglMaterial = sdfMatNew();
+        eglMaterial->constant = 1.0f;
     }
 }
 
@@ -2053,7 +2053,7 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     list = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
-    sdf3DPrimLinkMat(list, D_00551BA8, 0);
+    sdf3DPrimLinkMat(list, eglMaterial, 0);
     memset(&desc, 0, sizeof(desc));
     desc.color = 0x80808080;
     desc.faceCount = 2;
@@ -2077,7 +2077,7 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     colors[1] = color2;
     colors[2] = color3;
     colors[3] = color1;
-    strip[0] = D_002F5970[0];
+    strip[0] = eglPolyStripWord[0];
     sdfDrawTagLink(list, sdf3DPrimMakePoly(&desc));
     surface = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
@@ -2125,7 +2125,7 @@ void eglLinkTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0, s32 color1, f32 x1, f32
     colors[1] = color2;
     colors[2] = color3;
     colors[3] = color1;
-    strip[0] = D_002F5970[0];
+    strip[0] = eglPolyStripWord[0];
     uvs[0].x = u0;
     uvs[0].y = v0;
     uvs[1].x = u0;
@@ -2143,17 +2143,17 @@ void eglLinkTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0, s32 color1, f32 x1, f32
 void eglLinkLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, u32 color0, u32 color1)
 {
     void *list;
-    D_002F5980[0].x = x0;
-    D_002F5980[0].y = y0;
-    D_002F5980[0].z = z0;
-    D_002F5980[1].x = x1;
-    D_002F5980[1].y = y1;
-    D_002F5980[1].z = z1;
-    D_002F59A0[1] = color1;
-    D_002F59A0[0] = color0;
+    eglLineVerts[0].x = x0;
+    eglLineVerts[0].y = y0;
+    eglLineVerts[0].z = z0;
+    eglLineVerts[1].x = x1;
+    eglLineVerts[1].y = y1;
+    eglLineVerts[1].z = z1;
+    eglLineColors[1] = color1;
+    eglLineColors[0] = color0;
     list = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, effDebugDrawWireModel(D_002F5980, D_002F59A0, 2, 0x80));
+    sdfDrawTagLink(list, effDebugDrawWireModel(eglLineVerts, eglLineColors, 2, 0x80));
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
@@ -2254,5 +2254,5 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_0054E984);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", D_0054E988);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeGainTable);
 

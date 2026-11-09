@@ -146,15 +146,15 @@ void makaDrawNormal(tagMakaObject_t *object)
 }
 
 typedef struct { f32 value[7]; } makaEaseTable_t;
-extern const makaEaseTable_t D_00548FD8;
-extern const makaEaseTable_t D_00548FF8;
+extern const makaEaseTable_t makaSingleEaseTable;
+extern const makaEaseTable_t makaMultiEaseTable;
 extern void eglLinkAlpha(s32 alpha);
 extern void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy);
 extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 
 void makaDrawSingle(tagMakaObject_t *object)
 {
-    makaEaseTable_t easeTable = D_00548FD8;
+    makaEaseTable_t easeTable = makaSingleEaseTable;
     s8 phase = (s8)(16 - (s32)object->count);
     s32 value = object->maka;
     f32 easing;
@@ -237,7 +237,7 @@ extern void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha);
 
 void makaDrawMulti(tagMakaObject_t *object)
 {
-    makaEaseTable_t easeTable = D_00548FF8;
+    makaEaseTable_t easeTable = makaMultiEaseTable;
     s8 phase = (s8)(16 - (s32)object->count);
     s32 value = object->maka;
     f32 easing;
@@ -486,7 +486,7 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawBar);
 #endif
 
-INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", D_00548FD8);
+INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", makaSingleEaseTable);
 
-INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", D_00548FF8);
+INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", makaMultiEaseTable);
 

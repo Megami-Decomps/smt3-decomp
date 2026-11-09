@@ -215,7 +215,7 @@ extern s32 nbFindStockSkillError(void);
 
 extern s32 evtBitCheck(s32 no);
 
-extern char D_00545DC8[];
+extern char nbEventProcessName[];
 
 extern void *sdfMemAllocDirect(u32 aSize);
 
@@ -223,11 +223,11 @@ extern void *sdfMemLock(void *aHandle);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_00545DB0[];
+extern char nbEventNoFormat[];
 
-extern char D_005464A8[];
+extern char nbModelPackNameFormat[];
 
-extern char D_005464C0[];
+extern char nbModelPackLoadFormat[];
 
 extern void pacFileHandleFree_(void *pacHandle);
 
@@ -239,7 +239,7 @@ extern s32 nbMakeModelPackName(s32 no);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern u16 D_003E7028[];
+extern u16 nbUnitMotionIdTable[];
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -708,9 +708,9 @@ s32 nbMakeModelPackName(s32 no)
     char name[0x40];
     s32 h;
 
-    sprintf(name, D_005464A8, no);
+    sprintf(name, nbModelPackNameFormat, no);
     h = pacLoadUseTail(name);
-    printf(D_005464C0, name);
+    printf(nbModelPackLoadFormat, name);
     return h;
 }
 
@@ -746,7 +746,7 @@ void nbLoadMotionData(nbStatWork_t *stat, void *src, u32 size, s32 motion, s32 u
 
     if (stat != NULL) {
         if (evtBitCheck(0xC0F)) {
-            id = D_003E7028[unitid];
+            id = nbUnitMotionIdTable[unitid];
         } else {
             id = unitid;
         }
@@ -783,7 +783,7 @@ typedef struct {
 } nbPackEntry_t;
 
 extern nbStatWork_t *nbSetFormEntry(s32 id);
-extern char D_005464E0[];
+extern char nbFormEntryLoadFormat[];
 
 typedef struct {
     u8 reserved00[0x10];
@@ -822,7 +822,7 @@ void nbAddFormEntry(void *buffer, s32 group, s32 id)
             break;
         }
     }
-    printf(D_005464E0, group, id);
+    printf(nbFormEntryLoadFormat, group, id);
 }
 
 
@@ -851,9 +851,9 @@ zero:
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", D_005464A8);
+INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbModelPackNameFormat);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", D_005464C0);
+INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbModelPackLoadFormat);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", D_005464E0);
+INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbFormEntryLoadFormat);
 

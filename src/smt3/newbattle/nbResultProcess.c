@@ -34,7 +34,7 @@ typedef struct nbResultCaption_t {
     s32 life;
 } nbResultCaption_t;
 
-extern nbResultCaption_t D_00574F50[64];
+extern nbResultCaption_t nbResultCaptions[64];
 extern u32 nbResultTimer;
 extern u32 nbResultCounter;
 extern u8 rstCalcLevelFromExp(u8 index, u32 exp);
@@ -43,7 +43,7 @@ extern void p2sdPlaySE(s32 no, s32 volume, s32 pan);
 
 extern void fldSkyBattle(void);
 
-extern TMX_HEADER_t *D_00551FD0, *D_00551FD4, *D_00551FD8;
+extern TMX_HEADER_t *nbResultTmxData1, *nbResultTmxData2, *nbResultTmxData3;
 extern sdfTexHandle_t *nbResultTex1, *nbResultTex2, *nbResultTexHandle;
 extern sdfTexHandle_t *sdfTexSet(TMX_HEADER_t *texture);
 extern s32 nbResultTobiwarpLabel;
@@ -64,9 +64,9 @@ void nbResultLoadTextures(void)
     s32 count;
     s32 addExp;
 
-    nbResultTex1 = sdfTexSet(D_00551FD0);
-    nbResultTex2 = sdfTexSet(D_00551FD4);
-    nbResultTexHandle = sdfTexSet(D_00551FD8);
+    nbResultTex1 = sdfTexSet(nbResultTmxData1);
+    nbResultTex2 = sdfTexSet(nbResultTmxData2);
+    nbResultTexHandle = sdfTexSet(nbResultTmxData3);
     nbResultTimer = 0;
     nbResultTobiwarpLabel = 0;
     nbResultState = 0;
@@ -120,10 +120,10 @@ void nbResultLoadTextures(void)
         }
     }
     for (i = 0; i < 64; i++) {
-        D_00574F50[i].flag = 0;
-        D_00574F50[i].x = 0;
-        D_00574F50[i].y = 0;
-        D_00574F50[i].life = 0;
+        nbResultCaptions[i].flag = 0;
+        nbResultCaptions[i].x = 0;
+        nbResultCaptions[i].y = 0;
+        nbResultCaptions[i].life = 0;
     }
 }
 #else
@@ -148,11 +148,11 @@ void nbResultCountEntries(s32 x, s32 y)
     s32 i;
 
     for (i = 0; i < 64; i++) {
-        if (D_00574F50[i].flag == 0) {
-            D_00574F50[i].flag = 1;
-            D_00574F50[i].x = x;
-            D_00574F50[i].y = y;
-            D_00574F50[i].life = 20;
+        if (nbResultCaptions[i].flag == 0) {
+            nbResultCaptions[i].flag = 1;
+            nbResultCaptions[i].x = x;
+            nbResultCaptions[i].y = y;
+            nbResultCaptions[i].life = 20;
             return;
         }
     }
@@ -179,7 +179,7 @@ void nbResultInitLabels(void)
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     for (i = 0; i < 64; i++) {
-        caption = &D_00574F50[i];
+        caption = &nbResultCaptions[i];
         if (caption->flag != 0) {
             caption->life -= SDF_FRAME_DUE(dds3GetKernelCount());
             if (caption->life <= 0) {
@@ -214,7 +214,7 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
 extern char *text2[];
 extern s32 rstCalcExpFromLevel(u8 index, s32 level);
 extern const char D_005510F0[], D_005510F8[];
-extern frFontHandle_t *D_00551FBC;
+extern frFontHandle_t *nbResultFontHandle;
 extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
@@ -341,10 +341,10 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
         fontColor = rewardColor | alpha;
         level = nbResultScoreTable[scoreIndex].l_lv;
         sprintf(buf, D_005510F0, level < 100 ? level : 99);
-        D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x3C) << 4, (y + 0x10) << 3,
+        nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x3C) << 4, (y + 0x10) << 3,
                                                             0, fontColor, buf, NULL);
-        frDrawFontEx(D_00551FBC, 1);
-        frDestroyFontRequestAfter(D_00551FBC);
+        frDrawFontEx(nbResultFontHandle, 1);
+        frDestroyFontRequestAfter(nbResultFontHandle);
         nbPnlSprite(x + 0xCA, y, 0x9B, 0x1F, 1, 0x51, 0x9B, 0x1F, drawColor, nbResultTex1);
         nbPnlSprite(x + 0xD6, y + 8, 0x27, 0x18, 0x70, 0x12, 0x27, 0x18, drawColor,
                     nbResultTex1);
@@ -353,18 +353,18 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                 alpha = (nbResultScoreTable[scoreIndex].lvupanmcnt * 128 - 640) / 10;
                 sprintf(buf, D_005510F8, expNextLevel - exp);
                 fontColor = 0xA09DC380;
-                D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
+                nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                     (x + 0x11D) << 4, (y + 7) << 3, 0, rewardColor | alpha, buf, NULL);
                 alpha = 0x80;
-                frDrawFontEx(D_00551FBC, 1);
-                frDestroyFontRequestAfter(D_00551FBC);
+                frDrawFontEx(nbResultFontHandle, 1);
+                frDestroyFontRequestAfter(nbResultFontHandle);
             }
         } else {
             sprintf(buf, D_005510F8, expNextLevel - exp);
-            D_00551FBC = (frFontHandle_t *)frwGetSmallNumFontFRQ(
+            nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                 (x + 0x11D) << 4, (y + 7) << 3, 0, fontColor, buf, NULL);
-            frDrawFontEx(D_00551FBC, 1);
-            frDestroyFontRequestAfter(D_00551FBC);
+            frDrawFontEx(nbResultFontHandle, 1);
+            frDestroyFontRequestAfter(nbResultFontHandle);
         }
         if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
             count = nbResultScoreTable[scoreIndex].lvupanmcnt;
@@ -405,16 +405,16 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
         }
         cmpSetSkillListRows(0x14);
         if (work->flag & 4) {
-            D_00551FBC = frGetCNameFRQ(0, 1, 0, 0);
-            frSetDrawPosition(D_00551FBC, (x + 0x59) << 4, (y + 0xC) << 3);
-            frSetFontColor(D_00551FBC, fontColor);
-            frDrawFont(D_00551FBC);
-            frDestroyFontRequestAfter(D_00551FBC);
+            nbResultFontHandle = frGetCNameFRQ(0, 1, 0, 0);
+            frSetDrawPosition(nbResultFontHandle, (x + 0x59) << 4, (y + 0xC) << 3);
+            frSetFontColor(nbResultFontHandle, fontColor);
+            frDrawFont(nbResultFontHandle);
+            frDestroyFontRequestAfter(nbResultFontHandle);
         } else {
-            D_00551FBC = (frFontHandle_t *)frwGetSmallFontFRQ(
+            nbResultFontHandle = (frFontHandle_t *)frwGetSmallFontFRQ(
                 (x + 0x59) << 4, (y + 0xC) << 3, 0, fontColor, text2[work->id], NULL);
-            frDrawFont(D_00551FBC);
-            frDestroyFontRequestAfter(D_00551FBC);
+            frDrawFont(nbResultFontHandle);
+            frDestroyFontRequestAfter(nbResultFontHandle);
         }
         cmpSetSkillListRows(-1);
     }
@@ -473,7 +473,7 @@ s32 nbResultFindBestScore(nbMainProcessData_t *data)
 
 extern s32 nbTobiwarpLabelIdx;
 extern f32 D_00551100;
-extern frFontRequest_t *D_00551FC0;
+extern frFontRequest_t *nbResultFontRequest;
 extern char *pStr[];
 extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h,
                       u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1,
@@ -640,18 +640,18 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
             if (id != 0) {
                 font = frwGetSmallFontFRQ(0x1210, ty1,
                                           0, (s32)0xA09DC380, pStr[id], NULL);
-                D_00551FC0 = font;
+                nbResultFontRequest = font;
                 frDrawFont((frFontHandle_t *)font);
-                frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+                frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
                 nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
                             0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
                             nbResultTex1);
                 sprintf(numberText, D_005510F0, itemCount[i]);
                 font = frwGetSmallNumFontFRQ(0x1AC0, ty2,
                                              0, 0xA09DC380, numberText, NULL);
-                D_00551FC0 = font;
+                nbResultFontRequest = font;
                 frDrawFont((frFontHandle_t *)font);
-                frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+                frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
             }
             ty2 += 0xD0;
             ty1 += 0xD0;
@@ -688,16 +688,16 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
         font = frwGetSmallNumFontFRQ(0x7A0, 0x348, 0,
                                      color,
                                      numberText, 0);
-        D_00551FC0 = font;
+        nbResultFontRequest = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
-        frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+        frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
         sprintf(numberText, D_005510F8, nbGetKakutokuMaka(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x448, 0,
                                      color,
                                      numberText, 0);
-        D_00551FC0 = font;
+        nbResultFontRequest = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
-        frDestroyFontRequestAfter((frFontHandle_t *)D_00551FC0);
+        frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
     }
 
     nbResultCounter = 0;
@@ -905,7 +905,7 @@ extern s32 nbResultState;
 extern void nbFindTobiwarpLabel(nbMainProcessData_t *data);
 extern void nbBgmFadeOut(void);
 extern void nbIncResultCounter(void);
-extern char D_005435F8[];
+extern char nbResultDoneMsg[];
 
 /* Qualified reorg traces: the preceding C reward routine removes $2 from
  * the fall-through live set, preserving the final plain loading-state branch. */
@@ -933,7 +933,7 @@ s32 nbResultProcess2(dds3ProcessID_t *id)
         fldLoadNextTask();
         if (fldLoadNextGetStatus() == 0) {
             nbResultStep = 0;
-            printf(D_005435F8);
+            printf(nbResultDoneMsg);
         }
     }
     if (dds3GetProcessRunTime(id) >= SDF_FRAMES(21)) {
@@ -1000,7 +1000,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,
                                           void *work);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_005435F8);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbResultDoneMsg);
 
 void nbInitResultProcess(nbMainProcessData_t *data)
 {
@@ -1015,17 +1015,17 @@ void nbLoadStageSky(void)
     fldSkyBattle();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543618);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageLightName);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543628);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbNiidaCameraPos);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543648);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbEventCameraPos);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543668);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultPos);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543678);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultRot);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543688);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageProcessName);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_00543698);
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageDrawProcessName);
 

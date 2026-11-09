@@ -311,7 +311,7 @@ u32 nbGetPrevNegoId(nbNegoProcessData_t *n);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-extern nbNegoSkillEntry_t D_003E1338[];
+extern nbNegoSkillEntry_t nbNegoSkillTable[];
 extern s32 nbFlowCheckUnit2(datUnitWork_t *pwork, datUnitWork_t *ework,
                             s32 ptype, s32 etype, s32 data);
 
@@ -337,21 +337,21 @@ s32 Flow6_1(nbNegoProcessData_t *n)
     skill = n->negoskillid - 0x180;
     n->aisyo = 0;
     for (i = 0; i < 4; i++) {
-        ptype = D_003E1338[skill].condition[i].ptype;
-        etype = D_003E1338[skill].condition[i].etype;
+        ptype = nbNegoSkillTable[skill].condition[i].ptype;
+        etype = nbNegoSkillTable[skill].condition[i].etype;
         if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 1)) {
             n->aisyo = 1;
-            n->aisyomes = D_003E1338[skill].condition[i].message;
+            n->aisyomes = nbNegoSkillTable[skill].condition[i].message;
             break;
         }
     }
     if (n->aisyo == 0) {
         for (i = 0; i < 4; i++) {
-            ptype = D_003E1338[skill].condition[i + 4].ptype;
-            etype = D_003E1338[skill].condition[i + 4].etype;
+            ptype = nbNegoSkillTable[skill].condition[i + 4].ptype;
+            etype = nbNegoSkillTable[skill].condition[i + 4].etype;
             if ((ptype != 0 || etype != 0) && nbFlowCheckUnit(n, ptype, etype, 0)) {
                 n->aisyo = 2;
-                n->aisyomes = D_003E1338[skill].condition[i + 4].message;
+                n->aisyomes = nbNegoSkillTable[skill].condition[i + 4].message;
                 break;
             }
         }
@@ -482,10 +482,10 @@ s32 Flow6_8(nbNegoProcessData_t *n)
 }
 
 extern s32 nbGetNegoRequestType(s32 reqtype);
-extern char D_00544FF0[];
+extern char nbNegoRequestTypeFormat[];
 #include "sdk_libc.h"
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00544FF0);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoRequestTypeFormat);
 
 s32 Flow6_9(nbNegoProcessData_t *n)
 {
@@ -512,7 +512,7 @@ s32 Flow6_9(nbNegoProcessData_t *n)
         requestType = 5;
     }
     n->requesttype = requestType;
-    printf(D_00544FF0, requestType);
+    printf(nbNegoRequestTypeFormat, requestType);
 
     if ((u32)requestType < 6) {
         switch (requestType) {
@@ -757,10 +757,10 @@ s32 Flow6_21(nbNegoProcessData_t *n)
     return 0;
 }
 
-extern char D_00545018[];
+extern char nbNegoNowSelectFormat[];
 extern void nbMakaDispOff(void);
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545018);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoNowSelectFormat);
 
 s32 Flow6_70(nbNegoProcessData_t *n)
 {
@@ -800,7 +800,7 @@ s32 Flow6_70(nbNegoProcessData_t *n)
         }
         break;
     case 1:
-        printf(D_00545018, n->nowselect);
+        printf(nbNegoNowSelectFormat, n->nowselect);
         nbAddNegoIdKouho(n, 0x60030);
         switch (n->requesttype) {
         case 4:
@@ -923,7 +923,7 @@ s32 Flow6_24(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x6004A);
     n->cnt6_36 = (u32)n->cnt6_36 + 1;
     for (i = 0; i < 4; i++) {
-        rate[i] = D_003E1338[n->negoskillid - 0x180].rate[i];
+        rate[i] = nbNegoSkillTable[n->negoskillid - 0x180].rate[i];
     }
     race = datGetRace(n->ework);
     if (race != 0x13) {
@@ -1587,9 +1587,9 @@ s32 Flow6_52(nbNegoProcessData_t *n)
 extern void nbCameraSetHojo(nbFormation_t *hojo, nbFormation_t *target1,
                             nbFormation_t *target2);
 extern void nbDispSkillName(s32 id);
-extern char D_00545068[];
+extern char nbNegoHojoFormat[];
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545068);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoHojoFormat);
 
 s32 Flow6_53(nbNegoProcessData_t *n)
 {
@@ -1658,7 +1658,7 @@ s32 Flow6_53(nbNegoProcessData_t *n)
         break;
     case 3:
         nbDispSkillName(skill);
-        printf(D_00545068, n->hojopartyindex, n->hojoskillid);
+        printf(nbNegoHojoFormat, n->hojopartyindex, n->hojoskillid);
         n->waitframe = 0x3C;
         break;
     case 4:
@@ -1749,7 +1749,7 @@ s32 Flow6_56(nbNegoProcessData_t *n)
         n->hojoaisyo = 0;
     } else {
         work = nbGetUnitWorkPointer(n->data, &n->data->party[n->hojopartyindex]);
-        condition = D_003E1338[n->hojoskillid - 0x180].condition;
+        condition = nbNegoSkillTable[n->hojoskillid - 0x180].condition;
         for (i = 0; i < 4; i++, condition++) {
             ptype = condition->ptype;
             etype = condition->etype;

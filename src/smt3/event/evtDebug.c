@@ -56,10 +56,10 @@ extern dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fovy);
 extern void *dds3FontReqAllocDrawTag(void);
-extern const char D_0054F790[];
-extern const char *D_0054F788;
+extern const char evtDebugCameraNameFmt[];
+extern const char *evtDebugDefaultCameraName;
 extern u32 evtDebugCameraPage;
-SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, sdfDebugGrOt, sdfGrOtTable, 0xA60);
 
 void evtDebugPrintCamera(void)
 {
@@ -110,14 +110,14 @@ void evtDebugPrintCamera(void)
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
 
-    cameraName = D_0054F788;
+    cameraName = evtDebugDefaultCameraName;
     if (camera->name != NULL) {
         cameraName = camera->name;
     }
     tag = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0x00FF0000, 5,
-                                     D_0054F790, cameraName)));
-    D_002F6978.regFunc(&D_002F6978, tag);
+                                     evtDebugCameraNameFmt, cameraName)));
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, tag);
 }
 
 /* After launching a test script, keep the test task idle and return 0. */
@@ -223,17 +223,17 @@ typedef struct {
     evtSceneDispRow_t rows[17];
 } evtSceneDispRows_t;
 
-extern const evtSceneDispRows_t D_0053B348;
+extern const evtSceneDispRows_t evtSceneDispRows;
 extern s32 evtSceneDispTimer, evtSceneDispState;
 extern s8 dds3PadBitTable[];
-extern const char D_0054F810[], D_0054F818[];
+extern const char evtSceneDispCountFmt[], evtSceneDispSerialFmt[];
 SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 extern saddr_t dds3DebugBasic(dds3ProcessID_t *id);
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
 saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
 {
-    evtSceneDispRows_t rows = D_0053B348;
+    evtSceneDispRows_t rows = evtSceneDispRows;
     evtSceneDispRow_t *row;
     sdfDrawTag_t *textTag, *panelTag;
     dds3Basic_t *scene, *basic;
@@ -271,7 +271,7 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
             sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(0x7180, (line - evtSceneDispWork) * 0x60 + 0x7900,
                                                  0xFEFFFF, attr, row->name)));
             sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(0x7900, (line - evtSceneDispWork) * 0x60 + 0x7900,
-                                                 0xFEFFFF, attr, D_0054F810,
+                                                 0xFEFFFF, attr, evtSceneDispCountFmt,
                                                  sceneWork->basictable[row->type].linkcount)));
             basic = sceneWork->basictable[row->type].firstbasic;
             if (basic != NULL) {
@@ -284,7 +284,7 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
                     }
                     column++;
                     sdfDrawTagLink(textTag, EE_ADDR(sdfDevPrintf(x, (line - evtSceneDispWork) * 0x60 + 0x7900,
-                                                         0xFEFFFF, attr, D_0054F818, basic->serialID)));
+                                                         0xFEFFFF, attr, evtSceneDispSerialFmt, basic->serialID)));
                     x += 0x480;
                     if (column >= 4) {
                         x = 0x7CC0;
@@ -378,15 +378,15 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B308);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameCamera);
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B318);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameMatter);
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B328);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameEffect);
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B338);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameStatic);
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B348);
+INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispRows);
 
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif

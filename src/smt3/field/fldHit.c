@@ -129,7 +129,7 @@ void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     }
 }
 
-extern s32 D_0054ED90;
+extern s32 fldHitMatterIndex;
 
 extern s32 fldHitChkMatter;
 
@@ -146,7 +146,7 @@ void fldClearMatterFlags(void) {
     }
     fldValueRecordCount = 0;
     fldHitChkMatter = -1;
-    D_0054ED90 = -1;
+    fldHitMatterIndex = -1;
     fldPlaneCount = 0;
     fldItemBoxObjCount = 0;
     if (fldMatterTable != 0) {
@@ -1078,7 +1078,7 @@ INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitDamage);
 #ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s8 dds3PadButtonState[];
-extern s32 fldHitChkSlope, D_0054ED90;
+extern s32 fldHitChkSlope, fldHitMatterIndex;
 extern void fldAutoMapNameD(s32 name);
 extern void fldAutoMapNameU(s32 name);
 extern void fldAutoMapOpenBlock(s32 block);
@@ -1396,7 +1396,7 @@ void fldHitChkUnit(f32 *position)
                             fldGlobalBase.hitY = current.y;
                             fldGlobalBase.hitZ = current.z;
                             fldGlobalBase.hitValid = 1;
-                            D_0054ED90 = index;
+                            fldHitMatterIndex = index;
                         } else if (!(signedDistance < 0.0f)) {
                             if (clearance < distance) {
                                 clearance = distance;
@@ -1418,7 +1418,7 @@ void fldHitChkUnit(f32 *position)
                             fldGlobalBase.hitX = current.x;
                             fldGlobalBase.hitY = current.y;
                             fldGlobalBase.hitZ = current.z;
-                            D_0054ED90 = index;
+                            fldHitMatterIndex = index;
                         }
                     }
                 }
@@ -1454,7 +1454,7 @@ INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnit);
 #endif
 
 #ifdef NON_MATCHING
-extern f32 D_0054C46C;
+extern f32 fldHitMinMove;
 extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* 487 of 808 words match, first differing word at +0x7C; 3232 of 3256 native
@@ -1539,7 +1539,7 @@ void fldHitChkUnitVWM(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < D_0054C46C) {
+    if (MATH_VectorLength(&delta) < fldHitMinMove) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;
@@ -1751,7 +1751,7 @@ void fldHitChkUnitVWM(f32 *position)
                             fldGlobalBase.hitX = current.x;
                             fldGlobalBase.hitY = current.y;
                             fldGlobalBase.hitZ = current.z;
-                            D_0054ED90 = index;
+                            fldHitMatterIndex = index;
                         } else {
                             projected.x = current.x - mface->normal[0] * signedDistance;
                             projected.y = current.y - mface->normal[1] * signedDistance;
@@ -1784,7 +1784,7 @@ void fldHitChkUnitVWM(f32 *position)
                                 fldGlobalBase.hitY = current.y;
                                 fldGlobalBase.hitZ = current.z;
                                 fldGlobalBase.hitValid = 1;
-                                D_0054ED90 = index;
+                                fldHitMatterIndex = index;
                             } else if (!(signedDistance < 0.0f)) {
                                 if (clearance < distance) {
                                     clearance = distance;
@@ -1808,7 +1808,7 @@ void fldHitChkUnitVWM(f32 *position)
                                 fldGlobalBase.hitX = current.x;
                                 fldGlobalBase.hitY = current.y;
                                 fldGlobalBase.hitZ = current.z;
-                                D_0054ED90 = index;
+                                fldHitMatterIndex = index;
                             }
                         }
                     }
@@ -2366,7 +2366,7 @@ INCLUDE_SDATA(const s32, "field/fldHit", fldValueRecordCount);
 
 INCLUDE_SDATA(const s32, "field/fldHit", fldPlaneCount);
 
-INCLUDE_SDATA(const s32, "field/fldHit", D_0054EDA8);
+INCLUDE_SDATA(const s32, "field/fldHit", fldItemBoxObjBufHandle);
 
-INCLUDE_SDATA(const s32, "field/fldHit", D_0054EDAC);
+INCLUDE_SDATA(const s32, "field/fldHit", fldMatterTableHandle);
 

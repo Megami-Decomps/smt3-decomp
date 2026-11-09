@@ -111,9 +111,9 @@ extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
-extern sdf3DPrimPolyParm_t D_0056AF00;
-extern u32 D_0031FFE0[];
-extern sdfGrOt_t *D_00320020[];
+extern sdf3DPrimPolyParm_t effModelTrackPolyPrimParm;
+extern u32 effModelTrackPolyFaceIndex[];
+extern sdfGrOt_t *effModelTrackPolyBlendOt[];
 void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex);
 void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *hPoly);
 void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly);
@@ -452,9 +452,9 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 face, s32 split) {
     data->pVC = (u32 *)cursor;
     data->pMat = sdfMatNew();
     sdfMatSetConstant((sdfMat_t *)data->pMat, 1.0f);
-    memset(&D_0056AF00, 0, sizeof(D_0056AF00));
-    D_0056AF00.attr = 0x4000;
-    D_0056AF00.faceIndex = D_0031FFE0;
+    memset(&effModelTrackPolyPrimParm, 0, sizeof(effModelTrackPolyPrimParm));
+    effModelTrackPolyPrimParm.attr = 0x4000;
+    effModelTrackPolyPrimParm.faceIndex = effModelTrackPolyFaceIndex;
     return data;
 }
 
@@ -679,9 +679,9 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         runPointCount[0] = activePointCount;
         runPointCount[1] = 0;
     }
-    D_0056AF00.vertexColor = hPoly->pVC;
+    effModelTrackPolyPrimParm.vertexColor = hPoly->pVC;
     for (runIndex = 0; runIndex < 2; runIndex++) {
-        draw = &D_0056AF00;
+        draw = &effModelTrackPolyPrimParm;
         draw->vertex = (sdfVector4_t *)&hPoly->pVertex[runStart[runIndex]];
         draw->color = hPoly->abgr;
         draw->faceCount = 0x10;
@@ -689,9 +689,9 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AF00)));
-            D_0056AF00.vertex += 0x10;
-            D_0056AF00.vertexColor += 0x10;
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&effModelTrackPolyPrimParm)));
+            effModelTrackPolyPrimParm.vertex += 0x10;
+            effModelTrackPolyPrimParm.vertexColor += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->pointCount = pointsRemaining;
@@ -701,7 +701,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         }
     }
     if (hPoly->blend < 4) {
-        ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00320020[hPoly->blend]->regFunc)(D_00320020[hPoly->blend], list);
+        ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))effModelTrackPolyBlendOt[hPoly->blend]->regFunc)(effModelTrackPolyBlendOt[hPoly->blend], list);
     } else {
         list2 = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
         sdfDrawTagInit(list2);
@@ -811,18 +811,18 @@ void effSwordTrackPolygonDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
         runPointCount[0] = activePointCount;
         runPointCount[1] = 0;
     }
-    D_0056AF00.color = 0x20808080;
-    D_0056AF00.vertexColor = NULL;
+    effModelTrackPolyPrimParm.color = 0x20808080;
+    effModelTrackPolyPrimParm.vertexColor = NULL;
     for (runIndex = 0; runIndex < 2; runIndex++) {
-        draw = &D_0056AF00;
+        draw = &effModelTrackPolyPrimParm;
         draw->vertex = (sdfVector4_t *)&data->pVertex[runStart[runIndex]];
         draw->faceCount = 0x10;
         draw->pointCount = 0x12;
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AF00)));
-            D_0056AF00.vertex += 0x10;
+            sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&effModelTrackPolyPrimParm)));
+            effModelTrackPolyPrimParm.vertex += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->pointCount = pointsRemaining;

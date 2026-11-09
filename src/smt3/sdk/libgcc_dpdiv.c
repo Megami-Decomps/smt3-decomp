@@ -10,7 +10,7 @@ typedef struct fp_number_type_df {
 
 extern void sdfUnpackDouble(const double *value, fp_number_type_df *parts);
 extern f64 __pack_df(const fp_number_type_df *parts);
-extern const fp_number_type_df D_0054B460;
+extern const fp_number_type_df libgccDfInvalidResult;
 
 static inline s32 dfIsNaN(const fp_number_type_df *number)
 {
@@ -40,7 +40,7 @@ static inline const fp_number_type_df *dfDivideParts(fp_number_type_df *numerato
     if (dfIsNaN(denominator)) return denominator;
     numerator->sign ^= denominator->sign;
     if (dfIsInfinity(numerator) || dfIsZero(numerator)) {
-        if (numerator->class == denominator->class) return &D_0054B460;
+        if (numerator->class == denominator->class) return &libgccDfInvalidResult;
         return numerator;
     }
     if (dfIsInfinity(denominator)) {

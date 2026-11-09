@@ -161,9 +161,9 @@ typedef struct {
     f32 off_cam_range_max;
 } fldTest_FLDRUN_EFFTBL_t;
 
-extern fldTest_FLDRUN_EFFTBL_t *D_002FBEF0[];
+extern fldTest_FLDRUN_EFFTBL_t *fldRunEffTables[];
 
-extern char D_002FBD40[];
+extern char fldElvFloorLabels[];
 
 extern void FromRotation(f32 aAngle);
 
@@ -179,7 +179,7 @@ extern s32 fldRunTamaNext;
 
 extern sdfVector4Unaligned_t fldRunTamaSetAxis;
 
-extern sdfVector4_t D_00531040;
+extern sdfVector4_t fldRunTamaAxis;
 
 extern char fldTama1UnitName[], fldTama2UnitName[], fldTama3UnitName[];
 
@@ -402,7 +402,7 @@ void fldElvGetFloorDigits(s32 x, s32 y, s32 floor)
 
     frSetFontDrawOT(0x48);
     if (floor > 1000) {
-        char *roof = D_002FBD40;
+        char *roof = fldElvFloorLabels;
 
         fldKanjiDraw(x, y / 2, -0x80, roof + 0x30);
         return;
@@ -1249,7 +1249,7 @@ void fldRunTamaInit(void)
     pos.w = 1.0f;
     memset(&rot, 0, sizeof(rot));
     rot.w = 1.0f;
-    axis = D_00531040;
+    axis = fldRunTamaAxis;
     SDF_VU0_LOADVECTOR(&axis);
     FromRotation(3.1415926f);
     SDF_VU0_LOADVECTOR_B(&rot);
@@ -1380,7 +1380,7 @@ void fldRunTamaFree(void)
     s32 i;
 
     for (i = 0; i < 2; i++) {
-        for (entry = D_002FBEF0[i]; (res = entry->pEff) != NULL; entry++) {
+        for (entry = fldRunEffTables[i]; (res = entry->pEff) != NULL; entry++) {
             if (entry->effmode == 0) {
                 handle = res->d3p;
                 if (handle != NULL) {
@@ -1408,7 +1408,7 @@ INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaFree);
 
 void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
 {
-    fldTest_FLDRUN_EFFTBL_t *entry = D_002FBEF0[id];
+    fldTest_FLDRUN_EFFTBL_t *entry = fldRunEffTables[id];
     fldTest_FLDRUN_DANTE_t *dante = &fldRun_Dante;
     fldTest_FLDRUN_EFF_t *res;
     void *handle;
@@ -1459,7 +1459,7 @@ void fldRunEffTask(void)
     pos.w = 1.0f;
 
     for (i = 0; i < 2; i++) {
-        for (entry = D_002FBEF0[i]; (res = entry->pEff) != NULL; entry++) {
+        for (entry = fldRunEffTables[i]; (res = entry->pEff) != NULL; entry++) {
             if (entry->effmode == 0) {
                 if (res->d3p == NULL) {
                     continue;
@@ -1606,7 +1606,7 @@ void fldRunTamaSe(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaSe);
 #endif
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531040);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaAxis);
 
 INCLUDE_RODATA(const s32, "field/fldTest", fldTama1UnitName);
 
@@ -2738,13 +2738,13 @@ void fldRunDanteCollision(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteCollision);
 #endif
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531318);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun1Frames);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531328);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun1Marks);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531338);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun2Frames);
 
-INCLUDE_RODATA(const s32, "field/fldTest", D_00531350);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun2Marks);
 
 void fldRunDanteAi(void)
 {
@@ -3413,7 +3413,7 @@ void fldRunDanteStanceSet(s32 stance)
     }
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldTest", D_005313E0);
+INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteAxis);
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
 #endif

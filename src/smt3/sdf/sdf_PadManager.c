@@ -69,17 +69,17 @@ extern u8 D_005518E0[8];
 
 extern s8 dds3PadBitTable[0x20];
 
-extern u8 D_005298E8[0x18];
+extern u8 sdfPadPressure[0x18];
 
-extern u16 D_005518D8[2];
+extern u16 sdfPadButtons[2];
 
-extern u16 D_005298A0[0x10];
+extern u16 sdfPadBitMask[0x10];
 
 extern s32 sdfVblankFlag;
 
 extern u8 sdfPadPortSlotPairs[4];
 
-extern u8 D_0058F0C0[];
+extern u8 sdfPadPortBuffers[];
 
 extern u8 sdfPadManagerMode;
 
@@ -101,11 +101,11 @@ typedef struct sdfTexPacket_t {
 
 
 
-extern sdfTexHandle_t *D_005518B8;
+extern sdfTexHandle_t *sdf3DSlot2Tex;
 
 extern sdfTexHandle_t *sdf3DSpecularTex;
 
-extern sdfTexHandle_t *D_005518C8;
+extern sdfTexHandle_t *sdf3DSlot1Tex;
 
 extern s32 scePadGetState(s32 port, s32 slot);
 
@@ -304,7 +304,7 @@ void sdfPadWork(void) {
         u16 pressed;
         u16 repeat;
 
-        D_005518D8[padIndex] = current;
+        sdfPadButtons[padIndex] = current;
         pressed = changed & current;
         entry->lastPadData = current;
         if (current != previous) {
@@ -322,7 +322,7 @@ void sdfPadWork(void) {
             }
         }
         for (bitIndex = 0; bitIndex != 0x10; bitIndex++) {
-            u16 mask = D_005298A0[bitIndex];
+            u16 mask = sdfPadBitMask[bitIndex];
             s32 state = (current & mask) != 0;
 
             if (repeat & mask) {
@@ -334,7 +334,7 @@ void sdfPadWork(void) {
             dds3PadBitTable[padIndex * 0x10 + bitIndex] = state;
         }
         memcpy(&D_005518E0[padIndex * 4], entry->stick, 4);
-        memcpy(&D_005298E8[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure,
+        memcpy(&sdfPadPressure[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure,
                SDF_PAD_PRESSURE_COUNT);
     }
 }
@@ -366,7 +366,7 @@ void sdfPadInitManager(void) {
         s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         sdfPadCb_t *entry;
 
-        scePadPortOpen(port, slot, &D_0058F0C0[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
+        scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
         entry = &sdfPadCb[padIndex];
         entry->port = port;
         entry->slot = slot;
@@ -380,7 +380,7 @@ void sdfPadInitManager(void) {
     }
     memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
     memset(D_005518E0, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
-    memset(D_005298E8, 0, SDF_PAD_PRESSURE_STATE_BYTES);
+    memset(sdfPadPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
     sdfPadManagerMode = 0;
 }
 

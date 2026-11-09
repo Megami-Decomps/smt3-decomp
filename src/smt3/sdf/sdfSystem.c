@@ -29,15 +29,15 @@ struct pipeTextureFile_t;
 
 extern dds3Basic_t *pipe_Camera;
 
-extern s32 _gp, sdfThreadSema, sdfVblankFlag, D_00551824;
+extern s32 _gp, sdfThreadSema, sdfVblankFlag, sdfCoreDrawBuffSize;
 
-extern u8 sdfPadManagerMode, D_005756C0[], D_005776C0[];
+extern u8 sdfPadManagerMode, sdfSystemThreadStack[], sdfVblankThreadStack[];
 
 extern void (*D_00551828)(void);
 
 extern sdfThCB_t *sdfVblankThreadId;
 
-extern sdfThCB_t D_00552040;
+extern sdfThCB_t sdfSystemThreadCB;
 
 extern s32 CreateThread(sdfKernelThreadParam_t *parameter);
 
@@ -201,9 +201,9 @@ extern void *hWorkArea;
 
 extern sdfHandlerNode_t *sdfDmacHandlerTable;
 
-extern void *D_005516C4;
+extern void *slLoadProcId;
 
-extern s32 D_00552054;
+extern s32 sdfMainThreadId;
 
 extern char D_00551700[];
 
@@ -457,9 +457,9 @@ void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes
     sdfInitThreadSystem();
     sdfGrInit(packetBufferBytes);
     sdf3DInit(0x40);
-    sdfCoreDrawInit(D_00551824);
+    sdfCoreDrawInit(sdfCoreDrawBuffSize);
     sdfRandomizeByTime(NULL);
-    sdfStartThreadAndWait(&D_00552040, sdfSystemThreadProc, D_005756C0, 0x2000, 0x4C, 0);
+    sdfStartThreadAndWait(&sdfSystemThreadCB, sdfSystemThreadProc, sdfSystemThreadStack, 0x2000, 0x4C, 0);
 }
 
 void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
@@ -564,7 +564,7 @@ s32 sdfInitThreadSystem(void) {
     sdfVblankFlag = 0;
     sdfVblankThreadId = NULL;
     sdfThreadSema = sdfCreateSema(1, 1, 0);
-    threadId = CreateThreadSimple((void *)VblankThreadProc, D_005776C0, 0x800, 0x3E);
+    threadId = CreateThreadSimple((void *)VblankThreadProc, sdfVblankThreadStack, 0x800, 0x3E);
     sdfVblankSema = threadId;
     return _StartThread(threadId, 0);
 }
@@ -573,14 +573,14 @@ void sdfSetMainThreadPriority(void)
 {
     s32 thid = GetThreadId();
 
-    D_00552054 = thid;
+    sdfMainThreadId = thid;
     ChangeThreadPriority(thid, 0x7C);
     SleepThread();
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfDmacHandlerTable);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSystem", D_00551824);
+INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfCoreDrawBuffSize);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSystem", D_00551828);
 

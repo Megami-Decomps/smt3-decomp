@@ -104,7 +104,7 @@ extern u32 fldSkyTableIdx;
 
 extern u32 fldSkyLightMaTbl;
 
-extern u32 D_002FCAC0[];
+extern u32 fldSkyDisplayPointers[];
 
 extern u32 D_002FCAA0[];
 
@@ -180,9 +180,9 @@ extern addr_t fldItemBoxObjBuf;
 
 extern addr_t fldMatterTable;
 
-extern addr_t D_0054EDA8;
+extern addr_t fldItemBoxObjBufHandle;
 
-extern addr_t D_0054EDAC;
+extern addr_t fldMatterTableHandle;
 
 void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
@@ -976,7 +976,7 @@ void fldSetFileResolverIdx(u32 state) {
 }
 
 void fld_1374F0(void) {
-    u32 *displayPointers = D_002FCAC0;
+    u32 *displayPointers = fldSkyDisplayPointers;
 
     memset(displayPointers, 0, 0x14);
     displayPointers[0] = EE_ADDR(D_002FCAA0);
@@ -1126,23 +1126,23 @@ void fldAllocPlaneTable(void) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(FIELD_VALUE_RECORD_STORAGE_SIZE);
     void *storage;
 
-    D_0054EDAC = EE_ADDR(allocation);
+    fldMatterTableHandle = EE_ADDR(allocation);
     storage = EE_ADDR_AS(void *, sdfMemLock(allocation));
     fldMatterTable = EE_ADDR(storage);
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     allocation = sdfMemAllocDirect(FIELD_AUX_RECORD_STORAGE_SIZE);
-    D_0054EDA8 = EE_ADDR(allocation);
+    fldItemBoxObjBufHandle = EE_ADDR(allocation);
     storage = EE_ADDR_AS(void *, sdfMemLock(allocation));
     fldItemBoxObjBuf = EE_ADDR(storage);
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
 
 void fldFreeMatterTable(void) {
-    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDAC));
-    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDAC));
+    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, fldMatterTableHandle));
+    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, fldMatterTableHandle));
     fldMatterTable = 0;
-    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDA8));
-    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, D_0054EDA8));
+    sdfMemUnlock(EE_ADDR_AS(sdfMemHandle_t *, fldItemBoxObjBufHandle));
+    sdfMemFreeDelayedDirect(EE_ADDR_AS(sdfMemHandle_t *, fldItemBoxObjBufHandle));
     fldItemBoxObjBuf = 0;
 }
 
@@ -1209,7 +1209,7 @@ INCLUDE_SDATA(const s32, "field/fldSky", fldSkyLightMaTbl);
 
 INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTableSaved);
 
-INCLUDE_SDATA(const s32, "field/fldSky", D_0054ED90);
+INCLUDE_SDATA(const s32, "field/fldSky", fldHitMatterIndex);
 
 INCLUDE_SDATA(const s32, "field/fldSky", fldItemBoxObjBuf);
 

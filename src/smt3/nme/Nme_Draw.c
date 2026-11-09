@@ -253,7 +253,7 @@ void nmeDeleteChar(s8 delta)
     func_0029A108(mode);
 }
 
-extern const u8 *D_005276B8[];
+extern const u8 *nmeCharTables[];
 extern void func_0029A108(s32 mode);
 
 void nmeConfirmChar(void)
@@ -279,7 +279,7 @@ void nmeConfirmChar(void)
     } else {
         position = ((inputRow * 16) + nameColumn) * 2;
     }
-    charTable = D_005276B8[modeSelect];
+    charTable = nmeCharTables[modeSelect];
     char0 = charTable[position];
     char1 = charTable[position + 1];
 
@@ -304,14 +304,14 @@ void nmeBackspace(void)
 }
 
 #ifdef NON_MATCHING
-extern const s8 D_005516B8[3];
-extern const u8 *volatile D_005276C4;
+extern const s8 nmeMoveTextTemplate[3];
+extern const u8 *volatile nmeNameListRows;
 
 void nmeMoveCursorBy(s8 delta)
 {
-    volatile s32 first = D_005516B8[0];
-    volatile s32 second = D_005516B8[1];
-    volatile s32 terminator = D_005516B8[2];
+    volatile s32 first = nmeMoveTextTemplate[0];
+    volatile s32 second = nmeMoveTextTemplate[1];
+    volatile s32 terminator = nmeMoveTextTemplate[2];
     volatile u8 text[3];
     cmpCursorInfo_t *cursor = &nmeUpdateWork->inputCursor;
     s32 limit;
@@ -335,7 +335,7 @@ void nmeMoveCursorBy(s8 delta)
             cursor->unk_22 = 0;
             break;
         }
-        character = D_005276C4 + position * 0x20;
+        character = nmeNameListRows + position * 0x20;
         firstByte = character[0];
         text[0] = firstByte;
         secondByte = character[1];

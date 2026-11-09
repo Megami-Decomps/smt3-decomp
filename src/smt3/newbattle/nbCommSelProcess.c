@@ -17,7 +17,7 @@ extern char *text2[];
 
 extern char *pStr[];
 
-extern char D_00551130[];
+extern char nbCommSelNumFormat[];
 
 extern void cmpSetSkillListRows(s32 rows);
 
@@ -138,7 +138,7 @@ typedef struct nbCommSelProcessData_t {
     s32 openwait;
 } nbCommSelProcessData_t;
 
-extern char D_005441A8[];
+extern char nbCommSelProcessName[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -160,7 +160,7 @@ extern void SetCommCursor2(nbCommSelProcessData_t *s);
 
 extern void *memset(void *a, s32 b, size_t c);
 
-extern char D_00551118[];
+extern char nbUnitProcessName[];
 
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
@@ -177,9 +177,9 @@ void nbCommSelShutdown(dds3ProcessID_t *id);
 
 extern void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my);
 
-extern char *D_00551110;
+extern char *nbNiidaCameraName;
 
-extern char *D_00551114;
+extern char *nbEventCameraName;
 
 extern s32 StkSelId;
 
@@ -266,7 +266,7 @@ s32 GetCommListCnt(nbCommSelProcessData_t *s, s32 type)
 
 nbCommSelProcessData_t *GetCommSelProcessData(void)
 {
-    return dds3GetProcessData(dds3SearchProcessName(D_005441A8));
+    return dds3GetProcessData(dds3SearchProcessName(nbCommSelProcessName));
 }
 
 void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
@@ -297,7 +297,7 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", D_005441A8);
+INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", nbCommSelProcessName);
 
 void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
 {
@@ -842,9 +842,9 @@ void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u
     cmpSetSkillListRows(0x13);
     frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text2[id], NULL);
     if (w->level < 0x64) {
-        sprintf(buf, D_00551130, w->level);
+        sprintf(buf, nbCommSelNumFormat, w->level);
     } else {
-        sprintf(buf, D_00551130, 0x63);
+        sprintf(buf, nbCommSelNumFormat, 0x63);
     }
     frq = frwGetSmallNumFontFRQ((ox + 0x8C) << 4, (oy + 4) << 3, 0xFF0051, col, buf, frq);
     c = 0x754B3D80;
@@ -858,12 +858,12 @@ void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u
     }
     a = col & 0xFF;
     c = (c & 0xFFFFFF00) | a;
-    sprintf(buf, D_00551130, w->hp);
+    sprintf(buf, nbCommSelNumFormat, w->hp);
     frq2 = frwGetSmallNumFontFRQ((ox + 0x17) << 4, (oy + 0x13) << 3, 0xFF0051, c, buf, NULL);
     frDrawFontEx(frq2, 1);
     frDestroyFontRequestAfter(frq2);
     c = a | (0xA09DC380 & 0xFFFFFF00);
-    sprintf(buf, D_00551130, w->mp);
+    sprintf(buf, nbCommSelNumFormat, w->mp);
     frq2 = frwGetSmallNumFontFRQ((ox + 0x52) << 4, (oy + 0x13) << 3, 0xFF0051, c, buf, NULL);
     frDrawFontEx(frq2, 1);
     frDestroyFontRequestAfter(frq2);
@@ -879,7 +879,7 @@ void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
 
     cmpSetSkillListRows(0x13);
     frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, pStr[d], NULL);
-    sprintf(buf, D_00551130, ((u8 *)EE_ADDR_PTR(d) + EE_ADDR(DDS3_GBWK))[0x1928]);
+    sprintf(buf, nbCommSelNumFormat, ((u8 *)EE_ADDR_PTR(d) + EE_ADDR(DDS3_GBWK))[0x1928]);
     frq = frwGetSmallNumFontFRQ((ox + 0x8E) << 4, (oy + 4) << 3, 0xFF0051, col, buf, frq);
     frDrawFontEx(frq, 1);
     frDestroyFontRequestAfter(frq);
@@ -927,7 +927,7 @@ void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
         costtype = datSkillTable.normal[d].costtype;
         if (costtype < 3) {
             if (costtype != 0) {
-                sprintf(buf, D_00551130, datGetSkillCost(work, d));
+                sprintf(buf, nbCommSelNumFormat, datGetSkillCost(work, d));
                 frq = frwGetSmallNumFontFRQ((ox + 0x78) << 4, (oy + 4) << 3, 0xFF0051, col, buf,
                                             frq);
             }
@@ -1469,7 +1469,7 @@ typedef struct {
 } nbCommItem_t;
 extern nbCommItem_t datItemTable[];
 
-extern nbNegoSkillEntry_t D_003E1338[];
+extern nbNegoSkillEntry_t nbNegoSkillTable[];
 
 /* Partial save-work view: datAddDevil corroborates the unit, stock-list
  * and count offsets; this routine reads the following inventory bytes. */
@@ -1565,7 +1565,7 @@ void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my)
         case 1:
             break;
         case 2:
-            if ((u32)D_003E1338[entry - 0x180].requestmode < 7) {
+            if ((u32)nbNegoSkillTable[entry - 0x180].requestmode < 7) {
                 s->commlist[1][s->commcnt[1]] = entry;
                 s->commdisable[1][s->commcnt[1]] = 0;
                 if (badstatus == 0x200) {
@@ -1789,14 +1789,14 @@ void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
                           nbActionProcessData_t *act)
 {
     nbCommSelProcessData_t *s = InitCommSelProcessData(data, my, act);
-    dds3ProcessID_t *id = dds3StartProcess(D_005441A8, 0x2B0E, 1, 1, nbCommSelProcess1,
+    dds3ProcessID_t *id = dds3StartProcess(nbCommSelProcessName, 0x2B0E, 1, 1, nbCommSelProcess1,
                                            nbCommSelShutdown, s);
 
     dds3LinkProcess(data->MainProcessID, id);
     data->CommSelProcessID = id;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", D_00551130);
+INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", nbCommSelNumFormat);
 
 INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", D_00551134);
 

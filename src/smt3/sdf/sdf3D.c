@@ -171,9 +171,9 @@ typedef struct sdf3DFogPacket_t {
 
 extern u64 sdf3DRefMapParam;
 
-extern u8 D_002E8ED0[];
+extern u8 sdf3DSlot2TmxData[];
 
-extern u8 D_002ECF10[];
+extern u8 sdf3DSlot1TmxData[];
 
 /* The camera, as sdf3DMakeScreenParam derives it: twelve inputs, then the
  * matrix and the clip-to-screen mapping it computes. cameraPos is the inverted
@@ -228,11 +228,11 @@ typedef struct sdf3DSpecularTexImage_t {
     u8 indices[64][128];         /* 0x0440 */
 } sdf3DSpecularTexImage_t;
 
-extern sdfTexHandle_t *D_005518B8;
+extern sdfTexHandle_t *sdf3DSlot2Tex;
 
 extern sdfTexHandle_t *sdf3DSpecularTex;
 
-extern sdfTexHandle_t *D_005518C8;
+extern sdfTexHandle_t *sdf3DSlot1Tex;
 
 extern void sdfTmxSetHeader(TMX_HEADER_t *, s32, s32, s32, s32, s32);
 
@@ -524,12 +524,12 @@ void sdf3DInit(void) {
     sdf3DRefMapParam = textureWord;
     vu1Tex0Slot0[0] = textureWord;
     vu1Tex0Slot0[1] = textureWord >> 32;
-    D_005518B8 = sdfTexSetDirect((TMX_HEADER_t *)D_002E8ED0);
-    textureWord = sdfTexGetTex0Reg(D_005518B8);
+    sdf3DSlot2Tex = sdfTexSetDirect((TMX_HEADER_t *)sdf3DSlot2TmxData);
+    textureWord = sdfTexGetTex0Reg(sdf3DSlot2Tex);
     vu1Tex0Slot2[0] = textureWord;
     vu1Tex0Slot2[1] = textureWord >> 32;
-    D_005518C8 = sdfTexSetDirect((TMX_HEADER_t *)D_002ECF10);
-    textureWord = sdfTexGetTex0Reg(D_005518C8);
+    sdf3DSlot1Tex = sdfTexSetDirect((TMX_HEADER_t *)sdf3DSlot1TmxData);
+    textureWord = sdfTexGetTex0Reg(sdf3DSlot1Tex);
     vu1Tex0Slot1[0] = textureWord;
     vu1Tex0Slot1[1] = textureWord >> 32;
     sdfModelInitSystem();

@@ -35,7 +35,7 @@ extern datItem_t datItemTable[];
 
 extern s32 datGetItemSlotIndex(s32 id);
 extern void evtBitOff(s32 no);
-extern datUnitWork_t D_003493C0;
+extern datUnitWork_t datPlayerUnitTemplate;
 
 extern s32 memset(void *a, s32 b, s32 c);
 #include "sdk_libc.h"
@@ -1714,7 +1714,7 @@ void datInitPlayer(void)
     s32 i;
 
     memset((u8 *)DDS3_GBWK + 0xA54, 0, 0xEC0);
-    *(datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) = D_003493C0;
+    *(datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) = datPlayerUnitTemplate;
     gbwk = (u8 *)DDS3_GBWK;
     *(s32 *)(gbwk + 0x1924) = 1;
     gbwk[0x1914] = 0;
@@ -1731,7 +1731,7 @@ void datInitPlayer(void)
     s32 i;
 
     memset(datPartyWork->unitwork, 0, sizeof(datPartyWork->unitwork));
-    datPartyWork->unitwork[0] = D_003493C0;
+    datPartyWork->unitwork[0] = datPlayerUnitTemplate;
     party = datPartyWork;
     party->stocklist[0] = 0;
     party->stockcnt = 1;

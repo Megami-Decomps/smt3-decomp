@@ -108,9 +108,9 @@ extern f32 Bsnet_E907_2_EndDistance;
 
 extern f32 Bsnet_E907_2_Rate;
 
-extern u128 D_0056B420;
+extern u128 nbCameraBsnetE907ShotTarget;
 
-extern u128 D_0056B430;
+extern u128 nbCameraBsnetE907ShotDirection;
 
 extern void nbCameraState_SkillAttack_Init(void);
 
@@ -200,7 +200,7 @@ extern void effBTLModelTargetGroupHide(void);
 
 extern void nbCameraShot_TargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 
-extern effBezier4PPart_t D_0056B350[2];
+extern effBezier4PPart_t nbCameraMuret2Bezier[2];
 
 extern f32 nbCameraBoss_Sp_MURET2_Accele;
 
@@ -216,7 +216,7 @@ extern u32 effBTLSkillGetTargetParty(void);
 
 extern s32 nbCameraBoss_CheckRotate(nbFormation_t *pFormation);
 
-extern sdfVector4_t D_00325A20;
+extern sdfVector4_t nbCameraBossEx02AxisX;
 
 extern void effBTLModelTargetPartyShow(void);
 
@@ -457,10 +457,10 @@ void nbCameraBoss_Foru_E913_Set(void)
 }
 
 #ifdef NON_MATCHING
-extern sdfVector4_t D_003259C0;
-extern sdfVector4_t D_003259D0;
-extern sdfVector4_t D_003259E0;
-extern sdfVector4_t D_003259F0;
+extern sdfVector4_t nbCameraForuE913TargetStart;
+extern sdfVector4_t nbCameraForuE913DirectionStart;
+extern sdfVector4_t nbCameraForuE913TargetEnd;
+extern sdfVector4_t nbCameraForuE913DirectionEnd;
 
 void nbCameraBoss_Foru_E913_Run(void)
 {
@@ -470,12 +470,12 @@ void nbCameraBoss_Foru_E913_Run(void)
     if (rate > 1.0f) {
         rate = 1.0f;
     }
-    SDF_VU0_LOADVECTOR(&D_003259C0);
-    SDF_VU0_LOADVECTOR_B(&D_003259E0);
+    SDF_VU0_LOADVECTOR(&nbCameraForuE913TargetStart);
+    SDF_VU0_LOADVECTOR_B(&nbCameraForuE913TargetEnd);
     VU0_LERP_VF10_VF11(rate);
     SDF_VU0_STOREVECTOR(&pNbCamera.target);
-    SDF_VU0_LOADVECTOR(&D_003259D0);
-    SDF_VU0_LOADVECTOR_B(&D_003259F0);
+    SDF_VU0_LOADVECTOR(&nbCameraForuE913DirectionStart);
+    SDF_VU0_LOADVECTOR_B(&nbCameraForuE913DirectionEnd);
     VU0_LERP_VF10_VF11(rate);
     SDF_VU0_STOREVECTOR(&pNbCamera.direction);
     pNbCamera.distance = 1.0f;
@@ -560,9 +560,9 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    D_0056B350[1].point[0].x = result.x;
-    D_0056B350[1].point[0].y = result.y;
-    D_0056B350[1].point[0].z = result.z;
+    nbCameraMuret2Bezier[1].point[0].x = result.x;
+    nbCameraMuret2Bezier[1].point[0].y = result.y;
+    nbCameraMuret2Bezier[1].point[0].z = result.z;
     firstX = result.x;
 
     offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
@@ -572,9 +572,9 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    D_0056B350[1].point[1].x = firstX + (eye.x - firstX) * 0.5f;
-    D_0056B350[1].point[1].y = result.y;
-    D_0056B350[1].point[1].z = result.z;
+    nbCameraMuret2Bezier[1].point[1].x = firstX + (eye.x - firstX) * 0.5f;
+    nbCameraMuret2Bezier[1].point[1].y = result.y;
+    nbCameraMuret2Bezier[1].point[1].z = result.z;
 
     offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
     SetRotateMatrixY(0.87266455f);
@@ -583,29 +583,29 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    D_0056B350[1].point[2].x = firstX + (eye.x - firstX) * 0.83333335f;
-    D_0056B350[1].point[2].y = result.y;
-    D_0056B350[1].point[2].z = result.z;
-    D_0056B350[1].point[3].x = eye.x;
-    D_0056B350[1].point[3].y = eye.y;
-    D_0056B350[1].point[3].z = eye.z;
-    D_0056B350[0].point[0].x = center.x;
-    D_0056B350[0].point[0].y = center.y;
-    D_0056B350[0].point[0].z = center.z;
-    D_0056B350[0].point[1].x = (center.x + target.x + width * 0.25f) * 0.5f;
-    D_0056B350[0].point[1].y = center.y;
-    D_0056B350[0].point[1].z = center.z;
-    D_0056B350[0].point[2].x = target.x + width * 0.25f;
-    D_0056B350[0].point[2].y = center.y;
-    D_0056B350[0].point[2].z = center.z;
-    D_0056B350[0].point[3].x = target.x;
-    D_0056B350[0].point[3].y = target.y;
-    D_0056B350[0].point[3].z = target.z;
-    D_0056B350[1].step = 0.000952380884f;
-    D_0056B350[0].weight = 0.0f;
-    D_0056B350[1].weight = 0.0f;
+    nbCameraMuret2Bezier[1].point[2].x = firstX + (eye.x - firstX) * 0.83333335f;
+    nbCameraMuret2Bezier[1].point[2].y = result.y;
+    nbCameraMuret2Bezier[1].point[2].z = result.z;
+    nbCameraMuret2Bezier[1].point[3].x = eye.x;
+    nbCameraMuret2Bezier[1].point[3].y = eye.y;
+    nbCameraMuret2Bezier[1].point[3].z = eye.z;
+    nbCameraMuret2Bezier[0].point[0].x = center.x;
+    nbCameraMuret2Bezier[0].point[0].y = center.y;
+    nbCameraMuret2Bezier[0].point[0].z = center.z;
+    nbCameraMuret2Bezier[0].point[1].x = (center.x + target.x + width * 0.25f) * 0.5f;
+    nbCameraMuret2Bezier[0].point[1].y = center.y;
+    nbCameraMuret2Bezier[0].point[1].z = center.z;
+    nbCameraMuret2Bezier[0].point[2].x = target.x + width * 0.25f;
+    nbCameraMuret2Bezier[0].point[2].y = center.y;
+    nbCameraMuret2Bezier[0].point[2].z = center.z;
+    nbCameraMuret2Bezier[0].point[3].x = target.x;
+    nbCameraMuret2Bezier[0].point[3].y = target.y;
+    nbCameraMuret2Bezier[0].point[3].z = target.z;
+    nbCameraMuret2Bezier[1].step = 0.000952380884f;
+    nbCameraMuret2Bezier[0].weight = 0.0f;
+    nbCameraMuret2Bezier[1].weight = 0.0f;
     nbCameraBoss_Sp_MURET2_Accele = 0.000952380884f;
-    D_0056B350[0].step = 0.000952380884f;
+    nbCameraMuret2Bezier[0].step = 0.000952380884f;
     nbCameraBoss_Sp_MURET2_Run(camera);
     return 1;
 }
@@ -623,21 +623,21 @@ s32 nbCameraBoss_Sp_MURET2_Run(nbCamera_t *pNbCamera)
     if (effBTLSkillGetState() & 0xC) {
         return 0;
     }
-    D_0056B350[0].step = D_0056B350[0].step + nbCameraBoss_Sp_MURET2_Accele;
-    D_0056B350[1].step = D_0056B350[1].step + nbCameraBoss_Sp_MURET2_Accele;
-    if (D_0056B350[0].step > limit) {
-        D_0056B350[0].step = limit;
+    nbCameraMuret2Bezier[0].step = nbCameraMuret2Bezier[0].step + nbCameraBoss_Sp_MURET2_Accele;
+    nbCameraMuret2Bezier[1].step = nbCameraMuret2Bezier[1].step + nbCameraBoss_Sp_MURET2_Accele;
+    if (nbCameraMuret2Bezier[0].step > limit) {
+        nbCameraMuret2Bezier[0].step = limit;
     }
-    D_0056B350[1].step = D_0056B350[0].step;
-    if (D_0056B350[1].weight > 0.75f) {
-        D_0056B350[1].step = D_0056B350[0].step * 0.965f;
-        if (D_0056B350[1].step < 0.001f) {
-            D_0056B350[1].step = 0.0f;
+    nbCameraMuret2Bezier[1].step = nbCameraMuret2Bezier[0].step;
+    if (nbCameraMuret2Bezier[1].weight > 0.75f) {
+        nbCameraMuret2Bezier[1].step = nbCameraMuret2Bezier[0].step * 0.965f;
+        if (nbCameraMuret2Bezier[1].step < 0.001f) {
+            nbCameraMuret2Bezier[1].step = 0.0f;
         }
-        D_0056B350[0].step = D_0056B350[1].step;
+        nbCameraMuret2Bezier[0].step = nbCameraMuret2Bezier[1].step;
     }
-    nbCameraLerpVec(&D_0056B350[1], &eyePos);
-    nbCameraLerpVec(&D_0056B350[0], &targetPos);
+    nbCameraLerpVec(&nbCameraMuret2Bezier[1], &eyePos);
+    nbCameraLerpVec(&nbCameraMuret2Bezier[0], &targetPos);
     SDF_VU0_LOADVECTOR(&targetPos);
     SDF_VU0_STOREVECTOR(pNbCamera);
     SDF_VU0_LOADVECTOR_B(&eyePos);
@@ -1452,8 +1452,8 @@ void nbCameraBoss_Bsnet_E907_2_Set(void)
     SDF_VU0_COPYVECTOR(&Bsnet_E907_2_EndDirection, &pCamera->direction);
     Bsnet_E907_2_StartDistance = pCamera->distance;
     nbCameraShot_All_Set2(&camera, work);
-    SDF_VU0_COPYVECTOR(&D_0056B420, &camera.target);
-    SDF_VU0_COPYVECTOR(&D_0056B430, &camera.direction);
+    SDF_VU0_COPYVECTOR(&nbCameraBsnetE907ShotTarget, &camera.target);
+    SDF_VU0_COPYVECTOR(&nbCameraBsnetE907ShotDirection, &camera.direction);
     Bsnet_E907_2_EndDistance = camera.distance * 1.05f;
     Bsnet_E907_2_Rate = 1.0f;
 }
@@ -1470,11 +1470,11 @@ void nbCameraBoss_Bsnet_E907_2_Run(void)
             step = 1.0f;
         }
         SDF_VU0_LOADVECTOR(&Bsnet_E907_2_EndTarget);
-        SDF_VU0_LOADVECTOR_B(&D_0056B420);
+        SDF_VU0_LOADVECTOR_B(&nbCameraBsnetE907ShotTarget);
         VU0_LERP_VF10_VF11(step);
         SDF_VU0_STOREVECTOR(pCamera);
         SDF_VU0_LOADVECTOR(&Bsnet_E907_2_EndDirection);
-        SDF_VU0_LOADVECTOR_B(&D_0056B430);
+        SDF_VU0_LOADVECTOR_B(&nbCameraBsnetE907ShotDirection);
         VU0_LERP_VF10_VF11(step);
         SDF_VU0_STOREVECTOR(&pCamera->direction);
         pCamera->distance = Bsnet_E907_2_StartDistance +
@@ -1910,21 +1910,21 @@ void nbCameraBoss_Kagu_E909_Set(void)
     pNbCamera.frame = 0;
 }
 
-extern sdfVector4_t D_00325A00;
+extern sdfVector4_t nbCameraKaguStartTarget;
 
-extern sdfVector4_t D_00325A10;
+extern sdfVector4_t nbCameraKaguStartDirection;
 
 extern sdfVector4_t nbCameraKaguVec;
 
 extern sdfVector4_t nbCameraKaguVec2;
 
-extern f32 D_00551E78;
+extern f32 nbCameraKaguStartDistance;
 
-extern f32 D_00551E7C;
+extern f32 nbCameraKaguEndDistance;
 
-extern s32 D_00551E80;
+extern s32 nbCameraKaguFrame;
 
-extern s32 D_00551E84;
+extern s32 nbCameraKaguDuration;
 
 extern void nbCameraShot_All_Set3(nbCamera_t *pNbCamera, sdfVector4_t *pTarget);
 
@@ -1951,60 +1951,60 @@ void nbCameraBoss_Kagu_E909_Run(void)
         SDF_VU0_STOREVECTOR_NOMEM(&pos);
         nbCameraShot_All_Set3(pCamera, &pos);
         nbCameraShot_GroundCollision(pCamera);
-        SDF_VU0_COPYVECTOR(&D_00325A00, &pCamera->target);
-        SDF_VU0_COPYVECTOR(&D_00325A10, &pCamera->direction);
-        D_00551E78 = pCamera->distance;
+        SDF_VU0_COPYVECTOR(&nbCameraKaguStartTarget, &pCamera->target);
+        SDF_VU0_COPYVECTOR(&nbCameraKaguStartDirection, &pCamera->direction);
+        nbCameraKaguStartDistance = pCamera->distance;
         nbCameraKaguVec.x = -0.02f;
         nbCameraKaguVec.y = 0.18f;
         nbCameraKaguVec.z = 0.98f;
         nbCameraKaguVec2.x = 55.08f;
         nbCameraKaguVec2.y = -1304.78f;
         nbCameraKaguVec2.z = -2177.2896f;
-        D_00551E7C = 1.0f;
-        D_00551E84 = 120;
-        D_00551E80 = 0;
+        nbCameraKaguEndDistance = 1.0f;
+        nbCameraKaguDuration = 120;
+        nbCameraKaguFrame = 0;
         break;
     case 135:
         nbCameraBoss_BSKAGU_Command_Set(pCamera);
         SDF_VU0_COPYVECTOR(&nbCameraKaguVec2, &pCamera->target);
         SDF_VU0_COPYVECTOR(&nbCameraKaguVec, &pCamera->direction);
-        D_00551E7C = pCamera->distance;
-        D_00325A10.x = 0.01f;
-        D_00325A10.y = 0.3f;
-        D_00325A10.z = 0.95f;
-        D_00325A00.x = 9.0999985f;
-        D_00325A00.y = -1650.4699f;
-        D_00325A00.z = -636.35f;
+        nbCameraKaguEndDistance = pCamera->distance;
+        nbCameraKaguStartDirection.x = 0.01f;
+        nbCameraKaguStartDirection.y = 0.3f;
+        nbCameraKaguStartDirection.z = 0.95f;
+        nbCameraKaguStartTarget.x = 9.0999985f;
+        nbCameraKaguStartTarget.y = -1650.4699f;
+        nbCameraKaguStartTarget.z = -636.35f;
         effBTLModelGetSphereCenter(pBase);
         SDF_VU0_STOREVECTOR_NOMEM(&pos);
         pos.x = pos.x - nbCameraKaguVec.x * 800.0f;
         pos.y = pos.y - 350.0f;
         SDF_VU0_LOADVECTOR(&pos);
-        SDF_VU0_LOADVECTOR_B(&D_00325A00);
+        SDF_VU0_LOADVECTOR_B(&nbCameraKaguStartTarget);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(&D_00325A10);
-        D_00551E78 = 700.0f;
-        D_00551E84 = 70;
-        D_00551E80 = 0;
+        SDF_VU0_STOREVECTOR(&nbCameraKaguStartDirection);
+        nbCameraKaguStartDistance = 700.0f;
+        nbCameraKaguDuration = 70;
+        nbCameraKaguFrame = 0;
         break;
     }
-    frame = D_00551E80;
-    rate = (f32)frame / (f32)D_00551E84;
+    frame = nbCameraKaguFrame;
+    rate = (f32)frame / (f32)nbCameraKaguDuration;
     if (rate > 1.0f) {
         rate = 1.0f;
     }
-    SDF_VU0_LOADVECTOR(&D_00325A00);
+    SDF_VU0_LOADVECTOR(&nbCameraKaguStartTarget);
     SDF_VU0_LOADVECTOR_B(&nbCameraKaguVec2);
     VU0_LERP_VF10_VF11(rate);
     SDF_VU0_STOREVECTOR(pCamera);
-    SDF_VU0_LOADVECTOR(&D_00325A10);
+    SDF_VU0_LOADVECTOR(&nbCameraKaguStartDirection);
     SDF_VU0_LOADVECTOR_B(&nbCameraKaguVec);
     VU0_LERP_VF10_VF11(rate);
     SDF_VU0_STOREVECTOR(&pCamera->direction);
     pCamera->fovy = 0.69813163f;
-    pCamera->distance = D_00551E78 + (D_00551E7C - D_00551E78) * rate;
-    D_00551E80 = frame + 1;
+    pCamera->distance = nbCameraKaguStartDistance + (nbCameraKaguEndDistance - nbCameraKaguStartDistance) * rate;
+    nbCameraKaguFrame = frame + 1;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_E909_Run);
@@ -3397,7 +3397,7 @@ s32 nbCameraShot_BossEX02_Set(nbCamera_t *pNbCamera)
     half = length * 0.5f;
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_LOADVECTOR_B(&D_00325A20);
+    SDF_VU0_LOADVECTOR_B(&nbCameraBossEx02AxisX);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_COPYVECTOR_C_TO_B();
     VU0_LERP_VF10_VF11(0.35f);
@@ -5951,7 +5951,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
 #ifdef NON_MATCHING
 extern void ToMatrix(void);
 extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);
-extern u128 D_005357E0;
+extern u128 nbCameraBossForwardVec;
 
 s32 nbCameraDANTE_Init(void)
 {
@@ -5991,7 +5991,7 @@ s32 nbCameraDANTE_Init(void)
         }
         SDF_VU0_LOADVECTOR(&target->rot);
         ToMatrix();
-        SDF_VU0_LOADVECTOR(&D_005357E0);
+        SDF_VU0_LOADVECTOR(&nbCameraBossForwardVec);
         SDF_VU0_APPLYMATRIX_XYZ();
         distance = target->r * target->scl + invoke->cr * invoke->scl;
         SDF_VU0_SCALEVECTOR(distance);
@@ -6022,7 +6022,7 @@ s32 nbCameraDANTE_Init(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", D_005357E0);
+INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", nbCameraBossForwardVec);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraDANTE_Init);
 #endif

@@ -234,15 +234,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -314,7 +314,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 
@@ -391,7 +391,7 @@ extern const fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp
 extern s32 __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
 
-extern const fp_number_type_df D_0054B460;
+extern const fp_number_type_df libgccDfInvalidResult;
 
 /* fp-bit tags: NaN classes 0/1, zero 2, normal 3, infinity 4. */
 static inline s32 dfIsNaN(const fp_number_type_df *number) {
@@ -468,7 +468,7 @@ const fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number
     }
     if (dfIsInfinity(a)) {
         if (dfIsInfinity(b) && a->sign != b->sign) {
-            return &D_0054B460;
+            return &libgccDfInvalidResult;
         }
         return a;
     }
@@ -595,14 +595,14 @@ static inline const fp_number_type_df *dfMultiplyParts(fp_number_type_df *left,
     }
     if (dfIsInfinity(left)) {
         if (dfIsZero(right)) {
-            return &D_0054B460;
+            return &libgccDfInvalidResult;
         }
         left->sign = left->sign != right->sign;
         return left;
     }
     if (dfIsInfinity(right)) {
         if (dfIsZero(left)) {
-            return &D_0054B460;
+            return &libgccDfInvalidResult;
         }
         right->sign = left->sign != right->sign;
         return right;
@@ -1086,8 +1086,8 @@ typedef struct __attribute__((packed)) {
     void *value;
 } cieEncodedPointer_t;
 
-extern const char D_0054B480[];
-extern const char D_0054B488[];
+extern const char libgccCieAugEmpty[];
+extern const char libgccCieAugEh[];
 extern s32 strcmp(const char *left, const char *right);
 extern u32 strlen(const char *text);
 
@@ -1097,13 +1097,13 @@ u8 *libc_2D2B60(u32 *frame, cieInfo_t *info)
     u32 length;
 
     info->augmentation = (char *)frame - frame[1] + 13;
-    if (strcmp(info->augmentation, D_0054B480) != 0 &&
-        strcmp(info->augmentation, D_0054B488) != 0 &&
+    if (strcmp(info->augmentation, libgccCieAugEmpty) != 0 &&
+        strcmp(info->augmentation, libgccCieAugEh) != 0 &&
         info->augmentation[0] != 'z')
         return NULL;
     length = strlen(info->augmentation);
     p = (u8 *)info->augmentation + length + 1;
-    if (strcmp(info->augmentation, D_0054B488) == 0) {
+    if (strcmp(info->augmentation, libgccCieAugEh) == 0) {
         info->ehPointer = ((const cieEncodedPointer_t *)p)->value;
         p += sizeof(void *);
     } else {
@@ -1189,11 +1189,11 @@ typedef union __attribute__((packed)) {
     u32 word;
 } cfiEncodedValue_t;
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B460);
+INCLUDE_RODATA(const s32, "sdk/libgcc", libgccDfInvalidResult);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B480);
+INCLUDE_RODATA(const s32, "sdk/libgcc", libgccCieAugEmpty);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", D_0054B488);
+INCLUDE_RODATA(const s32, "sdk/libgcc", libgccCieAugEh);
 
 u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location)
 {

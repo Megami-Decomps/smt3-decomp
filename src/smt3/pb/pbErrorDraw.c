@@ -103,11 +103,11 @@ pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
     return panel;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", D_005365E8);
+INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuFreeSelectText);
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", D_005365F8);
+INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuStageSelectText);
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", D_00536608);
+INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuMoveCameraDegreeText);
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", D_00536620);
+INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuMoveCameraRadiusText);
 

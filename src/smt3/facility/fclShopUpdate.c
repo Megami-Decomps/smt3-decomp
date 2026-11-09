@@ -121,7 +121,7 @@ typedef struct
     u16 item;
 } shpItemBoxEntry_t;
 
-extern shpItemBoxEntry_t D_0032FBC8[][8];
+extern shpItemBoxEntry_t shpItemBoxTable[][8];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
 extern u32 dds3GetRandA(void *state);
@@ -137,7 +137,7 @@ u16 shpGetItemFromItemBox(s32 box)
     s32 i;
 
     for (i = 0; i < capacity; i++) {
-        shpItemBoxEntry_t *entry = &D_0032FBC8[box][i];
+        shpItemBoxEntry_t *entry = &shpItemBoxTable[box][i];
         u16 item = entry->item;
         s32 slot = datGetItemSlotIndex(item);
 
@@ -527,11 +527,11 @@ extern s32 fclSetWorkValue(s8 index, s32 value);
 extern s32 fclScriptStart(s32 script, s32 entry, void *process);
 extern s32 evtBitCheck(s32 eventNo);
 extern u16 shpGetItemFromItemBox(s32 slot);
-extern char D_0053D080[]; /* "Total pay : %d\n" */
+extern char shpTotalPayFormat[]; /* "Total pay : %d\n" */
 
 void shpServiceTicket(void)
 {
-    printf(D_0053D080, shopUpdateWork->totalPay);
+    printf(shpTotalPayFormat, shopUpdateWork->totalPay);
     cmpMoveCursorListEnd(&shopUpdateWork->listCursor);
     fclClearFlag(4);
     fclClearFlag(5);
@@ -752,7 +752,7 @@ extern void shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
 extern void shpUpdateSeqPay(void);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D080);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", shpTotalPayFormat);
 
 s32 shop_update_Process(dds3ProcessID_t *id)
 {
@@ -833,13 +833,13 @@ s32 shop_update_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D0C0);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTmxPath02);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D0E0);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTmxPath01);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D100);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeMitamaText);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D118);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeElementalsText);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", D_0053D130);
+INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeItemsText);
 

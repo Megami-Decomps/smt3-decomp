@@ -58,17 +58,17 @@ extern u8 sdfHddValid;
 
 extern u8 sdfDev9Ready;
 
-extern char D_00551990[];
+extern char sdfHddDevPfs[];
 
-extern char D_00551998[];
+extern char sdfHddDevHdd[];
 
-extern char D_005519A0[];
+extern char sdfHddMountPoint[];
 
-extern char D_00529B60[];
+extern char sdfHddIrxArgs[];
 
-extern char D_00529B70[];
+extern char sdfHddPfsIrxArgs[];
 
-extern u8 D_0058FFC0[];
+extern u8 sdfHddPowerOffStack[];
 
 #include "sdk_libc.h"
 
@@ -102,8 +102,8 @@ void sdfHddPowerOffTh(s32 aSemaId)
     while (1) {
         WaitSema(aSemaId);
         printf("power off request has come.\n");
-        sceDevctl(D_00551990, 0x5003, NULL, 0, NULL, 0);
-        sceDevctl(D_00551998, 0x4806, NULL, 0, NULL, 0);
+        sceDevctl(sdfHddDevPfs, 0x5003, NULL, 0, NULL, 0);
+        sceDevctl(sdfHddDevHdd, 0x4806, NULL, 0, NULL, 0);
         sceCdPowerOff(&result);
     }
 }
@@ -131,7 +131,7 @@ void sdfHddInit(void)
         printf("cdrom0:\\IRX\\ATAD.IRX;1 resident fail.\n");
         return;
     }
-    if (sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, D_00529B60, &result) < 0) {
+    if (sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfHddIrxArgs, &result) < 0) {
         printf("cdrom0:\\IRX\\HDD.IRX;1 could't load.\n");
         return;
     }
@@ -139,7 +139,7 @@ void sdfHddInit(void)
         printf("cdrom0:\\IRX\\HDD.IRX;1 resident fail.\n");
         return;
     }
-    if (sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, D_00529B70, &result) < 0) {
+    if (sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfHddPfsIrxArgs, &result) < 0) {
         printf("cdrom0:\\IRX\\PFS.IRX;1 could't load.\n");
         return;
     }
@@ -148,9 +148,9 @@ void sdfHddInit(void)
         return;
     }
     sema = sdfCreateSema(0, 1, 0);
-    _StartThread(CreateThreadSimple(sdfHddPowerOffTh, D_0058FFC0, 0x800, 1), EE_ADDR_AS(void *, sema));
+    _StartThread(CreateThreadSimple(sdfHddPowerOffTh, sdfHddPowerOffStack, 0x800, 1), EE_ADDR_AS(void *, sema));
     sceCdPOffCallback(sdfHddPowerOffHandler, EE_ADDR_AS(void *, sema));
     sceFsInit();
-    sceMount(D_005519A0, "hdd0:dds3,", 0, NULL, 0);
+    sceMount(sdfHddMountPoint, "hdd0:dds3,", 0, NULL, 0);
     sdfHddValid = 1;
 }

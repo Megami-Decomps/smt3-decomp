@@ -410,8 +410,8 @@ typedef struct {
     s8 type2[3][2];
     u8 remaining[54];
 } nbKotowariQuestion_t;
-extern nbNormalQuestion_t D_003E2538[][7];
-extern nbKotowariQuestion_t D_003E28A0[];
+extern nbNormalQuestion_t nbNormalQuestionTable[][7];
+extern nbKotowariQuestion_t nbKotowariQuestionTable[];
 extern s32 datGetParam(datUnitWork_t *work, s32 type);
 extern void datAddKotowariPoint(s32 type, s32 point);
 
@@ -440,7 +440,7 @@ s32 Flow2_6(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x2000D);
     switch (n->qtype) {
     case 0:
-        question = &D_003E2538[n->ekucyo][n->qindex];
+        question = &nbNormalQuestionTable[n->ekucyo][n->qindex];
         questionType = question->type;
         higher = question->higher;
         /* Retain the native order of these two live byte loads. */
@@ -476,9 +476,9 @@ roll:
     if ((s32)dds3GetRandIntA(NULL, 100) < rate) success = 1;
     type = n->qtype;
     switch (type) {
-    case 1: bonus = D_003E28A0[n->ekucyo].type1[n->nowselect][0]; break;
-    case 2: bonus = D_003E28A0[n->ekucyo].type2[n->nowselect][0]; break;
-    case 3: bonus = D_003E28A0[n->ekucyo].type3[n->nowselect][0]; break;
+    case 1: bonus = nbKotowariQuestionTable[n->ekucyo].type1[n->nowselect][0]; break;
+    case 2: bonus = nbKotowariQuestionTable[n->ekucyo].type2[n->nowselect][0]; break;
+    case 3: bonus = nbKotowariQuestionTable[n->ekucyo].type3[n->nowselect][0]; break;
     }
     if (type < 4) {
         if (type > 0) datAddKotowariPoint(bonus, 1);

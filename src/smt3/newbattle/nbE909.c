@@ -217,7 +217,7 @@ extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_00546870[];
+extern char nbE910EndMsg[];
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -261,7 +261,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-extern s32 (*D_005274F8[])(nbEventProcessData_t *e);
+extern s32 (*nbE909Table[])(nbEventProcessData_t *e);
 
 extern void nbCameraSetState(s32 state);
 
@@ -285,7 +285,7 @@ s32 nbE909Process_1(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_005274F8[e->seq](e) != 0) {
+    if (nbE909Table[e->seq](e) != 0) {
         return -1;
     }
     if (e->time == 0) {
@@ -351,12 +351,12 @@ s32 nbE910_Test(nbEventProcessData_t *e)
 s32 nbE910_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0x15) {
-        printf(D_00546870);
+        printf(nbE910EndMsg);
         e->data->endtype = 8;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE909", D_00546870);
+INCLUDE_RODATA(const s32, "newbattle/nbE909", nbE910EndMsg);
 

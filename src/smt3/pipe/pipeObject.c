@@ -75,7 +75,7 @@ extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBef
 
 extern void DEBUG_PRINT(const char *str, ...);
 
-extern tagPipeEnemyInfo D_00528F78[];
+extern tagPipeEnemyInfo pipeEnemyInfoTable[];
 
 extern tagPipeObject *ObjWork;
 
@@ -234,7 +234,7 @@ void Initmymdl(void)
 
 
 
-extern tagPipePosTable D_00528F58;
+extern tagPipePosTable pipePosData;
 extern void vecTranslate(f32 *, f32 *, f32 *);
 extern f32 vecNormalize(f32 *);
 extern void mtxRotateX(sdfMatrix4_t *, f32);
@@ -254,18 +254,18 @@ void getPosTranslate(tagPipeObject *object, f32 *output)
     sdfVector4_t basis;
 
     vecSet(&tangent.x,
-           D_00528F58.points[object->offset + 1].position[0] - D_00528F58.points[object->offset].position[0],
-           D_00528F58.points[object->offset + 1].position[1] - D_00528F58.points[object->offset].position[1],
-           D_00528F58.points[object->offset + 1].position[2] - D_00528F58.points[object->offset].position[2]);
-    vecSet(&basis.x, D_00528F58.points[object->offset].direction[0],
-           D_00528F58.points[object->offset].direction[1], D_00528F58.points[object->offset].direction[2]);
+           pipePosData.points[object->offset + 1].position[0] - pipePosData.points[object->offset].position[0],
+           pipePosData.points[object->offset + 1].position[1] - pipePosData.points[object->offset].position[1],
+           pipePosData.points[object->offset + 1].position[2] - pipePosData.points[object->offset].position[2]);
+    vecSet(&basis.x, pipePosData.points[object->offset].direction[0],
+           pipePosData.points[object->offset].direction[1], pipePosData.points[object->offset].direction[2]);
     vecTranslate(&side.x, &tangent.x, &basis.x);
     vecNormalize(&side.x);
     vecScale(&side.x, object->pos[0]);
     vecScale(&basis.x, object->pos[1]);
-    output[0] = D_00528F58.points[object->offset].position[0] - side.x + basis.x;
-    output[1] = D_00528F58.points[object->offset].position[1] - side.y + basis.y;
-    output[2] = D_00528F58.points[object->offset].position[2] - side.z + basis.z;
+    output[0] = pipePosData.points[object->offset].position[0] - side.x + basis.x;
+    output[1] = pipePosData.points[object->offset].position[1] - side.y + basis.y;
+    output[2] = pipePosData.points[object->offset].position[2] - side.z + basis.z;
 }
 
 
@@ -299,12 +299,12 @@ typedef struct {
     u8 value;
 } pipeObjectSource_t;
 
-extern tagPipeTable D_00528F68;
+extern tagPipeTable pipeObjectTable;
 extern u32 dds3GetRandA(void *state);
 
 u8 objLoad(tagPipeObject *object, s32 index)
 {
-    pipeObjectSource_t *source = &((pipeObjectSource_t *)D_00528F68.tabPtr)[index];
+    pipeObjectSource_t *source = &((pipeObjectSource_t *)pipeObjectTable.tabPtr)[index];
     u32 random = dds3GetRandA(NULL) + (u32)(unsigned long)source;
     u32 mode = (u8)((u32)source->way / 10);
     u32 place = (u8)(source->way - mode * 10);
@@ -429,7 +429,7 @@ u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value
 
 
 
-extern const u8 D_00548B50[16];
+extern const u8 objOptionWays[16];
 extern void *memcpy(void *dest, const void *src, size_t size);
 extern void objCopy2(s32 offset, f32 x, f32 y, u8 id, u8 action,
                      s16 count, s16 num, s32 range);
@@ -449,7 +449,7 @@ void objOption(tagPipeObject *objPtr, u8 option)
     u8 *way = ways;
     u8 id;
 
-    memcpy(ways, D_00548B50, sizeof(ways));
+    memcpy(ways, objOptionWays, sizeof(ways));
     if (action == 0x1A) {
         objCopy2(objPtr->offset, objPtr->pos[0], objPtr->pos[1], 5, 0, 0, 5, 100);
         return;
@@ -701,7 +701,7 @@ void objDelAll(void)
 
 tagPipeEnemyInfo *objInfo(s32 id)
 {
-    tagPipeEnemyInfo *pInfo = D_00528F78;
+    tagPipeEnemyInfo *pInfo = pipeEnemyInfoTable;
     s32 i;
 
     for (i = 10; i != -1; i--) {
@@ -732,53 +732,53 @@ extern void mymdlSetMotion(tagpipeBasic *work, f32 frame);
 extern void mymdlAlphaSet(tagpipeBasic *work, u8 alpha);
 extern tagpipeBasic *MyLine;
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548B50);
+INCLUDE_RODATA(const s32, "pipe/pipeObject", objOptionWays);
 
-const char D_00548B60[24] = "EML %d ADD OBJECT\n";
-const char D_00548B78[24] = "EMS %d ADD OBJECT\n";
-const char D_00548B90[24] = "DRBOX %d ADD OBJECT\n";
-const char D_00548BA8[24] = "DMaka %d ADD OBJECT\n";
-const char D_00548BC0[24] = "Maka1 %d ADD OBJECT\n";
-const char D_00548BD8[24] = "ZMaka %d ADD OBJECT\n";
-const char D_00548BF0[24] = "RBOX %d ADD OBJECT\n";
-const char D_00548C08[24] = "MY %d ADD OBJECT\n";
+const char objDbgAddEml[24] = "EML %d ADD OBJECT\n";
+const char objDbgAddEms[24] = "EMS %d ADD OBJECT\n";
+const char objDbgAddDrbox[24] = "DRBOX %d ADD OBJECT\n";
+const char objDbgAddDmaka[24] = "DMaka %d ADD OBJECT\n";
+const char objDbgAddMaka1[24] = "Maka1 %d ADD OBJECT\n";
+const char objDbgAddZmaka[24] = "ZMaka %d ADD OBJECT\n";
+const char objDbgAddRbox[24] = "RBOX %d ADD OBJECT\n";
+const char objDbgAddMy[24] = "MY %d ADD OBJECT\n";
 
 void objMdlAdd(tagPipeObject *objPtr)
 {
     switch ((u8)objPtr->id) {
     case 1:
         objPtr->mdl = mymdlAddObject(PipeEML, 50);
-        return DEBUG_PRINT(D_00548B60, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddEml, (u8)objPtr->mdl);
     case 5:
     case 6:
         objPtr->mdl = mymdlAddObject(PipeMaka1, 50);
-        return DEBUG_PRINT(D_00548BC0, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddMaka1, (u8)objPtr->mdl);
     case 2:
         objPtr->mdl = mymdlAddObject(PipeEMS, 50);
-        return DEBUG_PRINT(D_00548B78, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddEms, (u8)objPtr->mdl);
     case 12:
         objPtr->mdl = mymdlAddObject(PipeDRBOX, 2);
         if ((u8)objPtr->mdl != 0xFF) {
             mymdlSetMotion(&PipeDRBOX[(u8)objPtr->mdl], 0.0f);
         }
-        return DEBUG_PRINT(D_00548B90, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddDrbox, (u8)objPtr->mdl);
     case 11:
         objPtr->mdl = mymdlAddObject(PipeDMaka, 4);
         if ((u8)objPtr->mdl != 0xFF) {
             mymdlSetMotion(&PipeDMaka[(u8)objPtr->mdl], 0.0f);
         }
-        return DEBUG_PRINT(D_00548BA8, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddDmaka, (u8)objPtr->mdl);
     case 9:
         objPtr->mdl = mymdlAddObject(PipeZMaka, 2);
-        return DEBUG_PRINT(D_00548BD8, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddZmaka, (u8)objPtr->mdl);
     case 10:
         objPtr->mdl = mymdlAddObject(PipeRBOX, 10);
-        return DEBUG_PRINT(D_00548BF0, (u8)objPtr->mdl);
+        return DEBUG_PRINT(objDbgAddRbox, (u8)objPtr->mdl);
     case 128:
         objPtr->mdl = mymdlAddObject(basicMy, 1);
         mymdlAddObject(MyLine, 1);
         mymdlAlphaSet(MyLine, 0);
-        DEBUG_PRINT(D_00548C08, (u8)objPtr->mdl);
+        DEBUG_PRINT(objDbgAddMy, (u8)objPtr->mdl);
         break;
     }
 }
@@ -786,14 +786,14 @@ void objMdlAdd(tagPipeObject *objPtr)
 extern void objMdlSclSet(tagPipeObject *object, f32 scale);
 extern void objMdlAlphaSet(tagPipeObject *object, u8 alpha);
 
-const char D_00548C20[24] = "EML %d DEL OBJECT\n";
-const char D_00548C38[24] = "EMS %d DEL OBJECT\n";
-const char D_00548C50[24] = "DRBOX %d DEL OBJECT\n";
-const char D_00548C68[24] = "DMaka %d DEL OBJECT\n";
-const char D_00548C80[24] = "Maka1 %d DEL OBJECT\n";
-const char D_00548C98[24] = "ZMaka %d DEL OBJECT\n";
-const char D_00548CB0[24] = "RBOX %d DEL OBJECT\n";
-const char D_00548CC8[24] = "MY %d DEL OBJECT\n";
+const char objDbgDelEml[24] = "EML %d DEL OBJECT\n";
+const char objDbgDelEms[24] = "EMS %d DEL OBJECT\n";
+const char objDbgDelDrbox[24] = "DRBOX %d DEL OBJECT\n";
+const char objDbgDelDmaka[24] = "DMaka %d DEL OBJECT\n";
+const char objDbgDelMaka1[24] = "Maka1 %d DEL OBJECT\n";
+const char objDbgDelZmaka[24] = "ZMaka %d DEL OBJECT\n";
+const char objDbgDelRbox[24] = "RBOX %d DEL OBJECT\n";
+const char objDbgDelMy[24] = "MY %d DEL OBJECT\n";
 
 extern void objMdlSclSet(tagPipeObject *objPtr, f32 scale);
 extern void objMdlAlphaSet(tagPipeObject *objPtr, u8 alpha);
@@ -810,30 +810,30 @@ void objMdlDel(tagPipeObject *objPtr) {
     switch ((u8)objPtr->id) {
     case 1:
         mymdlDelObject(&PipeEML[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C20, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelEml, objPtr->mdl);
     case 2:
         mymdlDelObject(&PipeEMS[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C38, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelEms, objPtr->mdl);
     case 12:
         mymdlDelObject(&PipeDRBOX[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C50, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelDrbox, objPtr->mdl);
     case 11:
         mymdlDelObject(&PipeDMaka[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C68, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelDmaka, objPtr->mdl);
     case 5:
     case 6:
         mymdlDelObject(&PipeMaka1[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C80, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelMaka1, objPtr->mdl);
     case 9:
         mymdlDelObject(&PipeZMaka[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548C98, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelZmaka, objPtr->mdl);
     case 10:
         mymdlDelObject(&PipeRBOX[objPtr->mdl]);
-        return DEBUG_PRINT(D_00548CB0, objPtr->mdl);
+        return DEBUG_PRINT(objDbgDelRbox, objPtr->mdl);
     case 128:
         mymdlDelObject(MyLine);
         mymdlDelObject(basicMy);
-        DEBUG_PRINT(D_00548CC8, objPtr->mdl);
+        DEBUG_PRINT(objDbgDelMy, objPtr->mdl);
         break;
     default:
         break;
@@ -1032,9 +1032,9 @@ extern u16 myStatus;
 extern void pipeEffSet(tagPipeObject *object, s32 type);
 extern void pipeBulrSetLimit(s32 frame);
 
-const char D_00548CE0[32] = "player-motion NORMAL_MOTION\n";
-const char D_00548D00[32] = "player-motion DAMAGE_MOTION\n";
-const char D_00548D20[32] = "player-motion ATTACK_MOTION\n";
+const char objDbgPlayerNormal[32] = "player-motion NORMAL_MOTION\n";
+const char objDbgPlayerDamage[32] = "player-motion DAMAGE_MOTION\n";
+const char objDbgPlayerAttack[32] = "player-motion ATTACK_MOTION\n";
 
 void objMyStatusChange(tagPipeObject *object, u8 status)
 {
@@ -1048,7 +1048,7 @@ void objMyStatusChange(tagPipeObject *object, u8 status)
         object->count = 0;
         object->flags &= 0xF8FF;
         attackCount = 0;
-        return DEBUG_PRINT(D_00548CE0);
+        return DEBUG_PRINT(objDbgPlayerNormal);
     case 2: {
         CameraAction = 6;
         objMdlMotion(object, 3, 1.0f);
@@ -1059,7 +1059,7 @@ void objMyStatusChange(tagPipeObject *object, u8 status)
         pipeEffSet(object, 2);
         attackCount = 0;
         pipeBulrSetLimit(10);
-        return DEBUG_PRINT(D_00548D00);
+        return DEBUG_PRINT(objDbgPlayerDamage);
     }
     case 1:
         if ((myStatus & 0xF) == 0) {
@@ -1070,7 +1070,7 @@ void objMyStatusChange(tagPipeObject *object, u8 status)
         object->action = 1;
         object->count = 27;
         object->flags |= 0x240;
-        return DEBUG_PRINT(D_00548D20);
+        return DEBUG_PRINT(objDbgPlayerAttack);
     case 10:
         pipeEffSet(object, 4);
         break;
@@ -1104,7 +1104,7 @@ void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z)
     getPosTranslate(objPtr, &translated.x);
     /* Preserve the index-first EE address sum; see
      * docs/levers/addressing-and-types.md. */
-    node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(D_00528F58.points));
+    node = (tagPipePosData *)((u32)offsetCount * sizeof(tagPipePosData) + EE_ADDR(pipePosData.points));
     nextNode = node + 1;
     position.x = node->direction[0];
     radians = 0x1.1df46ap-6f;
@@ -1149,9 +1149,9 @@ extern saddr_t getPartsType(s32);
 extern tagPipePartsInfo *getPartsInfo(s16);
 extern s32 mymdlAddObject(tagpipeBasic *, u16);
 extern void PipemdlRot(tagpipeBasic *, tagPipePartsInfo *);
-const char D_00548D40[32] = "-----PipeLine %d ADD OBJECT\n";
-const char D_00548D60[32] = "-----PipeCur %d ADD OBJECT\n";
-const char D_00548D80[32] = "-----PipeCur2 %d ADD OBJECT\n";
+const char objDbgAddPipeLine[32] = "-----PipeLine %d ADD OBJECT\n";
+const char objDbgAddPipeCur[32] = "-----PipeCur %d ADD OBJECT\n";
+const char objDbgAddPipeCur2[32] = "-----PipeCur2 %d ADD OBJECT\n";
 
 void partsAdd(tagPipeLinkInput *input, s32 offset)
 {
@@ -1170,25 +1170,25 @@ void partsAdd(tagPipeLinkInput *input, s32 offset)
             case 3:
                 slot->mdl = mymdlAddObject(PipeLine, 10);
                 if (slot->mdl == 0xFF) return;
-                DEBUG_PRINT(D_00548D40, slot->mdl);
-                mymdlPosSet(&PipeLine[slot->mdl], D_00528F58.points[slot->offset].position[0],
-                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                DEBUG_PRINT(objDbgAddPipeLine, slot->mdl);
+                mymdlPosSet(&PipeLine[slot->mdl], pipePosData.points[slot->offset].position[0],
+                    pipePosData.points[slot->offset].position[1], pipePosData.points[slot->offset].position[2]);
                 PipemdlRot(&PipeLine[slot->mdl], info);
                 break;
             case 2:
                 slot->mdl = mymdlAddObject(PipeCur, 10);
                 if (slot->mdl == 0xFF) return;
-                DEBUG_PRINT(D_00548D60, slot->mdl);
-                mymdlPosSet(&PipeCur[slot->mdl], D_00528F58.points[slot->offset].position[0],
-                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                DEBUG_PRINT(objDbgAddPipeCur, slot->mdl);
+                mymdlPosSet(&PipeCur[slot->mdl], pipePosData.points[slot->offset].position[0],
+                    pipePosData.points[slot->offset].position[1], pipePosData.points[slot->offset].position[2]);
                 PipemdlRot(&PipeCur[slot->mdl], info);
                 break;
             case 4:
                 slot->mdl = mymdlAddObject(PipeCur2, 10);
                 if (slot->mdl == 0xFF) return;
-                DEBUG_PRINT(D_00548D80, slot->mdl);
-                mymdlPosSet(&PipeCur2[slot->mdl], D_00528F58.points[slot->offset].position[0],
-                    D_00528F58.points[slot->offset].position[1], D_00528F58.points[slot->offset].position[2]);
+                DEBUG_PRINT(objDbgAddPipeCur2, slot->mdl);
+                mymdlPosSet(&PipeCur2[slot->mdl], pipePosData.points[slot->offset].position[0],
+                    pipePosData.points[slot->offset].position[1], pipePosData.points[slot->offset].position[2]);
                 PipemdlRot(&PipeCur2[slot->mdl], info);
                 break;
             }

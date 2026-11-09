@@ -285,7 +285,7 @@ typedef struct {
     nbInnenPhase_t phase[13];
 } nbInnenRec_t;
 
-extern nbInnenRec_t D_003E3158[];
+extern nbInnenRec_t nbInnenTable[];
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
@@ -312,11 +312,11 @@ extern void nbNegoDebugPrint(nbNegoProcessData_t *n);
 
 extern s32 nbCheckNegoMessage(nbNegoProcessData_t *n);
 
-extern char D_00544F10[];
+extern char nbMsgEndStr[];
 
 extern void nbNegoShutdown(dds3ProcessID_t *id);
 
-extern char D_00551160[];
+extern char nbNegoProcessName[];
 
 extern s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
@@ -332,9 +332,9 @@ extern u8 datNegoReqItemListA[];
 
 extern u8 datNegoReqItemListB[];
 
-extern u8 D_003E2318[];
+extern u8 nbKureItemTableA[];
 
-extern u8 D_003E23F8[];
+extern u8 nbKureItemTableB[];
 
 extern s32 nbSelectKureItemA(s32 lv_idx);
 
@@ -580,7 +580,7 @@ s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
         return 0;
     }
     group = (b->level - 1) / 5;
-    return D_003E2318[(group * 4 + nbSelectKureItemA(group)) * 2];
+    return nbKureItemTableA[(group * 4 + nbSelectKureItemA(group)) * 2];
 }
 
 s32 nbSelectKureItemA(s32 lv_idx)
@@ -613,7 +613,7 @@ s32 nbGetKureItemB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
         return 0;
     }
     group = (b->level - 1) / 5;
-    return D_003E23F8[(group * 3 + nbSelectKureItemB(group)) * 2];
+    return nbKureItemTableB[(group * 3 + nbSelectKureItemB(group)) * 2];
 }
 
 s32 nbSelectKureItemB(s32 lv_idx)
@@ -676,7 +676,7 @@ s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
 }
 
 extern datSkill_t attr[];
-extern nbNegoSkillEntry_t D_003E1338[];
+extern nbNegoSkillEntry_t nbNegoSkillTable[];
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
 extern s32 datCheckTalk(datUnitWork_t *work);
 
@@ -699,7 +699,7 @@ void nbSetAllHojoSkillWork(nbNegoProcessData_t *n)
                 count = 0;
                 for (j = 0; j < work->skillcnt; j++) {
                     skill = work->skill[j];
-                    if (attr[skill].type == 2 && D_003E1338[skill - 0x180].requestmode == 7) {
+                    if (attr[skill].type == 2 && nbNegoSkillTable[skill - 0x180].requestmode == 7) {
                         n->data->party[i].hojoskill[count++] = skill;
                     }
                 }
@@ -833,7 +833,7 @@ s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
 }
 
 #ifdef NON_MATCHING
-extern u8 D_003E2508[][4];
+extern u8 nbQuestionWeightTable[][4];
 
 s32 nbGetQuestionType(datUnitWork_t *work)
 {
@@ -855,7 +855,7 @@ s32 nbGetQuestionType(datUnitWork_t *work)
         roll = dds3GetRandIntA(NULL, 100);
         sum = 0;
         for (i = 0; i < 4; i++) {
-            sum += D_003E2508[row][i];
+            sum += nbQuestionWeightTable[row][i];
             if (roll < sum) return i;
         }
         return 0;
@@ -956,8 +956,8 @@ s32 nbGetNegoYaruStone(datUnitWork_t *w)
     return 0;
 }
 
-extern char D_00544E48[];
-extern char D_00544E70[];
+extern char nbInfoSelectFmt[];
+extern char nbInfoCountFmt[];
 
 s32 nbGetInfoMsg(s32 infotype)
 {
@@ -1005,8 +1005,8 @@ s32 nbGetInfoMsg(s32 infotype)
         selected = conditionList[dds3GetRandIntA(NULL, conditionCount)];
     }
 
-    printf(D_00544E48, useConditionList, selected);
-    printf(D_00544E70, normalCount, conditionCount);
+    printf(nbInfoSelectFmt, useConditionList, selected);
+    printf(nbInfoCountFmt, normalCount, conditionCount);
     return selected;
 }
 
@@ -1058,7 +1058,7 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
     nbInnenRec_t *p;
     s32 i;
 
-    p = D_003E3158;
+    p = nbInnenTable;
     for (i = 0; i < 64; i++) {
         if (p->id != 0 && n->pwork->id == p->pid && n->ework->id == p->eid) {
             return i;
@@ -1074,10 +1074,10 @@ extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern sdfGrOt_t sdfGrOtTable[];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
-extern char D_00544E98[];
-extern char D_00544EA8[];
-extern char D_00551148[];
-extern char D_00551150[];
+extern char nbDebugNowFmt[];
+extern char nbDebugHistoryFmt[];
+extern char nbDebugHistoryStr[];
+extern char nbNegoIdFmt[];
 
 void nbNegoDebugPrint(nbNegoProcessData_t *n)
 {
@@ -1093,10 +1093,10 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
 
-    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7B60, 0x00FFFF80, 0, D_00544E98,
+    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7B60, 0x00FFFF80, 0, nbDebugNowFmt,
                                (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF)));
     sdfDrawTagLink(tag, packet);
-    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7C80, 0x00FFFF80, 5, D_00551148));
+    packet = EE_ADDR(sdfDevPrintf(0x7100, 0x7C80, 0x00FFFF80, 5, nbDebugHistoryStr));
     sdfDrawTagLink(tag, packet);
 
     index = (n->historyindex + 1) % 14;
@@ -1104,11 +1104,11 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
         historyMessageId = n->history[index];
         message = n->historymes[index];
         if (message != 0) {
-            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00544EA8,
+            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, nbDebugHistoryFmt,
                                        (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF), message));
             sdfDrawTagLink(tag, packet);
         } else {
-            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, D_00551150,
+            packet = EE_ADDR(sdfDevPrintf(0x7100, y, 0x00FFFF80, 0, nbNegoIdFmt,
                                        (s32)(historyMessageId >> 16), (s32)(historyMessageId & 0xFFFF)));
             sdfDrawTagLink(tag, packet);
         }
@@ -1118,11 +1118,11 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern char D_00544EB8[];
-extern char D_00544ED8[];
-extern char D_00544EF0[];
-extern char D_00544F00[];
-extern char D_00551158[];
+extern char nbDebugSelectFmt[];
+extern char nbDebugSelectStr[];
+extern char nbDebugEnterStr[];
+extern char nbDebugRandomStr[];
+extern char nbDebugEndStr[];
 
 void nbNegoDebugPrint2(nbNegoProcessData_t *n)
 {
@@ -1134,28 +1134,28 @@ void nbNegoDebugPrint2(nbNegoProcessData_t *n)
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     if (n->endid == 0) {
-        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544EB8,
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, nbDebugSelectFmt,
                                   (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF)));
         sdfDrawTagLink(tag, packet);
     } else {
-        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544ED8));
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, nbDebugSelectStr));
         sdfDrawTagLink(tag, packet);
     }
     if (n->endid == 0) {
         for (i = 0; i < n->nextkouhocnt; i++) {
             id = n->nextkouho[i];
             packet = EE_ADDR(sdfDevPrintf(0x7A00 + i * 0x480, 0x7D40, 0xFFFF80,
-                                      i == n->selectcur ? 4 : 0, D_00551150,
+                                      i == n->selectcur ? 4 : 0, nbNegoIdFmt,
                                       (s32)(id >> 16), (s32)(id & 0xFFFF)));
             sdfDrawTagLink(tag, packet);
         }
     } else {
-        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7D40, 0xFFFF80, 4, D_00551158));
+        packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7D40, 0xFFFF80, 4, nbDebugEndStr));
         sdfDrawTagLink(tag, packet);
     }
-    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7E60, 0xFFFF80, 0, D_00544EF0));
+    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7E60, 0xFFFF80, 0, nbDebugEnterStr));
     sdfDrawTagLink(tag, packet);
-    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7EC0, 0xFFFF80, 0, D_00544F00));
+    packet = EE_ADDR(sdfDevPrintf(0x7A00, 0x7EC0, 0xFFFF80, 0, nbDebugRandomStr));
     sdfDrawTagLink(tag, packet);
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
@@ -1192,7 +1192,7 @@ void *nbNegoProcessMessageChk(dds3ProcessID_t *id)
         nbNegoDebugPrint(n);
     }
     if (nbCheckNegoMessage(n) != 0) {
-        printf(D_00544F10);
+        printf(nbMsgEndStr);
         return nbNegoProcess1;
     }
     return NULL;
@@ -1230,7 +1230,7 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
 }
 
 extern s32 nbGetUniqueIdKoukaPacketCnt(saddr_t uniqueid);
-extern s32 (*D_004EF468[])(nbNegoProcessData_t *n);
+extern s32 (*nbNegoFlowTable[])(nbNegoProcessData_t *n);
 
 void *nbNegoProcess1(dds3ProcessID_t *id)
 {
@@ -1260,7 +1260,7 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
             n->nextnegoid = 0;
             n->nextkouhocnt = 0;
             index = n->nownegoid >> 16;
-            result = D_004EF468[index](n);
+            result = nbNegoFlowTable[index](n);
             n->nownegophase++;
             if (result != 0) {
                 n->endid = 1;
@@ -1362,7 +1362,7 @@ void nbNegoShutdown(dds3ProcessID_t *id)
 }
 
 /* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
-extern nbNegoSkillEntry_t D_003E1338[];
+extern nbNegoSkillEntry_t nbNegoSkillTable[];
 typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
 extern nbNegoMsgEntry_t negoMsgTable[];
 extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
@@ -1377,23 +1377,23 @@ extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E38);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E48);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbInfoSelectFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E70);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbInfoCountFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E98);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugNowFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EA8);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugHistoryFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EB8);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugSelectFmt);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544ED8);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugSelectStr);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EF0);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugEnterStr);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugRandomStr);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbMsgEndStr);
 
 nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pformindex,
                                       s32 eformindex, s32 negotype, s32 skillid)
@@ -1424,7 +1424,7 @@ nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pfo
     n->flag1_6 = 0;
     n->flag1_39 = 0;
     skillindex = skillid - 0x180;
-    switch (D_003E1338[skillindex].requestmode) {
+    switch (nbNegoSkillTable[skillindex].requestmode) {
     case 0: requesttype = 0; break;
     case 1: requesttype = 2; break;
     case 2: requesttype = 3; break;
@@ -1494,15 +1494,15 @@ void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eform
     nbSetNegoWaitMotion(n->eform);
     nbSetAllHojoSkillWork(n);
     p2sdBgmVolDown();
-    id = dds3StartProcess(D_00551160, 0x3F9, 1, 1, nbNegoProcess1, nbNegoShutdown, n);
+    id = dds3StartProcess(nbNegoProcessName, 0x3F9, 1, 1, nbNegoProcess1, nbNegoShutdown, n);
     dds3LinkProcess(actdata->data->MainProcessID, id);
     actdata->data->negoproc = id;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551148);
+INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbDebugHistoryStr);
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551150);
+INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbNegoIdFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551158);
+INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbDebugEndStr);
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551160);
+INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbNegoProcessName);
 

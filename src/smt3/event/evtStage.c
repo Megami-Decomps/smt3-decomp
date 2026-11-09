@@ -95,11 +95,11 @@ extern void dds3SetAmbient(u128 *ambient);
 
 /* Three parallel lights, 0x40 each, which is what the IDB types here and what
  * the +0x40 steps below were spelling as byte arithmetic. */
-extern sdf3DLight_t D_0032C5F0[3];
+extern sdf3DLight_t evtStageLights[3];
 
-extern sdf3DFogParam_t D_0032C6B0;
+extern sdf3DFogParam_t evtStageFog;
 
-extern u128 D_0032C6D0;
+extern u128 evtStageAmbient;
 
 #include "sdk_libc.h"
 
@@ -108,7 +108,7 @@ extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u
                                                        const sdfTextureOffsetListHeader_t *pTB, u32 pBF);
 
 
-extern char D_0056CE50[];
+extern char evtStageScriptPath[];
 
 s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
@@ -121,7 +121,7 @@ enum evtProcessState {
     EVT_PROCESS_STATE_DESTROY_PENDING = 3
 };
 
-extern const char D_0053A828[0x28];
+extern const char evtKillFieldScriptFormat[0x28];
 
 void dds3PathBasicPauseOn(dds3PathBasicControl_t *value);
 
@@ -270,7 +270,7 @@ void evtFreeAllUnit(void) {
 /* Sized explicitly: retail pads this to 16 bytes and an inline literal would
  * emit 13 plus whatever gcc aligns to, which shortens .rodata and shifts the
  * link. The same padding is why the strings around it stay placeholders. */
-const char D_0053A7F8[0x10] = "%sf%03d_%03d";
+const char evtAreaPathFormat[0x10] = "%sf%03d_%03d";
 
 
 /* Build the field world object and load its stage resource. */
@@ -286,7 +286,7 @@ s32 evtLoadArea(s32 fld, s32 area)
     dds3SetActiveScene(worldObject);
     dds3SetMapNo(worldObject, (fld << 16) + area);
     fldMakeFilePath(directory, fld, area);
-    sprintf(resourcePath, D_0053A7F8, directory, fld, area);
+    sprintf(resourcePath, evtAreaPathFormat, directory, fld, area);
     dds3SceneBasicMakeScene(worldObject, EE_ADDR(resourcePath));
     evtSetTestCamera();
     if (fld < 10) {
@@ -294,11 +294,11 @@ s32 evtLoadArea(s32 fld, s32 area)
     } else {
         dds3SetScreenFovy(0.75398216f);
     }
-    dds3SetLight(&D_0032C5F0[0], 0);
-    dds3SetLight(&D_0032C5F0[1], 1);
-    dds3SetLight(&D_0032C5F0[2], 2);
-    dds3SetFog(&D_0032C6B0);
-    dds3SetAmbient(&D_0032C6D0);
+    dds3SetLight(&evtStageLights[0], 0);
+    dds3SetLight(&evtStageLights[1], 1);
+    dds3SetLight(&evtStageLights[2], 2);
+    dds3SetFog(&evtStageFog);
+    dds3SetAmbient(&evtStageAmbient);
     return 1;
 }
 
@@ -318,21 +318,21 @@ s32 evtLoadArea_FromMemory(s32 fld, s32 area, saddr_t pF1, saddr_t pF2,
     dds3SceneBasicMakeScene_FromMemory(worldObject, fld, area, pF1, pF2, pTB, pBF);
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
-    dds3SetLight(&D_0032C5F0[0], 0);
-    dds3SetLight(&D_0032C5F0[1], 1);
-    dds3SetLight(&D_0032C5F0[2], 2);
-    dds3SetFog(&D_0032C6B0);
-    dds3SetAmbient(&D_0032C6D0);
+    dds3SetLight(&evtStageLights[0], 0);
+    dds3SetLight(&evtStageLights[1], 1);
+    dds3SetLight(&evtStageLights[2], 2);
+    dds3SetFog(&evtStageFog);
+    dds3SetAmbient(&evtStageAmbient);
     while (sdfDelayedResrcCheck() != 0) {
     }
     return 1;
 }
 
 void evtStartEvent(s32 no) {
-    sprintf(D_0056CE50, "/event/e%03d/e%03d/scr/e%03d.bf", no - no % 10, no, no);
-    scrStartScriptByName(0x3EB, D_0056CE50, 0);
+    sprintf(evtStageScriptPath, "/event/e%03d/e%03d/scr/e%03d.bf", no - no % 10, no, no);
+    scrStartScriptByName(0x3EB, evtStageScriptPath, 0);
 }
-const char D_0053A828[0x28] = "kill field script -> [%s]\n";
+const char evtKillFieldScriptFormat[0x28] = "kill field script -> [%s]\n";
 
 
 void evtKillFieldScript(void)
@@ -346,7 +346,7 @@ void evtKillFieldScript(void)
         for (taskIndex = 0; taskIndex < dds3GetProcessCount(taskState); taskIndex++) {
             task = dds3SearchProcessNumber(taskState, taskIndex);
             if (task->priority == 0x3EA) {
-                printf(D_0053A828, task->name);
+                printf(evtKillFieldScriptFormat, task->name);
                 dds3KillProcess(task, 0);
                 /* Destruction changes the queue, so restart the current scan. */
                 goto restartStateScan;

@@ -246,11 +246,11 @@ extern void nbPanelAllHide(void);
 
 extern u32 f;
 
-extern u16 D_005755F0[];
+extern u16 nbE908SavedPartyCount[];
 
-extern char D_005755B0[];
+extern char nbE908ModelPath[];
 
-extern char D_00546840[];
+extern char nbE908ModelPathFormat[];
 
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
@@ -370,9 +370,9 @@ extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
 
 extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-extern dds3Basic_t *D_00551610;
+extern dds3Basic_t *nbE908CameraBasic;
 
-extern dds3Basic_t *D_00551614;
+extern dds3Basic_t *nbE908SceneBasic;
 
 s32 nbE908Process_1(dds3ProcessID_t *id)
 {
@@ -383,31 +383,31 @@ s32 nbE908Process_1(dds3ProcessID_t *id)
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
     if (nbE908Table[e->seq](e) != 0) {
-        D_00551610 = NULL;
-        if (D_00551614 != NULL) {
-            dds3DeleteSceneBasicData(D_00551614);
-            D_00551614 = NULL;
+        nbE908CameraBasic = NULL;
+        if (nbE908SceneBasic != NULL) {
+            dds3DeleteSceneBasicData(nbE908SceneBasic);
+            nbE908SceneBasic = NULL;
         }
         return -1;
     }
-    if (e->time > 0 && D_00551610 != NULL) {
-        unit = dds3GetUnitHandleObjectBasic(D_00551610);
+    if (e->time > 0 && nbE908CameraBasic != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(nbE908CameraBasic);
         if (unit->basic != NULL) {
             nbCameraHelperModelSet(unit->basic);
         }
     }
     if (e->time == 0) {
         nbCameraSetState(0x17);
-        D_00551610 = NULL;
-        D_00551614 = NULL;
+        nbE908CameraBasic = NULL;
+        nbE908SceneBasic = NULL;
         nbGroupFormDispOff(0);
         nbGroupFormDispOn(1);
         nbSetEnemyFormation(e->data);
         nbSetPlayerFormation(e->data, 0);
         serial = evtInitMotionSeProcess(e->eventrid, 2);
-        D_00551614 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551614), 0, 0, 0, 2);
-        D_00551610 = D_00551614;
+        nbE908SceneBasic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE908SceneBasic), 0, 0, 0, 2);
+        nbE908CameraBasic = nbE908SceneBasic;
     }
     switch (e->time) {
     case 0:
@@ -433,14 +433,14 @@ s32 nbE909_Model1Start(nbEventProcessData_t *e)
     form = nbGetEventForm();
     evtSetUnitMotion(form->hunit, 0x11, 0, 0, 2);
     for (i = 4; i < 9; i++) {
-        D_005755F0[i] = e->data->party[form->partyindex].count[i];
+        nbE908SavedPartyCount[i] = e->data->party[form->partyindex].count[i];
     }
     nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x38D, 1), 2, form);
     if (evtBitCheck(0xC0F)) {
         e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(0x108));
     } else {
-        sprintf(D_005755B0, D_00546840, 0x108);
-        e->file = fileLoad(D_005755B0);
+        sprintf(nbE908ModelPath, nbE908ModelPathFormat, 0x108);
+        e->file = fileLoad(nbE908ModelPath);
     }
     nbBgmFadeOut();
     nbFreeEffectSlot(e);
@@ -513,7 +513,7 @@ s32 Model2Start(nbEventProcessData_t *ed)
         ed->pfile = NULL;
     }
     for (i = 4; i < 9; i++) {
-        ed->data->party[p->partyindex].count[i] = D_005755F0[i];
+        ed->data->party[p->partyindex].count[i] = nbE908SavedPartyCount[i];
     }
     nbAddFormOnOffPacket(0, 0, p, 1);
     nbAddUnitAKoukaPacket(0, 0, p, 0, 0);
@@ -557,11 +557,11 @@ s32 nbE909_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE908", D_00546840);
+INCLUDE_RODATA(const s32, "newbattle/nbE908", nbE908ModelPathFormat);
 
 INCLUDE_RODATA(const s32, "newbattle/nbE908", D_00546860);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE908", D_00551610);
+INCLUDE_SDATA(const s32, "newbattle/nbE908", nbE908CameraBasic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE908", D_00551614);
+INCLUDE_SDATA(const s32, "newbattle/nbE908", nbE908SceneBasic);
 

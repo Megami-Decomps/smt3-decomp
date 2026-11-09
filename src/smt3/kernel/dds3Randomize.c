@@ -2,11 +2,11 @@
 #include "kernel.h"
 #include "libsdf.h"
 
-extern u8 D_002F5948[];
+extern u8 dds3RandCB[];
 
 extern void sdfRandomize(void *aCB, u32 aSeed);
 
 void dds3InitRandCB(void) {
-    sdfRandomize(D_002F5948, 0x12345678);
+    sdfRandomize(dds3RandCB, 0x12345678);
 }
 

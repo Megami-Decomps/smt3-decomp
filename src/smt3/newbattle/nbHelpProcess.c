@@ -240,7 +240,7 @@ extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
-extern char D_005514F0[];
+extern char nbHelpProcessName[];
 
 extern void nbHelpOff(void);
 
@@ -264,7 +264,7 @@ extern char *text2[];
 
 extern char *pStr[];
 
-extern char *D_005263F8[];
+extern char *nbHelpTextTable[];
 
 extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
 
@@ -333,7 +333,7 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
     nbHelpProcessData_t *w;
     frFontHandle_t *frq;
 
-    w = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
+    w = dds3GetProcessData(dds3SearchProcessName(nbHelpProcessName));
     nbHelpOff();
     w->text1 = text;
     w->text2 = text2;
@@ -385,7 +385,7 @@ void nbDispTextById(s32 no)
 
 void nb_289078(s32 no, s32 type)
 {
-    nbDispText(D_005263F8[no], NULL, type, 30, 0x89FEFF80);
+    nbDispText(nbHelpTextTable[no], NULL, type, 30, 0x89FEFF80);
 }
 
 void nbDispActionText(u32 command)
@@ -447,7 +447,7 @@ void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype)
 {
     nbHelpProcessData_t *w;
 
-    w = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
+    w = dds3GetProcessData(dds3SearchProcessName(nbHelpProcessName));
     w->nextmeshandle = msgid;
     w->nextmesid = no;
     switch (msgtype) {
@@ -469,7 +469,7 @@ void nbHelpOff(void)
 {
     nbHelpProcessData_t *h;
 
-    h = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
+    h = dds3GetProcessData(dds3SearchProcessName(nbHelpProcessName));
     if (h->text1 == NULL) {
         if (h->type != 1) {
             return;
@@ -619,11 +619,11 @@ void nbInitHelpProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *proc;
 
-    proc = dds3StartProcess(D_005514F0, 0x3F9, 1, 1, nbHelpProcess1, nbHelpShutdown,
+    proc = dds3StartProcess(nbHelpProcessName, 0x3F9, 1, 1, nbHelpProcess1, nbHelpShutdown,
                             nbAllocHelpWork());
     dds3LinkProcess(data->MainProcessID, proc);
     data->helpproc = proc;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbHelpProcess", D_005514F0);
+INCLUDE_SDATA(const s32, "newbattle/nbHelpProcess", nbHelpProcessName);
 

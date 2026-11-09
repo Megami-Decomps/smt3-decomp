@@ -38,7 +38,7 @@ typedef struct nbTarSelProcessData_t {
     f32 scale_b;
 } nbTarSelProcessData_t;
 
-extern char D_005442B8[];
+extern char nbTarSelProcessName[];
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void sdfChipFreeDirect(void *ptr);
@@ -55,7 +55,7 @@ extern void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process);
 
 nbTarSelProcessData_t *GetTarSelProcessData(void)
 {
-    return dds3GetProcessData(dds3SearchProcessName(D_005442B8));
+    return dds3GetProcessData(dds3SearchProcessName(nbTarSelProcessName));
 }
 
 s32 nbGetTarSelStat(void)
@@ -73,7 +73,7 @@ void nbSetTarSelJyokyoTime(s32 time)
     GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", D_005442B8);
+INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", nbTarSelProcessName);
 
 void AnimeTargetCursor(nbTarSelProcessData_t *process)
 {
@@ -620,7 +620,7 @@ nbTarSelProcessData_t *InitTarSelProcessData(nbMainProcessData_t *data)
 void nbInitTarSelProcess(nbMainProcessData_t *data)
 {
     nbTarSelProcessData_t *process = InitTarSelProcessData(data);
-    dds3ProcessID_t *id = dds3StartProcess(D_005442B8, 0x3F9, 1, 1,
+    dds3ProcessID_t *id = dds3StartProcess(nbTarSelProcessName, 0x3F9, 1, 1,
                                            nbTarSelProcess1,
                                            (dds3ProcessFunc_t)nbTarSelShutdown,
                                            process);

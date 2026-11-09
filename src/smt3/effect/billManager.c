@@ -42,7 +42,7 @@ typedef struct billGeneralRow_t {
 
 
 extern billGeneralEntry_t BillboardTable[];
-extern billGeneralRow_t D_00316FF0[];
+extern billGeneralRow_t dds3BillboardGeneralRows[];
 extern struct dds3BillResource_tag *dds3BillboardTag;
 
 extern void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
@@ -54,7 +54,7 @@ extern void pacFileHandleFree_(void *pacHandle);
 
 billHandle_t *dds3BillboardGeneral(s32 number);
 
-extern sdfGrOt_t *D_00317050[];
+extern sdfGrOt_t *dds3BillboardOtTable[];
 
 typedef struct effBlurDrawBank_t {
     u8 pad0000[0x1300];
@@ -62,10 +62,10 @@ typedef struct effBlurDrawBank_t {
 } effBlurDrawBank_t;
 
 extern effBlurDrawBank_t dds3DrawEnv[];
-extern billRenderPair_t *D_00551D78;
+extern billRenderPair_t *dds3MultiBillboardPairList;
 extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3BillboardTagParam[4];
-extern f32 D_00317030[4];
+extern f32 dds3BillboardUpAxis[4];
 
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern f32 D_002FA240[16];
@@ -280,7 +280,7 @@ void dds3BillboardManagerInit(void) {
     work = request->pac.resrcHead;
     if (work != NULL) {
         slot = hGeneralBillboard;
-        row = D_00316FF0;
+        row = dds3BillboardGeneralRows;
         do {
             void *data = sdfMemGetPtr(work->resrc);
             *slot = dds3BillboardCreate(row->kind, EE_ADDR(data));
@@ -400,7 +400,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
             SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
-            SDF_VU0_LOADVECTOR_B(D_00317030);
+            SDF_VU0_LOADVECTOR_B(dds3BillboardUpAxis);
             SDF_VU0_INNERPRODUCT(dot);
             dds3BillboardTagParam[1] = 1.0 - fabs(dot);
             SDF_VU0_STOREVECTOR(&direction);
@@ -486,7 +486,7 @@ void dds3BillboardLinkOt(void) {
             for (i = 0; i < 4; i++) {
                 sdfDrawTag_t *tag = res->pBillTag[i];
                 if (tag != NULL) {
-                    D_00317050[i]->regFunc(D_00317050[i], tag);
+                    dds3BillboardOtTable[i]->regFunc(dds3BillboardOtTable[i], tag);
                     res->pBillTag[i] = NULL;
                 }
             }
@@ -502,7 +502,7 @@ void dds3BillboardLinkOt(void) {
  * f045_1, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-extern f32 D_00317060[4];
+extern f32 dds3MultiBillboardUpAxis[4];
 extern f32 dds3MultiBillboardTagParam[4];
 extern void sdfGrSetFrameMaskRGB(const u8 *env, void *packet, s32 context);
 extern sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *handle);
@@ -567,7 +567,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
             SDF_VU0_LOADVECTOR_B(aViewEye);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_NORMALIZE();
-            SDF_VU0_LOADVECTOR_B(D_00317060);
+            SDF_VU0_LOADVECTOR_B(dds3MultiBillboardUpAxis);
             SDF_VU0_INNERPRODUCT(dot);
             dds3MultiBillboardTagParam[1] = 1.0 - fabs(dot);
             SDF_VU0_STOREVECTOR(&direction);
@@ -581,8 +581,8 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         }
         sdfBillBoardMakeTMPacket(packet, matrix);
         sdfDrawTagLink(node->packetList, EE_ADDR(packet));
-        node->next = D_00551D78;
-        D_00551D78 = node;
+        node->next = dds3MultiBillboardPairList;
+        dds3MultiBillboardPairList = node;
     }
     child = node->children[0];
     index = node->children[1]->batch->count;
@@ -669,7 +669,7 @@ void dds3MultiBillboardPktLink(billRenderPair_t *hResource) {
 }
 
 void dds3MultiBillboardLinkOt(void) {
-    billRenderPair_t *pair = D_00551D78;
+    billRenderPair_t *pair = dds3MultiBillboardPairList;
     sdfDrawTag_t *tag;
     u64 *packet;
     void *buffer;
@@ -702,7 +702,7 @@ void dds3MultiBillboardLinkOt(void) {
     packet[7] = 0x42;
     sdfDrawTagLink(tag, EE_ADDR(packet));
     dds3MultiBillboardOt.regFunc(&dds3MultiBillboardOt, tag);
-    D_00551D78 = NULL;
+    dds3MultiBillboardPairList = NULL;
 }
 
 void dds3Billboard_BasicInit(billHandle_t *pBasic) {
@@ -1517,9 +1517,9 @@ void dds3P2APolygonGetResource(dds3P2APolygon_tag *hP2APoly, dds3P2APolygonResou
 }
 
 
-extern u32 D_003170B0[];
-extern u32 D_003170C0[];
-extern sdfGrOt_t *D_003170D0[];
+extern u32 dds3P2APolygonFaceIndex[];
+extern u32 dds3P2APolygonVertexColor[];
+extern sdfGrOt_t *dds3P2APolygonSurfaceTable[];
 extern void MultMatrixNoArg(void);
 extern void sdf3DPrimLinkTm(sdfDrawTag_t *, s32 (*)(s32));
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *, sdfMat_t *, s32 (*)(s32));
@@ -1566,9 +1566,9 @@ void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
     sdf3DPrimLinkTm(list, 0);
     memset(&params, 0, sizeof(params));
     params.attr = 0x4000;
-    params.faceIndex = D_003170B0;
+    params.faceIndex = dds3P2APolygonFaceIndex;
     params.vertex = positions;
-    params.vertexColor = D_003170C0;
+    params.vertexColor = dds3P2APolygonVertexColor;
     params.uv = (sdfVector2_t *)uv;
     params.color = instance->hBillboard->abgr;
     params.faceCount = 2;
@@ -1664,7 +1664,7 @@ void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
     }
     sdf3DPrimLinkMat(list, instance->pMat, 0);
     sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&params)));
-    surface = D_003170D0[instance->hBillboard->mode];
+    surface = dds3P2APolygonSurfaceTable[instance->hBillboard->mode];
     surface->regFunc(surface, list);
 }
 

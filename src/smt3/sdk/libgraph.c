@@ -86,7 +86,7 @@ typedef struct {
 #define D2_MADR (*(volatile u32 *)0x1000A010)
 #define D2_QWC (*(volatile u32 *)0x1000A020)
 
-extern GParam D_00529F20;
+extern GParam sceGsGParam;
 extern void scePrintf(const char *fmt, ...);
 
 #include "sdk_libkernl.h"
@@ -137,7 +137,7 @@ void sceGsResetGraph(s16 mode, s16 interlace, s16 outputMode, s16 fieldMode)
 
 GParam *sceGsGetGParam(void)
 {
-    return &D_00529F20;
+    return &sceGsGParam;
 }
 
 /* EE register macros: pointer-valued volatile casts of the address constant. */
@@ -151,7 +151,7 @@ GParam *sceGsGetGParam(void)
 #define putVIF1_FIFO(x)  (*VIF1_FIFO = (x))
 #define putGIF_CTRL(x)   (*GIF_CTRL = (x))
 
-extern const u32 D_00529F30[8];
+extern const u32 sceGsResetPathPackets[8];
 
 #ifdef NON_MATCHING
 /* The truthful output-only FBRST scratch omits retail's dead zero setup. */
@@ -163,8 +163,8 @@ void sceGsResetPath(void)
     putVIF1_ERR(2);
     EE_SYNC_L();
     EE_FBRST_SET(vu1, 0x200);
-    putVIF1_FIFO(*(u128 *)&D_00529F30[0]);
-    putVIF1_FIFO(*(u128 *)&D_00529F30[4]);
+    putVIF1_FIFO(*(u128 *)&sceGsResetPathPackets[0]);
+    putVIF1_FIFO(*(u128 *)&sceGsResetPathPackets[4]);
     putGIF_CTRL(1);
 }
 #else
@@ -209,7 +209,7 @@ INCLUDE_ASM(const s32, "sdk/libgraph", _GetGsDxDyOffset);
 #ifdef NON_MATCHING
 extern void _GetGsDxDyOffset(s32 mode, s32 *dx, s32 *dy, s32 *w, s32 *h);
 extern void scePrintf(const char *fmt, ...);
-extern const char D_0054A3F0[];
+extern const char sceGsDefDispEnvModeMsg[];
 
 void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 dy)
 {
@@ -279,7 +279,7 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 d
             ((u64)((dy + offsetY + 35) & 0xFFF) << 12) |
             ((u64)((232 + dx * 2 + ((720 - w) / 2) * 2 + offsetX) & 0xFFF));
     } else {
-        scePrintf(D_0054A3F0, (s16)param->mode);
+        scePrintf(sceGsDefDispEnvModeMsg, (s16)param->mode);
     }
     disp->bgcolor = 0;
 }
@@ -313,36 +313,36 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
 
 /* Native diagnostic strings are retained through DUMP_REGS macro ownership. */
 /* The five timeout messages and the ten register-dump formats. */
-extern const char D_0054A428[];
-extern const char D_0054A458[];
-extern const char D_0054A468[];
-extern const char D_0054A478[];
-extern const char D_0054A488[];
-extern const char D_0054A498[];
-extern const char D_0054A4A8[];
-extern const char D_0054A4B8[];
-extern const char D_0054A4C8[];
-extern const char D_0054A4D8[];
-extern const char D_0054A4F0[];
-extern const char D_0054A508[];
-extern const char D_0054A538[];
-extern const char D_0054A568[];
-extern const char D_0054A590[];
+extern const char sceGsSyncPathDma1Msg[];
+extern const char sceGsDumpD1ChcrFmt[];
+extern const char sceGsDumpD1TadrFmt[];
+extern const char sceGsDumpD1MadrFmt[];
+extern const char sceGsDumpD1QwcFmt[];
+extern const char sceGsDumpD2ChcrFmt[];
+extern const char sceGsDumpD2TadrFmt[];
+extern const char sceGsDumpD2MadrFmt[];
+extern const char sceGsDumpD2QwcFmt[];
+extern const char sceGsDumpVif1StatFmt[];
+extern const char sceGsDumpGifStatFmt[];
+extern const char sceGsSyncPathDma2Msg[];
+extern const char sceGsSyncPathVif1Msg[];
+extern const char sceGsSyncPathVu1Msg[];
+extern const char sceGsSyncPathGifMsg[];
 
 #define DUMP(fmt, addr)                      \
     scePrintf(fmt, *(volatile u32 *)(addr))
 
 #define DUMP_REGS()                          \
-    DUMP(D_0054A458, 0x10009000);            \
-    DUMP(D_0054A468, 0x10009030);            \
-    DUMP(D_0054A478, 0x10009010);            \
-    DUMP(D_0054A488, 0x10009020);            \
-    DUMP(D_0054A498, 0x1000A000);            \
-    DUMP(D_0054A4A8, 0x1000A030);            \
-    DUMP(D_0054A4B8, 0x1000A010);            \
-    DUMP(D_0054A4C8, 0x1000A020);            \
-    DUMP(D_0054A4D8, 0x10003C00);            \
-    DUMP(D_0054A4F0, 0x10003020)
+    DUMP(sceGsDumpD1ChcrFmt, 0x10009000);            \
+    DUMP(sceGsDumpD1TadrFmt, 0x10009030);            \
+    DUMP(sceGsDumpD1MadrFmt, 0x10009010);            \
+    DUMP(sceGsDumpD1QwcFmt, 0x10009020);            \
+    DUMP(sceGsDumpD2ChcrFmt, 0x1000A000);            \
+    DUMP(sceGsDumpD2TadrFmt, 0x1000A030);            \
+    DUMP(sceGsDumpD2MadrFmt, 0x1000A010);            \
+    DUMP(sceGsDumpD2QwcFmt, 0x1000A020);            \
+    DUMP(sceGsDumpVif1StatFmt, 0x10003C00);            \
+    DUMP(sceGsDumpGifStatFmt, 0x10003020)
 
 s32 sceGsSyncPath(s32 mode, u16 timeout)
 {
@@ -352,21 +352,21 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
     if (mode == 0) {
         while (D1_CHCR & 0x100) {
             if (i++ > 0x1000000) {
-                scePrintf(D_0054A428);
+                scePrintf(sceGsSyncPathDma1Msg);
                 DUMP_REGS();
                 return -1;
             }
         }
         while (D2_CHCR & 0x100) {
             if (i++ > 0x1000000) {
-                scePrintf(D_0054A508);
+                scePrintf(sceGsSyncPathDma2Msg);
                 DUMP_REGS();
                 return -1;
             }
         }
         while (VIF1_STAT & 0x1F000003) {
             if (i++ > 0x1000000) {
-                scePrintf(D_0054A538);
+                scePrintf(sceGsSyncPathVif1Msg);
                 DUMP_REGS();
                 return -1;
             }
@@ -374,7 +374,7 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
         EE_GET_VPU_STAT(stat);
         while (stat & 0x100) {
             if (i++ > 0x1000000) {
-                scePrintf(D_0054A568);
+                scePrintf(sceGsSyncPathVu1Msg);
                 DUMP_REGS();
                 return -1;
             }
@@ -382,7 +382,7 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
         }
         while (GIF_STAT & 0xC00) {
             if (i++ > 0x1000000) {
-                scePrintf(D_0054A590);
+                scePrintf(sceGsSyncPathGifMsg);
                 DUMP_REGS();
                 return -1;
             }
@@ -412,35 +412,35 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
     }
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A428);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathDma1Msg);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A458);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1ChcrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A468);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1TadrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A478);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1MadrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A488);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1QwcFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A498);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2ChcrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4A8);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2TadrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4B8);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2MadrFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4C8);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2QwcFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4D8);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpVif1StatFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A4F0);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpGifStatFmt);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A508);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathDma2Msg);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A538);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathVif1Msg);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A568);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathVu1Msg);
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A590);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathGifMsg);
 
 s32 sceGsSetDefLoadImage(sceGsLoadImage *p, s16 dbp, s16 dbw, s16 dpsm, s16 dsax, s16 dsay,
                          s16 rrw, s16 rrh)
@@ -522,7 +522,7 @@ s32 sceGsSetDefStoreImage(sceGsStoreImage *p, s16 sbp, s16 sbw, s16 spsm, s16 ss
     return 7;
 }
 
-extern const char D_0054A6E0[]; /* DMA channel timeout diagnostic, with native padding. */
+extern const char sceGsExecLoadImageDma2Msg[]; /* DMA channel timeout diagnostic, with native padding. */
 
 s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
 {
@@ -530,7 +530,7 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
 
     while (D2_CHCR & 0x100) {
         if (i++ > 0x1000000) {
-            scePrintf(D_0054A6E0);
+            scePrintf(sceGsExecLoadImageDma2Msg);
             return -1;
         }
     }
@@ -543,7 +543,7 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     D2_CHCR = 0x101;
     while (D2_CHCR & 0x100) {
         if (i++ > 0x1000000) {
-            scePrintf(D_0054A6E0);
+            scePrintf(sceGsExecLoadImageDma2Msg);
             return -1;
         }
     }
@@ -575,11 +575,11 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
  * case body computes the byte remainder, then the quadword remainder, then the
  * DMA count, which halved the instruction-order difference. */
 #ifdef NON_MATCHING
-extern const char D_0054A720[];
-extern const char D_0054A758[];
-extern const char D_0054A788[];
-extern const char D_0054A7C8[];
-extern const u128 D_00529F50;
+extern const char sceGsExecStoreImageDma1Msg[];
+extern const char sceGsExecStoreImageGsMsg[];
+extern const char sceGsExecStoreImageDma1ToMemMsg[];
+extern const char sceGsExecStoreImageVif1Msg[];
+extern const u128 sceGsStoreImageFlushPacket;
 
 s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
 {
@@ -696,7 +696,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     if ((value & 0x100) != 0) {
         do {
             if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(D_0054A720);
+                scePrintf(sceGsExecStoreImageDma1Msg);
                 return -1;
             }
             value = *(volatile u32 *)0x10009000;
@@ -719,7 +719,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     if ((value & 0x100) != 0) {
         do {
             if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(D_0054A720);
+                scePrintf(sceGsExecStoreImageDma1Msg);
                 return -1;
             }
             value = *(volatile u32 *)0x10009000;
@@ -730,8 +730,8 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     if ((csr & 2) == 0) {
         do {
             if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(D_0054A758);
-                *(volatile u128 *)0x10005000 = D_00529F50;
+                scePrintf(sceGsExecStoreImageGsMsg);
+                *(volatile u128 *)0x10005000 = sceGsStoreImageFlushPacket;
                 return -1;
             }
             csr = *(volatile u64 *)0x12001000;
@@ -755,7 +755,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
         if ((value & 0x100) != 0) {
             do {
                 if ((u32)timeout++ > 0x1000000U) {
-                    scePrintf(D_0054A788);
+                    scePrintf(sceGsExecStoreImageDma1ToMemMsg);
 *(volatile u64 *)0x12001000 = 0x100;
                     *(volatile u64 *)0x12001040 = 0;
                     *(volatile u32 *)0x10003000 = 1;
@@ -773,7 +773,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             if ((value & 0x1F000000) == 0) {
                 do {
                     if ((u32)timeout++ > 0x1000000U) {
-                        scePrintf(D_0054A7C8);
+                        scePrintf(sceGsExecStoreImageVif1Msg);
 *(volatile u64 *)0x12001000 = 0x100;
                         *(volatile u64 *)0x12001040 = 0;
                         *(volatile u32 *)0x10003000 = 1;
@@ -792,7 +792,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
         if ((value & 0x1F000000) == 0) {
             do {
                 if ((u32)timeout++ > 0x1000000U) {
-                    scePrintf(D_0054A7C8);
+                    scePrintf(sceGsExecStoreImageVif1Msg);
 *(volatile u64 *)0x12001000 = 0x100;
                     *(volatile u64 *)0x12001040 = 0;
                     *(volatile u32 *)0x10003000 = 1;
@@ -814,7 +814,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
                 if ((value & 0x1F000000) == 0) {
                     do {
                         if ((u32)timeout++ > 0x1000000U) {
-                            scePrintf(D_0054A7C8);
+                            scePrintf(sceGsExecStoreImageVif1Msg);
 *(volatile u64 *)0x12001000 = 0x100;
                             *(volatile u64 *)0x12001040 = 0;
                             *(volatile u32 *)0x10003000 = 1;
@@ -833,12 +833,12 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     *(volatile u64 *)0x12001040 = 0;
     GsPutIMR(restoreImr);
     *(volatile u64 *)0x12001000 = 2;
-    *(volatile u128 *)0x10005000 = D_00529F50;
+    *(volatile u128 *)0x10005000 = sceGsStoreImageFlushPacket;
     return 0;
 
 }
 #else
-INCLUDE_RODATA(const s32, "sdk/libgraph", D_0054A6E0);
+INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsExecLoadImageDma2Msg);
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 #endif

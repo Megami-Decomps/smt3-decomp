@@ -87,18 +87,18 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
-extern f32 D_003175B0[4];
+extern f32 dds3TrackPolyVCType1Param[4];
 extern f32 dds3TrackPolyVCType2Param[4];
-extern f32 D_003175D0[4];
-extern f32 D_003175E0[4];
+extern f32 dds3TrackPolyVCSetAcuteParam[4];
+extern f32 dds3TrackPolyVCSetAcuteWParam[4];
 extern f32 dds3TrackPolyVCAcuteParam[4];
 extern void (*VCSetFunc[])(void *, void *, void *);
-extern u32 D_00317380[];
-extern u32 D_00317400[];
-extern u32 D_00317540[];
-extern u32 D_00317470[];
-extern u32 D_003174F0[];
-extern sdfGrOt_t *D_00317640[];
+extern u32 dds3TrackPolyPairFaceIndex[];
+extern u32 dds3TrackPolyTriangleFaceIndex[];
+extern u32 dds3TrackPolyFiveVectorFaceIndex[];
+extern u32 dds3TrackPolySixVectorFaceIndex[];
+extern u32 dds3TrackPolyDefaultFaceIndex[];
+extern sdfGrOt_t *dds3TrackPolyOtTable[];
 extern sdfGrOt_t sdfGrOtTable[85];
 
 void dds3TrackPolyListInit(dds3TrackPoly_t *hTrackPoly, s32 number);
@@ -289,10 +289,10 @@ typedef struct
 extern void *memcpy(void *a, const void *b, size_t c);
 extern void *memset(void *a, s32 b, size_t c);
 extern dds3SpPolyEntry_t dds3SpPolyTable[];
-extern void (*D_003176A0[])(void *work);
-extern void (*D_003176B0[])(void *work, f32 scale);
-extern f32 D_00317650[4];
-extern f32 D_00317660[4];
+extern void (*dds3SpPolyResetTable[])(void *work);
+extern void (*dds3SpPolySetScaleTable[])(void *work, f32 scale);
+extern f32 dds3SpPolyColorTo[4];
+extern f32 dds3SpPolyColorFrom[4];
 extern f32 dds3PolygonTriangleParam[4];
 extern u8 dds3EffectBase[];
 extern f32 dds3GetRandFloatA(void *name);
@@ -353,8 +353,8 @@ void dds3PolygonSetColor(dds3Polygon_t *hPolygon, u32 color);
 void dds3PolygonTriangleSet(dds3Polygon_t *hPolygon, const f32 *center);
 void dds3TrackPolyColorSet(dds3TrackPoly_t *hTrackPoly, s32 number, u32 color);
 extern dds3Polygon_t *hDrawListTop;
-extern u8 D_005698A0[];
-extern sdf3DPrimPolyParm_t D_005698B0;
+extern u8 dds3PolygonRandState[];
+extern sdf3DPrimPolyParm_t dds3PolygonPrimParm;
 
 extern void sdfRandomizeByTime(void *aCB);
 
@@ -364,7 +364,7 @@ void dds3PolygonManagerInit(void)
 {
     hDrawListTop = 0;
     dds3TrackPolyInit();
-    sdfRandomizeByTime(D_005698A0);
+    sdfRandomizeByTime(dds3PolygonRandState);
 }
 
 void dds3PolygonManagerExit(void) {
@@ -485,8 +485,8 @@ void dds3PolygonSetTex(dds3Polygon_t *hPolygon, sdfTexHandle_t *hTex) {
 
 void dds3TrackPolyInit(void)
 {
-    memset(&D_005698B0, 0, sizeof(D_005698B0));
-    D_005698B0.attr = 0x4000;
+    memset(&dds3PolygonPrimParm, 0, sizeof(dds3PolygonPrimParm));
+    dds3PolygonPrimParm.attr = 0x4000;
 }
 
 dds3TrackPoly_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type) {
@@ -678,7 +678,7 @@ void dds3TrackPolyVCRefresh_ParType1(dds3TrackPoly_t *hTrackPoly, s32 index) {
     startCarrier[0] = color & 0xFF000000;
     MMI_RGBA_UNPACK(startCarrier, 1.0f / 128.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR(D_003175B0);
+    SDF_VU0_LOADVECTOR(dds3TrackPolyVCType1Param);
     VU0_LERP_VF10_VF11(1.0f / (f32)perCell);
     SDF_VU0_COPYVECTOR_A_TO_C();
     cellCarrier[0] = color;
@@ -795,7 +795,7 @@ void dds3TrackPolyVCSet_Acute(dds3TrackPoly_t *hTrackPoly, u32 abgr_in, u32 abgr
     startCarrier[0] = abgr_in & 0xFF000000;
     MMI_RGBA_UNPACK(startCarrier, 1.0f / 128.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR(D_003175D0);
+    SDF_VU0_LOADVECTOR(dds3TrackPolyVCSetAcuteParam);
     VU0_LERP_VF10_VF11(1.0f / (f32)perCell);
     SDF_VU0_COPYVECTOR_A_TO_C();
     for (i = 0; i < cellCount; i++) {
@@ -839,7 +839,7 @@ void dds3TrackPolyVCSet_AcuteW(dds3TrackPoly_t *hTrackPoly, u32 color) {
     alpha[0] = color & 0xFF000000;
     MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADVECTOR(D_003175E0);
+    SDF_VU0_LOADVECTOR(dds3TrackPolyVCSetAcuteWParam);
     SDF_VU0_INTERPOLATE(1.0f / quarter);
     SDF_VU0_COPYVECTOR_A_TO_C();
     i = 0;
@@ -1401,105 +1401,105 @@ void dds3TrackPolyLinkOt(void) {
         sdf3DPrimLinkMat(list, system->pMat, 0);
         count = system->number;
         if (system->type == TRACK_TOPOLOGY_PAIR) {
-            D_005698B0.faceIndex = D_00317380;
+            dds3PolygonPrimParm.faceIndex = dds3TrackPolyPairFaceIndex;
             for (i = 0; i < count; i++) {
                 cell = &system->trackList[i];
-                D_005698B0.faceCount = 16;
-                D_005698B0.pointCount = 18;
+                dds3PolygonPrimParm.faceCount = 16;
+                dds3PolygonPrimParm.pointCount = 18;
                 remaining = cell->count;
-                D_005698B0.vertex = (sdfVector4_t *)cell->pVertex;
-                D_005698B0.vertexColor = cell->pVC;
-                D_005698B0.color = cell->color;
+                dds3PolygonPrimParm.vertex = (sdfVector4_t *)cell->pVertex;
+                dds3PolygonPrimParm.vertexColor = cell->pVC;
+                dds3PolygonPrimParm.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
-                    D_005698B0.vertex += 16;
-                    D_005698B0.vertexColor += 16;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
+                    dds3PolygonPrimParm.vertex += 16;
+                    dds3PolygonPrimParm.vertexColor += 16;
                 }
                 if (remaining >= 4) {
-                    D_005698B0.faceCount = remaining - 2;
-                    D_005698B0.pointCount = remaining;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
+                    dds3PolygonPrimParm.faceCount = remaining - 2;
+                    dds3PolygonPrimParm.pointCount = remaining;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
                 }
             }
         } else if (system->type == TRACK_TOPOLOGY_TRIANGLE) {
-            D_005698B0.faceIndex = D_00317400;
+            dds3PolygonPrimParm.faceIndex = dds3TrackPolyTriangleFaceIndex;
             for (i = 0; i < count; i++) {
                 cell = &system->trackList[i];
-                D_005698B0.faceCount = 16;
-                D_005698B0.pointCount = 15;
+                dds3PolygonPrimParm.faceCount = 16;
+                dds3PolygonPrimParm.pointCount = 15;
                 remaining = cell->count;
-                D_005698B0.vertex = (sdfVector4_t *)cell->pVertex;
-                D_005698B0.vertexColor = cell->pVC;
-                D_005698B0.color = cell->color;
+                dds3PolygonPrimParm.vertex = (sdfVector4_t *)cell->pVertex;
+                dds3PolygonPrimParm.vertexColor = cell->pVC;
+                dds3PolygonPrimParm.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
-                    D_005698B0.vertex += 12;
-                    D_005698B0.vertexColor += 12;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
+                    dds3PolygonPrimParm.vertex += 12;
+                    dds3PolygonPrimParm.vertexColor += 12;
                 }
                 if (remaining >= 6) {
-                    D_005698B0.faceCount = (remaining / 3) * 4 - 4;
-                    D_005698B0.pointCount = remaining;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
+                    dds3PolygonPrimParm.faceCount = (remaining / 3) * 4 - 4;
+                    dds3PolygonPrimParm.pointCount = remaining;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
                 }
             }
         } else if (system->type == TRACK_TOPOLOGY_FIVE_VECTOR) {
-            D_005698B0.faceIndex = D_00317540;
+            dds3PolygonPrimParm.faceIndex = dds3TrackPolyFiveVectorFaceIndex;
             for (i = 0; i < count; i++) {
                 cell = &system->trackList[i];
-                D_005698B0.faceCount = 8;
-                D_005698B0.pointCount = 10;
+                dds3PolygonPrimParm.faceCount = 8;
+                dds3PolygonPrimParm.pointCount = 10;
                 remaining = cell->count;
-                D_005698B0.vertex = (sdfVector4_t *)cell->pVertex;
-                D_005698B0.vertexColor = cell->pVC;
-                D_005698B0.color = cell->color;
+                dds3PolygonPrimParm.vertex = (sdfVector4_t *)cell->pVertex;
+                dds3PolygonPrimParm.vertexColor = cell->pVC;
+                dds3PolygonPrimParm.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
-                    D_005698B0.vertex += 5;
-                    D_005698B0.vertexColor += 5;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
+                    dds3PolygonPrimParm.vertex += 5;
+                    dds3PolygonPrimParm.vertexColor += 5;
                 }
             }
         } else if (system->type == TRACK_TOPOLOGY_SIX_VECTOR) {
-            D_005698B0.faceIndex = D_00317470;
+            dds3PolygonPrimParm.faceIndex = dds3TrackPolySixVectorFaceIndex;
             for (i = 0; i < count; i++) {
                 cell = &system->trackList[i];
-                D_005698B0.faceCount = 10;
-                D_005698B0.pointCount = 12;
+                dds3PolygonPrimParm.faceCount = 10;
+                dds3PolygonPrimParm.pointCount = 12;
                 remaining = cell->count;
-                D_005698B0.vertex = (sdfVector4_t *)cell->pVertex;
-                D_005698B0.vertexColor = cell->pVC;
-                D_005698B0.color = cell->color;
+                dds3PolygonPrimParm.vertex = (sdfVector4_t *)cell->pVertex;
+                dds3PolygonPrimParm.vertexColor = cell->pVC;
+                dds3PolygonPrimParm.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
-                    D_005698B0.vertex += 6;
-                    D_005698B0.vertexColor += 6;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
+                    dds3PolygonPrimParm.vertex += 6;
+                    dds3PolygonPrimParm.vertexColor += 6;
                 }
             }
         } else {
-            D_005698B0.faceIndex = D_003174F0;
+            dds3PolygonPrimParm.faceIndex = dds3TrackPolyDefaultFaceIndex;
             for (i = 0; i < count; i++) {
                 cell = &system->trackList[i];
-                D_005698B0.faceCount = 12;
-                D_005698B0.pointCount = 16;
+                dds3PolygonPrimParm.faceCount = 12;
+                dds3PolygonPrimParm.pointCount = 16;
                 remaining = cell->count;
-                D_005698B0.vertex = (sdfVector4_t *)cell->pVertex;
-                D_005698B0.vertexColor = cell->pVC;
-                D_005698B0.color = cell->color;
+                dds3PolygonPrimParm.vertex = (sdfVector4_t *)cell->pVertex;
+                dds3PolygonPrimParm.vertexColor = cell->pVC;
+                dds3PolygonPrimParm.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
-                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&D_005698B0)));
-                    D_005698B0.vertex += 12;
-                    D_005698B0.vertexColor += 12;
+                    sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3PolygonPrimParm)));
+                    dds3PolygonPrimParm.vertex += 12;
+                    dds3PolygonPrimParm.vertexColor += 12;
                 }
             }
         }
     }
     for (i = 0; i < 4; i++) {
         if (lists[i] != 0) {
-            ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00317640[i]->regFunc)(D_00317640[i], lists[i]);
+            ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))dds3TrackPolyOtTable[i]->regFunc)(dds3TrackPolyOtTable[i], lists[i]);
         }
     }
     if (lists[4] != 0) {
@@ -1568,8 +1568,8 @@ void dds3TrianglePolyLinkOt(sdfGrOt_t *pOt, dds3TrianglePoly_t *hTriPoly) {
         sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&state)));
     }
     if (remaining > 0) {
-        D_005698B0.faceCount = remaining / 3;
-        D_005698B0.pointCount = remaining;
+        dds3PolygonPrimParm.faceCount = remaining / 3;
+        dds3PolygonPrimParm.pointCount = remaining;
         sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&state)));
     }
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))pOt->regFunc)(pOt, list);
@@ -1769,8 +1769,8 @@ u32 dds3SpPoly_Color(u32 frame, u32 frame_end, u32 abgr) {
     if (frame < frame_end) {
         ratio = (f32)frame / (f32)frame_end;
     }
-    SDF_VU0_LOADVECTOR(D_00317660);
-    SDF_VU0_LOADVECTOR_B(D_00317650);
+    SDF_VU0_LOADVECTOR(dds3SpPolyColorFrom);
+    SDF_VU0_LOADVECTOR_B(dds3SpPolyColorTo);
     SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
     SDF_VU0_SCALEVECTOR_B_BITS(ratio);
     SDF_VU0_ADDVECTOR();
@@ -2456,12 +2456,12 @@ void dds3SpPolyDraw(dds3SpPoly_Basic_t *hData) {
 }
 
 void dds3SpPolyReset(dds3SpPoly_Basic_t *hData) {
-    D_003176A0[hData->type](hData);
+    dds3SpPolyResetTable[hData->type](hData);
     hData->state = 1;
 }
 
 void dds3SpPolySetScale(dds3SpPoly_Basic_t *hData, f32 scale) {
-    D_003176B0[hData->type](hData, scale);
+    dds3SpPolySetScaleTable[hData->type](hData, scale);
     dds3SpPolyReset(hData);
 }
 
@@ -2539,7 +2539,7 @@ typedef void *(*dds3SpPolyCreateFunc_t)(void *);
 typedef void (*dds3SpPolyWorkFunc_t)(void *);
 typedef void (*dds3SpPolyScaleFunc_t)(void *, f32);
 
-u32 D_00317380[32] = {
+u32 dds3TrackPolyPairFaceIndex[32] = {
     0x00030100, 0x00020300, 0x00050302, 0x00040502,
     0x00070504, 0x00060704, 0x00090706, 0x00080906,
     0x000B0908, 0x000A0B08, 0x000D0B0A, 0x000C0D0A,
@@ -2549,7 +2549,7 @@ u32 D_00317380[32] = {
     0x001B1918, 0x001A1B18, 0x001D1B1A, 0x001C1D1A,
     0x001F1D1C, 0x001E1F1C, 0x00000000, 0x00000000,
 };
-u32 D_00317400[28] = {
+u32 dds3TrackPolyTriangleFaceIndex[28] = {
     0x00040100, 0x00030400, 0x00050201, 0x00040501,
     0x00070403, 0x00060703, 0x00080504, 0x00070804,
     0x000A0706, 0x00090A06, 0x000B0807, 0x000A0B07,
@@ -2558,7 +2558,7 @@ u32 D_00317400[28] = {
     0x0013100F, 0x0012130F, 0x00141110, 0x00131410,
     0x00161312, 0x00151612, 0x00171413, 0x00161713,
 };
-u32 D_00317470[32] = {
+u32 dds3TrackPolySixVectorFaceIndex[32] = {
     0x00070100, 0x00060700, 0x00080201, 0x00070801,
     0x00090302, 0x00080902, 0x000A0403, 0x00090A03,
     0x000B0504, 0x000A0B04, 0x000D0706, 0x000C0D06,
@@ -2568,14 +2568,14 @@ u32 D_00317470[32] = {
     0x00150F0E, 0x0014150E, 0x0016100F, 0x0015160F,
     0x00171110, 0x00161710, 0x00000000, 0x00000000,
 };
-u32 D_003174F0[20] = {
+u32 dds3TrackPolyDefaultFaceIndex[20] = {
     0x00050100, 0x00040500, 0x00060201, 0x00050601,
     0x00070302, 0x00060702, 0x000D0908, 0x000C0D08,
     0x000E0A09, 0x000D0E09, 0x000F0B0A, 0x000E0F0A,
     0x00151110, 0x00141510, 0x00161211, 0x00151611,
     0x00171312, 0x00161712, 0x00000000, 0x00000000,
 };
-u32 D_00317540[24] = {
+u32 dds3TrackPolyFiveVectorFaceIndex[24] = {
     0x00060100, 0x00050600, 0x00070201, 0x00060701,
     0x00080302, 0x00070802, 0x00090403, 0x00080903,
     0x00100B0A, 0x000F100A, 0x00110C0B, 0x0010110B,
@@ -2584,10 +2584,10 @@ u32 D_00317540[24] = {
     0x001C1716, 0x001B1C16, 0x001D1817, 0x001C1D17,
 };
 f32 dds3PolygonTriangleParam[4] = { 0.0f, 0.0f, -1.0f, 0.0f };
-f32 D_003175B0[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 dds3TrackPolyVCType1Param[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 f32 dds3TrackPolyVCType2Param[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-f32 D_003175D0[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-f32 D_003175E0[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 dds3TrackPolyVCSetAcuteParam[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 dds3TrackPolyVCSetAcuteWParam[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 f32 dds3TrackPolyVCAcuteParam[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 /* Indexed by track type * 3 + colour mode. Types 0, 1 and 3 are populated;
  * the IDB's dds3TrackPolyVCSet4Table is entry 9. */
@@ -2605,14 +2605,14 @@ void (*VCSetFunc[16])(void *, void *, void *) = {
     (dds3TrackPolyVCSetFunc_t)dds3TrackPolyVCSet4_Acute,
     (dds3TrackPolyVCSetFunc_t)dds3TrackPolyVCSet4_AcuteW,
 };
-sdfGrOt_t *D_00317640[4] = {
+sdfGrOt_t *dds3TrackPolyOtTable[4] = {
     &sdfGrOtTable[43],
     &sdfGrOtTable[43],
     &sdfGrOtTable[44],
     &sdfGrOtTable[45],
 };
-f32 D_00317650[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-f32 D_00317660[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
+f32 dds3SpPolyColorTo[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+f32 dds3SpPolyColorFrom[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 dds3SpPolyEntry_t dds3SpPolyTable[4] = {
     { (dds3SpPolyCreateFunc_t)dds3SpPoly_Ring_Old_Create, (dds3SpPolyWorkFunc_t)dds3SpPoly_Ring_Old_Draw,
       (dds3SpPolyWorkFunc_t)dds3SpPoly_Ring_Old_Delete },
@@ -2623,13 +2623,13 @@ dds3SpPolyEntry_t dds3SpPolyTable[4] = {
     { (dds3SpPolyCreateFunc_t)dds3SpPoly_RollRingCreate, (dds3SpPolyWorkFunc_t)dds3SpPoly_RollRingDraw,
       (dds3SpPolyWorkFunc_t)dds3SpPoly_RollRingDelete },
 };
-void (*D_003176A0[4])(void *work) = {
+void (*dds3SpPolyResetTable[4])(void *work) = {
     (dds3SpPolyWorkFunc_t)dds3SpPoly_Ring_Old_BuffInit,
     (dds3SpPolyWorkFunc_t)dds3SpPoly_RingAllBuffInit,
     (dds3SpPolyWorkFunc_t)dds3SpPoly_SphereRingAllBuffInit,
     (dds3SpPolyWorkFunc_t)dds3SpPoly_RollRingAllBuffInit,
 };
-void (*D_003176B0[4])(void *work, f32 scale) = {
+void (*dds3SpPolySetScaleTable[4])(void *work, f32 scale) = {
     (dds3SpPolyScaleFunc_t)dds3SpPoly_Ring_Old_SetScale,
     (dds3SpPolyScaleFunc_t)dds3SpPoly_RingSetScale,
     (dds3SpPolyScaleFunc_t)dds3SpPoly_SphereRingSetScale,

@@ -2,7 +2,7 @@
 #include "sdfFrame.h"
 #include "kernel.h"
 
-extern char D_0054F908[];
+extern char evtSkyProcName[];
 
 extern u16 skyanime;
 
@@ -108,7 +108,7 @@ void evtExitSky(void)
 {
     dds3ProcessID_t *id;
 
-    id = dds3SearchProcessName(D_0054F908);
+    id = dds3SearchProcessName(evtSkyProcName);
     if (id != NULL) {
         dds3KillProcess(id, 1);
     }
@@ -120,7 +120,7 @@ dds3ProcessID_t *evtInitSky(void)
     fldSkySetAlpha(0x80);
     fldSkySetAlphaOfs(0);
     fldSkySetFilter(0, 1, 0);
-    return dds3StartProcess(D_0054F908, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
+    return dds3StartProcess(evtSkyProcName, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
 }
 INCLUDE_SDATA(const s32, "event/evtSky", skyanime);
 
@@ -128,9 +128,9 @@ INCLUDE_SDATA(const s32, "event/evtSky", D_0054F902);
 
 INCLUDE_SDATA(const s32, "event/evtSky", fldbokasi);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F908);
+INCLUDE_SDATA(const s32, "event/evtSky", evtSkyProcName);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F910);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFrameNumFmt);
 
 INCLUDE_SDATA(const s32, "event/evtSky", D_0054F918);
 
@@ -168,29 +168,29 @@ INCLUDE_SDATA(const s32, "event/evtSky", evtMenuDisp_cnt);
 
 INCLUDE_SDATA(const s32, "event/evtSky", D_0054F99C);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9A0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtScrollUpMark);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9A8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtScrollDownMark);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9B0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtIndentInt);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9B8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtStr);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9C0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtSpaceStr);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9C8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtNameExt);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9D0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtChar);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9D8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtLabelEvent);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9E0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtEventNo);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9E8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtLabelCut);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9F0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtCutNo);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F9F8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtLabelName);
 
 INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA00);
 
@@ -208,33 +208,33 @@ INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA30);
 
 INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA38);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA40);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtInt4);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA48);
+INCLUDE_SDATA(const s32, "event/evtSky", evtStrEllipsis);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA50);
+INCLUDE_SDATA(const s32, "event/evtSky", evtStrOn);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA58);
+INCLUDE_SDATA(const s32, "event/evtSky", evtStrOff);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA60);
+INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameNormal);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA68);
+INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameAdd);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA70);
+INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameSub);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA78);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtFloat1);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA80);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtInt);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA88);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtName11);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA90);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtPlayerNo);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA98);
+INCLUDE_SDATA(const s32, "event/evtSky", evtFmtIndentStr);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FAA0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtMsgSaveOpenError);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FAA8);
+INCLUDE_SDATA(const s32, "event/evtSky", evtPfsDevice);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FAB0);
+INCLUDE_SDATA(const s32, "event/evtSky", evtPackNameFormat);
 

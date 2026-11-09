@@ -48,7 +48,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 extern void FrameRun(evtPolygonMovieWork_t *wdata);
 #include "sdk_libc.h"
 
-extern f32 D_0056CFF0[12];
+extern f32 evtSceneLightParam[12];
 extern s32 strcmp(const char *a, const char *b);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, f32 *pos, f32 *rot);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
@@ -98,8 +98,8 @@ extern void dds3MoverBasicSetPath(dds3Basic_t *mover, dds3Basic_t *path);
 extern void dds3MoverBasicMakePath(dds3Basic_t *mover);
 extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern u32 dds3DrawFlag;
-extern char D_0053BAF8[];
-extern char D_0053BB20[];
+extern char evtPolygonMovieStartMsg[];
+extern char evtPolygonMovieMapMsg[];
 void evtPolygonMovieShutdown(dds3ProcessID_t *id);
 void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file);
 evtPolygonMovieWork_t *InitPolygonMovieWorkData(void);
@@ -123,13 +123,13 @@ extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
 extern u8 dds3ScreenBlurFlag;
 extern u32 dds3LightParam[];
-extern pmdSceneFogTable_t D_0056D020;
-extern dds3Effect_Blur_t D_0056D040;
-extern dds3Effect_PartialMultiBlurParam_t D_0056D070;
-extern dds3Effect_DistortionBlurParam_t D_0056D0A0;
-extern dds3Effect_RippleBlurParam_t D_0056D0D0;
-extern dds3Effect_PartialMultiFilterParam_t D_0056D100;
-extern dds3Effect_Filter_t D_0056D130;
+extern pmdSceneFogTable_t evtSceneFogParam;
+extern dds3Effect_Blur_t evtBlur2Param;
+extern dds3Effect_PartialMultiBlurParam_t evtMultBlurParam;
+extern dds3Effect_DistortionBlurParam_t evtDistBlurParam;
+extern dds3Effect_RippleBlurParam_t evtRipBlurParam;
+extern dds3Effect_PartialMultiFilterParam_t evtMultFilterParam;
+extern dds3Effect_Filter_t evtFilterParam;
 extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
 extern void Eve_BlurSetParam(dds3Effect_Blur_t *pParam);
 extern void Eve_BlurON(void);
@@ -166,7 +166,7 @@ extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t 
 extern void dds3SetScreenFovy(f32 fovy);
 extern saddr_t evtCameraFrameState;
 extern f32 nowfovy;
-extern s32 D_0054F8E0;
+extern s32 evtCameraLastFrame;
 
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *memset(void *a, s32 b, size_t c);
@@ -176,25 +176,25 @@ u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2);
 
 extern f32 evtHokanFogParam[4];
 
-extern u32 D_0032C830[4];
+extern u32 evtSceneFogDefaultColor[4];
 
 
-extern dds3Effect_Blur_t D_0032C840;
+extern dds3Effect_Blur_t evtBlur2DefaultParam;
 
 
-extern dds3Effect_PartialMultiBlurParam_t D_0032C870;
+extern dds3Effect_PartialMultiBlurParam_t evtMultBlurDefaultParam;
 
 
-extern dds3Effect_Filter_t D_0032C8A0;
+extern dds3Effect_Filter_t evtFilterDefaultParam;
 
 
-extern dds3Effect_PartialMultiFilterParam_t D_0032C8C0;
+extern dds3Effect_PartialMultiFilterParam_t evtMultFilterDefaultParam;
 
 
-extern dds3Effect_DistortionBlurParam_t D_0032C8F0;
+extern dds3Effect_DistortionBlurParam_t evtDistBlurDefaultParam;
 
 
-extern dds3Effect_RippleBlurParam_t D_0032C920;
+extern dds3Effect_RippleBlurParam_t evtRipBlurDefaultParam;
 
 typedef struct polyMovieClip_t {
     u8 opaque_00[8];
@@ -229,11 +229,11 @@ void dds3PathBasicPauseOn(evtScaledValue_t *value);
 
 void dds3PathBasicPauseOff(evtScaledValue_t *pControl);
 
-extern f32 D_0032C7F0[4];
+extern f32 evtSceneLightDefaultColor[4];
 
-extern f32 D_0032C800[4];
+extern f32 evtSceneLightDefaultDir[4];
 
-extern f32 D_0032C810[4];
+extern f32 evtSceneLightDefaultAmbient[4];
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -283,10 +283,10 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, wdata->nameTable[f->NameIndex]);
         if (basic != NULL) {
             if (evtCameraFrameState == 0) {
-                D_0054F8E0 = -1;
+                evtCameraLastFrame = -1;
             }
-            if (D_0054F8E0 < f->Frame) {
-                D_0054F8E0 = f->Frame;
+            if (evtCameraLastFrame < f->Frame) {
+                evtCameraLastFrame = f->Frame;
                 evtCameraFrameState = EE_ADDR_S(basic);
                 nowfovy = f->data.f[0];
             }
@@ -737,10 +737,10 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         soften2 = f->data.f[0];
         key2 = wdata->slightTable[f->Length].color;
     }
-    evtHokanSceneLight(hokan, ratio, key1, key2, D_0056CFF0);
-    dds3SetLightColor(0, 0, D_0056CFF0);
-    dds3SetLightDir(0, 0, &D_0056CFF0[4]);
-    dds3SetAmbientColor(0, &D_0056CFF0[8]);
+    evtHokanSceneLight(hokan, ratio, key1, key2, evtSceneLightParam);
+    dds3SetLightColor(0, 0, evtSceneLightParam);
+    dds3SetLightDir(0, 0, &evtSceneLightParam[4]);
+    dds3SetAmbientColor(0, &evtSceneLightParam[8]);
     sdfFaceDivSoften = evtHokanFloat(hokan, ratio, soften1, soften2);
     sdfFaceDivBias = evtHokanFloat(hokan, ratio, bias1, bias2);
 }
@@ -766,9 +766,9 @@ void SFogFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
         key1 = NULL;
         key2 = &wdata->sfogTable[f->Length];
     }
-    evtHokanSceneFog(hokan, ratio, &key1->fog, &key2->fog, &D_0056D020.fog);
-    dds3SetFogPara(0, D_0056D020.fog.vec[1], D_0056D020.fog.vec[0], D_0056D020.fog.vec[2], D_0056D020.fog.vec[3]);
-    dds3LightParam[12] = D_0056D020.fog.color;
+    evtHokanSceneFog(hokan, ratio, &key1->fog, &key2->fog, &evtSceneFogParam.fog);
+    dds3SetFogPara(0, evtSceneFogParam.fog.vec[1], evtSceneFogParam.fog.vec[0], evtSceneFogParam.fog.vec[2], evtSceneFogParam.fog.vec[3]);
+    dds3LightParam[12] = evtSceneFogParam.fog.color;
 }
 
 void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
@@ -792,9 +792,9 @@ void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
         key1 = NULL;
         key2 = &wdata->blur2Table[f->data.h[1]];
     }
-    evtHokanBlur2(hokan, ratio, key1, key2, &D_0056D040);
-    Eve_BlurSetParam(&D_0056D040);
-    if (((u8 *)&D_0056D040.abgr)[3] < 3) {
+    evtHokanBlur2(hokan, ratio, key1, key2, &evtBlur2Param);
+    Eve_BlurSetParam(&evtBlur2Param);
+    if (((u8 *)&evtBlur2Param.abgr)[3] < 3) {
         Eve_BlurOFF();
     } else {
         Eve_BlurON();
@@ -822,9 +822,9 @@ void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
         key1 = NULL;
         key2 = &wdata->mblurTable[f->data.h[1]];
     }
-    evtHokanMultBlur(hokan, ratio, key1, key2, &D_0056D070);
-    Eve_PartialMultiBlurSetParam(&D_0056D070);
-    if (((u8 *)&D_0056D070.Blur.abgr)[3] < 3) {
+    evtHokanMultBlur(hokan, ratio, key1, key2, &evtMultBlurParam);
+    Eve_PartialMultiBlurSetParam(&evtMultBlurParam);
+    if (((u8 *)&evtMultBlurParam.Blur.abgr)[3] < 3) {
         Eve_PartialMultiBlurOFF();
     } else {
         Eve_PartialMultiBlurON();
@@ -852,9 +852,9 @@ void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
         key1 = NULL;
         key2 = &wdata->dblurTable[f->data.h[1]];
     }
-    evtHokanDistBlur(hokan, ratio, key1, key2, &D_0056D0A0);
-    Eve_DistortionBlurSetParam(&D_0056D0A0);
-    if (((u8 *)&D_0056D0A0.abgr)[3] < 3) {
+    evtHokanDistBlur(hokan, ratio, key1, key2, &evtDistBlurParam);
+    Eve_DistortionBlurSetParam(&evtDistBlurParam);
+    if (((u8 *)&evtDistBlurParam.abgr)[3] < 3) {
         Eve_DistortionBlurOFF();
     } else {
         Eve_DistortionBlurON();
@@ -882,9 +882,9 @@ void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
         key1 = NULL;
         key2 = &wdata->rblurTable[f->data.h[1]];
     }
-    evtHokanRipBlur(hokan, ratio, key1, key2, &D_0056D0D0);
-    Eve_RippleBlurSetParam(&D_0056D0D0);
-    if (((u8 *)&D_0056D0D0.abgr)[3] < 3) {
+    evtHokanRipBlur(hokan, ratio, key1, key2, &evtRipBlurParam);
+    Eve_RippleBlurSetParam(&evtRipBlurParam);
+    if (((u8 *)&evtRipBlurParam.abgr)[3] < 3) {
         Eve_RippleBlurOFF();
     } else {
         Eve_RippleBlurON();
@@ -912,9 +912,9 @@ void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrame
         key1 = NULL;
         key2 = &wdata->mfilterTable[f->data.h[1]];
     }
-    evtHokanMultFilter(hokan, ratio, key1, key2, &D_0056D100);
-    Eve_PartialMultiFilterSetParam(&D_0056D100);
-    if (((u8 *)&D_0056D100.Filter.rgba)[3] < 3) {
+    evtHokanMultFilter(hokan, ratio, key1, key2, &evtMultFilterParam);
+    Eve_PartialMultiFilterSetParam(&evtMultFilterParam);
+    if (((u8 *)&evtMultFilterParam.Filter.rgba)[3] < 3) {
         Eve_PartialMultiFilterOFF();
     } else {
         Eve_PartialMultiFilterON();
@@ -942,9 +942,9 @@ void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         key1 = NULL;
         key2 = &wdata->filterTable[f->data.h[1]];
     }
-    evtHokanFilter(hokan, ratio, key1, key2, &D_0056D130);
-    Eve_FilterSetParam(&D_0056D130);
-    if (((u8 *)&D_0056D130.abgr)[3] < 2) {
+    evtHokanFilter(hokan, ratio, key1, key2, &evtFilterParam);
+    Eve_FilterSetParam(&evtFilterParam);
+    if (((u8 *)&evtFilterParam.abgr)[3] < 2) {
         Eve_FilterOFF();
     } else {
         Eve_FilterON();
@@ -1110,9 +1110,9 @@ s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id)
     return set;
 }
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
+INCLUDE_RODATA(const s32, "event/evtPolygonMovie", evtPolygonMovieStartMsg);
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
+INCLUDE_RODATA(const s32, "event/evtPolygonMovie", evtPolygonMovieMapMsg);
 
 saddr_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
 {
@@ -1139,12 +1139,12 @@ saddr_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
     if ((work->movieFlags & 1) != 0) {
         return 0;
     }
-    printf(D_0053BAF8, work->eventNo, work->cutNo);
+    printf(evtPolygonMovieStartMsg, work->eventNo, work->cutNo);
     if (work->stageTable != NULL) {
         major = work->stageTable->MajorNum;
         minor = work->stageTable->MinorNum;
         mapNo = (major << 16) + minor;
-        printf(D_0053BB20, major, minor);
+        printf(evtPolygonMovieMapMsg, major, minor);
         if (dds3GetMapNo(dds3GetControlScene()) != mapNo) {
             evtLoadArea_FromMemory(major, minor, EE_ADDR_S(work->stageF1), EE_ADDR_S(work->stageF2),
                                    work->stageTB, 0);
@@ -1284,13 +1284,13 @@ void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
     if (key1 != NULL) {
         SDF_VU0_LOADVECTOR(key1);
     } else {
-        SDF_VU0_LOADVECTOR(D_0032C7F0);
+        SDF_VU0_LOADVECTOR(evtSceneLightDefaultColor);
     }
     SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
     if (key2 != NULL) {
         SDF_VU0_LOADVECTOR_B(key2);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_0032C7F0);
+        SDF_VU0_LOADVECTOR_B(evtSceneLightDefaultColor);
     }
     SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
@@ -1298,13 +1298,13 @@ void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
     if (key1 != NULL) {
         SDF_VU0_LOADVECTOR(key1 + 4);
     } else {
-        SDF_VU0_LOADVECTOR(D_0032C800);
+        SDF_VU0_LOADVECTOR(evtSceneLightDefaultDir);
     }
     SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
     if (key2 != NULL) {
         SDF_VU0_LOADVECTOR_B(key2 + 4);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_0032C800);
+        SDF_VU0_LOADVECTOR_B(evtSceneLightDefaultDir);
     }
     SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
@@ -1312,13 +1312,13 @@ void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
     if (key1 != NULL) {
         SDF_VU0_LOADVECTOR(key1 + 8);
     } else {
-        SDF_VU0_LOADVECTOR(D_0032C810);
+        SDF_VU0_LOADVECTOR(evtSceneLightDefaultAmbient);
     }
     SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
     if (key2 != NULL) {
         SDF_VU0_LOADVECTOR_B(key2 + 8);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_0032C810);
+        SDF_VU0_LOADVECTOR_B(evtSceneLightDefaultAmbient);
     }
     SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
@@ -1367,14 +1367,14 @@ void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVe
     if (key1 != NULL) {
         UnpackRGBAWordFloat(key1->color, 1.0f / 128.0f);
     } else {
-        UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(evtSceneFogDefaultColor[0], 1.0f / 128.0f);
     }
     SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (key2 != NULL) {
         UnpackRGBAWordFloat(key2->color, 1.0f / 128.0f);
     } else {
-        UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(evtSceneFogDefaultColor[0], 1.0f / 128.0f);
     }
     SDF_VU0_SCALEVECTOR_BITS(ratio);
     SDF_VU0_ADDVECTOR();
@@ -1390,10 +1390,10 @@ void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blu
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C840;
+        key1 = &evtBlur2DefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C840;
+        key2 = &evtBlur2DefaultParam;
     }
     d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
     d->blend = key1->blend;
@@ -1418,10 +1418,10 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C870;
+        key1 = &evtMultBlurDefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C870;
+        key2 = &evtMultBlurDefaultParam;
     }
     d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
     d->Blur.abgr = evtHokanColor(hokan, ratio, key1->Blur.abgr, key2->Blur.abgr);
@@ -1449,10 +1449,10 @@ void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C8A0;
+        key1 = &evtFilterDefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C8A0;
+        key2 = &evtFilterDefaultParam;
     }
     for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
@@ -1471,10 +1471,10 @@ void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C8C0;
+        key1 = &evtMultFilterDefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C8C0;
+        key2 = &evtMultFilterDefaultParam;
     }
     d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
     for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
@@ -1493,10 +1493,10 @@ void evtHokanDistBlur(s32 hokan, f32 ratio, dds3Effect_DistortionBlurParam_t *ke
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C8F0;
+        key1 = &evtDistBlurDefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C8F0;
+        key2 = &evtDistBlurDefaultParam;
     }
     d->number = evtHokanUInt(hokan, ratio, key1->number, key2->number);
     d->interval = evtHokanUInt(hokan, ratio, key1->interval, key2->interval);
@@ -1520,10 +1520,10 @@ void evtHokanRipBlur(s32 hokan, f32 ratio, dds3Effect_RippleBlurParam_t *key1, d
         ratio = 0.0f;
     }
     if (key1 == NULL) {
-        key1 = &D_0032C920;
+        key1 = &evtRipBlurDefaultParam;
     }
     if (key2 == NULL) {
-        key2 = &D_0032C920;
+        key2 = &evtRipBlurDefaultParam;
     }
     d->number = evtHokanUInt(hokan, ratio, key1->number, key2->number);
     d->speed = evtHokanFloat(hokan, ratio, key1->speed, key2->speed);
@@ -1883,5 +1883,5 @@ INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", nowfovy);
 
-INCLUDE_SDATA(const s32, "event/evtPolygonMovie", D_0054F8E0);
+INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraLastFrame);
 

@@ -81,7 +81,7 @@ void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
-extern s32 D_00326508[4];
+extern s32 itfPanelMesWinRowOffset[4];
 
 void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
@@ -99,15 +99,15 @@ void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1,
 
 extern void itfMiscSetRatioRGB(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 
-extern s32 D_00326518[];
+extern s32 itfPanelMesWinColorRatio[];
 
-extern s32 D_00326578[];
+extern s32 itfPanelSelWinColorRatio[];
 
-extern s32 D_003265B8[];
+extern s32 itfPanelPlainColorRatio[];
 
 #define ITF_PANEL_FULL_COLOR_SCALE 0x80
 
-extern s32 D_003265C8[];
+extern s32 itfPanelPlainFullColorRatio[];
 
 void CreateColorFacility(itfPanelFacilityData_t *base);
 
@@ -117,11 +117,11 @@ void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, sdfDrawTag_t *command);
 
-extern u8 D_003265F8[];
+extern u8 itfPanelNormalVertexIndex[];
 
 #define ITF_PANEL_QUAD_INDEX_COUNT 4
 
-extern u8 D_00326608[];
+extern u8 itfPanelNormalColorIndex[];
 
 void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
@@ -135,7 +135,7 @@ extern void itfMiscDrawTriangleStripPrim(void *vertices, void *colors, u8 *verte
 
 extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
-extern u8 D_00326618[], D_00326630[], D_00326648[];
+extern u8 itfPanelMesWinStripVertexIndex[], itfPanelMesWinStripColorIndex[], itfPanelMesWinLineColorIndex[];
 
 void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
@@ -143,58 +143,58 @@ void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_FIVE_SIDE_PASS_COUNT 2
 
-extern u8 D_0054F480[8], D_0054F488[8];
+extern u8 itfPanelMesWinLineVertexIndex[8], itfPanelSelWinLineVertexIndex[8];
 
-extern u8 D_00326660[], D_00326678[], D_00326690[];
+extern u8 itfPanelSelWinStripVertexIndex[], itfPanelSelWinStripColorIndex[], itfPanelSelWinLineColorIndex[];
 
 void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-extern u8 D_0054F490[8];
+extern u8 itfPanelPlainRectVertexIndex[8];
 
-extern u8 D_0054F498[8];
+extern u8 itfPanelPlainRectColorIndex[8];
 
-extern u8 D_003266A0[];
+extern u8 itfPanelPlainLineVertexIndex[];
 
-extern u8 D_003266B0[];
+extern u8 itfPanelPlainLineColorIndex[];
 
 void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-extern u8 D_0054F4A0[8];
+extern u8 itfPanelPera1RectVertexIndex[8];
 
-extern u8 D_0054F4A8[8];
+extern u8 itfPanelPera1RectColorIndex[8];
 
 void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
-extern u8 D_0054F4B0[8];
+extern u8 itfPanelLeftFadeStripVertexIndex[8];
 
-extern u8 D_0054F4B8[8];
+extern u8 itfPanelLeftFadeStripColorIndex[8];
 
 void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
 /*END itfDrawFramedPanelWithTextureStrips*/
-extern itfDrawColor_t D_003266C0;
+extern itfDrawColor_t itfPanelSpkCapColor;
 
 extern void itfMiscDrawSpritePrim2(itfDrawVertex_t *, itfDrawColor_t *, itfDrawColor_t *, u32, s32, sdfDrawTag_t *);
 
-extern itfDrawColor_t D_003266D0;
+extern itfDrawColor_t itfPanelSpkCenterColor;
 
 void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-extern u8 D_003266E0[];
+extern u8 itfPanelFacilityVertexIndex[];
 
-extern u8 D_003266F0[];
+extern u8 itfPanelFacilityColorIndex[];
 
-extern itfDrawColor_t D_003264A0;
+extern itfDrawColor_t itfPanelBandTopColor;
 
-extern itfDrawColor_t D_003264B0;
+extern itfDrawColor_t itfPanelBandStretchColor;
 
-extern itfDrawColor_t D_003264C0;
+extern itfDrawColor_t itfPanelBandBottomColor;
 
-extern itfDrawColor_t D_003264D0;
+extern itfDrawColor_t itfPanelBandShortColor;
 
 #define ITF_PANEL_STATE_PACKET_BYTES 0x40
 
@@ -202,7 +202,7 @@ extern u32 sdf2DMakeStdPacket(u32, s32);
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
-extern void (*D_00326428[])();
+extern void (*CreateVertexTable[])();
 extern void (*CreateColorTable[])();
 extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
 
@@ -215,7 +215,7 @@ static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
-extern s32 D_003264E0[];
+extern s32 itfPanelPayloadSize[];
 
 /* Allocate the common record and the kind's payload; kinds 6 to 8 take the
  * caller's value as the first payload word. */
@@ -228,7 +228,7 @@ itfpanel_t *itfPnlRegist2(s32 type, saddr_t texhandle) {
     panel = (itfpanel_t *)sdfMemLock(allocation);
     panel->kind = type;
     panel->allocation = allocation;
-    allocation = sdfMemAllocDirect(D_003264E0[type]);
+    allocation = sdfMemAllocDirect(itfPanelPayloadSize[type]);
     panel->payloadAllocation = allocation;
     payload = (u32 *)sdfMemLock(allocation);
     panel->pwork = payload;
@@ -267,15 +267,15 @@ void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z
     handle->top = y0;
     handle->right = x1;
     handle->bottom = y1;
-    if (D_00326428[handle->kind] != 0) {
-        D_00326428[handle->kind](handle->pwork);
+    if (CreateVertexTable[handle->kind] != 0) {
+        CreateVertexTable[handle->kind](handle->pwork);
     }
 }
 
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
-    void (*handler)() = D_00326428[handle->kind];
+    void (*handler)() = CreateVertexTable[handle->kind];
 
     handle->left += x0;
     handle->top += y0;
@@ -373,7 +373,7 @@ void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     for (i = 0; i < 3; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
             pwork->x = xs[j];
-            pwork->y = ys[0] + D_00326508[i];
+            pwork->y = ys[0] + itfPanelMesWinRowOffset[i];
             pwork++;
         }
     }
@@ -381,7 +381,7 @@ void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     for (i = 0; i < 3; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
             pwork->x = xs[j];
-            pwork->y = ys[0] - D_00326508[i];
+            pwork->y = ys[0] - itfPanelMesWinRowOffset[i];
             pwork++;
         }
     }
@@ -507,7 +507,7 @@ void CreateColorMesWin(itfPanelMesWinData_t *pwork, u32 red, u32 green, u32 blue
     SetVec4(colorRow, red, green, blue, 1);
     colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, D_00326518, 6);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, itfPanelMesWinColorRatio, 6);
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
@@ -517,7 +517,7 @@ void CreateColorSelWin(itfPanelSelWinData_t *pwork, u32 red, u32 green, u32 blue
     SetVec4(colorRow, red, green, blue, 1);
     colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, D_00326578, 4);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, itfPanelSelWinColorRatio, 4);
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
@@ -525,8 +525,8 @@ void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, 
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[1].components, red, green, blue, alpha, D_003265B8, 1);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, D_003265C8, 2);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[1].components, red, green, blue, alpha, itfPanelPlainColorRatio, 1);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelPlainFullColorRatio, 2);
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */
@@ -566,7 +566,7 @@ void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
     colors[1].rgba.alpha = handle->alpha;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003265F8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00326608[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], handle->z, pdrawtag);
+        itfMiscDrawRectanglePrim(drawBuffer, colors, &itfPanelNormalVertexIndex[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &itfPanelNormalColorIndex[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], handle->z, pdrawtag);
     }
 }
 
@@ -584,10 +584,10 @@ void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326618[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &itfPanelMesWinStripVertexIndex[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &itfPanelMesWinStripColorIndex[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F480, &D_00326648[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, itfPanelMesWinLineVertexIndex, &itfPanelMesWinLineColorIndex[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
     }
 }
 
@@ -605,10 +605,10 @@ void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326660[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326678[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &itfPanelSelWinStripVertexIndex[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &itfPanelSelWinStripColorIndex[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F488, &D_00326690[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, itfPanelSelWinLineVertexIndex, &itfPanelSelWinLineColorIndex[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
     }
 }
 
@@ -635,9 +635,9 @@ void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfMiscDrawRectanglePrim(buf, colors, D_0054F490, D_0054F498, handle->z, pdrawtag);
+    itfMiscDrawRectanglePrim(buf, colors, itfPanelPlainRectVertexIndex, itfPanelPlainRectColorIndex, handle->z, pdrawtag);
     for (i = 0; i < 3; i++) {
-        itfMiscDrawLineStripPrim(vertices, colors, &D_003266A0[i * 5], &D_003266B0[i * 5], 5, handle->z, pdrawtag);
+        itfMiscDrawLineStripPrim(vertices, colors, &itfPanelPlainLineVertexIndex[i * 5], &itfPanelPlainLineColorIndex[i * 5], 5, handle->z, pdrawtag);
     }
 }
 
@@ -648,7 +648,7 @@ void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawColor_t *colors = data->colors;
 
     colors[0].rgba.alpha = handle->alpha;
-    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->z, pdrawtag);
+    itfMiscDrawRectanglePrim(drawBuffer, colors, itfPanelPera1RectVertexIndex, itfPanelPera1RectColorIndex, handle->z, pdrawtag);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
@@ -659,7 +659,7 @@ void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
     colors[1].rgba.alpha = handle->alpha;
     itfMiscDrawAlphaPrim(pdrawtag, 2, 0);
-    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_0054F4B0, D_0054F4B8, 6, handle->z, pdrawtag);
+    itfMiscDrawTriangleStripPrim(drawBuffer, colors, itfPanelLeftFadeStripVertexIndex, itfPanelLeftFadeStripColorIndex, 6, handle->z, pdrawtag);
     itfMiscDrawAlphaPrim(pdrawtag, 0, 0);
 }
 
@@ -679,18 +679,18 @@ void DrawMesWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         rect[0].y = top;
         rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&handle->red, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandTopColor, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&handle->red, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandStretchColor, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
         rect[1].y = handle->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&handle->red, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandBottomColor, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     } else {
-        itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
+        itfMiscDrawSpritePrim(&handle->left, &itfPanelBandShortColor,
                                       &handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     }
@@ -709,20 +709,20 @@ void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     rect[0].y = handle->top;
     rect[1].x = leftInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim(rect, &D_003266C0, color, handle->z,
+    itfMiscDrawSpritePrim(rect, &itfPanelSpkCapColor, color, handle->z,
                                   payload->texture, 0, pdrawtag);
 
     rect[0].x = leftInset;
     rect[0].y = handle->top;
     rect[1].x = rightInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266D0, color, handle->z, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(rect, &itfPanelSpkCenterColor, color, handle->z, 0, pdrawtag);
 
     rect[0].x = handle->right;
     rect[0].y = handle->top;
     rect[1].x = rightInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266C0, color, handle->z, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(rect, &itfPanelSpkCapColor, color, handle->z, 0, pdrawtag);
 }
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
@@ -738,8 +738,8 @@ void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
     colors[1].components[3] = (handle->alpha * 0x20) >> 7;
     for (i = 0; i < 3; i++) {
-        itfMiscDrawRectanglePrim(vertices, colors, &D_003266E0[i * 4],
-                        &D_003266F0[i * 4], handle->z, pdrawtag);
+        itfMiscDrawRectanglePrim(vertices, colors, &itfPanelFacilityVertexIndex[i * 4],
+                        &itfPanelFacilityColorIndex[i * 4], handle->z, pdrawtag);
     }
     bottom = handle->bottom;
     top = handle->top;
@@ -752,18 +752,18 @@ void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         rect[0].y = top;
         rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, color, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandTopColor, color, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, color, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandStretchColor, color, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
         rect[1].y = handle->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, color, handle->z,
+        itfMiscDrawSpritePrim(rect, &itfPanelBandBottomColor, color, handle->z,
                                       payload->texture, 0, pdrawtag);
     } else {
-        itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
+        itfMiscDrawSpritePrim(&handle->left, &itfPanelBandShortColor,
                                       &handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     }
@@ -780,19 +780,19 @@ void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag) {
     stateWords[7] = 0x42;
     sdfDrawTagLink(pdrawtag, packet);
 }
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F480);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelMesWinLineVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F488);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelSelWinLineVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F490);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPlainRectVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F498);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPlainRectColorIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F4A0);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPera1RectVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F4A8);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPera1RectColorIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F4B0);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelLeftFadeStripVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F4B8);
+INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelLeftFadeStripColorIndex);
 

@@ -107,8 +107,8 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *aParm);
 
 extern effBezierDrawParam_t dds3BezierVertexCount, dds3BezierTrackPolyVertex;
-extern const f32 D_0031F0B0[8][4];
-extern const u32 D_0031F020[28], D_0031F090[8];
+extern const f32 dds3BezierTrackPolyInitVertex[8][4];
+extern const u32 dds3BezierVertexCountIndices[28], dds3BezierTrackPolyVertexIndices[8];
 extern sdfGrOt_t *dds3BezierTrackPolyParam[];
 
 dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex);
@@ -745,16 +745,16 @@ dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex) {
     history->abgr = 0x80808080;
     history->hMem = allocation;
     history->count = 0;
-    memcpy(history->pHeadVertex, D_0031F0B0, sizeof(D_0031F0B0));
+    memcpy(history->pHeadVertex, dds3BezierTrackPolyInitVertex, sizeof(dds3BezierTrackPolyInitVertex));
     asset = sdfMatNew();
     history->pMat = asset;
     sdfMatSetConstant(asset, 1.0f);
     memset(&dds3BezierVertexCount, 0, 0x2C);
     dds3BezierVertexCount.flags = 0x4000;
-    dds3BezierVertexCount.primitiveIndices = D_0031F020;
+    dds3BezierVertexCount.primitiveIndices = dds3BezierVertexCountIndices;
     memset(&dds3BezierTrackPolyVertex, 0, 0x2C);
     dds3BezierTrackPolyVertex.flags = 0x4000;
-    dds3BezierTrackPolyVertex.primitiveIndices = D_0031F090;
+    dds3BezierTrackPolyVertex.primitiveIndices = dds3BezierTrackPolyVertexIndices;
     dds3BezierTrackPolyVertex.primitiveCount = 6;
     dds3BezierTrackPolyVertex.pointCount = 8;
     return history;

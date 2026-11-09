@@ -431,7 +431,7 @@ typedef struct sdfPreDrawTag_t {
 
 extern s32 sdfGrPacketBuffSize;
 
-extern s32 D_00551870[2];
+extern s32 sdfGrPacketBuffBase[2];
 
 extern s32 sdfGrPacketBuffPtr;
 

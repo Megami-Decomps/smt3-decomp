@@ -61,22 +61,22 @@ typedef struct vrefParam {
     u8 b[12];
 } vrefParam;
 
-/* D_005989D0 is the per-port state array, D_00598BC0 the RPC packet shared by
- * every call into the IOP module, D_00598980 its sceSif client data, and
- * D_00529FA8 the "libpad is initialised" flag. D_00529FB0 and D_00529FD0 are
+/* padPortState is the per-port state array, padRpcPacket the RPC packet shared by
+ * every call into the IOP module, padRpcClient its sceSif client data, and
+ * padInitialized the "libpad is initialised" flag. padStateNames and padRequestNames are
  * the state and request name tables, D_0054AA80 the empty string both
  * stringify functions fall back to. */
-extern padState D_005989D0[2][4] __attribute__((section(".data")));
+extern padState padPortState[2][4] __attribute__((section(".data")));
 typedef struct padRpcClient_t {
     u32 reserved[9];
     void *server;
 } padRpcClient_t;
-extern padRpcClient_t D_00598980[2] __attribute__((section(".data")));
-extern padRpc D_00598BC0 __attribute__((section(".data")));
-extern s32 D_00529FA8 __attribute__((section(".data")));
+extern padRpcClient_t padRpcClient[2] __attribute__((section(".data")));
+extern padRpc padRpcPacket __attribute__((section(".data")));
+extern s32 padInitialized __attribute__((section(".data")));
 
-extern const char *D_00529FB0[8] __attribute__((section(".data")));
-extern const char *D_00529FD0[4] __attribute__((section(".data")));
+extern const char *padStateNames[8] __attribute__((section(".data")));
+extern const char *padRequestNames[4] __attribute__((section(".data")));
 
 extern void SyncDCache(void *start, void *end);
 extern void *memcpy(void *a, const void *b, size_t c);
@@ -85,7 +85,7 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
 extern int _send_to_iop(int port, int slot);
 
-/* D_00598AC0 is the command-block array the IOP DMAs from, D_00529FAC the
+/* padCmdBlock is the command-block array the IOP DMAs from, padDebugPrint the
  * debug-print flag used by initialization and command diagnostics. */
 typedef struct sceSifDmaData {
     void *src;
@@ -94,33 +94,33 @@ typedef struct sceSifDmaData {
     s32 attr;
 } sceSifDmaData;
 
-extern padCmd D_00598AC0[2][4] __attribute__((section(".data")));
-extern s32 D_00529FAC __attribute__((section(".data")));
+extern padCmd padCmdBlock[2][4] __attribute__((section(".data")));
+extern s32 padDebugPrint __attribute__((section(".data")));
 extern void *memset(void *a, int b, size_t c);
 extern int scePrintf(const char *fmt, ...);
 extern s32 sceSifDmaStat(u32 id);
 extern u32 sceSifSetDma(sceSifDmaData *data, s32 count);
 
-extern const char D_0054A960[];
+extern const char padDmaFailMsg[];
 
 int _send_to_iop(int port, int slot)
 {
-    padCmd *c = D_005989D0[port][slot].cmd;
+    padCmd *c = padPortState[port][slot].cmd;
     sceSifDmaData dma[16];
     int id;
     u32 seq;
     void *destination;
 
-    if (D_005989D0[port][slot].dmaId != 0) {
-        if (sceSifDmaStat(D_005989D0[port][slot].dmaId) >= 0) {
-            if (D_00529FAC != 0) {
-                scePrintf(D_0054A960);
+    if (padPortState[port][slot].dmaId != 0) {
+        if (sceSifDmaStat(padPortState[port][slot].dmaId) >= 0) {
+            if (padDebugPrint != 0) {
+                scePrintf(padDmaFailMsg);
             }
             return 0;
         }
     }
     seq = c->seq + 1;
-    destination = EE_ADDR_AS(void *, (D_005989D0[port][slot].iopAddr + ((seq & 1) << 5)));
+    destination = EE_ADDR_AS(void *, (padPortState[port][slot].iopAddr + ((seq & 1) << 5)));
     c->seq = seq;
     SyncDCache(c, (u8 *)c + 0x20);
     dma[0].dest = destination;
@@ -129,12 +129,12 @@ int _send_to_iop(int port, int slot)
     dma[0].attr = 0;
     id = sceSifSetDma(dma, 1);
     if (id == 0) {
-        if (D_00529FAC != 0) {
-            scePrintf(D_0054A960);
+        if (padDebugPrint != 0) {
+            scePrintf(padDmaFailMsg);
         }
         return 0;
     }
-    D_005989D0[port][slot].dmaId = id;
+    padPortState[port][slot].dmaId = id;
     return 1;
 }
 
@@ -142,7 +142,7 @@ extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
 extern int scePadGetModVersion(void);
 extern int scePadInit2(int mode);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054A960);
+INCLUDE_RODATA(const s32, "sdk/libpad", padDmaFailMsg);
 
 int scePadInit(int mode)
 {
@@ -150,18 +150,18 @@ int scePadInit(int mode)
     s32 version;
     s32 major;
 
-    D_00529FA8 = 1;
+    padInitialized = 1;
     for (;;) {
-        sceSifBindRpc(&D_00598980[0], 0x80000100, 0);
-        if (D_00598980[0].server != NULL) {
+        sceSifBindRpc(&padRpcClient[0], 0x80000100, 0);
+        if (padRpcClient[0].server != NULL) {
             break;
         }
         for (delay = 0x10000; --delay != -1;) {
         }
     }
     for (;;) {
-        sceSifBindRpc(&D_00598980[1], 0x80000101, 0);
-        if (D_00598980[1].server != NULL) {
+        sceSifBindRpc(&padRpcClient[1], 0x80000101, 0);
+        if (padRpcClient[1].server != NULL) {
             break;
         }
         for (delay = 0x10000; --delay != -1;) {
@@ -170,7 +170,7 @@ int scePadInit(int mode)
     version = scePadGetModVersion();
     major = version >> 8;
     if (major != 4) {
-        if (D_00529FAC != 0) {
+        if (padDebugPrint != 0) {
             scePrintf("libpad: Module version mismatch ");
             scePrintf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
                       4, 0, major, version & 0xFF);
@@ -185,31 +185,31 @@ int scePadInit2(int mode)
     int i;
 
     for (i = 0; i < 4; i++) {
-        D_005989D0[0][i].open = 0;
-        D_005989D0[0][i].f18 = 0;
-        D_005989D0[0][i].f14 = 0;
-        D_005989D0[1][i].open = 0;
-        D_005989D0[1][i].f18 = 0;
-        D_005989D0[1][i].f14 = 0;
+        padPortState[0][i].open = 0;
+        padPortState[0][i].f18 = 0;
+        padPortState[0][i].f14 = 0;
+        padPortState[1][i].open = 0;
+        padPortState[1][i].f18 = 0;
+        padPortState[1][i].f14 = 0;
     }
-    D_00598BC0.cmd = 0x10;
-    D_00598BC0.a.w[1] = 0;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 0x10;
+    padRpcPacket.a.w[1] = 0;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    return D_00598BC0.a.w[0];
+    return padRpcPacket.a.w[0];
 }
 
 int scePadEnd(void)
 {
-    D_00598BC0.cmd = 0xF;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 0xF;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    if (D_00598BC0.a.w[0] == 1) {
-        D_00529FA8 = 0;
+    if (padRpcPacket.a.w[0] == 1) {
+        padInitialized = 0;
     }
-    return D_00598BC0.a.w[0];
+    return padRpcPacket.a.w[0];
 }
 
 /* NON_MATCHING: 120 words against retail's 122; the saved-register pair is
@@ -223,13 +223,13 @@ int scePadPortOpen(int port, int slot, void *addr)
     int i;
 
     if ((EE_ADDR(addr) & 0x3F) != 0) {
-        if (D_00529FAC != 0) {
+        if (padDebugPrint != 0) {
             scePrintf("libpad: buffer addr is not 64 byte align. %08x\n", addr);
         }
         return 0;
     }
-    if (D_005989D0[port][slot].open == 1) {
-        if (D_00529FAC != 0) {
+    if (padPortState[port][slot].open == 1) {
+        if (padDebugPrint != 0) {
             scePrintf("libpad: pad port is already open [%d][%d]\n", port, slot);
         }
         return 0;
@@ -244,21 +244,21 @@ int scePadPortOpen(int port, int slot, void *addr)
         d->length = 0;
         d++;
     }
-    D_00598BC0.cmd = 1;
-    D_00598BC0.port = port;
-    D_00598BC0.slot = slot;
-    D_00598BC0.a.w[1] = EE_ADDR_S(addr);
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 1;
+    padRpcPacket.port = port;
+    padRpcPacket.slot = slot;
+    padRpcPacket.a.w[1] = EE_ADDR_S(addr);
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    c = &D_00598AC0[port][slot];
-    D_005989D0[port][slot].open = 1;
+    c = &padCmdBlock[port][slot];
+    padPortState[port][slot].open = 1;
     c->seq = 0;
-    D_005989D0[port][slot].dmaId = 0;
-    D_005989D0[port][slot].iopAddr = D_00598BC0.a.w[2];
-    D_005989D0[port][slot].dma = (padDma *)addr;
-    D_005989D0[port][slot].cmd = c;
-    return D_00598BC0.a.w[0];
+    padPortState[port][slot].dmaId = 0;
+    padPortState[port][slot].iopAddr = padRpcPacket.a.w[2];
+    padPortState[port][slot].dma = (padDma *)addr;
+    padPortState[port][slot].cmd = c;
+    return padRpcPacket.a.w[0];
 }
 #else
 INCLUDE_ASM(const s32, "sdk/libpad", scePadPortOpen);
@@ -266,25 +266,25 @@ INCLUDE_ASM(const s32, "sdk/libpad", scePadPortOpen);
 
 int scePadPortClose(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
-    D_00598BC0.cmd = 0xE;
-    D_00598BC0.port = port;
-    D_00598BC0.slot = slot;
-    D_00598BC0.a.w[1] = 1;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 0xE;
+    padRpcPacket.port = port;
+    padRpcPacket.slot = slot;
+    padRpcPacket.a.w[1] = 1;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    D_005989D0[port][slot].open = 0;
-    return D_00598BC0.a.w[0];
+    padPortState[port][slot].open = 0;
+    return padRpcPacket.a.w[0];
 }
 
 /* The IOP writes the newer frame counter into whichever half it filled last,
  * so the reader picks the half with the higher count. */
 padDma *scePadGetDmaStr(int port, int slot)
 {
-    padDma *d = D_005989D0[port][slot].dma;
+    padDma *d = padPortState[port][slot].dma;
     int newer;
 
     SyncDCache(d, d + 2);
@@ -294,7 +294,7 @@ padDma *scePadGetDmaStr(int port, int slot)
 
 u32 scePadGetFrameCount(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     return scePadGetDmaStr(port, slot)->frame;
@@ -304,7 +304,7 @@ int scePadRead(int port, int slot, u8 *data)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     d = scePadGetDmaStr(port, slot);
@@ -316,7 +316,7 @@ int scePadGetState(int port, int slot)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0x63;
     }
     d = scePadGetDmaStr(port, slot);
@@ -328,18 +328,18 @@ int scePadGetState(int port, int slot)
     return d->state;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA58);
+INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameError);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA60);
+INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameStable);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA68);
+INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameExecCmd);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA70);
+INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameFindCtp1);
 
 void scePadStateIntToStr(u32 state, char *str)
 {
     if (state < 8) {
-        strcpy(str, D_00529FB0[state]);
+        strcpy(str, padStateNames[state]);
     } else {
         strcpy(str, "");
     }
@@ -347,7 +347,7 @@ void scePadStateIntToStr(u32 state, char *str)
 
 int scePadSetReqState(int port, int slot, int state)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     scePadGetDmaStr(port, slot)->reqState = state;
@@ -356,7 +356,7 @@ int scePadSetReqState(int port, int slot, int state)
 
 int scePadGetReqState(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     return scePadGetDmaStr(port, slot)->reqState;
@@ -365,7 +365,7 @@ int scePadGetReqState(int port, int slot)
 void scePadReqIntToStr(u32 req, char *str)
 {
     if (req < 4) {
-        strcpy(str, D_00529FD0[req]);
+        strcpy(str, padRequestNames[req]);
     } else {
         strcpy(str, "");
     }
@@ -375,7 +375,7 @@ int scePadInfoAct(int port, int slot, int actno, int term)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     d = scePadGetDmaStr(port, slot);
@@ -408,7 +408,7 @@ int scePadInfoComb(int port, int slot, int listno, int offs)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     d = scePadGetDmaStr(port, slot);
@@ -441,7 +441,7 @@ int scePadInfoMode(int port, int slot, int term, int offs)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     d = scePadGetDmaStr(port, slot);
@@ -484,18 +484,18 @@ int scePadInfoMode(int port, int slot, int term, int offs)
 
 int scePadSetMainMode(int port, int slot, int offs, int lock)
 {
-    D_00598BC0.a.w[0] = offs;
-    D_00598BC0.a.w[1] = lock;
-    D_00598BC0.cmd = 6;
-    D_00598BC0.port = port;
-    D_00598BC0.slot = slot;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.a.w[0] = offs;
+    padRpcPacket.a.w[1] = lock;
+    padRpcPacket.cmd = 6;
+    padRpcPacket.port = port;
+    padRpcPacket.slot = slot;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    if (D_00598BC0.a.w[2] == 1) {
+    if (padRpcPacket.a.w[2] == 1) {
         scePadSetReqState(port, slot, 2);
     }
-    return D_00598BC0.a.w[2];
+    return padRpcPacket.a.w[2];
 }
 
 int scePadSetActDirect(int port, int slot, const u8 *data)
@@ -507,7 +507,7 @@ int scePadSetActDirect(int port, int slot, const u8 *data)
     if (scePadGetDmaStr(port, slot)->ok != 1) {
         return 0;
     }
-    c = D_005989D0[port][slot].cmd;
+    c = padPortState[port][slot].cmd;
     for (i = 0; i < 6; i++) {
         c->data[i] = data[i];
     }
@@ -522,16 +522,16 @@ int scePadSetActDirect(int port, int slot, const u8 *data)
 
 int scePadSetActAlign(int port, int slot, const u8 *align)
 {
-    padRpc *rpc = &D_00598BC0;
+    padRpc *rpc = &padRpcPacket;
     int i;
 
-    D_00598BC0.cmd = 8;
+    padRpcPacket.cmd = 8;
     rpc->port = port;
     rpc->slot = slot;
     for (i = 0; i < 6; i++) {
         rpc->a.b[i] = align[i];
     }
-    if (sceSifCallRpc(D_00598980, 1, 0, rpc, 0x80, rpc, 0x80, 0, 0) < 0) {
+    if (sceSifCallRpc(padRpcClient, 1, 0, rpc, 0x80, rpc, 0x80, 0, 0) < 0) {
         return 0;
     }
     if (rpc->a.w[2] == 1) {
@@ -544,7 +544,7 @@ u32 scePadGetButtonMask(int port, int slot)
 {
     padDma *d;
 
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     d = scePadGetDmaStr(port, slot);
@@ -563,22 +563,22 @@ u32 scePadGetButtonMask(int port, int slot)
 
 int scePadSetButtonInfo(int port, int slot, u32 buttonInfo)
 {
-    D_00598BC0.a.w[0] = buttonInfo;
-    D_00598BC0.cmd = 0xA;
-    D_00598BC0.port = port;
-    D_00598BC0.slot = slot;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.a.w[0] = buttonInfo;
+    padRpcPacket.cmd = 0xA;
+    padRpcPacket.port = port;
+    padRpcPacket.slot = slot;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    if (D_00598BC0.a.w[1] == 1) {
+    if (padRpcPacket.a.w[1] == 1) {
         scePadSetReqState(port, slot, 2);
     }
-    return D_00598BC0.a.w[1];
+    return padRpcPacket.a.w[1];
 }
 
 int scePadInfoPressMode(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     return scePadGetButtonMask(port, slot) == 0x3FFFF;
@@ -586,7 +586,7 @@ int scePadInfoPressMode(int port, int slot)
 
 int scePadEnterPressMode(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     return scePadSetButtonInfo(port, slot, 0xFFF);
@@ -594,7 +594,7 @@ int scePadEnterPressMode(int port, int slot)
 
 int scePadExitPressMode(int port, int slot)
 {
-    if (D_005989D0[port][slot].open == 0) {
+    if (padPortState[port][slot].open == 0) {
         return 0;
     }
     return scePadSetButtonInfo(port, slot, 0);
@@ -602,62 +602,62 @@ int scePadExitPressMode(int port, int slot)
 
 int scePadSetVrefParam(int port, int slot, const vrefParam *param)
 {
-    D_00598BC0.port = port;
-    D_00598BC0.slot = slot;
-    D_00598BC0.cmd = 0xB;
-    *(vrefParam *)D_00598BC0.a.b = *param;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.port = port;
+    padRpcPacket.slot = slot;
+    padRpcPacket.cmd = 0xB;
+    *(vrefParam *)padRpcPacket.a.b = *param;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    if (D_00598BC0.a.w[4] == 1) {
+    if (padRpcPacket.a.w[4] == 1) {
         scePadSetReqState(port, slot, 2);
     }
-    return D_00598BC0.a.w[4];
+    return padRpcPacket.a.w[4];
 }
 
 int scePadGetPortMax(void)
 {
-    D_00598BC0.cmd = 0xC;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 0xC;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    return D_00598BC0.a.w[0];
+    return padRpcPacket.a.w[0];
 }
 
 int scePadGetSlotMax(int port)
 {
-    D_00598BC0.port = port;
-    D_00598BC0.cmd = 0xD;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.port = port;
+    padRpcPacket.cmd = 0xD;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    return D_00598BC0.a.w[0];
+    return padRpcPacket.a.w[0];
 }
 
 int scePadGetModVersion(void)
 {
-    D_00598BC0.cmd = 0x12;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.cmd = 0x12;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    return D_00598BC0.a.w[0];
+    return padRpcPacket.a.w[0];
 }
 
 int scePadSetWarningLevel(int level)
 {
-    D_00598BC0.port = level;
-    D_00598BC0.cmd = 0x14;
-    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+    padRpcPacket.port = level;
+    padRpcPacket.cmd = 0x14;
+    if (sceSifCallRpc(padRpcClient, 1, 0, &padRpcPacket, 0x80, &padRpcPacket, 0x80, 0, 0) < 0) {
         return 0;
     }
-    return D_00598BC0.slot;
+    return padRpcPacket.slot;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA88);
+INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameDisconnect);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AA98);
+INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameBusy);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AAA0);
+INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameFailed);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", D_0054AAA8);
+INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameComplete);
 

@@ -250,7 +250,7 @@ void rstUpdateSeqPlayerLevelUpOnly(void)
 extern char *cmpGetParamName(s8 index);
 #include "sdk_libc.h"
 
-extern char D_0054FD00[]; /* "%d", padded eight-byte small-data span. */
+extern char rstParamValueFormat[]; /* "%d", padded eight-byte small-data span. */
 
 void rstUpdateSeqDevilParam(void)
 {
@@ -266,7 +266,7 @@ void rstUpdateSeqDevilParam(void)
         do {
             if ((s8)startPos->unk_129F[index] > 0) {
                 fclSetMessageVar_20743088(8, EE_ADDR_S(cmpGetParamName((s8)index)));
-                sprintf(buffer, D_0054FD00, (s8)startPos->unk_129F[index]);
+                sprintf(buffer, rstParamValueFormat, (s8)startPos->unk_129F[index]);
                 fclSetMessageVar_20743088(9, EE_ADDR_S(buffer));
                 if (startPos->Flag == 0) {
                     fclStartMessage(3);
@@ -791,7 +791,7 @@ s32 rstUpdateSeqDestroySkill(void)
 extern u16 rstChkHeartsSkill(datUnitWork_t *unit);
 extern s32 datGetDevilSlotState(u8 devilId);
 
-static const char D_0053DBD8[] = "New hearts skill ID : %02x\n";
+static const char rstHeartsSkillIdFormat[] = "New hearts skill ID : %02x\n";
 
 s8 rstGetHeartsSkill(s8 type)
 {
@@ -808,7 +808,7 @@ s8 rstGetHeartsSkill(s8 type)
         if (type == 0) {
             startPos->HeartsSkFlag++;
         }
-        printf(D_0053DBD8, skill);
+        printf(rstHeartsSkillIdFormat, skill);
         return 1;
     }
     return 0;
@@ -1165,7 +1165,7 @@ extern char *pstr[];
 extern s32 datGetPlayerLNDLevel(datUnitWork_t *unit);
 extern void rstSetDevilRegistered(s8 id);
 extern void rstSetHeartsMasterPhase(void);
-extern char D_0053DC40[]; /* Format occupies a padded 32-byte span. */
+extern char rstPlayerRaceFormat[]; /* Format occupies a padded 32-byte span. */
 
 void rstUpdateSeqHeartsMaster(void)
 {
@@ -1183,7 +1183,7 @@ void rstUpdateSeqHeartsMaster(void)
         rstSetDevilRegistered((s8)DDS3_GBWK->heartsequip);
         after = datGetPlayerLNDLevel(startPos->pCurrentStock);
         if (before != after) {
-            printf(D_0053DC40, after);
+            printf(rstPlayerRaceFormat, after);
             if (after != 0)
                 rstSetHeartsMasterPhase();
         }
@@ -1220,7 +1220,7 @@ extern s32 rstUpdateSeqDestroySkill(void);
 extern void fclUpdateMessage(void);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DC40);
+INCLUDE_RODATA(const s32, "result/rstupdate", rstPlayerRaceFormat);
 
 s32 rstUpdate(dds3ProcessID_t *id)
 {
@@ -1313,7 +1313,7 @@ INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD58);
 
 INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD68);
 
-INCLUDE_SDATA(const s32, "result/rstupdate", D_0054FD00);
+INCLUDE_SDATA(const s32, "result/rstupdate", rstParamValueFormat);
 
 INCLUDE_SDATA(const s32, "result/rstupdate", D_0054FD08);
 

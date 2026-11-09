@@ -305,11 +305,11 @@ INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
 
 extern s32 nbGetEncountJoken(s32 id);
 
-extern s32 D_0054FF1C;
+extern s32 nbEncountMaxBase;
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
 #include "sdk_libc.h"
 
-extern char D_00545BA0[];
+extern char nbEncountMaxFormat[];
 
 s32 nbGetEncountMax(s32 id)
 {
@@ -332,9 +332,9 @@ s32 nbGetEncountMax(s32 id)
     if (nbEncountMax > 0) {
         return nbEncountMax;
     }
-    maximum = D_0054FF1C - nbEncountTable[id].enctable[condition].normalritu * 48 / 100;
+    maximum = nbEncountMaxBase - nbEncountTable[id].enctable[condition].normalritu * 48 / 100;
     nbEncountMax = dds3GetRandIntA(0, maximum * 2 - 32) + 16;
-    printf(D_00545BA0, nbEncountMax, maximum);
+    printf(nbEncountMaxFormat, nbEncountMax, maximum);
     return nbEncountMax;
 }
 
@@ -493,7 +493,7 @@ s32 nbGetUnitWorkFromAction(nbFormation_t *form)
     return nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbEncount", D_00545BA0);
+INCLUDE_RODATA(const s32, "newbattle/nbEncount", nbEncountMaxFormat);
 
 INCLUDE_SDATA(const s32, "newbattle/nbEncount", nbEncountMax);
 

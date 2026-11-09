@@ -48,10 +48,10 @@ typedef struct
     f32 depth;
 } effDebugPolyParams_t;
 
-extern sdfMat_t *D_0054F270;
-extern f32 D_0054F274;
-extern f32 D_0056B050[4][4];
-extern u32 D_003201C0[4];
+extern sdfMat_t *effDebugSelectCursorMat;
+extern f32 effDebugSelectCursorAngle;
+extern f32 effDebugTriPositions[4][4];
+extern u32 effDebugTriColors[4];
 f32 sdfCos(f32 aRadius);
 f32 sdfSin(f32 aRadius);
 void SetRotateMatrixX(f32 aAngle);
@@ -363,44 +363,44 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
 
 /* vu0 routine: build and submit the debug geometry. */
 void effDebugSelectCursorDraw(f32 *position) {
-    sdfMat_t *asset = D_0054F270;
+    sdfMat_t *asset = effDebugSelectCursorMat;
     sdfDrawTag_t *list;
     effDebugPolyParams_t packet;
     sdfGrOt_t *surface;
 
     if (asset == NULL) {
         asset = sdfMatNew();
-        D_0054F270 = asset;
+        effDebugSelectCursorMat = asset;
         sdfMatSetConstant(asset, 1.0f);
     }
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    SetRotateMatrixY(D_0054F274);
-    D_0054F274 += 0.10471974313259125f;
+    SetRotateMatrixY(effDebugSelectCursorAngle);
+    effDebugSelectCursorAngle += 0.10471974313259125f;
     SDF_VU0_LOADVECTOR( position);
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
     packet.primitive = 0x4000;
-    D_0056B050[2][2] = 0.0f;
-    packet.colors = D_003201C0;
+    effDebugTriPositions[2][2] = 0.0f;
+    packet.colors = effDebugTriColors;
     packet.color = 0x80808080;
 
-    D_0056B050[0][0] = 0.0f;
-    D_0056B050[0][1] = 0.0f;
-    D_0056B050[0][2] = 0.0f;
-    D_0056B050[1][0] = 15.0f;
-    D_0056B050[1][1] = -30.0f;
-    D_0056B050[1][2] = 0.0f;
-    D_0056B050[2][0] = -15.0f;
-    D_0056B050[2][1] = -30.0f;
+    effDebugTriPositions[0][0] = 0.0f;
+    effDebugTriPositions[0][1] = 0.0f;
+    effDebugTriPositions[0][2] = 0.0f;
+    effDebugTriPositions[1][0] = 15.0f;
+    effDebugTriPositions[1][1] = -30.0f;
+    effDebugTriPositions[1][2] = 0.0f;
+    effDebugTriPositions[2][0] = -15.0f;
+    effDebugTriPositions[2][1] = -30.0f;
 
     packet.parameterCount = 1;
     packet.vertexCount = 3;
-    packet.positions = (u128 *)D_0056B050;
+    packet.positions = (u128 *)effDebugTriPositions;
     packet.texcoords = NULL;
-    sdf3DPrimLinkMat(list, D_0054F270, NULL);
+    sdf3DPrimLinkMat(list, effDebugSelectCursorMat, NULL);
     sdfDrawTagLink(list, effPkt3DPrimMakePoly(&packet));
     surface = &sdfGrOtTable[39];
     ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
@@ -537,7 +537,7 @@ void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 
     ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
 }
 
-INCLUDE_SDATA(const s32, "effect/effDebug", D_0054F270);
+INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorMat);
 
-INCLUDE_SDATA(const s32, "effect/effDebug", D_0054F274);
+INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorAngle);
 

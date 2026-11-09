@@ -44,7 +44,7 @@ extern void p2sdStopAllBgm(void);
 
 extern void p2sdStopSe(u32);
 
-extern s32 D_0054EE3C;
+extern s32 fldSeBgmId;
 
 extern s32 D_0030A2D8[];
 
@@ -140,14 +140,14 @@ void fldClearSe3D(void) {
 }
 
 extern f32 fldCamTarget[];
-extern f32 D_002FC9C0[];
+extern f32 fldCamEye[];
 /* Native frame counters wrap and have no signed consumers. */
-extern u32 D_0054EE38;
-extern u32 D_0054EE34;
+extern u32 fldSe3DTick;
+extern u32 fldSe3DCalls;
 typedef struct {
     f32 v[4];
 } fldSoundPosition_t;
-extern const fldSoundPosition_t D_00532110;
+extern const fldSoundPosition_t fldSe3DDefaultPos;
 void p2sdPlaySe3DEx(s32 trackId, s32 radiusInHundreds, f32 x, f32 y, f32 z);
 void p2sdSetStandPos(f32 firstX, f32 firstY, f32 firstZ,
                     f32 secondX, f32 secondY, f32 secondZ);
@@ -155,7 +155,7 @@ void p2sdSetStandPos(f32 firstX, f32 firstY, f32 firstZ,
 /* Adapted from DDS func_001415F8: SMT3 always uses the camera listener and
  * a fixed 500-unit radius margin, with the current area resolved per call. */
 void fldPlaySe3D(void) {
-    fldSoundPosition_t position = D_00532110;
+    fldSoundPosition_t position = fldSe3DDefaultPos;
     f32 listenerX, listenerY, listenerZ;
     f32 dx, dy, dz, distance;
     f32 sourceX, sourceY, sourceZ;
@@ -165,16 +165,16 @@ void fldPlaySe3D(void) {
     s32 i;
     fldSe3D_tag *entry;
 
-    tick = D_0054EE38 + 1;
+    tick = fldSe3DTick + 1;
     nearby = 0;
-    D_0054EE38 = tick;
-    listenerX = fldCamTarget[0] - D_002FC9C0[0];
-    listenerY = D_002FC9C0[1];
-    listenerZ = fldCamTarget[2] - D_002FC9C0[2];
+    fldSe3DTick = tick;
+    listenerX = fldCamTarget[0] - fldCamEye[0];
+    listenerY = fldCamEye[1];
+    listenerZ = fldCamTarget[2] - fldCamEye[2];
     distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
     if (distance > 200.0f) {
-        listenerX = D_002FC9C0[0] + (listenerX / distance) * 200.0f;
-        listenerZ = D_002FC9C0[2] + (listenerZ / distance) * 200.0f;
+        listenerX = fldCamEye[0] + (listenerX / distance) * 200.0f;
+        listenerZ = fldCamEye[2] + (listenerZ / distance) * 200.0f;
     } else {
         listenerX = fldCamTarget[0];
         listenerZ = fldCamTarget[2];
@@ -190,7 +190,7 @@ void fldPlaySe3D(void) {
     }
     if (nearby != 0 && (SDF_FRAME_TICK(tick) & 1) && SDF_FRAME_DUE(tick)) {
         p2sdSetStandPos(listenerX, listenerY, listenerZ,
-            D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
+            fldCamEye[0], fldCamEye[1], fldCamEye[2]);
     }
     for (i = 0; i < gFldSe3DNum; i++) {
         entry = &fldSe3DTable[i];
@@ -220,10 +220,10 @@ void fldPlaySe3D(void) {
             p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + entry->id);
         }
     }
-    D_0054EE34++;
+    fldSe3DCalls++;
 }
 
-INCLUDE_RODATA(const s32, "field/fldSe", D_00532110);
+INCLUDE_RODATA(const s32, "field/fldSe", fldSe3DDefaultPos);
 
 s32 fldGetBgmTrack(s32 code) {
     s32 track;
@@ -572,27 +572,27 @@ void fldSeVol(s32 seid, s32 vol) {
 void fld_1457F8(s32 mode) {
     switch (mode) {
     case -1:
-        if (D_0054EE3C != mode) {
-            p2sdStopSe(D_0054EE3C);
-            D_0054EE3C = mode;
+        if (fldSeBgmId != mode) {
+            p2sdStopSe(fldSeBgmId);
+            fldSeBgmId = mode;
         }
         break;
     case 0:
         mode = -1;
-        if (D_0054EE3C != mode) {
-            p2sdStopBGM(D_0054EE3C);
-            D_0054EE3C = mode;
+        if (fldSeBgmId != mode) {
+            p2sdStopBGM(fldSeBgmId);
+            fldSeBgmId = mode;
         }
         break;
     case 1:
         mode = fldBgmTrackTable[0] + 1;
         p2sdPlayBGM(mode);
-        D_0054EE3C = mode;
+        fldSeBgmId = mode;
         break;
     case 2:
         mode = D_0030A2D8[0] + 1;
         p2sdPlayBGM(mode);
-        D_0054EE3C = mode;
+        fldSeBgmId = mode;
         break;
     }
 }
@@ -784,7 +784,7 @@ void fldStartBgmLoad(s32 kind) {
     fldWaitBgmLoad();
 }
 
-extern f32 D_002FC9C0[];
+extern f32 fldCamEye[];
 extern f32 fldCamTarget[];
 extern void p2sdSetStandPos(f32 cameraX, f32 cameraY, f32 cameraZ,
                            f32 playerX, f32 playerY, f32 playerZ);
@@ -792,20 +792,20 @@ extern void p2sdPlaySe3DEx(s32 midiNo, s32 x, f32 y, f32 z, f32 limit);
 
 void fld_145DC0(s32 soundId, f32 x, f32 y, f32 z, f32 limit)
 {
-    f32 listenerX = fldCamTarget[0] - D_002FC9C0[0];
-    f32 listenerY = D_002FC9C0[1];
-    f32 listenerZ = fldCamTarget[2] - D_002FC9C0[2];
+    f32 listenerX = fldCamTarget[0] - fldCamEye[0];
+    f32 listenerY = fldCamEye[1];
+    f32 listenerZ = fldCamTarget[2] - fldCamEye[2];
     f32 distance = fsqrtf(listenerX * listenerX + listenerZ * listenerZ);
 
     if (distance > 200.0f) {
-        listenerX = D_002FC9C0[0] + listenerX / distance * 200.0f;
-        listenerZ = D_002FC9C0[2] + listenerZ / distance * 200.0f;
+        listenerX = fldCamEye[0] + listenerX / distance * 200.0f;
+        listenerZ = fldCamEye[2] + listenerZ / distance * 200.0f;
     } else {
         listenerX = fldCamTarget[0];
         listenerZ = fldCamTarget[2];
     }
     p2sdSetStandPos(listenerX, listenerY, listenerZ,
-                    D_002FC9C0[0], D_002FC9C0[1], D_002FC9C0[2]);
+                    fldCamEye[0], fldCamEye[1], fldCamEye[2]);
     p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + soundId, (s32)(x / 100.0f), y, z, limit);
 }
 
@@ -819,11 +819,11 @@ INCLUDE_SDATA(const s32, "field/fldSe", gFldSndTransSrc);
 
 INCLUDE_SDATA(const s32, "field/fldSe", gFldSe3DNum);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE34);
+INCLUDE_SDATA(const s32, "field/fldSe", fldSe3DCalls);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE38);
+INCLUDE_SDATA(const s32, "field/fldSe", fldSe3DTick);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE3C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldSeBgmId);
 
 INCLUDE_SDATA(const s32, "field/fldSe", MidiNo);
 
@@ -837,7 +837,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapField);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSeqStep);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE58);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapStartFloor);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSeqState);
 
@@ -849,7 +849,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapData);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBuf);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE70);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapPulsePhase);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBBox);
 
@@ -857,7 +857,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorCur);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorOld);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE80);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorOfsY);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawX);
 
@@ -865,17 +865,17 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawY);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawState);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE90);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSlideCount);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE94);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBlinkPhase);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE98);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE9C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBobPhase);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEA0);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBgScroll);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EEA4);
+INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontAlpha);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontWork);
 
@@ -941,9 +941,9 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3Mem);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Mem);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF28);
+INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxEffectHandle);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF2C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxEffectData);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF30);
 
@@ -951,9 +951,9 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxCount);
 
 INCLUDE_SDATA(const s32, "field/fldSe", hEffPart);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF3C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxTexHandle);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF40);
+INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxTexData);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTakaraSlotCount);
 
@@ -973,7 +973,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldVLPulsePhase);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldWaveDistance);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF68);
+INCLUDE_SDATA(const s32, "field/fldSe", fldWaveFrames);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosX);
 
@@ -991,25 +991,25 @@ INCLUDE_SDATA(const s32, "field/fldSe", fldCamNpcTarget2);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTitleState);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF8C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitlePhase);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF90);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleFld);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF94);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleWaitFrames);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF98);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleFldTex);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF9C);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun1Tex);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EFA0);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun2Tex);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EFA4);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun3Tex);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniState);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldSnowActive);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EFB0);
+INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniFld);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniTex);
 
@@ -1103,11 +1103,11 @@ INCLUDE_SDATA(const s32, "field/fldSe", slMcAccessDraw_fc);
 
 INCLUDE_SDATA(const s32, "field/fldSe", gSlWindowCnt);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F06C);
+INCLUDE_SDATA(const s32, "field/fldSe", slIconSysSaveBuff);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F070);
+INCLUDE_SDATA(const s32, "field/fldSe", slIconSysSaveSize);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F074);
+INCLUDE_SDATA(const s32, "field/fldSe", slFileSelPulsePhase);
 
 INCLUDE_SDATA(const s32, "field/fldSe", slFileSelWork);
 
@@ -1123,5 +1123,5 @@ INCLUDE_SDATA(const s32, "field/fldSe", D_0054F098);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054F0A0);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F0A8);
+INCLUDE_SDATA(const s32, "field/fldSe", fldHojiNameKey);
 

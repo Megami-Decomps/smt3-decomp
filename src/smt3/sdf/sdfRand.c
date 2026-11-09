@@ -119,11 +119,11 @@ enum sdf_stream_playback {
 
 typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
 
-extern sdfMathConstants_t D_00529BB0;
+extern sdfMathConstants_t sdfMathConstants;
 
 extern s8 sdfPrintIopFlag;
 
-extern char D_00551908[];
+extern char sdfPrintStrFmt[];
 
 extern char sdfFileCdromPrefix[];
 
@@ -163,7 +163,7 @@ extern s32 sceCdReadClock(sdfCdClock_t *);
 
 extern u8 sdfCdClock;
 
-extern sdfClock_t D_005519B8;
+extern sdfClock_t sdfCdClockCache;
 
 extern s32 (*p2sdSmgBuf)(void);
 
@@ -193,7 +193,7 @@ void sdfRandomizeByTime(sdfRandCB_t *aCB) {
     sdfClock_t now;
     s32 secondsSinceEpoch;
     sdfGetCdClock(&now);
-    secondsSinceEpoch = now.year * 0x16E + now.day + D_00529BB0.monthDays[now.month + 7] + 0xFFF4FF83;
+    secondsSinceEpoch = now.year * 0x16E + now.day + sdfMathConstants.monthDays[now.month + 7] + 0xFFF4FF83;
     secondsSinceEpoch = secondsSinceEpoch * 0x18 + now.hour;
     secondsSinceEpoch = secondsSinceEpoch * 0x3C + now.min;
     sdfRandomize(aCB, secondsSinceEpoch * 0x3C + now.sec);
@@ -207,18 +207,18 @@ s32 sdfGetCdClock(sdfClock_t *now) {
         sceCdReadClock(&clock);
         result = -1;
         if ((clock.status & 0x103) == 0) {
-            D_005519B8.sec = sdfBcdToDecimal(clock.second);
-            D_005519B8.min = sdfBcdToDecimal(clock.minute);
-            D_005519B8.hour = sdfBcdToDecimal(clock.hour);
-            D_005519B8.day = sdfBcdToDecimal(clock.day);
-            D_005519B8.month = sdfBcdToDecimal(clock.month);
+            sdfCdClockCache.sec = sdfBcdToDecimal(clock.second);
+            sdfCdClockCache.min = sdfBcdToDecimal(clock.minute);
+            sdfCdClockCache.hour = sdfBcdToDecimal(clock.hour);
+            sdfCdClockCache.day = sdfBcdToDecimal(clock.day);
+            sdfCdClockCache.month = sdfBcdToDecimal(clock.month);
             /* Retail reuses the month byte as the two-digit year input. */
             year = sdfBcdToDecimal(clock.month);
             result = 0;
-            D_005519B8.year = year + (year < 70 ? 2000 : 1900);
+            sdfCdClockCache.year = year + (year < 70 ? 2000 : 1900);
         }
         sdfCdClock = 20;
     }
-    *now = D_005519B8;
+    *now = sdfCdClockCache;
     return result;
 }

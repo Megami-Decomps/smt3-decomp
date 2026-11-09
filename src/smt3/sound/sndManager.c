@@ -43,7 +43,7 @@ extern void titleFreeTextures(void);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
-extern char D_0054FD18[]; /* "/sound/" */
+extern char sndPathPrefix[]; /* "/sound/" */
 
 extern char *strcat(char *dst, const char *src);
 
@@ -51,11 +51,11 @@ extern void *memcpy(void *a, const void *b, size_t c);
 
 char *sdfSndMakeFilename(char *aDstName, const char *aSrcName)
 {
-    memcpy(aDstName, D_0054FD18, 8);
+    memcpy(aDstName, sndPathPrefix, 8);
     return strcat(aDstName, aSrcName);
 }
 
-extern s8 D_0054FD10;
+extern s8 sndInitDone;
 
 extern s32 D_0054FD20;
 
@@ -63,9 +63,9 @@ extern s32 D_0054FD24;
 
 extern s16 D_00551F94;
 
-extern char D_00342FA0[];
+extern char sndVcInfo[];
 
-extern char D_00342FC0[];
+extern char sndSqInfo[];
 
 extern void *D_0033A540[];
 
@@ -75,12 +75,12 @@ extern void p2sdLoadSMGFile(void *MidiNo);
 
 void sndInit(void)
 {
-    if (D_0054FD10 != 0) {
+    if (sndInitDone != 0) {
         p2sdStopAllSe();
         return;
     }
-    D_0054FD10 = 1;
-    sdfSndInit(D_00342FA0, 4, D_00342FC0, 4);
+    sndInitDone = 1;
+    sdfSndInit(sndVcInfo, 4, sndSqInfo, 4);
     p2sdLoadSMGFile(D_0033A540[0]);
     D_0054FD20 = 4;
     D_00551F94 = -1;
@@ -139,7 +139,7 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
 extern f32 sdfSin(f32 angle);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
 extern const u8 *D_00342FD0[], *D_00342FD8[], *D_00342FE0[], *D_00342FE8[];
-extern f32 D_0054FD30;
+extern f32 dds3TitleMenuPhase;
 
 void dds3TitleDrawMenu(void)
 {
@@ -170,12 +170,12 @@ void dds3TitleDrawMenu(void)
     if (work->unk_2C >= 12) {
         rsetAlpha(1);
         if (titleWork->unk_2C < 24) {
-            alpha = (s32)(sdfSin(D_0054FD30) * 20.0f + 10.0f) + 0x5C;
+            alpha = (s32)(sdfSin(dds3TitleMenuPhase) * 20.0f + 10.0f) + 0x5C;
             work = titleWork;
             alpha = alpha * (work->unk_2C - 12) / 12;
         } else {
-            phase = D_0054FD30 + 0.15f;
-            D_0054FD30 = phase;
+            phase = dds3TitleMenuPhase + 0.15f;
+            dds3TitleMenuPhase = phase;
             alpha = (s32)(sdfSin(phase) * 20.0f + 10.0f) + 0x5C;
             work = titleWork;
         }
@@ -453,7 +453,7 @@ void dds3TitleUpdateFade(void)
 
 
 extern char D_0053DD68[];
-extern char D_0053DD98[];
+extern char dds3TitleProcName[];
 extern void *pacLoad(const char *path);
 extern void pacSync(void *request);
 extern s32 pacFileHandleFree_(void *request);
@@ -570,7 +570,7 @@ dds3ProcessID_t *titleAllocWork(s32 mode)
         }
     }
     dds3BackColor = 0x80000000;
-    return dds3StartProcess(D_0053DD98, 0x2B19, 0, 0, dds3Titlemain, NULL, NULL);
+    return dds3StartProcess(dds3TitleProcName, 0x2B19, 0, 0, dds3Titlemain, NULL, NULL);
 }
 
 s32 titleFreeWork(s32 arg)
@@ -583,13 +583,13 @@ s32 titleFreeWork(s32 arg)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "sound/sndManager", D_0053DD98);
+INCLUDE_RODATA(const s32, "sound/sndManager", dds3TitleProcName);
 
 INCLUDE_RODATA(const s32, "sound/sndManager", D_0053DDA8);
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD10);
+INCLUDE_SDATA(const s32, "sound/sndManager", sndInitDone);
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD18);
+INCLUDE_SDATA(const s32, "sound/sndManager", sndPathPrefix);
 
 INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD20);
 
@@ -599,7 +599,7 @@ INCLUDE_SDATA(const s32, "sound/sndManager", titleWork);
 
 INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD2C);
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD30);
+INCLUDE_SDATA(const s32, "sound/sndManager", dds3TitleMenuPhase);
 
 INCLUDE_SDATA(const s32, "sound/sndManager", dds3TitleFadeLevel);
 

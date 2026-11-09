@@ -6,11 +6,11 @@
 #include "effBattle.h"
 #include "ps2asm.h"
 
-extern sdfVector4_t D_0031DF60;
+extern sdfVector4_t effPartModelPosInit;
 
-extern sdfVector4_t D_0031DF70;
+extern sdfVector4_t effPartModelRotInit;
 
-extern sdfVector4_t D_0031DF80;
+extern sdfVector4_t effPartModelScaleInit;
 
 typedef struct
 {
@@ -55,7 +55,7 @@ extern dds3EffectFunc_t dds3EffectFuncTable[7];
 
 extern void *D_002F69B8[4];
 
-extern s32 D_0054F1E4;
+extern s32 effPartModelSerial;
 
 extern s32 effBTLCutCount;
 
@@ -77,7 +77,7 @@ void mdlFree(mdlObj_t *aHandle);
 
 extern dds3EffectFunc_t EffectPCPFuncTable[];
 
-extern void **D_0031DDD0[];
+extern void **effPartPCPDataTable[];
 
 void *sdfChipAllocDirect(s32 aSize);
 
@@ -113,9 +113,9 @@ extern u8 effBTLDebugCameraAllTable;
 
 extern u8 D_0054F1C3;
 
-extern s32 D_0054F130;
+extern s32 effBTLPartyIndex;
 
-extern s8 D_0054F134;
+extern s8 effBTLUnitLightOn;
 
 extern char effBedDirName[];
 
@@ -236,11 +236,11 @@ void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
 
 void dds3EffectPartModelInit(mdlObj_t *hModel)
 {
-    SDF_VU0_LOADVECTOR(&D_0031DF60);
+    SDF_VU0_LOADVECTOR(&effPartModelPosInit);
     mdlSetPosition(hModel);
-    SDF_VU0_LOADVECTOR(&D_0031DF70);
+    SDF_VU0_LOADVECTOR(&effPartModelRotInit);
     mdlSetRotate(hModel);
-    SDF_VU0_LOADVECTOR(&D_0031DF80);
+    SDF_VU0_LOADVECTOR(&effPartModelScaleInit);
     mdlSetScale(hModel);
     mdlSetColor(hModel, 0x80808080);
     if (hModel->first != NULL) {
@@ -254,10 +254,10 @@ mdlObj_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
 {
     mdlObj_t *hModel;
 
-    mdlPackDecode(7, D_0054F1E4, 0x101, pData->data, pData->size);
-    hModel = mdlLoad(7, D_0054F1E4);
+    mdlPackDecode(7, effPartModelSerial, 0x101, pData->data, pData->size);
+    hModel = mdlLoad(7, effPartModelSerial);
     dds3EffectPartModelInit(hModel);
-    D_0054F1E4++;
+    effPartModelSerial++;
     return hModel;
 }
 
@@ -323,7 +323,7 @@ dds3EffectPCP_t *dds3EffectPCPCreate(dds3EffectPCPData_t *hPCPData)
     hPCP->kateg = dds3EffectPCPDataGetKateg(hPCPData);
     hPCP->param = dds3EffectPCPDataGetParam(hPCPData);
     if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
-        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(effPartPCPDataTable[hPCP->kateg][hPCP->param]);
     } else {
         hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(hPCPData);
     }
@@ -349,7 +349,7 @@ dds3EffectPCP_t *dds3EffectPCPCopy(dds3EffectPCP_t *hPCPSrc)
     hPCP->kateg = hPCPSrc->kateg;
     hPCP->param = hPCPSrc->param;
     if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
-        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(effPartPCPDataTable[hPCP->kateg][hPCP->param]);
     } else {
         hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].copy(hPCPSrc->pHandle);
     }
@@ -1073,7 +1073,7 @@ void effPCP_HBED2_SetScale(void *, f32);
 void effPCP_HBED2_SetRotateMatrix(void *, void *);
 void effPCP_HBED2_SetColor(void *, u32);
 
-void **D_0031DDD0[28] = {
+void **effPartPCPDataTable[28] = {
     (void **)&D_0031DD20, (void **)&D_0031DD48, (void **)&D_0031DDA0, NULL,
     NULL, NULL, NULL, NULL,
     NULL, NULL, (void **)&D_0031DDA8, NULL,
@@ -1091,9 +1091,9 @@ dds3EffectFunc_t dds3EffectFuncTable[7] = {
     { dds3P2APolygonCreate, dds3P2APolygonDraw, dds3P2APolygonDelete, dds3P2APolygonCopy, dds3P2APolygonSetPosition, dds3P2APolygonSetScale, dds3P2APolygonSetRotateMatrix, dds3P2APolygonSetRGBA, dds3P2APolygonSetDirection, NULL },
     { (void * (*)(void *))dds3EffectPCPCreate, (void (*)(void *))dds3EffectPCPDraw, (void (*)(void *))dds3EffectPCPDelete, (void * (*)(void *))dds3EffectPCPCopy, (void (*)(void *, void *))dds3EffectPCPSetPosition, (void (*)(void *, f32))dds3EffectPCPSetScale, (void (*)(void *, void *))dds3EffectPCPSetRotateMatrix, (void (*)(void *, u32))dds3EffectPCPSetColor, (void (*)(void *, void *))dds3EffectPCPSetDirection, (void (*)(void *, f32))dds3EffectPCPSetArea },
 };
-sdfVector4_t D_0031DF60 __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };
-sdfVector4_t D_0031DF70 __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };
-sdfVector4_t D_0031DF80 __attribute__((aligned(16))) = { 1.0f, 1.0f, 1.0f, 0.0f };
+sdfVector4_t effPartModelPosInit __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };
+sdfVector4_t effPartModelRotInit __attribute__((aligned(16))) = { 0.0f, 0.0f, 0.0f, 0.0f };
+sdfVector4_t effPartModelScaleInit __attribute__((aligned(16))) = { 1.0f, 1.0f, 1.0f, 0.0f };
 /* Indexed by PCP category. The IDB names entries from 1 on, as effPCP*Table. */
 dds3EffectFunc_t EffectPCPFuncTable[106] = {
     { effPCPThunderSpherePolyCreate, effPCPThunderSpherePolyDraw, effPCPThunderSpherePolyDelete, NULL, effPCPThunderSpherePolySetPosition, effPCPThunderSpherePolySetScale, NULL, effPCPThunderSpherePolySetColor, NULL, NULL },

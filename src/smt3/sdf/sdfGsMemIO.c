@@ -275,7 +275,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrPacketBuffHandle);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrPacketBuffSize);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_00551870);
+INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrPacketBuffBase);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrPacketBuffPtr);
 
@@ -289,7 +289,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfDrawSyncFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfDrawFrameCounter);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_00551888);
+INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfDrawPublishFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfGrDrawFrameId);
 

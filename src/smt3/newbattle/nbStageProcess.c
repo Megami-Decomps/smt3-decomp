@@ -26,13 +26,13 @@ typedef struct nbStageState_t {
     u32 param;
 } nbStageState_t;
 
-extern char D_00543618[];
+extern char nbStageLightName[];
 
-extern char D_00543688[];
+extern char nbStageProcessName[];
 
-extern char D_00543698[];
+extern char nbStageDrawProcessName[];
 
-extern u8 D_003FA760[];
+extern u8 nbBattleLightResource[];
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -83,13 +83,13 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern sdfVector4Unaligned_t D_00543628;
+extern sdfVector4Unaligned_t nbNiidaCameraPos;
 
-extern sdfVector4Unaligned_t D_00543648;
+extern sdfVector4Unaligned_t nbEventCameraPos;
 
-extern char *D_00551110;
+extern char *nbNiidaCameraName;
 
-extern char *D_00551114;
+extern char *nbEventCameraName;
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 serialID, sdfVector4_t *pos, f32 *rot);
 
@@ -101,9 +101,9 @@ extern void dds3ObjectBaseSetPadControl(dds3Basic_t *pObjectBasic, dds3BasicCont
 
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *pBasic, f32 fovy);
 
-extern char D_00543668[];
+extern char nbStageCameraDefaultPos[];
 
-extern char D_00543678[];
+extern char nbStageCameraDefaultRot[];
 
 extern void *memcpy(void *a, const void *b, size_t c);
 
@@ -142,19 +142,19 @@ void SetBattleLight(nbMainProcessData_t *data)
 
     memset(&pos, 0, sizeof(pos));
     pos.x = -1000.0f;
-    if (dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 9, D_00543618) == NULL) {
+    if (dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 9, nbStageLightName) == NULL) {
         struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
 
         data->light[0] = light;
-        dds3SetLightObjectResoruce(light, D_003FA760);
+        dds3SetLightObjectResoruce(light, nbBattleLightResource);
         dds3SetPosPoseSet(data->light[0], &pos);
-        dds3SetUnitObjectId(data->light[0], D_00543618);
+        dds3SetUnitObjectId(data->light[0], nbStageLightName);
     }
     {
         struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
 
         data->light[1] = light;
-        dds3SetLightObjectResoruce(light, D_003FA760);
+        dds3SetLightObjectResoruce(light, nbBattleLightResource);
     }
 }
 
@@ -164,11 +164,11 @@ void nbAddStageCamera(nbMainProcessData_t *data)
     sdfVector4_t rot;
     dds3Basic_t *camera;
 
-    pos = D_00543628;
+    pos = nbNiidaCameraPos;
     memset(&rot, 0, 0x10);
     rot.w = 1.0f;
     camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, &rot.x);
-    camera->name = D_00551110;
+    camera->name = nbNiidaCameraName;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
@@ -182,11 +182,11 @@ void nbAddStageCamera2(nbMainProcessData_t *data)
     sdfVector4_t rot;
     dds3Basic_t *camera;
 
-    pos = D_00543648;
+    pos = nbEventCameraPos;
     memset(&rot, 0, 0x10);
     rot.w = 1.0f;
     camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, &rot.x);
-    camera->name = D_00551114;
+    camera->name = nbEventCameraName;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
@@ -241,8 +241,8 @@ void StageLoad(void)
     dds3Basic_t *camera;
     s32 state;
 
-    memcpy(&pos, D_00543668, 0x10);
-    memcpy(&rot, D_00543678, 0x10);
+    memcpy(&pos, nbStageCameraDefaultPos, 0x10);
+    memcpy(&rot, nbStageCameraDefaultRot, 0x10);
     memset(&q, 0, 0x10);
     q.w = 1.0f;
     data = nbGetMainProcessData();
@@ -352,10 +352,10 @@ void nbInitStageProcess(nbMainProcessData_t *data)
     nbStageState.pad02[0] = 0;
     nbStageState.major = 0;
     nbStageState.minor = 0;
-    id = dds3StartProcess(D_00543688, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
+    id = dds3StartProcess(nbStageProcessName, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->StageProcessID = id;
-    draw = dds3StartProcess(D_00543698, 0x2B0E, 1, 1, nbStageDrawProcess1, NULL, NULL);
+    draw = dds3StartProcess(nbStageDrawProcessName, 0x2B0E, 1, 1, nbStageDrawProcess1, NULL, NULL);
     dds3LinkProcess(id, draw);
     if (nbGetEncountOn() == 0) {
         dds3FadeOut(0, 0, 0, 0);
@@ -502,7 +502,7 @@ void nbStageSp(void)
         }
     }
 }
-INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", D_00551110);
+INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", nbNiidaCameraName);
 
-INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", D_00551114);
+INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", nbEventCameraName);
 

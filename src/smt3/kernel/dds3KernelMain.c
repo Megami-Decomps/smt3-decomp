@@ -14,20 +14,20 @@ extern u32 dds3SlowTime;
 extern u32 dds3SlowRunCount;
 extern u32 dds3SlowEndCount;
 extern u16 dds3VblanksPerFrame;
-extern s16 D_0054E828;
-extern s16 D_0054E82A;
-extern s8 D_0054E834;
+extern s16 dds3FrameRunTime;
+extern s16 dds3LastDrawFrameCount;
+extern s8 dds3FileCmdLoPrio;
 extern u16 sdfReqDrawDelaySleepCount;
 extern u16 sdfDrawFrameCounter;
-extern char D_0052DCF0[]; /* "hard reset !!\n" */
-extern char D_0052DD00[]; /* "cdrom0:\\SLPS_999.99;1" */
-extern char D_0054E838[]; /* "1st" */
-extern char D_0054E840[]; /* "draw1st" */
-extern char D_0052DCA0[]; /* "RequestDraw" */
-extern char D_0052DCB0[]; /* "basic_main" */
-extern char D_0052DCC0[]; /* "basic_draw" */
-extern char D_0052DCD0[]; /* "font_sys" */
-extern char D_0052DCE0[]; /* "DbgDevDump" */
+extern char dds3HardResetMessage[]; /* "hard reset !!\n" */
+extern char dds3ResetExecPath[]; /* "cdrom0:\\SLPS_999.99;1" */
+extern char dds3FirstProcessName[]; /* "1st" */
+extern char dds3DrawFirstProcessName[]; /* "draw1st" */
+extern char dds3DrawProcessName[]; /* "RequestDraw" */
+extern char dds3BasicMainProcessName[]; /* "basic_main" */
+extern char dds3BasicDrawProcessName[]; /* "basic_draw" */
+extern char dds3FontSysProcessName[]; /* "font_sys" */
+extern char dds3DebugDevDumpProcessName[]; /* "DbgDevDump" */
 extern void dds3InitDrawEnv(void);
 extern void dds3PadInitialize(void);
 extern dds3ProcessID_t *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB,
@@ -80,13 +80,13 @@ void dds3FirstInit(void)
 {
     dds3InitDrawEnv();
     dds3PadInitialize();
-    dds3StartProcess(D_0054E838, 0, 0, 0, dds3FirstProcess, 0, 0);
-    dds3StartProcess(D_0054E840, 0x2710, 0, 0, dds3DrawFirstProcess, 0, 0);
-    dds3StartProcess(D_0052DCA0, 0x4E20, 0, 0, dds3DrawProcess, 0, 0);
-    dds3StartProcess(D_0052DCB0, 0x3FC, 1, 1, dds3BasicMainProcess, 0, 0);
-    dds3StartProcess(D_0052DCC0, 0x2B09, 1, 1, dds3BasicDrawProcess, 0, 0);
+    dds3StartProcess(dds3FirstProcessName, 0, 0, 0, dds3FirstProcess, 0, 0);
+    dds3StartProcess(dds3DrawFirstProcessName, 0x2710, 0, 0, dds3DrawFirstProcess, 0, 0);
+    dds3StartProcess(dds3DrawProcessName, 0x4E20, 0, 0, dds3DrawProcess, 0, 0);
+    dds3StartProcess(dds3BasicMainProcessName, 0x3FC, 1, 1, dds3BasicMainProcess, 0, 0);
+    dds3StartProcess(dds3BasicDrawProcessName, 0x2B09, 1, 1, dds3BasicDrawProcess, 0, 0);
     frInitFontTable(0x100, 0x200);
-    dds3StartProcess(D_0052DCD0, 0x4E1F, 0, 0, frFlipPacketBuf,
+    dds3StartProcess(dds3FontSysProcessName, 0x4E1F, 0, 0, frFlipPacketBuf,
         (dds3ProcessFunc_t)frDestroyFontTable, 0);
     fileSysInit();
     itfMesMngInitializeManager();
@@ -109,7 +109,7 @@ void dds3FirstInit(void)
     dds3AdminiCallSequence(0, 0, 0, 0);
     dds3InitDebugSystem();
     cmpTexLoad();
-    dds3StartProcess(D_0052DCE0, 0x5214, 0, 0, dds3DebugDevDumpProcess, 0, 0);
+    dds3StartProcess(dds3DebugDevDumpProcessName, 0x5214, 0, 0, dds3DebugDevDumpProcess, 0, 0);
     dds3FadeClear();
     evtInitMoonProcess();
     encInitProcess();
@@ -203,8 +203,8 @@ void dds3KernelMain(void)
     goto top;
 frame:
     dds3FrameCount++;
-    D_0054E828 = sdfGetRunTimeCount(base) - sdfReqDrawDelaySleepCount;
-    D_0054E82A = sdfDrawFrameCounter;
+    dds3FrameRunTime = sdfGetRunTimeCount(base) - sdfReqDrawDelaySleepCount;
+    dds3LastDrawFrameCount = sdfDrawFrameCounter;
     dds3FrameID ^= 1;
     goto runcount;
 pause:
@@ -220,7 +220,7 @@ pause:
     }
 runcount:
     dds3RunCount++;
-    if (D_0054E834 == 0) {
+    if (dds3FileCmdLoPrio == 0) {
         sdfFileCmdThreadSetHiPrio();
     }
 top:
@@ -230,7 +230,7 @@ top:
     sdfWaitVblank(dds3VblanksPerFrame);
     sdfGrReqDrawDelay(dds3VblanksPerFrame - 1);
     sdfPadWork();
-    if (D_0054E834 != 0) {
+    if (dds3FileCmdLoPrio != 0) {
         sdfFileCmdThreadSetLoPrio();
     }
     if (dds3PauseSign != 0) {
@@ -243,23 +243,23 @@ top:
     }
     goto frame;
 done:
-    printf(D_0052DCF0);
-    LoadExecPS2(D_0052DD00, 0, 0);
+    printf(dds3HardResetMessage);
+    LoadExecPS2(dds3ResetExecPath, 0, 0);
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCA0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3DrawProcessName);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCB0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3BasicMainProcessName);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCC0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3BasicDrawProcessName);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCD0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3FontSysProcessName);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCE0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3DebugDevDumpProcessName);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DCF0);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3HardResetMessage);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", D_0052DD00);
+INCLUDE_RODATA(const s32, "kernel/dds3KernelMain", dds3ResetExecPath);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3FrameCount);
 
@@ -285,9 +285,9 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3SlowEndCount);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3DebugSign);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E828);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3FrameRunTime);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E82A);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3LastDrawFrameCount);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3VblanksPerFrame);
 
@@ -295,11 +295,11 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E82E);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3KernelDebugSign);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E834);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3FileCmdLoPrio);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E838);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3FirstProcessName);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E840);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3DrawFirstProcessName);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3DrawProcessFlag);
 

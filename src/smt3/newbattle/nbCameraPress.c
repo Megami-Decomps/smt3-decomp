@@ -22,9 +22,9 @@ void nbCameraPressStart(void);
 /* Native 0x28-byte inline blur parameter bodies, corroborated by the HD
  * player/enemy blur names. Access the primary abgr member, not a scalar
  * array: this lets ee-gcc keep the independent frame reload before the store. */
-extern dds3Effect_Blur_t D_00325970;
+extern dds3Effect_Blur_t nbCameraPressBlurBit8Clear;
 
-extern dds3Effect_Blur_t D_00325998;
+extern dds3Effect_Blur_t nbCameraPressBlurBit8Set;
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -43,9 +43,9 @@ void nbCameraPressProcessRun(void)
             if (nbCameraPressFrame < SDF_FRAMES(0xA)) {
                 frame = SDF_FRAME_TICK(nbCameraPressFrame);
                 if ((data->stat & 8) != 0) {
-                    target = &D_00325998;
+                    target = &nbCameraPressBlurBit8Set;
                 } else {
-                    target = &D_00325970;
+                    target = &nbCameraPressBlurBit8Clear;
                 }
                 if (frame < 3) {
                     rate = frame / 3.0f;

@@ -65,13 +65,13 @@ extern void dds3EffectFileListWindowSetPadWait(void *hEffFLWin, s32 wait);
 
 extern void dds3EffectFileListWindowSetWindowColor(void *hEffFLWin, u32 frame_c, u32 bg_c);
 
-extern const char D_005358A8[];
+extern const char nbCameraHelperViewerPBDir[];
 
 extern u32 D_0054F37C;
 
-extern char D_00535850[];
+extern char nbCameraHelperMsgNotTarget[];
 
-extern char D_00535878[];
+extern char nbCameraHelperMsgNotEye[];
 
 #include "sdk_libc.h"
 
@@ -215,12 +215,12 @@ void nbCameraHelperRun(nbCameraHelper_tag *hCameraHelper)
         dds3EffectPartDraw(hCameraHelper->hPB);
         model = dds3EffectPartGetHandle(hCameraHelper->hPB);
         if (sdfModelGetMarkPos(model->inner, 0) == 0) {
-            printf(D_00535850);
+            printf(nbCameraHelperMsgNotTarget);
         }
         SDF_VU0_STOREVECTOR(camera);
         SDF_VU0_STOREVECTOR(&hCameraHelper->target);
         if (sdfModelGetMarkPos(model->inner, 1) == 0) {
-            printf(D_00535878);
+            printf(nbCameraHelperMsgNotEye);
         }
         SDF_VU0_STOREVECTOR(&hCameraHelper->eye);
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -241,11 +241,11 @@ void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye)
     f32 length;
 
     if (sdfModelGetMarkPos(hModel->inner, target) == 0) {
-        printf(D_00535850);
+        printf(nbCameraHelperMsgNotTarget);
     }
     SDF_VU0_STOREVECTOR(pCamera);
     if (sdfModelGetMarkPos(hModel->inner, eye) == 0) {
-        printf(D_00535878);
+        printf(nbCameraHelperMsgNotEye);
     }
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(pCamera);
@@ -264,7 +264,7 @@ void nbCameraHelperModelSet(mdlObj_t *hModel)
 
 s32 nbCameraHelperViewer_PB_Init(s32 pData)
 {
-    void *hFileList = dds3EffectFileListCreate(D_005358A8, 0x10);
+    void *hFileList = dds3EffectFileListCreate(nbCameraHelperViewerPBDir, 0x10);
     void *pWork;
 
     nbCameraHelperViewerPBHandle = hFileList;
@@ -291,7 +291,7 @@ typedef struct effDebugViewer_t {
 } effDebugViewer_t;
 
 extern effDebugViewer_t nbCameraHelperViewerPBParam;
-extern char D_0056B470[];
+extern char nbCameraHelperViewerModeBuf[];
 extern void dds3EffectFileListWindowDraw(void *window);
 extern u32 dds3EffectFileListWindowGetState(void *window);
 extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
@@ -306,8 +306,8 @@ void nbCameraHelperViewer_PB_Draw(void *pData)
         void (*destroy)(void *);
         s32 (*create)(void *);
 
-        dds3EffectFileListWindowGetFilename(nbCameraHelperViewerPBWork, D_0056B470);
-        nbCameraHelperViewerMode = D_0056B470;
+        dds3EffectFileListWindowGetFilename(nbCameraHelperViewerPBWork, nbCameraHelperViewerModeBuf);
+        nbCameraHelperViewerMode = nbCameraHelperViewerModeBuf;
         destroy = nbCameraHelperViewerPBParam.destroy;
         if (destroy != NULL) {
             if (nbCameraHelperViewerPBParam.handle != NULL) {
@@ -371,7 +371,7 @@ s32 nbCameraHelperViewer_Init(s32 pData)
 
 extern u8 D_0054F3E8;
 extern u8 D_0054F3E9;
-extern const char D_005358E0[];
+extern const char nbCameraHelperViewerFrameFormat[];
 
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
 extern void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode);
@@ -392,7 +392,7 @@ void nbCameraHelperViewer_Draw(void *pData)
         return;
     }
     if (D_0054F3E8 != 0) {
-        sprintf(buf, D_005358E0, D_0054F3DC->frame,
+        sprintf(buf, nbCameraHelperViewerFrameFormat, D_0054F3DC->frame,
                 nbCameraHelperLength(D_0054F3DC));
         effDebugStringDraw(0x12C, 0x3C, 0, buf);
     }
@@ -415,13 +415,13 @@ void nbCameraHelperViewer_Draw(void *pData)
     nbCameraHelperRun(D_0054F3DC);
 }
 #else
-INCLUDE_RODATA(const s32, "code_001C55F8", D_00535850);
+INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotTarget);
 
-INCLUDE_RODATA(const s32, "code_001C55F8", D_00535878);
+INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotEye);
 
 INCLUDE_RODATA(const s32, "code_001C55F8", D_00535898);
 
-INCLUDE_RODATA(const s32, "code_001C55F8", D_005358A8);
+INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperViewerPBDir);
 
 INCLUDE_RODATA(const s32, "code_001C55F8", D_005358C0);
 

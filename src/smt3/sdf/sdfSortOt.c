@@ -234,15 +234,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -314,7 +314,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 

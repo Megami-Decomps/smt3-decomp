@@ -6,11 +6,11 @@
 #include "event.h"
 #include "kernel.h"
 
-extern char D_0053D640[];
+extern char trmCalcProcessName[];
 
-extern char D_0053D650[];
+extern char trmDrawProcessName[];
 
-extern char D_0053D660[];
+extern char trmUpdateProcessName[];
 
 typedef struct
 {

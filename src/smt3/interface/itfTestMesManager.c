@@ -69,25 +69,25 @@ s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
 
 void pbDrawRotatedPrim(s32 otIndex);
 
-extern char D_0054F530[];
+extern char pbDebugBlurOnText[];
 
-extern char D_0054F538[];
+extern char pbDebugBlurOffText[];
 
-extern char D_0054F540[];
+extern char pbDebugPanel2CursorMark[];
 
-extern char D_0054F548[];
+extern char pbDebugPanel2RowFormat[];
 
-extern char D_0054F550[];
+extern char pbDebugBlurValueFormat[];
 
-extern char D_0054F558[];
+extern char pbDebugBlurOffsetFormat[];
 
-extern char D_0054F588[];
+extern char pbDebugPanel3Title[];
 
-extern char D_0054F590[];
+extern char pbDebugPanel3CursorMark[];
 
-extern char D_0054F598[];
+extern char pbDebugPanel3RowFormat[];
 
-extern char D_0054F5A0[];
+extern char pbDebugChannelFormat[];
 
 extern char D_0054F5A8[];
 
@@ -117,9 +117,9 @@ extern u8 dds3PadButtonState[];
 
 extern u32 dds3BackColor;
 
-extern s32 D_0054F510;
+extern s32 testMsgTexIndex;
 
-extern void *D_0054F514;
+extern void *testMsgTexture;
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -169,13 +169,13 @@ void itfDebugMesMngInitialize(void)
 
 void TestMsgReloadTexture(void)
 {
-    if (D_0054F514 != NULL) {
-        sdfTexFreeDelayed(D_0054F514);
-        D_0054F514 = NULL;
+    if (testMsgTexture != NULL) {
+        sdfTexFreeDelayed(testMsgTexture);
+        testMsgTexture = NULL;
     }
-    D_0054F510 = (D_0054F510 + 1) & 3;
-    if (D_0054F510 != 3) {
-        D_0054F514 = itfMiscLoadTexture(D_00326BC8[D_0054F510]);
+    testMsgTexIndex = (testMsgTexIndex + 1) & 3;
+    if (testMsgTexIndex != 3) {
+        testMsgTexture = itfMiscLoadTexture(D_00326BC8[testMsgTexIndex]);
     }
 }
 
@@ -192,11 +192,11 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *id)
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
 
-    if ((D_0054F514 != NULL) && (D_0054F510 != 3)) {
+    if ((testMsgTexture != NULL) && (testMsgTexIndex != 3)) {
         tag = sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tag);
         itfMiscDrawAlphaPrim(tag, 0, 0);
-        itfMiscDrawSpritePrim(D_00326BD8, D_00326BE8, D_00326BF8, 0xFFF, D_0054F514, 0, tag);
+        itfMiscDrawSpritePrim(D_00326BD8, D_00326BE8, D_00326BF8, 0xFFF, testMsgTexture, 0, tag);
         ot = &sdfGrOtTable[71];
         ((sdfGrOtRegFunc_t)ot->regFunc)(ot, tag);
         return 0;
@@ -327,21 +327,21 @@ s32 pbDebugPrintPanel2(void) {
         EE_ADDR(dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020)));
     sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet,
-        "BLUR:        %s", dds3ScreenBlurFlag ? D_0054F530 : D_0054F538)));
+        "BLUR:        %s", dds3ScreenBlurFlag ? pbDebugBlurOnText : pbDebugBlurOffText)));
 
     y = 0x7A20;
     if (pbDebugPanel2Pos.editing == 0) {
         sdfDevSetPrintCB(&packet, 0x82C0, pbDebugPanel2Pos.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel2Pos.blink++;
         if (pbDebugPanel2Pos.blink < 32 || (pbDebugPanel2Pos.blink & 31) < 18) {
-            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F540)));
+            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, pbDebugPanel2CursorMark)));
         }
     }
 
     for (row = 0; row != 3; row++) {
         sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
         sdfDrawTagLink(list,
-            EE_ADDR(sdfDevPrintfEx(&packet, D_0054F548, D_00326C08[row])));
+            EE_ADDR(sdfDevPrintfEx(&packet, pbDebugPanel2RowFormat, D_00326C08[row])));
         highlight = 0;
         if (pbDebugPanel2Pos.editing != 0 && row == pbDebugPanel2Pos.selection) {
             highlight = 6;
@@ -350,15 +350,15 @@ s32 pbDebugPrintPanel2(void) {
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
-                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurAlpha)));
+                EE_ADDR(sdfDevPrintfEx(&packet, pbDebugBlurValueFormat, dds3ScreenBlurAlpha)));
             break;
         case 1:
             sdfDrawTagLink(list,
-                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurScale)));
+                EE_ADDR(sdfDevPrintfEx(&packet, pbDebugBlurValueFormat, dds3ScreenBlurScale)));
             break;
         case 2:
             sdfDrawTagLink(list,
-                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F558, dds3ScreenBlurOfsX[0], dds3ScreenBlurOfsX[1])));
+                EE_ADDR(sdfDevPrintfEx(&packet, pbDebugBlurOffsetFormat, dds3ScreenBlurOfsX[0], dds3ScreenBlurOfsX[1])));
             break;
         }
         y += 0x60;
@@ -470,18 +470,18 @@ s32 pbDebugPrintPanel3(void) {
     sdfDrawTagLink(list,
         EE_ADDR(dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020)));
     sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
-    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F588)));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, pbDebugPanel3Title)));
     if (pbDebugPanel3X.editing == 0) {
         sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel3X.blink++;
         if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
-            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, D_0054F590)));
+            sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&packet, pbDebugPanel3CursorMark)));
         }
     }
     for (row = 0; row != 4; row++) {
         sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, D_00326C20[row].highlight);
         sdfDrawTagLink(list,
-            EE_ADDR(sdfDevPrintfEx(&packet, D_0054F598, D_00326C20[row].title)));
+            EE_ADDR(sdfDevPrintfEx(&packet, pbDebugPanel3RowFormat, D_00326C20[row].title)));
         highlight = 0;
         if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
@@ -489,7 +489,7 @@ s32 pbDebugPrintPanel3(void) {
         sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
             sdfDrawTagLink(list,
-                EE_ADDR(sdfDevPrintfEx(&packet, D_0054F5A0, D_00326C50.channels[row])));
+                EE_ADDR(sdfDevPrintfEx(&packet, pbDebugChannelFormat, D_00326C50.channels[row])));
         } else {
             sdfDrawTagLink(list,
                 EE_ADDR(sdfDevPrintfEx(&packet, D_0054F5A8, D_00551EA8)));
@@ -639,13 +639,13 @@ void func_001D2638(f32 *delta) {
     }
 }
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535C58);
+INCLUDE_RODATA(const s32, "interface/itfTestMesManager", pbMyCharScale);
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535C68);
+INCLUDE_RODATA(const s32, "interface/itfTestMesManager", pbDrawMyCharacterProcName);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F510);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", testMsgTexIndex);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F514);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", testMsgTexture);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F518);
 
@@ -653,17 +653,17 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F520);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F528);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F530);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOnText);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F538);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOffText);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F540);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel2CursorMark);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F548);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel2RowFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F550);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurValueFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F558);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOffsetFormat);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F560);
 
@@ -677,25 +677,25 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F580);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F584);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F588);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3Title);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F590);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3CursorMark);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F598);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3RowFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5A0);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugChannelFormat);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5A8);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5B0);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapCallbacks);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5B8);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbNeighborOffsets);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5C0);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbProcNameFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5C4);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapWork);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D0);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMenuItemCount);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D2);
 
@@ -723,15 +723,15 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapCursorWork);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5FC);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F600);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardInitFormat);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F608);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardNewline);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", g_pdebug_0);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F614);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F618);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugMenuCursorMark);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F620);
+INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugFloatFormat);
 

@@ -19,7 +19,7 @@ extern dds3ProcessID_t *titleAllocWork(s32 arg);
 
 extern s8 dds3PadButtonState[];
 
-extern char D_0053DD98[];
+extern char dds3TitleProcName[];
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
@@ -32,8 +32,8 @@ extern mselGlobalWork_t *gGlobal;
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 #include "sdk_libc.h"
 
-extern char D_0054FD50[];
-extern char D_0054FD58[];
+extern char mselLevelLabel[];
+extern char mselLevelFormat[];
 extern char *datExplainTable[];
 extern char *text2[];
 
@@ -54,7 +54,7 @@ extern void eglLinkSprite(s32 x, s32 y, s32 w, s32 h,
 
 #ifdef NON_MATCHING
 extern dds3TitleWork_t *titleWork;
-extern s32 D_0054FD2C, D_0054FD38, dds3KernelDebugSign;
+extern s32 D_0054FD2C, dds3TitleMovieCount, dds3KernelDebugSign;
 extern char D_0053DDA8[];
 
 extern void rsetOtOfs(s32 offset);
@@ -185,14 +185,14 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         } else {
             titleWork->unk_34 = -1;
             dds3FadeIn(0, 0, 0, 30);
-            if (D_0054FD38 & 1) {
+            if (dds3TitleMovieCount & 1) {
                 dds3PlayMovieByIndex(24);
                 titleWork->unk_3C = 1;
             } else {
                 dds3PlayMovieByIndex(23);
                 titleWork->unk_3C = 0;
             }
-            D_0054FD38 = (s32)((u32)D_0054FD38 + 1);
+            dds3TitleMovieCount = (s32)((u32)dds3TitleMovieCount + 1);
             titleWork->mode = (s32)((u32)titleWork->mode + 1);
             titleWork->unk_20 = 0;
         }
@@ -440,7 +440,7 @@ s32 titleStart(s32 mode)
 s32 titleExit(void)
 {
     titleFreeWork(0);
-    dds3KillProcessName(D_0053DD98, 1);
+    dds3KillProcessName(dds3TitleProcName, 1);
     return 0;
 }
 
@@ -491,8 +491,8 @@ void mselUpdateCursor(void)
 }
 
 extern f32 sdfSin(f32 angle);
-extern char *D_00342FF8[];
-extern char *D_00343008[];
+extern char *mselTitleCursor0Lines[];
+extern char *mselTitleCursor1Lines[];
 
 void mselDrawTitleAnim(void)
 {
@@ -527,14 +527,14 @@ void mselDrawTitleAnim(void)
     }
     switch (gGlobal->cursor) {
     case 0:
-        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(D_00342FF8[0]));
-        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(D_00342FF8[1]));
-        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(D_00342FF8[2]));
+        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(mselTitleCursor0Lines[0]));
+        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(mselTitleCursor0Lines[1]));
+        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(mselTitleCursor0Lines[2]));
         return;
     case 1:
-        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(D_00343008[0]));
-        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(D_00343008[1]));
-        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(D_00343008[2]));
+        mselDrawMenuText(239, 82, 0x64618780, EE_ADDR_S(mselTitleCursor1Lines[0]));
+        mselDrawMenuText(239, 94, 0x64618780, EE_ADDR_S(mselTitleCursor1Lines[1]));
+        mselDrawMenuText(239, 106, 0x64618780, EE_ADDR_S(mselTitleCursor1Lines[2]));
         break;
     }
 }
@@ -617,13 +617,13 @@ void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
             fclencyceelem_t *record = &saveData->records[devilId];
             mselDrawMenuText(0x64, y, color, EE_ADDR_S(datExplainTable[datDevilTable[record->id].race]));
             mselDrawMenuText(0xA4, y, nameColor, EE_ADDR_S(text2[record->id]));
-            sprintf(text, D_0054FD50);
+            sprintf(text, mselLevelLabel);
             mselDrawMenuText(0x140, y, color, EE_ADDR_S(text));
             level = record->level;
             if (level >= 0x64) {
                 level = 0x63;
             }
-            sprintf(text, D_0054FD58, level);
+            sprintf(text, mselLevelFormat, level);
             mselDrawSaveNum(0x15A, y + 2, color, EE_ADDR_S(text));
         }
     }
@@ -637,7 +637,7 @@ INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE88);
 
 INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DEA8);
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD38);
+INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", dds3TitleMovieCount);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD3C);
 
@@ -649,9 +649,9 @@ INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", fldWmapEnabled);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD4C);
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD50);
+INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelLabel);
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD58);
+INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelFormat);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD60);
 

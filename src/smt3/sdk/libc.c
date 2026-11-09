@@ -237,15 +237,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -322,7 +322,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 
@@ -555,21 +555,21 @@ INCLUDE_ASM(const s32, "sdk/libc", memset);
 void __malloc_lock(_reent *r) {
     s32 owner = GetThreadId();
 
-    if (D_0052C288 == owner) {
-        D_0052C28C++;
+    if (mallocLockOwner == owner) {
+        mallocLockCount++;
     } else {
-        WaitSema(D_0052C378);
-        D_0052C288 = owner;
-        D_0052C28C++;
+        WaitSema(mallocSema);
+        mallocLockOwner = owner;
+        mallocLockCount++;
     }
 }
 
 void __malloc_unlock(_reent *r) {
-    if (--D_0052C28C != 0) {
+    if (--mallocLockCount != 0) {
         return;
     }
-    D_0052C288 = -1;
-    SignalSema(D_0052C378);
+    mallocLockOwner = -1;
+    SignalSema(mallocSema);
 }
 
 s32 _printf_r(_reent *r, const char *fmt, ...) {
@@ -590,7 +590,7 @@ s32 printf(const char *fmt, ...) {
 
 extern u32 strlen(const char *s);
 /* The newline owns a padded 16-byte read-only block in retail. */
-extern const char D_0054B660[];
+extern const char putsNewline[];
 s32 _puts_r(_reent *r, const char *s)
 {
     __suio request;
@@ -599,7 +599,7 @@ s32 _puts_r(_reent *r, const char *s)
 
     vectors[0].iov_base = (void *)s;
     vectors[0].iov_len = length;
-    vectors[1].iov_base = (void *)D_0054B660;
+    vectors[1].iov_base = (void *)putsNewline;
     vectors[1].iov_len = 1;
     request.uio_resid = length + 1;
     request.uio_iov = vectors;
@@ -1131,17 +1131,17 @@ extern s32 isinf(f64 value);
 extern s32 isnan(f64 value);
 extern s32 exponent(char *out, s32 value, s32 marker);
 extern _reent *_impure_ptr;
-extern s32 D_0052C290 __attribute__((section(".data")));
-extern const char D_0054B690[];
-extern const char D_0054B698[];
-extern const char D_0054B6A0[];
-extern const char D_0054B6B8[];
-extern const char D_0054B6C0[];
-extern const char D_0054B6D8[];
-extern const char D_0054B6F8[];
-extern const char D_0054B700[];
-extern const char D_0054B670[16];
-extern const char D_0054B680[16];
+extern s32 mbCurMax __attribute__((section(".data")));
+extern const char printfInfText[];
+extern const char printfNanText[];
+extern const char printfHexLower[];
+extern const char printfNullText[];
+extern const char printfHexUpper[];
+extern const char printfBadBaseMsg[];
+extern const char printfZeroDigit[];
+extern const char printfDecimalPoint[];
+extern const char printfSpaces[16];
+extern const char printfZeros[16];
 
 /* Native output uses eight vectors and a 348-byte digit workspace. */
 s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
@@ -1228,7 +1228,7 @@ s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
         scanStart = cursor;
         for (;;) {
             decodedBytes = _mbtowc_r(_impure_ptr, &wideCharacter, cursor,
-                                      D_0052C290, &mbstate);
+                                      mbCurMax, &mbstate);
             if (decodedBytes <= 0) break;
             cursor += decodedBytes;
             if (wideCharacter == '%') {
@@ -1382,7 +1382,7 @@ dispatch_conversion:
         case 's':
             signByte = 0;
             text = __builtin_va_arg(ap, char *);
-            if (text == NULL) text = (char *)D_0054B6B8;
+            if (text == NULL) text = (char *)printfNullText;
             if (precision >= 0) {
                 char *end = (char *)memchr(text, 0, (u32)precision);
                 textBytes = end != NULL ? end - text : precision;
@@ -1414,11 +1414,11 @@ dispatch_conversion:
             floatValue = __builtin_va_arg(ap, f64);
             if (isinf(floatValue) != 0) {
                 if (dpcmp(floatValue, 0.0) < 0) signByte = '-';
-                text = (char *)D_0054B690;
+                text = (char *)printfInfText;
                 textBytes = 3;
                 renderedLength = 3;
             } else if (isnan(floatValue) != 0) {
-                text = (char *)D_0054B698;
+                text = (char *)printfNanText;
                 textBytes = 3;
                 renderedLength = 3;
             } else {
@@ -1468,7 +1468,7 @@ dispatch_conversion:
         }
 format_integer:
         {
-            const char *alphabet = conversion == 'X' ? D_0054B6C0 : D_0054B6A0;
+            const char *alphabet = conversion == 'X' ? printfHexUpper : printfHexLower;
             char *end = numberBuffer + sizeof(numberBuffer);
             text = end;
             nonzero = unsignedLong != 0;
@@ -1495,7 +1495,7 @@ format_integer:
                         unsignedLong >>= 4;
                     } while (unsignedLong != 0);
                 } else {
-                    text = (char *)D_0054B6D8;
+                    text = (char *)printfBadBaseMsg;
                     textBytes = strlen(text);
                     goto emit_field;
                 }
@@ -1512,7 +1512,7 @@ emit_field:
         if (width > fieldBytes) padBytes = width - fieldBytes;
         else padBytes = 0;
         if ((flags & 0x84) == 0 && (flags & 4) == 0) {
-            PAD(D_0054B670, padBytes);
+            PAD(printfSpaces, padBytes);
         }
         if (signByte != 0) {
             PRINT(&signByte, 1);
@@ -1522,9 +1522,9 @@ emit_field:
             PRINT(prefix, 2);
         }
         if ((flags & 0x80) && !(flags & 4) && width > fieldBytes) {
-            PAD(D_0054B680, width - fieldBytes);
+            PAD(printfZeros, width - fieldBytes);
         }
-        if (precisionZeros > 0) PAD(D_0054B680, precisionZeros);
+        if (precisionZeros > 0) PAD(printfZeros, precisionZeros);
         if ((flags & 0x100) == 0) {
             PRINT(text, textBytes);
         } else if (conversion == 'e' || conversion == 'E') {
@@ -1537,35 +1537,35 @@ emit_field:
                 if (dpcmp(floatValue, 0.0) != 0) {
                     PRINT(text + 1, digitLength - 1);
                 } else if (digitLength - 1 > 0) {
-                    PAD(D_0054B680, digitLength - 1);
+                    PAD(printfZeros, digitLength - 1);
                 }
             }
             PRINT(exponentBuffer, exponentLength);
         } else if (dpcmp(floatValue, 0.0) == 0) {
-            PRINT(D_0054B6F8, 1);
+            PRINT(printfZeroDigit, 1);
             if (decimalPosition < digitLength || (flags & 1)) PRINT(decimalPoint, 1);
-            if (digitLength - 1 > 0) PAD(D_0054B680, digitLength - 1);
+            if (digitLength - 1 > 0) PAD(printfZeros, digitLength - 1);
         } else if (decimalPosition <= 0) {
-            PRINT(D_0054B6F8, 1);
+            PRINT(printfZeroDigit, 1);
             if (decimalPosition != 0 || digitLength != 0) {
                 PRINT(decimalPoint, 1);
-                if (decimalPosition < 0) PAD(D_0054B680, -decimalPosition);
+                if (decimalPosition < 0) PAD(printfZeros, -decimalPosition);
                 PRINT(text, digitLength);
             }
         } else if (decimalPosition < digitLength) {
             PRINT(text, decimalPosition);
-            PRINT(D_0054B700, 1);
+            PRINT(printfDecimalPoint, 1);
             PRINT(text + decimalPosition, digitLength - decimalPosition);
         } else {
             PRINT(text, digitLength);
             if (decimalPosition > digitLength)
-                PAD(D_0054B680, decimalPosition - digitLength);
-            if (flags & 1) PRINT(D_0054B700, 1);
+                PAD(printfZeros, decimalPosition - digitLength);
+            if (flags & 1) PRINT(printfDecimalPoint, 1);
         }
         if (flags & 4) {
             padBytes = width - fieldBytes;
             if (padBytes > 0) {
-                PAD(D_0054B670, padBytes);
+                PAD(printfSpaces, padBytes);
             }
         }
         if (width > fieldBytes) cumulative += width;
@@ -1590,11 +1590,11 @@ INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B660);
+INCLUDE_RODATA(const s32, "sdk/libc", putsNewline);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B670);
+INCLUDE_RODATA(const s32, "sdk/libc", printfSpaces);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B680);
+INCLUDE_RODATA(const s32, "sdk/libc", printfZeros);
 
 INCLUDE_ASM(const s32, "sdk/libc", func_002D6678);
 #endif
@@ -1837,12 +1837,12 @@ _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n);
 _Bigint *_lshift(_reent *r, _Bigint *b, s32 shift);
 _Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b);
 s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor);
-extern char D_0054B880[], D_0054B890[];
-extern const f64 D_0054B8A0 __attribute__((section(".rodata")));
-extern const f64 D_0054B8A8 __attribute__((section(".rodata")));
-extern const f64 D_0054B8B0 __attribute__((section(".rodata")));
-extern const f64 D_0054B9F8[];
-extern const f64 D_0054BA18 __attribute__((section(".rodata")));
+extern char dtoaInfinityText[], dtoaNanText[];
+extern const f64 dtoaLog10Slope __attribute__((section(".rodata")));
+extern const f64 dtoaLog10Offset __attribute__((section(".rodata")));
+extern const f64 dtoaLog10Of2 __attribute__((section(".rodata")));
+extern const f64 dtoaPow10Big[];
+extern const f64 dtoaPow10Limit __attribute__((section(".rodata")));
 
 #ifdef NON_MATCHING
 char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
@@ -1876,7 +1876,7 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
     if ((value.word[1] & 0x7FF00000U) == 0x7FF00000U) {
         *decimalPoint = 9999;
         start = (value.bits & 0x000FFFFFFFFFFFFFULL) == 0 ?
-                D_0054B880 : D_0054B890;
+                dtoaInfinityText : dtoaNanText;
         if (end != NULL) {
             *end = start[3] == '\0' ? start + 3 : start + 8;
         }
@@ -1913,15 +1913,15 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
         binaryScale = j - 0x433;
         denormal = 1;
     }
-    estimate = ((normalized.value - 1.5) * D_0054B8A0 + D_0054B8A8) +
-               (f64)binaryScale * D_0054B8B0;
+    estimate = ((normalized.value - 1.5) * dtoaLog10Slope + dtoaLog10Offset) +
+               (f64)binaryScale * dtoaLog10Of2;
     k = (s32)estimate;
     if (estimate < 0.0 && estimate != (f64)k) {
         k--;
     }
     kCheck = 1;
     if ((u32)k < 23U) {
-        if (value.value < D_0054B930[k]) {
+        if (value.value < pow10Table[k]) {
             k--;
         }
         kCheck = 0;
@@ -1997,14 +1997,14 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
         errors = 2;
         if (k > 0) {
             i = k >> 4;
-            scale = D_0054B930[k & 15];
+            scale = pow10Table[k & 15];
             if ((i & 16) != 0) {
                 i &= 15;
                 errors = 3;
-                value.value /= D_0054BA18;
+                value.value /= dtoaPow10Limit;
             }
             if (i != 0) {
-                power = D_0054B9F8;
+                power = dtoaPow10Big;
                 do {
                     if ((i & 1) != 0) {
                         errors++;
@@ -2019,9 +2019,9 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
             j = -k;
             if (j != 0) {
                 i = j >> 4;
-                value.value = D_0054B930[j & 15] * value.value;
+                value.value = pow10Table[j & 15] * value.value;
                 if (i != 0) {
-                    power = D_0054B9F8;
+                    power = dtoaPow10Big;
                     do {
                         if ((i & 1) != 0) {
                             errors++;
@@ -2058,7 +2058,7 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
         }
         if (leftRight != 0) {
             i = 0;
-            threshold = 0.5 / D_0054B930[limit - 1] - epsilon.value;
+            threshold = 0.5 / pow10Table[limit - 1] - epsilon.value;
             for (;;) {
                 digit = (s32)value.value;
                 remainder = value.value - (f64)digit;
@@ -2078,7 +2078,7 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
             }
         } else {
             i = 1;
-            threshold = D_0054B930[limit - 1] * epsilon.value;
+            threshold = pow10Table[limit - 1] * epsilon.value;
             for (;;) {
                 digit = (s32)value.value;
                 remainder = value.value - (f64)digit;
@@ -2108,7 +2108,7 @@ quickFailed:
     }
 
     if (binaryExponent >= 0 && k < 15) {
-        scale = D_0054B930[k];
+        scale = pow10Table[k];
         i = 1;
         if (digits < 0 && limit <= 0) {
             mhi = NULL;
@@ -2378,25 +2378,25 @@ oneDigit:
     goto bigintDone;
 }
 #else
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B698);
+INCLUDE_RODATA(const s32, "sdk/libc", printfNanText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6A0);
+INCLUDE_RODATA(const s32, "sdk/libc", printfHexLower);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6B8);
+INCLUDE_RODATA(const s32, "sdk/libc", printfNullText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6C0);
+INCLUDE_RODATA(const s32, "sdk/libc", printfHexUpper);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6D8);
+INCLUDE_RODATA(const s32, "sdk/libc", printfBadBaseMsg);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B6F8);
+INCLUDE_RODATA(const s32, "sdk/libc", printfZeroDigit);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B700);
+INCLUDE_RODATA(const s32, "sdk/libc", printfDecimalPoint);
 
 INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B710);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B880);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaInfinityText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B890);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaNanText);
 
 INCLUDE_ASM(const s32, "sdk/libc", _dtoa_r);
 #endif
@@ -2822,23 +2822,23 @@ s32 _fwalk(_reent *r, s32 (*func)(void *)) {
     return ret;
 }
 
-extern char D_0054B908[];
-extern char D_0054B918[];
+extern char localeEmptyStr[];
+extern char localeCName[];
 extern s32 strcmp(const char *left, const char *right);
 
 char *_setlocale_r(_reent *r, s32 category, const char *locale)
 {
     if (locale != NULL) {
-        if (strcmp(locale, D_0054B918) != 0 && strcmp(locale, D_0054B908) != 0)
+        if (strcmp(locale, localeCName) != 0 && strcmp(locale, localeEmptyStr) != 0)
             return NULL;
         r->_current_category = category;
         r->_current_locale = locale;
     }
-    return D_0054B918;
+    return localeCName;
 }
 
 void *func_002DA308(_reent *r) {
-    return D_0054B8D8;
+    return localeconvData;
 }
 
 char *setlocale(s32 category, const char *locale) {
@@ -3096,7 +3096,7 @@ _Bigint *_i2b(_reent *r, s32 i) {
 INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
 /* Native indexed constants span the separately labeled word at 0x0054B928. */
-extern const s32 D_0054B91C[4];
+extern const s32 pow5MultTable[4];
 _Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
 
 _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
@@ -3108,7 +3108,7 @@ _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
 
     remainder = n & 3;
     if (remainder != 0) {
-        b = _multadd(r, b, D_0054B91C[remainder], 0);
+        b = _multadd(r, b, pow5MultTable[remainder], 0);
     }
     n >>= 2;
     if (n == 0) {
@@ -3438,7 +3438,7 @@ double _mprec_log10(s32 dig) {
     double v = 1.0;
 
     if (dig < 24) {
-        return D_0054B930[dig];
+        return pow10Table[dig];
     }
     while (dig > 0) {
         v *= 10.0;
@@ -3550,39 +3550,39 @@ long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A0);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Slope);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8A8);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Offset);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8B0);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Of2);
 
 INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B8C0);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B8D8);
+INCLUDE_RODATA(const s32, "sdk/libc", localeconvData);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B908);
+INCLUDE_RODATA(const s32, "sdk/libc", localeEmptyStr);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B910);
+INCLUDE_RODATA(const s32, "sdk/libc", localeDecimalPoint);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B918);
+INCLUDE_RODATA(const s32, "sdk/libc", localeCName);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B91C);
+INCLUDE_RODATA(const s32, "sdk/libc", pow5MultTable);
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B928);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B930);
+INCLUDE_RODATA(const s32, "sdk/libc", pow10Table);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B9F8);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaPow10Big);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BA18);
+INCLUDE_RODATA(const s32, "sdk/libc", dtoaPow10Limit);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BA48);
+INCLUDE_RODATA(const s32, "sdk/libc", kernlInternalErrorMsg);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BA70);
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgPacketTooLarge);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BA98);
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgReceiveError);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAB0);
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgSendError);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054BAC8);
+INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgWlenError);
 

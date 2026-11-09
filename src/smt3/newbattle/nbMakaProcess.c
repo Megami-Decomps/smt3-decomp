@@ -225,7 +225,7 @@ extern void p2sdPlayBGM(s32 MidiNo);
 
 extern void p2sdStopBGM(s32 no);
 
-extern char D_00551560[];
+extern char nbMakaProcessName[];
 
 /* 28-byte entries; only the fields this unit reads are named. */
 typedef struct {
@@ -348,7 +348,7 @@ nbMakaProcessData_t *GetMakaProcessData()
 {
     dds3ProcessID_t *id;
 
-    id = dds3SearchProcessName(D_00551560);
+    id = dds3SearchProcessName(nbMakaProcessName);
     if (id == NULL) {
         return NULL;
     }
@@ -514,7 +514,7 @@ dds3ProcessID_t *nbInitMakaProcess(dds3ProcessID_t *parent)
 {
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_00551560, 0x2B0E, 1, 1, nbMakaProcess1, nbMakaShutdown,
+    id = dds3StartProcess(nbMakaProcessName, 0x2B0E, 1, 1, nbMakaProcess1, nbMakaShutdown,
                           nbAllocMakaWork());
     if (parent != NULL) {
         dds3LinkProcess(parent, id);
@@ -585,25 +585,25 @@ void nbStartEventPacks(nbMainProcessData_t *data)
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakaProcess", nbDigitStringTable);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551560);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbMakaProcessName);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551568);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString0);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551570);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString1);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551578);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString2);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551580);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString3);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551588);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString4);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551590);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString5);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_00551598);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString6);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_005515A0);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString7);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_005515A8);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString8);
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", D_005515B0);
+INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString9);
 

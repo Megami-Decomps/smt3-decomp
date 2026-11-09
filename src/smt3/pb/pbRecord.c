@@ -94,7 +94,7 @@ struct pbProcHandle_t
 
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbProcHandle_t *record;
 
@@ -215,19 +215,19 @@ s32 pbPopRecord(pbProcHandle_t *panel, pbProcHandle_t **characters, pbProcHandle
     group = pbSearchGroupDB(database, savedCells[0].status & 0x7FF);
     if (group != NULL) {
         for (i = 0; i < group->count; i++) {
-            map = D_0054F5C4;
+            map = pbMapWork;
             entry = &group->blockEntries[i];
             map->map[group->cellY + entry->y][group->cellX + entry->x] &= 0x1800;
         }
     }
     for (i = 0; i < slot->flag[2]; i++) {
-        map = D_0054F5C4;
+        map = pbMapWork;
         savedCells = slot->blocks;
         map->map[savedCells[i].y][savedCells[i].x] &= 0x800;
         map->map[savedCells[i].y][savedCells[i].x] |= savedCells[i].status;
     }
     {
-    pbMapWork_t *wholeMap = D_0054F5C4;
+    pbMapWork_t *wholeMap = pbMapWork;
     for (i = 0; i < 20; i++) {
         u32 column;
         for (column = 0; column < 20; column++) {
@@ -241,7 +241,7 @@ s32 pbPopRecord(pbProcHandle_t *panel, pbProcHandle_t **characters, pbProcHandle
     }
     if (slot->flag[2] == slot->flag[3]) {
         for (i = 0; i < slot->flag[3]; i++) {
-            map = D_0054F5C4;
+            map = pbMapWork;
             savedCells = slot->floors;
             map->map[savedCells[i].y][savedCells[i].x] |= savedCells[i].status;
         }
@@ -271,7 +271,7 @@ s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
     slots = rec->slot;
     slots[position].blocks = cells;
     if (group->count != 0) {
-        map = D_0054F5C4;
+        map = pbMapWork;
         entry = group->blockEntries;
         i = 0;
         do {
@@ -316,7 +316,7 @@ s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
         do {
             cells[i].x = group->cellX + entry->x;
             cells[i].y = group->cellY + entry->y;
-            cells[i].status = D_0054F5C4->map[cells[i].y][cells[i].x] & 0x800;
+            cells[i].status = pbMapWork->map[cells[i].y][cells[i].x] & 0x800;
             entry++;
         } while (++i < group->count);
     }
@@ -333,15 +333,15 @@ s32 pbAddRecord_char(pbProcHandle_t *panel, s32 currentChar,
     s16 x, y;
     u32 i;
 
-    rec->slot[rec->pos].flag[1] = D_0054F5C4->pcharNum;
+    rec->slot[rec->pos].flag[1] = pbMapWork->pcharNum;
     if (rec->slot[rec->pos].characters != NULL) {
         sdfChipFreeDelayedDirect(rec->slot[rec->pos].characters);
     }
     rec->slot[rec->pos].characters = sdfChipAllocDirect(
-        D_0054F5C4->pcharNum * sizeof(pbRecordCharacter_t));
+        pbMapWork->pcharNum * sizeof(pbRecordCharacter_t));
     rec->slot[rec->pos].flag[0] = currentChar;
 
-    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+    for (i = 0; i < pbMapWork->pcharNum; i++) {
         pbGetMyCharcterPos2(*characters, &x, &y);
         {
             /* Keep the freshly reloaded snapshot base in the native call-free
@@ -430,7 +430,7 @@ s32 pb_draw_help_Process(dds3ProcessID_t *id)
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                0x80808080, (sdfTexHandle_t *)D_0054F5C4->tex34C);
+                0x80808080, (sdfTexHandle_t *)pbMapWork->tex34C);
     return 0;
 }
 
@@ -439,5 +439,5 @@ void pb_draw_help_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
-    D_0054F5C4->helpProc = NULL;
+    pbMapWork->helpProc = NULL;
 }

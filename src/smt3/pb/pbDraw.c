@@ -127,14 +127,14 @@ void pbSetExitPos(pbProcHandle_t *p, s32 x, s32 y) {
 }
 
 
-extern char D_00535CE8[]; /* "pb-draw-mapbase", followed by two aligned empty strings. */
+extern char pbDrawMapbaseProcName[]; /* "pb-draw-mapbase", followed by two aligned empty strings. */
 
 pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     pbExit_t *mapWork;
     dds3ProcessID_t *processId;
-    panel->id = dds3StartProcess(D_00535CE8, 0x2AFD, 1, 1, pb_draw_mapbase_Process,
+    panel->id = dds3StartProcess(pbDrawMapbaseProcName, 0x2AFD, 1, 1, pb_draw_mapbase_Process,
                                       (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -178,7 +178,7 @@ typedef struct
 } pbMapWork_t;
 
 extern sdfMemHandle_t *a_key;
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern sdfTexHandle_t *sdfDevLoadTex(const char *filename);
@@ -191,13 +191,13 @@ extern void dds3SetLightColor(s32 frame, s32 no, f32 *color);
 extern void dds3SetLightDir(s32 frame, s32 no, f32 *direction);
 extern void dds3SetAmbientColor(s32 frame, f32 *color);
 extern sdf3DScreenParam_t dds3ScreenParam;
-extern s32 D_00327270[];
+extern s32 pbFogParam[];
 extern void dds3SetFog(s32 *fog);
 extern u32 dds3DrawFlag;
 extern void pbResetKeyState(void);
 extern void p2sdPlayBGM(s32 track);
 
-INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CE8);
+INCLUDE_RODATA(const s32, "pb/pbDraw", pbDrawMapbaseProcName);
 
 void pbLoadTextures(s32 mode, s32 stage)
 {
@@ -205,31 +205,31 @@ void pbLoadTextures(s32 mode, s32 stage)
     sdfVector4_t light;
 
     a_key = sdfMemAllocDirect(sizeof(pbMapWork_t));
-    D_0054F5C4 = sdfMemLock(a_key);
-    memset(D_0054F5C4, 0, sizeof(pbMapWork_t));
+    pbMapWork = sdfMemLock(a_key);
+    memset(pbMapWork, 0, sizeof(pbMapWork_t));
     for (row = 0; row < 20; row++) {
         for (column = 0; column < 20; column++) {
-            D_0054F5C4->map[row][column] =
-                (D_0054F5C4->map[row][column] & 0x1FFF) | 0x2000;
+            pbMapWork->map[row][column] =
+                (pbMapWork->map[row][column] & 0x1FFF) | 0x2000;
         }
     }
-    D_0054F5C4->charIndex = 1;
-    D_0054F5C4->exitX = D_0054F5C4->exitY = -1;
+    pbMapWork->charIndex = 1;
+    pbMapWork->exitX = pbMapWork->exitY = -1;
     stage--;
     if (stage < 0) {
-        D_0054F5C4->unk35C[0] = 1;
+        pbMapWork->unk35C[0] = 1;
         stage = 0;
     }
-    D_0054F5C4->level = stage;
-    D_0054F5C4->stage = 0;
-    D_0054F5C4->baseTex = sdfDevLoadTex("/pb/sample1.tmx");
-    D_0054F5C4->tex344 = sdfDevLoadTex("/pb/p_boy03.tmx");
-    D_0054F5C4->tex348 = sdfDevLoadTex("/pb/p_boy01.tmx");
-    D_0054F5C4->tex34C = sdfDevLoadTex("/pb/p_boy02.tmx");
-    D_0054F5C4->giveupScript = NULL;
-    D_0054F5C4->mapData = sdfDevLoadFileEx("/pb/pbmsg.bf",
-        (u32 *)&D_0054F5C4->giveupScript, NULL);
-    D_0054F5C4->helpProc = D_0054F5C4->menuProc = NULL;
+    pbMapWork->level = stage;
+    pbMapWork->stage = 0;
+    pbMapWork->baseTex = sdfDevLoadTex("/pb/sample1.tmx");
+    pbMapWork->tex344 = sdfDevLoadTex("/pb/p_boy03.tmx");
+    pbMapWork->tex348 = sdfDevLoadTex("/pb/p_boy01.tmx");
+    pbMapWork->tex34C = sdfDevLoadTex("/pb/p_boy02.tmx");
+    pbMapWork->giveupScript = NULL;
+    pbMapWork->mapData = sdfDevLoadFileEx("/pb/pbmsg.bf",
+        (u32 *)&pbMapWork->giveupScript, NULL);
+    pbMapWork->helpProc = pbMapWork->menuProc = NULL;
 
     pbGameCameraParam[0][0] = 0.0f;
     pbGameCameraParam[0][1] = -1300.0f;
@@ -293,7 +293,7 @@ void pbLoadTextures(s32 mode, s32 stage)
     light.w = 1.0f;
     dds3SetAmbientColor(0, &light.x);
     dds3ScreenParam.fovy = 0.6283185f;
-    dds3SetFog(D_00327270);
+    dds3SetFog(pbFogParam);
     dds3DrawFlag &= ~0x400;
     pbResetKeyState();
     p2sdPlayBGM(0x340000);

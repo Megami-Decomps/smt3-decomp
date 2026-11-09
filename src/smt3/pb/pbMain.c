@@ -86,7 +86,7 @@ extern u32 pbMapIsValid(void);
 
 extern s8 pbLoadState;
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbProcHandle_t *record;
 
@@ -125,7 +125,7 @@ extern pbProcHandle_t *pbGetMoveChar(void);
  * Same real symbol and prototype; a reconstruction aid, not original spelling. */
 extern pbProcHandle_t *pbGetMoveCharOpaque(void) FAKEMATCH_ASM_NAME("pbGetMoveChar");
 
-extern char D_00535DE0[];
+extern char pbEncycName[];
 
 extern sdfMemHandle_t *a_key;
 
@@ -143,7 +143,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void sdfTexFreeDelayed(void *aHandle);
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
-extern char D_00535E10[], D_00535E20[], D_00535EC8[];
+extern char pbDrawBgProcName[], pbMapPathFormat[], pbLoadMapDataProcName[];
 
 
 typedef struct { dds3ProcessID_t *id; } pbMapEditorState_t;
@@ -152,17 +152,17 @@ extern s32 pbEditWork;
 /* Constructors consume the editor root's process-link prefix. The unsized
  * view preserves its non-small-data address form. */
 extern pbMapEditorState_t pbMapEditorState[];
-extern pbProcHandle_t *(*D_00327260[])(pbProcHandle_t *parent);
+extern pbProcHandle_t *(*pbEditorCreateTable[])(pbProcHandle_t *parent);
 
 extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 restore);
 extern s32 p2sdStopBGM(s32 midi);
-extern char D_0054F5C0[]; /* Shared "%s\n" process-name format. */
+extern char pbProcNameFormat[]; /* Shared "%s\n" process-name format. */
 
 /* Exact native dispatcher; see docs/matching/pb/pbMain.md. */
 s32 pbEditInitProc(dds3ProcessID_t *id)
 {
     if (pbEditWork == 0) {
-        pbProcHandle_t *(*create)(pbProcHandle_t *) = D_00327260[pbEditorState];
+        pbProcHandle_t *(*create)(pbProcHandle_t *) = pbEditorCreateTable[pbEditorState];
 
         if (create == NULL) {
             printf("********* Puzzle boy process halted (0).\n");
@@ -202,7 +202,7 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
         /* Local reconstruction aid: the live map address uses native $2.
          * Its lifetime starts after the sound call and ends at the byte read;
          * it does not carry a value across either call. */
-        map = D_0054F5C4;
+        map = pbMapWork;
         if (map->unk35C[0] != 0) {
             dds3AdminiCallSequence(0, NULL, 0, 0);
         }
@@ -212,7 +212,7 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
     case 1:
         break;
     default:
-        printf(D_0054F5C0, pbMoveChar->id->name);
+        printf(pbProcNameFormat, pbMoveChar->id->name);
         printf("default %d\n", pbMoveChar->state);
         break;
     }
@@ -224,16 +224,16 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
 
 void pbEditMainExitProc(void) {
     p2sdStopAllSe();
-    sdfTexFreeDelayed(D_0054F5C4->baseTex);
-    sdfTexFreeDelayed(D_0054F5C4->tex344);
-    sdfTexFreeDelayed(D_0054F5C4->tex348);
-    sdfTexFreeDelayed(D_0054F5C4->tex34C);
-    if (D_0054F5C4->giveupScript != NULL) {
-        sdfMemFreeDirect(D_0054F5C4->mapData);
-        D_0054F5C4->giveupScript = NULL;
+    sdfTexFreeDelayed(pbMapWork->baseTex);
+    sdfTexFreeDelayed(pbMapWork->tex344);
+    sdfTexFreeDelayed(pbMapWork->tex348);
+    sdfTexFreeDelayed(pbMapWork->tex34C);
+    if (pbMapWork->giveupScript != NULL) {
+        sdfMemFreeDirect(pbMapWork->mapData);
+        pbMapWork->giveupScript = NULL;
     }
     sdfMemFreeDirect(a_key);
-    fclEncycFreeEntries(D_00535DE0);
+    fclEncycFreeEntries(pbEncycName);
     fldProcNextJump();
 }
 
@@ -281,7 +281,7 @@ s32 pb_draw_bg_Process(dds3ProcessID_t *id) {
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0,
-                0x80808080, D_0054F5C4->tex344);
+                0x80808080, pbMapWork->tex344);
 
     rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     rsetOtOfs(0x47);
@@ -289,19 +289,19 @@ s32 pb_draw_bg_Process(dds3ProcessID_t *id) {
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (pbGetMessageScriptProc() == NULL && fclGetFlag(0) == 0) {
         DrwSprite2D(0, 0x15E, 0x200, 0x62, 0, 0x15E, 0x200, 0x62,
-                    0x80808080, D_0054F5C4->tex348);
+                    0x80808080, pbMapWork->tex348);
     }
 
     DrwSprite2D(0x100, 0, 0x100, 0xC8, 0x100, 0, 0x100, 0xC8,
-                0x80808080, D_0054F5C4->tex348);
+                0x80808080, pbMapWork->tex348);
 
     DrwSprite2D(0x1C4, 0x1B, 0xD, 0x14,
-                ((D_0054F5C4->stage + 1) % 10) * 0x14 + 0x28,
-                0x1CC, 0xD, 0x14, 0x80808080, D_0054F5C4->tex348);
-    tens = (D_0054F5C4->stage + 1) / 10;
+                ((pbMapWork->stage + 1) % 10) * 0x14 + 0x28,
+                0x1CC, 0xD, 0x14, 0x80808080, pbMapWork->tex348);
+    tens = (pbMapWork->stage + 1) / 10;
     if (tens > 0) {
         DrwSprite2D(0x1B7, 0x1B, 0xD, 0x14, tens * 0x14 + 0x28, 0x1CC, 0xD, 0x14,
-                    0x80808080, D_0054F5C4->tex348);
+                    0x80808080, pbMapWork->tex348);
     }
     return 0;
 }
@@ -310,7 +310,7 @@ void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(id->workdata);
 }
 
-extern char D_00535DE0[];
+extern char pbEncycName[];
 extern void pbLoadTextures(s32 mode, s32 stage);
 extern s32 pbEditInitProc(dds3ProcessID_t *id);
 extern pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent);
@@ -323,7 +323,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 priority, s32 v2, s32 v3,
                                          dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
-INCLUDE_RODATA(const s32, "pb/pbMain", D_00535DE0);
+INCLUDE_RODATA(const s32, "pb/pbMain", pbEncycName);
 
 dds3ProcessID_t *pbStartMapEditor(s32 mode, s32 stage) {
     s32 state;
@@ -351,7 +351,7 @@ dds3ProcessID_t *pbStartMapEditor(s32 mode, s32 stage) {
     pbLoadTextures(mode, stage);
     pbStartBackGround((pbProcHandle_t *)mapState);
     if (mode == 1) {
-        fclEncycAllocEntry(D_00535DE0, (dds3ProcessFunc_t)pbDebugProc,
+        fclEncycAllocEntry(pbEncycName, (dds3ProcessFunc_t)pbDebugProc,
                            (dds3ProcessFunc_t)pbDebugShutdown, NULL);
     }
     return mapState->id;
@@ -379,7 +379,7 @@ pbProcHandle_t *pbStartDummy(pbProcHandle_t *parent) {
 
 pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
-    panel->id = dds3StartProcess(D_00535E10, 0x2AFD, 1, 1, pb_draw_bg_Process,
+    panel->id = dds3StartProcess(pbDrawBgProcName, 0x2AFD, 1, 1, pb_draw_bg_Process,
                                       (dds3ProcessFunc_t)pb_draw_bg_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -395,8 +395,8 @@ pbProcHandle_t *func_001D4B28(pbProcHandle_t *parent) {
 }
 
 u32 pbMapIsValid(void) {
-    u32 ret = (D_0054F5C4->pcharNum == 0);
-    if ((D_0054F5C4->exitX < 0) || (D_0054F5C4->exitY < 0)) {
+    u32 ret = (pbMapWork->pcharNum == 0);
+    if ((pbMapWork->exitX < 0) || (pbMapWork->exitY < 0)) {
         ret |= 2;
     }
     return ret;
@@ -467,8 +467,8 @@ void func_001D4C08(pbProcHandle_t *panel) {
 void pbMakeMapPathHdd(pbProcHandle_t *parent) {
     if (pbMapPathIdx == 1) {
         dds3FadeOut(0, 0, 0, 1);
-        sprintf(pbMapPathBuf, D_00535E20, pbMenuIndex);
-        sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+        sprintf(pbMapPathBuf, pbMapPathFormat, pbMenuIndex);
+        sdfFileCmdReadFile(pbMapPathBuf, pbMapWork, -1, pbLoadSystemDataDone, 0);
         pbLoadState = 0;
         pbWaitLoadMapData(parent);
     } else {
@@ -476,7 +476,7 @@ void pbMakeMapPathHdd(pbProcHandle_t *parent) {
     }
 }
 
-INCLUDE_RODATA(const s32, "pb/pbMain", D_00535E10);
+INCLUDE_RODATA(const s32, "pb/pbMain", pbDrawBgProcName);
 
-INCLUDE_RODATA(const s32, "pb/pbMain", D_00535E20);
+INCLUDE_RODATA(const s32, "pb/pbMain", pbMapPathFormat);
 

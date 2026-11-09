@@ -10,7 +10,7 @@
 
 extern u32 dds3GetKernelCount(void);
 
-extern s32 D_0054EB54;
+extern s32 fldEncountCount;
 extern u32 fldEncountTimer;
 
 extern char dds3DebugLabelB[], dds3DebugLabelG[], dds3DebugLabelR[], dds3DebugFmtInt3[], dds3DebugFmtFloat3[];
@@ -56,7 +56,7 @@ extern s32 sdfDelayedResrcCheck(void);
 
 extern s32 fldNext_fld;
 
-extern s32 D_0054EB7C;
+extern s32 fldNextArea;
 
 extern s32 gFldAnahoriAkumaIdx;
 
@@ -231,7 +231,7 @@ struct dds3FontReq_t
 
 extern dds3FontReqFunc_t dds3FontReqTable;
 
-extern dds3FontReqFunc_t D_0054EA30;
+extern dds3FontReqFunc_t dds3FontReqBoxTable;
 
 extern u8 dds3PadButtonState[];
 
@@ -249,7 +249,7 @@ extern s8 slNewGameBit2208, slNewGameBit2209, slNewGameBit2210, slNewGameBit2211
 
 extern s8 slNewGameBit2212, slNewGameBit2213, slNewGameBit2323, slNewGameBit162;
 
-extern u16 D_0054EA16;
+extern u16 dds3NewGameSavedHalf0C;
 
 extern s32 D_0054EA18;
 
@@ -263,7 +263,7 @@ extern s32 fldProcAmWait;
 
 extern s32 fldNext_fld;
 
-extern s32 D_0054EB7C;
+extern s32 fldNextArea;
 
 extern s32 fldNextFieldId;
 
@@ -323,11 +323,11 @@ void fldRegistUnitPad(void);
  * field underground facility, field unknown realm savestates, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
-extern sdfVector4_t D_002FC490;
+extern sdfVector4_t fldPlayerLastPos;
 extern s32 fldPlayerStepDist;
 extern s32 fldEncountCheckWork;
 extern s32 fldEncountSagasiFlag;
-extern u32 D_0054EB94;
+extern u32 fldEncountBtlId;
 extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
 extern void dds3GetPosPoseSet(dds3Basic_t *basic);
 extern s32 evtGetAgeOfMoon16(void);
@@ -367,8 +367,8 @@ s32 ProcRandomEncountCheck(void)
     if (unit == NULL) return 0;
 
     dds3GetPosPoseSet(unit);
-    SDF_VU0_LOADVECTOR_B(&D_002FC490);
-    SDF_VU0_STOREVECTOR(&D_002FC490);
+    SDF_VU0_LOADVECTOR_B(&fldPlayerLastPos);
+    SDF_VU0_STOREVECTOR(&fldPlayerLastPos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     if (distance < SDF_FRAME_STEP(0.1999999881f)) distance = 0.0f;
@@ -376,7 +376,7 @@ s32 ProcRandomEncountCheck(void)
     oldMoon = evtGetAgeOfMoon16();
     if (fldGlobalBase.word5C > 0) {
         dds3GetPosPoseSet(unit);
-        SDF_VU0_STOREVECTOR(&D_002FC490);
+        SDF_VU0_STOREVECTOR(&fldPlayerLastPos);
         fldGlobalBase.wordC8 = 0;
         return 0;
     }
@@ -444,7 +444,7 @@ s32 ProcRandomEncountCheck(void)
         fldAutoMapSeqSetFlag(2);
         fldReleaseUnitPad();
         evtKillFieldScript();
-        D_0054EB94 = 0x40A;
+        fldEncountBtlId = 0x40A;
         fldEncountTimer = 0;
         switch (fldGlobalBase.floor) {
         case 3: fldSetNextField(43, 200); break;
@@ -459,8 +459,8 @@ s32 ProcRandomEncountCheck(void)
     encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     fldEncountTimer = encounter;
-    D_0054EB94 = nbEncountCalc(encounter, distance);
-    if (D_0054EB94 == 0) return 0;
+    fldEncountBtlId = nbEncountCalc(encounter, distance);
+    if (fldEncountBtlId == 0) return 0;
     if (fldRunDanteGunFlag.enabled == 1 || distance > 9998.0f) {
         fldEveHit_End();
         fldAutoMapSeqSetFlag(1);
@@ -472,7 +472,7 @@ s32 ProcRandomEncountCheck(void)
     fclClearTerminalState();
     p2sdPlaySE(15, 127, 63);
     dds3FadeIn(128, 128, 128, 6);
-    D_0054EB54++;
+    fldEncountCount++;
     return 0;
 }
 #else
@@ -907,7 +907,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
         fldFreeNextFile();
         fldLoadNextFile_SetId_BtlRet(fldGlobalBase.area, fldGlobalBase.floor + 1);
         controller->stage = 0;
-        D_0054EB54++;
+        fldEncountCount++;
         gFldRndEncBtl = 1;
         dds3AdminiCallSequence(0x13, &fldEncountTimer, 8, 1);
         return -1;
@@ -1176,7 +1176,7 @@ void fldProc_CallSisetuReturn(void)
 void fldSetNextField(s32 fld, s32 area)
 {
     fldNext_fld = fld;
-    D_0054EB7C = area;
+    fldNextArea = area;
     if (fld == 14 && area == 0x25B) {
         fldNextFieldId = 1;
     }
@@ -1193,7 +1193,7 @@ void fldProcNextJump(void)
                 return;
             }
         }
-        fldDoor_EveBtlExit(fldNext_fld, D_0054EB7C);
+        fldDoor_EveBtlExit(fldNext_fld, fldNextArea);
         fldNext_fld = 0;
     }
 }
@@ -1201,13 +1201,13 @@ void fldProcNextJump(void)
 /* After the definition it offsets from, which the assembler needs. */
 SYMBOL_AT(s32, fldSequenceState, fldAutoMapSeqFlags, 4);
 
-SYMBOL_AT(u32, D_0054EB94, fldEncountTimer, 4);
+SYMBOL_AT(u32, fldEncountBtlId, fldEncountTimer, 4);
 
 INCLUDE_RODATA(const s32, "field/fldProcess", fldProcDrawName);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldNextFieldId);
 
-INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB54);
+INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountCount);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountSagasiFlag);
 
@@ -1227,7 +1227,7 @@ INCLUDE_SDATA(const s32, "field/fldProcess", fldProcShutDownFlg);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldNext_fld);
 
-INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB7C);
+INCLUDE_SDATA(const s32, "field/fldProcess", fldNextArea);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldAutoMapSeqFlags);
 

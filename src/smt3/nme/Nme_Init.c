@@ -10,11 +10,11 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
-extern char D_00551690[];
+extern char nmeCalcProcessName[];
 
-extern char D_005487C8[];
+extern char nmeDrawProcessName[];
 
-extern char D_005487D8[];
+extern char nmeUpdateProcessName[];
 
 extern s8 gProcessStat;
 
@@ -24,12 +24,12 @@ u8 nmeCharToIndex(u8 lead, u8 trail) {
     return (u8)(index - 0x4A);
 }
 
-extern const u8 D_005276F8[][2];
+extern const u8 nmeAsciiCodeTable[][2];
 
 u32 nmeDecodeChar(s8 code)
 {
     s32 index = code - 0x20;
-    return ((u32)D_005276F8[index][0] << 8) | D_005276F8[index][1];
+    return ((u32)nmeAsciiCodeTable[index][0] << 8) | nmeAsciiCodeTable[index][1];
 }
 
 extern void frDelFontStyle(u8 styleNo);
@@ -38,7 +38,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void frLoadFontData(s32 style, const char *filename);
 extern void nmeInitNameRows(s8 target, nmeWork_t *work);
-extern char D_00548768[];
+extern char nmeFontPath[];
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -49,7 +49,7 @@ void frAllocNameData(void)
     nmeWork_t *work = sdfMemLock(handle);
 
     memset(work, 0, 0x51C8);
-    frLoadFontData(4, D_00548768);
+    frLoadFontData(4, nmeFontPath);
     for (; target < 4; target++) {
         nmeInitNameRows(target, work);
         nmeBuildNameFont(target, work);
@@ -58,11 +58,11 @@ void frAllocNameData(void)
     sdfMemFreeDirect(handle);
 }
 
-extern u8 D_00552020[4];
+extern u8 nmeFadeColor[4];
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 void nmeStartFadeOut(void)
 {
-    dds3FadeOut(D_00552020[0], D_00552020[1], D_00552020[2], 0x1E);
+    dds3FadeOut(nmeFadeColor[0], nmeFadeColor[1], nmeFadeColor[2], 0x1E);
 }
 
 s32 nmeGetInputMode(nmeWork_t *work) {
@@ -85,7 +85,7 @@ s8 nmeGetModeFlag(nmeWork_t *work) {
     return nmeGetMaxNameLen(nmeGetInputMode(work));
 }
 
-extern const char *D_005276C8[];
+extern const char *nmeDefaultNames[];
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * seq41, covering only the paths those calls took.
@@ -112,7 +112,7 @@ void nmeInitNameRow(s8 mode, s32 rowValue, void *data)
         } while (i < maxLength);
     }
     count = 0;
-    name = D_005276C8[mode + row];
+    name = nmeDefaultNames[mode + row];
     characters = work->inputChars[row];
     while (*name != 0) {
         if (*name & 0x80) {
@@ -180,7 +180,7 @@ void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
 }
 
 
-extern const char *D_005276C4 __attribute__((section(".data")));
+extern const char *nmeNameListRows __attribute__((section(".data")));
 extern u32 strlen(const char *string);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
@@ -201,7 +201,7 @@ void nmeInitNameCursor(s8 mode, nmeWork_t *work)
         inputCount = 6;
         break;
     case 3: {
-        u32 length = strlen(D_005276C4);
+        u32 length = strlen(nmeNameListRows);
         work->alternateCursorActive = 0;
         inputCount = length / 32;
         break;
@@ -236,21 +236,21 @@ void nmeInitCursor(s8 mode, nmeWork_t *work)
 }
 
 
-extern char D_00548780[];
-extern char D_00548798[];
-extern char D_005487B0[];
+extern char nmeTexFile01[];
+extern char nmeTexFile02[];
+extern char nmeTexFile03[];
 extern char *nmeCharTexFile[4];
-extern char *D_005276B0 __attribute__((section(".data")));
+extern char *nmeAltCharTexFile __attribute__((section(".data")));
 extern s32 fclLoadTexture(char *filename);
 extern s32 evtBitCheck(s32 bit);
 
 void nmeTexLoad(s8 mode, nmeWork_t *work)
 {
-    work->textures[0] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548780));
-    work->textures[1] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_00548798));
-    work->textures[2] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005487B0));
+    work->textures[0] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeTexFile01));
+    work->textures[1] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeTexFile02));
+    work->textures[2] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeTexFile03));
     if (evtBitCheck(0x8B0) != 0 && mode == 0) {
-        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(D_005276B0));
+        work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeAltCharTexFile));
     } else {
         work->textures[3] = EE_ADDR_AS(sdfTexHandle_t *, fclLoadTexture(nmeCharTexFile[mode]));
     }
@@ -270,7 +270,7 @@ extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
 extern void nmeInitCursor(s8 mode, nmeWork_t *work);
 extern void nmeTexLoad(s8 mode, nmeWork_t *work);
 extern void frLoadFontData(s32 style, const char *filename);
-extern char D_00548768[];
+extern char nmeFontPath[];
 
 nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
 {
@@ -291,7 +291,7 @@ nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
     nmeInitNameBuffer(0, work);
     nmeInitCursor(4, work);
     nmeInitNameRows(target, work);
-    frLoadFontData(4, D_00548768);
+    frLoadFontData(4, nmeFontPath);
     nmeTexLoad(target, work);
     return work;
 }
@@ -434,9 +434,9 @@ void nmeStartProcesses(s8 target, s8 mode, s32 unused)
         return;
     }
     nmeProcessId = nmeLoadFont(target, mode, 0);
-    dds3StartProcess(D_00551690, 0x406, 1, 1, nmeCalc, NULL, nmeProcessId);
-    dds3StartProcess(D_005487C8, 0x2B16, 1, 1, nmeDraw, NULL, nmeProcessId);
-    dds3StartProcess(D_005487D8, 0x5212, 1, 1, nmeUpdate,
+    dds3StartProcess(nmeCalcProcessName, 0x406, 1, 1, nmeCalc, NULL, nmeProcessId);
+    dds3StartProcess(nmeDrawProcessName, 0x2B16, 1, 1, nmeDraw, NULL, nmeProcessId);
+    dds3StartProcess(nmeUpdateProcessName, 0x5212, 1, 1, nmeUpdate,
                      nmeDestroyName,
                      nmeProcessId);
     gProcessStat = 1;
@@ -448,7 +448,7 @@ void nmeStartProcesses(s8 target, s8 mode, s32 unused)
          * the shared RGB base and frame value through their native consumers.
          * They reconstruct allocation/scheduling, not original source spelling. */
         FAKEMATCH_ASM_REG(s32, frames, "$7") = 30;
-        FAKEMATCH_ASM_REG(u8 *, color, "$5") = D_00552020;
+        FAKEMATCH_ASM_REG(u8 *, color, "$5") = nmeFadeColor;
         FAKEMATCH_ASM_LIVE_PAIR(frames, color);
         if (event == 0) {
             s32 white = -1;
@@ -470,9 +470,9 @@ void nmeStartProcesses(s8 target, s8 mode, s32 unused)
 
 
 void nmeNameProcessEnd(void) {
-    dds3KillProcessName(D_00551690, 1);
-    dds3KillProcessName(D_005487C8, 1);
-    dds3KillProcessName(D_005487D8, 1);
+    dds3KillProcessName(nmeCalcProcessName, 1);
+    dds3KillProcessName(nmeDrawProcessName, 1);
+    dds3KillProcessName(nmeUpdateProcessName, 1);
 }
 
 s32 nmeCheckProcessStat(void) {
@@ -522,19 +522,19 @@ s32 nme_298698(void)
     return done;
 }
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeFontPath);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548780);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile01);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548798);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile02);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487B0);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile03);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487C8);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeDrawProcessName);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487D8);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeUpdateProcessName);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487E8);
+INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeConfirmQuestion);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeProcessId);
 
@@ -542,29 +542,29 @@ INCLUDE_SDATA(const s32, "nme/Nme_Init", gProcessStat);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", D_0055165D);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551660);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameChiaki);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551668);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameIsamu);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551670);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameNitta);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551678);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameYuko);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551680);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameTakao);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551688);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeEmptyName);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551690);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeCalcProcessName);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_00551698);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeNameTextTemplate);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516A0);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeConfirmYes);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516A8);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeConfirmNo);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516B0);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeCursorSkip);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516B8);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeMoveTextTemplate);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", mccb);
 

@@ -16,12 +16,12 @@
 
 extern evtViewerInfo_t *viewerinfo;
 
-extern char D_0053BC98[];
+extern char evtFrameVarName[];
 
-extern char D_0054F910[];
+extern char evtFrameNumFmt[];
 
 extern sdfGrOt_t sdfGrOtTable[];
-SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, sdfDebugGrOt, sdfGrOtTable, 0xA60);
 
 extern void *dds3FontReqAllocDrawTag(void);
 
@@ -63,7 +63,7 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     }
     tag = dds3FontReqAllocDrawTag();
     dds3ConsPanelTagLink(tag, 0x1E, 0x190, 0x26, 2);
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x71E0, 0x8580, 0xFEFFFF, 0, D_0054F910,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x71E0, 0x8580, 0xFEFFFF, 0, evtFrameNumFmt,
                                           viewerinfo->firstframe)));
     sdfPrimLinkRect(tag, 0x80009000, 0, 0x74E0, 0x85A0, 0x8B60, 0x85B8, 0xFEFFFF, NULL);
     if (viewerinfo->firstframe > 0) {
@@ -82,9 +82,9 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     sdfPrimLinkRect(tag, (viewerinfo->flags & 1) ? 0x80FFFF00 : 0x8000FFFF, 0, x, 0x8588,
                     ((span + 2) << 4) + 0x74E0, 0x85D8, 0xFEFFFF, NULL);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, 0x85E0, 0xFEFFFF,
-                                          (viewerinfo->flags & 1) ? 5 : 6, D_0054F910,
+                                          (viewerinfo->flags & 1) ? 5 : 6, evtFrameNumFmt,
                                           viewerinfo->nowframe)));
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8B60, 0x8580, 0xFEFFFF, 0, D_0054F910,
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8B60, 0x8580, 0xFEFFFF, 0, evtFrameNumFmt,
                                           viewerinfo->lastframe)));
     if (viewerinfo->framelist_target != NULL && viewerinfo->menusw == 1) {
         frame = viewerinfo->framelist_target->children;
@@ -105,9 +105,9 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
             frame = frame->next;
         }
     }
-    D_002F6978.regFunc(&D_002F6978, tag);
+    sdfDebugGrOt.regFunc(&sdfDebugGrOt, tag);
     if (cursorTag != NULL) {
-        D_002F6978.regFunc(&D_002F6978, cursorTag);
+        sdfDebugGrOt.regFunc(&sdfDebugGrOt, cursorTag);
     }
     return 0;
 }
@@ -117,10 +117,10 @@ INCLUDE_ASM(const s32, "event/evtEventViewerFrameVar", FrameVarProcess);
 
 dds3ProcessID_t *evtInitFrameVar(void)
 {
-    return dds3StartProcess(D_0053BC98, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
+    return dds3StartProcess(evtFrameVarName, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", D_0053BC98);
+INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", evtFrameVarName);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", D_0053BCB0);
 

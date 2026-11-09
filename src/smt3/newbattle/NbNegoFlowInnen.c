@@ -235,7 +235,7 @@ typedef union {
     } message;
 } nbInnenRec_t;
 
-extern nbInnenRec_t D_003E3158[];
+extern nbInnenRec_t nbInnenTable[];
 
 extern s32 datSearchDevilStock(s32 id);
 
@@ -329,15 +329,15 @@ s32 Flow5_3(nbNegoProcessData_t *n)
     nbFormation_t *form;
     s32 i;
 
-    if (n->nownegophase >= D_003E3158[n->innen_id].message.mescnt) {
+    if (n->nownegophase >= nbInnenTable[n->innen_id].message.mescnt) {
         nbAddNegoIdKouho(n, 0x50004);
     } else {
         nbDispNegoMessage(n, n->innenmsg,
-                          D_003E3158[n->innen_id].message.mainmes + n->nownegophase, 0);
+                          nbInnenTable[n->innen_id].message.mainmes + n->nownegophase, 0);
         for (i = 0; i < 3; i++) {
-            if (D_003E3158[n->innen_id].message.motion[i].phase == n->nownegophase + 1) {
-                form = D_003E3158[n->innen_id].message.motion[i].side == 1 ? n->pform : n->eform;
-                nbAddMotionKoukaPacket(0, 0, form, D_003E3158[n->innen_id].message.motion[i].motion == 1 ? 14 : 15);
+            if (nbInnenTable[n->innen_id].message.motion[i].phase == n->nownegophase + 1) {
+                form = nbInnenTable[n->innen_id].message.motion[i].side == 1 ? n->pform : n->eform;
+                nbAddMotionKoukaPacket(0, 0, form, nbInnenTable[n->innen_id].message.motion[i].motion == 1 ? 14 : 15);
             }
         }
     }
@@ -369,12 +369,12 @@ s32 Flow5_6(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].phase_record.phase[i].item == 0) {
+        if (nbInnenTable[n->innen_id].phase_record.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].phase_record.phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].phase_record.phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase_record.phase[i])->cnt);
+        n->getitem = nbInnenTable[n->innen_id].phase_record.phase[i].item;
+        datAddItem(nbInnenTable[n->innen_id].phase_record.phase[i].item,
+                   ((nbInnenPhase_t *)&nbInnenTable[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50009);
     return 0;
@@ -395,10 +395,10 @@ s32 Flow5_8(nbNegoProcessData_t *n)
 
 s32 Flow5_9(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
+    if (nbInnenTable[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
         return 2;
     }
-    n->getitem = D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item;
+    n->getitem = nbInnenTable[n->innen_id].phase_record.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 8, 0);
     return 0;
@@ -454,12 +454,12 @@ s32 Flow5_18(nbNegoProcessData_t *n)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (D_003E3158[n->innen_id].phase_record.phase[i].item == 0) {
+        if (nbInnenTable[n->innen_id].phase_record.phase[i].item == 0) {
             break;
         }
-        n->getitem = D_003E3158[n->innen_id].phase_record.phase[i].item;
-        datAddItem(D_003E3158[n->innen_id].phase_record.phase[i].item,
-                   ((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase_record.phase[i])->cnt);
+        n->getitem = nbInnenTable[n->innen_id].phase_record.phase[i].item;
+        datAddItem(nbInnenTable[n->innen_id].phase_record.phase[i].item,
+                   ((nbInnenPhase_t *)&nbInnenTable[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50015);
     return 0;
@@ -480,10 +480,10 @@ s32 Flow5_20(nbNegoProcessData_t *n)
 
 s32 Flow5_21(nbNegoProcessData_t *n)
 {
-    if (D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
+    if (nbInnenTable[n->innen_id].phase_record.phase[n->nownegophase].item == 0) {
         return 6;
     }
-    n->getitem = D_003E3158[n->innen_id].phase_record.phase[n->nownegophase].item;
+    n->getitem = nbInnenTable[n->innen_id].phase_record.phase[n->nownegophase].item;
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 5, 0);
     return 0;

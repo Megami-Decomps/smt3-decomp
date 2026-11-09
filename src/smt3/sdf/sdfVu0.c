@@ -353,13 +353,13 @@ void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDown) {
     SDF_VU0_SET_ROW1();
     ReverseMatrix();
 }
-INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518B8);
+INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdf3DSlot2Tex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdf3DSpecularTex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdf3DRefMapParam);
 
-INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518C8);
+INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdf3DSlot1Tex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadPortSlotPairs);
 
@@ -367,7 +367,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadManagerMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518D5);
 
-INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518D8);
+INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadButtons);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518E0);
 

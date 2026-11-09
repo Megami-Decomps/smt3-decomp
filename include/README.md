@@ -344,7 +344,7 @@ with `scrGetIntPara` and returns 1.
 
 ### newdata.h
 
-`datDevilAIData_t` is the full 0xA4-byte row at `D_003989E0`, not an
+`datDevilAIData_t` is the full 0xA4-byte row at `datDevilAIDataTable`, not an
 array beginning at its interior action-table symbol. `nbGetAiEntry`
 (`0x2867A8`) reads two condition words at row + 4/+8 with a 12-byte
 condition stride; `nbRunAi` (`0x287CB8`) scans three conditions and reads
@@ -361,7 +361,7 @@ the same 0xA4 stride. It is an interior field, not a separate row array. The ear
 table overlays were stride views, not evidence for those array bounds.
 
 IDB type synchronization remains pending: apply this 0xA4-byte row at
-`D_003989E0` in the `SLUS_209.11` database and make `D_003989EC`,
+`datDevilAIDataTable` in the `SLUS_209.11` database and make `D_003989EC`,
 `D_00398A08` and `D_00398A80` consistent interior aliases for the first
 condition's dispatch number, the action tables and the death fields. The
 source/header checks do not establish that the IDB was updated. Existing
@@ -781,7 +781,7 @@ the event controls and the battle field-filter draw path.
 `effect/effBattleMisc.c` keeps a local formation-extent view with radius and
 height at `+0x50`/`+0x54` and uniform scale at `+0x5C`; no full formation size
 is asserted. Despite its recovered name, `effBTLPartGetScalePtrSub` returns
-an integer frame duration from `D_00317740` (0, 5, 15 or 30), not a pointer.
+an integer frame duration from `effBTLScaleFrameTable` (0, 5, 15 or 30), not a pointer.
 Point-light and model-color callers compare and subtract these durations.
 
 Event-only blur, smoke-particle and Bezier-emitter owners remain local to

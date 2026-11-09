@@ -73,11 +73,11 @@ extern movieViewerProcWork_t movieViewerWork;
 
 extern s8 dds3PadButtonState[];
 
-extern sdfMovieInitParm_t D_00343EF0;
+extern sdfMovieInitParm_t movieViewerPlayParm;
 
-extern u16 D_005518D8[2];
+extern u16 sdfPadButtons[2];
 
-extern u16 D_00551F96;
+extern u16 movieViewerPrevButtons;
 
 extern s32 movieViewerPhase;
 
@@ -131,8 +131,8 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
         if (dds3WaitMovieEnd() != 0) {
             movieViewerWork.playing = 0;
         } else {
-            s32 previousButtons = D_00551F96;
-            if (((D_005518D8[0] ^ previousButtons) & D_005518D8[0]) != 0) {
+            s32 previousButtons = movieViewerPrevButtons;
+            if (((sdfPadButtons[0] ^ previousButtons) & sdfPadButtons[0]) != 0) {
                 movieViewerWork.playing = 0;
             }
         }
@@ -142,7 +142,7 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
             movieStop();
             strcpy(path, "pfs0:/movie/");
             strcat(path, entry + 4);
-            moviePlayFile_27041744(path, &D_00343EF0);
+            moviePlayFile_27041744(path, &movieViewerPlayParm);
             movieViewerWork.playing = 1;
         } else {
             movieStop();
@@ -172,7 +172,7 @@ s32 MovieViewerProc(dds3ProcessID_t *process)
     movieDebugDrawInfo();
     MovieViewerDrawFrameInfo();
     D_002F67F8.regFunc(&D_002F67F8, movieViewerWork.tag);
-    D_00551F96 = D_005518D8[0];
+    movieViewerPrevButtons = sdfPadButtons[0];
     return 0;
 }
 
@@ -180,22 +180,22 @@ extern void movieViewerScanDir(void);
 
 extern s32 MovieViewerProc(dds3ProcessID_t *process);
 
-extern char D_0053F418[];
+extern char movieViewerProcName[];
 
 void InitMovieViewer(void)
 {
     movieViewerScanDir();
     movieViewerWork.proc =
-        dds3StartProcess(D_0053F418, 0x2B02, 1, 0, MovieViewerProc, NULL, NULL);
+        dds3StartProcess(movieViewerProcName, 0x2B02, 1, 0, MovieViewerProc, NULL, NULL);
 }
 
-extern char D_0053F418[];
+extern char movieViewerProcName[];
 
 extern void movieViewerFree(void);
 
 void FinishMovieViewer(void)
 {
-    void *proc = dds3SearchProcessName(D_0053F418);
+    void *proc = dds3SearchProcessName(movieViewerProcName);
 
     if (proc != NULL) {
         dds3KillProcess(proc, 0);
@@ -281,13 +281,13 @@ extern void sdfPrimLinkRect(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, 
 SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
 
 /* "%08X", "%02X" and "**", in .sdata where a literal cannot go. */
-extern char D_0054FDB8[];
-extern char D_0054FDC0[];
-extern char D_0054FDC8[];
+extern char movieViewerFmtWord[];
+extern char movieViewerFmtByte[];
+extern char movieViewerBlankByte[];
 
 /* The memory window: a cursor over the eight nibbles of either source address,
  * the word above and the 8x8 block below. */
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F418);
+INCLUDE_RODATA(const s32, "movie/MovieViewer", movieViewerProcName);
 
 s32 movieViewerDebugDraw(void)
 {
@@ -347,10 +347,10 @@ s32 movieViewerDebugDraw(void)
                     (movieViewerDebugFlag.cursor >> 3) * 0xC0 + 0x79C0,
                     (movieViewerDebugFlag.cursor & 7) * 0xC0 + 0x7240,
                     (movieViewerDebugFlag.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
-    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, D_0054FDB8,
+    sdfDrawTagLink(tag, sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, movieViewerFmtWord,
                                      movieViewerDebugFlag.regAddr));
     if (movieViewerDebugFlag.wordPending != 0) {
-        sdfDrawTagLink(tag, sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, D_0054FDB8,
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, movieViewerFmtWord,
                                          movieViewerDebugFlag.word));
     } else {
         sdfDrawTagLink(tag, sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, "********"));
@@ -358,15 +358,15 @@ s32 movieViewerDebugDraw(void)
     step = 0;
     y = 0x7A80;
     for (i = 0; i != 8; i++, y += 0x60) {
-        sdfDrawTagLink(tag, sdfDevPrintf(0x7180, y, 0xFF0080, 0, D_0054FDB8,
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7180, y, 0xFF0080, 0, movieViewerFmtWord,
                                          movieViewerDebugFlag.buffer + step));
         x = 0x7840;
         for (col = 0; col != 8; col++, x += 0x240, step++) {
             if (movieViewerDebugFlag.blockPending != 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(x, y, 0xFF0080, 0, D_0054FDC0,
+                sdfDrawTagLink(tag, sdfDevPrintf(x, y, 0xFF0080, 0, movieViewerFmtByte,
                                                  movieViewerDebugFlag.block[step]));
             } else {
-                sdfDrawTagLink(tag, sdfDevPrintf(x, y, 0xFF0080, 0, D_0054FDC8));
+                sdfDrawTagLink(tag, sdfDevPrintf(x, y, 0xFF0080, 0, movieViewerBlankByte));
             }
         }
     }
@@ -382,15 +382,15 @@ INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F458);
 
 INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F468);
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F478);
+INCLUDE_RODATA(const s32, "movie/MovieViewer", cmpCampTmxPath);
 
 INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerPhase);
 
 INCLUDE_SDATA(const s32, "movie/MovieViewer", D_0054FDB4);
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", D_0054FDB8);
+INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerFmtWord);
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", D_0054FDC0);
+INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerFmtByte);
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", D_0054FDC8);
+INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerBlankByte);
 

@@ -149,7 +149,7 @@ extern void *memcpy(void *, const void *, size_t);
 
 extern s8 sdfPrintIopFlag;
 
-extern char D_00551908[];
+extern char sdfPrintStrFmt[];
 
 extern char sdfFileCdromPrefix[];
 
@@ -187,7 +187,7 @@ extern u8 sdfDev9Ready;
 
 extern u8 sdfCdClock;
 
-extern sdfClock_t D_005519B8;
+extern sdfClock_t sdfCdClockCache;
 
 extern u32 sdfSndSendCmd_cmd_id;
 
@@ -197,25 +197,25 @@ extern s32 p2sdSmgHandle;
 
 extern char sdfDumpAddrFmt[];
 
-extern char D_00551A28[];
+extern char sdfDumpPadStr[];
 
-extern char D_00551A30[];
+extern char sdfDumpMidGapStr[];
 
-extern char D_00551A38[];
+extern char sdfDumpByteSepStr[];
 
 extern char sdfDumpByteFmt[];
 
 extern char sdfDumpLineBuf[];
 
-extern char D_00551A50[];
+extern char sdfDumpEndStr[];
 
 extern char sdfVifMaskedName[];
 
 extern char sdfVifXferOkName[];
 
-extern char D_00551B10[];
+extern char sdfDumpIndentStr[];
 
-extern char D_00551B18[];
+extern char sdfDumpWordFmt[];
 
 
 extern char sdfGsMemTypeFmt[];
@@ -240,7 +240,7 @@ extern void sdfImageSetChainReleaseMem(saddr_t);
 
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 
-extern sdfIpuDecodeCb_t *D_00552158;
+extern sdfIpuDecodeCb_t *sdfIpuPendingCb;
 
 extern s32 sdfIpuDecode(sdfIpuDecodeCb_t *);
 
@@ -251,7 +251,7 @@ extern s32 sdfIpuDecodeThId;
 
 extern s32 iWakeupThread(s32 threadId);
 
-extern s32 D_00552144;
+extern s32 sdfIpuDoneFrame;
 
 u32 sdfTexGetPixelAddr(sdfTexHandle_t *aHandle);
 
@@ -667,7 +667,7 @@ void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
 /* Start IPU input from the initial chain or a feed slot; defer an empty ring. */
 void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *cb) {
     if (cb->active == 0) {
-        D_00552158 = cb;
+        sdfIpuPendingCb = cb;
         HW_WRITE(D4_TADR, EE_PHYSICAL(EE_ADDR(cb->inputDmaChain)));
         HW_WRITE(D4_QWC, 0);
         HW_WRITE(D4_CHCR, 0x105);
@@ -676,7 +676,7 @@ void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *cb) {
             cb->inputDmaStartPending = 1;
             return;
         }
-        D_00552158 = cb;
+        sdfIpuPendingCb = cb;
         cb->inputFeedDmaInFlight = 1;
         HW_WRITE(D4_MADR, EE_PHYSICAL(EE_ADDR(cb->scratchBuffer) + (cb->firstSlot << 13)));
         HW_WRITE(D4_QWC, 0x2000 / 16);
@@ -706,7 +706,7 @@ s32 IpuWriteCommand(void) {
     return decodedBits;
 }
 
-extern u8 D_00529CE8[][2];
+extern u8 sdfIpuRgbModeBits[][2];
 
 /* Residual: 18 of 114 words, first differing at +0x10. ee-gcc schedules
  * &cb->dma into the prologue exactly as retail does, then the delay-slot pass
@@ -739,7 +739,7 @@ s32 sdfIpuDecode(sdfIpuDecodeCb_t *cb)
     }
 
     sdfCurrIpuDecodeCb = cb;
-    D_00552158 = cb;
+    sdfIpuPendingCb = cb;
     cb->dma.outputAddress = EE_PHYSICAL(EE_ADDR(cb->frameBuffers[cb->bufferIndex]));
     cb->dma.outputQwords = cb->buffSize / 16;
     cb->dma.outputControl = 0x100;
@@ -755,8 +755,8 @@ s32 sdfIpuDecode(sdfIpuDecodeCb_t *cb)
     decodedBits = IpuWriteCommand();
     HW_WRITE(IPU_CTRL, (decodedBits >> 8) & 0x00FB0000);
     mode = (decodedBits & 0x04000000) ? 0x01010000 : 0x00010000;
-    HW_WRITE(IPU_CMD, 0x10000000 | ((u32)D_00529CE8[cb->rgbMode][0] << 27) |
-                  ((u32)D_00529CE8[cb->rgbMode][1] << 26) | mode);
+    HW_WRITE(IPU_CMD, 0x10000000 | ((u32)sdfIpuRgbModeBits[cb->rgbMode][0] << 27) |
+                  ((u32)sdfIpuRgbModeBits[cb->rgbMode][1] << 26) | mode);
     return mode;
 }
 #else
@@ -836,10 +836,10 @@ s32 sdfIpuFromDmacHandler(void) {
 }
 
 s32 sdfIpuToDmacHandler(void) {
-    sdfIpuDecodeCb_t *stream = D_00552158;
+    sdfIpuDecodeCb_t *stream = sdfIpuPendingCb;
     if (stream != NULL) {
-        D_00552144 = stream->frame;
-        D_00552158 = NULL;
+        sdfIpuDoneFrame = stream->frame;
+        sdfIpuPendingCb = NULL;
         if (stream->inputFeedEnabled != 0 && stream->active == 1) {
             if (stream->inputFeedDmaInFlight != 0) {
                 stream->inputFeedDmaInFlight = 0;

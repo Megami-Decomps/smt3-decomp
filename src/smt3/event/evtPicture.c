@@ -52,7 +52,7 @@ typedef struct
     s32 pri;
 } evtPicturePriTbl_t;
 
-extern char D_0054F8F0[];
+extern char evtPictureProcName[];
 
 /* The four GS colour components itfMiscDrawSpritePrim packs; only alpha is set
  * per sprite. */
@@ -61,9 +61,9 @@ typedef struct
     u32 components[4];
 } evtPictureColor_t;
 
-extern s32 D_0032C950[];
-extern s32 D_0032C960[];
-extern evtPictureColor_t D_0032C970;
+extern s32 evtPictureSpritePos[];
+extern s32 evtPictureSpriteUv[];
+extern evtPictureColor_t evtPictureSpriteColor;
 extern sdfGrOt_t sdfGrOtTable[];
 extern void eglSetOt(s32 ot);
 extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
@@ -88,7 +88,7 @@ extern void *evtPicturePriList;
 extern void evtPicturePriClear(void);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
-extern char D_0054F8F8[];
+extern char evtPicturePriProcName[];
 
 void evtPicturePriClear(void)
 {
@@ -138,19 +138,19 @@ void evtPicturePriDraw(void)
                     eglLinkTest(1, 0, 0x80, 1, 0, 0, 1, 1);
                     eglLinkAlpha(0);
                 }
-                D_0032C950[0] = tbl->x0 * 16.0f;
-                D_0032C950[1] = tbl->y0 * 8.0f;
-                D_0032C950[2] = tbl->x1 * 16.0f;
-                D_0032C950[3] = tbl->y1 * 8.0f;
-                D_0032C960[0] = tbl->u0 << 4;
-                D_0032C960[1] = tbl->v0 << 4;
-                D_0032C960[2] = tbl->u1 << 4;
-                D_0032C960[3] = tbl->v1 << 4;
-                D_0032C970.components[3] = tbl->alpha;
+                evtPictureSpritePos[0] = tbl->x0 * 16.0f;
+                evtPictureSpritePos[1] = tbl->y0 * 8.0f;
+                evtPictureSpritePos[2] = tbl->x1 * 16.0f;
+                evtPictureSpritePos[3] = tbl->y1 * 8.0f;
+                evtPictureSpriteUv[0] = tbl->u0 << 4;
+                evtPictureSpriteUv[1] = tbl->v0 << 4;
+                evtPictureSpriteUv[2] = tbl->u1 << 4;
+                evtPictureSpriteUv[3] = tbl->v1 << 4;
+                evtPictureSpriteColor.components[3] = tbl->alpha;
                 tag = sdfGrAllocPacketBuff(0x20);
                 sdfDrawTagInit(tag);
                 itfMiscDrawAlphaPrim(tag, 0, 0);
-                itfMiscDrawSpritePrim(D_0032C950, D_0032C960, &D_0032C970, 0xFFF, tbl->tex, 0, tag);
+                itfMiscDrawSpritePrim(evtPictureSpritePos, evtPictureSpriteUv, &evtPictureSpriteColor, 0xFFF, tbl->tex, 0, tag);
                 if (tbl->ot == 0) {
                     sdfGrOt_t *ot = &sdfGrOtTable[0x47];
 
@@ -379,7 +379,7 @@ dds3ProcessID_t *evtStartPictureProcess2(u32 priority, const char *texdata)
     evtPictureProcessData_t *work = InitPictureProcessData();
 
     LoadTexture(work, texdata);
-    return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
+    return dds3StartProcess(evtPictureProcName, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
 }
 
 dds3ProcessID_t *evtStartPictureProcess(u32 priority, void *texpath)
@@ -387,7 +387,7 @@ dds3ProcessID_t *evtStartPictureProcess(u32 priority, void *texpath)
     evtPictureProcessData_t *work = InitPictureProcessData();
 
     work->tex = texpath;
-    return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
+    return dds3StartProcess(evtPictureProcName, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
 }
 
 s32 picpri_Process(dds3ProcessID_t *id)
@@ -408,7 +408,7 @@ void evtPicturePriProcessInit(void)
 {
     void *tbl = sdfChipAllocDirect(sizeof(evtPicturePriTbl_t) * 8);
 
-    evtPicturePriList = dds3StartProcess(D_0054F8F8, 0x2AF8, 1, 1, picpri_Process, picpri_Shutdown, NULL);
+    evtPicturePriList = dds3StartProcess(evtPicturePriProcName, 0x2AF8, 1, 1, picpri_Process, picpri_Shutdown, NULL);
     dds3SetProcessData(evtPicturePriList, tbl);
     evtPicturePriClear();
 }
@@ -416,7 +416,7 @@ INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriList);
 
 INCLUDE_SDATA(const s32, "event/evtPicture", D_0054F8EC);
 
-INCLUDE_SDATA(const s32, "event/evtPicture", D_0054F8F0);
+INCLUDE_SDATA(const s32, "event/evtPicture", evtPictureProcName);
 
-INCLUDE_SDATA(const s32, "event/evtPicture", D_0054F8F8);
+INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriProcName);
 

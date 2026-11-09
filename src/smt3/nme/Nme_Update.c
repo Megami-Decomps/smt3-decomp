@@ -1,7 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 
-extern char D_00551690[];
+extern char nmeCalcProcessName[];
 
 
 

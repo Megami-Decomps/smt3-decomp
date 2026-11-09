@@ -35,7 +35,7 @@ extern s32 gFldSe3DNum;
 
 extern u32 fldSeLastBgm;
 
-extern s32 D_0054EE3C;
+extern s32 fldSeBgmId;
 
 extern s32 fldBgmReloadStep;
 
@@ -142,7 +142,7 @@ extern void fldCamGetPhokanParam(void);
 
 extern f32 fldCamPhokanSelX[];
 
-extern f32 D_002FC9F0[];
+extern f32 fldCamPhokanRot[];
 
 extern s32 fldCamPhokanState;
 
@@ -158,7 +158,7 @@ dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const u8 *name);
 
 #include "sdk_libc.h"
 
-extern char D_0054F0A8[];
+extern char fldHojiNameKey[];
 
 extern char *strstr(const char *, const char *);
 
@@ -295,7 +295,7 @@ extern void fldMotionSeStop(s32 seid, s32 subid);
 
 extern void fldTitleStart(s32 fld, s32 waittime);
 
-extern f32 D_0054EEA0;
+extern f32 fldAutoMapBgScroll;
 
 extern void evtBitOn(s32 no);
 
@@ -334,9 +334,9 @@ extern s32 slDDS3To31Flg;
 
 extern s32 version_convert_ver;
 
-extern u32 D_0054F06C;
+extern u32 slIconSysSaveBuff;
 
-extern u32 D_0054F070;
+extern u32 slIconSysSaveSize;
 
 
 extern void fldDoor_Warp(const char *evename);
@@ -353,13 +353,13 @@ extern void *fldDmgBlurEffect;
 
 extern void *fldTDmgEffect;
 
-extern sdfTexHandle_t *D_0054EF98;
+extern sdfTexHandle_t *fldTitleFldTex;
 
-extern sdfTexHandle_t *D_0054EF9C;
+extern sdfTexHandle_t *fldTitleDun1Tex;
 
-extern sdfTexHandle_t *D_0054EFA0;
+extern sdfTexHandle_t *fldTitleDun2Tex;
 
-extern sdfTexHandle_t *D_0054EFA4;
+extern sdfTexHandle_t *fldTitleDun3Tex;
 
 extern s32 gFldBgmBit;
 
@@ -381,10 +381,10 @@ extern s32 evtGetAgeOfMoon(void);
 
 extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
-extern s32 D_00316EC8[];
+extern s32 fldItemBoxRndTable[];
 
 
-extern char D_00532980[];
+extern char fldFixCameraMissingMsg[];
 
 extern void resetCamTgtPlayer(void);
 
@@ -602,7 +602,7 @@ s32 fldCommand_SET_FIX_CAMERA(void) {
     dds3Basic_t *basic = dds3SearchSceneBasic(scene, scrGetIntPara(0), 4);
 
     if (basic == NULL) {
-        printf(D_00532980);
+        printf(fldFixCameraMissingMsg);
         return 1;
     }
     fldGlobalBase.mode = 1;
@@ -614,7 +614,7 @@ s32 fldCommand_SET_FIX_CAMERA(void) {
 }
 
 extern f32 fldCamPitch;
-extern f32 D_002FC9C0[];
+extern f32 fldCamEye[];
 extern f32 fldCamTarget[];
 extern f32 sdfSin(f32 angle);
 extern f32 sdfCos(f32 angle);
@@ -653,9 +653,9 @@ s32 fldCommand_SET_CHASE_CAMERA(void) {
         targetPos.z = fldGlobalBase.z + cosine * 550.0f;
     }
 
-    D_002FC9C0[0] = cameraPos.x;
-    D_002FC9C0[1] = cameraPos.y;
-    D_002FC9C0[2] = cameraPos.z;
+    fldCamEye[0] = cameraPos.x;
+    fldCamEye[1] = cameraPos.y;
+    fldCamEye[2] = cameraPos.z;
     fldCamTarget[0] = targetPos.x;
     fldCamTarget[1] = targetPos.y;
     fldCamTarget[2] = targetPos.z;
@@ -708,9 +708,9 @@ s32 fldCommand_CAM_DIR(void) {
         targetPos.z = fldGlobalBase.z + cosine * 550.0f;
     }
 
-    D_002FC9C0[0] = cameraPos.x;
-    D_002FC9C0[1] = cameraPos.y;
-    D_002FC9C0[2] = cameraPos.z;
+    fldCamEye[0] = cameraPos.x;
+    fldCamEye[1] = cameraPos.y;
+    fldCamEye[2] = cameraPos.z;
     fldCamTarget[0] = targetPos.x;
     fldCamTarget[1] = targetPos.y;
     fldCamTarget[2] = targetPos.z;
@@ -740,9 +740,9 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         fldCamPhokanSelX[0] = pos.x;
         fldCamPhokanSelX[1] = pos.y;
         fldCamPhokanSelX[2] = pos.z;
-        D_002FC9F0[0] = rot.x;
-        D_002FC9F0[1] = rot.y;
-        D_002FC9F0[2] = rot.z;
+        fldCamPhokanRot[0] = rot.x;
+        fldCamPhokanRot[1] = rot.y;
+        fldCamPhokanRot[2] = rot.z;
         fldCamPhokanState = 0;
         fldCamPHokanMode = SDF_FRAMES(scrGetIntPara(1));
         fldGlobalBase.mode = 4;
@@ -771,7 +771,7 @@ extern void evtEnableMoonDraw(void);
 extern void evtDisableMoonDraw2(void);
 extern void evtEnableMoonDraw2(void);
 
-INCLUDE_RODATA(const s32, "field/fldCommand", D_00532980);
+INCLUDE_RODATA(const s32, "field/fldCommand", fldFixCameraMissingMsg);
 
 s32 fldCommand_SET_ALLPANEL(void)
 {
@@ -842,7 +842,7 @@ s32 fldCommand_SEARCH_ID(const char *pName) {
 
 s32 fldCommand_GetHojiID(char *pName) {
     s32 index;
-    if (strstr(pName, D_0054F0A8) == 0) return 0;
+    if (strstr(pName, fldHojiNameKey) == 0) return 0;
     for (index = 0; index < 32; index++) {
         if (pName[index] == '\0') {
             if (index < 4) return 0;
@@ -1767,7 +1767,7 @@ s32 fldCommand_FLD_GET_KIRETA(void) {
 }
 
 s32 fldCommand_FLD_GET_ITEMBOX_RND(void) {
-    s32 threshold = D_00316EC8[evtGetAgeOfMoon()];
+    s32 threshold = fldItemBoxRndTable[evtGetAgeOfMoon()];
     s32 value = dds3GetRandIntA(0, 100);
 
     printf("ITEMBOX_RND %d / %d\n", value, threshold);

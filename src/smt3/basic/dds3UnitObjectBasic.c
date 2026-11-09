@@ -157,13 +157,13 @@ extern void Mult(void);
 extern void Normalize(void);
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
 extern void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic);
-extern const f32 D_00530D60[4];
-extern const f32 D_00530D70[4];
+extern const f32 dds3UnitAdditionalRotation[4];
+extern const f32 dds3UnitWobbleAxis[4];
 
 s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *basic) {
     dds3UnitObjectBasicWorkData_t *work;
     mdlObj_t *model;
-    sdfVector4_t rotationAxis = *(const sdfVector4_t *)D_00530D70;
+    sdfVector4_t rotationAxis = *(const sdfVector4_t *)dds3UnitWobbleAxis;
     dds3PoseSet_t callbackPose;
     s32 deform = 0;
     s32 fixedModel = 0;
@@ -225,7 +225,7 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *basic) {
             Mult();
         }
         if (work->rotationFlags & 1) {
-            SDF_VU0_LOADVECTOR_B(D_00530D60);
+            SDF_VU0_LOADVECTOR_B(dds3UnitAdditionalRotation);
             Mult();
         }
         mdlSetRotate(model);
@@ -378,7 +378,7 @@ linkLight:
     }
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", D_00530D60);
+INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", dds3UnitAdditionalRotation);
 
-INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", D_00530D70);
+INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", dds3UnitWobbleAxis);
 

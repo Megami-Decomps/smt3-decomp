@@ -9,7 +9,7 @@
 
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
-extern u32 D_00317740[]; /* 0, 5, 15, 30 frames */
+extern u32 effBTLScaleFrameTable[]; /* 0, 5, 15, 30 frames */
 extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
 extern u32 effBTLSkillGetInvokeParty(void);
 extern u32 effBTLSkillGetTargetParty(void);
@@ -24,17 +24,17 @@ extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
 extern f32 aViewDown[4];
 extern f32 effBTL_Ptr_D[];
-extern f32 D_0031B990[];
+extern f32 effBTLAimVerticalScale[];
 extern void MultMatrixNoArg(void);
 extern u8 effBTLModelShowFlag[];
-extern f32 D_0031B900[];
-extern f32 D_0031B910[];
-extern f32 D_0031B920[];
-extern f32 D_0031B930[];
-extern f32 D_0031B940[];
-extern f32 D_0031B960[];
-extern f32 D_0031B970[];
-extern f32 D_0031B980[];
+extern f32 effBTLModelDirFwd[];
+extern f32 effBTLModelDirBack[];
+extern f32 effBTLModelLocalZ[];
+extern f32 effBTLCircumferenceAxisZ[];
+extern f32 effBTLCircumferenceAngleTable[];
+extern f32 effBTLZeroVector[];
+extern f32 effBTLGroupDirFwd[];
+extern f32 effBTLGroupDirBack[];
 extern sdfVector4_t effBTLPartCenterOffset[32];
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern s32 effBTLSkillCheckRun(void);
@@ -106,16 +106,16 @@ void effBTLModelGetDirection(nbFormation_t *pFormation, sdfVector4_t *pDirection
     u32 stat = pFormation->stat;
 
     if (stat & 0x100) {
-        SDF_VU0_COPYVECTOR(pDirection, D_0031B900);
+        SDF_VU0_COPYVECTOR(pDirection, effBTLModelDirFwd);
     } else if (stat & 0x200) {
-        SDF_VU0_COPYVECTOR(pDirection, D_0031B910);
+        SDF_VU0_COPYVECTOR(pDirection, effBTLModelDirBack);
     }
 }
 
 void effBTLModelGetDirection2(nbFormation_t *pFormation) {
     SDF_VU0_LOADVECTOR(&pFormation->rot);
     ToMatrix();
-    SDF_VU0_LOADVECTOR(D_0031B920);
+    SDF_VU0_LOADVECTOR(effBTLModelLocalZ);
     SDF_VU0_APPLYMATRIX_XYZ();
 }
 
@@ -146,10 +146,10 @@ void effBTLModelGetCircumference(nbFormation_t *pFormation, sdfVector4_t *pDirec
 void effBTLModelGetCircumferencePtr(nbFormation_t *pFormation, u16 ptr_y, u16 ptr_x) {
     sdfVector4_t dir;
 
-    SetRotateMatrixX(D_0031B940[ptr_x]);
-    SetRotateMatrixY_B(D_0031B940[ptr_y]);
+    SetRotateMatrixX(effBTLCircumferenceAngleTable[ptr_x]);
+    SetRotateMatrixY_B(effBTLCircumferenceAngleTable[ptr_y]);
     MultMatrixRevNoArg();
-    SDF_VU0_LOADVECTOR(D_0031B930);
+    SDF_VU0_LOADVECTOR(effBTLCircumferenceAxisZ);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR_MEMOPS(dir);
     effBTLModelGetCircumference(pFormation, &dir);
@@ -186,7 +186,7 @@ void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark) {
 
 void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark) {
     if (hModel == NULL) {
-        SDF_VU0_LOADVECTOR(D_0031B960);
+        SDF_VU0_LOADVECTOR(effBTLZeroVector);
         return;
     }
     if (sdfModelGetMarkPos(hModel->inner, mark) == 0) {
@@ -545,9 +545,9 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetVectorSphere);
 
 void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection) {
     if (group & 0x100) {
-        SDF_VU0_COPYVECTOR(pDirection, D_0031B970);
+        SDF_VU0_COPYVECTOR(pDirection, effBTLGroupDirFwd);
     } else if (group & 0x200) {
-        SDF_VU0_COPYVECTOR(pDirection, D_0031B980);
+        SDF_VU0_COPYVECTOR(pDirection, effBTLGroupDirBack);
     }
 }
 
@@ -1175,7 +1175,7 @@ u16 effBTLModelGetBadStatus(nbFormation_t *pFormation) {
 
 /* Native point-light/color callers use this four-entry table as frame durations. */
 u32 effBTLPartGetScalePtrSub(s32 pFormation) {
-    return D_00317740[pFormation];
+    return effBTLScaleFrameTable[pFormation];
 }
 
 f32 effBTLPartCalcScale(nbFormation_t *form) {
@@ -1309,7 +1309,7 @@ void effBTLPartGetModelPositionPtr(nbFormation_t *formation, effBTLAimParams_t *
             vertical = -1.0f;
         }
     } else {
-        vertical = center.y - D_0031B990[aimMode] * halfHeight;
+        vertical = center.y - effBTLAimVerticalScale[aimMode] * halfHeight;
         if (directionMode == 8 || directionMode == 10) {
             if (request->rangeOverride != 0) {
                 vertical -= radius;
@@ -1483,7 +1483,7 @@ void effBTLPartGetWorldPositionPtr(nbFormation_t *formation, effBTLAimParams_t *
                 vertical = -1.0f;
             }
         } else {
-            vertical = D_0031B990[aimMode] * 250.0f;
+            vertical = effBTLAimVerticalScale[aimMode] * 250.0f;
         }
 
         if (directionMode == 8 || directionMode == 10) {

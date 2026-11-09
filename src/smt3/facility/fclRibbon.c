@@ -21,9 +21,9 @@ extern void MoveDeactive(fclRibbon_t *phandle);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
-extern itfColor_t D_00332438;
+extern itfColor_t fclRibbonHexEndUv;
 
-extern itfColor_t D_00332448;
+extern itfColor_t fclRibbonHexMidUv;
 
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color,
                                    u32 z, s32 context, sdfDrawTag_t *pdrawtag);
@@ -188,7 +188,7 @@ void MoveDeactive(fclRibbon_t *phandle)
     }
 }
 
-extern itfColor_t D_003323E8, D_003323F8;
+extern itfColor_t fclRibbonBackFrameUvBody, fclRibbonBackFrameUvEdge;
 extern void itfMiscDrawSpritePrim(void *position, void *uv, void *color, s32 z,
                                   sdfTexHandle_t *texture, s32 context, sdfDrawTag_t *tag);
 
@@ -203,36 +203,36 @@ void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
         pos[0].y = y;
         pos[1].x = 0x6A0;
         pos[1].y = y + 0x128;
-        itfMiscDrawSpritePrim(pos, &D_003323E8, &color, z, handle->tex[0], 0, tag);
+        itfMiscDrawSpritePrim(pos, &fclRibbonBackFrameUvBody, &color, z, handle->tex[0], 0, tag);
 
         pos[0].x = 0x2000;
         pos[1].x = 0x1960;
-        itfMiscDrawSpritePrim2(pos, &D_003323E8, &color, z, 0, tag);
+        itfMiscDrawSpritePrim2(pos, &fclRibbonBackFrameUvBody, &color, z, 0, tag);
         pos[0].x = 0x6A0;
         pos[0].y = y;
         pos[1].x = 0x1960;
         pos[1].y = y + 0x128;
-        itfMiscDrawSpritePrim2(pos, &D_003323F8, &color, z, 0, tag);
+        itfMiscDrawSpritePrim2(pos, &fclRibbonBackFrameUvEdge, &color, z, 0, tag);
     } else if (alpha > 0) {
         color.components[3] = (128 * alpha) >> 7;
         pos[0].x = x;
         pos[0].y = y;
         pos[1].x = x + 0x6A0;
         pos[1].y = y + 0x128;
-        itfMiscDrawSpritePrim(pos, &D_003323E8, &color, z, handle->tex[0], 0, tag);
+        itfMiscDrawSpritePrim(pos, &fclRibbonBackFrameUvBody, &color, z, handle->tex[0], 0, tag);
 
         pos[0].x = x + 0x2000;
         pos[1].x = x + 0x1960;
-        itfMiscDrawSpritePrim2(pos, &D_003323E8, &color, z, 0, tag);
+        itfMiscDrawSpritePrim2(pos, &fclRibbonBackFrameUvBody, &color, z, 0, tag);
         pos[0].x = x + 0x6A0;
         pos[0].y = y;
         pos[1].x = x + 0x1960;
         pos[1].y = y + 0x128;
-        itfMiscDrawSpritePrim2(pos, &D_003323F8, &color, z, 0, tag);
+        itfMiscDrawSpritePrim2(pos, &fclRibbonBackFrameUvEdge, &color, z, 0, tag);
     }
 }
 
-extern itfColor_t D_00332408, D_00332418, D_00332428;
+extern itfColor_t fclRibbonBackUvBody, fclRibbonBackLeftUv, fclRibbonBackRightUv;
 
 void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha, sdfDrawTag_t *tag)
 {
@@ -244,18 +244,18 @@ void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha, sdfDrawTag_t 
     position[0].y = y + 0x90;
     position[1].x = x + 0x6E0;
     position[1].y = y + 0xA0;
-    itfMiscDrawSpritePrim(position, &D_00332408, &color, z, handle->tex[0], 0, tag);
+    itfMiscDrawSpritePrim(position, &fclRibbonBackUvBody, &color, z, handle->tex[0], 0, tag);
     position[0].x = x + 0x2000;
     position[1].x = x + 0x1920;
-    itfMiscDrawSpritePrim2(position, &D_00332408, &color, z, 0, tag);
+    itfMiscDrawSpritePrim2(position, &fclRibbonBackUvBody, &color, z, 0, tag);
     position[0].x = x + 0x1E0;
     position[0].y = y + 0x30;
     position[1].x = x + 0x500;
     position[1].y = y + 0xF8;
-    itfMiscDrawSpritePrim2(position, &D_00332418, &color, z, 0, tag);
+    itfMiscDrawSpritePrim2(position, &fclRibbonBackLeftUv, &color, z, 0, tag);
     position[0].x = x + 0x1B00;
     position[1].x = x + 0x1E20;
-    itfMiscDrawSpritePrim2(position, &D_00332428, &color, z, 0, tag);
+    itfMiscDrawSpritePrim2(position, &fclRibbonBackRightUv, &color, z, 0, tag);
 }
 
 extern void DrawHexagonElem(sdfIVector3_t *position, itfColor_t *color,
@@ -308,24 +308,24 @@ void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTa
     pos[0].y = std_pos->pm[2];
     pos[1].x = std_pos->pm[0];
     pos[1].y = std_pos->pm[2] + 160;
-    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(pos, &fclRibbonHexEndUv, color, z, 0, pdrawtag);
 
     pos[0].x = std_pos->pm[0];
     pos[1].x = std_pos->pm[1];
-    itfMiscDrawSpritePrim2(pos, &D_00332448, color, z, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(pos, &fclRibbonHexMidUv, color, z, 0, pdrawtag);
 
     pos[0].x = std_pos->pm[1] + 320;
     pos[1].x = std_pos->pm[1];
-    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(pos, &fclRibbonHexEndUv, color, z, 0, pdrawtag);
 }
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 type, s32 context);
-extern itfColor_t D_0053DA08;
+extern itfColor_t fclRibbonBaseColor;
 
 void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
               s32 alpha, sdfDrawTag_t *tag)
 {
-    itfColor_t color = D_0053DA08;
+    itfColor_t color = fclRibbonBaseColor;
     sdfIVector2_t pos[2];
     fclribbon_elem_t *entry = handle->pelem;
     s32 count = handle->num;
@@ -383,5 +383,5 @@ void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
     itfMiscDrawAlphaPrim(tag, 0, 0);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053DA08);
+INCLUDE_RODATA(const s32, "facility/fclRibbon", fclRibbonBaseColor);
 

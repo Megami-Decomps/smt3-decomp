@@ -33,7 +33,7 @@ extern s32 sdfMovieIsFinished(sdfMovieCb_t *movie);
 
 extern void movieStop(void);
 
-extern char D_0053F100[];
+extern char stfProcName[];
 
 extern s32 scrGetIntPara(s32 n);
 
@@ -289,7 +289,7 @@ extern void sdfPrimLinkF3(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s3
                           s32 aY1, s32 aX2, s32 aY2, s32 aZ, s32 (*aAllocator)(s32));
 
 /* "%c%s", in .sdata where a literal cannot go. */
-extern char D_0054FDA8[];
+extern char movieDebugRowFmt[];
 
 /* One screen of the movie list, with an arrow on the selected row and a
  * marker at each end the list continues past. */
@@ -314,7 +314,7 @@ void movieDebugDrawInfo(void)
         chip = chip->next;
     }
     for (i = 0; i < 8 && chip != NULL; i++, chip = chip->next) {
-        sdfDrawTagLink(tag, sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_0054FDA8,
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, movieDebugRowFmt,
                                          (i == selected) ? '>' : ' ', chip->path));
     }
     if (movieViewerWork.top != 0) {
@@ -338,5 +338,5 @@ INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIpu);
 
 INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIps);
 
-INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FDA8);
+INCLUDE_SDATA(const s32, "movie/mviManager", movieDebugRowFmt);
 

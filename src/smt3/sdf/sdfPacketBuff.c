@@ -22,7 +22,7 @@ u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
 
 extern s32 sdfGrPacketBuffSize;
 
-extern s32 D_00551870[2];
+extern s32 sdfGrPacketBuffBase[2];
 
 extern s32 sdfGrPacketBuffPtr;
 
@@ -62,13 +62,13 @@ void sdfGrMakePacketBuff(s32 aPacketBuffSize) {
     sdfGrPacketBuffSize = aPacketBuffSize;
     sdfGrPacketBuffHandle = sdfMemAllocDirect(aPacketBuffSize * SDF_PACKET_BUFFER_COUNT);
     allocationAddress = sdfMemLock(sdfGrPacketBuffHandle);
-    D_00551870[0] = allocationAddress;
-    D_00551870[1] = allocationAddress + aPacketBuffSize;
+    sdfGrPacketBuffBase[0] = allocationAddress;
+    sdfGrPacketBuffBase[1] = allocationAddress + aPacketBuffSize;
 }
 
 void sdfGrSetupPacketBuff(s32 aFrameId) {
-    sdfGrPacketBuffPtr = D_00551870[aFrameId];
-    sdfGrPacketBuffLimit = D_00551870[aFrameId] + sdfGrPacketBuffSize;
+    sdfGrPacketBuffPtr = sdfGrPacketBuffBase[aFrameId];
+    sdfGrPacketBuffLimit = sdfGrPacketBuffBase[aFrameId] + sdfGrPacketBuffSize;
 }
 
 s32 sdfGrGetPacketBuffRemain(void) {

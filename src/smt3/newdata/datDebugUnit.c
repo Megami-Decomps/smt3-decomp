@@ -5,14 +5,14 @@
 /* Declared here because no header carries these. */
 extern void *memcpy(void *a, const void *b, size_t c);
 
-const char D_005431A8[] = "STOCKCNT :%d";
-const char D_005431B8[] = "STOCKLIST:";
+const char datDebugStockCountFmt[] = "STOCKCNT :%d";
+const char datDebugStockListLabel[] = "STOCKLIST:";
 
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
-extern const char D_00550EB0[];
+extern const char datDebugStockItemFmt[];
 
 typedef struct {
     u8 reserved0000[0x1914];
@@ -29,11 +29,11 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                            0x7900 + y * 0x60,
-                                           0xFEFFFF, 0, D_005431A8, count)));
+                                           0xFEFFFF, 0, datDebugStockCountFmt, count)));
     y++;
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                            0x7900 + y * 0x60,
-                                           0xFEFFFF, 0, D_005431B8)));
+                                           0xFEFFFF, 0, datDebugStockListLabel)));
     y++;
 
     for (i = 0; i < 16; i++) {
@@ -42,7 +42,7 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
 
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0,
                                                0x7900 + y * 0x60,
-                                               0xFEFFFF, attr, D_00550EB0, item)));
+                                               0xFEFFFF, attr, datDebugStockItemFmt, item)));
         item = ((datDebugStockWorkView_t *)DDS3_GBWK)->stock[i];
         if (item >= 10) {
             x += 3;
@@ -52,13 +52,13 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
     }
 }
 
-extern const char D_00550F20[];
-extern const char D_00550F28[];
-extern const char D_00550F30[];
-extern const char D_00550F38[];
-extern const char D_00550F40[];
-extern const char D_00550F48[];
-extern const char D_00550F50[];
+extern const char datDebugUnitIndexFmt[];
+extern const char datDebugEmptyLabel[];
+extern const char datDebugIdFmt[];
+extern const char datDebugPartyMark[];
+extern const char datDebugLevelFmt[];
+extern const char datDebugHpMpFmt[];
+extern const char datDebugBadStatusFmt[];
 extern const char *nbUnitBadStatusNames[13];
 
 void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
@@ -70,31 +70,31 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
     s32 badStatusIndex;
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F20, unit)));
+                                           0xFEFFFF, 0, datDebugUnitIndexFmt, unit)));
     column += 5;
     if ((work->flag & 1) == 0) {
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                               0xFEFFFF, 0xE, D_00550F28)));
+                                               0xFEFFFF, 0xE, datDebugEmptyLabel)));
         return;
     }
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F30, work->id)));
+                                           0xFEFFFF, 0, datDebugIdFmt, work->id)));
     column += 4;
     if (work->flag & 2) {
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                               0xFEFFFF, 5, D_00550F38)));
+                                               0xFEFFFF, 5, datDebugPartyMark)));
     }
     column += 2;
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F40, work->level)));
+                                           0xFEFFFF, 0, datDebugLevelFmt, work->level)));
     column += 4;
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F48,
+                                           0xFEFFFF, 0, datDebugHpMpFmt,
                                            work->hp, work->maxhp)));
     column += 8;
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0, baseY,
-                                           0xFEFFFF, 0, D_00550F48,
+                                           0xFEFFFF, 0, datDebugHpMpFmt,
                                            work->mp, work->maxmp)));
     column += 8;
 
@@ -106,7 +106,7 @@ void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
     }
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7000 + column * 0xC0,
                                            0x7900 + y * 0x60,
-                                           0xFEFFFF, 0, D_00550F50,
+                                           0xFEFFFF, 0, datDebugBadStatusFmt,
                                            nbUnitBadStatusNames[badStatusIndex])));
 }
 
@@ -119,7 +119,7 @@ extern void DispList(s32 x, s32 y, sdfDrawTag_t *tag);
 extern void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag);
 extern sdfGrOt_t sdfGrOtTable[];
 SYMBOL_AT(sdfGrOt_t, D_002F6938, sdfGrOtTable, 0xA20);
-const char D_005431C8[] = "     ID     LV  HP       MP     STAT";
+const char datDebugUnitHeader[] = "     ID     LV  HP       MP     STAT";
 
 s32 datDebugUnitProcess(dds3ProcessID_t *id)
 {
@@ -130,7 +130,7 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
 
     sdfDrawTagInit(unitList);
     DispList(2, 10, unitList);
-    sdfDrawTagLink(unitList, EE_ADDR(sdfDevPrintf(0x7180, 0x7E40, 0xFEFFFF, 4, D_005431C8)));
+    sdfDrawTagLink(unitList, EE_ADDR(sdfDevPrintf(0x7180, 0x7E40, 0xFEFFFF, 4, datDebugUnitHeader)));
 
     for (i = 0, entry = 15; i < 16; i++, entry++) {
         DispUnit1(i, 2, entry, unitList);
@@ -145,10 +145,10 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
     return 0;
 }
 
-extern const char *const D_005431F0[];
-extern const char D_00543200[];
-extern const char D_00550F70[];
-extern s32 D_00550F54;
+extern const char *const datDebugKotowariLabels[];
+extern const char datDebugKotowariTitle[];
+extern const char datDebugKotowariFmt[];
+extern s32 datDebugMenuCursor;
 extern s8 dds3PadButtonState[];
 extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
                            s32 *basex, s32 *basey, s32 *x, s32 *y);
@@ -164,19 +164,19 @@ s32 datDebugDrawSelectMenu(void)
     s32 x;
     s32 y;
 
-    memcpy(labels, D_005431F0, sizeof(labels));
+    memcpy(labels, datDebugKotowariLabels, sizeof(labels));
     listTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(listTag);
-    sdfDrawTagLink(listTag, EE_ADDR(sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, D_00543200)));
+    sdfDrawTagLink(listTag, EE_ADDR(sdfDevPrintf(0x82C0, 0x7AE0, 0xFEFFFF, 0xE, datDebugKotowariTitle)));
 
     for (i = 1, x = 27, y = 0x7B40; i < 4; i++, y += 0x60) {
         const char *name = labels[i - 1];
         s32 attr = 0;
-        if (D_00550F54 == i - 1) {
+        if (datDebugMenuCursor == i - 1) {
             attr = 4;
         }
         sdfDrawTagLink(listTag,
-                       EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0, y, 0xFEFFFF, attr, D_00550F70,
+                       EE_ADDR(sdfDevPrintf(0x7000 + x * 0xC0, y, 0xFEFFFF, attr, datDebugKotowariFmt,
                                          name, DDS3_GBWK->kotowari[i])));
     }
 
@@ -186,28 +186,28 @@ s32 datDebugDrawSelectMenu(void)
     D_002F6938.regFunc(&D_002F6938, panelTag);
     D_002F6938.regFunc(&D_002F6938, listTag);
 
-    result = dds3SelectMenu(1, 1, 3, 1, 3, NULL, NULL, NULL, &D_00550F54);
+    result = dds3SelectMenu(1, 1, 3, 1, 3, NULL, NULL, NULL, &datDebugMenuCursor);
     if (result == -1) {
         return -1;
     }
     if (dds3PadButtonState[0x34] & 2) {
-        datAddKotowariPoint(D_00550F54 + 1, -1);
+        datAddKotowariPoint(datDebugMenuCursor + 1, -1);
     }
     if (dds3PadButtonState[0x35] & 2) {
-        datAddKotowariPoint(D_00550F54 + 1, 1);
+        datAddKotowariPoint(datDebugMenuCursor + 1, 1);
     }
     if (dds3PadButtonState[0x38] & 2) {
-        datAddKotowariPoint(D_00550F54 + 1, -10);
+        datAddKotowariPoint(datDebugMenuCursor + 1, -10);
     }
     if (dds3PadButtonState[0x3A] & 2) {
-        datAddKotowariPoint(D_00550F54 + 1, 10);
+        datAddKotowariPoint(datDebugMenuCursor + 1, 10);
     }
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_005431F0);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariLabels);
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543200);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariTitle);
 
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543230);
 
@@ -215,61 +215,61 @@ INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543240);
 
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543250);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EB0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugStockItemFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EB8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameNone);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EC0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameDead);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EC8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameStone);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550ED0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameFly);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550ED8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePara);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EE0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameCharm);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EE8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePoison);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EF0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameClose);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550EF8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameBind);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F00);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePanic);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F08);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameSleep);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F10);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameFreeze);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F18);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameShock);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F20);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugUnitIndexFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F28);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugEmptyLabel);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F30);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugIdFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F38);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugPartyMark);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F40);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugLevelFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F48);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugHpMpFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F50);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugBadStatusFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F54);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugMenuCursor);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F58);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariYosuga);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F60);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariMusubi);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F68);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariSizima);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F70);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariFmt);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F78);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F7C);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugGameCameraName);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F80);
 
@@ -349,11 +349,11 @@ INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510A8);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510B0);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510B8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbMainProcessName);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510C0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbMaeProcessName);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510C8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbAtoProcessName);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTimer);
 

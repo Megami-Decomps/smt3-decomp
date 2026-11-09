@@ -8,8 +8,8 @@ typedef struct dds3AreaBasicWorkData_t
     dds3BasicArrayHandle_t *items[2];
 } dds3AreaBasicWorkData_t;
 
-extern char D_0052F7C0[]; /* "エリアリストが見つかりません...\n" */
-extern char D_0052F7E8[]; /* "not exist a area  エリアが見つかりません...\n" */
+extern char dds3AreaBasicMsgNoList[]; /* "エリアリストが見つかりません...\n" */
+extern char dds3AreaBasicMsgNoArea[]; /* "not exist a area  エリアが見つかりません...\n" */
 
 #include "sdk_libc.h"
 
@@ -177,11 +177,11 @@ dds3Basic_t *dds3AreaBasicGetFastArea(void)
 
     handle = dds3SceneBasicGetList(dds3GetControlScene(), BASIC_TYPE_AREA);
     if (handle == NULL) {
-        printf(D_0052F7C0);
+        printf(dds3AreaBasicMsgNoList);
         return NULL;
     }
     if (dds3GetBasicArrayCount(handle) == 0) {
-        printf(D_0052F7E8);
+        printf(dds3AreaBasicMsgNoArea);
         return NULL;
     }
 
@@ -191,7 +191,7 @@ dds3Basic_t *dds3AreaBasicGetFastArea(void)
     return area;
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", D_0052F7C0);
+INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", dds3AreaBasicMsgNoList);
 
-INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", D_0052F7E8);
+INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", dds3AreaBasicMsgNoArea);
 

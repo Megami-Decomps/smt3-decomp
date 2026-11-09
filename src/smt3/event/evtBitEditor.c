@@ -12,9 +12,9 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern u8 dds3PadBitTable[];
 
-extern s32 D_0054F728, dds3BitEditorTable, dds3BitEditorTable2;
+extern s32 dds3BitEditorRowBase, dds3BitEditorTable, dds3BitEditorTable2;
 
-extern char D_0054F738[];
+extern char dds3BitEditorGlyphTemplate[];
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
@@ -50,33 +50,33 @@ typedef enum PIB_CHUNK_TYPE {
     PIB_CHUNK_TYPE_END = 0xFFFF
 } PIB_CHUNK_TYPE;
 
-extern char D_0054F648[];
+extern char mdlPibLabelP2A[];
 
-extern char D_0054F650[];
+extern char mdlPibLabelD3P[];
 
-extern char D_0054F678[];
+extern char mdlColorByteFormat[];
 
-extern char D_0054F680[];
+extern char mdlPibCursorMark[];
 
-extern char D_0054F6A0[];
+extern char mdlDebugLightCursor[];
 
-extern char D_0054F6A8[];
+extern char mdlDebugLightFormat[];
 
-extern char D_0054F6E0[];
+extern char mdlDebugScaleCursor[];
 
-extern char D_0054F700[];
+extern char softenBiasCursor[];
 
-extern char D_0054F708[];
+extern char softenBiasValueFormat[];
 
-extern char D_0054F710[];
+extern char softenBiasAdjustFormat[];
 
-extern char D_0054F718[];
+extern char softenBiasLabelOn[];
 
-extern char D_0054F720[];
+extern char softenBiasLabelOff[];
 
-extern char D_0054F740[];
+extern char dds3BitEditorColumnFormat[];
 
-extern char D_0054F748[];
+extern char dds3BitEditorRowFormat[];
 
 s32 evtBitCheck(s32 no);
 
@@ -90,34 +90,34 @@ s32 dds3BitEditorProcess(void) {
 
     /* The DDS1 twin at 0021F664..74 copies this space/NUL template as a
      * block too; see DDS docs/idioms.md, "Bit-editor glyph template block copy". */
-    memcpy(glyph, D_0054F738, sizeof(glyph));
+    memcpy(glyph, dds3BitEditorGlyphTemplate, sizeof(glyph));
     packets = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(*packets));
     sdfDrawTagInit(packets);
     dds3ConsPanelTagLink(packets, 50, 50, 23, 20);
     sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
         0x7320, 0x7A90, 0xFF0000, 0, "BitEditor")));
-    if (evtBitCheck((D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)) {
+    if (evtBitCheck((dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable)) {
         sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = ON",
-            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
+            (dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
     } else {
         sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = OFF",
-            (D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
+            (dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable)));
     }
     for (column = 0; column < 16; column++) {
         style = dds3BitEditorTable == column ? 14 : 7;
         sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x7320 + (column + 6) * cellWidth, 0x7A90 + cellHeight * 2,
-            0xFF0000, style, D_0054F740, column)));
+            0xFF0000, style, dds3BitEditorColumnFormat, column)));
     }
     for (row = 0; row < 16; row++) {
         style = dds3BitEditorTable2 == row ? 14 : 7;
         sdfDrawTagLink(packets, EE_ADDR(sdfDevPrintf(
             0x73E0, 0x7A90 + (row + 3) * cellHeight, 0xFF0000,
-            style, D_0054F748, (D_0054F728 + row) * 16)));
+            style, dds3BitEditorRowFormat, (dds3BitEditorRowBase + row) * 16)));
         for (column = 0; column < 16; column++) {
-            if (evtBitCheck((D_0054F728 + row) * 16 + column)) {
+            if (evtBitCheck((dds3BitEditorRowBase + row) * 16 + column)) {
                 glyph[0] = 'O';
                 style = dds3BitEditorTable == column || dds3BitEditorTable2 == row ? 6 : 0;
             } else {
@@ -133,24 +133,24 @@ s32 dds3BitEditorProcess(void) {
         }
     }
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((mdlOtRegFunc_t)ot->regFunc)(ot, packets); }
-    if ((dds3PadBitTable[24] & 2) && D_0054F728 > 0) {
-        D_0054F728 -= 16;
-        if (D_0054F728 < 0) D_0054F728 = 0;
+    if ((dds3PadBitTable[24] & 2) && dds3BitEditorRowBase > 0) {
+        dds3BitEditorRowBase -= 16;
+        if (dds3BitEditorRowBase < 0) dds3BitEditorRowBase = 0;
     }
     if (dds3PadBitTable[26] & 2) {
-        if (D_0054F728 + 16 < 256) {
-            if (D_0054F728 + 32 > 256) D_0054F728 = 240;
-            else D_0054F728 += 16;
+        if (dds3BitEditorRowBase + 16 < 256) {
+            if (dds3BitEditorRowBase + 32 > 256) dds3BitEditorRowBase = 240;
+            else dds3BitEditorRowBase += 16;
         }
     }
     result = dds3SelectMenu(1, 16, 256, 16, 16, NULL,
-        &D_0054F728, &dds3BitEditorTable, &dds3BitEditorTable2);
+        &dds3BitEditorRowBase, &dds3BitEditorTable, &dds3BitEditorTable2);
     if (result == -1) return -1;
     if (result == 1) {
-        if (evtBitCheck((D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable)) {
-            evtBitOff((D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable);
+        if (evtBitCheck((dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable)) {
+            evtBitOff((dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable);
         } else {
-            evtBitOn((D_0054F728 + dds3BitEditorTable2) * 16 + dds3BitEditorTable);
+            evtBitOn((dds3BitEditorRowBase + dds3BitEditorTable2) * 16 + dds3BitEditorTable);
         }
     }
     return 0;

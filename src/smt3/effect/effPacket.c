@@ -22,7 +22,7 @@ extern f32 D_002F5C30[];
 extern void dds3CrossfadeEnd(void);
 extern s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect);
 extern s32 dds3RenderTextureON(void);
-extern u32 D_003176C0[];
+extern u32 effPktDefaultFaceIndex[];
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
@@ -119,7 +119,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     *cursor++ = 0x6E00C001 | ((u32)parameterCount << 16);
 
     if (aParm->faceIndex == NULL) {
-        memcpy(cursor, D_003176C0, parameterCount * 4);
+        memcpy(cursor, effPktDefaultFaceIndex, parameterCount * 4);
     } else {
         memcpy(cursor, aParm->faceIndex, parameterCount * 4);
     }

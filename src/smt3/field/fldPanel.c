@@ -22,7 +22,7 @@ typedef struct
 
 extern dds3ProcessID_t *inputpanel_id;
 extern dds3ProcessID_t *addressprocess_id;
-extern char D_0054EE18[]; /* "address" */
+extern char fldAddressProcessName[]; /* "address" */
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
@@ -51,8 +51,8 @@ extern void dds3FadeIn2(s32 frame);
 extern s32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
 extern s8 dds3PadBitTable[];
-extern s32 D_003095B0[];
-extern char D_003094F0[][16];
+extern s32 fldInputPanelX[];
+extern char fldInputPanelLabel[][16];
 extern void fldDrawInputPanel(void);
 extern void fldDrawInputCursor(s32 x, s32 y);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
@@ -87,9 +87,9 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *id)
         goto ret0;
     }
     fldDrawInputPanel();
-    fldDrawInputCursor(D_003095B0[work->Type] - 0xC, 0x132);
-    fldKanjiDraw(D_003095B0[work->Type] + 0xA, 0x98, 0xA09DC380,
-        D_003094F0[work->Type]);
+    fldDrawInputCursor(fldInputPanelX[work->Type] - 0xC, 0x132);
+    fldKanjiDraw(fldInputPanelX[work->Type] + 0xA, 0x98, 0xA09DC380,
+        fldInputPanelLabel[work->Type]);
     work->Count++;
     work->Draw = 0;
 ret0:
@@ -250,7 +250,7 @@ void fldAddressShutdown(dds3ProcessID_t *id)
 void fldInitAddressProcess(void)
 {
     if (addressprocess_id == 0) {
-        addressprocess_id = dds3StartProcess(D_0054EE18, 0x2B0B, 1, 1,
+        addressprocess_id = dds3StartProcess(fldAddressProcessName, 0x2B0B, 1, 1,
             fldAddressProcess1, (dds3ProcessFunc_t)fldAddressShutdown, 0);
     }
 }
@@ -266,5 +266,5 @@ INCLUDE_SDATA(const s32, "field/fldPanel", addressprocess_id);
 
 INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
 
-INCLUDE_SDATA(const s32, "field/fldPanel", D_0054EE18);
+INCLUDE_SDATA(const s32, "field/fldPanel", fldAddressProcessName);
 

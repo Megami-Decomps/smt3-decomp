@@ -254,7 +254,7 @@ extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smo
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_00546830[];
+extern char nbE908EndMessage[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -307,7 +307,7 @@ nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 lengt
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
 
 
-extern s32 (*D_005274D0[])(nbEventProcessData_t *e);
+extern s32 (*nbE907Table[])(nbEventProcessData_t *e);
 
 extern void dds3DeleteSceneBasicData(void *basic);
 
@@ -341,9 +341,9 @@ extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
 
 extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-extern dds3Basic_t *D_00551604;
+extern dds3Basic_t *nbE907CameraModel;
 
-extern dds3Basic_t *D_00551608;
+extern dds3Basic_t *nbE907Model;
 
 extern dds3Basic_t *D_0055160C;
 
@@ -355,11 +355,11 @@ s32 nbE907Process_1(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_005274D0[e->seq](e) != 0) {
-        D_00551604 = NULL;
-        if (D_00551608 != NULL) {
-            dds3DeleteSceneBasicData(D_00551608);
-            D_00551608 = NULL;
+    if (nbE907Table[e->seq](e) != 0) {
+        nbE907CameraModel = NULL;
+        if (nbE907Model != NULL) {
+            dds3DeleteSceneBasicData(nbE907Model);
+            nbE907Model = NULL;
         }
         if (D_0055160C != NULL) {
             dds3DeleteSceneBasicData(D_0055160C);
@@ -367,8 +367,8 @@ s32 nbE907Process_1(dds3ProcessID_t *id)
         }
         return -1;
     }
-    if (e->time > 0 && D_00551604 != NULL) {
-        unit = dds3GetUnitHandleObjectBasic(D_00551604);
+    if (e->time > 0 && nbE907CameraModel != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(nbE907CameraModel);
         if (unit->basic != NULL) {
             nbCameraHelperModelSet(unit->basic);
         }
@@ -376,8 +376,8 @@ s32 nbE907Process_1(dds3ProcessID_t *id)
     switch (e->time) {
     case 0:
         nbCameraSetState(0x17);
-        D_00551604 = NULL;
-        D_00551608 = NULL;
+        nbE907CameraModel = NULL;
+        nbE907Model = NULL;
         D_0055160C = NULL;
         nbAllFormDispOn();
         nbSetEnemyFormation(e->data);
@@ -387,12 +387,12 @@ s32 nbE907Process_1(dds3ProcessID_t *id)
     case 0x98:
         nbCameraSetState(0x17);
         serial = evtInitMotionSeProcess(e->eventrid, 3);
-        D_00551608 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551608), 0, 0, 0, 2);
-        D_00551604 = D_00551608;
+        nbE907Model = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE907Model), 0, 0, 0, 2);
+        nbE907CameraModel = nbE907Model;
         break;
     case 0xEB:
-        D_00551604 = NULL;
+        nbE907CameraModel = NULL;
         break;
     case 0xED:
         nbCameraBoss_Bsnet_E907_2_Set();
@@ -446,18 +446,18 @@ s32 nbE908_Test(nbEventProcessData_t *e)
 s32 nbE908_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0x10F) {
-        printf(D_00546830);
+        printf(nbE908EndMessage);
         e->data->endtype = 1;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE907", D_00546830);
+INCLUDE_RODATA(const s32, "newbattle/nbE907", nbE908EndMessage);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE907", D_00551604);
+INCLUDE_SDATA(const s32, "newbattle/nbE907", nbE907CameraModel);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE907", D_00551608);
+INCLUDE_SDATA(const s32, "newbattle/nbE907", nbE907Model);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE907", D_0055160C);
 

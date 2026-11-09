@@ -604,11 +604,11 @@ s32 rcvUpdate(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D4F0);
+INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmTmxPath);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D518);
+INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelAmalaLink);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D528);
+INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelPursueHijiri);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D538);
+INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelLinkToTerminal);
 

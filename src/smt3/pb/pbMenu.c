@@ -82,7 +82,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 
 extern s8 pbLoadState;
 
-extern pbMapWork_t *D_0054F5C4;
+extern pbMapWork_t *pbMapWork;
 
 extern pbProcHandle_t *record;
 
@@ -92,7 +92,7 @@ extern pbProcHandle_t *blockDB;
 
 extern char pbMapPathBuf[];
 
-extern char D_00535E40[], D_00535E68[];
+extern char pbMapPathPb1Format[], pbMapPathPb2Format[];
 
 extern pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent);
 
@@ -114,7 +114,7 @@ extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
 extern void pb_proc_menu_Shutdown(dds3ProcessID_t *id);
 
-extern char D_005361B0[];
+extern char pbDrawMapCursorProcName[];
 
 extern void dds3FadeOut(s32, s32, s32, s32);
 
@@ -132,7 +132,7 @@ extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
-extern char D_00535E90[];
+extern char pbMenuDebugOwnerName[];
 
 extern dds3ProcessID_t *pbStartGiveupConfirm(void);
 
@@ -143,7 +143,7 @@ extern pbProcHandle_t *pbStartHelp(pbProcHandle_t *parent, s32 page);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
-extern char D_00535E10[], D_00535EC8[];
+extern char pbDrawBgProcName[], pbLoadMapDataProcName[];
 
 
 extern u8 pbMapNo;
@@ -153,11 +153,11 @@ void pbMakeMapPath(pbProcHandle_t *parent)
     if (pbMapPathIdx == 3) {
         dds3FadeOut(0, 0, 0, 1);
         if (pbMapNo < 30) {
-            sprintf(pbMapPathBuf, D_00535E40, pbMapNo);
+            sprintf(pbMapPathBuf, pbMapPathPb1Format, pbMapNo);
         } else {
-            sprintf(pbMapPathBuf, D_00535E68, pbMapNo);
+            sprintf(pbMapPathBuf, pbMapPathPb2Format, pbMapNo);
         }
-        sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+        sdfFileCmdReadFile(pbMapPathBuf, pbMapWork, -1, pbLoadSystemDataDone, 0);
         pbLoadState = 0;
         pbWaitLoadMapData(parent);
     } else {
@@ -203,9 +203,9 @@ void pbSetDebugOwner(pbProcHandle_t *panel) {
     pbPanelValue_t *work = panel->data.value;
     pbProcHandle_t *help = pbStartHelp(pbGetMoveChar(), work->value);
     dds3ProcessID_t *id;
-    D_0054F5C4->helpProc = help;
+    pbMapWork->helpProc = help;
     dds3SetProcessFlag(help->id, 0x10, 1);
-    id = dds3SearchProcessName(D_00535E90);
+    id = dds3SearchProcessName(pbMenuDebugOwnerName);
     if (id != NULL) {
         dds3ResetProcessFlag(id, 0x10, 2);
     }
@@ -223,17 +223,17 @@ extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail,
 extern void DrwSprite2D(s32 x, s32 y, s32 width, s32 height,
                         s32 u, s32 v, s32 uw, s32 vh, u32 color,
                         sdfTexHandle_t *texture);
-extern u8 D_0054F5D0[2];
+extern u8 pbMenuItemCount[2];
 extern s32 D_0054F5D4;
 extern u8 D_00551EC1;
-extern s32 (*D_003272F0[][8])(pbProcHandle_t *panel);
-extern void (*D_00327330[][8])(pbProcHandle_t *panel);
+extern s32 (*pbMenuCheckTable[][8])(pbProcHandle_t *panel);
+extern void (*pbMenuActionTable[][8])(pbProcHandle_t *panel);
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E40);
+INCLUDE_RODATA(const s32, "pb/pbMenu", pbMapPathPb1Format);
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E68);
+INCLUDE_RODATA(const s32, "pb/pbMenu", pbMapPathPb2Format);
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535E90);
+INCLUDE_RODATA(const s32, "pb/pbMenu", pbMenuDebugOwnerName);
 
 s32 pb_proc_menu_Process(dds3ProcessID_t *id)
 {
@@ -260,13 +260,13 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
         if (dds3PadButtonState[0x26] & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             if (pbMenuState == 0) {
-                pbMenuState = D_0054F5D0[work->value] - 1;
+                pbMenuState = pbMenuItemCount[work->value] - 1;
             } else {
                 pbMenuState = pbMenuState - 1;
             }
         } else if (dds3PadButtonState[0x27] & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
-            if (pbMenuState < D_0054F5D0[work->value] - 1) {
+            if (pbMenuState < pbMenuItemCount[work->value] - 1) {
                 pbMenuState = pbMenuState + 1;
             } else {
                 pbMenuState = 0;
@@ -325,9 +325,9 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
     }
 
     if ((s8)dds3PadButtonState[0x21] < 0) {
-        if (D_003272F0[work->value][pbMenuState](panel) == 1) {
+        if (pbMenuCheckTable[work->value][pbMenuState](panel) == 1) {
             p2sdPlaySE(0x340005, 0x7F, 0x3F);
-            D_00327330[work->value][pbMenuState](panel);
+            pbMenuActionTable[work->value][pbMenuState](panel);
         } else {
             p2sdPlaySE(0x340008, 0x7F, 0x3F);
         }
@@ -342,9 +342,9 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(0, 0, 0x100, 0x100, 0, 0, 0x100, 0x100, 0x80808080,
-                (sdfTexHandle_t *)D_0054F5C4->tex348);
+                (sdfTexHandle_t *)pbMapWork->tex348);
     DrwSprite2D(0x27, pbMenuState * 24 + 0x43, 0x1A, 0x1A, 1, 0x1CC, 0x1A, 0x1A,
-                0x80808080, (sdfTexHandle_t *)D_0054F5C4->tex348);
+                0x80808080, (sdfTexHandle_t *)pbMapWork->tex348);
     return 0;
 }
 
@@ -354,12 +354,12 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     dds3ResetProcessFlag(id, 0x10, 1);
     sdfChipFreeDelayedDirect(work);
     sdfChipFreeDelayedDirect(panel);
-    D_0054F5C4->menuState = 0;
+    pbMapWork->menuState = 0;
 }
 
 extern void *memcpy(void *dst, const void *src, size_t size);
 typedef struct { u16 cells[20][20]; } pbMapBlock_t;
-extern pbMapBlock_t D_00327458;
+extern pbMapBlock_t pbMapSnapshot;
 
 s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
     s32 result = 0;
@@ -378,7 +378,7 @@ s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
                 pbGetMoveChar()->flags = 0x10000;
             }
             if (panelValue->value == loadState) {
-                memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
+                memcpy(&pbMapSnapshot, pbMapWork->unk01C, 0x320);
             }
             result = -1;
         }
@@ -386,7 +386,7 @@ s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
         if (pbGetMoveChar() != 0) {
             pbGetMoveChar()->flags = 0x10000;
         }
-        memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
+        memcpy(&pbMapSnapshot, pbMapWork->unk01C, 0x320);
         result = -1;
     }
 
@@ -418,7 +418,7 @@ pbProcHandle_t *pbStartMenu(pbProcHandle_t *parent, s32 mode) {
 
 pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
-    panel->id = dds3StartProcess(D_00535EC8, 0x3EE, 1, 1, pb_load_mapdata_Process,
+    panel->id = dds3StartProcess(pbLoadMapDataProcName, 0x3EE, 1, 1, pb_load_mapdata_Process,
                                       (dds3ProcessFunc_t)pb_load_mapdata_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->id, panel->id);
@@ -431,14 +431,14 @@ pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent) {
 void pbLoadSystemData(s32 num) {
     dds3FadeOut(0, 0, 0, 1);
     if (num < 30) {
-        sprintf(pbMapPathBuf, D_00535E40, num);
+        sprintf(pbMapPathBuf, pbMapPathPb1Format, num);
     } else {
-        sprintf(pbMapPathBuf, D_00535E68, num);
+        sprintf(pbMapPathBuf, pbMapPathPb2Format, num);
     }
-    sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+    sdfFileCmdReadFile(pbMapPathBuf, pbMapWork, -1, pbLoadSystemDataDone, 0);
     pbLoadState = 0;
     pbWaitLoadMapData(NULL);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535EC8);
+INCLUDE_RODATA(const s32, "pb/pbMenu", pbLoadMapDataProcName);
 

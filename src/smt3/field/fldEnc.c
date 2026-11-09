@@ -58,7 +58,7 @@ void rsetAlpha(s32 mode);
 
 void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 
-extern dds3Effect_PartialMultiBlurParam_t D_0055DAD8;
+extern dds3Effect_PartialMultiBlurParam_t encBlurParam;
 
 extern void dds3EffectPartialMultiBlurSetParam(void *hPartialMultiBlur, dds3Effect_PartialMultiBlurParam_t *pParam);
 
@@ -78,9 +78,9 @@ s32 encDrawProc(dds3ProcessID_t *aProcId) {
         aDrawBoxF(0, 0xDF, 0x200, 2, 0, 0, 0, 0x80);
         rsetAlpha(0);
         if (encDrawState >= 13) {
-            D_0055DAD8.Blur.scale = D_0055DAD8.Blur.scale + 0.001f;
-            D_0055DAD8.area = D_0055DAD8.area - 2;
-            dds3EffectPartialMultiBlurSetParam(hPartialMultiBlur, &D_0055DAD8);
+            encBlurParam.Blur.scale = encBlurParam.Blur.scale + 0.001f;
+            encBlurParam.area = encBlurParam.area - 2;
+            dds3EffectPartialMultiBlurSetParam(hPartialMultiBlur, &encBlurParam);
             dds3EffectPartialMultiBlurDraw(hPartialMultiBlur);
         }
         if (encDrawState >= 0x29) {
@@ -119,7 +119,7 @@ void encFreeBlur(void)
     }
 }
 
-extern dds3Effect_PartialMultiBlurParam_t D_0055DAD8;
+extern dds3Effect_PartialMultiBlurParam_t encBlurParam;
 
 extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 
@@ -130,20 +130,20 @@ void encStart(void) {
         return;
     }
     gencStageInnAlp = 0x80;
-    D_0055DAD8.Blur.abgr = 0x09808080;
-    D_0055DAD8.Blur.blend = 0x44;
-    D_0055DAD8.Blur.rotate = 0.01f;
-    D_0055DAD8.Blur.scale = 1.02f;
-    D_0055DAD8.area = 0x12C;
+    encBlurParam.Blur.abgr = 0x09808080;
+    encBlurParam.Blur.blend = 0x44;
+    encBlurParam.Blur.rotate = 0.01f;
+    encBlurParam.Blur.scale = 1.02f;
+    encBlurParam.area = 0x12C;
     gencMode = 0;
     encDrawState = 0;
-    D_0055DAD8.Blur.center[0] = 0;
-    D_0055DAD8.Blur.center[1] = 0;
-    D_0055DAD8.Blur.xy[0][0] = 0;
-    D_0055DAD8.Blur.xy[0][1] = 0;
-    D_0055DAD8.Blur.xy[1][0] = 0;
-    D_0055DAD8.Blur.xy[1][1] = 0;
-    hPartialMultiBlur = dds3EffectPartialMultiBlurCreate(&D_0055DAD8);
+    encBlurParam.Blur.center[0] = 0;
+    encBlurParam.Blur.center[1] = 0;
+    encBlurParam.Blur.xy[0][0] = 0;
+    encBlurParam.Blur.xy[0][1] = 0;
+    encBlurParam.Blur.xy[1][0] = 0;
+    encBlurParam.Blur.xy[1][1] = 0;
+    hPartialMultiBlur = dds3EffectPartialMultiBlurCreate(&encBlurParam);
     gencOn = 1;
     if (dds3GetActiveScene() == NULL) {
         return;

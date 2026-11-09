@@ -2,23 +2,23 @@
 #include "common.h"
 #include "ps2asm.h"
 
-extern s32 D_0052BA70 __attribute__((section(".data")));
+extern s32 cdvdStreamActive __attribute__((section(".data")));
 typedef void (*cdvdCallback_t)(s32 reason);
-extern cdvdCallback_t D_00598C40 __attribute__((section(".data")));
-extern u8 D_00598ED8[] __attribute__((section(".data")));
+extern cdvdCallback_t cdvdCallback __attribute__((section(".data")));
+extern u8 cdvdDefaultStreamMode[] __attribute__((section(".data")));
 
-extern s32 D_0052A010 __attribute__((section(".data")));
+extern s32 cdvdDebugLevel __attribute__((section(".data")));
 typedef struct cdvdRpcClient_t {
     u8 transactionAndCallbacks[0x24];
     void *server;
 } cdvdRpcClient_t;
-extern cdvdRpcClient_t D_0052BA48 __attribute__((section(".data")));
+extern cdvdRpcClient_t cdvdScmdClient __attribute__((section(".data")));
 
-extern s32 D_0052A030 __attribute__((section(".data")));
-extern s32 D_0052A02C __attribute__((section(".data")));
-extern cdvdRpcClient_t D_0052B1D0 __attribute__((section(".data")));
-extern s32 D_0052B640 __attribute__((section(".data")));
-extern s32 D_0052B200[4] __attribute__((section(".data")));
+extern s32 cdvdNcmdState __attribute__((section(".data")));
+extern s32 cdvdScmdLockSema __attribute__((section(".data")));
+extern cdvdRpcClient_t cdvdNcmdClient __attribute__((section(".data")));
+extern s32 cdvdMmodeArg __attribute__((section(".data")));
+extern s32 cdvdScmdReply[4] __attribute__((section(".data")));
 
 typedef struct sdfSemaParam_t {
     s32 count;
@@ -49,9 +49,9 @@ typedef struct {
 } sdfKernelThreadParam_t;
 
 extern s32 cdvdCallbackThreadId __attribute__((section(".data")));
-extern s32 D_00598C50 __attribute__((section(".data")));
-extern u8 D_00598C58[0x30] __attribute__((section(".data")));
-extern sdfKernelThreadParam_t D_00598C88 __attribute__((section(".data")));
+extern s32 cdvdOwnerThreadId __attribute__((section(".data")));
+extern u8 cdvdThreadStatus[0x30] __attribute__((section(".data")));
+extern sdfKernelThreadParam_t cdvdCallbackThreadParam __attribute__((section(".data")));
 extern s32 _gp;
 extern s32 GetThreadId(void);
 extern s32 ReferThreadStatus(s32 threadId, void *status);
@@ -72,14 +72,14 @@ typedef struct {
     u8 secondData[0];
 } cdvdReadReplyPrefix_t;
 
-extern s32 D_0052A054 __attribute__((section(".data")));
+extern s32 cdvdCallbackReason __attribute__((section(".data")));
 void _sceCd_cd_callback(s32 *reason);
 
 typedef void (*cdvdPowerCallback_t)(void *argument);
-extern cdvdPowerCallback_t D_00598C44 __attribute__((section(".data")));
-extern void *D_00598C48 __attribute__((section(".data")));
-extern s32 D_0052A024 __attribute__((section(".data")));
-extern s32 D_0052A03C[6] __attribute__((section(".data")));
+extern cdvdPowerCallback_t cdvdPowerCallback __attribute__((section(".data")));
+extern void *cdvdPowerArgument __attribute__((section(".data")));
+extern s32 cdvdPowerOffActive __attribute__((section(".data")));
+extern s32 cdvdScmdState[6] __attribute__((section(".data")));
 extern void sceSifAddCmdHandler(s32 id, void (*handler)(void *, void *), void *argument);
 void _sceCd_Poff_Intr(void *packet, void *argument);
 s32 PowerOffCB(void);
@@ -131,8 +131,8 @@ cdvdCallback_t sceCdCallback(cdvdCallback_t func)
         return 0;
     }
     intr = DIntr();
-    old = D_00598C40;
-    D_00598C40 = func;
+    old = cdvdCallback;
+    cdvdCallback = func;
     if (intr) {
         EIntr();
     }
@@ -148,14 +148,14 @@ s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
     s32 created = 1;
 
     if (cdvdCallbackThreadId == 0) {
-        D_00598C50 = GetThreadId();
-        ReferThreadStatus(D_00598C50, D_00598C58);
-        D_00598C88.stackSize = stackSize;
-        D_00598C88.gp = &_gp;
-        D_00598C88.entry = _Cdvd_cbLoop;
-        D_00598C88.stack = stack;
-        D_00598C88.priority = priority;
-        cdvdCallbackThreadId = CreateThread(&D_00598C88);
+        cdvdOwnerThreadId = GetThreadId();
+        ReferThreadStatus(cdvdOwnerThreadId, cdvdThreadStatus);
+        cdvdCallbackThreadParam.stackSize = stackSize;
+        cdvdCallbackThreadParam.gp = &_gp;
+        cdvdCallbackThreadParam.entry = _Cdvd_cbLoop;
+        cdvdCallbackThreadParam.stack = stack;
+        cdvdCallbackThreadParam.priority = priority;
+        cdvdCallbackThreadId = CreateThread(&cdvdCallbackThreadParam);
         _StartThread(cdvdCallbackThreadId, NULL);
     } else {
         ChangeThreadPriority(cdvdCallbackThreadId, priority);
@@ -182,7 +182,7 @@ void _sceCd_cd_read_intr(void *argument)
             destination[i] = reply->secondData[i];
         }
     }
-    _sceCd_cd_callback(&D_0052A054);
+    _sceCd_cd_callback(&cdvdCallbackReason);
 }
 
 extern s32 cdvdScmdSema __attribute__((section(".data")));
@@ -194,7 +194,7 @@ void cmd_sem_init(void)
      * service's treatment of the untouched fields is not inferred here. */
     sdfSemaParam_t param;
 
-    if (cdvdNcmdSema == -1 || D_0052A02C == -1) {
+    if (cdvdNcmdSema == -1 || cdvdScmdLockSema == -1) {
         param.option = 0;
         param.initCount = 1;
         param.maxCount = 1;
@@ -206,7 +206,7 @@ void cmd_sem_init(void)
             FAKEMATCH_ASM_REG(sdfSemaParam_t *, nextParam, "a0") = &param;
             FAKEMATCH_ASM_LIVE(nextParam);
             cdvdNcmdSema = sema;
-            D_0052A02C = CreateSema(nextParam);
+            cdvdScmdLockSema = CreateSema(nextParam);
         }
         param.initCount = 0;
         cdvdScmdSema = CreateSema(&param);
@@ -214,7 +214,7 @@ void cmd_sem_init(void)
          * clear-address setup. This empty read-only operand emits no access
          * and is not a memory barrier or an original-source claim. */
         FAKEMATCH_ASM_READ_MEM(cdvdScmdSema);
-        D_0052A030 = 0;
+        cdvdNcmdState = 0;
     }
 }
 
@@ -227,12 +227,12 @@ void cdvd_exit(void)
         /* The one-pass block preserves the SDK compiler's native ordering:
          * publish the stop reason before loading the semaphore to signal. */
         do {
-            D_0052A054 = -1;
+            cdvdCallbackReason = -1;
         } while (0);
         SignalSema(cdvdScmdSema);
     }
     DeleteSema(cdvdNcmdSema);
-    DeleteSema(D_0052A02C);
+    DeleteSema(cdvdScmdLockSema);
     DeleteSema(cdvdScmdSema);
     intr = DIntr();
     sceSifRemoveCmdHandler(0x80000012);
@@ -246,13 +246,13 @@ cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argume
     cdvdPowerCallback_t old;
     s32 intr;
 
-    if (D_0052A03C[0] < 0) {
+    if (cdvdScmdState[0] < 0) {
         PowerOffCB();
     }
     intr = DIntr();
-    old = D_00598C44;
-    D_00598C48 = argument;
-    D_00598C44 = callback;
+    old = cdvdPowerCallback;
+    cdvdPowerArgument = argument;
+    cdvdPowerCallback = callback;
     if (intr) {
         EIntr();
     }
@@ -261,8 +261,8 @@ cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argume
 
 void _sceCd_Poff_Intr(void *packet, void *argument)
 {
-    if (D_00598C44 != NULL && D_0052A024 == 0) {
-        D_00598C44(D_00598C48);
+    if (cdvdPowerCallback != NULL && cdvdPowerOffActive == 0) {
+        cdvdPowerCallback(cdvdPowerArgument);
     }
 }
 
@@ -270,14 +270,14 @@ s32 PowerOffCB(void)
 {
     s32 intr;
 
-    D_0052A024 = 1;
+    cdvdPowerOffActive = 1;
     intr = DIntr();
     sceSifAddCmdHandler(0x80000012, _sceCd_Poff_Intr, NULL);
     if (intr) {
         EIntr();
     }
-    D_0052A024 = 0;
-    D_0052A03C[0] = 1;
+    cdvdPowerOffActive = 0;
+    cdvdScmdState[0] = 1;
     return 1;
 }
 
@@ -292,8 +292,8 @@ extern void cmd_sem_init(void);
 extern s32 PollSema(s32 sema);
 extern void sceSifInitRpc(s32 mode);
 extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
-extern s32 D_0052A01C __attribute__((section(".data")));
-SYMBOL_AT(s32, cdvdNcmdInit, D_0052A030, 8);
+extern s32 cdvdNcmdLastCommand __attribute__((section(".data")));
+SYMBOL_AT(s32, cdvdNcmdInit, cdvdNcmdState, 8);
 
 s32 _sceCd_ncmd_prechk(s32 command)
 {
@@ -307,13 +307,13 @@ s32 _sceCd_ncmd_prechk(s32 command)
         status = PollSema(sema);
     }
     if (cdvdNcmdSema != status) {
-        if (D_0052A010 > 0) {
-            scePrintf("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0052A01C);
+        if (cdvdDebugLevel > 0) {
+            scePrintf("Ncmd fail sema cur_cmd:%d keep_cmd:%d\n", command, cdvdNcmdLastCommand);
         }
         return 0;
     }
-    D_0052A01C = command;
-    ReferThreadStatus(D_00598C50, D_00598C58);
+    cdvdNcmdLastCommand = command;
+    ReferThreadStatus(cdvdOwnerThreadId, cdvdThreadStatus);
     status = sceCdSync(1);
     {
         FAKEMATCH_ASM_REG(s32, rpcMode, "$4") = 0;
@@ -327,10 +327,10 @@ s32 _sceCd_ncmd_prechk(s32 command)
     }
     if (cdvdNcmdInit < 0) {
         for (;;) {
-            cdvdRpcClient_t *client = &D_0052B1D0;
+            cdvdRpcClient_t *client = &cdvdNcmdClient;
 
             if (sceSifBindRpc(client, 0x80000595, 0) < 0) {
-                if (D_0052A010 > 0) {
+                if (cdvdDebugLevel > 0) {
                     scePrintf("Libcdvd bind err N CMD\n");
                 }
                 for (delay = 0x100000; delay != -1; --delay) {
@@ -350,7 +350,7 @@ s32 _sceCd_ncmd_prechk(s32 command)
 
 
 extern s32 _sceCd_ncmd_prechk(s32 cmd);
-extern s32 D_0052A080 __attribute__((section(".data")));
+extern s32 cdvdNcmdReply __attribute__((section(".data")));
 
 s32 sceCdNcmdDiskReady(void)
 {
@@ -359,11 +359,11 @@ s32 sceCdNcmdDiskReady(void)
     if (!_sceCd_ncmd_prechk(2)) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052B1D0, 14, 0, 0, 0, &D_0052A080, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&cdvdNcmdClient, 14, 0, 0, 0, &cdvdNcmdReply, 4, 0, 0) < 0) {
         SignalSema(cdvdNcmdSema);
         return 0;
     }
-    ret = UNCACHED(&D_0052A080)[0];
+    ret = UNCACHED(&cdvdNcmdReply)[0];
     SignalSema(cdvdNcmdSema);
     return ret;
 }
@@ -371,15 +371,15 @@ s32 sceCdNcmdDiskReady(void)
 s32 sceCdSync(s32 mode)
 {
     if (mode == 0) {
-        if (D_0052A010 > 0) {
+        if (cdvdDebugLevel > 0) {
             scePrintf("N cmd wait\n");
         }
-        while (D_0052A030 != 0 || sceSifCheckStatRpc(&D_0052B1D0) != 0) {
+        while (cdvdNcmdState != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
             sceCdDelayThread(60);
         }
         return 0;
     }
-    if (D_0052A030 != 0 || sceSifCheckStatRpc(&D_0052B1D0) != 0) {
+    if (cdvdNcmdState != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
         return 1;
     }
     return 0;
@@ -388,26 +388,26 @@ s32 sceCdSync(s32 mode)
 s32 sceCdSyncS(s32 mode)
 {
     if (mode == 0) {
-        if (D_0052A010 > 0) {
+        if (cdvdDebugLevel > 0) {
             scePrintf("S cmd wait\n");
         }
         while (1) {
-            if (sceSifCheckStatRpc(&D_0052BA48) == 0) {
+            if (sceSifCheckStatRpc(&cdvdScmdClient) == 0) {
                 break;
             }
             sceCdDelayThread(60);
         }
         return 0;
     }
-    return sceSifCheckStatRpc(&D_0052BA48);
+    return sceSifCheckStatRpc(&cdvdScmdClient);
 }
 
 extern void cmd_sem_init(void);
 extern s32 PollSema(s32 sema);
 extern void sceSifInitRpc(s32 mode);
 extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
-extern s32 D_0052A018 __attribute__((section(".data")));
-SYMBOL_AT(s32, cdvdScmdInit, D_0052A03C, 12);
+extern s32 cdvdScmdLastCommand __attribute__((section(".data")));
+SYMBOL_AT(s32, cdvdScmdInit, cdvdScmdState, 12);
 
 s32 _sceCd_scmd_prechk(s32 command)
 {
@@ -416,23 +416,23 @@ s32 _sceCd_scmd_prechk(s32 command)
 
     cmd_sem_init();
     {
-        s32 sema = D_0052A02C;
+        s32 sema = cdvdScmdLockSema;
         FAKEMATCH_ASM_LIVE(sema);
         status = PollSema(sema);
     }
-    if (D_0052A02C != status) {
-        if (D_0052A010 > 0) {
-            scePrintf("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, D_0052A018);
+    if (cdvdScmdLockSema != status) {
+        if (cdvdDebugLevel > 0) {
+            scePrintf("Scmd fail sema cur_cmd:%d keep_cmd:%d\n", command, cdvdScmdLastCommand);
         }
         return 0;
     }
-    D_0052A018 = command;
-    ReferThreadStatus(D_00598C50, D_00598C58);
+    cdvdScmdLastCommand = command;
+    ReferThreadStatus(cdvdOwnerThreadId, cdvdThreadStatus);
     status = sceCdSyncS(1);
     {
         FAKEMATCH_ASM_REG(s32, rpcMode, "$4") = 0;
         if (status != 0) {
-            s32 sema = D_0052A02C;
+            s32 sema = cdvdScmdLockSema;
             FAKEMATCH_ASM_LIVE(sema);
             SignalSema(sema);
             return 0;
@@ -441,10 +441,10 @@ s32 _sceCd_scmd_prechk(s32 command)
     }
     if (cdvdScmdInit < 0) {
         for (;;) {
-            cdvdRpcClient_t *client = &D_0052BA48;
+            cdvdRpcClient_t *client = &cdvdScmdClient;
 
             if (sceSifBindRpc(client, 0x80000593, 0) < 0) {
-                if (D_0052A010 > 0) {
+                if (cdvdDebugLevel > 0) {
                     scePrintf("Libcdvd bind err S cmd\n");
                 }
                 for (delay = 0x100000; delay != -1; --delay) {
@@ -468,20 +468,20 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdDiskReady);
 
 s32 sceCdMmode(s32 media)
 {
-    s32 *arg = &D_0052B640;
+    s32 *arg = &cdvdMmodeArg;
     s32 ret;
 
     if (!_sceCd_scmd_prechk(34)) {
         return 0;
     }
-    D_0052B640 = media;
+    cdvdMmodeArg = media;
     sceSifWriteBackDCache(arg, 4);
-    if (sceSifCallRpc(&D_0052BA48, 34, 0, arg, 4, D_0052B200, 4, 0, 0) < 0) {
-        SignalSema(D_0052A02C);
+    if (sceSifCallRpc(&cdvdScmdClient, 34, 0, arg, 4, cdvdScmdReply, 4, 0, 0) < 0) {
+        SignalSema(cdvdScmdLockSema);
         return 0;
     }
-    ret = UNCACHED(D_0052B200)[0];
-    SignalSema(D_0052A02C);
+    ret = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
     return ret;
 }
 
@@ -492,12 +492,12 @@ s32 sceCdGetDiskType(void)
     if (!_sceCd_scmd_prechk(1)) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052BA48, 3, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
-        SignalSema(D_0052A02C);
+    if (sceSifCallRpc(&cdvdScmdClient, 3, 0, 0, 0, cdvdScmdReply, 4, 0, 0) < 0) {
+        SignalSema(cdvdScmdLockSema);
         return 0;
     }
-    ret = UNCACHED(D_0052B200)[0];
-    SignalSema(D_0052A02C);
+    ret = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
     return ret;
 }
 
@@ -508,13 +508,13 @@ s32 sceCdStatus(void)
     if (!_sceCd_scmd_prechk(2)) {
         return -1;
     }
-    if (sceSifCallRpc(&D_0052BA48, 12, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
-        SignalSema(D_0052A02C);
+    if (sceSifCallRpc(&cdvdScmdClient, 12, 0, 0, 0, cdvdScmdReply, 4, 0, 0) < 0) {
+        SignalSema(cdvdScmdLockSema);
         return -1;
     }
-    ret = UNCACHED(D_0052B200)[0];
-    SignalSema(D_0052A02C);
-    if (D_0052A010 >= 2) {
+    ret = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
+    if (cdvdDebugLevel >= 2) {
         scePrintf("status called\n");
     }
     return ret;
@@ -527,13 +527,13 @@ s32 sceCdPowerOff(s32 *result)
     if (!_sceCd_scmd_prechk(33)) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052BA48, 33, 0, 0, 0, D_0052B200, 8, 0, 0) < 0) {
-        SignalSema(D_0052A02C);
+    if (sceSifCallRpc(&cdvdScmdClient, 33, 0, 0, 0, cdvdScmdReply, 8, 0, 0) < 0) {
+        SignalSema(cdvdScmdLockSema);
         return 0;
     }
-    *result = UNCACHED(D_0052B200 + 1)[0];
-    ret = UNCACHED(D_0052B200)[0];
-    SignalSema(D_0052A02C);
+    *result = UNCACHED(cdvdScmdReply + 1)[0];
+    ret = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
     return ret;
 }
 
@@ -548,8 +548,8 @@ typedef struct sdfCdClock_t {
     u8 year;
 } sdfCdClock_t;
 
-static const char D_0054AC78[32] = "Libcdvd call Clock read 1\n";
-static const char D_0054AC98[32] = "Libcdvd call Clock read 2\n";
+static const char cdvdMsgClockRead1[32] = "Libcdvd call Clock read 1\n";
+static const char cdvdMsgClockRead2[32] = "Libcdvd call Clock read 2\n";
 
 s32 sceCdReadClock(sdfCdClock_t *clock)
 {
@@ -558,50 +558,50 @@ s32 sceCdReadClock(sdfCdClock_t *clock)
     if (!_sceCd_scmd_prechk(0xF)) {
         return 0;
     }
-    if (D_0052A010 > 0) {
-        scePrintf(D_0054AC78);
+    if (cdvdDebugLevel > 0) {
+        scePrintf(cdvdMsgClockRead1);
     }
-    if (sceSifCallRpc(&D_0052BA48, 1, 0, NULL, 0,
-                      D_0052B200, 16, NULL, NULL) < 0) {
-        SignalSema(D_0052A02C);
+    if (sceSifCallRpc(&cdvdScmdClient, 1, 0, NULL, 0,
+                      cdvdScmdReply, 16, NULL, NULL) < 0) {
+        SignalSema(cdvdScmdLockSema);
         return 0;
     }
-    *clock = *(sdfCdClock_t *)UNCACHED(&D_0052B200[1]);
-    if (D_0052A010 > 0) {
-        scePrintf(D_0054AC98);
+    *clock = *(sdfCdClock_t *)UNCACHED(&cdvdScmdReply[1]);
+    if (cdvdDebugLevel > 0) {
+        scePrintf(cdvdMsgClockRead2);
     }
-    result = UNCACHED(D_0052B200)[0];
-    SignalSema(D_0052A02C);
+    result = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
     return result;
 }
 
 
 s32 sceCdStInit(u32 bufmax, u32 bankmax, void *buf)
 {
-    D_0052BA70 = 0;
-    return sceCdStream(bufmax, bankmax, buf, 5, D_00598ED8);
+    cdvdStreamActive = 0;
+    return sceCdStream(bufmax, bankmax, buf, 5, cdvdDefaultStreamMode);
 }
 
 s32 sceCdStStart(u32 lsn, void *mode)
 {
-    D_0052BA70 = 1;
+    cdvdStreamActive = 1;
     return sceCdStream(lsn, 0, 0, 1, mode);
 }
 
 s32 sceCdStSeekF(u32 lsn)
 {
-    return sceCdStream(lsn, 0, 0, 9, D_00598ED8);
+    return sceCdStream(lsn, 0, 0, 9, cdvdDefaultStreamMode);
 }
 
 s32 sceCdStSeek(u32 lsn)
 {
-    return sceCdStream(lsn, 0, 0, 4, D_00598ED8);
+    return sceCdStream(lsn, 0, 0, 4, cdvdDefaultStreamMode);
 }
 
 s32 sceCdStStop(void)
 {
-    D_0052BA70 = 0;
-    return sceCdStream(0, 0, 0, 3, D_00598ED8);
+    cdvdStreamActive = 0;
+    return sceCdStream(0, 0, 0, 3, cdvdDefaultStreamMode);
 }
 
 /* NON_MATCHING: native size; the active-flag address/load uses the opposite
@@ -615,11 +615,11 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
     u32 reply;
     s32 currentError;
 
-    if (D_0052A010 > 0) {
+    if (cdvdDebugLevel > 0) {
         scePrintf("sceCdStRead call read size= %d mode= %d\n", sectors, mode);
     }
     error = 0;
-    if (D_0052BA70 == 0) {
+    if (cdvdStreamActive == 0) {
         return 0;
     }
     completed = 0;
@@ -627,13 +627,13 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
     if (mode != 0) {
         do {
             reply = sceCdStream(0, sectors - completed,
-                               (u8 *)buffer + (completed << 11), 2, D_00598ED8);
+                               (u8 *)buffer + (completed << 11), 2, cdvdDefaultStreamMode);
             read = reply & 0xFFFF;
             currentError = reply >> 16;
             completed += read;
             if (currentError != 0) {
                 error = currentError;
-                if (D_0052A010 > 0) {
+                if (cdvdDebugLevel > 0) {
                     scePrintf("sceCdStRead BLK Read cur_size= %d read_size= %d req_size= %d err 0x%x\n",
                               completed, read, sectors, currentError);
                 }
@@ -641,12 +641,12 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
                 sceCdDelayThread(8);
             }
         } while (completed != sectors && (currentError == 0 || read != 0));
-        if (D_0052A010 > 0) {
+        if (cdvdDebugLevel > 0) {
             scePrintf("sceCdStRead BLK Read Ended\n");
         }
         *status = error;
     } else {
-        reply = sceCdStream(0, sectors, buffer, 2, D_00598ED8);
+        reply = sceCdStream(0, sectors, buffer, 2, cdvdDefaultStreamMode);
         currentError = reply >> 16;
         completed = reply & 0xFFFF;
         *status = currentError;
@@ -659,28 +659,28 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdStRead);
 
 s32 sceCdStPause(void)
 {
-    D_0052BA70 = 0;
-    if (D_0052A010 > 0) {
+    cdvdStreamActive = 0;
+    if (cdvdDebugLevel > 0) {
         scePrintf("sceCdStPause call\n");
     }
-    return sceCdStream(0, 0, 0, 7, D_00598ED8);
+    return sceCdStream(0, 0, 0, 7, cdvdDefaultStreamMode);
 }
 
 s32 sceCdStResume(void)
 {
-    D_0052BA70 = 1;
-    if (D_0052A010 > 0) {
+    cdvdStreamActive = 1;
+    if (cdvdDebugLevel > 0) {
         scePrintf("sceCdStResume call\n");
     }
-    return sceCdStream(0, 0, 0, 8, D_00598ED8);
+    return sceCdStream(0, 0, 0, 8, cdvdDefaultStreamMode);
 }
 
 s32 sceCdStStat(void)
 {
-    if (D_0052A010 > 0) {
+    if (cdvdDebugLevel > 0) {
         scePrintf("sceCdStStat call\n");
     }
-    return sceCdStream(0, 0, 0, 6, D_00598ED8);
+    return sceCdStream(0, 0, 0, 6, cdvdDefaultStreamMode);
 }
 
 typedef struct cdvdStreamRequest_t {
@@ -691,22 +691,22 @@ typedef struct cdvdStreamRequest_t {
     u8 mode[3];
     u8 opaque13;
 } cdvdStreamRequest_t;
-extern cdvdStreamRequest_t D_0052A100 __attribute__((section(".data")));
+extern cdvdStreamRequest_t cdvdStreamRequest __attribute__((section(".data")));
 extern s32 _sceCd_ncmd_prechk(s32 command);
 
 s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg)
 {
-    cdvdStreamRequest_t *request = &D_0052A100;
+    cdvdStreamRequest_t *request = &cdvdStreamRequest;
     u8 *mode = arg;
     s32 result;
 
     if (_sceCd_ncmd_prechk(15) == 0) {
         return 0;
     }
-    if (D_0052A010 > 0) {
+    if (cdvdDebugLevel > 0) {
         scePrintf("call cdreadstm call\n");
     }
-    D_0052A100.lsn = lsn;
+    cdvdStreamRequest.lsn = lsn;
     request->sectors = sectors;
     request->buffer = buf;
     request->command = cmd;
@@ -715,19 +715,19 @@ s32 sceCdStream(u32 lsn, u32 sectors, void *buf, s32 cmd, void *arg)
         request->mode[1] = mode[1];
         request->mode[2] = mode[2];
     }
-    if (D_0052A010 > 0) {
+    if (cdvdDebugLevel > 0) {
         scePrintf("call cdreadstm cmd\n");
     }
     sceSifWriteBackDCache(request, 0x14);
-    if (sceSifCallRpc(&D_0052B1D0, 9, 0, request, 0x14,
-                      &D_0052A080, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&cdvdNcmdClient, 9, 0, request, 0x14,
+                      &cdvdNcmdReply, 4, NULL, NULL) < 0) {
         SignalSema(cdvdNcmdSema);
         return 0;
     }
-    if (D_0052A010 > 0) {
+    if (cdvdDebugLevel > 0) {
         scePrintf("cdread end\n");
     }
-    result = *UNCACHED(&D_0052A080);
+    result = *UNCACHED(&cdvdNcmdReply);
     SignalSema(cdvdNcmdSema);
     return result;
 }

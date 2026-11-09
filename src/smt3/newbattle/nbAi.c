@@ -213,7 +213,7 @@ extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
-extern datDevilAIData_t D_003989E0[];
+extern datDevilAIData_t datDevilAIDataTable[];
 
 extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n);
 
@@ -229,9 +229,9 @@ extern void nbRunAi(nbActionProcessData_t *a);
 
 extern s32 nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
-extern char D_00545728[];
+extern char nbDebugProcessName[];
 
-#define D_00398A08 ((u8 *)D_003989E0 + 0x28)
+#define D_00398A08 ((u8 *)datDevilAIDataTable + 0x28)
 
 extern s32 datGetPlayerLevel(void);
 
@@ -254,7 +254,7 @@ extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 extern s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index);
 
 
-extern char D_00545840[];
+extern char nbAiTblFormat[];
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -1085,8 +1085,8 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
     u32 j2;
 
     a->aiselect = 0;
-    j1 = D_003989E0[a->work->id].entry[index].joken[0];
-    j2 = D_003989E0[a->work->id].entry[index].joken[1];
+    j1 = datDevilAIDataTable[a->work->id].entry[index].joken[0];
+    j2 = datDevilAIDataTable[a->work->id].entry[index].joken[1];
     a->aijokentbl = index;
     if (nbAiChkJoken(a, j1) != 0) {
         if (nbAiChkJoken(a, j2) != 0) {
@@ -1220,7 +1220,7 @@ s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group)
 {
     s32 points[32];
     s32 pointIndex;
-    s32 level = D_003989E0[a->work->id].ailevel;
+    s32 level = datDevilAIDataTable[a->work->id].ailevel;
     s32 skill;
     s32 count;
     s32 i;
@@ -1634,7 +1634,7 @@ s32 ChkCost(nbActionProcessData_t *a)
         return 0;
     }
     if (nbCheckSkillCost(a->form->formindex, skill) != 0) {
-        ailevel = D_003989E0[a->work->id].ailevel;
+        ailevel = datDevilAIDataTable[a->work->id].ailevel;
         switch (ailevel) {
         case 0:
         case 1:
@@ -1664,7 +1664,7 @@ s32 ChkClose(nbActionProcessData_t *a)
         return ret;
     }
     if (nbCheckSkillUse(a->form->formindex, nowindex) >= 1) {
-        switch (D_003989E0[a->work->id].ailevel) {
+        switch (datDevilAIDataTable[a->work->id].ailevel) {
         case 0:
             break;
         case 1:
@@ -1786,15 +1786,15 @@ void nbRunAi(nbActionProcessData_t *a)
     no = 0;
     for (i = 0; i < 3; i++) {
         if (nbGetAiEntry(a, i) != 0) {
-            no = D_003989E0[a->work->id].entry[i].no;
+            no = datDevilAIDataTable[a->work->id].entry[i].no;
             break;
         }
     }
-    printf(D_00545840, no);
+    printf(nbAiTblFormat, no);
     nbRunAiSub(a, no);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545840);
+INCLUDE_RODATA(const s32, "newbattle/nbAi", nbAiTblFormat);
 
 INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545850);
 

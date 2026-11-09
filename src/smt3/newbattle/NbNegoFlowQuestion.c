@@ -205,7 +205,7 @@ extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 typedef struct { u16 type; u8 lo; u8 hi; } nbNegoRateEntry_t;
 
-extern nbNegoRateEntry_t D_003E2540[][7];
+extern nbNegoRateEntry_t nbNegoRateTable[][7];
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
@@ -390,9 +390,9 @@ s32 Flow7_20(nbNegoProcessData_t *n)
 
     nbAddNegoIdKouho(n, 0x70017);
     nbAddNegoIdKouho(n, 0x70018);
-    hi = D_003E2540[n->ekucyo][n->qindex].hi;
-    lo = D_003E2540[n->ekucyo][n->qindex].lo;
-    switch (D_003E2540[n->ekucyo][n->qindex].type) {
+    hi = nbNegoRateTable[n->ekucyo][n->qindex].hi;
+    lo = nbNegoRateTable[n->ekucyo][n->qindex].lo;
+    switch (nbNegoRateTable[n->ekucyo][n->qindex].type) {
     case 0:
         if (!(datGetParam(n->pwork, 1) < datGetParam(n->ework, 1))) goto low;
         goto high;
@@ -429,9 +429,9 @@ chosen:
     return 0;
 }
 
-extern s8 D_003E28B2[];
-extern s8 D_003E28BE[];
-extern s8 D_003E28CA[];
+extern s8 nbNegoKotowariQ3Table[];
+extern s8 nbNegoKotowariQ1Table[];
+extern s8 nbNegoKotowariQ2Table[];
 extern void datAddKotowariPoint(s32 type, s32 point);
 
 s32 Flow7_22(nbNegoProcessData_t *n)
@@ -459,13 +459,13 @@ s32 Flow7_22(nbNegoProcessData_t *n)
 
     switch (n->qtype) {
     case 1:
-        value = D_003E28BE[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        value = nbNegoKotowariQ1Table[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
         break;
     case 2:
-        value = D_003E28CA[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        value = nbNegoKotowariQ2Table[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
         break;
     case 3:
-        value = D_003E28B2[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
+        value = nbNegoKotowariQ3Table[2 * (3 * n->qindex + 36 * n->ekucyo + n->nowselect)];
         break;
     default:
         break;

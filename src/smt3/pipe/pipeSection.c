@@ -56,9 +56,9 @@ extern void pipeFreeLink(tagPipeLinkInfo *pInfo);
 
 extern tagPipeLinkInfo linkHeader00;
 
-extern tagPipePosTable D_00528F58;
+extern tagPipePosTable pipePosData;
 
-extern tagPipeTable D_00528F68;
+extern tagPipeTable pipeObjectTable;
 
 extern s32 offsetCount;
 
@@ -144,7 +144,7 @@ s32 pipe_Section(void)
 extern const sdfVector4_t D_00548910;
 INCLUDE_RODATA(const s32, "pipe/pipeSection", D_00548910);
 
-const char D_00548920[16] = "pipeArea";
+const char pipeAreaName[16] = "pipeArea";
 extern s32 pipeIndex;
 extern dds3Basic_t *dds3AddScene(void);
 extern void dds3SetControlScene(dds3Basic_t *);
@@ -174,7 +174,7 @@ void pipeInitSection(void)
     dds3SetControlScene(scene);
     dds3SetActiveScene(scene);
     AddCamera();
-    dds3AddAreaBasic(0, (char *)D_00548920);
+    dds3AddAreaBasic(0, (char *)pipeAreaName);
     pipeIndex = 0;
     mymdlStartUp();
     PipeTexLoad();
@@ -238,13 +238,13 @@ void pipeDataRelease(void)
         pipeFreeLink(&linkHeader00);
         linkHeader00.aHandle = NULL;
     }
-    if (D_00528F58.aHandle != NULL) {
-        sdfMemFreeDirect(D_00528F58.aHandle);
-        D_00528F58.aHandle = NULL;
+    if (pipePosData.aHandle != NULL) {
+        sdfMemFreeDirect(pipePosData.aHandle);
+        pipePosData.aHandle = NULL;
     }
-    if (D_00528F68.aHandle != NULL) {
-        sdfMemFreeDirect(D_00528F68.aHandle);
-        D_00528F68.aHandle = NULL;
+    if (pipeObjectTable.aHandle != NULL) {
+        sdfMemFreeDirect(pipeObjectTable.aHandle);
+        pipeObjectTable.aHandle = NULL;
     }
 }
 
@@ -257,9 +257,9 @@ extern s32 pipeFileLoad(char *filename, tagPipePosTable *pos, tagPipeTable *obje
 
 extern s32 p2sdLoadCheckMidi(s32 midi);
 extern void p2sdLoadSMGFile(s32 midi);
-const char D_00548948[24] = "/pipe/PIPE_%02d.DAT";
-const char D_00548960[40] = "PosTableData Loading [%s]....OK\n";
-const char D_00548988[40] = "ObjectData Loading [%s]....OK\n";
+const char pipeFileFormat[24] = "/pipe/PIPE_%02d.DAT";
+const char pipePosTableLoadMsg[40] = "PosTableData Loading [%s]....OK\n";
+const char pipeObjectLoadMsg[40] = "ObjectData Loading [%s]....OK\n";
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLoadState);
 
@@ -273,10 +273,10 @@ s32 pipeLoadSection(s32 index)
 
     if (pipeLoadState == 0) {
         pipeDataRelease();
-        sprintf(filename, D_00548948, index + 1);
-        if (pipeFileLoad(filename, &D_00528F58, &D_00528F68, &linkHeader00)) {
-            DEBUG_PRINT(D_00548960, filename);
-            DEBUG_PRINT(D_00548988, filename);
+        sprintf(filename, pipeFileFormat, index + 1);
+        if (pipeFileLoad(filename, &pipePosData, &pipeObjectTable, &linkHeader00)) {
+            DEBUG_PRINT(pipePosTableLoadMsg, filename);
+            DEBUG_PRINT(pipeObjectLoadMsg, filename);
             pipeLoadState = 1;
         }
     }
@@ -325,13 +325,13 @@ s32 pipeMainSection(void)
         pipeIndex = 1;
         break;
     case 1:
-        if (D_00528F58.tSize - 0x600 < offsetCount) {
+        if (pipePosData.tSize - 0x600 < offsetCount) {
             dds3FadeOut(0xFF, 0xFF, 0xFF, 0x3C);
             pipeIndex = 2;
         }
         /* Continue to the end threshold after the fade threshold. */
     case 2:
-        if (D_00528F58.tSize - 0x400 < offsetCount) {
+        if (pipePosData.tSize - 0x400 < offsetCount) {
             pipeEnd();
             pipeIndex = 0;
             return 1;
@@ -374,7 +374,7 @@ s32 pipeSoundSection(void)
 
 #ifdef NON_MATCHING
 extern tagPipePartsInfo *getPartsInfo(s16 partsID);
-extern s32 D_00551740;
+extern s32 pipeLinkId;
 
 void pipeOffset(void)
 {
@@ -401,7 +401,7 @@ void pipeOffset(void)
     }
     step = *(s8 *)&offsetStep;
     count = *(s8 *)&offsetStepCount;
-    D_00551740 = id;
+    pipeLinkId = id;
     next = (s32)((u32)position + (u32)(s32)step + 7);
     countBits = offsetStepCount;
     if (count > 0) {
@@ -446,7 +446,7 @@ void pipeStart(void)
     Initmymdl();
     p2sdPlayBGM(0x670001);
     dds3FadeIn(0, 0, 0, 0x3C);
-    memset(D_00528F68.data, 0, D_00528F68.tabMax);
+    memset(pipeObjectTable.data, 0, pipeObjectTable.tabMax);
     offset = 0;
 }
 
@@ -550,15 +550,15 @@ void pipeLoadObjects(void)
 {
     tagPipeObject object;
     tagPipeLinkData *node = linkHeader00.head;
-    s32 count = D_00528F68.tabMax;
-    s8 *loaded = D_00528F68.data;
-    tagPipeObjectEntry *entry = D_00528F68.tabPtr;
+    s32 count = pipeObjectTable.tabMax;
+    s8 *loaded = pipeObjectTable.data;
+    tagPipeObjectEntry *entry = pipeObjectTable.tabPtr;
     tagPipePartsInfo *info;
 
     while (count != 0) {
         if (*loaded == 0 && entry->offset <= offsetCount + 500) {
             memset(&object, 0, sizeof(object));
-            objOption(&object, objLoad(&object, D_00528F68.tabMax - count));
+            objOption(&object, objLoad(&object, pipeObjectTable.tabMax - count));
             *loaded = 1;
         }
         count--;
@@ -718,7 +718,7 @@ void MyAction(tagPipeObject *object)
         }
         break;
     }
-    if ((f32)(D_00528F58.tSize - 0x600) + 256.0f < (f32)offsetCount) {
+    if ((f32)(pipePosData.tSize - 0x600) + 256.0f < (f32)offsetCount) {
         object->flags |= 0x200;
     }
     ActionKey(object);
@@ -1689,7 +1689,7 @@ INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551738);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", D_0055173C);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551740);
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLinkId);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551744);
 

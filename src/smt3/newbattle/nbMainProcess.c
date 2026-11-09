@@ -78,7 +78,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern char D_00543448[];
+extern char nbActionStackErrorMsg[];
 
 extern s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index);
 
@@ -146,7 +146,7 @@ extern s32 evtBitCheck(s32 no);
 
 
 
-extern char D_00543540[]; /* "encno = %d\n" */
+extern char nbEncnoFormat[]; /* "encno = %d\n" */
 
 extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
 
@@ -156,13 +156,13 @@ extern void nbInitResultProcess(nbMainProcessData_t *data);
 
 extern void nbBgmFadeOut(void);
 
-extern char D_00543550[]; /* "formationtype = %d\n" */
+extern char nbFormationTypeFormat[]; /* "formationtype = %d\n" */
 
-extern char D_00543468[]; /* "game over !!\n" */
+extern char nbGameOverMsg[]; /* "game over !!\n" */
 
-extern char D_00543478[]; /* "level up !!\n" */
+extern char nbLevelUpMsg[]; /* "level up !!\n" */
 
-extern char D_005510B8[]; /* "nb_main" */
+extern char nbMainProcessName[]; /* "nb_main" */
 
 extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
@@ -210,7 +210,7 @@ extern s32 nbCheckBadStatusGameOver(nbMainProcessData_t *data);
 
 extern s32 nbCheckRenzokuEncount(nbMainProcessData_t *data);
 
-extern char D_00543458[];
+extern char nbBadStatusGameOverMsg[];
 
 extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
@@ -384,13 +384,13 @@ extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fovy);
 extern s32 D_00550F80;
 extern char *D_00550F78;
-extern char *D_00550F7C;
+extern char *nbDebugGameCameraName;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern sdfGrOt_t sdfGrOtTable[];
-SYMBOL_AT(sdfGrOt_t, D_002F6978, sdfGrOtTable, 0xA60);
+SYMBOL_AT(sdfGrOt_t, sdfDebugGrOt, sdfGrOtTable, 0xA60);
 
 void nbDebugCamera(nbMainProcessData_t *data)
 {
@@ -449,12 +449,12 @@ void nbDebugCamera(nbMainProcessData_t *data)
     if (camera->name != NULL) {
         name = camera->name;
     } else {
-        name = (data->stat & 0x20) ? D_00550F7C : D_00550F78;
+        name = (data->stat & 0x20) ? nbDebugGameCameraName : D_00550F78;
     }
     if (data->debug == 1) {
         tag = dds3FontReqAllocDrawTag();
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00550F88, name)));
-        D_002F6978.regFunc(&D_002F6978, tag);
+        sdfDebugGrOt.regFunc(&sdfDebugGrOt, tag);
     }
 }
 
@@ -462,7 +462,7 @@ extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char *nbDebugPhaseNameTable[];
-extern char *D_003FA748[];
+extern char *nbActionTypeNameTable[];
 extern char D_00551060[]; /* "Turn:%d", shared small-data strings. */
 extern char D_00551068[]; /* "ENEMY" */
 extern char D_00551070[]; /* "PLAYER" */
@@ -600,7 +600,7 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
         for (i = 0; i < 8; i++) {
             if (i < data->actionstackp) {
                 sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:%s %d->%d %d", i,
-                    D_003FA748[data->actionstack[i].type], data->actionstack[i].from,
+                    nbActionTypeNameTable[data->actionstack[i].type], data->actionstack[i].from,
                     data->actionstack[i].to, data->actionstack[i].data)));
             } else {
                 sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8480, y, 0xFFFF80, 0, "%d:-----", i)));
@@ -612,7 +612,7 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
 }
 
 
-extern char D_005433C8[], D_005433D8[], D_005433F0[], D_00543408[], D_00543420[];
+extern char nbDebugCountFormat[], nbDebugSlotHeader[], nbDebugEventTimeFormat[], nbDebugEventSeqFormat[], nbDebugEventSeqTimeFormat[];
 extern char D_00551098[], D_005510A0[], D_005510A8[], D_005510B0[];
 
 #ifdef NON_MATCHING
@@ -630,10 +630,10 @@ void DebugDisp2(nbMainProcessData_t *data)
 
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x80A0, 0xFFFF80, 0,
-                                            D_005433C8, data->playerpcnt,
+                                            nbDebugCountFormat, data->playerpcnt,
                                             data->enemypcnt, data->activeunit)));
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8100, 0xFFFF80, 0xE,
-                                            D_005433D8)));
+                                            nbDebugSlotHeader)));
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8160, 0xFFFF80, 0xE,
                                             D_00551098)));
@@ -697,11 +697,11 @@ void DebugDisp2(nbMainProcessData_t *data)
     if (eventProcess != NULL) {
         event = dds3GetProcessData(eventProcess);
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x82E0, 0xFFFF80, 0,
-                                                D_005433F0, event->time)));
+                                                nbDebugEventTimeFormat, event->time)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8340, 0xFFFF80, 0,
-                                                D_00543408, event->seq)));
+                                                nbDebugEventSeqFormat, event->seq)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x83A0, 0xFFFF80, 0,
-                                                D_00543420, event->seqtime)));
+                                                nbDebugEventSeqTimeFormat, event->seqtime)));
     }
 
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -851,7 +851,7 @@ s32 nbCheckActionStack(void)
     }
     for (i = 0; i < data->actionstackp; i++) {
         if (CheckErrorActionStack(data, i) == 0) {
-            printf(D_00543448);
+            printf(nbActionStackErrorMsg);
             return 1;
         }
     }
@@ -1036,7 +1036,7 @@ void nbSetChkEndPhase(nbMainProcessData_t *data)
             data->endtype = 1;
         }
         if (nbCheckBadStatusGameOver(data)) {
-            printf(D_00543458);
+            printf(nbBadStatusGameOverMsg);
             data->endtype = 6;
         }
         if (NB_PLAYERUNIT->hp == 0) {
@@ -1172,11 +1172,11 @@ void nbSetEndPhase(nbMainProcessData_t *data)
     }
     if (data->endtype == 2 || data->endtype == 6) {
         if (evtBitCheck(0xC0C) == 0) {
-            printf(D_00543468);
+            printf(nbGameOverMsg);
             dds3AdminiCallSequence(7, &seq, 4, 0);
         }
     } else if (rstChkResultEntry() != 0) {
-        printf(D_00543478);
+        printf(nbLevelUpMsg);
         dds3AdminiCallSequence(0xE, 0, 0, 1);
     }
 }
@@ -1198,13 +1198,13 @@ void nbSetNextPhase(s32 phase)
     nbGetMainProcessData()->nextphase = phase;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543448);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbActionStackErrorMsg);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543458);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbBadStatusGameOverMsg);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543468);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbGameOverMsg);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543478);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbLevelUpMsg);
 
 void nbSetPhase(s32 phase)
 {
@@ -1612,7 +1612,7 @@ void SetFlag(nbMainProcessData_t *data)
     printf("encpackno = %d\n", data->encpackno);
     printf("packno = %d\n", data->packno);
     printf("packindex = %d\n", data->packindex);
-    printf(D_00543540, data->encno);
+    printf(nbEncnoFormat, data->encno);
     encno = data->encno;
     if (encno == 0xC7) {
         data->stat |= 0x400;
@@ -1637,8 +1637,8 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     printf("encpackno = %d\n", data->encpackno);
     printf("packno = %d\n", data->packno);
     printf("packindex = %d\n", data->packindex);
-    printf(D_00543540, data->encno);
-    printf(D_00543550, data->formationtype);
+    printf(nbEncnoFormat, data->encno);
+    printf(nbFormationTypeFormat, data->formationtype);
     data->StageMajor = stagemajor;
     data->StageMinor = stageminor;
     if (data->encno == 0x1D9) {
@@ -1648,7 +1648,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     SetJyocyuData(data);
     SetFlag(data);
     ClearLocalBit();
-    data->MainProcessID = dds3StartProcess(D_005510B8, 0x3FA, 1, 1, nbMainProcess1, nbMainShutdown, data);
+    data->MainProcessID = dds3StartProcess(nbMainProcessName, 0x3FA, 1, 1, nbMainProcess1, nbMainShutdown, data);
     evtEnableMoonDraw();
     if (data->encno == 0x1C3) {
         nbLoadDeadMoonTex();
@@ -1665,7 +1665,7 @@ void nbKillMainProcess(void)
     nbFreeDeadMoonTex();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543540);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbEncnoFormat);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543550);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbFormationTypeFormat);
 

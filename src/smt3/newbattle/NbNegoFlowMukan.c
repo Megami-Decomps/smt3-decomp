@@ -207,7 +207,7 @@ extern s32 nbGetInfoMsg(s32 infotype);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
-extern u8 D_003E2470[];
+extern u8 nbMukanRateTable[];
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
@@ -221,7 +221,7 @@ extern s32 datGetPlayerLevel(void);
 
 #include "sdk_libc.h"
 
-extern char D_00545218[];
+extern char nbLevelPrintFmt[];
 
 
 
@@ -311,11 +311,11 @@ s32 Flow12_2(nbNegoProcessData_t *n)
     row = master_text[n->ework->id].mukanindex;
     rand = dds3GetRandIntA(0, 0x64);
     for (i = 0; i < 3; i++) {
-        if (rand < sum + D_003E2470[i + row * 3]) {
+        if (rand < sum + nbMukanRateTable[i + row * 3]) {
             n->nextnegoid = n->nextkouho[i];
             break;
         }
-        sum += D_003E2470[i + row * 3];
+        sum += nbMukanRateTable[i + row * 3];
     }
     return 0;
 }
@@ -600,7 +600,7 @@ s32 Flow12_27(nbNegoProcessData_t *n)
             n->nextnegoid = n->nextkouho[2];
         }
     }
-    printf(D_00545218, datGetPlayerLevel(), n->ework->level);
+    printf(nbLevelPrintFmt, datGetPlayerLevel(), n->ework->level);
     if (n->nextnegoid == n->nextkouho[0]) {
         if (datGetPlayerLevel() < n->ework->level) {
             n->nextnegoid = n->nextkouho[2];
@@ -811,5 +811,5 @@ s32 nbNegoFlowMukan(nbNegoProcessData_t *n)
     return D_004EF960[(u16)n->nownegoid](n);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowMukan", D_00545218);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowMukan", nbLevelPrintFmt);
 

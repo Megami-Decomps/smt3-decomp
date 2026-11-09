@@ -209,7 +209,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern char D_00545728[];
+extern char nbDebugProcessName[];
 
 extern void *nbDebugProcess1(dds3ProcessID_t *id);
 
@@ -343,13 +343,13 @@ extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern const char *nbBadStatusNames[12];
-extern const char D_00551358[];
-extern const char D_00551360[];
+extern const char nbDebugStrFmt[];
+extern const char nbDebugNoStatusLabel[];
 extern sdfGrOt_t sdfGrOtTable[];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 
-extern const char *D_004F06D8[];
+extern const char *nbDebugMenuLabels[];
 typedef struct frFontRequest_t frFontRequest_t;
 extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
                                         const char *text, frFontRequest_t *request);
@@ -361,9 +361,9 @@ extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
 
 extern void DispBadStatus(s32 x, s32 y, u32 status, s32 color);
 
-extern s32 D_005512EC;
-extern s32 D_005512F0;
-extern const char D_005512F8[];
+extern s32 nbDebugStockCursor;
+extern s32 nbDebugStockBase;
+extern const char nbDebugEmptyStockLabel[];
 extern char *text2[];
 
 #ifdef NON_MATCHING
@@ -382,11 +382,11 @@ s32 nbDebugStockSelect(void)
     D_002F67F8.regFunc(&D_002F67F8, tag);
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    base = *(volatile s32 *)&D_005512F0;
+    base = *(volatile s32 *)&nbDebugStockBase;
     y = 70;
     for (i = 0; i < 12; i++) {
         unit = &DDS3_GBWK->akuma[base + i];
-        if (D_005512EC == i) {
+        if (nbDebugStockCursor == i) {
             attr = 4;
             color = 0xFF0080;
         } else {
@@ -405,20 +405,20 @@ s32 nbDebugStockSelect(void)
             frDestroyFontRequestAfter((frFontHandle_t *)request);
         } else {
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7FA0, (y + 4) * 8 + 0x7900,
-                                                  0xFFFF80, attr, D_005512F8, 0, 0xFF)));
+                                                  0xFFFF80, attr, nbDebugEmptyStockLabel, 0, 0xFF)));
         }
         y += 20;
-        base = *(volatile s32 *)&D_005512F0;
+        base = *(volatile s32 *)&nbDebugStockBase;
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    result = dds3SelectMenu(0, 1, 16, 1, 12, NULL, &D_005512F0, NULL, &D_005512EC);
+    result = dds3SelectMenu(0, 1, 16, 1, 12, NULL, &nbDebugStockBase, NULL, &nbDebugStockCursor);
     if (result == -1) {
         return -2;
     }
     if (result != 1) {
         return -1;
     }
-    index = D_005512F0 + D_005512EC;
+    index = nbDebugStockBase + nbDebugStockCursor;
     return (DDS3_GBWK->akuma[index].flag & 1) ? index : -1;
 }
 #else
@@ -440,14 +440,14 @@ void DispBadStatus(s32 x, s32 y, u32 status, s32 color)
     while (i < 12) {
         if ((status & (bit << i)) != 0) {
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color,
-                                                  D_00551358, *name)));
+                                                  nbDebugStrFmt, *name)));
             break;
         }
         name++;
         i++;
     }
     if (i == 12) {
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, D_00551360)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, color, nbDebugNoStatusLabel)));
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
@@ -458,8 +458,8 @@ typedef struct {
     const char *aisyo[16];
 } nbDebugUnitLabels_t;
 extern nbDebugUnitLabels_t nbDebugUnitLabelTable;
-extern const char D_00545658[], D_00545668[], D_00545678[], D_00545688[];
-extern const char D_00551488[], D_00551490[];
+extern const char nbDebugIdFmt[], nbDebugLevelFmt[], nbDebugHpFmt[], nbDebugMpFmt[];
+extern const char nbDebugBadLabel[], nbDebugPairFmt[];
 extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 extern u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr);
 
@@ -481,18 +481,18 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     request = frwGetSmallFontFRQ(0x80, 0x270, 0xFFFF80, -0x80, text2[work->id], NULL);
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, D_00545658, work->id)));
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C90, 0xFEFFFF, 0, D_00545668, work->level)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C30, 0xFEFFFF, 0, nbDebugIdFmt, work->id)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7C90, 0xFEFFFF, 0, nbDebugLevelFmt, work->level)));
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7CF0, 0xFEFFFF, d->seq == 5 ? 4 : 0,
-                                         D_00545678, work->hp, work->maxhp)));
+                                         nbDebugHpFmt, work->hp, work->maxhp)));
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7D50, 0xFEFFFF, d->seq == 6 ? 4 : 0,
-                                         D_00545688, work->mp, work->maxmp)));
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7DB0, 0xFEFFFF, 0, D_00551488)));
+                                         nbDebugMpFmt, work->mp, work->maxmp)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, 0x7DB0, 0xFEFFFF, 0, nbDebugBadLabel)));
     DispBadStatus(0x50, 0x96, work->badstatus, 0);
     y = 0x7E70;
     for (i = 0; i < 20; i++) {
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7080, y, 0xFEFFFF, 0,
-                                             D_00551490, labels.count[i], party->count[i])));
+                                             nbDebugPairFmt, labels.count[i], party->count[i])));
         y += 0x60;
     }
     y = 0x80D0;
@@ -506,8 +506,8 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
         if ((s32)aisyo < 0) flags[n++] = 'W';
         flags[n] = '\0';
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7820, y, 0xFEFFFF, 0,
-                                             D_00551490, labels.aisyo[i], aisyo & 0xFFFF)));
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7E20, y, 0xFEFFFF, 0, D_00551358, flags)));
+                                             nbDebugPairFmt, labels.aisyo[i], aisyo & 0xFFFF)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7E20, y, 0xFEFFFF, 0, nbDebugStrFmt, flags)));
         y += 0x60;
     }
     frDrawFont((frFontHandle_t *)request);
@@ -537,7 +537,7 @@ void DispHpMpBad(nbDebugProcessData_t *d)
 
 s32 SelectMenu(nbDebugProcessData_t *d)
 {
-    const char **label = D_004F06D8;
+    const char **label = nbDebugMenuLabels;
     s32 i;
     s32 x = 200;
     s32 y = 50 * 16;
@@ -664,13 +664,13 @@ s32 SelectBad(nbDebugProcessData_t *d)
 
 extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 typedef struct { const char *name[4]; } nbDebugMotionNames_t;
-extern nbDebugMotionNames_t D_00545698;
-extern const char D_005514B8[];
-extern const char D_005514C0[];
-extern const char D_005514C8[];
-extern const char D_005514D0[];
-extern s32 D_005512E8;
-extern s32 D_005512E0;
+extern nbDebugMotionNames_t nbDebugMotionNames;
+extern const char nbDebugTypeFmt[];
+extern const char nbDebugDataFmt[];
+extern const char nbDebugBFrameFmt[];
+extern const char nbDebugHFrameFmt[];
+extern s32 nbDebugMotionFieldCursor;
+extern s32 nbDebugMotionCursor;
 extern s32 slSelectMotIndex;
 
 #ifdef NON_MATCHING
@@ -687,33 +687,33 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     u8 byteBits;
     u16 halfBits;
 
-    typeNames = D_00545698;
+    typeNames = nbDebugMotionNames;
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     work = nbGetUnitWorkFromFormindex(d->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x2E, 0x16E, 12, 5, 0xFF0000);
     visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
-    motion = &visual->motions[slSelectMotIndex + D_005512E0];
+    motion = &visual->motions[slSelectMotIndex + nbDebugMotionCursor];
     y = 0x8490;
     for (i = 0; i < 4; i++) {
-        selected = *(volatile s32 *)&D_005512E8;
+        selected = *(volatile s32 *)&nbDebugMotionFieldCursor;
         attr = active && i == selected ? 4 : 0;
         switch (i) {
         case 0:
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514B8, typeNames.name[motion->type])));
+                                                 nbDebugTypeFmt, typeNames.name[motion->type])));
             break;
         case 1:
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514C0, motion->data)));
+                                                 nbDebugDataFmt, motion->data)));
             break;
         case 2:
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514C8, motion->bframe)));
+                                                 nbDebugBFrameFmt, motion->bframe)));
             break;
         case 3:
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
-                                                 D_005514D0, motion->hframe)));
+                                                 nbDebugHFrameFmt, motion->hframe)));
             break;
         }
         y += 0x60;
@@ -722,13 +722,13 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     if (!active) {
         return 0;
     }
-    result = dds3SelectMenu(0, 1, 4, 1, 4, NULL, NULL, NULL, &D_005512E8);
+    result = dds3SelectMenu(0, 1, 4, 1, 4, NULL, NULL, NULL, &nbDebugMotionFieldCursor);
     if (result == -1) {
         return -1;
     }
-    selected = *(volatile s32 *)&D_005512E8;
+    selected = *(volatile s32 *)&nbDebugMotionFieldCursor;
     if (result == 1) {
-        SetMotion(d->data, d->form, slSelectMotIndex + D_005512E0, 0);
+        SetMotion(d->data, d->form, slSelectMotIndex + nbDebugMotionCursor, 0);
         return 1;
     }
     switch (selected) {
@@ -783,8 +783,8 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
 #endif
 
-extern const char *D_004F06F0[];
-extern const char D_005514D8[];
+extern const char *nbDebugMotionLabels[];
+extern const char nbDebugIndexFmt[];
 
 #ifdef NON_MATCHING
 s32 SelectMot(nbDebugProcessData_t *d, s32 active)
@@ -800,7 +800,7 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
     dds3ConsPanelTagLinkZ(tag, 0x18C, 0x4C, 8, 20, 0xFF0000);
     y = 0x7BA0;
     yText = 80;
-    selected = *(volatile s32 *)&D_005512E0;
+    selected = *(volatile s32 *)&nbDebugMotionCursor;
     for (i = 0; i < 10; i++) {
         attr = 0;
         color = -0x80;
@@ -814,25 +814,25 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
             }
         }
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8900, y, 0xFFFF80, attr,
-                                             D_005514D8, slSelectMotIndex + i)));
+                                             nbDebugIndexFmt, slSelectMotIndex + i)));
         y += 0xB0;
         request = frwGetSmallFontFRQ(0x1AE * 16, yText * 8, 0xFF0005, color,
-                                     D_004F06F0[slSelectMotIndex + i], NULL);
+                                     nbDebugMotionLabels[slSelectMotIndex + i], NULL);
         yText += 22;
         frDrawFont((frFontHandle_t *)request);
         frDestroyFontRequestAfter((frFontHandle_t *)request);
-        selected = *(volatile s32 *)&D_005512E0;
+        selected = *(volatile s32 *)&nbDebugMotionCursor;
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
     if (!active) {
         return 0;
     }
-    result = dds3SelectMenu(0, 1, 26, 1, 10, NULL, &slSelectMotIndex, NULL, &D_005512E0);
+    result = dds3SelectMenu(0, 1, 26, 1, 10, NULL, &slSelectMotIndex, NULL, &nbDebugMotionCursor);
     if (result == -1) {
         return -1;
     }
     if (result == 1) {
-        SetMotion(d->data, d->form, slSelectMotIndex + D_005512E0, 0);
+        SetMotion(d->data, d->form, slSelectMotIndex + nbDebugMotionCursor, 0);
         return 1;
     }
     button = ((volatile u8 *)dds3PadButtonState)[5];
@@ -855,7 +855,7 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMot);
 #endif
 
-extern const char D_005514E0[];
+extern const char nbDebugHexIndexFmt[];
 extern s32 devilbase;
 extern s32 devilcur;
 
@@ -891,7 +891,7 @@ s32 SelectDevil(nbDebugProcessData_t *d)
          * Both are live through the loop; this emits no memory barrier. */
         FAKEMATCH_ASM_LIVE_PAIR(xText, x);
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, y, 0xFFFF80, attr,
-                                             D_005514E0, devilbase + i)));
+                                             nbDebugHexIndexFmt, devilbase + i)));
         y += 0xB0;
         request = frwGetSmallFontFRQ(xText << 4, yText * 8, 0xFF0005, color,
                                      text2[devilbase + i], NULL);
@@ -1177,149 +1177,149 @@ void nbInitDebugProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_00545728, 0x3F9, 1, 1, nbDebugProcess1, nbDebugShutdown,
+    id = dds3StartProcess(nbDebugProcessName, 0x3F9, 1, 1, nbDebugProcess1, nbDebugShutdown,
                           InitDebugProcessData(data));
     dds3LinkProcess(data->MainProcessID, id);
     data->debugproc = id;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbDebugProcess", D_00545728);
+INCLUDE_RODATA(const s32, "newbattle/nbDebugProcess", nbDebugProcessName);
 
 INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", menucur);
 
 INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", badcur);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005512E0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionCursor);
 
 INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", slSelectMotIndex);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005512E8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionFieldCursor);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005512EC);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStockCursor);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005512F0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStockBase);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005512F8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugEmptyStockLabel);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551300);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusDead);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551308);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusStone);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551310);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusFly);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551318);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusCharm);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551320);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusPoison);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551328);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusClose);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551330);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusBind);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551338);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusPanic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551340);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusSleep);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551348);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusFreeze);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551350);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusShock);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551358);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStrFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551360);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugNoStatusLabel);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551368);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountDmg);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551370);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi0);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551378);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi1);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551380);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi2);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551388);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountBatk);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551390);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountMatk);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551398);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountEsc);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513A0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountDef);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513A8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHit);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513B0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHyooff);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513B8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountKaeoff);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513C0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountJyuoff);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513C8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHamoff);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513D0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountMref);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513D8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountBref);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513E0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAtkx2);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513E8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountTarget);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513F0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountKCnt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005513F8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountPCnt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551400);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAisyo);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551408);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoButu);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551410);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoKaen);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551418);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHyou);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551420);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoDeng);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551428);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoShog);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551430);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoBann);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551438);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHama);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551440);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoJyus);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551448);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoMary);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551450);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSnke);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551458);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSsin);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551460);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoJiba);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551468);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoNego);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551470);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoRec);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551478);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHojo);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551480);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSpec);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551488);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugBadLabel);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551490);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugPairFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_00551498);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameNormal);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514A0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNamePause);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514A8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameOut);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514B0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameStop);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514B8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugTypeFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514C0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugDataFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514C8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugBFrameFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514D0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugHFrameFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514D8);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugIndexFmt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", D_005514E0);
+INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugHexIndexFmt);
 

@@ -226,7 +226,7 @@ extern void nbGroupFormDispOff(s32 side);
 
 extern u32 f;
 
-extern char D_005458A0[];
+extern char nbAutoCommProcName[];
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
 
@@ -242,11 +242,11 @@ extern void nbFormDispOn(s32 formindex);
 
 extern void Mult(void);
 
-extern f32 D_005458B0[4];
+extern f32 nbFormRotScale[4];
 
-extern f32 D_00575440[4];
+extern f32 nbFormRotPose[4];
 
-extern f32 D_005514F8;
+extern f32 nbFormPartyInterval;
 
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 
@@ -269,9 +269,9 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 extern datUnitVisual_t datModelParamTable[];
 
-extern u128 D_00526420;
+extern u128 nbFormDefaultPos;
 
-extern u128 D_00526430;
+extern u128 nbFormDefaultRot;
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -544,10 +544,10 @@ void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot)
         return;
     }
     SDF_VU0_LOADVECTOR(rot);
-    SDF_VU0_LOADVECTOR_B(D_005458B0);
+    SDF_VU0_LOADVECTOR_B(nbFormRotScale);
     Mult();
-    SDF_VU0_STOREVECTOR_NOMEM(D_00575440);
-    dds3SetRotPoseSet(form->basic, D_00575440);
+    SDF_VU0_STOREVECTOR_NOMEM(nbFormRotPose);
+    dds3SetRotPoseSet(form->basic, nbFormRotPose);
     SDF_VU0_COPYVECTOR(p, rot);
 }
 
@@ -603,7 +603,7 @@ f32 nbCameraGetSummonFar(void)
 
 f32 func_0028A330(void)
 {
-    return D_005514F8;
+    return nbFormPartyInterval;
 }
 
 f32 nbGetEnemyInterval(void)
@@ -618,8 +618,8 @@ extern f32 sdfCos(f32 value);
 extern s32 effBTLModelGetID(nbFormation_t *form);
 #include "sdk_libc.h"
 
-extern sdfVector4_t D_00526400;
-extern sdfVector4_t D_00526410;
+extern sdfVector4_t nbFormPartyRot;
+extern sdfVector4_t nbFormEnemyRot;
 
 void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
 {
@@ -660,7 +660,7 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
             else if (interval > 100.0f) interval = 100.0f;
         }
     }
-    if (group & 0x100) D_005514F8 = interval;
+    if (group & 0x100) nbFormPartyInterval = interval;
     else nbFormEnemyInterval = interval;
     gapAngle = sdfAtan(interval / 1200.0f);
     totalAngle = -gapAngle;
@@ -677,8 +677,8 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
     angle = -totalAngle * 0.5f;
     sign = 1.0f;
     if (!(group & 0x100)) sign = -1.0f;
-    if (group & 0x100) SDF_VU0_COPYVECTOR(&rot, &D_00526400);
-    else SDF_VU0_COPYVECTOR(&rot, &D_00526410);
+    if (group & 0x100) SDF_VU0_COPYVECTOR(&rot, &nbFormPartyRot);
+    else SDF_VU0_COPYVECTOR(&rot, &nbFormEnemyRot);
     formation = data->formationtype >= 8 && data->formationtype < 11;
     for (i = 0; i < count; i++) {
         form = &data->form[list[i]];
@@ -704,7 +704,7 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
     }
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbFormation", D_005458B0);
+INCLUDE_RODATA(const s32, "newbattle/nbFormation", nbFormRotScale);
 
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 #endif
@@ -990,10 +990,10 @@ void nbFormatFormation(nbMainProcessData_t *data, s32 index)
     } else {
         form->stat |= 0x400;
     }
-    SDF_VU0_COPYVECTOR(&form->pos, &D_00526420);
-    SDF_VU0_COPYVECTOR(&form->orgpos, &D_00526420);
-    SDF_VU0_COPYVECTOR(&form->rot, &D_00526430);
-    SDF_VU0_COPYVECTOR(&form->orgrot, &D_00526430);
+    SDF_VU0_COPYVECTOR(&form->pos, &nbFormDefaultPos);
+    SDF_VU0_COPYVECTOR(&form->orgpos, &nbFormDefaultPos);
+    SDF_VU0_COPYVECTOR(&form->rot, &nbFormDefaultRot);
+    SDF_VU0_COPYVECTOR(&form->orgrot, &nbFormDefaultRot);
 }
 
 void nbCopyFormation(nbMainProcessData_t *data, s32 sindex, s32 dindex)
@@ -1115,7 +1115,7 @@ s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
     }
     return ret;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbFormation", D_005514F8);
+INCLUDE_SDATA(const s32, "newbattle/nbFormation", nbFormPartyInterval);
 
 INCLUDE_SDATA(const s32, "newbattle/nbFormation", nbFormEnemyInterval);
 

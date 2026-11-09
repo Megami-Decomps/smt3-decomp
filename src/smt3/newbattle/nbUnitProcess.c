@@ -13,10 +13,10 @@ extern u32 dds3GetKernelCount(void);
 
 extern void Mult(void);
 
-extern f32 D_00543720[];
-extern char D_00543730[];
+extern f32 nbRotOffset[];
+extern char nbModelLoadErrorText[];
 
-extern f32 D_003FA7A0[];
+extern f32 nbPartyRotation[];
 
 extern u8 D_003493A0[];
 
@@ -119,9 +119,9 @@ extern void evtSetWaitMotionSpeed(struct evtUnit_t *h, f32 sp);
 
 extern s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t *work);
 
-extern char D_00551118[];
+extern char nbUnitProcessName[];
 
-extern char D_00543768[]; /* "nb_unitdraw" */
+extern char nbUnitDrawProcessName[]; /* "nb_unitdraw" */
 
 void *nbUnitProcess2(dds3ProcessID_t *id);
 
@@ -1040,7 +1040,7 @@ void UpdateFormPosRot(nbFormation_t *form)
         pose = form->basic->poseset;
         SDF_VU0_COPYVECTOR(&form->pos, &pose->pos);
         SDF_VU0_LOADVECTOR(&pose->rot);
-        SDF_VU0_LOADVECTOR_B(D_00543720);
+        SDF_VU0_LOADVECTOR_B(nbRotOffset);
         Mult();
         SDF_VU0_STOREVECTOR(&form->rot);
     }
@@ -1252,7 +1252,7 @@ void RegistUnit(nbMainProcessData_t *data, s32 major, s32 minor, nbFormation_t *
     }
     dds3SetPosPoseSet(basic, &form->pos);
     if (form->partyindex < 4) {
-        dds3SetRotPoseSet(basic, (u128 *)D_003FA7A0);
+        dds3SetRotPoseSet(basic, (u128 *)nbPartyRotation);
     }
     if ((form->anime & 0x200) == 0) {
         evtSetUnitColorRGB(form->hunit, 0, 0);
@@ -1318,7 +1318,7 @@ void RunLoad(nbMainProcessData_t *data, nbFormation_t *form)
             return;
         }
         if (nbCheckModelLoad(data, 1, unitid) != 0) {
-            printf(D_00543730);
+            printf(nbModelLoadErrorText);
             form->flag &= ~1;
             RegistUnit(data, 1, unitid, form, work);
             nbLoadMidiFile(unitid);
@@ -1359,13 +1359,13 @@ void RunLoad(nbMainProcessData_t *data, nbFormation_t *form)
     }
 }
 
-extern sdfVector4_t D_003FA7B0;
+extern sdfVector4_t nbUnitBaseScale;
 extern void RunSake(nbMainProcessData_t *data, nbFormation_t *form);
 extern void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work);
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543720);
+INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbRotOffset);
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543730);
+INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbModelLoadErrorText);
 
 void *nbUnitProcess2(dds3ProcessID_t *id)
 {
@@ -1428,7 +1428,7 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                 }
             } while (0);
             if (form->basic != NULL) {
-                SDF_VU0_LOADVECTOR(&D_003FA7B0);
+                SDF_VU0_LOADVECTOR(&nbUnitBaseScale);
                 SDF_VU0_SCALEVECTOR(form->scl);
                 form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
                 SDF_VU0_STOREVECTOR(&form->basic->poseset->scl);
@@ -1454,12 +1454,12 @@ void *nbUnitShutdown(dds3ProcessID_t *id)
 
 void nbInitUnitProcess(nbMainProcessData_t *data)
 {
-    dds3ProcessID_t *id = dds3StartProcess(D_00551118, 0x3F9, 1, 1, nbUnitProcess2,
+    dds3ProcessID_t *id = dds3StartProcess(nbUnitProcessName, 0x3F9, 1, 1, nbUnitProcess2,
                                            nbUnitShutdown, NULL);
 
     dds3LinkProcess(data->MainProcessID, id);
     data->UnitProcessID = id;
-    dds3LinkProcess(id, dds3StartProcess(D_00543768, 0x2B0E, 1, 1, nbUnitDrawProcess1,
+    dds3LinkProcess(id, dds3StartProcess(nbUnitDrawProcessName, 0x2B0E, 1, 1, nbUnitDrawProcess1,
                                          NULL, NULL));
 }
 
@@ -1471,7 +1471,7 @@ void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543768);
+INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbUnitDrawProcessName);
 
-INCLUDE_SDATA(const s32, "newbattle/nbUnitProcess", D_00551118);
+INCLUDE_SDATA(const s32, "newbattle/nbUnitProcess", nbUnitProcessName);
 

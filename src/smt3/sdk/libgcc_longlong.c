@@ -11,7 +11,7 @@ typedef union {
     struct { s32 low, high; } words;
 } runtimeWide_t;
 
-extern const u8 D_0054BF78[256];
+extern const u8 libgccUdivdiBitLengths[256];
 
 static inline u32 LeadingZeroBits(u32 word)
 {
@@ -21,7 +21,7 @@ static inline u32 LeadingZeroBits(u32 word)
     } else {
         shift = word < 0x1000000 ? 16 : 24;
     }
-    return 32 - (D_0054BF78[word >> shift] + shift);
+    return 32 - (libgccUdivdiBitLengths[word >> shift] + shift);
 }
 
 /* The historical longlong.h uses this multi-output arithmetic primitive.
@@ -68,8 +68,8 @@ static inline u32 LeadingZeroBits(u32 word)
 #ifdef NON_MATCHING
 /* Preserve the shared helper's optional remainder output. The wrapper
  * discards its quotient and returns the remainder written to its local. */
-extern const u8 D_0054BE78[256];
-extern const u8 D_0054C078[256];
+extern const u8 libgccModdiBitLengths[256];
+extern const u8 libgccUmoddiBitLengths[256];
 
 static inline u32 RemainderLeadingZeroBits(u32 word, const u8 *bitLengths)
 {
@@ -210,7 +210,7 @@ s64 __moddi3(s64 numerator, s64 denominator)
         d.words.low = 0U - (u32)d.words.low;
         d.words.high = negatedHigh - ((u32)d.words.low != 0);
     }
-    DivideWithRemainder(n.value, d.value, &remainder.value, D_0054BE78);
+    DivideWithRemainder(n.value, d.value, &remainder.value, libgccModdiBitLengths);
     if (negative != 0) {
         u32 negatedHigh = 0U - (u32)remainder.words.high;
         remainder.words.low = 0U - (u32)remainder.words.low;
@@ -312,7 +312,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __udivdi3);
 u64 __umoddi3(u64 numerator, u64 denominator)
 {
     u64 remainder;
-    DivideWithRemainder(numerator, denominator, &remainder, D_0054C078);
+    DivideWithRemainder(numerator, denominator, &remainder, libgccUmoddiBitLengths);
     return remainder;
 }
 
@@ -321,11 +321,11 @@ u64 __umoddi3(u64 numerator, u64 denominator)
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __umoddi3);
 #endif
 
-INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054BD78);
+INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", libgccDivdiBitLengths);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054BE78);
+INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", libgccModdiBitLengths);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054BF78);
+INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", libgccUdivdiBitLengths);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", D_0054C078);
+INCLUDE_RODATA(const s32, "sdk/libgcc_longlong", libgccUmoddiBitLengths);
 

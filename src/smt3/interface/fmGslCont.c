@@ -14,8 +14,8 @@ struct FontGsControl_t {
 };
 
 extern FontGsControl_t gFGC;
-extern s8 D_0054F3FE;
-extern u32 D_0054F414;
+extern s8 fmFontMemInitialized;
+extern u32 frSpaceAdvanceOffset;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
@@ -47,7 +47,7 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
     s32 row;
     s32 column;
 
-    if (gFGC.root != NULL && D_0054F3FE != 0) {
+    if (gFGC.root != NULL && fmFontMemInitialized != 0) {
         return 0;
     }
     count = columns * rows;
@@ -91,7 +91,7 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
             i++;
         }
     }
-    D_0054F3FE = 1;
+    fmFontMemInitialized = 1;
     return 1;
 }
 
@@ -240,7 +240,7 @@ void fr_1C6270(frFontHandle_t *chain) {
 }
 
 void func_001C62F8(u32 messageCode) {
-    D_0054F414 = messageCode;
+    frSpaceAdvanceOffset = messageCode;
 }
 
 INCLUDE_SDATA(const s32, "interface/fmGslCont", D_0054F3F8);

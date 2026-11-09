@@ -42,17 +42,17 @@ extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 
 
 extern void fclDrawBG(fclSprite_t *pSprite, s32 OtNo);
 
-extern char D_00548870[];
+extern char dds3ConfigRestoreBackupMsg[];
 
 
 
 extern void dds3DrawConfigPanel(s32 id);
 
-extern char D_00548858[];
+extern char dds3ConfigSaveBackupMsg[];
 
-extern char D_005488B8[];
+extern char dds3ConfigBgPath[];
 
-extern void *D_005516C4;
+extern void *slLoadProcId;
 
 extern s32 dds3ConfigValue[2];
 
@@ -91,9 +91,9 @@ extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layou
 
 void slKillLoadProcess(void)
 {
-    if (D_005516C4 != NULL) {
-        dds3KillProcess(D_005516C4, 1);
-        D_005516C4 = NULL;
+    if (slLoadProcId != NULL) {
+        dds3KillProcess(slLoadProcId, 1);
+        slLoadProcId = NULL;
         slLoadKillFlag = 0;
     }
 }
@@ -118,13 +118,13 @@ s32 dds3ConfigChanged(void)
 
 void dds3ConfigSaveBackup(void)
 {
-    printf(D_00548858);
+    printf(dds3ConfigSaveBackupMsg);
     dds3ConfigValue[0] = dds3ConfigValue[1] = *(s32 *)(DDS3_GBWK + 0x11AB8);
 }
 
 void dds3ConfigRestoreBackup(void)
 {
-    printf(D_00548870);
+    printf(dds3ConfigRestoreBackupMsg);
     *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigValue[1];
 }
 
@@ -366,7 +366,7 @@ void dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot)
     cmpDrawBoxGDefault((s32)((u32)x + (u32)target), (s32)((u32)y + 0x2B0u), z, 0xEE, 0x121, colors, ot);
 }
 
-extern const s32 D_00548888[3][4];
+extern const s32 dds3ConfigBarSprites[3][4];
 extern void *memcpy(void *destination, const void *source, size_t size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
@@ -384,7 +384,7 @@ void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
     s32 zScaled = z << 4;
     u32 alpha;
 
-    memcpy(spriteIds, D_00548888, sizeof(spriteIds));
+    memcpy(spriteIds, dds3ConfigBarSprites, sizeof(spriteIds));
     alpha = dds3GetConfigFadeAlpha() | 0x80808000;
 
     colors[0] = alpha;
@@ -414,7 +414,7 @@ typedef struct {
     const char *text;
     s32 optionCount;
 } configValueLabel_t;
-extern configValueLabel_t D_00528F28[];
+extern configValueLabel_t dds3ConfigValueLabels[];
 extern void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height,
                                 s32 selected, s32 ot);
 extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
@@ -446,7 +446,7 @@ void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     fclDrawSpriteRes(x, y, zScaled, color, 0, 9, D_00345D88, dds3ConfigLayoutTable, ot);
     dds3DrawConfigCursor(0x1B0, y + 0x30, z, 0x1CA, 9, selected, ot);
     font = frwGetSmallFontFRQ(x + 0x340, y + 8, z, textColor,
-                              D_00528F28[index].text, NULL);
+                              dds3ConfigValueLabels[index].text, NULL);
     func_001C7E38((frFontHandle_t *)font, 1, ot);
     frDestroyFontRequestAfter((frFontHandle_t *)font);
 }
@@ -548,7 +548,7 @@ void dds3DrawConfigPanel(s32 ot)
 
 void *cfgTexLoad(void)
 {
-    return fclLoadTexture(D_005488B8);
+    return fclLoadTexture(dds3ConfigBgPath);
 }
 
 void dds3FreeConfigTexture(void *handle)
@@ -581,19 +581,19 @@ void *dds3AllocConfigWork(s32 mode)
     return work;
 }
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548858);
+INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigSaveBackupMsg);
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548870);
+INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigRestoreBackupMsg);
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548888);
+INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigBarSprites);
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_005488B8);
+INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigBgPath);
 
 INCLUDE_SDATA(const s32, "code_0029B780", slLoadKillFlag);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516C1);
+INCLUDE_SDATA(const s32, "code_0029B780", slLoadDoneFlag);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516C4);
+INCLUDE_SDATA(const s32, "code_0029B780", slLoadProcId);
 
 INCLUDE_SDATA(const s32, "code_0029B780", slYesLabel);
 
@@ -601,9 +601,9 @@ INCLUDE_SDATA(const s32, "code_0029B780", slNoLabel);
 
 INCLUDE_SDATA(const s32, "code_0029B780", slNoFileLabel);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516E0);
+INCLUDE_SDATA(const s32, "code_0029B780", slNewCycleMsg3);
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516E8);
+INCLUDE_SDATA(const s32, "code_0029B780", slCycleLabel);
 
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516F0);
 

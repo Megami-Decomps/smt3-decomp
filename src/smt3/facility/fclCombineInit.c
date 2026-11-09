@@ -32,11 +32,11 @@ extern char fclCombineUpdateName[];
 
 extern char fclCombineCalcName[];
 
-extern cmbUnlockEntry_t D_0032DCC0[];
+extern cmbUnlockEntry_t cmbUnlockTable[];
 
-extern cmbEvoTableEntry_t D_0032DBB8[];
+extern cmbEvoTableEntry_t cmbEvoTable[];
 
-extern u16 D_0032DCA0[];
+extern u16 cmbSpecialDevilTable[];
 
 extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
 
@@ -84,15 +84,15 @@ typedef struct
 
 
 
-extern cmbRaceEntry_t D_0032DA70[];
+extern cmbRaceEntry_t cmbRaceResultTable[];
 
-extern cmbPairEntry_t D_0032DB78[];
+extern cmbPairEntry_t cmbEntryPairTable[];
 
-extern cmbPairEntry_t D_0032DB90[];
+extern cmbPairEntry_t cmbPairTable[];
 
 extern datDevilTableEntry_t datDevilTable[];
 
-extern u8 D_0032DBD8[][4];
+extern u8 cmbTripleRaceTable[][4];
 
 extern u32 dds3GetRandA(void *state);
 
@@ -153,7 +153,7 @@ typedef struct
     /* 0x10 */ s32 color;
 } cmbSmokeParam_t;
 
-extern cmbSmokeParam_t D_0032DE20[];
+extern cmbSmokeParam_t cmbSmokeParamTable[];
 
 extern rcvWork_t *shutdownfunc;
 
@@ -213,7 +213,7 @@ typedef struct
     /* 0x04 */ u8 unk_04[0x10];
 } cmbSlotParam_t;
 
-extern cmbSlotParam_t D_0032DE28[];
+extern cmbSlotParam_t cmbSlotParamTable[];
 
 extern void p2sdPlayBGM(s32 MidiNo);
 
@@ -225,7 +225,7 @@ extern s32 fclRunPanelAnim(void *work);
 
 #include "sdk_libc.h"
 
-extern u8 D_0032D1F0[];
+extern u8 cmbDataTable[];
 
 extern void sdfTexFree(s32 aHandle);
 
@@ -373,7 +373,7 @@ extern void fclEncycSetExplainData(void *pbmd);
 
 extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
-extern u8 D_00551F18[4];
+extern u8 cmbCursorFlags[4];
 extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, saddr_t flags);
 
 void fclCombineDisableCmdZensyo(void)
@@ -383,9 +383,9 @@ void fclCombineDisableCmdZensyo(void)
 
     enabled = (allow != 0) ? enabled : 0;
     if (enabled != 0) {
-        cmpSetCursorFlag(&CMB_GBWK->combineCursor, EE_ADDR_S(D_00551F18));
-        if ((D_00551F18[1] & 2) == 0) {
-            D_00551F18[1] |= 2;
+        cmpSetCursorFlag(&CMB_GBWK->combineCursor, EE_ADDR_S(cmbCursorFlags));
+        if ((cmbCursorFlags[1] & 2) == 0) {
+            cmbCursorFlags[1] |= 2;
             CMB_GBWK->combineCursor.unk_21++;
         }
     }
@@ -434,7 +434,7 @@ void fclCombineInitWork(void)
     fclSetWorkValue(1, 100);
 }
 
-extern char *D_0032CB80[];
+extern char *cmbTexturePathTable[];
 extern s32 fclLoadTexture(char *filename);
 extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1, s32 texture);
 
@@ -443,7 +443,7 @@ void fclCombineLoadTextures(void)
     s8 i;
 
     for (i = 0; (u8)i < 7; i++) {
-        CMB_GBWK->texHandle[i] = fclLoadTexture(D_0032CB80[i]);
+        CMB_GBWK->texHandle[i] = fclLoadTexture(cmbTexturePathTable[i]);
     }
     fclSetPanelTex(CMB_GBWK->panel, 0, 0, 0x100, 0x80, CMB_GBWK->texHandle[5]);
     fclSetSprite(&CMB_GBWK->backgroundSprite, 0x200, 0x1C0, 0, 5, 5,
@@ -463,7 +463,7 @@ void fclCombineTexFree(void)
 
 void fclCombineSetTable(void)
 {
-    CMB_GBWK->table = D_0032D1F0;
+    CMB_GBWK->table = cmbDataTable;
 }
 
 s32 cmbChkGeneralStat(void)
@@ -597,7 +597,7 @@ void fclUpdateInit(void)
     fclInitCursorWindow((u8 *)CMB_GBWK + 0x1763C, D_0032D1C8, 8);
     fclSetCursorList((u8 *)CMB_GBWK + 0x1763C, 0x19);
 
-    memset(D_00551F18, 0, 4);
+    memset(cmbCursorFlags, 0, 4);
     memset(cmbMenuEntryTable, 0, 8);
     CMB_GBWK->displayFlags[0] = 0;
     CMB_GBWK->displayFlags[1] = 0;
@@ -1420,7 +1420,7 @@ s32 cmbCalcSequence(void)
 
 s32 cmbDevilIsUnlocked(u16 devilId)
 {
-    cmbUnlockEntry_t *entry = D_0032DCC0;
+    cmbUnlockEntry_t *entry = cmbUnlockTable;
     u32 i;
 
     for (i = 0; i < 34; i++, entry++) {
@@ -1457,7 +1457,7 @@ s8 cmbFindEvoIndex(u16 devilId)
     u32 i;
 
     for (i = 0; i < 4; i++) {
-        if (D_0032DBB8[i].devilId == devilId) {
+        if (cmbEvoTable[i].devilId == devilId) {
             return i;
         }
     }
@@ -1485,7 +1485,7 @@ s32 cmbGetEvoTable(u16 devilId, datUnitWork_t *unit)
     if (index < 0) {
         return 0;
     }
-    entry = &D_0032DBB8[index];
+    entry = &cmbEvoTable[index];
     percent = entry->percent;
     for (i = 0; i < 2; i++) {
         s32 selector = (s8)entry->selector[i];
@@ -1517,10 +1517,10 @@ s32 cmbGetCombineRace(u16 devilA, u16 devilB, u16 devilC)
     for (swap = 0; swap < 2; swap++) {
         u32 j = 0;
         do {
-            if ((D_0032DBD8[j][0] == race[0]) &&
-                (D_0032DBD8[j][1] == race[1]) &&
-                (D_0032DBD8[j][2] == race[2])) {
-                return (s8)D_0032DBD8[j][3];
+            if ((cmbTripleRaceTable[j][0] == race[0]) &&
+                (cmbTripleRaceTable[j][1] == race[1]) &&
+                (cmbTripleRaceTable[j][2] == race[2])) {
+                return (s8)cmbTripleRaceTable[j][3];
             }
             j++;
         } while (j < 1);
@@ -1553,13 +1553,13 @@ typedef struct {
     u16 result;
 } cmbRacePairEntry_t;
 
-extern cmbRacePairEntry_t D_0032DC90[];
+extern cmbRacePairEntry_t cmbRacePairTable[];
 
 u16 cmbFindCombineResult(u16 first, u16 second, u16 thirdId)
 {
     datDevilTableEntry_t *devilTable = datDevilTable;
     datDevilTableEntry_t *third = &devilTable[thirdId];
-    cmbRacePairEntry_t *table = D_0032DC90;
+    cmbRacePairEntry_t *table = cmbRacePairTable;
     s32 pass = 0;
     u8 race[2];
     u16 result;
@@ -1597,7 +1597,7 @@ typedef struct {
     u16 result;
 } cmbTripleEntry_t;
 
-extern cmbTripleEntry_t D_0032DBE0[];
+extern cmbTripleEntry_t cmbTripleTable[];
 extern cmbPairEntry_t D_0032DC18[];
 
 extern u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag,
@@ -1606,7 +1606,7 @@ extern u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag,
 u16 cmbFindUnlockedResult(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC,
                           s8 flag, s8 levelFlag)
 {
-    cmbTripleEntry_t *table = D_0032DBE0;
+    cmbTripleEntry_t *table = cmbTripleTable;
     s32 pass = 0;
     u16 ids[3];
     u16 result;
@@ -1653,7 +1653,7 @@ s32 cmbFindBirthEntry(u16 devilId)
     u32 i;
 
     for (i = 0; i < 7; i++) {
-        if (devilId == D_0032DBE0[i].result) {
+        if (devilId == cmbTripleTable[i].result) {
             return 1;
         }
     }
@@ -1663,7 +1663,7 @@ s32 cmbFindBirthEntry(u16 devilId)
         }
     }
     for (i = 0; i < 2; i++) {
-        if (devilId == D_0032DC90[i].result) {
+        if (devilId == cmbRacePairTable[i].result) {
             return 1;
         }
     }
@@ -1729,10 +1729,10 @@ s8 cmbFindRaceEntry(u16 devilId, u8 race)
     s32 j;
 
     for (i = 0; i < 4; i++) {
-        if (D_0032DA70[i].devilId == devilId) {
+        if (cmbRaceResultTable[i].devilId == devilId) {
             for (j = 0; j < 32; j++) {
-                if (D_0032DA70[i].result[j].race == race) {
-                    return D_0032DA70[i].result[j].value;
+                if (cmbRaceResultTable[i].result[j].race == race) {
+                    return cmbRaceResultTable[i].result[j].value;
                 }
             }
         }
@@ -1743,7 +1743,7 @@ s8 cmbFindRaceEntry(u16 devilId, u8 race)
 s32 cmbFindPairEntry(u16 first, u16 second)
 {
     u32 i;
-    cmbPairEntry_t *entry = D_0032DB90;
+    cmbPairEntry_t *entry = cmbPairTable;
 
     for (i = 0; i < 6; i++, entry++) {
         s32 side = 0;
@@ -1879,7 +1879,7 @@ void cmbGetDevilIdAndRace(cmbUnit_t *unit, u16 *devilId, u8 *race)
 
 s32 cmbCheckUnlockedPair(u16 first, u16 second)
 {
-    cmbPairEntry_t *table = D_0032DB78;
+    cmbPairEntry_t *table = cmbEntryPairTable;
     s32 pass;
 
     for (pass = 0; pass < 2; pass++) {
@@ -1915,7 +1915,7 @@ s32 cmbEntryIsValid(u16 devilId)
     u32 i;
 
     for (i = 0; i < 3; i++) {
-        if (devilId == D_0032DB78[i].result) {
+        if (devilId == cmbEntryPairTable[i].result) {
             return 1;
         }
     }
@@ -1955,7 +1955,7 @@ s32 cmbFindSpecialEntry(u16 devilId)
     u16 candidate;
 
     for (i = 13; i >= 0; i--) {
-        candidate = D_0032DCA0[i];
+        candidate = cmbSpecialDevilTable[i];
         if (cmbCheckEvoUnlocked(candidate, (datUnitWork_t *)&DDS3_GBWK->akuma[0].flag, 16) < 0 &&
             candidate != devilId) {
             return candidate;
@@ -2521,9 +2521,9 @@ s32 cmbGetSpecialItemId(void)
     return 0x8D;
 }
 
-extern u8 D_0032DDD0[5][2];
-extern u8 D_0032DDE0[];
-extern u16 D_0032DDE8[4][5];
+extern u8 cmbMoonRangeTable[5][2];
+extern u8 cmbMoonRaceTable[];
+extern u16 cmbMoonItemTable[4][5];
 extern s32 datCheckItem(s32 id, s32 count);
 
 s32 cmbGetMoonBonus(u16 devilId)
@@ -2536,7 +2536,7 @@ s32 cmbGetMoonBonus(u16 devilId)
     u16 itemId;
 
     for (i = 0; i < 5; i++) {
-        if (moon >= D_0032DDD0[i][0] && moon <= D_0032DDD0[i][1]) {
+        if (moon >= cmbMoonRangeTable[i][0] && moon <= cmbMoonRangeTable[i][1]) {
             moonIndex = i;
         }
     }
@@ -2544,7 +2544,7 @@ s32 cmbGetMoonBonus(u16 devilId)
     {
         u32 j;
         for (j = 0; j < 4; j++) {
-            if (D_0032DDE0[j] == race) {
+            if (cmbMoonRaceTable[j] == race) {
                 raceIndex = j;
             }
         }
@@ -2554,7 +2554,7 @@ s32 cmbGetMoonBonus(u16 devilId)
         if (moonIndex < 0 || raceIndex < 0) {
             return 0;
         }
-        itemId = D_0032DDE8[raceIndex][moonIndex];
+        itemId = cmbMoonItemTable[raceIndex][moonIndex];
         if (cmbDevilIsUnlocked(itemId) != 0) {
             return 0;
         }
@@ -3182,13 +3182,13 @@ void cmbDrawTopSprite(s32 unusedX, s32 unusedY, u32 unusedZ, s32 unusedOt)
     fclDrawSpriteRes(0, 0, 0xFFFFF0, 0, 0, 0x23, CMB_GBWK->texHandle, cmbSpriteTable, 0x47);
 }
 
-extern const char *D_0032DE10[];
+extern const char *cmbTopTextTable[];
 
 #ifdef NON_MATCHING
 s32 cmbDrawTopText(s8 index)
 {
     void *request = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, 0x8CA0FF80,
-                                       D_0032DE10[index], NULL);
+                                       cmbTopTextTable[index], NULL);
 
     frSetDrawPosition(request, 0x280, 0x78);
     fclDrawPanelSprite(0x33001, 0x47);
@@ -4512,7 +4512,7 @@ s32 cmbUpdateSequence(void)
 
 void func_00203F18(u16 index, u8 type)
 {
-    D_0032DE20[index].type = type;
+    cmbSmokeParamTable[index].type = type;
 }
 
 void func_00203F40(u16 index, f32 value)
@@ -4520,47 +4520,47 @@ void func_00203F40(u16 index, f32 value)
     if (value < 0.0f) {
         value = 0.0f;
     }
-    D_0032DE28[index].unk_00 = value;
+    cmbSlotParamTable[index].unk_00 = value;
 }
 
 void func_00203F78(u16 index, f32 scale)
 {
-    D_0032DE20[index].modelScale = scale;
+    cmbSmokeParamTable[index].modelScale = scale;
 }
 
 void func_00203FA0(u16 index, f32 scale)
 {
-    D_0032DE20[index].smokeScale = scale;
+    cmbSmokeParamTable[index].smokeScale = scale;
 }
 
 void func_00203FC8(u16 index, s32 color)
 {
-    D_0032DE20[index].color = color;
+    cmbSmokeParamTable[index].color = color;
 }
 
 u8 cmbGetSmokeType(u16 index)
 {
-    return D_0032DE20[index].type;
+    return cmbSmokeParamTable[index].type;
 }
 
 f32 func_00204018(u16 index)
 {
-    return D_0032DE20[index].unk_08;
+    return cmbSmokeParamTable[index].unk_08;
 }
 
 f32 cmbGetModelScaleById(u16 index)
 {
-    return D_0032DE20[index].modelScale;
+    return cmbSmokeParamTable[index].modelScale;
 }
 
 f32 cmbGetSmokeScale(u16 index)
 {
-    return D_0032DE20[index].smokeScale;
+    return cmbSmokeParamTable[index].smokeScale;
 }
 
 s32 cmbGetSmokeColor(u16 index)
 {
-    return D_0032DE20[index].color;
+    return cmbSmokeParamTable[index].color;
 }
 
 s32 cmbPrepareModel(s32 group, s32 id, s32 blocking)
@@ -4698,13 +4698,13 @@ typedef struct
     f32 v[4];
 } cmbPanelScale_t;
 
-extern cmbPanelScale_t D_0053CE38;
+extern cmbPanelScale_t cmbPanelScaleTable;
 
 f32 cmbGetPanelScale(s32 mode)
 {
     cmbPanelScale_t scale;
 
-    scale = D_0053CE38;
+    scale = cmbPanelScaleTable;
     return scale.v[mode & 3];
 }
 
@@ -4889,7 +4889,7 @@ void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, u32 color
     }
 }
 
-extern const char *D_0032F590[3];
+extern const char *cmbModelMarkNames[3];
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 id);
 
 #ifdef NON_MATCHING
@@ -4901,7 +4901,7 @@ void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
     for (i = 0; i < 3; i++) {
         found[i] = 0;
         if (CMB_GBWK->actionData[i].model != NULL &&
-            cmbFindCameraPoint(D_0032F590[i], CMB_GBWK->modelMark[i]) != 0) {
+            cmbFindCameraPoint(cmbModelMarkNames[i], CMB_GBWK->modelMark[i]) != 0) {
             found[i] = 1;
             sizes[i] = datModelParamTable[CMB_GBWK->stockSlot[i].id].formsize;
             if (cmbGetSmokeType((u16)CMB_GBWK->actionData[i].id) != 0) {
@@ -4961,8 +4961,8 @@ void cmbDrawFullScreenPanel(s32 flags)
 
 extern void cmbRotateModelPanel(const f32 *center, s32 mode, u32 color,
                                 sdfVector4_t *vertices, u32 *colors, f32 radius, f32 height);
-extern sdfVector4_t D_0056D190[2][384];
-extern u32 D_00573190[2][384];
+extern sdfVector4_t cmbModelPanelVertices[2][384];
+extern u32 cmbModelPanelColors[2][384];
 
 void cmbDrawModelPanel(f32 (*positions)[4], f32 *sizes, u32 color,
                        f32 scale, s32 *found, s32 ot)
@@ -4971,11 +4971,11 @@ void cmbDrawModelPanel(f32 (*positions)[4], f32 *sizes, u32 color,
 
     for (i = 0; i < 2; i++) {
         if (found[i] != 0) {
-            cmbRotateModelPanel(positions[i], 0, 0x80808080, D_0056D190[i],
-                                D_00573190[i], sizes[i], sizes[i] * scale);
+            cmbRotateModelPanel(positions[i], 0, 0x80808080, cmbModelPanelVertices[i],
+                                cmbModelPanelColors[i], sizes[i], sizes[i] * scale);
             cmpDisableRGB(ot);
             fclDrawPanelSprite(0x30000, ot);
-            cmbDrawModelPoly(color, color, D_0056D190[i], ot);
+            cmbDrawModelPoly(color, color, cmbModelPanelVertices[i], ot);
             fclDrawPanelSprite(0x30000, ot);
             cmpAllocRefGifTag(ot);
         }
@@ -5121,7 +5121,7 @@ s32 cmbFindUnitScene(mdlObj_t *work)
     return 1;
 }
 
-extern const char *D_0032F59C[];
+extern const char *cmbCameraPointNames[];
 extern sdfModelOt_t D_002F69B8[];
 
 void cmbUpdateCameraPos(void)
@@ -5136,7 +5136,7 @@ void cmbUpdateCameraPos(void)
     if ((__SIZE_TYPE__)CMB_GBWK + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->cameraPosition == 0) {
         return;
     }
-    if (cmbFindCameraPoint(D_0032F59C[0], CMB_GBWK->cameraPosition) == 0) {
+    if (cmbFindCameraPoint(cmbCameraPointNames[0], CMB_GBWK->cameraPosition) == 0) {
         return;
     }
     if (CMB_GBWK->actionData[index].model != NULL) {
@@ -5221,14 +5221,14 @@ typedef struct
     u8 reserved05[3];
 } cmbTimeTable_t;
 
-extern cmbTimeTable_t D_0032F628[];
+extern cmbTimeTable_t cmbTimeTable[];
 
 #ifdef NON_MATCHING
 void cmbUpdateTimeTable(void)
 {
     s8 mode = cmbActionMode;
     cmbGbWork_t *work = CMB_GBWK;
-    cmbTimeTable_t *table = &D_0032F628[mode];
+    cmbTimeTable_t *table = &cmbTimeTable[mode];
     s32 index = work->actionTargetIndex;
     cmbTimeTableEntry_t *entry;
     void (*action)(void);
@@ -5241,7 +5241,7 @@ void cmbUpdateTimeTable(void)
     }
     mode = cmbActionMode;
     index = work->actionTargetIndex;
-    entry = &D_0032F628[mode].entries[index];
+    entry = &cmbTimeTable[mode].entries[index];
     action = entry->action;
     if (action != NULL &&
         (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == SDF_FRAMES(entry->frame)))) {
@@ -5275,7 +5275,7 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMdlLoadFmt)
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMemFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbPanelScaleTable);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineTargetModelName);
 
@@ -5376,8 +5376,8 @@ void cmbRunActionSe(s32 enabled, s32 mode)
 
 extern void fclCombineBGM(s8 Mode);
 
-extern const char D_0053CEB0[];
-extern const char D_0053CEC8[];
+extern const char cmbBgmStopMsg[];
+extern const char cmbBgmPlayMsg[];
 
 s32 cmbActionBGM(s32 mode)
 {
@@ -5386,11 +5386,11 @@ s32 cmbActionBGM(s32 mode)
     if (mode == 0) {
         p2sdStopBGM(0x380000);
         fclCombineBGM(0);
-        return printf(D_0053CEB0);
+        return printf(cmbBgmStopMsg);
     }
     fclCombineBGM(mode);
     p2sdPlayBGM(0x380000);
-    result = printf(D_0053CEC8);
+    result = printf(cmbBgmPlayMsg);
     /* Use fclCombineBGM's qualified consumed-selector reset pattern to keep
      * the native final diagnostic call and epilogue. */
     mode = 0;
@@ -5410,8 +5410,8 @@ extern f32 cmbActionTargetModel[3];
 extern f32 cmbTargetModelId;
 extern s8 cmbActionMode;
 extern s8 cmbActionStep;
-extern char D_0053CEE0[];
-extern char D_0053CEF8[];
+extern char cmbInitActionMsg[];
+extern char cmbInitActionModeFmt[];
 
 void cmbInitAction(void)
 {
@@ -5468,8 +5468,8 @@ void cmbInitAction(void)
     cmbActionTargetModel[1] = 0.0f;
     cmbActionTargetModel[2] = 0.0f;
     cmbTargetModelId = 0.0f;
-    printf(D_0053CEE0);
-    printf(D_0053CEF8, cmbActionMode);
+    printf(cmbInitActionMsg);
+    printf(cmbInitActionModeFmt, cmbActionMode);
 }
 
 void cmb_205CE8(void)
@@ -5542,11 +5542,11 @@ s32 cmbChkActScript(void)
     return dds3SearchProcessName(fclE807MainName) != NULL;
 }
 
-extern char D_0053CF20[];
+extern char cmbMovieProcessName[];
 
 s32 cmbChkPolygonMovie(void)
 {
-    void *proc = dds3SearchProcessName(D_0053CF20);
+    void *proc = dds3SearchProcessName(cmbMovieProcessName);
 
     if (proc == NULL)
     {
@@ -5585,7 +5585,7 @@ void cmbUpdateAction(void)
     }
     if (cmbActionStep != 0) {
         if (cmbActionStep == 2) {
-            dds3KillProcessName(D_0053CF20, 0);
+            dds3KillProcessName(cmbMovieProcessName, 0);
             while (sdfDelayedResrcCheck() != 0) {
             }
             fclFilterOFF();
@@ -5612,7 +5612,7 @@ void cmbUpdateAction(void)
         return;
     }
     event = dds3SearchProcessName(fclE807MainName);
-    movie = dds3SearchProcessName(D_0053CF20);
+    movie = dds3SearchProcessName(cmbMovieProcessName);
     if (CMB_GBWK->actionFrame == 0) {
         if (fclCombineChkEventStat() != 0 || event == NULL || movie == NULL) {
             return;
@@ -5794,17 +5794,17 @@ void shopStartEvent(s8 value)
     evtStartEvent(0x322);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEB0);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbBgmStopMsg);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEC8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbBgmPlayMsg);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEE0);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbInitActionMsg);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEF8);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbInitActionModeFmt);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclE807MainName);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF20);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbMovieProcessName);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF30);
 

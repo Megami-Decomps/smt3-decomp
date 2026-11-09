@@ -4,7 +4,7 @@
 #include "nme.h"
 #include "font.h"
 
-extern nmeWork_t *D_00552024;
+extern nmeWork_t *nmeCalcWork;
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern s32 dds3FadeCheck(void);
 extern void cmpUpdateTerminate(void *work);
@@ -23,12 +23,12 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 sprit
 
 s32 nmeCalc(dds3ProcessID_t *id)
 {
-    D_00552024 = dds3GetProcessData(id);
+    nmeCalcWork = dds3GetProcessData(id);
     if (dds3FadeCheck() != 0) {
         return 0;
     }
-    if (D_00552024->sequence.flag & 0x10) {
-        cmpUpdateTerminate(D_00552024);
+    if (nmeCalcWork->sequence.flag & 0x10) {
+        cmpUpdateTerminate(nmeCalcWork);
         return -1;
     }
     return 0;
@@ -65,7 +65,7 @@ void nmeDrawSymbolRow(s32 x, s32 y, s32 unused)
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern void *memcpy(void *dest, const void *src, size_t size);
-extern const s8 D_00551698[];
+extern const s8 nmeNameTextTemplate[];
 extern s32 nmeGetCursorPos(nmeWork_t *work);
 extern void cmpSetSkillListRows(s32 rows);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
@@ -80,9 +80,9 @@ extern u8 frEnableMode(s32 flag);
 
 void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode)
 {
-    volatile s32 first = D_00551698[0];
-    volatile s32 second = D_00551698[1];
-    volatile s32 terminator = D_00551698[2];
+    volatile s32 first = nmeNameTextTemplate[0];
+    volatile s32 second = nmeNameTextTemplate[1];
+    volatile s32 terminator = nmeNameTextTemplate[2];
     u8 text[3];
     s32 cursor, i;
 
@@ -147,9 +147,9 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
 #ifdef NON_MATCHING
 void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
 {
-    volatile s32 first = D_00551698[0];
-    volatile s32 second = D_00551698[1];
-    volatile s32 terminator = D_00551698[2];
+    volatile s32 first = nmeNameTextTemplate[0];
+    volatile s32 second = nmeNameTextTemplate[1];
+    volatile s32 terminator = nmeNameTextTemplate[2];
     u8 text[3];
     s32 cursor, i;
 
@@ -218,7 +218,7 @@ typedef struct {
     const char *no;
 } nmeColoredTextStrings_t;
 
-extern const nmeColoredTextStrings_t D_005487F8;
+extern const nmeColoredTextStrings_t nmeColoredText;
 extern void cmpSetSkillListRows(s32 rows);
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                              const char *text, frFontHandle_t *previous);
@@ -231,7 +231,7 @@ extern u8 frDisableMode(u8 flag);
 
 void nmeDrawColoredText(s8 selected)
 {
-    nmeColoredTextStrings_t text = D_005487F8;
+    nmeColoredTextStrings_t text = nmeColoredText;
     frFontHandle_t *request;
 
     cmpSetSkillListRows(0x18);
@@ -365,9 +365,9 @@ done:
 }
 
 #ifdef NON_MATCHING
-extern const s8 D_005516B0[];
-extern const s8 D_005280C0[][2];
-extern const u8 *D_005276B8[];
+extern const s8 nmeCursorSkip[];
+extern const s8 nmeCharOffsets[][2];
+extern const u8 *nmeCharTables[];
 
 void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
 {
@@ -375,8 +375,8 @@ void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
     s8 skip[3];
     s32 rows, step, row, column;
 
-    memcpy(text, D_00551698, 3);
-    memcpy(skip, D_005516B0, 3);
+    memcpy(text, nmeNameTextTemplate, 3);
+    memcpy(skip, nmeCursorSkip, 3);
     rows = (s8)namelist_buttonAnim_end->inputCursor.unk_26;
     step = 0x16;
     if (mode == 2) {
@@ -388,14 +388,14 @@ void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
         s32 drawY = row * 0x1E;
         for (column = 0; column < 16 - skip[mode]; column++) {
             s32 index = row * 16 + column + skip[mode];
-            s8 offsetX = D_005280C0[index][0];
-            s8 offsetY = D_005280C0[index][1];
+            s8 offsetX = nmeCharOffsets[index][0];
+            s8 offsetY = nmeCharOffsets[index][1];
             const u8 *character;
             frFontHandle_t *font;
 
             fclDrawSpriteRes(drawX * 16, drawY * 8, 0, NULL, 0, 0x2B,
                              (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
-            character = D_005276B8[mode] + index * 2;
+            character = nmeCharTables[mode] + index * 2;
             text[0] = character[0];
             text[1] = character[1];
             font = frLinkFontString(text, 4, 0, 0, NULL);
@@ -449,11 +449,11 @@ void nmeDrawModeTabs(s8 mode)
     }
 }
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", D_005487F8);
+INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeColoredText);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", D_00548808);
+INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeAutoMemoryLabel);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", D_00548818);
+INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeMenuMemoryLabel);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", D_00548828);
+INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeVibrationLabel);
 

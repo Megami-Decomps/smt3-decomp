@@ -219,7 +219,7 @@ extern u8 aViewEye[];
 
 extern mdlLightParams_t dds3LightParam;
 
-extern mdlDebugLight_t D_0032C530;
+extern mdlDebugLight_t mdlDebugLightWork;
 
 extern mdlDebugScale_t mdlDebugScaleWork;
 
@@ -227,17 +227,17 @@ extern mdlDebugEntry_t mdlDebugEntryTable[];
 
 extern mdlDebugOption_t softenBiasWork;
 
-extern mdlDebugLabel_t D_0032C4E0[4], D_0032C548, D_0032C5B8[4];
-extern u16 D_0032C510[], D_0032C5E8[4] __attribute__((section(".data")));
+extern mdlDebugLabel_t mdlDebugLightLabels[4], mdlDebugScaleFogLabel, softenBiasLabels[4];
+extern u16 mdlDebugLightCursorY[], softenBiasCursorY[4] __attribute__((section(".data")));
 extern u8 corePktSoftenBias __attribute__((section(".sdata")));
 
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 
-extern char *D_0032C4D0[];
+extern char *mdlColorChannelLabels[];
 
-extern u8 D_0032C4C8[];
+extern u8 mdlColorChannelStyle[];
 
-extern u16 D_0032C498[];
+extern u16 mdlPibTrackRowOffset[];
 
 extern void *sdfChipAllocZeroDirect(u32 aSize);
 
@@ -337,29 +337,29 @@ typedef enum PIB_CHUNK_TYPE {
     PIB_CHUNK_TYPE_END = 0xFFFF
 } PIB_CHUNK_TYPE;
 
-extern char D_0054F648[];
+extern char mdlPibLabelP2A[];
 
-extern char D_0054F650[];
+extern char mdlPibLabelD3P[];
 
-extern char D_0054F678[];
+extern char mdlColorByteFormat[];
 
-extern char D_0054F680[];
+extern char mdlPibCursorMark[];
 
-extern char D_0054F6A0[];
+extern char mdlDebugLightCursor[];
 
-extern char D_0054F6A8[];
+extern char mdlDebugLightFormat[];
 
-extern char D_0054F6E0[];
+extern char mdlDebugScaleCursor[];
 
-extern char D_0054F700[];
+extern char softenBiasCursor[];
 
-extern char D_0054F708[];
+extern char softenBiasValueFormat[];
 
-extern char D_0054F710[];
+extern char softenBiasAdjustFormat[];
 
-extern char D_0054F718[];
+extern char softenBiasLabelOn[];
 
-extern char D_0054F720[];
+extern char softenBiasLabelOff[];
 
 #define MDL_RECORD_LIST_HEADER_BYTES 8
 
@@ -476,7 +476,7 @@ void mdlPibDrawEffectInfo(sdfDrawTag_t *tag, s32 x, s32 y, s32 z, s32 attr, pibH
         switch (data->group) {
         case PIB_CHUNK_TYPE_P2A:
         case PIB_CHUNK_TYPE_D3P: {
-            char *label = data->group == PIB_CHUNK_TYPE_P2A ? D_0054F648 : D_0054F650;
+            char *label = data->group == PIB_CHUNK_TYPE_P2A ? mdlPibLabelP2A : mdlPibLabelD3P;
 
             if (data->parameter.part.count == 1) {
                 sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y, z, attr,
@@ -530,15 +530,15 @@ void mdlPibDrawTrackInfo(sdfDrawTag_t *tag, s32 x, s32 y, s32 z, mdlTrackParams_
         packedColor = data->colors[colorIndex];
         sdfDrawTagLink(tag, EE_ADDR(dds3PrimFrameRect(x + 0x480, colorY, z, 0x300, 0x180, (packedColor & 0xFFFFFF) | 0x80000000, 0x60404040)));
         for (channelIndex = 0; channelIndex != MDL_COLOR_CHANNEL_COUNT; channelIndex++) {
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, colorY, z, D_0032C4C8[channelIndex], D_0032C4D0[channelIndex])));
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x240, colorY, z, 0, D_0054F678, packedColor & MDL_COLOR_BYTE_MASK)));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(labelX, colorY, z, mdlColorChannelStyle[channelIndex], mdlColorChannelLabels[channelIndex])));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x240, colorY, z, 0, mdlColorByteFormat, packedColor & MDL_COLOR_BYTE_MASK)));
             packedColor >>= MDL_COLOR_BYTE_BITS;
             colorY += 0x60;
         }
         colorY += 0x60;
     }
     if (cursor >= 0) {
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y + D_0032C498[cursor], z, 0, D_0054F680)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, y + mdlPibTrackRowOffset[cursor], z, 0, mdlPibCursorMark)));
     }
 }
 
@@ -997,10 +997,10 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     f32 *color;
 
     if (EE_ADDR(state) == 0) {
-        state = &D_0032C530;
+        state = &mdlDebugLightWork;
         state->pad = (mdlDebugPad_t *)(dds3PadButtonState + 0x10);
     } else if (EE_ADDR(state) == 1) {
-        state = &D_0032C530;
+        state = &mdlDebugLightWork;
         state->pad = (mdlDebugPad_t *)dds3PadButtonState;
     }
     if (state->pad == NULL) {
@@ -1070,7 +1070,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     sdfDrawTagLink(state->packetList,
                     EE_ADDR(dds3PrimFrameRect(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
                                   0x60000000, 0x40806020)));
-    label = D_0032C4E0;
+    label = mdlDebugLightLabels;
     for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
         sdfDrawTagLink(state->packetList,
                         EE_ADDR(sdfDevPrintf(label->x, label->y,
@@ -1079,8 +1079,8 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     }
     if (state->editing == 0 && state->blinkTick < 20) {
         sdfDrawTagLink(state->packetList,
-                        EE_ADDR(sdfDevPrintf(0x8680, D_0032C510[state->selection],
-                                                         0xFF0080, 0, D_0054F6A0)));
+                        EE_ADDR(sdfDevPrintf(0x8680, mdlDebugLightCursorY[state->selection],
+                                                         0xFF0080, 0, mdlDebugLightCursor)));
     }
     selected = state->selection;
     y = 0x7A20;
@@ -1098,7 +1098,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
             for (j = 0; j != 3; j++) {
                 sdfDrawTagLink(state->packetList,
                                 EE_ADDR(sdfDevPrintf(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
-                                                                 0, D_0054F6A8, light[1][j])));
+                                                                 0, mdlDebugLightFormat, light[1][j])));
             }
             color = light[0];
         } else {
@@ -1269,7 +1269,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
                     EE_ADDR(dds3PrimFrameRect(0x8590, 0x79A8, 0xFF007F, 0x960, 0x570, 0x60000000, 0x40806020)));
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
-                    EE_ADDR(sdfDevPrintf(D_0032C548.x, D_0032C548.y, 0xFF0080, D_0032C548.style, D_0032C548.format)));
+                    EE_ADDR(sdfDevPrintf(mdlDebugScaleFogLabel.x, mdlDebugScaleFogLabel.y, 0xFF0080, mdlDebugScaleFogLabel.style, mdlDebugScaleFogLabel.format)));
     if (mdlDebugScaleWork.editing == 0 && mdlDebugScaleWork.blinkTick < 0x14) {
         s32 y;
 
@@ -1278,7 +1278,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else {
             y = mdlDebugScaleWork.selection * 0x60 + 0x7AE0;
         }
-        sdfDrawTagLink(mdlDebugScaleWork.packetList, EE_ADDR(sdfDevPrintf(0x85C0, y, 0xFF0080, 0, D_0054F6E0)));
+        sdfDrawTagLink(mdlDebugScaleWork.packetList, EE_ADDR(sdfDevPrintf(0x85C0, y, 0xFF0080, 0, mdlDebugScaleCursor)));
     }
     for (i = 0; i != 4; i++) {
         s32 y = mdlDebugEntryTable[i].y;
@@ -1380,7 +1380,7 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     sdfDrawTagLink(softenBiasWork.packetList,
                     EE_ADDR(dds3PrimFrameRect(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020)));
-    label = D_0032C5B8;
+    label = softenBiasLabels;
     for (i = 0; i != 4; i++, label++) {
         sdfDrawTagLink(softenBiasWork.packetList,
                         EE_ADDR(sdfDevPrintf(label->x, label->y,
@@ -1390,20 +1390,20 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     if (softenBiasWork.control.fields.active == 0 && softenBiasWork.control.fields.blink < 20) {
         sdfDrawTagLink(softenBiasWork.packetList,
                         EE_ADDR(sdfDevPrintf(0x8500,
-                                                         D_0032C5E8[softenBiasWork.control.fields.cursor],
-                                                         0xFF0080, 0, D_0054F700)));
+                                                         softenBiasCursorY[softenBiasWork.control.fields.cursor],
+                                                         0xFF0080, 0, softenBiasCursor)));
     }
 
     /* Ignore the blink byte when testing the active mode and selected row. */
     valueStyle = (softenBiasWork.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
     sdfDrawTagLink(softenBiasWork.packetList,
                     EE_ADDR(sdfDevPrintf(0x8B00, 0x7A80, 0xFF0080,
-                                                     valueStyle, D_0054F708, softenBiasWork.value)));
+                                                     valueStyle, softenBiasValueFormat, softenBiasWork.value)));
     adjustmentStyle = (softenBiasWork.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
     sdfDrawTagLink(softenBiasWork.packetList,
                     EE_ADDR(sdfDevPrintf(0x8B00, 0x7AE0, 0xFF0080,
-                                                     adjustmentStyle, D_0054F710, softenBiasWork.adjustment)));
-    format = corePktSoftenBias == 0 ? D_0054F718 : D_0054F720;
+                                                     adjustmentStyle, softenBiasAdjustFormat, softenBiasWork.adjustment)));
+    format = corePktSoftenBias == 0 ? softenBiasLabelOn : softenBiasLabelOff;
     sdfDrawTagLink(softenBiasWork.packetList,
                     EE_ADDR(sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format)));
@@ -1413,67 +1413,67 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "model/mdlEffect", D_0053A788);
+INCLUDE_RODATA(const s32, "model/mdlEffect", mdlDebugLabelAmbient);
 
-INCLUDE_RODATA(const s32, "model/mdlEffect", D_0053A798);
+INCLUDE_RODATA(const s32, "model/mdlEffect", softenBiasTitle);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F648);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibLabelP2A);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F650);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibLabelD3P);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F658);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelA);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F660);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelB);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F668);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelG);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F670);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelR);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F678);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorByteFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F680);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibCursorMark);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F688);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight2);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F690);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight1);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F698);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight0);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6A0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLightCursor);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6A8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLightFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6B0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelFog);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6B8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelFar);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6C0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelMin);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6C8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelNear);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6D0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugIntFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6D8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelMax);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6E0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugScaleCursor);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6E8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelDivide);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6F0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelBias);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F6F8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelSoften);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F700);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasCursor);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F708);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasValueFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F710);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasAdjustFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F718);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelOn);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F720);
+INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelOff);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F728);
+INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorRowBase);
 
 INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable);
 
@@ -1481,11 +1481,11 @@ INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable2);
 
 INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F734);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F738);
+INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorGlyphTemplate);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F740);
+INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorColumnFormat);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F748);
+INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorRowFormat);
 
 INCLUDE_SDATA(const s32, "model/mdlEffect", evtNextEventNo);
 

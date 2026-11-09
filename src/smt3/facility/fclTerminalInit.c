@@ -68,11 +68,11 @@ extern trmTerminalWork_t *GBWK_3;
 extern void sdfTexFree(s32 aHandle);
 
 
-extern char D_0053D640[];
+extern char trmCalcProcessName[];
 
-extern char D_0053D650[];
+extern char trmDrawProcessName[];
 
-extern char D_0053D660[];
+extern char trmUpdateProcessName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -182,9 +182,9 @@ s32 trmGetEventNo(s32 update, trmTerminalWork_t *work)
     return event;
 }
 
-extern char D_0053D5B0[]; /* "e%d_main" */
+extern char trmProcessNameMainFmt[]; /* "e%d_main" */
 
-extern char D_0054FC20[];
+extern char trmProcessNameTrmFmt[];
 
 s32 trmCreateEventProcessName(s32 Type, char *pBuf)
 {
@@ -194,9 +194,9 @@ s32 trmCreateEventProcessName(s32 Type, char *pBuf)
         return 0;
     }
     if (Type == 0) {
-        sprintf(pBuf, D_0053D5B0, no);
+        sprintf(pBuf, trmProcessNameMainFmt, no);
     } else {
-        sprintf(pBuf, D_0054FC20, no);
+        sprintf(pBuf, trmProcessNameTrmFmt, no);
     }
     return 1;
 }
@@ -309,17 +309,17 @@ typedef trmTerminalWork_t trmUpdateWork_t;
 
 extern trmUpdateWork_t *trmUpdateWork;
 
-extern s32 D_002FC120[32];
+extern s32 trmTerminalNoList[32];
 extern s16 D_002FC1A2[][2];
 extern s32 evtBitCheck(s32 no);
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D5B0);
+INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmProcessNameMainFmt);
 
 void fclTerminalScanCommands(trmTerminalWork_t *work)
 {
     s32 terminalNo;
     s32 i;
-    s32 *terminal = D_002FC120;
+    s32 *terminal = trmTerminalNoList;
 
     work->terminalCommandCount = 0;
     for (i = 31; i >= 0; i--) {
@@ -385,7 +385,7 @@ typedef struct
 } trmFieldEntry_t;
 
 extern trmFieldEntry_t fldAllCnt[];
-extern char D_0054FC28[]; /* "%x\n" */
+extern char trmHexLineFmt[]; /* "%x\n" */
 
 s32 fclTerminalDumpJump(trmTerminalWork_t *work)
 {
@@ -393,7 +393,7 @@ s32 fclTerminalDumpJump(trmTerminalWork_t *work)
 
     printf("jump:%x %x\n", fldAllCnt[work->terminalNo].jumpTerminalNo, work->terminalNo);
     for (i = 0; i < work->terminalCommandCount; i++) {
-        printf(D_0054FC28, work->terminalList[i]);
+        printf(trmHexLineFmt, work->terminalList[i]);
         if (work->terminalList[i] == fldAllCnt[work->terminalNo].jumpTerminalNo) {
             return 1;
         }
@@ -422,7 +422,7 @@ void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work)
     cmpSetCursorFlag((u8 *)commands + 4, EE_ADDR_S(gCommandFlag));
 }
 
-extern char *D_00330808[];
+extern char *trmTextureNames[];
 
 extern s32 fclLoadTexture(char *pFileName);
 
@@ -435,7 +435,7 @@ void fclTerminalLoadTextures(void *work)
         /* Keep the live signed counter indexed; ordinary signed induction
          * strength-reduces the name table to a second walking pointer. */
         FAKEMATCH_ASM_LIVE(i);
-        *tex = fclLoadTexture(D_00330808[i]);
+        *tex = fclLoadTexture(trmTextureNames[i]);
         tex++;
     }
     printf("TERMINAL : Tex load.\n");
@@ -537,9 +537,9 @@ void fclTerminalProcessStart(s32 terminalType, s32 terminalNo)
             fclAllocTerminalWork(terminalType, terminalNo, 0);
         GBWK_3 = work;
         FclDebug(1, work);
-        dds3StartProcess(D_0053D640, 0x404, 1, 1, trmCalc, NULL, GBWK_3);
-        dds3StartProcess(D_0053D650, 0x2B14, 1, 1, trmDraw, NULL, GBWK_3);
-        dds3StartProcess(D_0053D660, 0x5210, 1, 1, trmUpdate,
+        dds3StartProcess(trmCalcProcessName, 0x404, 1, 1, trmCalc, NULL, GBWK_3);
+        dds3StartProcess(trmDrawProcessName, 0x2B14, 1, 1, trmDraw, NULL, GBWK_3);
+        dds3StartProcess(trmUpdateProcessName, 0x5210, 1, 1, trmUpdate,
                          (dds3ProcessFunc_t)fclDestroyTerminal, GBWK_3);
         gCallMode = 0;
         gProcessStat_3 = 1;
@@ -548,9 +548,9 @@ void fclTerminalProcessStart(s32 terminalType, s32 terminalNo)
 
 void fclTerminalProcessEnd(void)
 {
-    dds3KillProcessName(D_0053D640, 1);
-    dds3KillProcessName(D_0053D650, 1);
-    dds3KillProcessName(D_0053D660, 1);
+    dds3KillProcessName(trmCalcProcessName, 1);
+    dds3KillProcessName(trmDrawProcessName, 1);
+    dds3KillProcessName(trmUpdateProcessName, 1);
 }
 
 s32 trmCheckProcessStat(void)
@@ -652,11 +652,11 @@ void trmResetCursor(void)
     trmCalcWork->pad_2217 = 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D640);
+INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmCalcProcessName);
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D650);
+INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmDrawProcessName);
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D660);
+INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmUpdateProcessName);
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D670);
 
@@ -666,15 +666,15 @@ INCLUDE_SDATA(const s32, "facility/fclTerminalInit", gProcessStat_3);
 
 INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMode);
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC08);
+INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelLeave);
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC10);
+INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelTalk);
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC18);
+INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelSave);
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC20);
+INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmProcessNameTrmFmt);
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC28);
+INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmHexLineFmt);
 
 INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC30);
 

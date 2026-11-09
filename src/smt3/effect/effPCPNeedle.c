@@ -51,10 +51,10 @@ typedef struct effDrawSurface_t
     void (*append)(struct effDrawSurface_t *surface, void *packet);
 } effDrawSurface_t;
 
-extern effPrimParam_t D_0056AD88;   /* effPkt3DPrimMakePoly parameter block */
-extern f32 D_0031F460[][4];         /* default triangle points */
-extern u32 D_0031F520[];            /* default triangle colours */
-extern effDrawSurface_t *D_0031F550[];
+extern effPrimParam_t dds3NeedleModelPrimParam;   /* effPkt3DPrimMakePoly parameter block */
+extern f32 dds3NeedleModelDefaultPoints[][4];         /* default triangle points */
+extern u32 dds3NeedleModelDefaultColors[];            /* default triangle colours */
+extern effDrawSurface_t *dds3NeedleModelDrawSurfaces[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(void *a);
@@ -119,7 +119,7 @@ typedef struct effPCPNeedleSpiral_tag {
 #define PAR_CELL_TOPOLOGY_PAIR 0
 #define EFFECT_RING_FULL_TURN 6.2831853f
 extern effRandState_t dds3EffectBase[];
-extern f32 aViewTarget[4], aViewEye[4], D_0031F450[4];
+extern f32 aViewTarget[4], aViewEye[4], dds3NeedleModelUpVector[4];
 extern void *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void *sdfMatNew(void);
@@ -251,7 +251,7 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     if (effBTLSkillCheckRun() != 0) {
         effBTLModelGetSphereCenter(EE_ADDR_AS(struct BtlUnit *, effBTLSkillGetInvokeFormation()));
         SDF_VU0_STOREVECTOR_NOMEM(&position);
-        LookAtMatrix(hData->param.position, &position.x, D_0031F450);
+        LookAtMatrix(hData->param.position, &position.x, dds3NeedleModelUpVector);
         ReverseMatrix();
         SDF_VU0_STOREMATRIX_NOMEM(hData->hNModel->matrix);
     } else {
@@ -412,8 +412,8 @@ dds3NeedleModel_tag *dds3NeedleModelCreate(u32 number)
     for (entryIndex = 0; entryIndex < number; entryIndex++, entry++) {
         entry->abgr = 0x80808080;
     }
-    memset(&D_0056AD88, 0, sizeof(D_0056AD88));
-    D_0056AD88.primitive = 0x4000;
+    memset(&dds3NeedleModelPrimParam, 0, sizeof(dds3NeedleModelPrimParam));
+    dds3NeedleModelPrimParam.primitive = 0x4000;
     return work;
 }
 
@@ -444,7 +444,7 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
     SDF_VU0_LOADMATRIX_B(hNModel->matrix);
     MultMatrixNoArg();
     SDF_VU0_STOREMATRIX(matrix);
-    D_0056AD88.parameters = NULL;
+    dds3NeedleModelPrimParam.parameters = NULL;
     entry = hNModel->pPart;
     for (entryIndex = 0; entryIndex < hNModel->number; entryIndex++, entry++) {
         perPrim = 3;
@@ -455,37 +455,37 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
         sdf3DPrimLinkTm(packet, 0);
         if (hNModel->hVNMem == NULL) {
             remaining = 12;
-            D_0056AD88.colors = D_0031F520;
-            D_0056AD88.positions = D_0031F460;
-            D_0056AD88.normals = NULL;
+            dds3NeedleModelPrimParam.colors = dds3NeedleModelDefaultColors;
+            dds3NeedleModelPrimParam.positions = dds3NeedleModelDefaultPoints;
+            dds3NeedleModelPrimParam.normals = NULL;
         } else {
-            D_0056AD88.positions = hNModel->positions;
-            D_0056AD88.colors = hNModel->pVC;
-            D_0056AD88.normals = hNModel->normals;
+            dds3NeedleModelPrimParam.positions = hNModel->positions;
+            dds3NeedleModelPrimParam.colors = hNModel->pVC;
+            dds3NeedleModelPrimParam.normals = hNModel->normals;
             remaining = hNModel->point;
         }
-        D_0056AD88.color = entry->abgr;
-        D_0056AD88.primCount = 16;
-        D_0056AD88.vertexCount = 48;
+        dds3NeedleModelPrimParam.color = entry->abgr;
+        dds3NeedleModelPrimParam.primCount = 16;
+        dds3NeedleModelPrimParam.vertexCount = 48;
         while (remaining >= 48) {
-            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD88)));
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&dds3NeedleModelPrimParam)));
             if (hNModel->hVNMem == NULL) {
-                D_0056AD88.colors += 48;
-                D_0056AD88.positions += 48;
+                dds3NeedleModelPrimParam.colors += 48;
+                dds3NeedleModelPrimParam.positions += 48;
             } else {
-                D_0056AD88.colors += 48;
-                D_0056AD88.positions += 48;
-                D_0056AD88.normals += 48;
+                dds3NeedleModelPrimParam.colors += 48;
+                dds3NeedleModelPrimParam.positions += 48;
+                dds3NeedleModelPrimParam.normals += 48;
             }
             remaining -= 48;
         }
         if (remaining >= 3) {
-            D_0056AD88.primCount = remaining / perPrim;
-            D_0056AD88.vertexCount = remaining;
-            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&D_0056AD88)));
+            dds3NeedleModelPrimParam.primCount = remaining / perPrim;
+            dds3NeedleModelPrimParam.vertexCount = remaining;
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&dds3NeedleModelPrimParam)));
         }
     }
-    D_0031F550[hNModel->blend]->append(D_0031F550[hNModel->blend], packet);
+    dds3NeedleModelDrawSurfaces[hNModel->blend]->append(dds3NeedleModelDrawSurfaces[hNModel->blend], packet);
 }
 
 #include "sdk_libc.h"

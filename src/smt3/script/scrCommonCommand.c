@@ -30,7 +30,7 @@ typedef struct
 } scrVec4_t;
 
 extern s8 dds3PadBitTable[];
-extern char D_0052F5E8[];
+extern char scrRunNoProcessMsg[];
 
 #include "sdk_libc.h"
 
@@ -298,7 +298,7 @@ s32 scrCommand_SCR_RUN(void)
     }
     if (work->ProcessID == NULL)
     {
-        printf(D_0052F5E8);
+        printf(scrRunNoProcessMsg);
         return 1;
     }
     if (startProc < 0 || startProc >= work->TypeTable->ItemCount)
@@ -393,7 +393,7 @@ s32 scrCommand_SCENE_LIGHT_RGB(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0052F5E8);
+INCLUDE_RODATA(const s32, "script/scrCommonCommand", scrRunNoProcessMsg);
 
 s32 scrCommand_SCENE_LIGHT_DIR(void)
 {

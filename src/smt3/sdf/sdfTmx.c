@@ -52,7 +52,7 @@ enum SdfFileIOCmdClbk {
     SDF_FILE_CMD_CLBK_FREE = 9
 };
 
-extern u8 D_00594940[];
+extern u8 sdfFileRpcReadBuf[];
 
 extern void SleepThread(void);
 
@@ -176,7 +176,7 @@ void sdfFileRpcContinueRead(void) {
     if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
         chunkBytes = SDF_STREAM_CHUNK_BYTES;
     }
-    sdfFileCmdRead(sdfFileRpcState.deviceState, D_00594940, chunkBytes);
+    sdfFileCmdRead(sdfFileRpcState.deviceState, sdfFileRpcReadBuf, chunkBytes);
 }
 
 s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sourceAddress,
@@ -412,15 +412,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -492,7 +492,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 
@@ -580,7 +580,7 @@ extern s32 WakeupThread(s32 threadId);
 extern u8 sdfHddValid;
 extern char sdfIopModulePathCdrom[];
 extern char sdfIopModulePathHost[];
-extern u8 D_00594800[];
+extern u8 sdfFileRpcRecvBuf[];
 
 void SdfFileRpcServerThreadProc(void)
 {
@@ -592,7 +592,7 @@ void SdfFileRpcServerThreadProc(void)
 
     state->semaphore = sdfCreateSema(0, 1, 0);
     sceSifSetRpcQueue(&queue, GetThreadId());
-    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x66504F49, (sceSifRpcFunc)sdfFileRpcHandler, D_00594800, NULL, NULL, (struct sifRpcDataQueue_t *)&queue);
+    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x66504F49, (sceSifRpcFunc)sdfFileRpcHandler, sdfFileRpcRecvBuf, NULL, NULL, (struct sifRpcDataQueue_t *)&queue);
     modulePath = sdfIopModulePathCdrom;
     if (sdfHddValid != 0) {
         if (sceGetstat(sdfIopModulePathHost, &stat) == 0) {

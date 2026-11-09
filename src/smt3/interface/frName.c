@@ -15,8 +15,8 @@ typedef struct
 } frNameGlobalWork_t;
 
 extern frNameGlobalWork_t *frNameGlobalWork FAKEMATCH_ASM_NAME("DDS3_GBWK");
-extern s32 D_0056BD50[4];
-extern const char *D_003263B0[4];
+extern s32 frNameRefCount[4];
+extern const char *frCNameTable[4];
 extern void frAllocNameData(void);
 
 extern void frTransNameImage(s8 target, s8 type);
@@ -36,7 +36,7 @@ void frInitNameData(void)
     s8 cNameLength;
 
     for (i = 3; i >= 0; i--) {
-        D_0056BD50[i] = 0;
+        frNameRefCount[i] = 0;
     }
     memset(frNameGlobalWork->nameBitmap, 0x11, sizeof(frNameGlobalWork->nameBitmap));
     frAllocNameData();
@@ -50,8 +50,8 @@ void frInitNameData(void)
         memcpy((u8 *)frNameGlobalWork->nameGlyphCodes[i * 16] + nameLength,
                name, secondLength);
         frNameGlobalWork->nameCounts[i][1] = secondLength / 2;
-        cNameLength = (s8)strlen(D_003263B0[i]);
-        memcpy(frNameGlobalWork->cNames[i], D_003263B0[i], cNameLength);
+        cNameLength = (s8)strlen(frCNameTable[i]);
+        memcpy(frNameGlobalWork->cNames[i], frCNameTable[i], cNameLength);
         frNameGlobalWork->cNameCounts[i] = cNameLength / 2;
         i++;
     } while (i <= 0);
@@ -95,7 +95,7 @@ void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData)
 
 void frTransNameImage(s8 target, s8 type)
 {
-    if (D_0056BD50[target] == 0) {
+    if (frNameRefCount[target] == 0) {
         s8 firstCount = (s8)frNameGlobalWork->nameCounts[target][0];
         u8 *images = &frNameGlobalWork->nameBitmap[(s32)target][0][0];
 
@@ -109,9 +109,9 @@ void frTransNameImage(s8 target, s8 type)
         }
     }
     if (type == 0) {
-        D_0056BD50[target] += frNameGlobalWork->nameCounts[target][0];
+        frNameRefCount[target] += frNameGlobalWork->nameCounts[target][0];
     } else {
-        D_0056BD50[target] += frNameGlobalWork->nameCounts[target][1];
+        frNameRefCount[target] += frNameGlobalWork->nameCounts[target][1];
     }
 }
 
@@ -127,8 +127,8 @@ void frRestoreNameImage(s8 target)
     FAKEMATCH_ASM_REG(s32, firstCount, "$6") = frNameGlobalWork->nameCounts[target][0];
     s32 count = firstCount + frNameGlobalWork->nameCounts[target][1];
 
-    if (D_0056BD50[target] != 0) {
-        if (--D_0056BD50[target] == 0) {
+    if (frNameRefCount[target] != 0) {
+        if (--frNameRefCount[target] == 0) {
             for (index = 0; index < count; index++) {
                 if (pFont[target][index] != NULL) {
                     fmRetFontMem(pFont[target][index]->font_mem);
@@ -231,9 +231,9 @@ frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 fi
     return font;
 }
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F448);
+INCLUDE_SDATA(const s32, "interface/frName", frWrapEmptyString);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F44C);
+INCLUDE_SDATA(const s32, "interface/frName", frHelpLastIndex);
 
 INCLUDE_SDATA(const s32, "interface/frName", frHelpPosX);
 
@@ -243,17 +243,17 @@ INCLUDE_SDATA(const s32, "interface/frName", D_0054F458);
 
 INCLUDE_SDATA(const s32, "interface/frName", frTestFontHandle);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F460);
+INCLUDE_SDATA(const s32, "interface/frName", frTestFontX);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F464);
+INCLUDE_SDATA(const s32, "interface/frName", frTestFontY);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F468);
+INCLUDE_SDATA(const s32, "interface/frName", frTestFontAlpha);
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F469);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F46C);
+INCLUDE_SDATA(const s32, "interface/frName", frTestFontTexture);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F470);
+INCLUDE_SDATA(const s32, "interface/frName", itfGaugeQuadVertexIndex);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F478);
+INCLUDE_SDATA(const s32, "interface/frName", itfGaugeQuadColorIndex);
 

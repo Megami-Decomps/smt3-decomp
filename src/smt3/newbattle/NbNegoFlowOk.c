@@ -217,7 +217,7 @@ extern s32 datGetPlayerLevel(void);
 
 
 
-extern char D_005450E0[];
+extern char nbNegoLevelFormat[];
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -362,7 +362,7 @@ s32 Flow9_4(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x90005);
     nbAddNegoIdKouho(n, 0x90009);
-    printf(D_005450E0, datGetPlayerLevel(), n->ework->level);
+    printf(nbNegoLevelFormat, datGetPlayerLevel(), n->ework->level);
     if (datGetPlayerLevel() < n->ework->level) {
         n->nextnegoid = n->nextkouho[1];
     } else {
@@ -405,7 +405,7 @@ s32 Flow9_10(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowOk", D_005450E0);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowOk", nbNegoLevelFormat);
 
 s32 Flow9_11(nbNegoProcessData_t *n)
 {

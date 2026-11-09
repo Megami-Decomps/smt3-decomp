@@ -610,9 +610,9 @@ extern u8 aViewTarget[], aViewEye[];
 extern parDispatch_t dds3ParticleFuncTable[];
 extern effRandState_t dds3EffectBase[];
 extern s32 ParRand[];
-extern f32 D_003170E0[][4];
-extern f32 D_003171B0[][4];
-extern f32 D_003171A0[4];
+extern f32 dds3ParticleSparkDirTable[][4];
+extern f32 dds3ParticleSparkOffsetDirTable[][4];
+extern f32 dds3ParticleNegOneVec[4];
 extern u8 aViewDown[];
 extern void (*dds3ParticleAllBuffInitTable[])(void *);
 extern void (*dds3ParticleSetScaleTable[])(dds3Particle_Basic_t *, f32);
@@ -1402,9 +1402,9 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[1] = pSpark->head.origin[1];
             packet->pos[2] = pSpark->head.origin[2];
             SDF_VU0_STOREIDENTITY(pSpark->head.matrix);
-            packet->vel[0] = D_003170E0[number % 12][0] * speed;
-            packet->vel[1] = D_003170E0[number % 12][1] * speed;
-            packet->vel[2] = D_003170E0[number % 12][2] * speed;
+            packet->vel[0] = dds3ParticleSparkDirTable[number % 12][0] * speed;
+            packet->vel[1] = dds3ParticleSparkDirTable[number % 12][1] * speed;
+            packet->vel[2] = dds3ParticleSparkDirTable[number % 12][2] * speed;
             packet->verticalAcceleration = gravity;
         }
         break;
@@ -2566,7 +2566,7 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             SDF_VU0_STOREVECTOR(&normal);
             if (distance > radius) {
                 SDF_VU0_LOADVECTOR(packet->vel);
-                SDF_VU0_LOADVECTOR_B(D_003171A0);
+                SDF_VU0_LOADVECTOR_B(dds3ParticleNegOneVec);
                 SDF_VU0_MULVECTOR();
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(&origin);
@@ -2825,9 +2825,9 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
             packet->pos[1] = 0;
             packet->pos[2] = 0;
             SDF_VU0_STOREIDENTITY(pSparkOffset->head.matrix);
-            packet->vel[0] = D_003171B0[number % 12][0] * speed;
-            packet->vel[1] = D_003171B0[number % 12][1] * speed;
-            packet->vel[2] = D_003171B0[number % 12][2] * speed;
+            packet->vel[0] = dds3ParticleSparkOffsetDirTable[number % 12][0] * speed;
+            packet->vel[1] = dds3ParticleSparkOffsetDirTable[number % 12][1] * speed;
+            packet->vel[2] = dds3ParticleSparkOffsetDirTable[number % 12][2] * speed;
             packet->offsetAcceleration = gravity;
         }
         break;

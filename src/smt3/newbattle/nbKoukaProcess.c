@@ -175,7 +175,7 @@ extern s32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(char *name, s32 channel);
 #include "sdk_libc.h"
 
-extern char D_00551138[];
+extern char nbPcmLoadNameFormat[];
 extern void dds3FadeIn2(s32 frame);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 extern u32 effBTLCutGetFrame(struct effBTLCutHandle_t *hBTLCutEffect);
@@ -1299,7 +1299,7 @@ void RunPcmKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         return;
     }
     sprintf(name, "MDD_%03X.ADB", p->data1.i);
-    printf(D_00551138, name);
+    printf(nbPcmLoadNameFormat, name);
     p2sdLoadPcmFile(name, 0x34);
     k->data->flag |= 1;
 }
@@ -1392,7 +1392,7 @@ extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *uni
 
 extern void mdlSetPosition(mdlObj_t *model);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
-extern sdfVector4_t D_003FB2E0;
+extern sdfVector4_t nbFlyKoukaRotation;
 
 void RunFlyKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
@@ -1435,7 +1435,7 @@ void RunFlyKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         SDF_VU0_LOADVECTOR(&p->form->pos);
         mdlSetPosition(p->form->hunit->owner);
         if (p->form->partyindex < 4) {
-            dds3SetRotPoseSet(basic, &D_003FB2E0);
+            dds3SetRotPoseSet(basic, &nbFlyKoukaRotation);
         }
         dds3ObjectBaseOnFlag(basic, 0x400);
         basic->poseset->r = 50.0f;
@@ -1765,5 +1765,5 @@ void nbInitKoukaProcess(nbMainProcessData_t *data)
     data->KoukaProcessID = id;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbKoukaProcess", D_00551138);
+INCLUDE_SDATA(const s32, "newbattle/nbKoukaProcess", nbPcmLoadNameFormat);
 

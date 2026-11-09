@@ -264,15 +264,15 @@ extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_00546500[];
+extern char nbE902EndMessage[];
 
-extern char D_005464A8[];
+extern char nbModelPackNameFormat[];
 
-extern char D_005464C0[];
+extern char nbModelPackLoadFormat[];
 
-extern char D_00546548[];
+extern char nbE903EndMessage[];
 
-extern char D_00546570[];
+extern char nbE904EndMessage[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -338,8 +338,8 @@ s32 Parts1(nbEventProcessData_t *ed)
     return 0;
 }
 
-extern const s32 D_00546518[4];
-extern const s32 D_00546528[4];
+extern const s32 nbE903StockIds[4];
+extern const s32 nbE903FormIndices[4];
 extern void *memcpy(void *dst, const void *src, size_t size);
 extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
@@ -362,8 +362,8 @@ s32 PartsEffect1(nbEventProcessData_t *ed)
     s32 i;
     s32 stockno;
 
-    memcpy(stockIds, D_00546518, sizeof(stockIds));
-    memcpy(formIndices, D_00546528, sizeof(formIndices));
+    memcpy(stockIds, nbE903StockIds, sizeof(stockIds));
+    memcpy(formIndices, nbE903FormIndices, sizeof(formIndices));
     seqtime = ed->seqtime;
     form = NULL;
     mark = 0;
@@ -422,9 +422,9 @@ s32 PartsWait(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546518);
+INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903StockIds);
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546528);
+INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903FormIndices);
 
 s32 PartsEffect2(nbEventProcessData_t *ed)
 {
@@ -462,18 +462,18 @@ s32 EffDel(nbEventProcessData_t *ed)
 s32 nbE903_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0x1F) {
-        printf(D_00546548);
+        printf(nbE903EndMessage);
         e->data->stat |= 0x2000;
         return 1;
     }
     return 0;
 }
 
-extern s32 (*D_00527470[])(nbEventProcessData_t *);
-extern dds3Basic_t *D_005515C4;
-extern dds3Basic_t *D_005515C8;
-extern dds3Basic_t *D_005515CC;
-extern dds3Basic_t *D_005515D0;
+extern s32 (*nbE903Table[])(nbEventProcessData_t *);
+extern dds3Basic_t *nbE903CurBasic;
+extern dds3Basic_t *nbE903Basic0;
+extern dds3Basic_t *nbE903Basic1;
+extern dds3Basic_t *nbE903Basic2;
 
 extern void nbCameraSetState(u16 state);
 extern void nbAllFormDispOn(void);
@@ -493,26 +493,26 @@ s32 nbE903Process_1(dds3ProcessID_t *id)
     dds3Basic_t *scene;
 
     if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
-    if (D_00527470[event->seq](event) != 0) {
-        D_005515C4 = NULL;
-        if (D_005515C8 != NULL) {
-            dds3DeleteSceneBasicData(D_005515C8);
-            D_005515C8 = NULL;
+    if (nbE903Table[event->seq](event) != 0) {
+        nbE903CurBasic = NULL;
+        if (nbE903Basic0 != NULL) {
+            dds3DeleteSceneBasicData(nbE903Basic0);
+            nbE903Basic0 = NULL;
         }
-        if (D_005515CC != NULL) {
-            dds3DeleteSceneBasicData(D_005515CC);
-            D_005515CC = NULL;
+        if (nbE903Basic1 != NULL) {
+            dds3DeleteSceneBasicData(nbE903Basic1);
+            nbE903Basic1 = NULL;
         }
-        if (D_005515D0 != NULL) {
-            dds3DeleteSceneBasicData(D_005515D0);
-            D_005515D0 = NULL;
+        if (nbE903Basic2 != NULL) {
+            dds3DeleteSceneBasicData(nbE903Basic2);
+            nbE903Basic2 = NULL;
         }
         return -1;
     }
 
     time = event->time;
-    if (time > 0 && D_005515C4 != NULL) {
-        evtUnit_t *unit = dds3GetUnitHandleObjectBasic(D_005515C4);
+    if (time > 0 && nbE903CurBasic != NULL) {
+        evtUnit_t *unit = dds3GetUnitHandleObjectBasic(nbE903CurBasic);
         if (unit->owner != NULL) {
             nbCameraHelperModelSet(unit->owner);
         }
@@ -523,29 +523,29 @@ s32 nbE903Process_1(dds3ProcessID_t *id)
         nbCameraSetState(0x17);
         nbAllFormDispOn();
         nbGroupFormDispOff(0);
-        D_005515C4 = NULL;
-        D_005515C8 = NULL;
-        D_005515CC = NULL;
-        D_005515D0 = NULL;
+        nbE903CurBasic = NULL;
+        nbE903Basic0 = NULL;
+        nbE903Basic1 = NULL;
+        nbE903Basic2 = NULL;
         serial = evtInitMotionSeProcess(event->eventrid, 9);
         scene = dds3GetActiveScene();
-        D_005515C8 = dds3SearchSceneBasic(scene, serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515C8), 0, 0, 0, 2);
-        D_005515C4 = D_005515C8;
+        nbE903Basic0 = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE903Basic0), 0, 0, 0, 2);
+        nbE903CurBasic = nbE903Basic0;
         break;
     case 0x32:
         serial = evtInitMotionSeProcess(event->eventrid, 10);
         scene = dds3GetActiveScene();
-        D_005515CC = dds3SearchSceneBasic(scene, serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515CC), 0, 0, 0, 2);
-        D_005515C4 = D_005515CC;
+        nbE903Basic1 = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE903Basic1), 0, 0, 0, 2);
+        nbE903CurBasic = nbE903Basic1;
         break;
     case 0xBE:
         serial = evtInitMotionSeProcess(event->eventrid, 11);
         scene = dds3GetActiveScene();
-        D_005515D0 = dds3SearchSceneBasic(scene, serial, 5);
-        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515D0), 0, 0, 0, 2);
-        D_005515C4 = D_005515D0;
+        nbE903Basic2 = dds3SearchSceneBasic(scene, serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(nbE903Basic2), 0, 0, 0, 2);
+        nbE903CurBasic = nbE903Basic2;
         break;
     }
 
@@ -573,22 +573,22 @@ s32 Test(nbEventProcessData_t *ed)
 s32 nbE904_End(nbEventProcessData_t *e)
 {
     if (e->seqtime >= 0xBF) {
-        printf(D_00546570);
+        printf(nbE904EndMessage);
         e->data->endtype = 1;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546548);
+INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903EndMessage);
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546570);
+INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE904EndMessage);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", D_005515C4);
+INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903CurBasic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", D_005515C8);
+INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic0);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", D_005515CC);
+INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic1);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", D_005515D0);
+INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic2);
 

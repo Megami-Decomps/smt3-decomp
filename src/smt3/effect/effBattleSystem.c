@@ -184,7 +184,7 @@ typedef struct
     nbFormation_t *pFormation;
 } effBTLSystemHandle_t;
 
-extern effBTLSystemFunc_t D_0031BF00[];
+extern effBTLSystemFunc_t effBTLSystemTable[];
 
 void effBTLSystemCut1DataFree(void);
 
@@ -226,17 +226,17 @@ extern void *nbHelperViewer;
 
 extern u32 dds3DebugSign;
 
-extern u8 D_0054F1DF;
+extern u8 effBTLDebugMenuOn;
 
-extern s32 D_0054F130;
+extern s32 effBTLPartyIndex;
 
-extern u8 D_0054F134;
+extern u8 effBTLUnitLightOn;
 
-extern u8 D_0031D000[];
+extern u8 effBTLHelperViewerInit[];
 
-extern void *D_00551DA0;
+extern void *effBedFileList;
 
-extern void *D_00551DA4;
+extern void *effBedFileListWindow;
 
 void dds3EffectFileListWindowDelete(void *a);
 
@@ -2619,24 +2619,24 @@ effBTLSystemHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 id)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSystemHandle_t));
     hEffect->family = id;
     hEffect->pFormation = pFormation;
-    if (D_0031BF00[id].create != NULL) {
-        hEffect->hEffect = D_0031BF00[id].create(pFormation);
+    if (effBTLSystemTable[id].create != NULL) {
+        hEffect->hEffect = effBTLSystemTable[id].create(pFormation);
     }
     return hEffect;
 }
 
 void effBTLSystemDelete(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffBTLSys->family].destroy != NULL) {
-        D_0031BF00[hEffBTLSys->family].destroy(hEffBTLSys->hEffect);
+    if (effBTLSystemTable[hEffBTLSys->family].destroy != NULL) {
+        effBTLSystemTable[hEffBTLSys->family].destroy(hEffBTLSys->hEffect);
     }
     sdfChipFreeDirect(hEffBTLSys);
 }
 
 void effBTLSystemDelete2(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffBTLSys->family].destroy2 != NULL) {
-        D_0031BF00[hEffBTLSys->family].destroy2(hEffBTLSys->hEffect);
+    if (effBTLSystemTable[hEffBTLSys->family].destroy2 != NULL) {
+        effBTLSystemTable[hEffBTLSys->family].destroy2(hEffBTLSys->hEffect);
     }
     sdfChipFreeDirect(hEffBTLSys);
 }
@@ -2662,24 +2662,24 @@ void effBTLSystemDraw(effBTLSystemHandle_t *hEffBTLSys)
         }
     }
 
-    if (D_0031BF00[family].setColor != NULL &&
+    if (effBTLSystemTable[family].setColor != NULL &&
         (((nbFormation_t *)hEffBTLSys->pFormation)->stat & 2) != 0 &&
         ((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner != NULL) {
         color = (mdlGetColor(((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner) &
                  0xFF000000) |
             0x00808080;
-        D_0031BF00[family].setColor(hEffBTLSys->hEffect, color);
+        effBTLSystemTable[family].setColor(hEffBTLSys->hEffect, color);
     }
 
-    if (D_0031BF00[family].draw != NULL) {
-        D_0031BF00[family].draw(hEffBTLSys->hEffect);
+    if (effBTLSystemTable[family].draw != NULL) {
+        effBTLSystemTable[family].draw(hEffBTLSys->hEffect);
     }
 }
 
 u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffBTLSys->family].getLength != NULL) {
-        return D_0031BF00[hEffBTLSys->family].getLength(hEffBTLSys->hEffect);
+    if (effBTLSystemTable[hEffBTLSys->family].getLength != NULL) {
+        return effBTLSystemTable[hEffBTLSys->family].getLength(hEffBTLSys->hEffect);
     }
     return 0;
 }
@@ -2691,7 +2691,7 @@ s32 effBTLSystemGetID(effBTLSystemHandle_t *hEffBTLSys)
 
 u32 effBTLSystemGetRGBA(s32 id)
 {
-    return D_0031BF00[id].rgba;
+    return effBTLSystemTable[id].rgba;
 }
 
 void effBTLSystemCut1DataFree(void)
@@ -2920,10 +2920,10 @@ void effBTLSystemInit(void)
     archiveIndex = 0;
     i = 0;
     while (i < 0x1E) {
-        if (D_0031BF00[i].pPartList != NULL) {
-            part = D_0031BF00[i].pPartList;
+        if (effBTLSystemTable[i].pPartList != NULL) {
+            part = effBTLSystemTable[i].pPartList;
             partIndex = 0;
-            if (D_0031BF00[i].unknown30 != 0) {
+            if (effBTLSystemTable[i].unknown30 != 0) {
                 do {
                     if (part->type == 3) {
                         struct {
@@ -2959,7 +2959,7 @@ void effBTLSystemInit(void)
                     archiveIndex++;
                     part++;
                     partIndex++;
-                } while (partIndex < (u32)D_0031BF00[i].unknown30);
+                } while (partIndex < (u32)effBTLSystemTable[i].unknown30);
             }
         }
         i++;
@@ -3001,8 +3001,8 @@ void effBTLSystemEnd(void)
 
     effBTLSystemCut1DataFree();
     for (i = 0; i <= 0x1D; i++) {
-        if (D_0031BF00[i].dataFree != NULL) {
-            D_0031BF00[i].dataFree();
+        if (effBTLSystemTable[i].dataFree != NULL) {
+            effBTLSystemTable[i].dataFree();
         }
     }
     printf("effBTLSys:DataFree\n");
@@ -3014,8 +3014,8 @@ void effBTLSystemPartHandleCreate(void)
 
     effBTLSystemCut1PartHandleCreate();
     for (i = 0; i <= 0x1D; i++) {
-        if (D_0031BF00[i].active != 0 && D_0031BF00[i].partHandleCreate != NULL) {
-            D_0031BF00[i].partHandleCreate();
+        if (effBTLSystemTable[i].active != 0 && effBTLSystemTable[i].partHandleCreate != NULL) {
+            effBTLSystemTable[i].partHandleCreate();
         }
     }
     printf("effBTLSys:PartHandleCreate\n");
@@ -3027,8 +3027,8 @@ void effBTLSystemPartHandleDelete(void)
 
     effBTLSystemCut1PartHandleDelete();
     for (i = 0; i <= 0x1D; i++) {
-        if (D_0031BF00[i].active != 0 && D_0031BF00[i].partHandleDelete != NULL) {
-            D_0031BF00[i].partHandleDelete();
+        if (effBTLSystemTable[i].active != 0 && effBTLSystemTable[i].partHandleDelete != NULL) {
+            effBTLSystemTable[i].partHandleDelete();
         }
     }
     printf("effBTLSys:PartHandleDelete\n");
@@ -3073,8 +3073,8 @@ void *effCAMPBadCreate(effCAMPBadParams_t *params, s32 id)
     work->formation.r = work->params.r;
     work->formation.h = work->params.h;
     work->formation.scl = work->params.scl;
-    if (D_0031BF00[work->id].partHandleCreate != NULL) {
-        D_0031BF00[work->id].partHandleCreate();
+    if (effBTLSystemTable[work->id].partHandleCreate != NULL) {
+        effBTLSystemTable[work->id].partHandleCreate();
     }
     work->hEffBTLSys = effBTLSystemCreate(&work->formation, work->id);
     switch (work->id) {
@@ -3092,11 +3092,11 @@ void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
 {
     u32 color;
 
-    if (D_0031BF00[work->id].draw != NULL) {
-        D_0031BF00[work->id].draw(work->hEffBTLSys->hEffect);
+    if (effBTLSystemTable[work->id].draw != NULL) {
+        effBTLSystemTable[work->id].draw(work->hEffBTLSys->hEffect);
     }
     if (work->params.hModel != NULL) {
-        color = D_0031BF00[work->id].rgba;
+        color = effBTLSystemTable[work->id].rgba;
         if (work->frame < SDF_FRAMES(8)) {
             color = effColorBlend(0x80808080, color, work->frame * SDF_FRAME_STEP(0.125f));
         }
@@ -3111,8 +3111,8 @@ void effCAMPBadDelete(effBattleSystem_effCAMPBad_tag *work)
     if (work->params.hModel != NULL) {
         mdlSetColor(work->params.hModel, 0x80808080);
     }
-    if (D_0031BF00[work->id].partHandleDelete != NULL) {
-        D_0031BF00[work->id].partHandleDelete();
+    if (effBTLSystemTable[work->id].partHandleDelete != NULL) {
+        effBTLSystemTable[work->id].partHandleDelete();
     }
     sdfChipFreeDirect(work);
 }
@@ -3192,7 +3192,7 @@ void effBTLCutSetMax(u8 cut, u32 max)
 }
 
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
-extern char *D_0054F0F8;
+extern char *effBTLSelectedName;
 extern char effBTLCutAllFmt[];
 extern char effBTLCut1Fmt[];
 extern char effBTLCut2Fmt[];
@@ -3217,7 +3217,7 @@ void effBTLCutDebugPrint(void)
         sprintf(text, effBTLCut3Fmt, effBTLCutMaxTable[2]);
         effDebugStringDraw(0x20, 0x18A, 0, text);
         effDebugStringDraw(0x20, 0x1A2, 0,
-            effBTLFieldColorIsOn() ? D_0054F0F8 : effBedNameBuf);
+            effBTLFieldColorIsOn() ? effBTLSelectedName : effBedNameBuf);
     }
     effBTLCutCount++;
 }
@@ -3299,12 +3299,12 @@ INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A40);
 
 char *effMakeBedPath(char *path)
 {
-    D_00551DA0 = dds3EffectFileListCreate("/efftool/bed/", 8);
-    D_00551DA4 = dds3EffectFileListWindowCreate(D_00551DA0);
-    dds3EffectFileListWindowSetPos(D_00551DA4, 0xF0, 0xD0);
-    dds3EffectFileListWindowSetOt(D_00551DA4, 1);
-    dds3EffectFileListWindowSetPadWait(D_00551DA4, 0x53);
-    dds3EffectFileListWindowSetWindowColor(D_00551DA4, 0x80806020, 0x80000000);
+    effBedFileList = dds3EffectFileListCreate("/efftool/bed/", 8);
+    effBedFileListWindow = dds3EffectFileListWindowCreate(effBedFileList);
+    dds3EffectFileListWindowSetPos(effBedFileListWindow, 0xF0, 0xD0);
+    dds3EffectFileListWindowSetOt(effBedFileListWindow, 1);
+    dds3EffectFileListWindowSetPadWait(effBedFileListWindow, 0x53);
+    dds3EffectFileListWindowSetWindowColor(effBedFileListWindow, 0x80806020, 0x80000000);
     return path;
 }
 
@@ -3312,38 +3312,38 @@ extern void dds3EffectFileListWindowDraw(void *window);
 extern u32 dds3EffectFileListWindowGetState(void *window);
 extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
 extern void *func_001AA310(void *viewer);
-extern char D_0056AA38[];
-extern char *D_0054F0F8;
+extern char effBedSelectBuf[];
+extern char *effBTLSelectedName;
 
 void eff_174D38(void)
 {
-    dds3EffectFileListWindowDraw(D_00551DA4);
-    if (dds3EffectFileListWindowGetState(D_00551DA4) == 1) {
-        dds3EffectFileListWindowGetFilename(D_00551DA4, D_0056AA38);
-        D_0054F0F8 = D_0056AA38;
+    dds3EffectFileListWindowDraw(effBedFileListWindow);
+    if (dds3EffectFileListWindowGetState(effBedFileListWindow) == 1) {
+        dds3EffectFileListWindowGetFilename(effBedFileListWindow, effBedSelectBuf);
+        effBTLSelectedName = effBedSelectBuf;
         nbHelperViewer = func_001AA310(nbHelperViewer);
     }
 }
 
 void eff_174D98(void)
 {
-    dds3EffectFileListWindowDelete(D_00551DA4);
-    dds3EffectFileListDelete(D_00551DA0);
+    dds3EffectFileListWindowDelete(effBedFileListWindow);
+    dds3EffectFileListDelete(effBedFileList);
 }
 
 
 
-extern u32 D_00551DA8;
-extern u32 D_00551DAC;
-extern u32 D_00551DB0;
-extern effBTLAimParams_t D_00551DB8;
+extern u32 effBTLUnitColor;
+extern u32 effBTLUnitLightColor;
+extern u32 effBTLUnitAmbientColor;
+extern effBTLAimParams_t effBTLAimParams;
 extern u32 mdlGetColor(mdlObj_t *model);
 
 #ifdef NON_MATCHING
 void *func_00174DC0(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
-    struct nbParty_t *party = &data->party[D_0054F130];
+    struct nbParty_t *party = &data->party[effBTLPartyIndex];
     nbFormation_t *formation;
     evtUnit_t *unit;
     u32 color;
@@ -3353,12 +3353,12 @@ void *func_00174DC0(void *unused)
         if (formation->stat & 2) {
             color = mdlGetColor(formation->hunit->owner);
             unit = formation->hunit;
-            D_00551DB0 = (unit->color50 & 0x00FFFFFF) | 0x80000000;
-            D_00551DAC = (unit->color & 0x00FFFFFF) | 0x80000000;
-            D_00551DB8.directionMode = 0;
-            D_00551DB8.scaleKind = 0;
-            D_00551DB8.aimMode = 0;
-            D_00551DA8 = color;
+            effBTLUnitAmbientColor = (unit->color50 & 0x00FFFFFF) | 0x80000000;
+            effBTLUnitLightColor = (unit->color & 0x00FFFFFF) | 0x80000000;
+            effBTLAimParams.directionMode = 0;
+            effBTLAimParams.scaleKind = 0;
+            effBTLAimParams.aimMode = 0;
+            effBTLUnitColor = color;
         }
     }
     return 0;
@@ -3369,8 +3369,8 @@ INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
 
 extern void *func_00174DC0(void *unused);
 extern s8 dds3PadBitTable[] __attribute__((section(".data")));
-extern u8 D_0054F135;
-extern sdfVector4_t D_0056AC30;
+extern u8 effBTLDebugSphereOn;
+extern sdfVector4_t effBTLLastFormationPos;
 extern void evtUnitLightOn(evtUnit_t *unit);
 extern void evtUnitLightOff(evtUnit_t *unit, s32 frame);
 extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 frame, u32 light, u32 ambient);
@@ -3390,38 +3390,38 @@ void eff_174E88(void *unused)
     s32 index;
 
     if (dds3PadBitTable[0xD] < 0) {
-        index = D_0054F130;
+        index = effBTLPartyIndex;
         for (;;) {
             if (index == 13) {
-                D_0054F130 = 0;
+                effBTLPartyIndex = 0;
                 break;
             }
-            D_0054F130 = index + 1;
+            effBTLPartyIndex = index + 1;
             func_00174DC0(0);
-            index = D_0054F130;
+            index = effBTLPartyIndex;
             if (formations[index].stat & 1) {
                 break;
             }
         }
         func_00174DC0(0);
     }
-    party = &data->party[D_0054F130];
+    party = &data->party[effBTLPartyIndex];
     if (party->flag & 1) {
         formation = &formations[party->formindex];
         if (formation->stat & 2) {
-            evtSetUnitColorRGB(formation->hunit, 0, D_00551DA8);
-            if (D_0054F134 == 0) {
+            evtSetUnitColorRGB(formation->hunit, 0, effBTLUnitColor);
+            if (effBTLUnitLightOn == 0) {
                 evtUnitLightOff(formation->hunit, 0);
             } else {
                 evtUnitLightOn(formation->hunit);
-                evtSetUnitLightAndAmbient(formation->hunit, 0, D_00551DAC, D_00551DB0);
-                effBTLPartGetPointLightPtr(formation, &D_00551DB8, &direction);
+                evtSetUnitLightAndAmbient(formation->hunit, 0, effBTLUnitLightColor, effBTLUnitAmbientColor);
+                effBTLPartGetPointLightPtr(formation, &effBTLAimParams, &direction);
                 SDF_VU0_LOADVECTOR(&direction);
                 evtSetUnitLightDir(formation->hunit, 0);
             }
-            SDF_VU0_COPYVECTOR(&D_0056AC30, &formation->pos);
+            SDF_VU0_COPYVECTOR(&effBTLLastFormationPos, &formation->pos);
             effDebugPointDraw(&formation->pos);
-            if (D_0054F135 != 0) {
+            if (effBTLDebugSphereOn != 0) {
                 effBTLModelGetSphereCenter(formation);
                 SDF_VU0_STOREVECTOR(&center);
                 effDebugWireframeCylinderDraw(&center.x, 0x80802020,
@@ -3443,17 +3443,17 @@ typedef struct {
 
 extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
-extern sdfVector4_t D_0056AC40;
-extern sdfVector4_t D_0056AC50;
+extern sdfVector4_t effBTLSavedParallelLight;
+extern sdfVector4_t effBTLSavedAmbientLight;
 extern u8 D_0054F18A;
-extern u8 D_0054F18B;
+extern u8 effBTLLightSaved;
 extern void dds3UnlinkSceneLight(dds3Basic_t *light);
 
 s32 func_00175030(void)
 {
-    SDF_VU0_COPYVECTOR(&D_0056AC40, dds3LightParam.parallel[0]);
-    SDF_VU0_COPYVECTOR(&D_0056AC50, &dds3AmbientColor);
-    D_0054F18B = 1;
+    SDF_VU0_COPYVECTOR(&effBTLSavedParallelLight, dds3LightParam.parallel[0]);
+    SDF_VU0_COPYVECTOR(&effBTLSavedAmbientLight, &dds3AmbientColor);
+    effBTLLightSaved = 1;
     return 0;
 }
 
@@ -3461,9 +3461,9 @@ void eff_175070(void)
 {
     if (D_0054F18A == 0) {
         dds3UnlinkSceneLight(nbGetMainProcessData()->light[1]);
-        SDF_VU0_COPYVECTOR(dds3LightParam.parallel[0], &D_0056AC40);
-        SDF_VU0_COPYVECTOR(&dds3AmbientColor, &D_0056AC50);
-        D_0054F18B = 0;
+        SDF_VU0_COPYVECTOR(dds3LightParam.parallel[0], &effBTLSavedParallelLight);
+        SDF_VU0_COPYVECTOR(&dds3AmbientColor, &effBTLSavedAmbientLight);
+        effBTLLightSaved = 0;
     }
 }
 
@@ -3483,11 +3483,11 @@ typedef struct fldResourceLight_t {
     f32 AmbientB;
 } fldResourceLight_t;
 
-extern u8 D_0054F18B;
-extern u32 D_0054F18C;
+extern u8 effBTLLightSaved;
+extern u32 effBTLLightColor;
 extern u32 D_0054F190;
-extern fldResourceLight_t D_0056AC60;
-extern dds3Effect_Filter_t D_0031CA90;
+extern fldResourceLight_t effBTLLightResource;
+extern dds3Effect_Filter_t effBTLFieldFilter;
 extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
 extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
 extern void dds3EffectFilter(dds3Effect_Filter_t *params);
@@ -3506,8 +3506,8 @@ void func_001750D0(s32 param)
     f32 scaleGreen;
     f32 scaleBlue;
 
-    if (D_0054F18B != 0) {
-        color = D_0054F18C;
+    if (effBTLLightSaved != 0) {
+        color = effBTLLightColor;
         blueChannel = (color >> 16) & 0xFF;
         blue = (f32)blueChannel / 255.0f;
         greenChannel = (color >> 8) & 0xFF;
@@ -3523,17 +3523,17 @@ void func_001750D0(s32 param)
         redChannel = color & 0xFF;
         scaleRed = (f32)redChannel * 0.0078125f;
 
-        D_0056AC60.DiffuseR = red * scaleRed;
-        D_0056AC60.DiffuseG = green * scaleGreen;
-        D_0056AC60.DiffuseB = blue * scaleBlue;
-        D_0056AC60.AmbientR = red * scaleRed;
-        D_0056AC60.AmbientG = green * scaleGreen;
-        D_0056AC60.AmbientB = blue * scaleBlue;
+        effBTLLightResource.DiffuseR = red * scaleRed;
+        effBTLLightResource.DiffuseG = green * scaleGreen;
+        effBTLLightResource.DiffuseB = blue * scaleBlue;
+        effBTLLightResource.AmbientR = red * scaleRed;
+        effBTLLightResource.AmbientG = green * scaleGreen;
+        effBTLLightResource.AmbientB = blue * scaleBlue;
 
         mainData = nbGetMainProcessData();
-        dds3SetLightObjectResoruce(mainData->light[1], &D_0056AC60);
+        dds3SetLightObjectResoruce(mainData->light[1], &effBTLLightResource);
         dds3LinkSceneLight(mainData->light[1], 0);
-        dds3EffectFilter(&D_0031CA90);
+        dds3EffectFilter(&effBTLFieldFilter);
     }
 }
 
@@ -3557,37 +3557,37 @@ void nbSetHelperViewer(void *pViewer)
     nbHelperViewer = pViewer;
 }
 
-extern u8 D_00551DC0;
-extern u8 D_00551DC1;
-extern u8 D_00551DC2;
-extern u8 D_00551DC3;
-extern u8 D_00551DC4;
-extern u8 D_00551DC5;
-extern u8 D_00551DC6;
-extern u8 D_00551DC7;
-extern u8 D_00551DC8;
-extern u8 D_00551DC9;
-extern u8 D_00551DCA;
-extern u8 D_00551DCB;
-extern u8 D_00551DCC;
+extern u8 effDebugStatBit16;
+extern u8 effDebugStatBit17;
+extern u8 effDebugStatBit18;
+extern u8 effDebugStatBit19;
+extern u8 effDebugStatBit22;
+extern u8 effDebugStatBit25;
+extern u8 effDebugStatBit23;
+extern u8 effDebugStatBit26;
+extern u8 effDebugStatBit27;
+extern u8 effDebugStatBit28;
+extern u8 effDebugStatBit29;
+extern u8 effDebugStatBit30;
+extern u8 effDebugStatBit31;
 
 s32 nb_175338(s32 value)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
 
-    D_00551DC0 = (((s32)data->stat >> 16) ^ 1) & 1;
-    D_00551DC1 = (((s32)data->stat >> 17) ^ 1) & 1;
-    D_00551DC2 = (((s32)data->stat >> 18) ^ 1) & 1;
-    D_00551DC3 = (((s32)data->stat >> 19) ^ 1) & 1;
-    D_00551DC4 = ((s32)data->stat >> 22) & 1;
-    D_00551DC5 = ((s32)data->stat >> 25) & 1;
-    D_00551DC6 = ((s32)data->stat >> 23) & 1;
-    D_00551DC7 = ((s32)data->stat >> 26) & 1;
-    D_00551DC8 = ((s32)data->stat >> 27) & 1;
-    D_00551DC9 = ((s32)data->stat >> 28) & 1;
-    D_00551DCA = (((s32)data->stat >> 29) ^ 1) & 1;
-    D_00551DCB = ((s32)data->stat >> 30) & 1;
-    D_00551DCC = data->stat >> 31;
+    effDebugStatBit16 = (((s32)data->stat >> 16) ^ 1) & 1;
+    effDebugStatBit17 = (((s32)data->stat >> 17) ^ 1) & 1;
+    effDebugStatBit18 = (((s32)data->stat >> 18) ^ 1) & 1;
+    effDebugStatBit19 = (((s32)data->stat >> 19) ^ 1) & 1;
+    effDebugStatBit22 = ((s32)data->stat >> 22) & 1;
+    effDebugStatBit25 = ((s32)data->stat >> 25) & 1;
+    effDebugStatBit23 = ((s32)data->stat >> 23) & 1;
+    effDebugStatBit26 = ((s32)data->stat >> 26) & 1;
+    effDebugStatBit27 = ((s32)data->stat >> 27) & 1;
+    effDebugStatBit28 = ((s32)data->stat >> 28) & 1;
+    effDebugStatBit29 = (((s32)data->stat >> 29) ^ 1) & 1;
+    effDebugStatBit30 = ((s32)data->stat >> 30) & 1;
+    effDebugStatBit31 = data->stat >> 31;
     return value;
 }
 
@@ -3595,67 +3595,67 @@ void nb_175440(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
 
-    if (D_00551DC0 != 0) {
+    if (effDebugStatBit16 != 0) {
         data->stat &= ~0x00010000;
     } else {
         data->stat |= 0x00010000;
     }
-    if (D_00551DC1 != 0) {
+    if (effDebugStatBit17 != 0) {
         data->stat &= ~0x00020000;
     } else {
         data->stat |= 0x00020000;
     }
-    if (D_00551DC2 != 0) {
+    if (effDebugStatBit18 != 0) {
         data->stat &= ~0x00040000;
     } else {
         data->stat |= 0x00040000;
     }
-    if (D_00551DC3 != 0) {
+    if (effDebugStatBit19 != 0) {
         data->stat &= ~0x00080000;
     } else {
         data->stat |= 0x00080000;
     }
-    if (D_00551DC4 != 0) {
+    if (effDebugStatBit22 != 0) {
         data->stat |= 0x00400000;
     } else {
         data->stat &= ~0x00400000;
     }
-    if (D_00551DC5 != 0) {
+    if (effDebugStatBit25 != 0) {
         data->stat |= 0x02000000;
     } else {
         data->stat &= ~0x02000000;
     }
-    if (D_00551DC6 != 0) {
+    if (effDebugStatBit23 != 0) {
         data->stat |= 0x00800000;
     } else {
         data->stat &= ~0x00800000;
     }
-    if (D_00551DC7 != 0) {
+    if (effDebugStatBit26 != 0) {
         data->stat |= 0x04000000;
     } else {
         data->stat &= ~0x04000000;
     }
-    if (D_00551DC8 != 0) {
+    if (effDebugStatBit27 != 0) {
         data->stat |= 0x08000000;
     } else {
         data->stat &= ~0x08000000;
     }
-    if (D_00551DC9 != 0) {
+    if (effDebugStatBit28 != 0) {
         data->stat |= 0x10000000;
     } else {
         data->stat &= ~0x10000000;
     }
-    if (D_00551DCA != 0) {
+    if (effDebugStatBit29 != 0) {
         data->stat &= ~0x20000000;
     } else {
         data->stat |= 0x20000000;
     }
-    if (D_00551DCB != 0) {
+    if (effDebugStatBit30 != 0) {
         data->stat |= 0x40000000;
     } else {
         data->stat &= ~0x40000000;
     }
-    if (D_00551DCC != 0) {
+    if (effDebugStatBit31 != 0) {
         data->stat |= 0x80000000;
     } else {
         data->stat &= ~0x80000000;
@@ -3663,9 +3663,9 @@ void nb_175440(void)
 }
 
 
-extern effDebugMenuItem_t D_0031CF88[5];
-extern char D_0056A920[0x20];
-extern char D_0056A940[0x20];
+extern effDebugMenuItem_t effBTLDebugMenuItems[5];
+extern char effBTLPlayerSphereLabel[0x20];
+extern char effBTLEnemySphereLabel[0x20];
 extern f32 effBTLModelGroupGetSphereOld(u32 group);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A60);
@@ -3726,10 +3726,10 @@ INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C10);
 
 void effBTLDebugPrintDistance(void)
 {
-    sprintf(D_0056A920, "PLAYER:%-4.3f", effBTLModelGroupGetSphereOld(0x100) * 0.02f);
-    sprintf(D_0056A940, " ENEMY:%-4.3f", effBTLModelGroupGetSphereOld(0x200) * 0.02f);
-    D_0031CF88[3].label = D_0056A920;
-    D_0031CF88[4].label = D_0056A940;
+    sprintf(effBTLPlayerSphereLabel, "PLAYER:%-4.3f", effBTLModelGroupGetSphereOld(0x100) * 0.02f);
+    sprintf(effBTLEnemySphereLabel, " ENEMY:%-4.3f", effBTLModelGroupGetSphereOld(0x200) * 0.02f);
+    effBTLDebugMenuItems[3].label = effBTLPlayerSphereLabel;
+    effBTLDebugMenuItems[4].label = effBTLEnemySphereLabel;
 }
 
 void eff_175768(void)
@@ -3737,10 +3737,10 @@ void eff_175768(void)
     if (dds3DebugSign != 0) {
         func_00174858();
         effBTLSkillActive = FALSE;
-        D_0054F1DF = 0;
-        D_0054F130 = 0;
-        nbHelperViewer = D_0031D000;
-        D_0054F134 = 0;
+        effBTLDebugMenuOn = 0;
+        effBTLPartyIndex = 0;
+        nbHelperViewer = effBTLHelperViewerInit;
+        effBTLUnitLightOn = 0;
     }
 }
 
@@ -3759,15 +3759,15 @@ void eff_1757D8(void)
 
     if (dds3DebugSign != 0) {
         if (dds3PadBitTable[14] < 0) {
-            D_0054F1DF ^= 1;
+            effBTLDebugMenuOn ^= 1;
             work = nbGetMainProcessData();
-            if (D_0054F1DF != 0) {
+            if (effBTLDebugMenuOn != 0) {
                 work->stat |= 0x200000;
             } else {
                 work->stat &= ~0x200000;
             }
         }
-        if (D_0054F1DF != 0) {
+        if (effBTLDebugMenuOn != 0) {
             nbHelperViewer = dblurUpdateHandle(nbHelperViewer);
         }
         func_001750D0(0);
@@ -3801,7 +3801,7 @@ void dds3_175878(void)
     if (D_0054F1C0 != 0) {
         func_00174C50(0x10206040);
     }
-    if (D_0054F1DF != 0) {
+    if (effBTLDebugMenuOn != 0) {
         effDebugAllocDrawTag();
         effDebugDrawMenu(nbHelperViewer);
         effDebugLinkDrawTag();
@@ -3833,7 +3833,7 @@ void InitModelCollisionEditorProcess(void)
 void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work);
 
 /* Indexed by effect family. The IDB names entries 1 on as effBTLSys*Table. */
-effBTLSystemFunc_t D_0031BF00[30] = {
+effBTLSystemFunc_t effBTLSystemTable[30] = {
     { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0x80808080, 1, { 0, 0, 0 }, 0, NULL },
     /* effBTLSysShockTable */
     { (void * (*)(nbFormation_t *))effBTLSys_Shock_Create, (void (*)(void *))effBTLSys_Shock_Delete, (void (*)(void *))effBTLSys_Shock_Delete2, (void (*)(void *, u32))effBTLSys_Shock_SetColor, (void (*)(void *))effBTLSys_Shock_Draw, effBTLSys_Shock_GetLength, effBTLSys_Shock_DataLoad, effBTLSys_Shock_DataFree, effBTLSys_Shock_PartHandleCreate, effBTLSys_Shock_PartHandleDelete, 0x80FFCDCD, 1, { 0, 0, 0 }, 0, effBTLSystem_Freeze_PartList },

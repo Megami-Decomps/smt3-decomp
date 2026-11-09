@@ -8,7 +8,7 @@ typedef struct mcRpcCd {
     s32 bound;
 } mcRpcCd;
 
-extern mcRpcCd D_00599740 __attribute__((section(".data")));
+extern mcRpcCd mcRpcClient __attribute__((section(".data")));
 /* The 0x30-byte request shared by short commands. Their argument words vary;
  * the write view names the consumed fields and inline transfer prefix. */
 typedef union mcReq {
@@ -25,7 +25,7 @@ typedef union mcReq {
     } write;
 } mcReq;
 
-extern mcReq D_005997C0 __attribute__((section(".data")));
+extern mcReq mcRequest __attribute__((section(".data")));
 
 /* The 0x40-byte entry block that sits just before the request: four words of
  * directory entry info and a 0x20-byte name. */
@@ -34,7 +34,7 @@ typedef struct mcEntInfo {
     char name[0x20];
 } mcEntInfo;
 
-extern mcEntInfo D_00599780 __attribute__((section(".data")));
+extern mcEntInfo mcEntInfoBuf __attribute__((section(".data")));
 
 /* The name-carrying request: the same header, then a 0x400-byte path. */
 typedef struct mcNameReq {
@@ -46,7 +46,7 @@ typedef struct mcNameReq {
     char name[0x400];
 } mcNameReq;
 
-extern mcNameReq D_005997F0 __attribute__((section(".data")));
+extern mcNameReq mcNameRequest __attribute__((section(".data")));
 
 /* Read-specific view of the shared callback buffer. The producer supplies
  * the second payload extent; other commands use different reply layouts. */
@@ -61,12 +61,12 @@ typedef struct {
 
 /* The 0xC0-byte block the RPC end functions read back, and the 0x400-byte
  * working directory sceMcChdir hands to mceStorePwd. */
-extern u8 D_00599C40[0xC0] __attribute__((section(".data")));
-extern u8 D_00599D00[0x400] __attribute__((section(".data")));
+extern u8 mcEndBuf[0xC0] __attribute__((section(".data")));
+extern u8 mcPwdBuf[0x400] __attribute__((section(".data")));
 
-extern saddr_t D_00599768 __attribute__((section(".data")));
-extern saddr_t D_0059976C __attribute__((section(".data")));
-extern saddr_t D_00599770 __attribute__((section(".data")));
+extern saddr_t mcReplyDst0 __attribute__((section(".data")));
+extern saddr_t mcReplyDst1 __attribute__((section(".data")));
+extern saddr_t mcReplyDst2 __attribute__((section(".data")));
 /* The shared reply begins with result/version words. The client accessor
  * also publishes the command semaphore at the end of its 0x40-byte buffer. */
 typedef struct mcReply {
@@ -77,9 +77,9 @@ typedef struct mcReply {
     s32 sema;
 } mcReply;
 
-extern mcReply D_0059AD00 __attribute__((section(".data")));
-extern s32 D_0052BB20 __attribute__((section(".data")));
-extern s32 D_0052BB24 __attribute__((section(".data")));
+extern mcReply mcReplyBuf __attribute__((section(".data")));
+extern s32 mcLastCmd __attribute__((section(".data")));
+extern s32 mcSema __attribute__((section(".data")));
 
 extern s32 PollSema(s32 sema);
 extern s32 SignalSema(s32 sema);
@@ -121,52 +121,52 @@ s32 sceMcInit(void)
     s32 ret;
     u32 delay;
 
-    if (D_0052BB24 < 0) {
+    if (mcSema < 0) {
         param.option = 0;
         param.initCount = 1;
         param.maxCount = 1;
-        D_0052BB24 = CreateSema(&param);
+        mcSema = CreateSema(&param);
     }
     sceMcSync(0, NULL, NULL);
-    WaitSema(D_0052BB24);
+    WaitSema(mcSema);
     sceSifInitRpc(0);
     for (;;) {
-        if (sceSifBindRpc(&D_00599740, 0x80000400, 0) < 0) {
+        if (sceSifBindRpc(&mcRpcClient, 0x80000400, 0) < 0) {
             scePrintf("bind error libmc \n");
             for (;;) {
             }
         }
-        if (D_00599740.bound != 0) {
+        if (mcRpcClient.bound != 0) {
             break;
         }
         for (delay = 0x100000; --delay != 0;) {
         }
     }
-    ret = sceSifCallRpc(&D_00599740, 0xFE, 0, &D_005997C0, 0x30,
-                        &D_0059AD00, 0xC, NULL, NULL);
-    SignalSema(D_0052BB24);
+    ret = sceSifCallRpc(&mcRpcClient, 0xFE, 0, &mcRequest, 0x30,
+                        &mcReplyBuf, 0xC, NULL, NULL);
+    SignalSema(mcSema);
     if (ret < 0) {
-        D_00599740.bound = 0;
+        mcRpcClient.bound = 0;
         return ret - 100;
     }
-    if (D_0059AD00.serverVersion < 0x20A) {
+    if (mcReplyBuf.serverVersion < 0x20A) {
         scePrintf("libmc: too old release of mcserv.irx\n");
-        D_00599740.bound = 0;
+        mcRpcClient.bound = 0;
         return -120;
     }
-    if (D_0059AD00.managerVersion < 0x20E) {
+    if (mcReplyBuf.managerVersion < 0x20E) {
         scePrintf("libmc: too old release of mcman.irx\n");
-        D_00599740.bound = 0;
+        mcRpcClient.bound = 0;
         return -121;
     }
-    return D_0059AD00.result;
+    return mcReplyBuf.result;
 }
 
 s32 sceMcEnd(void)
 {
-    if (D_0052BB24 >= 0) {
-        DeleteSema(D_0052BB24);
-        D_0052BB24 = -1;
+    if (mcSema >= 0) {
+        DeleteSema(mcSema);
+        mcSema = -1;
     }
     return 1;
 }
@@ -174,31 +174,31 @@ s32 sceMcEnd(void)
 /* Both outputs are generic pointer slots and may alias. */
 mcRpcCd *_lmcGetClientPtr(void **reply, void **command)
 {
-    mcReply *buffer = &D_0059AD00;
+    mcReply *buffer = &mcReplyBuf;
 
     *reply = buffer;
-    *command = &D_0052BB20;
-    buffer->sema = D_0052BB24;
-    return &D_00599740;
+    *command = &mcLastCmd;
+    buffer->sema = mcSema;
+    return &mcRpcClient;
 }
 
 s32 sceMcChangeThreadPriority(s32 prio)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[5] = prio;
-    ret = sceSifCallRpc(&D_00599740, 20, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[5] = prio;
+    ret = sceSifCallRpc(&mcRpcClient, 20, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 20;
+        mcLastCmd = 20;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -207,48 +207,48 @@ s32 sceMcGetSlotMax(s32 port)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[1] = port;
-    ret = sceSifCallRpc(&D_00599740, 21, 0, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[1] = port;
+    ret = sceSifCallRpc(&mcRpcClient, 21, 0, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret != 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return ret;
     }
-    SignalSema(D_0052BB24);
-    return D_0059AD00.result;
+    SignalSema(mcSema);
+    return mcReplyBuf.result;
 }
 
 s32 sceMcOpen(s32 a, s32 b, char *c, s32 d)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (c == NULL || *c == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    strncpy(D_005997F0.name, c, 0x3FF);
-    D_005997F0.port = a;
-    D_005997F0.flag = d;
-    D_005997F0.slot = b;
-    D_005997F0.name[0x3FF] = 0;
-    ret = sceSifCallRpc(&D_00599740, 2, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    strncpy(mcNameRequest.name, c, 0x3FF);
+    mcNameRequest.port = a;
+    mcNameRequest.flag = d;
+    mcNameRequest.slot = b;
+    mcNameRequest.name[0x3FF] = 0;
+    ret = sceSifCallRpc(&mcRpcClient, 2, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 2;
+        mcLastCmd = 2;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -258,7 +258,7 @@ s32 sceMcMkdir(s32 a, s32 b, char *c)
     s32 ret = sceMcOpen(a, b, c, 0x40);
 
     if (ret == 0) {
-        D_0052BB20 = 11;
+        mcLastCmd = 11;
     }
     return ret;
 }
@@ -267,19 +267,19 @@ s32 sceMcClose(s32 a)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[0] = a;
-    ret = sceSifCallRpc(&D_00599740, 3, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[0] = a;
+    ret = sceSifCallRpc(&mcRpcClient, 3, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 3;
+        mcLastCmd = 3;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -288,21 +288,21 @@ s32 sceMcSeek(s32 fd, s32 offset, s32 origin)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[0] = fd;
-    D_005997C0.w[4] = offset;
-    D_005997C0.w[5] = origin;
-    ret = sceSifCallRpc(&D_00599740, 4, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[0] = fd;
+    mcRequest.w[4] = offset;
+    mcRequest.w[5] = origin;
+    ret = sceSifCallRpc(&mcRpcClient, 4, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 4;
+        mcLastCmd = 4;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -331,25 +331,25 @@ s32 sceMcRead(s32 a, void *b, s32 c)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[0] = a;
-    D_005997C0.w[7] = EE_ADDR_S(D_00599C40);
-    D_005997C0.w[6] = EE_ADDR_S(b);
-    D_005997C0.w[3] = c;
+    mcRequest.w[0] = a;
+    mcRequest.w[7] = EE_ADDR_S(mcEndBuf);
+    mcRequest.w[6] = EE_ADDR_S(b);
+    mcRequest.w[3] = c;
     sceSifWriteBackDCache(b, c);
-    sceSifWriteBackDCache(D_00599C40, 0xC0);
-    ret = sceSifCallRpc(&D_00599740, 5, 1, &D_005997C0, 48, &D_0059AD00, 4,
-                        mceIntrReadFixAlign, D_00599C40);
+    sceSifWriteBackDCache(mcEndBuf, 0xC0);
+    ret = sceSifCallRpc(&mcRpcClient, 5, 1, &mcRequest, 48, &mcReplyBuf, 4,
+                        mceIntrReadFixAlign, mcEndBuf);
     if (ret == 0) {
-        D_0052BB20 = 5;
+        mcLastCmd = 5;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -359,18 +359,18 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
     s32 ret;
     u32 i;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.write.descriptor = a;
+    mcRequest.write.descriptor = a;
     if (c < 17) {
-        D_005997C0.write.inlineSize = c;
-        D_005997C0.write.bulkSize = 0;
-        D_005997C0.write.bulkBuffer = 0;
+        mcRequest.write.inlineSize = c;
+        mcRequest.write.bulkSize = 0;
+        mcRequest.write.bulkBuffer = 0;
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
@@ -378,19 +378,19 @@ s32 sceMcWrite(s32 a, const void *b, s32 c)
         addr_t bot = EE_ADDR(b) - 16;
         s32 head = top - bot;
 
-        D_005997C0.write.inlineSize = head;
-        D_005997C0.write.bulkSize = c - head;
-        D_005997C0.write.bulkBuffer = (const u8 *)b + head;
+        mcRequest.write.inlineSize = head;
+        mcRequest.write.bulkSize = c - head;
+        mcRequest.write.bulkBuffer = (const u8 *)b + head;
     }
-    for (i = 0; i < D_005997C0.write.inlineSize; i++) {
-        D_005997C0.write.inlineData[i] = ((const u8 *)b)[i];
+    for (i = 0; i < mcRequest.write.inlineSize; i++) {
+        mcRequest.write.inlineData[i] = ((const u8 *)b)[i];
     }
     FlushCache(0);
-    ret = sceSifCallRpc(&D_00599740, 6, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    ret = sceSifCallRpc(&mcRpcClient, 6, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 6;
+        mcLastCmd = 6;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -421,14 +421,14 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
     s32 done;
     s32 ok;
 
-    if (D_0052BB20 == 0) {
+    if (mcLastCmd == 0) {
         return -1;
     }
-    done = sceSifCheckStatRpc(&D_00599740);
+    done = sceSifCheckStatRpc(&mcRpcClient);
     if (a == 0 && done != 0) {
         while (1) {
             done = 0;
-            if (sceSifCheckStatRpc(&D_00599740) == 0) {
+            if (sceSifCheckStatRpc(&mcRpcClient) == 0) {
                 break;
             }
             mcDelayThread(60);
@@ -436,14 +436,14 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
     }
     ok = done == 0;
     if (b != NULL) {
-        *b = D_0052BB20;
+        *b = mcLastCmd;
     }
     if (ok) {
-        D_0052BB20 = 0;
+        mcLastCmd = 0;
         if (c != NULL) {
-            *c = D_0059AD00.result;
+            *c = mcReplyBuf.result;
         }
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ok;
 }
@@ -455,14 +455,14 @@ void mceGetInfoApdx(void *response)
 {
     s32 *reply = EE_ADDR_AS(s32 *, (EE_ADDR(response) | 0x20000000));
 
-    if (D_00599768) {
-        *EE_ADDR_AS(s32 *, D_00599768) = reply[0];
+    if (mcReplyDst0) {
+        *EE_ADDR_AS(s32 *, mcReplyDst0) = reply[0];
     }
-    if (D_0059976C) {
-        *EE_ADDR_AS(s32 *, D_0059976C) = reply[1];
+    if (mcReplyDst1) {
+        *EE_ADDR_AS(s32 *, mcReplyDst1) = reply[1];
     }
-    if (D_00599770) {
-        *EE_ADDR_AS(s32 *, D_00599770) = reply[0x90 / sizeof(s32)];
+    if (mcReplyDst2) {
+        *EE_ADDR_AS(s32 *, mcReplyDst2) = reply[0x90 / sizeof(s32)];
     }
 }
 
@@ -470,84 +470,84 @@ s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[1] = a;
-    D_005997C0.w[2] = b;
-    D_005997C0.w[7] = EE_ADDR_S(D_00599C40);
+    mcRequest.w[1] = a;
+    mcRequest.w[2] = b;
+    mcRequest.w[7] = EE_ADDR_S(mcEndBuf);
     if (c != NULL) {
-        D_005997C0.w[5] = 1;
+        mcRequest.w[5] = 1;
     } else {
-        D_005997C0.w[5] = 0;
+        mcRequest.w[5] = 0;
     }
     if (d != NULL) {
-        D_005997C0.w[4] = 1;
+        mcRequest.w[4] = 1;
     } else {
-        D_005997C0.w[4] = 0;
+        mcRequest.w[4] = 0;
     }
     if (e != NULL) {
-        D_005997C0.w[3] = 1;
+        mcRequest.w[3] = 1;
     } else {
-        D_005997C0.w[3] = 0;
+        mcRequest.w[3] = 0;
     }
-    D_00599768 = EE_ADDR_S(c);
-    D_0059976C = EE_ADDR_S(d);
-    D_00599770 = EE_ADDR_S(e);
-    sceSifWriteBackDCache(D_00599C40, 0xC0);
-    ret = sceSifCallRpc(&D_00599740, 1, 1, &D_005997C0, 48, &D_0059AD00, 4,
-                        mceGetInfoApdx, D_00599C40);
+    mcReplyDst0 = EE_ADDR_S(c);
+    mcReplyDst1 = EE_ADDR_S(d);
+    mcReplyDst2 = EE_ADDR_S(e);
+    sceSifWriteBackDCache(mcEndBuf, 0xC0);
+    ret = sceSifCallRpc(&mcRpcClient, 1, 1, &mcRequest, 48, &mcReplyBuf, 4,
+                        mceGetInfoApdx, mcEndBuf);
     if (ret == 0) {
-        D_0052BB20 = 1;
+        mcLastCmd = 1;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
 
 s32 sceMcUdCheckNewCard(void)
 {
-    if (sceSifCallRpc(&D_00599740, 53, 0, &D_005997C0, 48, &D_0059AD00, 4, 0, 0) != 0) {
+    if (sceSifCallRpc(&mcRpcClient, 53, 0, &mcRequest, 48, &mcReplyBuf, 4, 0, 0) != 0) {
         scePrintf(D_0054AEE8);
         return -1;
     }
-    return D_0059AD00.result;
+    return mcReplyBuf.result;
 }
 
 s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (c == NULL || *c == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    D_005997F0.port = a;
-    D_005997F0.slot = b;
-    D_005997F0.flag = d;
-    D_005997F0.maxent = e;
-    D_005997F0.pwd = f;
-    strncpy(D_005997F0.name, c, 0x3FF);
-    D_005997F0.name[0x3FF] = 0;
+    mcNameRequest.port = a;
+    mcNameRequest.slot = b;
+    mcNameRequest.flag = d;
+    mcNameRequest.maxent = e;
+    mcNameRequest.pwd = f;
+    strncpy(mcNameRequest.name, c, 0x3FF);
+    mcNameRequest.name[0x3FF] = 0;
     if (e >= 0) {
         sceSifWriteBackDCache(f, e << 6);
     }
-    ret = sceSifCallRpc(&D_00599740, 13, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    ret = sceSifCallRpc(&mcRpcClient, 13, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 13;
+        mcLastCmd = 13;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -558,7 +558,7 @@ extern void *memcpy(void *dest, const void *src, size_t size);
 void mceStorePwd(char *dest)
 {
     if (dest != NULL) {
-        const char *source = (const char *)(EE_ADDR(D_00599D00) | 0x20000000);
+        const char *source = (const char *)(EE_ADDR(mcPwdBuf) | 0x20000000);
         u32 count;
 
         /* Native evaluates the length again on the short-string path. */
@@ -567,7 +567,7 @@ void mceStorePwd(char *dest)
         } else {
             count = 0x3FF;
         }
-        memcpy(dest, (const char *)(EE_ADDR(D_00599D00) | 0x20000000), count);
+        memcpy(dest, (const char *)(EE_ADDR(mcPwdBuf) | 0x20000000), count);
         dest[count] = 0;
     }
 }
@@ -576,29 +576,29 @@ s32 sceMcChdir(s32 a, s32 b, char *c, char *d)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (c == NULL || *c == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    D_005997F0.port = a;
-    D_005997F0.pwd = D_00599D00;
-    D_005997F0.slot = b;
-    strncpy(D_005997F0.name, c, 0x3FF);
-    D_005997F0.name[0x3FF] = 0;
-    sceSifWriteBackDCache(D_00599D00, 0x400);
-    ret = sceSifCallRpc(&D_00599740, 12, 1, &D_005997F0, 0x414, &D_0059AD00, 4,
+    mcNameRequest.port = a;
+    mcNameRequest.pwd = mcPwdBuf;
+    mcNameRequest.slot = b;
+    strncpy(mcNameRequest.name, c, 0x3FF);
+    mcNameRequest.name[0x3FF] = 0;
+    sceSifWriteBackDCache(mcPwdBuf, 0x400);
+    ret = sceSifCallRpc(&mcRpcClient, 12, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4,
                         mceStorePwd, d);
     if (ret == 0) {
-        D_0052BB20 = 12;
+        mcLastCmd = 12;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -607,20 +607,20 @@ s32 sceMcFormat(s32 port, s32 slot)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[2] = slot;
-    D_005997C0.w[1] = port;
-    ret = sceSifCallRpc(&D_00599740, 16, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[2] = slot;
+    mcRequest.w[1] = port;
+    ret = sceSifCallRpc(&mcRpcClient, 16, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 16;
+        mcLastCmd = 16;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -629,27 +629,27 @@ s32 sceMcDelete(s32 port, s32 slot, char *name)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (name == NULL || *name == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    strncpy(D_005997F0.name, name, 0x3FF);
-    D_005997F0.port = port;
-    D_005997F0.slot = slot;
-    D_005997F0.name[0x3FF] = 0;
-    D_005997F0.flag = 0;
-    ret = sceSifCallRpc(&D_00599740, 15, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    strncpy(mcNameRequest.name, name, 0x3FF);
+    mcNameRequest.port = port;
+    mcNameRequest.slot = slot;
+    mcNameRequest.name[0x3FF] = 0;
+    mcNameRequest.flag = 0;
+    ret = sceSifCallRpc(&mcRpcClient, 15, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 15;
+        mcLastCmd = 15;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -658,19 +658,19 @@ s32 sceMcFlush(s32 port)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[0] = port;
-    ret = sceSifCallRpc(&D_00599740, 10, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[0] = port;
+    ret = sceSifCallRpc(&mcRpcClient, 10, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 10;
+        mcLastCmd = 10;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -683,30 +683,30 @@ s32 sceMcSetFileInfo(s32 port, s32 slot, char *name, mcEntInfo *info, s32 flags)
      * does not establish the historical source spelling. $17 is callee-saved. */
     FAKEMATCH_ASM_REG(s32, fileFlags, "$17") = flags;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (name == NULL || *name == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    D_005997F0.port = port;
-    D_005997F0.slot = slot;
-    D_005997F0.flag = fileFlags & 7;
-    D_00599780 = *info;
-    D_005997F0.pwd = &D_00599780;
-    strncpy(D_005997F0.name, name, 0x3FF);
-    D_005997F0.name[0x3FF] = 0;
+    mcNameRequest.port = port;
+    mcNameRequest.slot = slot;
+    mcNameRequest.flag = fileFlags & 7;
+    mcEntInfoBuf = *info;
+    mcNameRequest.pwd = &mcEntInfoBuf;
+    strncpy(mcNameRequest.name, name, 0x3FF);
+    mcNameRequest.name[0x3FF] = 0;
     FlushCache(0);
-    ret = sceSifCallRpc(&D_00599740, 14, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    ret = sceSifCallRpc(&mcRpcClient, 14, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 14;
+        mcLastCmd = 14;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -715,31 +715,31 @@ s32 sceMcRename(s32 port, s32 slot, char *name, char *newname)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (name == NULL || *name == 0 || newname == NULL) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    D_005997F0.port = port;
-    D_005997F0.slot = slot;
-    D_005997F0.flag = 16;
-    strncpy(D_005997F0.name, name, 0x3FF);
-    D_005997F0.name[0x3FF] = 0;
-    strncpy(D_00599780.name, newname, 0x20);
-    D_00599780.name[0x1F] = 0;
-    D_005997F0.pwd = &D_00599780;
+    mcNameRequest.port = port;
+    mcNameRequest.slot = slot;
+    mcNameRequest.flag = 16;
+    strncpy(mcNameRequest.name, name, 0x3FF);
+    mcNameRequest.name[0x3FF] = 0;
+    strncpy(mcEntInfoBuf.name, newname, 0x20);
+    mcEntInfoBuf.name[0x1F] = 0;
+    mcNameRequest.pwd = &mcEntInfoBuf;
     FlushCache(0);
-    ret = sceSifCallRpc(&D_00599740, 14, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    ret = sceSifCallRpc(&mcRpcClient, 14, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 19;
+        mcLastCmd = 19;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -748,20 +748,20 @@ s32 sceMcUnformat(s32 port, s32 slot)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
-    D_005997C0.w[2] = slot;
-    D_005997C0.w[1] = port;
-    ret = sceSifCallRpc(&D_00599740, 17, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
+    mcRequest.w[2] = slot;
+    mcRequest.w[1] = port;
+    ret = sceSifCallRpc(&mcRpcClient, 17, 1, &mcRequest, 48, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 17;
+        mcLastCmd = 17;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }
@@ -770,26 +770,26 @@ s32 sceMcGetEntSpace(s32 port, s32 slot, char *name)
 {
     s32 ret;
 
-    if (PollSema(D_0052BB24) < 0) {
+    if (PollSema(mcSema) < 0) {
         return -200;
     }
-    if (D_00599740.bound == 0) {
-        SignalSema(D_0052BB24);
+    if (mcRpcClient.bound == 0) {
+        SignalSema(mcSema);
         return -100;
     }
     if (name == NULL || *name == 0) {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
         return -210;
     }
-    D_005997F0.port = port;
-    D_005997F0.slot = slot;
-    strncpy(D_005997F0.name, name, 0x3FF);
-    D_005997F0.name[0x3FF] = 0;
-    ret = sceSifCallRpc(&D_00599740, 18, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
+    mcNameRequest.port = port;
+    mcNameRequest.slot = slot;
+    strncpy(mcNameRequest.name, name, 0x3FF);
+    mcNameRequest.name[0x3FF] = 0;
+    ret = sceSifCallRpc(&mcRpcClient, 18, 1, &mcNameRequest, 0x414, &mcReplyBuf, 4, 0, 0);
     if (ret == 0) {
-        D_0052BB20 = 18;
+        mcLastCmd = 18;
     } else {
-        SignalSema(D_0052BB24);
+        SignalSema(mcSema);
     }
     return ret;
 }

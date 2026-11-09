@@ -307,7 +307,7 @@ void fldPlayerMotion(s32 hisMotion, s32 upMotion, f32 motHokan) {
 }
 
 extern f32 fldCamTarget[];
-extern f32 D_002FC9C0[];
+extern f32 fldCamEye[];
 extern void fldSePlay(s32 id);
 extern void fldSeVol(s32 id, s32 volume);
 extern u32 dds3GetRandA(void *name);
@@ -357,9 +357,9 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
         default: left = 16; right = 16; break;
         }
         if (fldGlobalBase.mode == 1) {
-            dx = fldCamTarget[0] - D_002FC9C0[0];
-            dy = fldCamTarget[1] - D_002FC9C0[1];
-            dz = fldCamTarget[2] - D_002FC9C0[2];
+            dx = fldCamTarget[0] - fldCamEye[0];
+            dy = fldCamTarget[1] - fldCamEye[1];
+            dz = fldCamTarget[2] - fldCamEye[2];
             distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 500.0f;
             if (distance > 7000.0f) distance = 7000.0f;
             if (distance < 0.0f) distance = 0.0f;
@@ -688,7 +688,7 @@ extern const char fldDamageOnMsg[], fldDamageOffMsg[];
 #define D_0054E90A ((u8 *)dds3PadStickState + 2)
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
-extern s32 fldPlayerMoveState, fldPlayerSyukanState, D_0054ECD8;
+extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldCamSvsState;
 extern u32 fldPlayerMoveStateSaved;
 extern f32 fldCamPitch, fldCamLength, fldCamPitchTarget;
 extern f32 fldNmlGunSpeedScale0, fldNmlPi0, fldNmlGunSpeedScale1, fldNmlPi1;
@@ -816,7 +816,7 @@ s32 fldPlayerCalc_Nml(void)
         return 0;
     }
     if (fldCamMiwatasiChk() != 0) {
-        D_0054ECD8 = 0x80;
+        fldCamSvsState = 0x80;
         dds3ObjectBaseSetControlBasicSvs(control->handle, 0x80);
         dds3ObjectBaseOnFlag(control->handle, 0x800);
         fldPlayerOff();
@@ -1212,7 +1212,7 @@ s32 fldPlayerCalc_Nml(void)
         fldCamPitchTarget = fldPlayerCalc360_8(fldCamPitchTarget);
         fldPlayerMoveStateSaved = fldPlayerMoveState;
     }
-    D_0054ECD8 = 0;
+    fldCamSvsState = 0;
     dds3ObjectBaseSetControlBasicSvs(control->handle, 0);
     fldPlayerOn();
     fldPlayerSdwOn();
@@ -1702,7 +1702,7 @@ extern const volatile sdfVector4Unaligned_t fldNmlSyukanAxis;
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;
-extern s32 D_0054ECD8;
+extern s32 fldCamSvsState;
 extern f32 fldCamPitchTarget, fldSyukanGunSpeedScale, fldSyukanPi0, fldSyukanPi1, fldSyukanPi2;
 extern f32 fldCamPitch;
 extern sdfMatrix4_t D_002FA240;
@@ -1815,7 +1815,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
         fldEncountSetFlag(0x40);
     }
     if (fldCamMiwatasiChk() != 0) {
-        D_0054ECD8 = 0x80;
+        fldCamSvsState = 0x80;
         dds3ObjectBaseSetControlBasicSvs(control->handle, 0x80);
         dds3ObjectBaseOnFlag(control->handle, 0x800);
         fldPlayerOff();

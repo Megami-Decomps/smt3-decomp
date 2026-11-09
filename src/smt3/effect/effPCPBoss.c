@@ -526,7 +526,7 @@ extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
-extern u8 D_0031FF80[];
+extern u8 effPCPBossLookDown[];
 extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void *pMatrix);
 extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, const void *pPos);
 extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
@@ -560,7 +560,7 @@ extern effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src);
 
 
 extern void *effPCPBossTexHandle;
-extern s32 D_0054F1F4;
+extern s32 effPCPBossONGYTexRefCount;
 extern s32 effPCPBossONGY_RFrame;
 extern s32 dds3RenderDrawEnv;
 
@@ -636,7 +636,7 @@ extern void *effPCP_ThunderPolyCreate(const void *params);
 extern s32 dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
                             void *drawExit, void *deleteExit, void *p);
 extern void dds3SetProcessData(s32 id, void *data);
-extern const char D_00533DF0[];
+extern const char effPCPDANTE_ThunderProcessName[];
 extern u128 *effPCP_ThunderPolyGetParam(void *pThunderPoly);
 extern void effPCP_ThunderPolySetColor(void *hData, u32 abgr);
 extern void effPCP_ThunderPolyDraw(void *hData);
@@ -666,7 +666,7 @@ void effPCPCrackSizeInit(effPCPCrack_t *pPCPCrack, effPCPCrackPartFlash_t *pSize
 
 void effPCPBossONGYTexRenderStart(void)
 {
-    if (D_0054F1F4 == 0) {
+    if (effPCPBossONGYTexRefCount == 0) {
         dds3RenderDrawEnv = 0;
         dds3AllocRenderTexture(0x100, 0x100, 0.8f);
         dds3RenderTextureON();
@@ -675,12 +675,12 @@ void effPCPBossONGYTexRenderStart(void)
         effPCPBossONGY_RFrame = dds3GetKernelCount() - 1;
         printf("effPCPBossONGY:Model Load\n");
     }
-    D_0054F1F4++;
+    effPCPBossONGYTexRefCount++;
 }
 
 void effPCPBossONGYTexRenderEnd(void)
 {
-    if (--D_0054F1F4 == 0) {
+    if (--effPCPBossONGYTexRefCount == 0) {
         dds3RenderTextureOFF();
         dds3FreeRenderTexture();
         mdlFree(effPCPBossTexHandle);
@@ -690,10 +690,10 @@ void effPCPBossONGYTexRenderEnd(void)
 }
 
 #ifdef NON_MATCHING
-extern f32 D_002F5B8C;
+extern f32 effPCPBossONGYFovy;
 extern f32 aViewDown[4];
 extern sdfModelOt_t D_002F69B8[];
-extern sdf3DLightParallelPacket_t D_0056ADF0;
+extern sdf3DLightParallelPacket_t effPCPBossTexLightPacket;
 extern f32 sdfAtan(f32 value);
 extern u32 mdlGetColor(mdlObj_t *model);
 extern void mdlSetColor(mdlObj_t *model, u32 color);
@@ -723,7 +723,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
     }
     effPCPBossONGY_RFrame = count;
     SDF_VU0_COPYVECTOR(D_002F5C20, target);
-    scale = height / sdfAtan(D_002F5B8C * 0.5f);
+    scale = height / sdfAtan(effPCPBossONGYFovy * 0.5f);
     distance.x = scale;
     distance.y = scale;
     distance.z = scale;
@@ -757,9 +757,9 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         SDF_VU0_STOREVECTOR(&ambient);
         SDF_VU0_COPYVECTOR(&light.v, found->hunit->vec10);
         SDF_VU0_COPYVECTOR(&lastDirection, &light.v);
-        sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
+        sdf3DMakeLightParallelPacket(&effPCPBossTexLightPacket, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
-        model->inner->light = &D_0056ADF0;
+        model->inner->light = &effPCPBossTexLightPacket;
         mdlSetColor(effPCPBossTexHandle, (mdlGetColor(found->hunit->owner) & 0xFFFFFF) | 0x80000000);
     } else {
         color = 0x80808080;
@@ -768,9 +768,9 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         SDF_VU0_STOREVECTOR(&ambient);
         /* Retail reads stale saved registers here. */
         SDF_VU0_COPYVECTOR(&light.v, &lastDirection);
-        sdf3DMakeLightParallelPacket(&D_0056ADF0, (sdf3DLight_t **)lights.list, &ambient);
+        sdf3DMakeLightParallelPacket(&effPCPBossTexLightPacket, (sdf3DLight_t **)lights.list, &ambient);
         model = effPCPBossTexHandle;
-        model->inner->light = &D_0056ADF0;
+        model->inner->light = &effPCPBossTexLightPacket;
         mdlSetColor(model, 0x80808080);
     }
     mdlLink(effPCPBossTexHandle, &D_002F69B8[10]);
@@ -2142,7 +2142,7 @@ void effPCPBossBaelDraw(effPCPBossBael_t *hData)
             effBTLModelGetSphereCenter(effBTLSkillGetTargetFormation(0));
             SDF_VU0_STOREVECTOR(hData);
         }
-        LookAtMatrix(hData, &hData->param, D_0031FF80);
+        LookAtMatrix(hData, &hData->param, effPCPBossLookDown);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
         SDF_VU0_STOREMATRIX_MEMOPS(matrix[0], matrix[1], matrix[2], matrix[3]);
@@ -3930,7 +3930,7 @@ effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Pa
     SDF_VU0_GETLENGTH(work->scale);
     work->drawRequest = 0;
     work->frame = 0;
-    process = dds3StartProcess(D_00533DF0, 0x2B0A, 0, 0, effPCPDANTE_Thunder_ProcessDraw, 0, 0);
+    process = dds3StartProcess(effPCPDANTE_ThunderProcessName, 0x2B0A, 0, 0, effPCPDANTE_Thunder_ProcessDraw, 0, 0);
     work->process = process;
     dds3SetProcessData(process, work);
     return work;
@@ -5021,13 +5021,13 @@ INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DD0);
 
 INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DE0);
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DF0);
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", effPCPDANTE_ThunderProcessName);
 
 INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossTexHandle);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1F4);
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGYTexRefCount);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGY_RFrame);
 

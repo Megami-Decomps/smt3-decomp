@@ -56,7 +56,7 @@ extern s32 trmCheckProcessStat(void);
 
 #include "sdk_libc.h"
 
-extern const char D_0052E230[];
+extern const char dds3CallEventReturnMsg[];
 extern void fldProcTrigSequence(void *srcParam, u32 mode);
 extern void nmeStartProcesses(s32 arg0, s32 arg1, s32 arg2);
 extern void fclRagProcessStart(s32 Place);
@@ -295,7 +295,7 @@ void CallEvent(u32 flg, s32 *data)
         eventNo = *data;
         break;
     case 1:
-        printf(D_0052E230);
+        printf(dds3CallEventReturnMsg);
         eventNo = evtNextEventNo;
         break;
     }
@@ -305,7 +305,7 @@ void CallEvent(u32 flg, s32 *data)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E230);
+INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", dds3CallEventReturnMsg);
 
 s32 ExitEvent(void)
 {

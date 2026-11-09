@@ -28,7 +28,7 @@ extern s32 dds3GlobalWorkMainProc(dds3ProcessID_t *id);
 
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
-extern char D_0054EA08[];
+extern char dds3GlobalWorkProcName[];
 
 extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer, s32 shutdownTimer,
                                          dds3ProcessFunc_t processFunc, dds3ProcessFunc_t shutdownFunc,
@@ -115,11 +115,11 @@ typedef struct
     dds3FontReq_t *last;
 } dds3FontReqList_t;
 
-extern dds3FontReqList_t D_00551C80;
+extern dds3FontReqList_t dds3FontReqList;
 
 extern dds3FontReqFunc_t dds3FontReqTable;
 
-extern dds3FontReqFunc_t D_0054EA30;
+extern dds3FontReqFunc_t dds3FontReqBoxTable;
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -129,13 +129,13 @@ extern s8 slNewGameBit2212, slNewGameBit2213, slNewGameBit2323, slNewGameBit162;
 
 extern s8 slNewGameBit2561[0x18];
 
-extern u16 D_0054EA16;
+extern u16 dds3NewGameSavedHalf0C;
 
 extern s32 D_0054EA18;
 
 extern sdfMemHandle_t *D_0054EA1C;
 
-extern sdfMemHandle_t *D_00551C7C;
+extern sdfMemHandle_t *dds3NewGameSavedBossPress;
 
 extern void *sdfChipAllocZeroDirect(s32 aSize);
 
@@ -171,7 +171,7 @@ void dds3GlobalWorkInit(void)
     work->memHandle = handle;
     work->unk38 = 0;
     work->playtime = 0;
-    dds3StartProcess(D_0054EA08, DDS3_PRIORITY_GLOBALWORK, 0, 0, dds3GlobalWorkMainProc, NULL, work);
+    dds3StartProcess(dds3GlobalWorkProcName, DDS3_PRIORITY_GLOBALWORK, 0, 0, dds3GlobalWorkMainProc, NULL, work);
     DDS3_GBWK = work;
     return func_00116C30();
 }
@@ -180,7 +180,7 @@ void dds3GlobalWorkDestroy(void)
 {
     sdfMemHandle_t *handle;
 
-    dds3KillProcessName(D_0054EA08, 0);
+    dds3KillProcessName(dds3GlobalWorkProcName, 0);
     dds3GlobalWorkUserInit();
     handle = DDS3_GBWK->memHandle;
     sdfMemUnlock(handle);
@@ -234,7 +234,7 @@ void NewGame2Push(void)
     slNewGameBit2213 = 0;
     slNewGameBit2323 = 0;
     slNewGameBit162 = 0;
-    D_0054EA16 = 0;
+    dds3NewGameSavedHalf0C = 0;
     D_0054EA18 = 0;
     if (evtBitCheck(0x8A0) != 0) {
         slNewGameBit2208 = 1;
@@ -260,12 +260,12 @@ void NewGame2Push(void)
     if (evtBitCheck(0xA2) != 0) {
         slNewGameBit162 = 1;
     }
-    D_0054EA16 = DDS3_GBWK->half0C;
+    dds3NewGameSavedHalf0C = DDS3_GBWK->half0C;
     D_0054EA18 = DDS3_GBWK->playtime;
     D_0054EA1C = sdfMemAllocDirect(0x7E90);
     memcpy(sdfMemGetPtr(D_0054EA1C), (u8 *)DDS3_GBWK + 0x11E80, 0x7E90);
-    D_00551C7C = sdfMemAllocDirect(0xA0);
-    memcpy(sdfMemGetPtr(D_00551C7C), DDS3_GBWK->boss_press, 0xA0);
+    dds3NewGameSavedBossPress = sdfMemAllocDirect(0xA0);
+    memcpy(sdfMemGetPtr(dds3NewGameSavedBossPress), DDS3_GBWK->boss_press, 0xA0);
     for (i = 0; i < 0x18; i++) {
         slNewGameBit2561[i] = 0;
     }
@@ -373,11 +373,11 @@ void NewGame2Pop(void)
     }
     DDS3_GBWK->playtime = D_0054EA18;
     DDS3_GBWK->word08 = D_0054EA18;
-    DDS3_GBWK->half0C = D_0054EA16;
+    DDS3_GBWK->half0C = dds3NewGameSavedHalf0C;
     memcpy((u8 *)DDS3_GBWK + 0x11E80, sdfMemGetPtr(D_0054EA1C), 0x7E90);
     sdfMemFreeDirect(D_0054EA1C);
-    memcpy(DDS3_GBWK->boss_press, sdfMemGetPtr(D_00551C7C), 0xA0);
-    sdfMemFreeDirect(D_00551C7C);
+    memcpy(DDS3_GBWK->boss_press, sdfMemGetPtr(dds3NewGameSavedBossPress), 0xA0);
+    sdfMemFreeDirect(dds3NewGameSavedBossPress);
     if (slNewGameBit2561[0] != 0) {
         evtBitOn(0xA01);
     }
@@ -515,13 +515,13 @@ void dds3FontReqListRemove(dds3FontReqList_t *list, void *node, s32 linkofs)
 
 void dds3FontReqListAdd(dds3FontReq_t *req, dds3FontReqFunc_t *func)
 {
-    dds3FontReqListInsert(&D_00551C80, req, 0);
+    dds3FontReqListInsert(&dds3FontReqList, req, 0);
     req->func = func;
 }
 
 void dds3FontReqListRunOne(dds3FontReq_t *req)
 {
-    dds3FontReqListRemove(&D_00551C80, req, 0);
+    dds3FontReqListRemove(&dds3FontReqList, req, 0);
     req->func->destroy(req);
 }
 
@@ -529,7 +529,7 @@ void dds3FontReqListRunAll(void)
 {
     dds3FontReq_t *req;
 
-    while ((req = D_00551C80.first) != NULL) {
+    while ((req = dds3FontReqList.first) != NULL) {
         dds3FontReqListRunOne(req);
     }
 }
@@ -544,7 +544,7 @@ void dds3FontReqListRunTo(s32 group)
     dds3FontReq_t *req;
     dds3FontReq_t *next;
 
-    for (req = D_00551C80.first; req != NULL; req = next) {
+    for (req = dds3FontReqList.first; req != NULL; req = next) {
         next = req->next;
         if (req->group == group) {
             dds3FontReqListRunOne(req);
@@ -556,7 +556,7 @@ void dds3FontReqListCount(void)
 {
     dds3FontReq_t *req;
 
-    for (req = D_00551C80.first; req != NULL; req = req->next) {
+    for (req = dds3FontReqList.first; req != NULL; req = req->next) {
         req->func->draw(req);
     }
 }
@@ -620,7 +620,7 @@ dds3FontReq_t *dds3FontReqAddBox(s32 x, s32 y, u32 z, s32 w, s32 h, u32 color)
     req->h = h;
     req->z = z;
     req->color = color;
-    dds3FontReqListAdd(&req->req, &D_0054EA30);
+    dds3FontReqListAdd(&req->req, &dds3FontReqBoxTable);
     return &req->req;
 }
 
@@ -685,9 +685,9 @@ u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 
 
 extern f32 D_00529630[4];
 extern sdfMatrix4_t D_002FA240;
-extern const f32 D_002FA820[13][4];
-extern const f32 D_002FA920[4];
-extern const u8 D_002FA8F0[20][2];
+extern const f32 dds3PrimLineOutline[13][4];
+extern const f32 dds3PrimLineScale[4];
+extern const u8 dds3PrimLinePairs[20][2];
 extern void MultMatrixRev(const void *aMatrix);
 
 void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
@@ -727,7 +727,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     SDF_VU0_SET_ROW1();
     SDF_VU0_RESET_ROW3();
     MultMatrixRev(&D_002FA240);
-    SDF_VU0_LOADVECTOR(D_002FA920);
+    SDF_VU0_LOADVECTOR(dds3PrimLineScale);
     SDF_VU0_SCALE_XYZ_REV();
     axis[0] = (f32)x;
     axis[1] = (f32)y;
@@ -735,7 +735,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     SDF_VU0_LOAD_ROW3(axis);
 
     shade = highlighted ? 0x101 : 0x10101;
-    outline = D_002FA820;
+    outline = dds3PrimLineOutline;
     for (i = 0; i != 13; i++) {
         SDF_VU0_LOADVECTOR(outline[i]);
         SDF_VU0_APPLYMATRIX_XYZ1();
@@ -756,7 +756,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     packet[7] = 0x5151;
     endColor = packet + 10;
     endXyz = packet + 11;
-    pair = D_002FA8F0;
+    pair = dds3PrimLinePairs;
     for (i = 0; i != 20; i++) {
         s32 index = pair[i][0];
 
@@ -768,7 +768,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     }
     return packet;
 }
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA08);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3GlobalWorkProcName);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2211);
 
@@ -782,7 +782,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit162);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA15);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA16);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3NewGameSavedHalf0C);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA18);
 
@@ -794,5 +794,5 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA24);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqTable);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA30);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqBoxTable);
 

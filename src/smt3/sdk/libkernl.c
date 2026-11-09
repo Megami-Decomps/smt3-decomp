@@ -285,11 +285,11 @@ INCLUDE_ASM(const s32, "sdk/libkernl", GetMemorySize);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _InitTLB);
 
-extern s32 D_0052C2A4 __attribute__((section(".data")));
+extern s32 ttyInitDone __attribute__((section(".data")));
 
 void sceResetttyinit(void)
 {
-    D_0052C2A4 = 0;
+    ttyInitDone = 0;
 }
 
 extern s32 DIntr(void);
@@ -342,7 +342,7 @@ u64 VSync2(void)
     return result;
 }
 
-extern s32 D_0052C2A4 __attribute__((section(".data")));
+extern s32 ttyInitDone __attribute__((section(".data")));
 extern s32 sceTtyInit(void);
 extern s32 sceTtyRead(char *buffer, s32 length);
 extern s32 sceTtyWrite(const char *buffer, s32 length);
@@ -350,11 +350,11 @@ extern s32 sceTtyWrite(const char *buffer, s32 length);
 s32 write(s32 descriptor, const void *buffer, s32 length)
 {
     if ((u32)descriptor - 1 < 2) {
-        if (D_0052C2A4 == 0) {
+        if (ttyInitDone == 0) {
             if (sceTtyInit() == 0) {
                 return -1;
             }
-            D_0052C2A4 = 1;
+            ttyInitDone = 1;
         }
         return sceTtyWrite(buffer, length);
     }
@@ -364,11 +364,11 @@ s32 write(s32 descriptor, const void *buffer, s32 length)
 s32 read(s32 descriptor, void *buffer, s32 length)
 {
     if (descriptor == 0) {
-        if (D_0052C2A4 == 0) {
+        if (ttyInitDone == 0) {
             if (sceTtyInit() == 0) {
                 return -1;
             }
-            D_0052C2A4 = 1;
+            ttyInitDone = 1;
         }
         return sceTtyRead(buffer, length);
     }
@@ -494,7 +494,7 @@ extern s32 WakeupThread(s32 threadId);
 extern s32 RotateThreadReadyQueue(s32 priority);
 extern s32 SuspendThread(s32 threadId);
 extern void kprintf(const char *format, ...);
-extern const char D_0054BA48[];
+extern const char kernlInternalErrorMsg[];
 
 void topThread(void *argument)
 {
@@ -516,7 +516,7 @@ void topThread(void *argument)
             SuspendThread(queue->commands[index][1]);
             break;
         default:
-            kprintf(D_0054BA48);
+            kprintf(kernlInternalErrorMsg);
             break;
         }
     }
@@ -541,11 +541,11 @@ typedef struct kernelThreadParam_t {
     s32 priority;
     u8 opaque[0x18];
 } kernelThreadParam_t;
-extern s32 D_0052C2AC __attribute__((section(".data")));
+extern s32 topThreadId __attribute__((section(".data")));
 extern s32 threadMgrSema;
-extern u8 D_0059AD70[0x400];
+extern u8 topThreadStack[0x400];
 extern u8 _gp[];
-extern threadMgrQueue_t D_0059B178;
+extern threadMgrQueue_t threadCommandQueue;
 extern void topThread(void *queue);
 extern s32 CreateThread(kernelThreadParam_t *param);
 extern s32 DeleteSema(s32 sema);
@@ -558,7 +558,7 @@ s32 InitThread(void)
     kernelThreadParam_t thread;
     rpcSemaParam sema;
 
-    if (D_0052C2AC > 0) {
+    if (topThreadId > 0) {
         return -1;
     }
     sema.maxCount = 255;
@@ -568,20 +568,20 @@ s32 InitThread(void)
         return -1;
     }
     thread.entry = topThread;
-    thread.stack = D_0059AD70;
+    thread.stack = topThreadStack;
     thread.stackSize = 0x400;
     thread.gp = _gp;
     thread.priority = 0;
-    D_0052C2AC = CreateThread(&thread);
-    if (D_0052C2AC < 0) {
+    topThreadId = CreateThread(&thread);
+    if (topThreadId < 0) {
         DeleteSema(threadMgrSema);
         return -1;
     }
-    D_0059B178.readIndex = 0;
-    D_0059B178.writeIndex = 0;
-    _StartThread(D_0052C2AC, &D_0059B178);
+    threadCommandQueue.readIndex = 0;
+    threadCommandQueue.writeIndex = 0;
+    _StartThread(topThreadId, &threadCommandQueue);
     ChangeThreadPriority(GetThreadId(), 1);
-    return D_0052C2AC;
+    return topThreadId;
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", iWakeupThread);
@@ -592,14 +592,14 @@ s32 iRotateThreadReadyQueue(s32 priority)
 {
     u32 index;
 
-    if ((u32)priority >= 0x80 || D_0052C2AC == 0) {
+    if ((u32)priority >= 0x80 || topThreadId == 0) {
         return -1;
     }
 
-    index = D_0059B178.writeIndex & 0x1FF;
-    D_0059B178.writeIndex = index + 1;
-    D_0059B178.commands[index][0] = 1;
-    D_0059B178.commands[index][1] = (u8)priority;
+    index = threadCommandQueue.writeIndex & 0x1FF;
+    threadCommandQueue.writeIndex = index + 1;
+    threadCommandQueue.commands[index][0] = 1;
+    threadCommandQueue.commands[index][1] = (u8)priority;
     iSignalSema(threadMgrSema);
     return priority;
 }
@@ -615,11 +615,11 @@ typedef struct ttyQueue_t {
     u8 data[256];
 } ttyQueue_t;
 
-extern ttyQueue_t D_0059B580;
+extern ttyQueue_t ttyQueueStorage;
 
 ttyQueue_t *gcc2_compiled__10(u32 capacity)
 {
-    ttyQueue_t *queue = &D_0059B580;
+    ttyQueue_t *queue = &ttyQueueStorage;
 
     queue->capacity = capacity;
     queue->count = 0;
@@ -657,15 +657,15 @@ typedef struct ttyState_t {
     ttyQueue_t *queue;
 } ttyState_t;
 
-extern ttyState_t D_0059B690;
+extern ttyState_t ttyState;
 
 extern s32 sceDeci2ExRecv(s32 handle, void *buffer, u16 length);
 extern s32 sceDeci2ExSend(s32 handle, void *buffer, u16 length);
 extern void kprintf(const char *format, ...);
-extern const char D_0054BA70[];
-extern const char D_0054BA98[];
-extern const char D_0054BAB0[];
-extern const char D_0054BAC8[];
+extern const char ttyMsgPacketTooLarge[];
+extern const char ttyMsgReceiveError[];
+extern const char ttyMsgSendError[];
+extern const char ttyMsgWlenError[];
 
 /* The asynchronous callback observes progress and publishes completion with
  * volatile word accesses. The writer uses the same shared-word views while
@@ -686,7 +686,7 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
     case 2:
         if (byteCount != 0) {
             if ((u32)TTY_CALLBACK_WORD(state, receiveLength) + (u32)byteCount > 320) {
-                kprintf(D_0054BA70);
+                kprintf(ttyMsgPacketTooLarge);
             }
             {
                 s32 receiveOffset = TTY_CALLBACK_WORD(state, receiveLength);
@@ -695,7 +695,7 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
                                           (u16)byteCount);
             }
             if (byteCount < 0) {
-                kprintf(D_0054BA98);
+                kprintf(ttyMsgReceiveError);
             }
             TTY_CALLBACK_WORD(state, receiveLength) += byteCount;
         } else {
@@ -711,7 +711,7 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
         s32 sent = sceDeci2ExSend(state->handle, state->sendBuffer,
                                 (u16)TTY_CALLBACK_WORD(state, sendLength));
         if (sent < 0) {
-            kprintf(D_0054BAB0, sent);
+            kprintf(ttyMsgSendError, sent);
         } else {
             state->sendBuffer += sent;
             TTY_CALLBACK_WORD(state, sendLength) -= sent;
@@ -721,7 +721,7 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
     }
     case 4:
         if (TTY_CALLBACK_WORD(state, sendLength) != 0) {
-            kprintf(D_0054BAC8, TTY_CALLBACK_WORD(state, sendLength));
+            kprintf(ttyMsgWlenError, TTY_CALLBACK_WORD(state, sendLength));
         }
         break;
     default:
@@ -744,8 +744,8 @@ typedef struct ttyPacket_t {
     u8 payload[308];
 } ttyPacket_t;
 
-extern ttyPacket_t D_0059B6C0;
-extern ttyPacket_t D_0059B800;
+extern ttyPacket_t ttySendPacket;
+extern ttyPacket_t ttyReceivePacket;
 extern s32 sceDeci2ReqSend(s32 handle, s8 destination);
 extern s32 sceDeci2Poll(s32 handle);
 
@@ -758,13 +758,13 @@ s32 sceTtyWrite(const char *buffer, s32 length)
     ttyPacket_t *packet;
     u8 *output;
 
-    if ((*(volatile ttyState_t *)&D_0059B690).sendBusy != 0) {
+    if ((*(volatile ttyState_t *)&ttyState).sendBusy != 0) {
         return -1;
     }
     DIntr();
-    packet = (ttyPacket_t *)(EE_ADDR(&D_0059B6C0) | 0x20000000);
-    D_0059B690.sendBusy = 1;
-    D_0059B690.sendBuffer = (u8 *)packet;
+    packet = (ttyPacket_t *)(EE_ADDR(&ttySendPacket) | 0x20000000);
+    ttyState.sendBusy = 1;
+    ttyState.sendBuffer = (u8 *)packet;
     output = packet->payload;
     /* Native decrement wraps even for negative lengths; only zero stops it. */
     while ((length = (s32)((u32)length - 1)) != -1) {
@@ -782,11 +782,11 @@ s32 sceTtyWrite(const char *buffer, s32 length)
         }
     }
     {
-        volatile ttyState_t *state = &D_0059B690;
+        volatile ttyState_t *state = &ttyState;
 
         state->sendLength = outputLength + 12;
         packet->length = state->sendLength;
-        status = sceDeci2ReqSend((*(volatile ttyState_t *)&D_0059B690).handle,
+        status = sceDeci2ReqSend((*(volatile ttyState_t *)&ttyState).handle,
                                  (s8)packet->destination);
         if (status < 0) {
             state->sendBusy = 0;
@@ -794,7 +794,7 @@ s32 sceTtyWrite(const char *buffer, s32 length)
             return -1;
         }
         while ((status = state->sendBusy) != 0) {
-            sceDeci2Poll((*(volatile ttyState_t *)&D_0059B690).handle);
+            sceDeci2Poll((*(volatile ttyState_t *)&ttyState).handle);
         }
         EIntr();
         return consumed;
@@ -808,10 +808,10 @@ s32 sceTtyRead(char *buffer, s32 length)
     s32 count;
 
     for (count = 0; count < length; count++) {
-        while (D_0059B690.queue->count == 0) {
+        while (ttyState.queue->count == 0) {
         }
-        buffer[count] = *D_0059B690.queue->read;
-        QueuePeekReadDone(D_0059B690.queue);
+        buffer[count] = *ttyState.queue->read;
+        QueuePeekReadDone(ttyState.queue);
         if (buffer[count] == 10 || buffer[count] == 13) {
             return count + 1;
         }
@@ -830,22 +830,22 @@ s32 sceTtyInit(void)
     /* Registration exposes this context to the asynchronous TTY callback.
      * Publish and observe its shared words with native-width accesses. */
     FlushCache(0);
-    (*(volatile s32 *)&D_0059B690.handle) = sceDeci2Open(0x210, &D_0059B690, sceTtyHandler);
-    if ((*(volatile s32 *)&D_0059B690.handle) < 0) {
+    (*(volatile s32 *)&ttyState.handle) = sceDeci2Open(0x210, &ttyState, sceTtyHandler);
+    if ((*(volatile s32 *)&ttyState.handle) < 0) {
         return 0;
     }
-    (*(volatile s32 *)&D_0059B690.sendBusy) = 0;
-    (*(volatile s32 *)&D_0059B690.sendLength) = 0;
-    (*(volatile s32 *)&D_0059B690.receiveLength) = 0;
-    D_0059B690.receiveBuffer = (u8 *)(EE_ADDR(&D_0059B800) | 0x20000000);
-    packet = (ttyPacket_t *)(EE_ADDR(&D_0059B6C0) | 0x20000000);
-    D_0059B690.sendBuffer = (u8 *)packet;
+    (*(volatile s32 *)&ttyState.sendBusy) = 0;
+    (*(volatile s32 *)&ttyState.sendLength) = 0;
+    (*(volatile s32 *)&ttyState.receiveLength) = 0;
+    ttyState.receiveBuffer = (u8 *)(EE_ADDR(&ttyReceivePacket) | 0x20000000);
+    packet = (ttyPacket_t *)(EE_ADDR(&ttySendPacket) | 0x20000000);
+    ttyState.sendBuffer = (u8 *)packet;
     packet->protocol = 0x210;
     packet->source = 'E';
     packet->destination = 'H';
     packet->reserved = 0;
     packet->ttyReserved = 0;
-    D_0059B690.queue = gcc2_compiled__10(0x100);
+    ttyState.queue = gcc2_compiled__10(0x100);
     return 1;
 }
 
@@ -858,29 +858,29 @@ s32 kputchar(s32 character)
     return character;
 }
 
-extern s32 D_0052C2B0 __attribute__((section(".data")));
-extern char D_0059B940[128];
+extern s32 deci2LineIndex __attribute__((section(".data")));
+extern char deci2LineBuffer[128];
 extern s32 kputs(const char *text);
 
 void deci2Putchar(s32 character)
 {
     s32 index;
 
-    index = D_0052C2B0;
+    index = deci2LineIndex;
     if (index >= 126) {
-        D_0052C2B0 = 0;
-        D_0059B940[127] = 0;
-        kputs(D_0059B940);
-        index = D_0052C2B0;
+        deci2LineIndex = 0;
+        deci2LineBuffer[127] = 0;
+        kputs(deci2LineBuffer);
+        index = deci2LineIndex;
     }
     if (character == '\n') {
-        D_0052C2B0 = 0;
-        D_0059B940[index] = character;
-        D_0059B940[index + 1] = 0;
-        kputs(D_0059B940);
+        deci2LineIndex = 0;
+        deci2LineBuffer[index] = character;
+        deci2LineBuffer[index + 1] = 0;
+        kputs(deci2LineBuffer);
     } else {
-        D_0052C2B0 = index + 1;
-        D_0059B940[index] = character;
+        deci2LineIndex = index + 1;
+        deci2LineBuffer[index] = character;
     }
 }
 
@@ -900,7 +900,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", ftoi);
 
 /* ftoi consumes the integer bits directly, not a numeric double conversion. */
 extern s32 ftoi(u64 bits);
-extern void (*D_0052C2B4)(s32 character) __attribute__((section(".data")));
+extern void (*printfPutchar)(s32 character) __attribute__((section(".data")));
 
 void printfloat(f64 value)
 {
@@ -909,7 +909,7 @@ void printfloat(f64 value)
 
     if (value < 0.0) {
         value = 0.0 - value;
-        D_0052C2B4('-');
+        printfPutchar('-');
     }
     if (value < 0.1) {
         while (value < 0.1) {
@@ -939,7 +939,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", _printf);
  * that register-save area and then continues into the stack arguments. */
 typedef char *kernelVaList_t;
 extern void _printf(const char *format, kernelVaList_t arguments);
-extern void (*D_0052C2B4)(s32 character) __attribute__((section(".data")));
+extern void (*printfPutchar)(s32 character) __attribute__((section(".data")));
 
 void kprintf(const char *format, ...)
 {
@@ -954,11 +954,11 @@ void scePrintf(const char *format, ...)
     kernelVaList_t arguments;
     void (*previous)(s32);
 
-    previous = D_0052C2B4;
-    D_0052C2B4 = deci2Putchar;
+    previous = printfPutchar;
+    printfPutchar = deci2Putchar;
     arguments = (kernelVaList_t)__builtin_next_arg(format) - 7 * sizeof(long);
     _printf(format, arguments);
-    D_0052C2B4 = previous;
+    printfPutchar = previous;
 }
 
 typedef struct {
@@ -977,8 +977,8 @@ typedef struct {
     u32 *softwareRegisters;
 } sifCommandContext_t;
 
-extern sifCommandContext_t D_0059BA98;
-extern u32 D_0059BBC0[];
+extern sifCommandContext_t sifCommandContext;
+extern u32 sifSregs[];
 
 typedef struct {
     u8 header[16];
@@ -1007,46 +1007,46 @@ void _change_addr(void *packet, void *argument)
 
 u32 sceSifGetSreg(s32 index)
 {
-    return D_0059BBC0[index];
+    return sifSregs[index];
 }
 
 u32 sceSifSetSreg(s32 index, u32 value)
 {
-    return D_0059BBC0[index] = value;
+    return sifSregs[index] = value;
 }
 
 sifCommandContext_t *sceSifGetDataTable(void)
 {
-    return &D_0059BA98;
+    return &sifCommandContext;
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitCmd);
 
 extern s32 DisableDmac(s32 channel);
 extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
-extern s32 D_0059BA94;
+extern s32 sifDmacHandlerId;
 extern s32 D_0052C2B8;
 
 void sceSifExitCmd(void)
 {
     DisableDmac(5);
-    RemoveDmacHandler(5, D_0059BA94);
+    RemoveDmacHandler(5, sifDmacHandlerId);
     D_0052C2B8 = 0;
 }
 
 sifCommandHandler_t *sceSifSetCmdBuffer(sifCommandHandler_t *buffer, s32 count)
 {
-    sifCommandHandler_t *previous = D_0059BA98.handlers;
-    D_0059BA98.handlers = buffer;
-    D_0059BA98.handlerCount = count;
+    sifCommandHandler_t *previous = sifCommandContext.handlers;
+    sifCommandContext.handlers = buffer;
+    sifCommandContext.handlerCount = count;
     return previous;
 }
 
 sifCommandHandler_t *sceSifSetSysCmdBuffer(sifCommandHandler_t *buffer, s32 count)
 {
-    sifCommandHandler_t *previous = D_0059BA98.systemHandlers;
-    D_0059BA98.systemHandlers = buffer;
-    D_0059BA98.systemCount = count;
+    sifCommandHandler_t *previous = sifCommandContext.systemHandlers;
+    sifCommandContext.systemHandlers = buffer;
+    sifCommandContext.systemCount = count;
     return previous;
 }
 
@@ -1060,9 +1060,9 @@ void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *arg
     sifCommandHandler_t *entry;
 
     if (command < 0) {
-        command = EE_ADDR_S(D_0059BA98.systemHandlers);
+        command = EE_ADDR_S(sifCommandContext.systemHandlers);
     } else {
-        command = EE_ADDR_S(D_0059BA98.handlers);
+        command = EE_ADDR_S(sifCommandContext.handlers);
     }
     address += (u32)command;
     entry = (sifCommandHandler_t *)address;
@@ -1077,9 +1077,9 @@ void sceSifRemoveCmdHandler(s32 command)
     sifCommandHandler_t *entry;
 
     if (command < 0) {
-        command = EE_ADDR_S(D_0059BA98.systemHandlers);
+        command = EE_ADDR_S(sifCommandContext.systemHandlers);
     } else {
-        command = EE_ADDR_S(D_0059BA98.handlers);
+        command = EE_ADDR_S(sifCommandContext.handlers);
     }
     address += (u32)command;
     entry = (sifCommandHandler_t *)address;
@@ -1138,7 +1138,7 @@ s32 _sceSifSendCmd(s32 command, s32 interruptMode, void *packet, s32 packetBytes
         header->destination = 0;
     }
     transfers[count].source = EE_ADDR(packet);
-    transfers[count].destination = EE_ADDR(D_0059BA98.remoteAddress);
+    transfers[count].destination = EE_ADDR(sifCommandContext.remoteAddress);
     transfers[count].size = packetBytes;
     header->command = command;
     header->packetSize = packetBytes;
@@ -1187,12 +1187,12 @@ typedef struct rpcQueue {
     sifRpcDataQueue_t *queues;
 } rpcQueue;
 
-extern rpcQueue D_0059D440;
+extern rpcQueue sifRpcQueue;
 
-extern rpcPacket D_0059BC40[32];
-extern rpcPacket D_0059C440[32];
-extern rpcPacket D_0059CC40[32];
-extern s32 D_0052C2BC;
+extern rpcPacket rpcPackets[32];
+extern rpcPacket rpcForwardPackets[32];
+extern rpcPacket rpcIndexedPackets[32];
+extern s32 sifRpcInitialized;
 extern void sceSifInitCmd(void);
 extern u32 sceSifGetReg(u32 registerId);
 extern s32 sceSifSetReg(u32 registerId, u32 value);
@@ -1211,23 +1211,23 @@ void sceSifInitRpc(s32 mode)
     rpcQueue *queue;
 
     DIntr();
-    if (D_0052C2BC != 0) {
+    if (sifRpcInitialized != 0) {
         EIntr();
         return;
     }
-    D_0052C2BC = 1;
+    sifRpcInitialized = 1;
     EIntr();
     sceSifInitCmd();
     DIntr();
-    packets = D_0059BC40;
-    queue = &D_0059D440;
+    packets = rpcPackets;
+    queue = &sifRpcQueue;
     queue->indexedCount = queue->forwardCount = queue->count = 32;
     queue->seq = 1;
     queue->base = EE_ADDR_AS(rpcPacket *, (EE_ADDR(packets) | 0x20000000));
     queue->unk_C = 0;
     queue->unk_10 = 0;
-    queue->forwardBase = (rpcPacket *)(EE_ADDR(D_0059C440) | 0x20000000);
-    queue->indexedBase = (rpcPacket *)(EE_ADDR(D_0059CC40) | 0x20000000);
+    queue->forwardBase = (rpcPacket *)(EE_ADDR(rpcForwardPackets) | 0x20000000);
+    queue->indexedBase = (rpcPacket *)(EE_ADDR(rpcIndexedPackets) | 0x20000000);
     queue->forwardIndex = 0;
     sceSifAddCmdHandler(0x80000008, _request_end_0, queue);
     sceSifAddCmdHandler(0x80000009, _request_bind, queue);
@@ -1247,12 +1247,12 @@ void sceSifInitRpc(s32 mode)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
 #endif
 
-extern s32 D_0052C2BC;
+extern s32 sifRpcInitialized;
 
 void sceSifExitRpc(void)
 {
     sceSifExitCmd();
-    D_0052C2BC = 0;
+    sifRpcInitialized = 0;
 }
 
 extern s32 DIntr(void);
@@ -1404,7 +1404,7 @@ s32 sceSifGetOtherData(rpcTransactionPrefix *client, void *source, void *destina
     rpcSemaParam param;
     rpcPacket *packet;
 
-    packet = _sceRpcGetPacket_0(&D_0059D440);
+    packet = _sceRpcGetPacket_0(&sifRpcQueue);
     if (packet == NULL) {
         return -1;
     }
@@ -1464,7 +1464,7 @@ s32 sceSifBindRpc(rpcClient *client, u32 serverId, s32 mode)
 
     client->serverId = 0;
     client->server = NULL;
-    packet = _sceRpcGetPacket_0(&D_0059D440);
+    packet = _sceRpcGetPacket_0(&sifRpcQueue);
     if (packet == NULL) {
         return -1;
     }
@@ -1540,9 +1540,9 @@ void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
     queue->start = NULL;
     queue->end = NULL;
     queue->next = NULL;
-    head = D_0059D440.queues;
+    head = sifRpcQueue.queues;
     if (head == NULL) {
-        D_0059D440.queues = queue;
+        sifRpcQueue.queues = queue;
     } else {
         current = head;
         while (current->next != NULL) {
@@ -1609,9 +1609,9 @@ sifRpcDataQueue_t *sceSifRemoveRpcQueue(sifRpcDataQueue_t *queue)
     sifRpcDataQueue_t *current;
 
     DIntr();
-    current = D_0059D440.queues;
+    current = sifRpcQueue.queues;
     if (current == queue) {
-        D_0059D440.queues = current->next;
+        sifRpcQueue.queues = current->next;
     } else {
         while (current != NULL) {
             if (current->next == queue) {
@@ -1663,9 +1663,9 @@ void sceSifExecRequest(sifRpcServerData_t *server)
     }
     DIntr();
     if (server->requestId & 4) {
-        packet = _sceRpcGetFPacket2(&D_0059D440, (u32)server->requestId >> 16);
+        packet = _sceRpcGetFPacket2(&sifRpcQueue, (u32)server->requestId >> 16);
     } else {
-        packet = _sceRpcGetFPacket(&D_0059D440);
+        packet = _sceRpcGetFPacket(&sifRpcQueue);
     }
     EIntr();
     packet->w[8] = 0x8000000A;
@@ -1714,18 +1714,18 @@ void sceSifRpcLoop(sifRpcDataQueue_t *queue)
     }
 }
 
-extern s32 D_0052C348 __attribute__((section(".data")));
-extern s32 D_0052C34C __attribute__((section(".data")));
+extern s32 fsIobSema __attribute__((section(".data")));
+extern s32 fsIoctlSema __attribute__((section(".data")));
 
 void gcc2_compiled__13(void)
 {
     rpcSemaParam param;
-    if (D_0052C348 == -1) {
+    if (fsIobSema == -1) {
         param.initCount = 1;
         param.maxCount = 1;
         param.option = 0;
-        D_0052C348 = CreateSema(&param);
-        D_0052C34C = CreateSema(&param);
+        fsIobSema = CreateSema(&param);
+        fsIoctlSema = CreateSema(&param);
     }
 }
 
@@ -1735,8 +1735,8 @@ typedef struct {
     s32 active;
     u8 opaque[8];
 } fsRequestEntry_t;
-extern fsRequestEntry_t D_0059E580[32];
-extern s32 D_0052C348;
+extern fsRequestEntry_t fsIobTable[32];
+extern s32 fsIobSema;
 extern void gcc2_compiled__13(void);
 extern s32 SignalSema(s32 sema);
 
@@ -1745,15 +1745,15 @@ fsRequestEntry_t *new_iob(void)
     fsRequestEntry_t *entry;
 
     gcc2_compiled__13();
-    WaitSema(D_0052C348);
-    for (entry = D_0059E580; entry < &D_0059E580[32]; entry++) {
+    WaitSema(fsIobSema);
+    for (entry = fsIobTable; entry < &fsIobTable[32]; entry++) {
         if (entry->active == 0) {
             entry->active = 0x10000000;
-            SignalSema(D_0052C348);
+            SignalSema(fsIobSema);
             return entry;
         }
     }
-    SignalSema(D_0052C348);
+    SignalSema(fsIobSema);
     return NULL;
 }
 
@@ -1762,13 +1762,13 @@ fsRequestEntry_t *get_iob(u32 index)
     fsRequestEntry_t *entry;
 
     gcc2_compiled__13();
-    WaitSema(D_0052C348);
+    WaitSema(fsIobSema);
     if (index >= 32) {
-        SignalSema(D_0052C348);
+        SignalSema(fsIobSema);
         return NULL;
     }
-    entry = &D_0059E580[index];
-    SignalSema(D_0052C348);
+    entry = &fsIobTable[index];
+    SignalSema(fsIobSema);
     return entry;
 }
 
@@ -1806,9 +1806,9 @@ typedef struct fsOutputCompletion_t {
     void *destination;
     u32 size;
 } fsOutputCompletion_t;
-extern u8 D_0059E140[];
-extern u8 D_0059E154[];
-extern s32 D_0052C2C0[32];
+extern u8 fsCompletionBuffer[];
+extern u8 fsReadResultBuffer[];
+extern s32 fsRequestSemas[32];
 extern void *memcpy(void *destination, const void *source, size_t size);
 extern s32 iSignalSema(s32 sema);
 
@@ -1821,17 +1821,17 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
     fsOutputCompletion_t output;
     s32 index;
 
-    memcpy(&completion.sema, (void *)(EE_ADDR(D_0059E140) | 0x20000000), 4);
-    memcpy(&completion.command, (void *)(EE_ADDR((D_0059E140 + 4)) | 0x20000000), 4);
-    memcpy(&completion.result, (void *)(EE_ADDR((D_0059E140 + 8)) | 0x20000000), 4);
-    memcpy(&completion.resultSize, (void *)(EE_ADDR((D_0059E140 + 12)) | 0x20000000), 4);
+    memcpy(&completion.sema, (void *)(EE_ADDR(fsCompletionBuffer) | 0x20000000), 4);
+    memcpy(&completion.command, (void *)(EE_ADDR((fsCompletionBuffer + 4)) | 0x20000000), 4);
+    memcpy(&completion.result, (void *)(EE_ADDR((fsCompletionBuffer + 8)) | 0x20000000), 4);
+    memcpy(&completion.resultSize, (void *)(EE_ADDR((fsCompletionBuffer + 12)) | 0x20000000), 4);
     if (completion.sema >= 0) {
-        memcpy(completion.result, (void *)(EE_ADDR((D_0059E140 + 16)) | 0x20000000),
+        memcpy(completion.result, (void *)(EE_ADDR((fsCompletionBuffer + 16)) | 0x20000000),
                completion.resultSize);
     }
     switch (completion.command) {
     case 2: {
-        fsReadFragments_t *fragments = (void *)(EE_ADDR(D_0059E154) | 0x20000000);
+        fsReadFragments_t *fragments = (void *)(EE_ADDR(fsReadResultBuffer) | 0x20000000);
         u8 *destination;
         s32 i;
 
@@ -1850,22 +1850,22 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
         break;
     }
     case 11: {
-        memcpy(&output.destination, (void *)(EE_ADDR(D_0059E154) | 0x20000000), 4);
-        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000),
+        memcpy(&output.destination, (void *)(EE_ADDR(fsReadResultBuffer) | 0x20000000), 4);
+        memcpy(output.destination, (void *)(EE_ADDR((fsReadResultBuffer + 4)) | 0x20000000),
                sizeof(fsDirectoryEntry_t));
         break;
     }
     case 12: {
-        memcpy(&output.destination, (void *)(EE_ADDR(D_0059E154) | 0x20000000), 4);
-        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000),
+        memcpy(&output.destination, (void *)(EE_ADDR(fsReadResultBuffer) | 0x20000000), 4);
+        memcpy(output.destination, (void *)(EE_ADDR((fsReadResultBuffer + 4)) | 0x20000000),
                sizeof(fsStat_t));
         break;
     }
     case 23:
     case 25:
     case 26: {
-        const void *destinationSource = (void *)(EE_ADDR(D_0059E154) | 0x20000000);
-        const void *sizeSource = (void *)(EE_ADDR((D_0059E154 + 4)) | 0x20000000);
+        const void *destinationSource = (void *)(EE_ADDR(fsReadResultBuffer) | 0x20000000);
+        const void *sizeSource = (void *)(EE_ADDR((fsReadResultBuffer + 4)) | 0x20000000);
         u32 size;
 
         memcpy(&output.destination, destinationSource, 4);
@@ -1875,7 +1875,7 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
             output.size = 0x400;
             size = 0x400;
         }
-        memcpy(output.destination, (void *)(EE_ADDR((D_0059E154 + 8)) | 0x20000000),
+        memcpy(output.destination, (void *)(EE_ADDR((fsReadResultBuffer + 8)) | 0x20000000),
                size);
         break;
     }
@@ -1886,8 +1886,8 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
         completion.sema = -completion.sema;
         sema = completion.sema;
         for (index = 0; index < 32; index++) {
-            if (D_0052C2C0[index] == sema) {
-                D_0052C2C0[index] = -1;
+            if (fsRequestSemas[index] == sema) {
+                fsRequestSemas[index] = -1;
                 break;
             }
         }
@@ -1899,24 +1899,24 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Rcv_Intr);
 #endif
 
-extern s32 D_0052C344 __attribute__((section(".data")));
+extern s32 fsCommandSema __attribute__((section(".data")));
 
 void _sceFsSemInit(void)
 {
     rpcSemaParam param;
-    if (D_0052C344 == -1) {
+    if (fsCommandSema == -1) {
         /* Only these descriptor fields are initialized by the native helper. */
         param.initCount = 1;
         param.maxCount = 1;
         param.option = 0;
-        D_0052C344 = CreateSema(&param);
+        fsCommandSema = CreateSema(&param);
     }
 }
 
 s32 _sceFsWaitS(s32 command)
 {
     _sceFsSemInit();
-    WaitSema(D_0052C344);
+    WaitSema(fsCommandSema);
     return 0;
 }
 
@@ -1925,7 +1925,7 @@ extern s32 SignalSema(s32 sema);
 /* Internal notification: callers discard the SignalSema status. */
 void _sceFsSigSema(void)
 {
-    SignalSema(D_0052C344);
+    SignalSema(fsCommandSema);
 }
 
 typedef void (*fsPowerOffCallback_t)(void *argument);
@@ -1933,24 +1933,24 @@ typedef struct fsPowerOffState_t {
     fsPowerOffCallback_t callback;
     void *argument;
 } fsPowerOffState_t;
-extern fsPowerOffState_t D_0059E800;
-extern s32 D_0052C340;
+extern fsPowerOffState_t fsPowerOffState;
+extern s32 fsInitialized;
 extern s32 sceFsInit(void);
 
 fsPowerOffCallback_t scePowerOffHandler(fsPowerOffCallback_t callback, void *argument)
 {
-    fsPowerOffState_t *state = &D_0059E800;
+    fsPowerOffState_t *state = &fsPowerOffState;
     fsPowerOffCallback_t previous;
     s32 interrupts;
 
     _sceFsWaitS(0x1B);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     interrupts = DIntr();
-    previous = D_0059E800.callback;
+    previous = fsPowerOffState.callback;
     state->argument = argument;
-    D_0059E800.callback = callback;
+    fsPowerOffState.callback = callback;
     if (interrupts != 0) {
         EIntr();
     }
@@ -1969,24 +1969,24 @@ void _sceFs_Poff_Intr(void *packet, fsPowerOffState_t *state)
 typedef struct { u8 bytes[4]; } fsVersionTag_t;
 typedef struct { void *receiveBuffer; } fsRegistrationPacket_t;
 
-extern u8 D_0059E7C0[];
-extern rpcClient D_0059E780;
-extern u8 D_0059E140[];
-extern u8 D_0059E100[];
-extern fsRegistrationPacket_t D_0059D480;
+extern u8 fsCmdHandlerContext[];
+extern rpcClient fsRpcClient;
+extern u8 fsCompletionBuffer[];
+extern u8 fsVersionRpcBuffer[];
+extern fsRegistrationPacket_t fsRegistration;
 extern void sceSifInitRpc(s32 mode);
 extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *argument);
 extern void _sceFs_Rcv_Intr(void *packet, void *argument);
 extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);
-extern u8 D_0059E7A8[0x18];
-extern s32 D_0052C340 __attribute__((section(".data")));
+extern u8 fsDetectedVersion[0x18];
+extern s32 fsInitialized __attribute__((section(".data")));
 extern s32 SignalSema(s32 sema);
 
 s32 sceFsInit(void)
 {
-    fsPowerOffState_t *powerOff = &D_0059E800;
+    fsPowerOffState_t *powerOff = &fsPowerOffState;
     s32 previousInterrupts;
     s32 delay;
     fsRequestEntry_t *entry;
@@ -1995,59 +1995,59 @@ s32 sceFsInit(void)
     powerOff->callback = NULL;
     powerOff->argument = NULL;
     previousInterrupts = DIntr();
-    sceSifAddCmdHandler(0x80000011, _sceFs_Rcv_Intr, D_0059E7C0);
+    sceSifAddCmdHandler(0x80000011, _sceFs_Rcv_Intr, fsCmdHandlerContext);
     sceSifAddCmdHandler(0x80000013, (void (*)(void *, void *))_sceFs_Poff_Intr, powerOff);
     if (previousInterrupts)
         EIntr();
     for (;;) {
-        if (sceSifBindRpc(&D_0059E780, 0x80000001, 0) < 0)
+        if (sceSifBindRpc(&fsRpcClient, 0x80000001, 0) < 0)
             return -1;
-        if (D_0059E780.server != NULL)
+        if (fsRpcClient.server != NULL)
             break;
         for (delay = 0x100000; delay != -1; --delay) {
         }
     }
     gcc2_compiled__13();
-    WaitSema(D_0052C348);
-    for (entry = D_0059E580; entry < &D_0059E580[32]; entry++)
+    WaitSema(fsIobSema);
+    for (entry = fsIobTable; entry < &fsIobTable[32]; entry++)
         entry->active = 0;
-    SignalSema(D_0052C348);
-    D_0059D480.receiveBuffer = D_0059E140;
-    if (sceSifCallRpc(&D_0059E780, 255, 0, &D_0059D480, 4,
-                      D_0059E100, 4, NULL, NULL) < 0)
+    SignalSema(fsIobSema);
+    fsRegistration.receiveBuffer = fsCompletionBuffer;
+    if (sceSifCallRpc(&fsRpcClient, 255, 0, &fsRegistration, 4,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0)
         return -0x10001;
-    *(fsVersionTag_t *)D_0059E7A8 =
-        *(const fsVersionTag_t *)(EE_ADDR(D_0059E100) | 0x20000000);
-    D_0052C340 = 1;
+    *(fsVersionTag_t *)fsDetectedVersion =
+        *(const fsVersionTag_t *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
+    fsInitialized = 1;
     return 0;
 }
 
 
-extern u8 D_0059E7A8[0x18];
-extern u8 D_0052C2A0[4] __attribute__((section(".data")));
-extern const void *D_0052C350 __attribute__((section(".data")));
+extern u8 fsDetectedVersion[0x18];
+extern u8 kernelBuiltinVersion[4] __attribute__((section(".data")));
+extern const void *fsFallbackVersion __attribute__((section(".data")));
 extern s32 memcmp(const void *left, const void *right, size_t count);
 
 s32 _fs_version(void)
 {
-    const void *expected = D_0052C2A0;
-    const void *version = D_0059E7A8;
+    const void *expected = kernelBuiltinVersion;
+    const void *version = fsDetectedVersion;
     s32 mismatch = 0;
     if (memcmp(version, expected, 4) != 0) {
-        if (memcmp(version, D_0052C350, 4) != 0) {
-            mismatch = memcmp(expected, D_0052C350, 4) != 0;
+        if (memcmp(version, fsFallbackVersion, 4) != 0) {
+            mismatch = memcmp(expected, fsFallbackVersion, 4) != 0;
         }
     }
     return mismatch;
 }
 
-extern s32 D_0052C340 __attribute__((section(".data")));
+extern s32 fsInitialized __attribute__((section(".data")));
 extern void *memset(void *destination, s32 value, size_t count);
 
 s32 sceFsReset(void)
 {
-    D_0052C340 = 0;
-    memset(D_0059E7A8, 0, 4);
+    fsInitialized = 0;
+    memset(fsDetectedVersion, 0, 4);
     return 0;
 }
 
@@ -2184,7 +2184,7 @@ typedef union fsRequest_t {
     fsMountRequest_t mount;
     fsDreadRequest_t dread;
 } fsRequest_t;
-extern fsRequest_t D_0059D4C0;
+extern fsRequest_t fsRequest;
 
 /* NON_MATCHING: 640/644 bytes; opposite saved-register assignments
  * and final slot-return scheduling remain unresolved. */
@@ -2193,7 +2193,7 @@ s32 sceOpen(const char *name, s32 flags, ...)
 {
     rpcSemaParam param;
     s32 result;
-    fsOpenRequest_t *request = &D_0059D4C0.open;
+    fsOpenRequest_t *request = &fsRequest.open;
     fsRequestEntry_t *entry;
     kernelVaList_t args;
     s32 mode;
@@ -2203,7 +2203,7 @@ s32 sceOpen(const char *name, s32 flags, ...)
     s32 accepted;
 
     _sceFsWaitS(0);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     if (_fs_version() != 0) {
@@ -2225,7 +2225,7 @@ s32 sceOpen(const char *name, s32 flags, ...)
     if (length == 0x400) {
         request->name[0x3FF] = 0;
     }
-    slot = entry - D_0059E580;
+    slot = entry - fsIobTable;
     request->flags = flags & 0x6FFFFFFF;
     request->mode = mode;
     request->slot = slot;
@@ -2236,13 +2236,13 @@ s32 sceOpen(const char *name, s32 flags, ...)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 0, 0, &D_0059D4C0, 0x418,
-                      D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 0, 0, &fsRequest, 0x418,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2251,15 +2251,15 @@ s32 sceOpen(const char *name, s32 flags, ...)
     WaitSema(sema);
     DeleteSema(sema);
     if (result < 0) {
-        WaitSema(D_0052C348);
+        WaitSema(fsIobSema);
         entry->active = 0;
-        SignalSema(D_0052C348);
+        SignalSema(fsIobSema);
         return result;
     }
-    WaitSema(D_0052C348);
+    WaitSema(fsIobSema);
     entry->active |= flags;
     entry->word0 = result;
-    SignalSema(D_0052C348);
+    SignalSema(fsIobSema);
     return slot;
 }
 
@@ -2271,7 +2271,7 @@ s32 sceClose(s32 descriptor)
 {
     rpcSemaParam param;
     s32 result;
-    fsCloseRequest_t *request = &D_0059D4C0.close;
+    fsCloseRequest_t *request = &fsRequest.close;
     fsRequestEntry_t *entry;
     s32 sema;
     s32 accepted;
@@ -2280,7 +2280,7 @@ s32 sceClose(s32 descriptor)
 
     entry = get_iob(descriptor);
     _sceFsWaitS(1);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         _sceFsSigSema();
         return -1;
     }
@@ -2289,22 +2289,22 @@ s32 sceClose(s32 descriptor)
         return -9;
     }
     request->descriptor = entry->word0;
-    request->slot = entry - D_0059E580;
+    request->slot = entry - fsIobTable;
     param.maxCount = 1;
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    D_0059D4C0.close.sema = sema;
+    fsRequest.close.sema = sema;
     request->result = &result;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 1, 0, request, 0x14,
-                      D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 1, 0, request, 0x14,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
     entry->active = 0;
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2333,9 +2333,9 @@ typedef union fsIoctlStatus_t {
     s32 word;
     s64 doubleword;
 } fsIoctlStatus_t;
-extern fsIoctlStatus_t D_0059E150;
-extern void *D_0059D484;
-extern s32 D_0052C2C0[32];
+extern fsIoctlStatus_t fsIoctlStatus;
+extern void *fsIoctlArgument;
+extern s32 fsRequestSemas[32];
 extern void *memcpy(void *destination, const void *source, size_t size);
 
 /* NON_MATCHING: native 844-byte size; early switch allocation and
@@ -2345,7 +2345,7 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
 {
     rpcSemaParam param;
     s32 result;
-    fsIoctl2Request_t *request = &D_0059D4C0.ioctl2;
+    fsIoctl2Request_t *request = &fsRequest.ioctl2;
     fsRequestEntry_t *entry;
     s32 index;
     s32 sema;
@@ -2354,8 +2354,8 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
 
     entry = get_iob(descriptor);
     _sceFsWaitS(5);
-    D_0059D484 = argument;
-    if (D_0052C340 == 0) {
+    fsIoctlArgument = argument;
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     if (entry == NULL || entry->active == 0) {
@@ -2366,23 +2366,23 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
     request->outputSize = 0;
     switch (command) {
     case 1:
-        WaitSema(D_0052C34C);
-        for (index = 0; index < 32 && D_0052C2C0[index] == -1; index++) {
+        WaitSema(fsIoctlSema);
+        for (index = 0; index < 32 && fsRequestSemas[index] == -1; index++) {
         }
         if (index == 32) {
-            *(s32 *)D_0059D484 = 0;
+            *(s32 *)fsIoctlArgument = 0;
         } else {
-            *(s32 *)D_0059D484 = 1;
+            *(s32 *)fsIoctlArgument = 1;
         }
-        SignalSema(D_0052C34C);
+        SignalSema(fsIoctlSema);
         _sceFsSigSema();
         return 0;
     case 2:
-        *(s32 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&D_0059E150) | 0x20000000))->word;
+        *(s32 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->word;
         _sceFsSigSema();
         return 0;
     case 3:
-        *(s64 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&D_0059E150) | 0x20000000))->doubleword;
+        *(s64 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->doubleword;
         _sceFsSigSema();
         return 0;
     }
@@ -2398,18 +2398,18 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
     param.maxCount = 1;
     param.option = 0;
     sema = CreateSema(&param);
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     request->sema = sema;
     request->result = &result;
     request->resultSize = 4;
     sceSifWriteBackDCache(packet, 0x420);
-    if (sceSifCallRpc(&D_0059E780, 5, 0, packet,
-                      0x420, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 5, 0, packet,
+                      0x420, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2428,7 +2428,7 @@ s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
 {
     rpcSemaParam param;
     s32 result;
-    fsIoctl2Request_t *request = &D_0059D4C0.ioctl2;
+    fsIoctl2Request_t *request = &fsRequest.ioctl2;
     fsRequestEntry_t *entry;
     s32 sema;
     s32 accepted;
@@ -2436,7 +2436,7 @@ s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
 
     entry = get_iob(descriptor);
     _sceFsWaitS(26);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     if (entry == NULL || entry->active == 0) {
@@ -2458,7 +2458,7 @@ s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->outputSize = outputSize;
     request->result = &result;
@@ -2466,13 +2466,13 @@ s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
     request->output = output;
     request->sema = sema;
     sceSifWriteBackDCache(packet, 0x420);
-    if (sceSifCallRpc(&D_0059E780, 26, 0, packet,
-                      0x420, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 26, 0, packet,
+                      0x420, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2487,13 +2487,13 @@ s32 _sceCallCode(const char *path, s32 command)
 {
     rpcSemaParam param;
     s32 result;
-    fsPathRequest_t *request = &D_0059D4C0.path;
+    fsPathRequest_t *request = &fsRequest.path;
     s32 length;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(command);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -2510,13 +2510,13 @@ s32 _sceCallCode(const char *path, s32 command)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, command, 0, &D_0059D4C0,
-                      length + 0xD, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, command, 0, &fsRequest,
+                      length + 0xD, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2536,13 +2536,13 @@ s32 sceMkdir(const char *path, s32 mode)
 {
     rpcSemaParam param;
     s32 result;
-    fsMkdirRequest_t *request = &D_0059D4C0.mkdir;
+    fsMkdirRequest_t *request = &fsRequest.mkdir;
     s32 length;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(7);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -2560,13 +2560,13 @@ s32 sceMkdir(const char *path, s32 mode)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 7, 0, &D_0059D4C0,
-                      length + 0x11, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 7, 0, &fsRequest,
+                      length + 0x11, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2587,7 +2587,7 @@ s32 sceFormat(const char *device, const char *blockDevice, const void *args, s32
 {
     rpcSemaParam param;
     s32 result;
-    fsFormatRequest_t *request = &D_0059D4C0.format;
+    fsFormatRequest_t *request = &fsRequest.format;
     s32 deviceLength;
     s32 blockLength;
     s32 argIndex;
@@ -2596,7 +2596,7 @@ s32 sceFormat(const char *device, const char *blockDevice, const void *args, s32
     fsRequest_t *packet;
 
     _sceFsWaitS(14);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (deviceLength = 0; deviceLength < 0x400 &&
@@ -2626,19 +2626,19 @@ s32 sceFormat(const char *device, const char *blockDevice, const void *args, s32
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->sema = sema;
     request->result = &result;
     request->resultSize = 4;
     sceSifWriteBackDCache(packet, 0xC10);
-    if (sceSifCallRpc(&D_0059E780, 14, 0, packet,
-                      0xC10, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 14, 0, packet,
+                      0xC10, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2653,12 +2653,12 @@ s32 sceAddDrv(void *driver)
 {
     rpcSemaParam param;
     s32 result;
-    fsCloseRequest_t *request = &D_0059D4C0.close;
+    fsCloseRequest_t *request = &fsRequest.close;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(15);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     request->descriptor = EE_ADDR(driver);
@@ -2666,16 +2666,16 @@ s32 sceAddDrv(void *driver)
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    D_0059D4C0.close.sema = sema;
+    fsRequest.close.sema = sema;
     request->result = &result;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 15, 0, request, 16,
-                      D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 15, 0, request, 16,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -1;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2698,7 +2698,7 @@ s32 sceDopen(const char *path)
     s32 sema;
 
     _sceFsWaitS(9);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     _sceFsSigSema();
@@ -2708,14 +2708,14 @@ s32 sceDopen(const char *path)
     }
     result = _sceCallCode(path, 9);
     if (result < 0) {
-        WaitSema(D_0052C348);
+        WaitSema(fsIobSema);
         entry->active = 0;
-        sema = D_0052C348;
+        sema = fsIobSema;
     } else {
-        WaitSema(D_0052C348);
+        WaitSema(fsIobSema);
         entry->word0 = result;
-        sema = D_0052C348;
-        result = entry - D_0059E580;
+        sema = fsIobSema;
+        result = entry - fsIobTable;
     }
     SignalSema(sema);
     return result;
@@ -2725,7 +2725,7 @@ s32 sceDclose(s32 descriptor)
 {
     rpcSemaParam param;
     s32 result;
-    fsCloseRequest_t *request = &D_0059D4C0.close;
+    fsCloseRequest_t *request = &fsRequest.close;
     fsRequestEntry_t *entry;
     s32 sema;
     s32 accepted;
@@ -2734,7 +2734,7 @@ s32 sceDclose(s32 descriptor)
 
     entry = get_iob(descriptor);
     _sceFsWaitS(10);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         _sceFsSigSema();
         return -1;
     }
@@ -2747,17 +2747,17 @@ s32 sceDclose(s32 descriptor)
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    D_0059D4C0.close.sema = sema;
+    fsRequest.close.sema = sema;
     request->result = &result;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 10, 0, request, 0x14,
-                      D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 10, 0, request, 0x14,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
     entry->active = 0;
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2780,14 +2780,14 @@ s32 sceDread(s32 descriptor, void *directoryEntry)
 {
     rpcSemaParam param;
     s32 result;
-    fsDreadRequest_t *request = &D_0059D4C0.dread;
+    fsDreadRequest_t *request = &fsRequest.dread;
     fsRequestEntry_t *entry;
     s32 sema;
     s32 accepted;
 
     entry = get_iob(descriptor);
     _sceFsWaitS(11);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         _sceFsSigSema();
         return -1;
     }
@@ -2801,17 +2801,17 @@ s32 sceDread(s32 descriptor, void *directoryEntry)
     param.initCount = 0;
     param.option = 0;
     sema = CreateSema(&param);
-    D_0059D4C0.dread.sema = sema;
+    fsRequest.dread.sema = sema;
     request->result = &result;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 11, 0, request, 0x20,
-                      D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 11, 0, request, 0x20,
+                      fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         /* The failure path waits before releasing the filesystem lock. */
         WaitSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2826,13 +2826,13 @@ s32 sceGetstat(const char *path, void *stat)
 {
     rpcSemaParam param;
     s32 result;
-    fsGetstatRequest_t *request = &D_0059D4C0.getstat;
+    fsGetstatRequest_t *request = &fsRequest.getstat;
     s32 length;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(12);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -2850,13 +2850,13 @@ s32 sceGetstat(const char *path, void *stat)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 12, 0, &D_0059D4C0,
-                      length + 0x11, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 12, 0, &fsRequest,
+                      length + 0x11, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2872,14 +2872,14 @@ s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
 {
     rpcSemaParam param;
     s32 result;
-    fsChstatRequest_t *request = &D_0059D4C0.chstat;
+    fsChstatRequest_t *request = &fsRequest.chstat;
     s32 length;
     s32 sema;
     s32 accepted;
     fsRequest_t *packet;
 
     _sceFsWaitS(13);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -2894,19 +2894,19 @@ s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->sema = sema;
     request->result = &result;
     request->resultSize = 4;
     sceSifWriteBackDCache(packet, 0x450);
-    if (sceSifCallRpc(&D_0059E780, 13, 0, packet,
-                      length + 0x51, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 13, 0, packet,
+                      length + 0x51, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2922,7 +2922,7 @@ s32 sceRename(const char *oldPath, const char *newPath)
 {
     rpcSemaParam param;
     s32 result;
-    fsRenameRequest_t *request = &D_0059D4C0.rename;
+    fsRenameRequest_t *request = &fsRequest.rename;
     s32 oldLength;
     s32 newLength;
     s32 sema;
@@ -2930,7 +2930,7 @@ s32 sceRename(const char *oldPath, const char *newPath)
     fsRequest_t *packet;
 
     _sceFsWaitS(17);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (oldLength = 0; oldLength < 0x400 &&
@@ -2948,19 +2948,19 @@ s32 sceRename(const char *oldPath, const char *newPath)
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->sema = sema;
     request->result = &result;
     request->resultSize = 4;
     sceSifWriteBackDCache(packet, 0x80C);
-    if (sceSifCallRpc(&D_0059E780, 17, 0, packet,
-                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 17, 0, packet,
+                      0x80C, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -2980,13 +2980,13 @@ s32 sceSync(const char *path, s32 mode)
 {
     rpcSemaParam param;
     s32 result;
-    fsSyncRequest_t *request = &D_0059D4C0.sync;
+    fsSyncRequest_t *request = &fsRequest.sync;
     s32 length;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(19);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -3003,13 +3003,13 @@ s32 sceSync(const char *path, s32 mode)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 19, 0, &D_0059D4C0,
-                      0x414, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 19, 0, &fsRequest,
+                      0x414, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3024,7 +3024,7 @@ s32 sceMount(const char *device, const char *blockDevice, s32 mode, const void *
 {
     rpcSemaParam param;
     s32 result;
-    fsMountRequest_t *request = &D_0059D4C0.mount;
+    fsMountRequest_t *request = &fsRequest.mount;
     s32 deviceLength;
     s32 blockLength;
     s32 argIndex;
@@ -3033,7 +3033,7 @@ s32 sceMount(const char *device, const char *blockDevice, s32 mode, const void *
     fsRequest_t *packet;
 
     _sceFsWaitS(20);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (deviceLength = 0; deviceLength < 0x400 &&
@@ -3060,19 +3060,19 @@ s32 sceMount(const char *device, const char *blockDevice, s32 mode, const void *
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->sema = sema;
     request->result = &result;
     request->resultSize = 4;
     sceSifWriteBackDCache(packet, 0xC14);
-    if (sceSifCallRpc(&D_0059E780, 20, 0, packet,
-                      0xC14, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 20, 0, packet,
+                      0xC14, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3104,8 +3104,8 @@ s32 sceDevctl(const char *device, s32 command, const void *args, u32 argSize,
     fsRequest_t *packet;
 
     _sceFsWaitS(23);
-    request = &D_0059D4C0.devctl;
-    if (D_0052C340 == 0) {
+    request = &fsRequest.devctl;
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -3126,7 +3126,7 @@ s32 sceDevctl(const char *device, s32 command, const void *args, u32 argSize,
     param.initCount = 0;
     param.maxCount = 1;
     param.option = 0;
-    packet = &D_0059D4C0;
+    packet = &fsRequest;
     sema = CreateSema(&param);
     request->outputSize = outputSize;
     request->result = &result;
@@ -3134,13 +3134,13 @@ s32 sceDevctl(const char *device, s32 command, const void *args, u32 argSize,
     request->output = output;
     request->sema = sema;
     sceSifWriteBackDCache(packet, 0x81C);
-    if (sceSifCallRpc(&D_0059E780, 23, 0, packet,
-                      0x81C, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 23, 0, packet,
+                      0x81C, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3155,14 +3155,14 @@ s32 sceSymlink(const char *oldPath, const char *newPath)
 {
     rpcSemaParam param;
     s32 result;
-    fsRenameRequest_t *request = &D_0059D4C0.rename;
+    fsRenameRequest_t *request = &fsRequest.rename;
     s32 oldLength;
     s32 newLength;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(17);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (oldLength = 0; oldLength < 0x400 &&
@@ -3184,13 +3184,13 @@ s32 sceSymlink(const char *oldPath, const char *newPath)
     request->result = &result;
     request->sema = sema;
     request->resultSize = 4;
-    if (sceSifCallRpc(&D_0059E780, 24, 0, &D_0059D4C0,
-                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 24, 0, &fsRequest,
+                      0x80C, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3205,13 +3205,13 @@ s32 sceReadlink(const char *path, char *buffer, u32 count)
 {
     rpcSemaParam param;
     s32 result;
-    fsReadlinkRequest_t *request = &D_0059D4C0.readlink;
+    fsReadlinkRequest_t *request = &fsRequest.readlink;
     s32 length;
     s32 sema;
     s32 accepted;
 
     _sceFsWaitS(17);
-    if (D_0052C340 == 0) {
+    if (fsInitialized == 0) {
         sceFsInit();
     }
     for (length = 0; length < 0x400 &&
@@ -3234,13 +3234,13 @@ s32 sceReadlink(const char *path, char *buffer, u32 count)
     request->sema = sema;
     request->resultSize = 4;
     /* The fixed transfer also includes the shared buffer's untouched tail. */
-    if (sceSifCallRpc(&D_0059E780, 25, 0, &D_0059D4C0,
-                      0x80C, D_0059E100, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&fsRpcClient, 25, 0, &fsRequest,
+                      0x80C, fsVersionRpcBuffer, 4, NULL, NULL) < 0) {
         DeleteSema(sema);
         _sceFsSigSema();
         return -11;
     }
-    accepted = *(s32 *)(EE_ADDR(D_0059E100) | 0x20000000);
+    accepted = *(s32 *)(EE_ADDR(fsVersionRpcBuffer) | 0x20000000);
     _sceFsSigSema();
     if (accepted == 0) {
         DeleteSema(sema);
@@ -3251,12 +3251,12 @@ s32 sceReadlink(const char *path, char *buffer, u32 count)
     return result;
 }
 
-extern s32 D_0052C354;
+extern s32 iopHeapStatus;
 /* The BSS map bounds this opaque RPC client to 0x40 bytes. */
-extern u8 D_0059E840[0x40];
-extern s32 D_0059E880;
+extern u8 iopHeapRpcClient[0x40];
+extern s32 iopHeapResult;
 /* Shared heap request storage is 0x40 bytes in the BSS map. */
-extern addr_t D_0059E8C0[16];
+extern addr_t iopHeapArgs[16];
 extern s32 sceSifCallRpc(void *client, s32 function, s32 mode, void *send,
                          s32 sendBytes, void *receive, s32 receiveBytes,
                          void *endFunction, void *endParameter);
@@ -3266,10 +3266,10 @@ s32 sceSifInitIopHeap(void)
     s32 delay;
 
     for (;;) {
-        if (sceSifBindRpc((rpcClient *)D_0059E840, 0x80000003, 0) < 0) {
+        if (sceSifBindRpc((rpcClient *)iopHeapRpcClient, 0x80000003, 0) < 0) {
             return -1;
         }
-        if (((rpcClient *)D_0059E840)->server != NULL) {
+        if (((rpcClient *)iopHeapRpcClient)->server != NULL) {
             break;
         }
         for (delay = 0x100000; delay != -1; delay--) {
@@ -3281,7 +3281,7 @@ s32 sceSifInitIopHeap(void)
          * the binding is a reconstruction aid, not original-source evidence.
          * This initialized lifetime starts after the final call.
          */
-        FAKEMATCH_ASM_REG(saddr_t, result, "v0") = EE_ADDR_S(&D_0052C354);
+        FAKEMATCH_ASM_REG(saddr_t, result, "v0") = EE_ADDR_S(&iopHeapStatus);
         *EE_ADDR_AS(s32 *, result) = 0;
         result = 0;
         return result;
@@ -3290,13 +3290,13 @@ s32 sceSifInitIopHeap(void)
 
 s32 sceSifAllocIopHeap(s32 size)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    D_0059E8C0[0] = size;
-    if (sceSifCallRpc(D_0059E840, 1, 0, D_0059E8C0, 4,
-                      &D_0059E880, 4, NULL, NULL) >= 0) {
-        return D_0059E880;
+    iopHeapArgs[0] = size;
+    if (sceSifCallRpc(iopHeapRpcClient, 1, 0, iopHeapArgs, 4,
+                      &iopHeapResult, 4, NULL, NULL) >= 0) {
+        return iopHeapResult;
     }
     return 0;
 }
@@ -3304,28 +3304,28 @@ s32 sceSifAllocIopHeap(s32 size)
 
 void *sceSifAllocSysMemory(s32 mode, s32 size, void *address)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return NULL;
     }
-    D_0059E8C0[0] = size;
-    D_0059E8C0[1] = mode;
-    D_0059E8C0[2] = EE_ADDR(address);
-    if (sceSifCallRpc(D_0059E840, 4, 0, D_0059E8C0, 12,
-                      &D_0059E880, 4, NULL, NULL) >= 0) {
-        return EE_ADDR_AS(void *, D_0059E880);
+    iopHeapArgs[0] = size;
+    iopHeapArgs[1] = mode;
+    iopHeapArgs[2] = EE_ADDR(address);
+    if (sceSifCallRpc(iopHeapRpcClient, 4, 0, iopHeapArgs, 12,
+                      &iopHeapResult, 4, NULL, NULL) >= 0) {
+        return EE_ADDR_AS(void *, iopHeapResult);
     }
     return NULL;
 }
 
 s32 sceSifFreeSysMemory(void *address)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    D_0059E8C0[0] = EE_ADDR(address);
-    if (sceSifCallRpc(D_0059E840, 2, 0, D_0059E8C0, 4,
-                      &D_0059E880, 4, NULL, NULL) >= 0) {
-        return D_0059E880;
+    iopHeapArgs[0] = EE_ADDR(address);
+    if (sceSifCallRpc(iopHeapRpcClient, 2, 0, iopHeapArgs, 4,
+                      &iopHeapResult, 4, NULL, NULL) >= 0) {
+        return iopHeapResult;
     }
     return -1;
 }
@@ -3339,92 +3339,92 @@ typedef struct heapLoadRequest_t {
     u32 address;
     char name[0xFC];
 } heapLoadRequest_t;
-extern heapLoadRequest_t D_0059E900;
+extern heapLoadRequest_t iopHeapLoadRequest;
 
 s32 sceSifLoadIopHeap(const char *path, u32 address)
 {
     s32 length;
 
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
     for (length = 0; length < 0xFC &&
-         (D_0059E900.name[length] = path[length]) != 0; length++) {
+         (iopHeapLoadRequest.name[length] = path[length]) != 0; length++) {
     }
     if (length == 0xFC) {
-        D_0059E900.name[length - 1] = 0;
+        iopHeapLoadRequest.name[length - 1] = 0;
         length--;
     }
-    D_0059E900.address = address;
-    D_0059E900.name[0xFB] = 0;
-    if (sceSifCallRpc(D_0059E840, 3, 0, &D_0059E900, length + 5,
-                      &D_0059E880, 4, NULL, NULL) >= 0) {
-        return D_0059E880;
+    iopHeapLoadRequest.address = address;
+    iopHeapLoadRequest.name[0xFB] = 0;
+    if (sceSifCallRpc(iopHeapRpcClient, 3, 0, &iopHeapLoadRequest, length + 5,
+                      &iopHeapResult, 4, NULL, NULL) >= 0) {
+        return iopHeapResult;
     }
     return -1;
 }
 
 u32 sceSifQueryMemSize(void)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    if (sceSifCallRpc(D_0059E840, 5, 0, NULL, 0,
-                      &D_0059E880, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(iopHeapRpcClient, 5, 0, NULL, 0,
+                      &iopHeapResult, 4, NULL, NULL) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0059E880;
+    return iopHeapResult;
 }
 
 u32 sceSifQueryMaxFreeMemSize(void)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    if (sceSifCallRpc(D_0059E840, 6, 0, NULL, 0,
-                      &D_0059E880, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(iopHeapRpcClient, 6, 0, NULL, 0,
+                      &iopHeapResult, 4, NULL, NULL) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0059E880;
+    return iopHeapResult;
 }
 
 u32 sceSifQueryTotalFreeMemSize(void)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    if (sceSifCallRpc(D_0059E840, 7, 0, NULL, 0,
-                      &D_0059E880, 4, NULL, NULL) < 0) {
+    if (sceSifCallRpc(iopHeapRpcClient, 7, 0, NULL, 0,
+                      &iopHeapResult, 4, NULL, NULL) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0059E880;
+    return iopHeapResult;
 }
 
 /* The IOP block key and query results travel as 32-bit words. */
 u32 sceSifQueryBlockTopAddress(u32 block)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    D_0059E8C0[0] = block;
-    if (sceSifCallRpc(D_0059E840, 8, 0, D_0059E8C0, 4,
-                      &D_0059E880, 4, NULL, NULL) < 0) {
+    iopHeapArgs[0] = block;
+    if (sceSifCallRpc(iopHeapRpcClient, 8, 0, iopHeapArgs, 4,
+                      &iopHeapResult, 4, NULL, NULL) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0059E880;
+    return iopHeapResult;
 }
 
 u32 sceSifQueryBlockSize(u32 block)
 {
-    if (D_0052C354 < 0) {
+    if (iopHeapStatus < 0) {
         return 0;
     }
-    D_0059E8C0[0] = block;
-    if (sceSifCallRpc(D_0059E840, 9, 0, D_0059E8C0, 4,
-                      &D_0059E880, 4, NULL, NULL) < 0) {
+    iopHeapArgs[0] = block;
+    if (sceSifCallRpc(iopHeapRpcClient, 9, 0, iopHeapArgs, 4,
+                      &iopHeapResult, 4, NULL, NULL) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0059E880;
+    return iopHeapResult;
 }
 
 /* The load-file RPC sends this complete 0x200-byte shared request region. */
@@ -3435,16 +3435,16 @@ typedef struct lfRequest_t {
     u8 arguments[0xFC];
 } lfRequest_t;
 
-extern lfRequest_t D_0059EA00;
-extern rpcClient D_0059EC00;
+extern lfRequest_t lfRequest;
+extern rpcClient lfRpcClient;
 extern s32 _lf_bind(void);
 extern s32 _lf_version(void);
 extern char *strncpy(char *destination, const char *source, size_t count);
 
-extern s32 D_0052C358;
-extern u8 D_0059EC28[0x18];
-extern u8 D_0052C2A0[4];
-extern void *D_0052C35C;
+extern s32 lfBindStatus;
+extern u8 lfDetectedVersion[0x18];
+extern u8 kernelBuiltinVersion[4];
+extern void *lfFallbackVersion;
 extern void *memcpy(void *destination, const void *source, size_t size);
 extern s32 memcmp(const void *a, const void *b, size_t size);
 
@@ -3452,18 +3452,18 @@ s32 _lf_bind(void)
 {
     s32 delay;
 
-    if (D_0052C358 < 0) {
+    if (lfBindStatus < 0) {
         for (;;) {
-            if (sceSifBindRpc(&D_0059EC00, 0x80000006, 0) < 0) {
+            if (sceSifBindRpc(&lfRpcClient, 0x80000006, 0) < 0) {
                 return -1;
             }
-            if (D_0059EC00.server != NULL) {
-                D_0052C358 = 0;
-                if (sceSifCallRpc(&D_0059EC00, 0xFF, 0, NULL, 0,
-                                  &D_0059EA00, 4, NULL, NULL) < 0) {
+            if (lfRpcClient.server != NULL) {
+                lfBindStatus = 0;
+                if (sceSifCallRpc(&lfRpcClient, 0xFF, 0, NULL, 0,
+                                  &lfRequest, 4, NULL, NULL) < 0) {
                     return -65537;
                 }
-                memcpy(D_0059EC28, &D_0059EA00, 4);
+                memcpy(lfDetectedVersion, &lfRequest, 4);
                 return 0;
             }
             for (delay = 0x100000; delay != -1; delay--) {
@@ -3475,13 +3475,13 @@ s32 _lf_bind(void)
 
 s32 _lf_version(void)
 {
-    const void *builtin = D_0052C2A0;
-    const void *detected = D_0059EC28;
+    const void *builtin = kernelBuiltinVersion;
+    const void *detected = lfDetectedVersion;
     s32 mismatch = 0;
 
     if (memcmp(detected, builtin, 4) != 0) {
-        if (memcmp(detected, D_0052C35C, 4) != 0) {
-            mismatch = memcmp(builtin, D_0052C35C, 4) != 0;
+        if (memcmp(detected, lfFallbackVersion, 4) != 0) {
+            mismatch = memcmp(builtin, lfFallbackVersion, 4) != 0;
         }
     }
     return mismatch;
@@ -3491,8 +3491,8 @@ extern void *memset(void *destination, s32 value, size_t size);
 
 s32 sceSifLoadFileReset(void)
 {
-    D_0052C358 = -1;
-    memset(D_0059EC28, 0, 4);
+    lfBindStatus = -1;
+    memset(lfDetectedVersion, 0, 4);
     return 0;
 }
 
@@ -3506,24 +3506,24 @@ s32 _sceSifLoadModuleBuffer(void *buffer, s32 argumentSize, const void *argument
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = EE_ADDR_S(buffer);
+    lfRequest.value = EE_ADDR_S(buffer);
     if (arguments != NULL) {
         if (argumentSize > 0xFC) {
-            memcpy(D_0059EA00.arguments, arguments, 0xFC);
-            D_0059EA00.moduleResult = 0xFC;
+            memcpy(lfRequest.arguments, arguments, 0xFC);
+            lfRequest.moduleResult = 0xFC;
         } else {
-            memcpy(D_0059EA00.arguments, arguments, argumentSize);
-            D_0059EA00.moduleResult = argumentSize;
+            memcpy(lfRequest.arguments, arguments, argumentSize);
+            lfRequest.moduleResult = argumentSize;
         }
     } else {
-        D_0059EA00.moduleResult = 0;
+        lfRequest.moduleResult = 0;
     }
-    if (sceSifCallRpc(&D_0059EC00, 6, 0, &D_0059EA00, 0x200,
-                      &D_0059EA00, 8, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&lfRpcClient, 6, 0, &lfRequest, 0x200,
+                      &lfRequest, 8, NULL, NULL) < 0) {
         return -65537;
     }
-    result = D_0059EA00.value;
-    *moduleResult = D_0059EA00.moduleResult;
+    result = lfRequest.value;
+    *moduleResult = lfRequest.moduleResult;
     return result;
 }
 
@@ -3537,24 +3537,24 @@ s32 sceSifStopModule(s32 moduleId, s32 argumentSize, const void *arguments, s32 
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = moduleId;
+    lfRequest.value = moduleId;
     if (arguments != NULL) {
         if (argumentSize > 0xFC) {
-            memcpy(D_0059EA00.arguments, arguments, 0xFC);
-            D_0059EA00.moduleResult = 0xFC;
+            memcpy(lfRequest.arguments, arguments, 0xFC);
+            lfRequest.moduleResult = 0xFC;
         } else {
-            memcpy(D_0059EA00.arguments, arguments, argumentSize);
-            D_0059EA00.moduleResult = argumentSize;
+            memcpy(lfRequest.arguments, arguments, argumentSize);
+            lfRequest.moduleResult = argumentSize;
         }
     } else {
-        D_0059EA00.moduleResult = 0;
+        lfRequest.moduleResult = 0;
     }
-    if (sceSifCallRpc(&D_0059EC00, 7, 0, &D_0059EA00, 0x200,
-                      &D_0059EA00, 8, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&lfRpcClient, 7, 0, &lfRequest, 0x200,
+                      &lfRequest, 8, NULL, NULL) < 0) {
         return -65537;
     }
-    result = D_0059EA00.value;
-    *moduleResult = D_0059EA00.moduleResult;
+    result = lfRequest.value;
+    *moduleResult = lfRequest.moduleResult;
     return result;
 }
 
@@ -3566,12 +3566,12 @@ s32 sceSifUnloadModule(s32 moduleId)
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = moduleId;
-    if (sceSifCallRpc(&D_0059EC00, 8, 0, &D_0059EA00, 4,
-                      &D_0059EA00, 4, NULL, NULL) < 0) {
+    lfRequest.value = moduleId;
+    if (sceSifCallRpc(&lfRpcClient, 8, 0, &lfRequest, 4,
+                      &lfRequest, 4, NULL, NULL) < 0) {
         return -65537;
     }
-    return D_0059EA00.value;
+    return lfRequest.value;
 }
 
 s32 sceSifSearchModuleByName(const char *name)
@@ -3582,13 +3582,13 @@ s32 sceSifSearchModuleByName(const char *name)
     if (_lf_version() != 0) {
         return -65540;
     }
-    strncpy(D_0059EA00.name, name, 0xFC);
-    D_0059EA00.name[0xFB] = 0;
-    if (sceSifCallRpc(&D_0059EC00, 9, 0, &D_0059EA00, 512,
-                      &D_0059EA00, 4, NULL, NULL) < 0) {
+    strncpy(lfRequest.name, name, 0xFC);
+    lfRequest.name[0xFB] = 0;
+    if (sceSifCallRpc(&lfRpcClient, 9, 0, &lfRequest, 512,
+                      &lfRequest, 4, NULL, NULL) < 0) {
         return -65537;
     }
-    return D_0059EA00.value;
+    return lfRequest.value;
 }
 
 s32 sceSifSearchModuleByAddress(void *address)
@@ -3599,12 +3599,12 @@ s32 sceSifSearchModuleByAddress(void *address)
     if (_lf_version() != 0) {
         return -65540;
     }
-    D_0059EA00.value = EE_ADDR_S(address);
-    if (sceSifCallRpc(&D_0059EC00, 10, 0, &D_0059EA00, 4,
-                      &D_0059EA00, 4, NULL, NULL) < 0) {
+    lfRequest.value = EE_ADDR_S(address);
+    if (sceSifCallRpc(&lfRpcClient, 10, 0, &lfRequest, 4,
+                      &lfRequest, 4, NULL, NULL) < 0) {
         return -65537;
     }
-    return D_0059EA00.value;
+    return lfRequest.value;
 }
 
 s32 sceSifLoadModuleBuffer(void *buffer, s32 argumentSize, const void *arguments)
@@ -3631,26 +3631,26 @@ s32 _sceSifLoadModule(const char *path, s32 argumentSize, const void *arguments,
     if (_lf_version() != 0) {
         return -65540;
     }
-    strncpy(D_0059EA00.name, path, 0xFC);
-    D_0059EA00.name[0xFB] = 0;
+    strncpy(lfRequest.name, path, 0xFC);
+    lfRequest.name[0xFB] = 0;
     if (arguments != NULL) {
         if (argumentSize > 0xFC) {
-            memcpy(D_0059EA00.arguments, arguments, 0xFC);
-            D_0059EA00.value = 0xFC;
+            memcpy(lfRequest.arguments, arguments, 0xFC);
+            lfRequest.value = 0xFC;
         } else {
-            memcpy(D_0059EA00.arguments, arguments, argumentSize);
-            D_0059EA00.value = argumentSize;
+            memcpy(lfRequest.arguments, arguments, argumentSize);
+            lfRequest.value = argumentSize;
         }
     } else {
-        D_0059EA00.arguments[0] = 0;
-        D_0059EA00.value = 0;
+        lfRequest.arguments[0] = 0;
+        lfRequest.value = 0;
     }
-    if (sceSifCallRpc(&D_0059EC00, command, 0, &D_0059EA00, 0x200,
-                      &D_0059EA00, 8, NULL, NULL) < 0) {
+    if (sceSifCallRpc(&lfRpcClient, command, 0, &lfRequest, 0x200,
+                      &lfRequest, 8, NULL, NULL) < 0) {
         return -65537;
     }
-    result = D_0059EA00.value;
-    *moduleResult = D_0059EA00.moduleResult;
+    result = lfRequest.value;
+    *moduleResult = lfRequest.moduleResult;
     return result;
 }
 
@@ -3678,19 +3678,19 @@ s32 _sceSifLoadElfPart(const char *path, const char *section, u32 *result, s32 c
     if (_lf_version() != 0) {
         return -65540;
     }
-    strncpy(D_0059EA00.name, path, 0xFC);
-    D_0059EA00.name[0xFB] = 0;
-    strncpy((char *)D_0059EA00.arguments, section, 0xFC);
-    D_0059EA00.arguments[0xFB] = 0;
-    if (sceSifCallRpc(&D_0059EC00, command, 0, &D_0059EA00, 0x200,
-                      &D_0059EA00, 16, NULL, NULL) < 0) {
+    strncpy(lfRequest.name, path, 0xFC);
+    lfRequest.name[0xFB] = 0;
+    strncpy((char *)lfRequest.arguments, section, 0xFC);
+    lfRequest.arguments[0xFB] = 0;
+    if (sceSifCallRpc(&lfRpcClient, command, 0, &lfRequest, 0x200,
+                      &lfRequest, 16, NULL, NULL) < 0) {
         return -65537;
     }
-    if (D_0059EA00.value == 0) {
+    if (lfRequest.value == 0) {
         return -65539;
     }
-    result[0] = D_0059EA00.value;
-    result[1] = D_0059EA00.moduleResult;
+    result[0] = lfRequest.value;
+    result[1] = lfRequest.moduleResult;
     return 0;
 }
 
@@ -3716,18 +3716,18 @@ s32 sceSifGetIopAddr(void *address, void *output, u32 kind)
     if (kind >= 3) {
         return -65538;
     }
-    D_0059EA00.value = EE_ADDR_S(address);
-    D_0059EA00.moduleResult = kind;
-    if (sceSifCallRpc(&D_0059EC00, 3, 0, &D_0059EA00, 32,
-                      &D_0059EA00, 32, NULL, NULL) < 0) {
+    lfRequest.value = EE_ADDR_S(address);
+    lfRequest.moduleResult = kind;
+    if (sceSifCallRpc(&lfRpcClient, 3, 0, &lfRequest, 32,
+                      &lfRequest, 32, NULL, NULL) < 0) {
         return -65537;
     }
     if (kind == 0) {
-        *(u8 *)output = *(u8 *)&D_0059EA00.value;
+        *(u8 *)output = *(u8 *)&lfRequest.value;
     } else if (kind == 1) {
-        *(u16 *)output = *(u16 *)&D_0059EA00.value;
+        *(u16 *)output = *(u16 *)&lfRequest.value;
     } else if (kind == 2) {
-        *(u32 *)output = D_0059EA00.value;
+        *(u32 *)output = lfRequest.value;
     } else {
         return -65538;
     }
@@ -3739,20 +3739,20 @@ s32 sceSifSetIopAddr(void *address, const void *input, u32 kind)
     if (_lf_bind() < 0) {
         return -65536;
     }
-    D_0059EA00.value = EE_ADDR_S(address);
-    D_0059EA00.moduleResult = kind;
+    lfRequest.value = EE_ADDR_S(address);
+    lfRequest.moduleResult = kind;
     if (kind == 0) {
-        *(u8 *)D_0059EA00.name = *(const u8 *)input;
+        *(u8 *)lfRequest.name = *(const u8 *)input;
     } else if (kind == 1) {
-        *(u16 *)D_0059EA00.name = *(const u16 *)input;
+        *(u16 *)lfRequest.name = *(const u16 *)input;
     } else if (kind == 2) {
-        *(u32 *)D_0059EA00.name = *(const u32 *)input;
+        *(u32 *)lfRequest.name = *(const u32 *)input;
     } else {
         return -65538;
     }
     {
-        s32 status = sceSifCallRpc(&D_0059EC00, 2, 0, &D_0059EA00, 32,
-                               &D_0059EA00, 16, NULL, NULL);
+        s32 status = sceSifCallRpc(&lfRpcClient, 2, 0, &lfRequest, 32,
+                               &lfRequest, 16, NULL, NULL);
         /* Keep the selected post-RPC return value in its ABI register.
          * This is a target-specific matching aid, not an original-source claim. */
         FAKEMATCH_ASM_REG(s32, result, "v0") = status < 0 ? -65537 : 0;
@@ -3773,7 +3773,7 @@ typedef struct sifResetPacket_t {
 
 SIZE_CHECK(sifResetPacket_size_must_be_0x68, sifResetPacket_t, 0x68);
 
-extern sifResetPacket_t D_0059EC40;
+extern sifResetPacket_t sifResetPacket;
 extern void sceSifStopDma(void);
 extern u32 sceSifGetReg(u32 registerId);
 extern s32 sceSifSetReg(u32 registerId, u32 value);
@@ -3788,20 +3788,20 @@ s32 sceSifResetIop(const char *arguments, s32 mode)
 
     sceSifStopDma();
     destination = sceSifGetReg(0x80000000);
-    D_0059EC40.mode = mode;
+    sifResetPacket.mode = mode;
     for (length = 0; arguments[length] != 0; length++) {
-        D_0059EC40.arguments[length] = arguments[length];
+        sifResetPacket.arguments[length] = arguments[length];
     }
-    D_0059EC40.destination = NULL;
-    D_0059EC40.argumentSize = length;
-    D_0059EC40.command = 0x80000003;
-    D_0059EC40.dataSize = 0;
-    D_0059EC40.packetSize = 104;
-    transfer.source = EE_ADDR(&D_0059EC40);
+    sifResetPacket.destination = NULL;
+    sifResetPacket.argumentSize = length;
+    sifResetPacket.command = 0x80000003;
+    sifResetPacket.dataSize = 0;
+    sifResetPacket.packetSize = 104;
+    transfer.source = EE_ADDR(&sifResetPacket);
     transfer.destination = destination;
     transfer.size = 104;
     transfer.attributes = 0x44;
-    sceSifWriteBackDCache(&D_0059EC40, 104);
+    sceSifWriteBackDCache(&sifResetPacket, 104);
     sceSifSetReg(4, 0x40000);
     if (sceSifSetDma(&transfer, 1) != 0) {
         sceSifSetReg(4, 0x10000);
@@ -3840,7 +3840,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
 
-extern s32 D_0052C378;
+extern s32 mallocSema;
 extern s32 D_0052C37C;
 
 void supplement_crt0(void)
@@ -3852,7 +3852,7 @@ void supplement_crt0(void)
     first.initCount = 1;
     second.maxCount = 1;
     second.initCount = 1;
-    D_0052C378 = CreateSema(&first);
+    mallocSema = CreateSema(&first);
     D_0052C37C = CreateSema(&second);
 }
 
@@ -3882,14 +3882,14 @@ u32 *kFindAddress(u32 *start, const u32 *end, u32 instruction)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", FindAddress);
 
-extern u32 *D_0052C360 __attribute__((section(".data")));
+extern u32 *systemCallTable __attribute__((section(".data")));
 extern s32 Copy(void *dst, const void *src, u32 count);
 
 u32 GetSystemCallEntry(s32 index)
 {
     u32 entry;
 
-    Copy(&entry, &D_0052C360[index], 4);
+    Copy(&entry, &systemCallTable[index], 4);
     return entry;
 }
 
@@ -3898,7 +3898,7 @@ typedef struct {
     void *entry;
 } kernelEntryPair_t;
 
-extern kernelEntryPair_t D_0052C368[2];
+extern kernelEntryPair_t systemCallEntryPairs[2];
 extern void setup(u32 index, void *entry);
 extern u32 *FindAddress(u32 *start, const u32 *end, u32 instruction);
 
@@ -3909,8 +3909,8 @@ void GetSystemCallTableEntry(void)
     u32 *searchBase;
     u32 *copyBase;
 
-    setup(D_0052C368[0].index, D_0052C368[0].entry);
-    setup(D_0052C368[1].index, D_0052C368[1].entry);
+    setup(systemCallEntryPairs[0].index, systemCallEntryPairs[0].entry);
+    setup(systemCallEntryPairs[1].index, systemCallEntryPairs[1].entry);
     searchEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
                               EE_ADDR(kFindAddress));
     copyEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
@@ -3928,7 +3928,7 @@ void GetSystemCallTableEntry(void)
             copyBase = copyEntry - 0x5A;
         }
     }
-    D_0052C360 = searchBase;
+    systemCallTable = searchBase;
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", setup);
@@ -3985,8 +3985,8 @@ s32 PatchIsNeeded_0(void)
 
 extern void FlushCache(s32 mode);
 
-extern kernelEntryPair_t D_0052CB28[3];
-extern const u8 D_0052C380[0x7A8];
+extern kernelEntryPair_t execEntryPairs[3];
+extern const u8 execPs2Payload[0x7A8];
 extern s32 PatchIsNeeded_0(void);
 extern void gcc2_compiled__15(u32 index, void *entry);
 extern s32 Copy_0(void *destination, const void *source, u32 size);
@@ -4001,15 +4001,15 @@ void InitExecPS2(void)
     if (PatchIsNeeded_0() == 0) {
         return;
     }
-    gcc2_compiled__15(D_0052CB28[0].index, D_0052CB28[0].entry);
-    Copy_0((void *)0x80074000, D_0052C380, 0x7A8);
+    gcc2_compiled__15(execEntryPairs[0].index, execEntryPairs[0].entry);
+    Copy_0((void *)0x80074000, execPs2Payload, 0x7A8);
     FlushCache(0);
     FlushCache(2);
-    gcc2_compiled__15(D_0052CB28[1].index, D_0052CB28[1].entry);
+    gcc2_compiled__15(execEntryPairs[1].index, execEntryPairs[1].entry);
     for (i = 2; i < 3; i++) {
-        index = D_0052CB28[i].index;
+        index = execEntryPairs[i].index;
         entry = GetEntryAddress(index);
-        gcc2_compiled__15(D_0052CB28[i].index, entry);
+        gcc2_compiled__15(execEntryPairs[i].index, entry);
     }
 }
 
@@ -4035,20 +4035,20 @@ typedef struct execArgumentBlock_t {
     char *arguments[16];
     char strings[1];
 } execArgumentBlock_t;
-extern void *D_0052D668;
-extern kernelEntryPair_t D_0052CB40[1];
+extern void *execArgumentBlock;
+extern kernelEntryPair_t setArgEntryPairs[1];
 extern void PatchIsNeeded(u32 index, void *entry);
 extern s32 gcc2_compiled__16(void *destination, const void *source, u32 size);
 extern u32 strlen(const char *text);
 
 char *SetArg(const char *path, s32 count, const char *const *arguments)
 {
-    char **table = ((execArgumentBlock_t *)D_0052D668)->arguments;
+    char **table = ((execArgumentBlock_t *)execArgumentBlock)->arguments;
     char *cursor = (char *)&table[16];
     char *start = cursor;
     u32 length;
 
-    PatchIsNeeded(D_0052CB40[0].index, D_0052CB40[0].entry);
+    PatchIsNeeded(setArgEntryPairs[0].index, setArgEntryPairs[0].entry);
     if (count >= 16) {
         count = 15;
     }
@@ -4078,17 +4078,17 @@ void TerminateLibrary(void)
     InitTLB();
 }
 
-extern const char D_0054BCF0[];
+extern const char execDefaultPath[];
 extern s32 _ExecPS2(void *entry, void *gp, s32 count, char **arguments);
 extern void libc_2DBAC0(s32 status);
 extern void _ExecOSD(s32 count, char **arguments);
 
 s32 ExecPS2(void *entry, void *gp, s32 count, const char *const *arguments)
 {
-    SetArg(D_0054BCF0, count, arguments);
+    SetArg(execDefaultPath, count, arguments);
     TerminateLibrary();
     return _ExecPS2(entry, gp, count,
-                    &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+                    &((execArgumentBlock_t *)execArgumentBlock)->arguments[1]);
 }
 
 extern void libc_2DBAE0(const char *path, s32 count, char **arguments);
@@ -4098,7 +4098,7 @@ void LoadExecPS2(const char *path, s32 count, char **arguments)
     char *packedPath = SetArg(path, count, (const char *const *)arguments);
     TerminateLibrary();
     libc_2DBAE0(packedPath, count,
-                  &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+                  &((execArgumentBlock_t *)execArgumentBlock)->arguments[1]);
 }
 
 void Exit(s32 status)
@@ -4109,9 +4109,9 @@ void Exit(s32 status)
 
 void ExecOSD(s32 count, const char *const *arguments)
 {
-    SetArg(D_0054BCF0, count, arguments);
+    SetArg(execDefaultPath, count, arguments);
     TerminateLibrary();
-    _ExecOSD(count, &((execArgumentBlock_t *)D_0052D668)->arguments[1]);
+    _ExecOSD(count, &((execArgumentBlock_t *)execArgumentBlock)->arguments[1]);
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", gcc2_compiled__17);
@@ -4132,11 +4132,11 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
 
-extern kernelEntryPair_t D_0052D2B0[8];
-extern kernelEntryPair_t D_0052D670[8];
-extern void *D_0052D668;
-extern const u8 D_0052CB48[0x740];
-extern const u8 D_0052D288[0x28];
+extern kernelEntryPair_t alarmEntryPairs[8];
+extern kernelEntryPair_t tlbEntryPairs[8];
+extern void *execArgumentBlock;
+extern const u8 alarmPayload[0x740];
+extern const u8 alarmSmallPayload[0x28];
 extern const u8 TLBFunctionsImage[0x330];
 extern void gcc2_compiled__17(u32 index, void *entry);
 extern s32 Copy_1(void *destination, const void *source, u32 size);
@@ -4154,22 +4154,22 @@ void InitAlarm(void)
     if ((*(volatile u32 *)0x10001810 & 0x100) != 0) {
         return;
     }
-    gcc2_compiled__17(D_0052D2B0[0].index, D_0052D2B0[0].entry);
-    Copy_1((void *)0x80076000, D_0052CB48, 0x740);
-    Copy_1((void *)0x82000, D_0052D288, 0x28);
+    gcc2_compiled__17(alarmEntryPairs[0].index, alarmEntryPairs[0].entry);
+    Copy_1((void *)0x80076000, alarmPayload, 0x740);
+    Copy_1((void *)0x82000, alarmSmallPayload, 0x28);
     FlushCache(0);
     FlushCache(2);
-    gcc2_compiled__17(D_0052D2B0[1].index, D_0052D2B0[1].entry);
+    gcc2_compiled__17(alarmEntryPairs[1].index, alarmEntryPairs[1].entry);
     for (i = 2; i < 8; i++) {
-        index = D_0052D2B0[i].index;
+        index = alarmEntryPairs[i].index;
         entry = GetEntryAddress_0(index);
-        gcc2_compiled__17(D_0052D2B0[i].index, entry);
+        gcc2_compiled__17(alarmEntryPairs[i].index, entry);
     }
 }
 
 
 extern s32 Deci2Call(s32 command, void *packet);
-extern u8 D_0059ECA8[];
+extern u8 deci2PacketStorage[];
 
 typedef void (*deci2Handler_t)(s32 event, s32 parameter, void *argument);
 
@@ -4187,7 +4187,7 @@ s32 sceDeci2Open(u16 protocol, void *argument, deci2Handler_t handler)
     packet.protocol = protocol;
     packet.argument = argument;
     packet.handler = handler;
-    packet.storage = (void *)(EE_ADDR(D_0059ECA8) | 0x20000000);
+    packet.storage = (void *)(EE_ADDR(deci2PacketStorage) | 0x20000000);
     return Deci2Call(1, &packet);
 }
 
@@ -4277,8 +4277,8 @@ s32 kputs(const char *text)
 
 /* Handler entries stay opaque: callers supply code addresses, and this unit
  * does not establish a specific handler function signature. */
-extern void *D_0052D620;
-extern void *D_0052D628[16];
+extern void *tlbHandler;
+extern void *debugHandlers[16];
 extern void _kTLBException();
 extern void _kDebugException();
 extern void *SetVTLBRefillHandler(s32 index, void *handler);
@@ -4286,7 +4286,7 @@ extern void *SetVCommonHandler(s32 index, void *handler);
 
 void *SetTLBHandler(void *handler)
 {
-    D_0052D620 = handler;
+    tlbHandler = handler;
     SetVTLBRefillHandler(1, _kTLBException);
     SetVTLBRefillHandler(2, _kTLBException);
     SetVTLBRefillHandler(3, _kTLBException);
@@ -4301,8 +4301,8 @@ void *SetDebugHandler(s32 index, void *handler)
         return (void *)-1;
     }
 
-    previous = D_0052D628[index];
-    D_0052D628[index] = handler;
+    previous = debugHandlers[index];
+    debugHandlers[index] = handler;
     if (((u32)index - 1) < 3) {
         SetVTLBRefillHandler(index, _kDebugException);
     } else {
@@ -4334,18 +4334,18 @@ void InitTLBFunctions(void)
     u32 i;
     void *entry;
 
-    setup_0(D_0052D670[0].index, D_0052D670[0].entry);
+    setup_0(tlbEntryPairs[0].index, tlbEntryPairs[0].entry);
     Copy_2((void *)0x80075000, TLBFunctionsImage, 0x330);
     FlushCache(0);
     FlushCache(2);
-    setup_0(D_0052D670[1].index, D_0052D670[1].entry);
-    setup_0(D_0052D670[2].index, D_0052D670[2].entry);
+    setup_0(tlbEntryPairs[1].index, tlbEntryPairs[1].entry);
+    setup_0(tlbEntryPairs[2].index, tlbEntryPairs[2].entry);
     for (i = 3; i < 8; i++) {
-        index = D_0052D670[i].index;
+        index = tlbEntryPairs[i].index;
         entry = GetEntryAddress_1(index);
-        setup_0(D_0052D670[i].index, entry);
+        setup_0(tlbEntryPairs[i].index, entry);
     }
-    D_0052D668 = GetEntryAddress_1(3);
+    execArgumentBlock = GetEntryAddress_1(3);
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", PutTLBEntry);
@@ -4380,7 +4380,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", ExpandScratchPad);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB);
 
-INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BCF0);
+INCLUDE_RODATA(const s32, "sdk/libkernl", execDefaultPath);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB32MB);
 

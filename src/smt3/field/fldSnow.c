@@ -368,7 +368,7 @@ extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 extern void rsetAlpha(s32 mode);
 extern sdfTexHandle_t *fldSnowBlurHandle;
-extern volatile sdfVector4_t D_002FC9C0;
+extern volatile sdfVector4_t fldCamEye;
 extern volatile sdfVector4_t fldCamTarget;
 
 void fldSnowTask(void)
@@ -415,8 +415,8 @@ void fldSnowTask(void)
     rsetAlpha(1);
     cameraZ = fldCamTarget.z;
     cameraX = fldCamTarget.x;
-    eyeZ = D_002FC9C0.z;
-    eyeX = D_002FC9C0.x;
+    eyeZ = fldCamEye.z;
+    eyeX = fldCamEye.x;
     direction.x = eyeX - cameraX;
     direction.y = 0.0f;
     direction.z = eyeZ - cameraZ;

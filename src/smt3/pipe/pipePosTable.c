@@ -19,13 +19,13 @@ s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
 
 
 
-extern char D_005517E8[];
-extern char D_00548E78[]; /* "size %d\n" */
-extern char D_00548E88[]; /* "tMAX %d\n" */
-extern char D_00548E98[]; /* "linkNodeNum %d\n" */
+extern char pipeFmtInt[];
+extern char pipeFmtSize[]; /* "size %d\n" */
+extern char pipeFmtTableMax[]; /* "tMAX %d\n" */
+extern char pipeFmtLinkNodeNum[]; /* "linkNodeNum %d\n" */
 
 typedef struct fileRequest fileRequest_t;
-extern fileRequest_t *D_005517E0;
+extern fileRequest_t *pipePosFileRequest;
 
 extern void DEBUG_PRINT(const char *format, ...);
 extern fileRequest_t *fileLoad(const char *filename);
@@ -53,18 +53,18 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     pipeLinkSource_t source;
     tagPipeLinkInfo table;
 
-    if (D_005517E0 == NULL) {
-        D_005517E0 = fileLoad(filename);
+    if (pipePosFileRequest == NULL) {
+        pipePosFileRequest = fileLoad(filename);
     }
-    if (pacFileCheckEnd(D_005517E0) == 0) {
+    if (pacFileCheckEnd(pipePosFileRequest) == 0) {
         return 0;
     }
-    DEBUG_PRINT(D_005517E8, 0x20);
-    header = (s32 *)fileGetLoadPtr(D_005517E0);
+    DEBUG_PRINT(pipeFmtInt, 0x20);
+    header = (s32 *)fileGetLoadPtr(pipePosFileRequest);
     count = header[0];
     src = (u8 *)header + header[1];
     pos->tSize = count;
-    DEBUG_PRINT(D_00548E78, count);
+    DEBUG_PRINT(pipeFmtSize, count);
     size = pos->tSize << 5;
     pos->aHandle = sdfMemAllocDirect(size);
     pos->points = sdfMemGetPtr(pos->aHandle);
@@ -74,7 +74,7 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     count = header[2];
     type->tabMax = count;
     src = (u8 *)header + offset;
-    DEBUG_PRINT(D_00548E88, count);
+    DEBUG_PRINT(pipeFmtTableMax, count);
     type->aHandle = sdfMemAllocDirect(type->tabMax * 9);
     data = sdfMemGetPtr(type->aHandle);
     bytes = type->tabMax << 3;
@@ -85,16 +85,16 @@ s32 pipeFileLoad(const char *filename, tagPipePosTable *pos, tagPipeTable *type,
     src = (u8 *)header + header[5];
     nodes = header[4];
     source.count = nodes;
-    DEBUG_PRINT(D_00548E98, nodes);
+    DEBUG_PRINT(pipeFmtLinkNodeNum, nodes);
     source.data = src;
     LoadLinkData(&table, &source, 0);
     link->aHandle = table.aHandle;
     link->maxNum = table.maxNum;
     link->nextId = table.nextId;
     link->head = table.head;
-    sdfMemFreeDirect(fileGetMemHandle(D_005517E0));
-    fileHandleFree(D_005517E0);
-    D_005517E0 = NULL;
+    sdfMemFreeDirect(fileGetMemHandle(pipePosFileRequest));
+    fileHandleFree(pipePosFileRequest);
+    pipePosFileRequest = NULL;
     return 1;
 }
 
@@ -142,13 +142,13 @@ void func_002A2F48(void) {
 
 void func_002A2F50(void) {
 }
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E78);
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtSize);
 
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E88);
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtTableMax);
 
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", D_00548E98);
+INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtLinkNodeNum);
 
-INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E0);
+INCLUDE_SDATA(const s32, "pipe/pipePosTable", pipePosFileRequest);
 
-INCLUDE_SDATA(const s32, "pipe/pipePosTable", D_005517E8);
+INCLUDE_SDATA(const s32, "pipe/pipePosTable", pipeFmtInt);
 

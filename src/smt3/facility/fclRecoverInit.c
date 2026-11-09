@@ -29,7 +29,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern s8 gProcessStat_2;
 
-extern char D_0053D390[];
+extern char rcvEventProcName[];
 
 #include "sdk_libc.h"
 
@@ -40,11 +40,11 @@ extern void evtDisableMoonCalc(void);
 
 extern void sdfTexFree(s32 aHandle);
 
-extern char D_0054FBD8[];
+extern char rcvCalcProcName[];
 
-extern char D_0053D3F8[];
+extern char rcvDrawProcName[];
 
-extern char D_0053D408[];
+extern char rcvUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -58,7 +58,7 @@ extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 
 extern void evtDisableMoonDraw(void);
 
-extern char *D_003306C0[];
+extern char *rcvTmxPathTable[];
 
 extern char *rcv_data[];
 
@@ -109,7 +109,7 @@ extern void *dds3StartProcess(char *name, u32 priority, s32 v2, s32 v3,
 
 void fclRecoverEventEnd(void)
 {
-    dds3KillProcessName(D_0053D390, 1);
+    dds3KillProcessName(rcvEventProcName, 1);
     fclFreeStage();
 }
 
@@ -120,7 +120,7 @@ typedef struct
     /* 0x44E0 */ u8 panel[0x40];
 } fclRecoverWork_t;
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D390);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvEventProcName);
 
 void fclRecoverLoadTextures(void *workp)
 {
@@ -128,7 +128,7 @@ void fclRecoverLoadTextures(void *workp)
     s8 i;
 
     for (i = 0; i < 3; i++) {
-        work->texHandle[i] = EE_ADDR_S(fclLoadTexture(D_003306C0[i]));
+        work->texHandle[i] = EE_ADDR_S(fclLoadTexture(rcvTmxPathTable[i]));
     }
     fclSetPanelTex(work->panel, 0, 0, 0x100, 0x80, work->texHandle[2]);
     printf("RECOVER : Tex load.\n");
@@ -229,17 +229,17 @@ void fclRecoverProcessStart(s8 mode)
         return;
     }
     shutdownfunc = fclRecoverUpdateInit(mode, 0);
-    dds3StartProcess(D_0054FBD8, 0x401, 1, 1, rcvCalc, NULL, shutdownfunc);
-    dds3StartProcess(D_0053D3F8, 0x2B11, 1, 1, rcvDraw, NULL, shutdownfunc);
-    dds3StartProcess(D_0053D408, 0x520D, 1, 1, rcvUpdate, fclDestroyRecover, shutdownfunc);
+    dds3StartProcess(rcvCalcProcName, 0x401, 1, 1, rcvCalc, NULL, shutdownfunc);
+    dds3StartProcess(rcvDrawProcName, 0x2B11, 1, 1, rcvDraw, NULL, shutdownfunc);
+    dds3StartProcess(rcvUpdateProcName, 0x520D, 1, 1, rcvUpdate, fclDestroyRecover, shutdownfunc);
     gProcessStat_2 = 1;
 }
 
 void fclRecoverProcessEnd(void)
 {
-    dds3KillProcessName(D_0054FBD8, 1);
-    dds3KillProcessName(D_0053D3F8, 1);
-    dds3KillProcessName(D_0053D408, 1);
+    dds3KillProcessName(rcvCalcProcName, 1);
+    dds3KillProcessName(rcvDrawProcName, 1);
+    dds3KillProcessName(rcvUpdateProcName, 1);
 }
 
 s32 rcvCheckProcessStat(void)
@@ -269,15 +269,15 @@ s32 rcv_20DBE8(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D3F8);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvDrawProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D408);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvUpdateProcName);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D420);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvRemoveCurseText);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D430);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvCureStatusText);
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", D_0053D440);
+INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvHealHpMpText);
 
 INCLUDE_SDATA(const s32, "facility/fclRecoverInit", shutdownfunc);
 
@@ -285,17 +285,17 @@ INCLUDE_SDATA(const s32, "facility/fclRecoverInit", gProcessStat_2);
 
 INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBB5);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBB8);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdLeave);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBC0);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdTalk);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBC8);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdRevive);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBD0);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdHeal);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBD8);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCalcProcName);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBE0);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvReviveText);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBE8);
+INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvHealText);
 

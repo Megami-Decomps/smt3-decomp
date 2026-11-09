@@ -33,9 +33,9 @@ extern s32 sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
 
 extern void sdfFileClose(s32 aHandle);
 
-extern char D_005315D0[];
+extern char fldAllTblPath[];
 
-extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldNpcOverrides[], D_002FC1A0[];
+extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldNpcOverrides[], fldTerminalTable[];
 
 extern u8 fldAllCnt[];
 
@@ -53,7 +53,7 @@ void fldRunDanteClear(void);
 
 void fldAllTblLoad(void)
 {
-    s32 fd = sdfFileOpen(D_005315D0);
+    s32 fd = sdfFileOpen(fldAllTblPath);
 
     sdfFileRead(fd, fldAutoMapTitleTable, 0x4E0);
     sdfFileRead(fd, fldAreaNameTable, 0x2BC0);
@@ -63,7 +63,7 @@ void fldAllTblLoad(void)
     sdfFileRead(fd, D_00311850, 0x800);
     sdfFileRead(fd, fldNpcOverrides, 0x2A00);
     sdfFileRead(fd, fldTakaraTable, 0x1600);
-    sdfFileRead(fd, D_002FC1A0, 0x80);
+    sdfFileRead(fd, fldTerminalTable, 0x80);
     sdfFileRead(fd, fldAllCnt, 0x100);
     sdfFileClose(fd);
 }
@@ -245,7 +245,7 @@ void fldResetSequenceParams(void)
     fldGlobalBase.wordC8 = 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldGlobal", D_005315D0);
+INCLUDE_RODATA(const s32, "field/fldGlobal", fldAllTblPath);
 
 s32 dds3EffectFldCharToType(s32 charId)
 {

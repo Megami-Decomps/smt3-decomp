@@ -31,9 +31,9 @@ typedef struct
     f32 radius[4];
 } effMagaP4Point_t;
 
-extern const dds3EffectEventParameters_t D_00530E20;
-extern const effMagaSCArea_t D_00530E50;
-extern const effMagaP4Point_t D_00530E78;
+extern const dds3EffectEventParameters_t dds3EffectEventDefaultParameters;
+extern const effMagaSCArea_t dds3EffectMagaSCAreaDefault;
+extern const effMagaP4Point_t dds3EffectMagaP4PointDefault;
 extern void *memcpy(void *a, const void *b, size_t c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
@@ -676,7 +676,7 @@ dds3Basic_t *AddBEDEffect(source, position, rotation)
     const sdfVector4_t *position;
     const sdfVector4_t *rotation;
 {
-    dds3EffectEventParameters_t parameters = D_00530E20;
+    dds3EffectEventParameters_t parameters = dds3EffectEventDefaultParameters;
     dds3Basic_t *basic;
     effBTL_t *mixer;
     dds3EffectObjectBasicWorkData_t *work;
@@ -802,8 +802,8 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     memset(&position, 0, sizeof(position));
     memset(&rotation, 0, sizeof(rotation));
     rotation.w = 1.0f;
-    memcpy(&areaParameters, &D_00530E50, sizeof(areaParameters));
-    memcpy(&pointParameters, &D_00530E78, sizeof(pointParameters));
+    memcpy(&areaParameters, &dds3EffectMagaSCAreaDefault, sizeof(areaParameters));
+    memcpy(&pointParameters, &dds3EffectMagaP4PointDefault, sizeof(pointParameters));
     effect = dds3EffectLoad(descriptor);
     basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), &position, &rotation);
     if (basic == NULL) {
@@ -1166,9 +1166,9 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
     }
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E20);
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectEventDefaultParameters);
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E50);
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectMagaSCAreaDefault);
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E78);
+INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectMagaP4PointDefault);
 

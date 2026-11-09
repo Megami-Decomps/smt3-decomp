@@ -199,7 +199,7 @@ extern void sdfDelayThread(u32 delay);
 extern char * strcpy(char *, const char *);
 
 
-extern sndRingPacket_t D_00590840[32];
+extern sndRingPacket_t sdfSndCmdPacketRing[32];
 
 extern u32 sdfSndSendCmd_cmd_id;
 
@@ -213,7 +213,7 @@ extern s32 WakeupThread(s32 thread);
 
 extern void FlushCache(s32);
 
-extern sndListenerState_t D_005907F0;
+extern sndListenerState_t sdfSndListenerPrevState;
 
 char *sdfSndMakeFilename(char *aDstName, const char *aSrcName);
 
@@ -223,27 +223,27 @@ extern s32 p2sdSmgHandle;
 
 #include "sdk_libc.h"
 
-extern sndFileRequestState_t D_00593E20;
+extern sndFileRequestState_t sdfSndPcmRequest;
 
-extern s32 D_00552120;
+extern s32 sdfSndPcmBufferAddr;
 
-extern char D_00529BE8[];
+extern char sdfSndPcmFileName[];
 
 extern s32 sifRpcServerSema;
 
 extern char sdfDumpAddrFmt[];
 
-extern char D_00551A28[];
+extern char sdfDumpPadStr[];
 
-extern char D_00551A30[];
+extern char sdfDumpMidGapStr[];
 
-extern char D_00551A38[];
+extern char sdfDumpByteSepStr[];
 
 extern char sdfDumpByteFmt[];
 
 extern char sdfDumpLineBuf[];
 
-extern char D_00551A50[];
+extern char sdfDumpEndStr[];
 
 extern char sdfDmaDumpStartFmt[];
 
@@ -264,11 +264,11 @@ extern char sdfGsMemNodeFmt[];
 
 extern char sdfGsMemTypeFmt[];
 
-extern char *D_00529CC8[];
+extern char *sdfGsMemTypeNames[];
 
 sdfGsMemSlice_t *sdfGsMemGetLinkTail(void);
 
-extern char *D_00529CD8[];
+extern char *sdfGsMemTypeNamesTail[];
 
 void sdfMemGetInfo(sdfMemInfo_t *aInfo);
 
@@ -335,7 +335,7 @@ s32 sdfSndCmdTrans(void)
     if (current == tail) {
         return 1;
     }
-    packet = &D_00590840[current];
+    packet = &sdfSndCmdPacketRing[current];
     result = sceSifSendCmd(0, packet, ((u8 *)packet)[0xF] & 0xF0,
                            NULL, NULL, 0);
     if (result == 0) {
@@ -369,10 +369,10 @@ typedef struct sdfSndInitThreadParam_t {
     u8 reserved[0x18];
 } sdfSndInitThreadParam_t;
 
-extern sdfSndInitThreadParam_t D_005907C0;
-extern u8 D_00591840[];
-extern u8 D_00592880[];
-extern s32 D_005519D4;
+extern sdfSndInitThreadParam_t sdfSndCmdThreadParam;
+extern u8 sdfSndCmdThreadStack[];
+extern u8 sdfSifRpcThreadStack[];
+extern s32 sdfSifRpcThreadId;
 extern s32 _gp;
 extern s32 sceSifGetSreg(s32 index);
 extern s32 CreateThread(sdfSndInitThreadParam_t *parameter);
@@ -392,19 +392,19 @@ void sdfSndInitCmdIF(void)
             retries = 0;
         }
     }
-    D_005907C0.entry = sdfSndCmdIFThread;
-    D_005907C0.stack = D_00591840;
-    D_005907C0.stackSize = 0x1000;
+    sdfSndCmdThreadParam.entry = sdfSndCmdIFThread;
+    sdfSndCmdThreadParam.stack = sdfSndCmdThreadStack;
+    sdfSndCmdThreadParam.stackSize = 0x1000;
     /* Same descriptor order as CreateThreadSimple in sdfSystem.c. */
-    D_005907C0.priority = 0x42;
-    D_005907C0.gp = &_gp;
+    sdfSndCmdThreadParam.priority = 0x42;
+    sdfSndCmdThreadParam.gp = &_gp;
     sdfSndCmdIndex = 0;
     sdfSndCmdTailIndex = 0;
-    threadId = CreateThread(&D_005907C0);
+    threadId = CreateThread(&sdfSndCmdThreadParam);
     sdfSndCmdBuf = threadId;
     _StartThread(threadId, 0);
-    threadId = CreateThreadSimple(SifRpcServerThreadProc, D_00592880, 0x1000, 0x43);
-    D_005519D4 = threadId;
+    threadId = CreateThreadSimple(SifRpcServerThreadProc, sdfSifRpcThreadStack, 0x1000, 0x43);
+    sdfSifRpcThreadId = threadId;
     _StartThread(threadId, 0);
 }
 
@@ -425,7 +425,7 @@ s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize) {
         }
         return 0;
     }
-    entry = &D_00590840[(s16)sdfSndCmdTailIndex];
+    entry = &sdfSndCmdPacketRing[(s16)sdfSndCmdTailIndex];
     entry->sequence = sdfSndSendCmd_cmd_id;
     if (aExDataSize != 0) {
         memcpy(entry->payload, aExDataPtr, aExDataSize);
@@ -587,7 +587,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 
 
 extern s32 sceSifInitIopHeap(void);
-extern s32 D_0055213C;
+extern s32 sdfSndIopWorkAddr;
 
 INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndSeqMapInitMsg);
 
@@ -608,9 +608,9 @@ void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSeq
     iopAddress = sdfSndIopAlloc(0x5A0);
     sdfSndMap[0x72] = EE_ADDR(sdfSndMap);
     sdfSndMap[0x73] = 0x5A0;
-    D_0055213C = iopAddress;
+    sdfSndIopWorkAddr = iopAddress;
     sdfSndTransToIOP(iopAddress, sdfSndMap, 0x5A0);
-    sdfSndSendSyncCmd(0, 0, &D_0055213C, 4);
+    sdfSndSendSyncCmd(0, 0, &sdfSndIopWorkAddr, 4);
     sdfSndBurstReqMode = 0;
 }
 
@@ -750,11 +750,11 @@ void p2sdSetStandPos(f32 Cposx, f32 Cposy, f32 Cposz,
     state.scaledValues[3] = Pposx * 0.1f;
     state.scaledValues[4] = Pposy * 0.1f;
     state.scaledValues[5] = Pposz * 0.1f;
-    if (D_005907F0.scaledValues[0] != state.scaledValues[0] || D_005907F0.scaledValues[1] != state.scaledValues[1] ||
-        D_005907F0.scaledValues[2] != state.scaledValues[2] || D_005907F0.scaledValues[3] != state.scaledValues[3] ||
-        D_005907F0.scaledValues[4] != state.scaledValues[4] || D_005907F0.scaledValues[5] != state.scaledValues[5]) {
+    if (sdfSndListenerPrevState.scaledValues[0] != state.scaledValues[0] || sdfSndListenerPrevState.scaledValues[1] != state.scaledValues[1] ||
+        sdfSndListenerPrevState.scaledValues[2] != state.scaledValues[2] || sdfSndListenerPrevState.scaledValues[3] != state.scaledValues[3] ||
+        sdfSndListenerPrevState.scaledValues[4] != state.scaledValues[4] || sdfSndListenerPrevState.scaledValues[5] != state.scaledValues[5]) {
         sdfSndSendSyncCmd(0x160, 0, &state, 0x20);
-        D_005907F0 = state;
+        sdfSndListenerPrevState = state;
     }
 }
 
@@ -809,11 +809,11 @@ u64 p2sd_2C1D78(const char *aName)
 
 void p2sdSetPcmBuffer(saddr_t data, s32 size) {
     s32 *packet;
-    D_00593E20.size = size;
-    D_00593E20.pending = 1;
-    D_00593E20.data = data;
+    sdfSndPcmRequest.size = size;
+    sdfSndPcmRequest.pending = 1;
+    sdfSndPcmRequest.data = data;
     if (data != 0 && size > 0) {
-        packet = &D_00552120;
+        packet = &sdfSndPcmBufferAddr;
         *packet = data;
         sdfSndSendSyncCmd(0x1B0, 0, packet, 4);
     }
@@ -946,7 +946,7 @@ s32 p2sdLoadPcmFile(const char *name, u8 channel) {
     if (p2sdPcmState != 0) {
         return 1;
     }
-    strcpy(D_00529BE8, name);
+    strcpy(sdfSndPcmFileName, name);
     sdfSndSendSyncCmd((channel >> 3) | 0xF0, 0, 0, 0);
     return 0;
 }
@@ -1047,12 +1047,12 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
     case 0: {
         sdfFileCmdHandle_t *state;
 
-        if (D_00529BE8[0] == 0) {
+        if (sdfSndPcmFileName[0] == 0) {
             sdfFileRpcQueue[0] = 0;
             break;
         }
         p2sdPcmState = 1;
-        sdfSndMakeFilename(path, D_00529BE8);
+        sdfSndMakeFilename(path, sdfSndPcmFileName);
         state = sdfFileCmdReadOpen(path,
             (void (*)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32))sdfFileRpcCallback, 0);
         sdfFileRpcArg = state;
@@ -1103,7 +1103,7 @@ void *sdfFileRpcHandleCmd(s32 function, void *requestData, s32 requestSize)
         s32 bytes;
 
         sdfFileRpcResult = request;
-        sdfSndTransToIOP(request->destination, (u8 *)D_00593E20.data + sdfFileRpcCmdState,
+        sdfSndTransToIOP(request->destination, (u8 *)sdfSndPcmRequest.data + sdfFileRpcCmdState,
                          request->byteCount);
         bytes = sdfFileRpcResult->byteCount;
         sdfFileRpcQueue[0] = bytes;
@@ -1203,7 +1203,7 @@ void sdf_2C2618(u32 kind, const u8 *data)
         }
         break;
     }
-    sdfSndTransToIOP(D_0055213C, &sdfSndWork, 0x5A0);
+    sdfSndTransToIOP(sdfSndIopWorkAddr, &sdfSndWork, 0x5A0);
     sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
@@ -1259,12 +1259,12 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
             sdfPrintf(sdfDumpAddrFmt, data);
             column = EE_ADDR(data) & 0xF;
             for (i = column; i > 0; i--) {
-                sdfPrintf(D_00551A28);
+                sdfPrintf(sdfDumpPadStr);
             }
         } else if (column == 8) {
-            sdfPrintf(D_00551A30);
+            sdfPrintf(sdfDumpMidGapStr);
         } else {
-            sdfPrintf(D_00551A38);
+            sdfPrintf(sdfDumpByteSepStr);
         }
         sdfPrintf(sdfDumpByteFmt, *data++);
         column++;
@@ -1277,7 +1277,7 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     if (column == 0) {
         sdfPrintf(sdfDumpLineBuf);
     } else {
-        sdfPrintf(D_00551A50);
+        sdfPrintf(sdfDumpEndStr);
     }
 }
 
@@ -1351,12 +1351,12 @@ void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     }
 }
 
-extern char *D_00529C68[];
-extern s32 D_00529C88[];
+extern char *sdfGrVifUnpackNames[];
+extern s32 sdfGrVifUnpackBits[];
 extern char sdfVifMaskedName[];
 extern char sdfVifXferOkName[];
-extern char D_00551B10[];
-extern char D_00551B18[];
+extern char sdfDumpIndentStr[];
+extern char sdfDumpWordFmt[];
 
 void sdfGrFlushOtChain(u32 *source) {
     u32 *returnStack[2];
@@ -1562,10 +1562,10 @@ void sdfGrFlushOtChain(u32 *source) {
                         format = (((s32)immediate >> 13) & 6) | (((s32)opcode >> 4) & 1);
                         dataMode = 7;
                         sdfPrintf("VIF UNPACK%s %s,%04X,%04X\n",
-                                                   D_00529C68[format],
+                                                   sdfGrVifUnpackNames[format],
                                                    ((char **)((u8 *)sdfDmaTagNameTable + 0x20))[unpackFormat],
                                                    immediate & 0x3FF, num);
-                        bits = D_00529C88[unpackFormat];
+                        bits = sdfGrVifUnpackBits[unpackFormat];
                         n = (bits * (s32)num + 0x1F) >> 5;
                     } else {
                         sdfPrintf("unkown vif command\n");
@@ -1600,12 +1600,12 @@ void sdfGrFlushOtChain(u32 *source) {
                 break;
             case 5:
                 if (directRow == 0) {
-                    sdfPrintf(D_00551B10);
+                    sdfPrintf(sdfDumpIndentStr);
                 } else {
-                    sdfPrintf(D_00551A38);
+                    sdfPrintf(sdfDumpByteSepStr);
                 }
                 directRow++;
-                sdfPrintf(D_00551B18, value);
+                sdfPrintf(sdfDumpWordFmt, value);
                 if (directRow == 4) {
                     directRow = 0;
                     sdfPrintf(sdfDumpLineBuf);
@@ -1647,7 +1647,7 @@ void sdfDumpGsMemory(void) {
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
-            name = D_00529CC8[node->type];
+            name = sdfGsMemTypeNames[node->type];
         } else {
             sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;
@@ -1672,7 +1672,7 @@ void sdfDumpGsMemory2(void) {
     node = head;
     while (node != 0) {
         if ((u32)node->type < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
-            name = D_00529CD8[node->type];
+            name = sdfGsMemTypeNamesTail[node->type];
         } else {
             sdfPrintf(buf, sdfGsMemTypeFmt, node->type);
             name = buf;

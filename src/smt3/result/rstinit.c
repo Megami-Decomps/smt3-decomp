@@ -33,15 +33,15 @@ extern rstData_t *GBWK_1;
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
 extern void *memset(void *a, s32 b, size_t c);
 
-extern char D_0053DA28[];
+extern char rstMsgDestroyEvoAct[];
 
 extern s8 gProcessStat_4;
 
-extern char D_0054FCF0[];
+extern char rstProcName[];
 
-extern char D_0053DA90[];
+extern char rstDrawProcName[];
 
-extern char D_0053DAA0[];
+extern char rstUpdateProcName[];
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 extern void fclClearFlag(s8 index);
@@ -79,7 +79,7 @@ s32 rstChkEvoAct(void)
 void rstKillEvoAct(void)
 {
     fclFreeStage();
-    printf(D_0053DA28);
+    printf(rstMsgDestroyEvoAct);
 }
 
 void rstSetTestParam(void)
@@ -169,9 +169,9 @@ void rstCreateTargetList(rstData_t *work)
 /* Allocations, cursors and the texture are installed by rstInit. */
 
 
-extern char D_0053DA40[]; /* "/result2/scr/message.bf" */
-extern char D_0053DA58[]; /* "/result2/mes_data.bmd" */
-extern char D_0053DA70[]; /* "/result2/tmx/lvup_02.tmx" */
+extern char rstScriptPath[]; /* "/result2/scr/message.bf" */
+extern char rstMessagePath[]; /* "/result2/mes_data.bmd" */
+extern char rstTexturePath[]; /* "/result2/tmx/lvup_02.tmx" */
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
@@ -210,13 +210,13 @@ rstData_t *rstInit(s32 parent)
     cmpModelInit();
     rstChkResult2Process((u8 *)work);
     rstClearHeartsMasterPhase();
-    work->scriptAllocation = sdfDevLoadFileEx(D_0053DA40, (u32 *)&work->script, 0);
-    work->messageAllocation = sdfDevLoadFileEx(D_0053DA58, (u32 *)&work->message, 0);
+    work->scriptAllocation = sdfDevLoadFileEx(rstScriptPath, (u32 *)&work->script, 0);
+    work->messageAllocation = sdfDevLoadFileEx(rstMessagePath, (u32 *)&work->message, 0);
     fclInitMessage(work->message);
     fclSetSelMessagePos(0);
     cmpStartProcessPanelEff(0);
     rstSetStatusModelReady(1);
-    work->texture = fclLoadTexture(D_0053DA70);
+    work->texture = fclLoadTexture(rstTexturePath);
     rstSetResultWork(work->texture);
     rstCreateTargetList(work);
     work->unk_2310 = SDF_FRAMES(0x2B3);
@@ -271,18 +271,18 @@ void rstResult2ProcessStart(void)
         return;
     }
     GBWK_1 = rstInit(0);
-    dds3StartProcess(D_0054FCF0, 0x405, 1, 1, rstCalc, NULL, GBWK_1);
-    dds3StartProcess(D_0053DA90, 0x2B15, 1, 1, rstDraw, NULL, GBWK_1);
-    dds3StartProcess(D_0053DAA0, 0x5211, 1, 1, rstUpdate,
+    dds3StartProcess(rstProcName, 0x405, 1, 1, rstCalc, NULL, GBWK_1);
+    dds3StartProcess(rstDrawProcName, 0x2B15, 1, 1, rstDraw, NULL, GBWK_1);
+    dds3StartProcess(rstUpdateProcName, 0x5211, 1, 1, rstUpdate,
                      (dds3ProcessFunc_t)rstDestroyResult2, GBWK_1);
     gProcessStat_4 = 1;
 }
 
 void rstResult2ProcessEnd(void)
 {
-    dds3KillProcessName(D_0054FCF0, 1);
-    dds3KillProcessName(D_0053DA90, 1);
-    dds3KillProcessName(D_0053DAA0, 1);
+    dds3KillProcessName(rstProcName, 1);
+    dds3KillProcessName(rstDrawProcName, 1);
+    dds3KillProcessName(rstUpdateProcName, 1);
 }
 
 s32 checkResultStat(void)
@@ -376,17 +376,17 @@ void rstSetEvoState(void)
     EventStart->unk_22E6 = 2;
 }
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
+INCLUDE_RODATA(const s32, "result/rstinit", rstMsgDestroyEvoAct);
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA40);
+INCLUDE_RODATA(const s32, "result/rstinit", rstScriptPath);
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA58);
+INCLUDE_RODATA(const s32, "result/rstinit", rstMessagePath);
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA70);
+INCLUDE_RODATA(const s32, "result/rstinit", rstTexturePath);
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA90);
+INCLUDE_RODATA(const s32, "result/rstinit", rstDrawProcName);
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DAA0);
+INCLUDE_RODATA(const s32, "result/rstinit", rstUpdateProcName);
 
 INCLUDE_SDATA(const s32, "result/rstinit", GBWK_1);
 
@@ -394,7 +394,7 @@ INCLUDE_SDATA(const s32, "result/rstinit", gProcessStat_4);
 
 INCLUDE_SDATA(const s32, "result/rstinit", D_0054FCED);
 
-INCLUDE_SDATA(const s32, "result/rstinit", D_0054FCF0);
+INCLUDE_SDATA(const s32, "result/rstinit", rstProcName);
 
 INCLUDE_SDATA(const s32, "result/rstinit", D_0054FCF8);
 
