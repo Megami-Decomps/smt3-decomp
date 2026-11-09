@@ -118,6 +118,12 @@
 #define SDF_FRAME_INTERPOLATE_RESET(key)
 #endif
 
+/* SDF_FRAME_INTERPOLATE_RESET of key when cond holds, such as a camera cut.
+ * Expands to nothing here, cond included. */
+#ifndef SDF_FRAME_INTERPOLATE_RESET_IF
+#define SDF_FRAME_INTERPOLATE_RESET_IF(cond, key)
+#endif
+
 /* Sets lvalue to SDF_FRAME_INTERPOLATE(age, key, value). Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_SET
 #define SDF_FRAME_INTERPOLATE_SET(age, key, lvalue, value)

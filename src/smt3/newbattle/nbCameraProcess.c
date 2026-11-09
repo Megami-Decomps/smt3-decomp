@@ -11,12 +11,6 @@
 
 extern u32 dds3GetKernelCount(void);
 
-/* The tail halves its step every retail tick. Applying the decayed step
- * (1 - r) / r times as large each host tick sums to the retail total. */
-#define CAMERA_STEP(aStep, aTail)                                                                 \
-    ((aTail) ? (aStep) * ((1.0f - SDF_FRAME_DECAY(0.5f)) / SDF_FRAME_DECAY(0.5f))                 \
-             : SDF_FRAME_STEP(aStep))
-
 /* 16-byte rows indexed by camera state; +0xC selects the per-state reset. */
 typedef struct nbCameraStateEntry_t {
     char *name;
@@ -117,7 +111,7 @@ void nbCameraClearState(nbCamera_t *pCamera)
 
 void nbCameraAnim_RotateSet(nbCamera_t *pNbCamera, s32 frame, s32 rotate, f32 start_f)
 {
-    pNbCamera->anim.rotate_f = SDF_FRAMES(frame);
+    pNbCamera->anim.rotate_f = frame;
     pNbCamera->anim.rotate_s = start_f / frame;
     SetRotateMatrixY(pNbCamera->anim.rotate_s * rotate);
     SDF_VU0_LOADVECTOR(&pNbCamera->direction);
@@ -129,7 +123,7 @@ void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
 {
     f32 step = -angle / (f32)frames;
 
-    pCamera->anim.distance_f = SDF_FRAMES(frames);
+    pCamera->anim.distance_f = frames;
     pCamera->anim.distance_s = step;
     pCamera->distance += step * (f32)count;
 }
@@ -453,8 +447,6 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     sdfVector4_t eye;
     volatile sdfVector4_t scale;
     f32 distance;
-    s32 rotateTail;
-    s32 distanceTail;
 
     nbCameraCheckStateChange();
     if (pNbCamera.state != pNbCamera.state_change) {
@@ -498,26 +490,28 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     work = camera->workdata;
-    rotateTail = pNbCamera.anim.rotate_f <= 0;
-    if (!rotateTail) {
-        pNbCamera.anim.rotate_f--;
-    } else {
-        pNbCamera.anim.rotate_s *= SDF_FRAME_DECAY(0.5f);
-    }
-    if (pNbCamera.anim.rotate_s != 0.0f) {
-        SetRotateMatrixY(CAMERA_STEP(pNbCamera.anim.rotate_s, rotateTail));
-        SDF_VU0_LOADVECTOR(&pNbCamera.direction);
-        SDF_VU0_APPLYMATRIX();
-        SDF_VU0_STOREVECTOR(&pNbCamera.direction);
-    }
-    distanceTail = pNbCamera.anim.distance_f <= 0;
-    if (!distanceTail) {
-        pNbCamera.anim.distance_f--;
-    } else {
-        pNbCamera.anim.distance_s *= SDF_FRAME_DECAY(0.5f);
-    }
-    if (pNbCamera.anim.distance_s != 0.0f) {
-        pNbCamera.distance += CAMERA_STEP(pNbCamera.anim.distance_s, distanceTail);
+    /* Steps with the state calc, so the whole shot changes once per retail
+     * tick and the draw below interpolates it evenly. */
+    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (pNbCamera.anim.rotate_f > 0) {
+            pNbCamera.anim.rotate_f--;
+        } else {
+            pNbCamera.anim.rotate_s *= 0.5f;
+        }
+        if (pNbCamera.anim.rotate_s != 0.0f) {
+            SetRotateMatrixY(pNbCamera.anim.rotate_s);
+            SDF_VU0_LOADVECTOR(&pNbCamera.direction);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&pNbCamera.direction);
+        }
+        if (pNbCamera.anim.distance_f > 0) {
+            pNbCamera.anim.distance_f--;
+        } else {
+            pNbCamera.anim.distance_s *= 0.5f;
+        }
+        if (pNbCamera.anim.distance_s != 0.0f) {
+            pNbCamera.distance += pNbCamera.anim.distance_s;
+        }
     }
     distance = -pNbCamera.distance;
     scale.z = distance;
@@ -531,8 +525,15 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_B(&work->targetPos);
     SDF_VU0_STOREVECTOR(&eye);
+    /* A shot that starts this tick is a cut: draw it where it is. */
+    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &work->eyeVector.x);
+    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &work->targetPos.x);
+    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.direction.x);
+    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.fovy);
     SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &work->eyeVector.x, &eye.x, &eye.x, 3);
     SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &work->targetPos.x, &work->targetPos.x, &work->targetPos.x, 3);
+    /* MakeCamera aims at the eye plus this vector. */
+    SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &pNbCamera.direction.x, &work->eyeVector.x, &work->eyeVector.x, 3);
     dds3SetPosPoseSet(camera, &eye);
     dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &pNbCamera.fovy, pNbCamera.fovy));
     work->flag |= 1;
