@@ -76,6 +76,27 @@
 #define SDF_FRAME_MASK(age, bits) (bits)
 #endif
 
+/* A value drawn each host tick from state its owner updates once per retail
+ * tick, given a count of host ticks from 0 and a key no other smoothed value
+ * uses. A host draws it between its values at the ends of the last two retail
+ * ticks by the share of this tick run, so it moves every host tick and lands
+ * on the retail value at the tick's last host tick. The state is unchanged,
+ * so retail draws the value itself. */
+#ifndef SDF_FRAME_SMOOTH
+#define SDF_FRAME_SMOOTH(age, key, value) (value)
+#endif
+
+/* Sets lvalue to SDF_FRAME_SMOOTH(age, key, value). Expands to nothing here. */
+#ifndef SDF_FRAME_SMOOTH_SET
+#define SDF_FRAME_SMOOTH_SET(age, key, lvalue, value)
+#endif
+
+/* Sets the n floats at dst to SDF_FRAME_SMOOTH of the n floats at src, the
+ * i-th keyed by key and i. Expands to nothing here. */
+#ifndef SDF_FRAME_SMOOTH_VEC
+#define SDF_FRAME_SMOOTH_VEC(age, key, dst, src, n)
+#endif
+
 /* Brackets the reads of positions recorded once per retail tick by parts
  * that follow a moving mark: pos is the mark at the last retail tick and
  * posOld the one before. A host running more ticks than retail may move the

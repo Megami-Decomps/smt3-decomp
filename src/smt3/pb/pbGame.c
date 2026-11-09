@@ -1331,6 +1331,7 @@ s32 viewModeCamera(dds3ProcessID_t *id)
         return -1;
     }
     scale = work->scale;
+    SDF_FRAME_SMOOTH_VEC(dds3GetKernelCount(), &work->eye[0], aViewEye, &work->eye[0], 4);
     if (!(scale < 1.025)) {
         return -1;
     }
@@ -1346,6 +1347,7 @@ s32 viewModeCamera(dds3ProcessID_t *id)
         }
     }
     SDF_VU0_COPYVECTOR(&aViewEye, &work->eye[0]);
+    SDF_FRAME_SMOOTH_VEC(dds3GetKernelCount(), &work->eye[0], aViewEye, &work->eye[0], 4);
     SDF_VU0_COPYVECTOR(&aViewTarget, &work->target[0]);
     return 0;
 }

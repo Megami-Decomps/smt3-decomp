@@ -531,8 +531,10 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_B(&work->targetPos);
     SDF_VU0_STOREVECTOR(&eye);
+    SDF_FRAME_SMOOTH_VEC(dds3GetKernelCount(), &work->eyeVector.x, &eye.x, &eye.x, 3);
+    SDF_FRAME_SMOOTH_VEC(dds3GetKernelCount(), &work->targetPos.x, &work->targetPos.x, &work->targetPos.x, 3);
     dds3SetPosPoseSet(camera, &eye);
-    dds3CameraObjectBasicSetFovy(camera, pNbCamera.fovy);
+    dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_SMOOTH(dds3GetKernelCount(), &pNbCamera.fovy, pNbCamera.fovy));
     work->flag |= 1;
     pNbCamera.frame += SDF_FRAME_DUE(dds3GetKernelCount());
     return 0;
