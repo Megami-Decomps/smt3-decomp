@@ -10376,7 +10376,8 @@ void cmpSetStatusModelParam(void)
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR(600.0f);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
+    /* The quake moves once per retail tick. */
+    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), dds3QuakeOffset, 3));
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     SDF_VU0_LOADVECTOR(aViewEye);
