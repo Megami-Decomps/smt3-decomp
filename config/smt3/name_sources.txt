@@ -69,3 +69,14 @@
 0x00109E38	scrCreateProcessAtFirstProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109E38
 0x00109FD0	scrStartProcessProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name func_00109FD0
 0x002BFE08	sdfDecimalToPackedDigits	inferred	DDS1/2 name for the same sdfDev9 function; former name sdf_2BFE08
+0x001B1488	effSetChanStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B1488
+0x001B1478	effClearChanCursor	inferred	DDS1/2 name for the same effSpline function; former name func_001B1478
+0x001B1370	effSampleChannelBezier	inferred	DDS1/2 name for the same effSpline function; former name func_001B1370
+0x001B0CD0	effSplSetStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CD0
+0x001B0CC0	effSplRewind	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CC0
+0x001B0B90	effSplCalcRegist	inferred	DDS1/2 name for the same effSpline function; former name func_001B0B90
+0x001B0A60	effSplCalc	inferred	DDS1/2 name for the same effSpline function; former name func_001B0A60
+0x001B12D0	effAdvanceChanCursor	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12D0
+0x001B12B0	effReleaseInterpolationChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12B0
+0x001B1238	effCreateChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B1238
+0x001B09C0	effSplRun	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B09C0
