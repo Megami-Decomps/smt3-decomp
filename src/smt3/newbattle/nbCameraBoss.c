@@ -5948,10 +5948,12 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
 /* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * capture_015, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
+const f32 nbCameraBossForwardVec[4] __attribute__((aligned(16))) = { 0.0, 0.0, 1.0, 0.0 };
+
 #ifdef NON_MATCHING
 extern void ToMatrix(void);
 extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);
-extern u128 nbCameraBossForwardVec;
+extern const f32 nbCameraBossForwardVec[4];
 
 s32 nbCameraDANTE_Init(void)
 {
@@ -6022,7 +6024,6 @@ s32 nbCameraDANTE_Init(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbCameraBoss", nbCameraBossForwardVec);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraDANTE_Init);
 #endif
