@@ -372,1381 +372,1381 @@ s32 DebugProcFree(pbDebugWork_t *work, sdfDrawTag_t *tag)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcxxxAB);
+const char pbFileHumanPcxxxAB[15] = "human/pcxxx.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcxxxMB);
+const char pbFileHumanPcxxxMB[15] = "human/pcxxx.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcxxxTB);
+const char pbFileHumanPcxxxTB[15] = "human/pcxxx.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcAB);
+const char pbFileHumanPcAB[12] = "human/pc.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcMB);
+const char pbFileHumanPcMB[12] = "human/pc.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileHumanPcTB);
+const char pbFileHumanPcTB[12] = "human/pc.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x169PB);
+const char pbFileDevilBoss0x169PB[20] = "devil/boss/0x169.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x168PB);
+const char pbFileDevilBoss0x168PB[20] = "devil/boss/0x168.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x167PB);
+const char pbFileDevilBoss0x167PB[20] = "devil/boss/0x167.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x166PB);
+const char pbFileDevilBoss0x166PB[20] = "devil/boss/0x166.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x165PB);
+const char pbFileDevilBoss0x165PB[20] = "devil/boss/0x165.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x164PB);
+const char pbFileDevilBoss0x164PB[20] = "devil/boss/0x164.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x163PB);
+const char pbFileDevilBoss0x163PB[20] = "devil/boss/0x163.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x162PB);
+const char pbFileDevilBoss0x162PB[20] = "devil/boss/0x162.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x161PB);
+const char pbFileDevilBoss0x161PB[20] = "devil/boss/0x161.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x160PB);
+const char pbFileDevilBoss0x160PB[20] = "devil/boss/0x160.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15FPB);
+const char pbFileDevilBoss0x15FPB[20] = "devil/boss/0x15f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15EPB);
+const char pbFileDevilBoss0x15EPB[20] = "devil/boss/0x15e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15DPB);
+const char pbFileDevilBoss0x15DPB[20] = "devil/boss/0x15d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15CPB);
+const char pbFileDevilBoss0x15CPB[20] = "devil/boss/0x15c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15BPB);
+const char pbFileDevilBoss0x15BPB[20] = "devil/boss/0x15b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x15APB);
+const char pbFileDevilBoss0x15APB[20] = "devil/boss/0x15a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x159PB);
+const char pbFileDevilBoss0x159PB[20] = "devil/boss/0x159.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x158PB);
+const char pbFileDevilBoss0x158PB[20] = "devil/boss/0x158.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x157PB);
+const char pbFileDevilBoss0x157PB[20] = "devil/boss/0x157.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x156PB);
+const char pbFileDevilBoss0x156PB[20] = "devil/boss/0x156.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x155PB);
+const char pbFileDevilBoss0x155PB[20] = "devil/boss/0x155.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x154PB);
+const char pbFileDevilBoss0x154PB[20] = "devil/boss/0x154.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x153PB);
+const char pbFileDevilBoss0x153PB[20] = "devil/boss/0x153.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x152PB);
+const char pbFileDevilBoss0x152PB[20] = "devil/boss/0x152.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x150PB);
+const char pbFileDevilBoss0x150PB[20] = "devil/boss/0x150.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x14CPB);
+const char pbFileDevilBoss0x14CPB[20] = "devil/boss/0x14c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x14BPB);
+const char pbFileDevilBoss0x14BPB[20] = "devil/boss/0x14b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x14APB);
+const char pbFileDevilBoss0x14APB[20] = "devil/boss/0x14a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x148PB);
+const char pbFileDevilBoss0x148PB[20] = "devil/boss/0x148.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x147PB);
+const char pbFileDevilBoss0x147PB[20] = "devil/boss/0x147.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x146PB);
+const char pbFileDevilBoss0x146PB[20] = "devil/boss/0x146.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x145PB);
+const char pbFileDevilBoss0x145PB[20] = "devil/boss/0x145.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x144PB);
+const char pbFileDevilBoss0x144PB[20] = "devil/boss/0x144.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x143PB);
+const char pbFileDevilBoss0x143PB[20] = "devil/boss/0x143.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x142PB);
+const char pbFileDevilBoss0x142PB[20] = "devil/boss/0x142.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x141PB);
+const char pbFileDevilBoss0x141PB[20] = "devil/boss/0x141.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x12FPB);
+const char pbFileDevilBoss0x12FPB[20] = "devil/boss/0x12f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x12BPB);
+const char pbFileDevilBoss0x12BPB[20] = "devil/boss/0x12b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x129PB);
+const char pbFileDevilBoss0x129PB[20] = "devil/boss/0x129.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x126PB);
+const char pbFileDevilBoss0x126PB[20] = "devil/boss/0x126.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x125PB);
+const char pbFileDevilBoss0x125PB[20] = "devil/boss/0x125.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x124PB);
+const char pbFileDevilBoss0x124PB[20] = "devil/boss/0x124.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x123PB);
+const char pbFileDevilBoss0x123PB[20] = "devil/boss/0x123.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x122PB);
+const char pbFileDevilBoss0x122PB[20] = "devil/boss/0x122.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x121PB);
+const char pbFileDevilBoss0x121PB[20] = "devil/boss/0x121.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x120PB);
+const char pbFileDevilBoss0x120PB[20] = "devil/boss/0x120.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x11BPB);
+const char pbFileDevilBoss0x11BPB[20] = "devil/boss/0x11b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x11APB);
+const char pbFileDevilBoss0x11APB[20] = "devil/boss/0x11a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x119PB);
+const char pbFileDevilBoss0x119PB[20] = "devil/boss/0x119.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x118PB);
+const char pbFileDevilBoss0x118PB[20] = "devil/boss/0x118.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x117PB);
+const char pbFileDevilBoss0x117PB[20] = "devil/boss/0x117.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x116PB);
+const char pbFileDevilBoss0x116PB[20] = "devil/boss/0x116.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x114PB);
+const char pbFileDevilBoss0x114PB[20] = "devil/boss/0x114.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x110PB);
+const char pbFileDevilBoss0x110PB[20] = "devil/boss/0x110.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10FPB);
+const char pbFileDevilBoss0x10FPB[20] = "devil/boss/0x10f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10EPB);
+const char pbFileDevilBoss0x10EPB[20] = "devil/boss/0x10e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10DPB);
+const char pbFileDevilBoss0x10DPB[20] = "devil/boss/0x10d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10CPB);
+const char pbFileDevilBoss0x10CPB[20] = "devil/boss/0x10c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10BPB);
+const char pbFileDevilBoss0x10BPB[20] = "devil/boss/0x10b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x10APB);
+const char pbFileDevilBoss0x10APB[20] = "devil/boss/0x10a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x108PB);
+const char pbFileDevilBoss0x108PB[20] = "devil/boss/0x108.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x103PB);
+const char pbFileDevilBoss0x103PB[20] = "devil/boss/0x103.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x102PB);
+const char pbFileDevilBoss0x102PB[20] = "devil/boss/0x102.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x101PB);
+const char pbFileDevilBoss0x101PB[20] = "devil/boss/0x101.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilBoss0x100PB);
+const char pbFileDevilBoss0x100PB[20] = "devil/boss/0x100.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xF00xFF0xFFPB);
+const char pbFileDevil0xF00xFF0xFFPB[24] = "devil/0xf0/0xff/0xff.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCF0xCFPB);
+const char pbFileDevil0xC00xCF0xCFPB[24] = "devil/0xc0/0xcf/0xcf.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCE0xCEPB);
+const char pbFileDevil0xC00xCE0xCEPB[24] = "devil/0xc0/0xce/0xce.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCD0xCDPB);
+const char pbFileDevil0xC00xCD0xCDPB[24] = "devil/0xc0/0xcd/0xcd.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCC0xCCPB);
+const char pbFileDevil0xC00xCC0xCCPB[24] = "devil/0xc0/0xcc/0xcc.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCB0xCBPB);
+const char pbFileDevil0xC00xCB0xCBPB[24] = "devil/0xc0/0xcb/0xcb.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xCA0xCAPB);
+const char pbFileDevil0xC00xCA0xCAPB[24] = "devil/0xc0/0xca/0xca.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC90xC9PB);
+const char pbFileDevil0xC00xC90xC9PB[24] = "devil/0xc0/0xc9/0xc9.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC80xC8PB);
+const char pbFileDevil0xC00xC80xC8PB[24] = "devil/0xc0/0xc8/0xc8.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC70xC7PB);
+const char pbFileDevil0xC00xC70xC7PB[24] = "devil/0xc0/0xc7/0xc7.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC60xC6PB);
+const char pbFileDevil0xC00xC60xC6PB[24] = "devil/0xc0/0xc6/0xc6.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC50xC5PB);
+const char pbFileDevil0xC00xC50xC5PB[24] = "devil/0xc0/0xc5/0xc5.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC40xC4PB);
+const char pbFileDevil0xC00xC40xC4PB[24] = "devil/0xc0/0xc4/0xc4.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC30xC3PB);
+const char pbFileDevil0xC00xC30xC3PB[24] = "devil/0xc0/0xc3/0xc3.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC20xC2PB);
+const char pbFileDevil0xC00xC20xC2PB[24] = "devil/0xc0/0xc2/0xc2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC10xC1PB);
+const char pbFileDevil0xC00xC10xC1PB[24] = "devil/0xc0/0xc1/0xc1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xC00xC00xC0PB);
+const char pbFileDevil0xC00xC00xC0PB[24] = "devil/0xc0/0xc0/0xc0.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xB00xB20xB2PB);
+const char pbFileDevil0xB00xB20xB2PB[24] = "devil/0xb0/0xb2/0xb2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xB00xB10xB1PB);
+const char pbFileDevil0xB00xB10xB1PB[24] = "devil/0xb0/0xb1/0xb1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xB00xB00xB0PB);
+const char pbFileDevil0xB00xB00xB0PB[24] = "devil/0xb0/0xb0/0xb0.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAF0xAFPB);
+const char pbFileDevil0xA00xAF0xAFPB[24] = "devil/0xa0/0xaf/0xaf.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAE0xAEPB);
+const char pbFileDevil0xA00xAE0xAEPB[24] = "devil/0xa0/0xae/0xae.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAD0xADPB);
+const char pbFileDevil0xA00xAD0xADPB[24] = "devil/0xa0/0xad/0xad.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAC0xACPB);
+const char pbFileDevil0xA00xAC0xACPB[24] = "devil/0xa0/0xac/0xac.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAB0xABPB);
+const char pbFileDevil0xA00xAB0xABPB[24] = "devil/0xa0/0xab/0xab.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xAA0xAAPB);
+const char pbFileDevil0xA00xAA0xAAPB[24] = "devil/0xa0/0xaa/0xaa.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xA90xA9PB);
+const char pbFileDevil0xA00xA90xA9PB[24] = "devil/0xa0/0xa9/0xa9.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xA80xA8PB);
+const char pbFileDevil0xA00xA80xA8PB[24] = "devil/0xa0/0xa8/0xa8.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xA70xA7PB);
+const char pbFileDevil0xA00xA70xA7PB[24] = "devil/0xa0/0xa7/0xa7.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilDammyPB);
+const char pbFileDevilDammyPB[15] = "devil/dammy.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xA10xA1PB);
+const char pbFileDevil0xA00xA10xA1PB[24] = "devil/0xa0/0xa1/0xa1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0xA00xA00xA0PB);
+const char pbFileDevil0xA00xA00xA0PB[24] = "devil/0xa0/0xa0/0xa0.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x9D0x9DPB);
+const char pbFileDevil0x900x9D0x9DPB[24] = "devil/0x90/0x9d/0x9d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x9C0x9CPB);
+const char pbFileDevil0x900x9C0x9CPB[24] = "devil/0x90/0x9c/0x9c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x9B0x9BPB);
+const char pbFileDevil0x900x9B0x9BPB[24] = "devil/0x90/0x9b/0x9b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x9A0x9APB);
+const char pbFileDevil0x900x9A0x9APB[24] = "devil/0x90/0x9a/0x9a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x990x99PB);
+const char pbFileDevil0x900x990x99PB[24] = "devil/0x90/0x99/0x99.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x980x98PB);
+const char pbFileDevil0x900x980x98PB[24] = "devil/0x90/0x98/0x98.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x970x97PB);
+const char pbFileDevil0x900x970x97PB[24] = "devil/0x90/0x97/0x97.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x960x96PB);
+const char pbFileDevil0x900x960x96PB[24] = "devil/0x90/0x96/0x96.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x950x95PB);
+const char pbFileDevil0x900x950x95PB[24] = "devil/0x90/0x95/0x95.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x940x94PB);
+const char pbFileDevil0x900x940x94PB[24] = "devil/0x90/0x94/0x94.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x930x93PB);
+const char pbFileDevil0x900x930x93PB[24] = "devil/0x90/0x93/0x93.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x920x92PB);
+const char pbFileDevil0x900x920x92PB[24] = "devil/0x90/0x92/0x92.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x910x91PB);
+const char pbFileDevil0x900x910x91PB[24] = "devil/0x90/0x91/0x91.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x900x900x90PB);
+const char pbFileDevil0x900x900x90PB[24] = "devil/0x90/0x90/0x90.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8F0x8FPB);
+const char pbFileDevil0x800x8F0x8FPB[24] = "devil/0x80/0x8f/0x8f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8E0x8EPB);
+const char pbFileDevil0x800x8E0x8EPB[24] = "devil/0x80/0x8e/0x8e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8D0x8DPB);
+const char pbFileDevil0x800x8D0x8DPB[24] = "devil/0x80/0x8d/0x8d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8C0x8CPB);
+const char pbFileDevil0x800x8C0x8CPB[24] = "devil/0x80/0x8c/0x8c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8B0x8BPB);
+const char pbFileDevil0x800x8B0x8BPB[24] = "devil/0x80/0x8b/0x8b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x8A0x8APB);
+const char pbFileDevil0x800x8A0x8APB[24] = "devil/0x80/0x8a/0x8a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x890x89PB);
+const char pbFileDevil0x800x890x89PB[24] = "devil/0x80/0x89/0x89.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x880x88PB);
+const char pbFileDevil0x800x880x88PB[24] = "devil/0x80/0x88/0x88.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x870x87PB);
+const char pbFileDevil0x800x870x87PB[24] = "devil/0x80/0x87/0x87.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x860x86PB);
+const char pbFileDevil0x800x860x86PB[24] = "devil/0x80/0x86/0x86.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x850x85PB);
+const char pbFileDevil0x800x850x85PB[24] = "devil/0x80/0x85/0x85.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x840x84PB);
+const char pbFileDevil0x800x840x84PB[24] = "devil/0x80/0x84/0x84.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x830x83PB);
+const char pbFileDevil0x800x830x83PB[24] = "devil/0x80/0x83/0x83.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x820x82PB);
+const char pbFileDevil0x800x820x82PB[24] = "devil/0x80/0x82/0x82.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x810x81PB);
+const char pbFileDevil0x800x810x81PB[24] = "devil/0x80/0x81/0x81.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x800x800x80PB);
+const char pbFileDevil0x800x800x80PB[24] = "devil/0x80/0x80/0x80.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7F0x7FPB);
+const char pbFileDevil0x700x7F0x7FPB[24] = "devil/0x70/0x7f/0x7f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7E0x7EPB);
+const char pbFileDevil0x700x7E0x7EPB[24] = "devil/0x70/0x7e/0x7e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7D0x7DPB);
+const char pbFileDevil0x700x7D0x7DPB[24] = "devil/0x70/0x7d/0x7d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7C0x7CPB);
+const char pbFileDevil0x700x7C0x7CPB[24] = "devil/0x70/0x7c/0x7c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7B0x7BPB);
+const char pbFileDevil0x700x7B0x7BPB[24] = "devil/0x70/0x7b/0x7b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x7A0x7APB);
+const char pbFileDevil0x700x7A0x7APB[24] = "devil/0x70/0x7a/0x7a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x790x79PB);
+const char pbFileDevil0x700x790x79PB[24] = "devil/0x70/0x79/0x79.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x780x78PB);
+const char pbFileDevil0x700x780x78PB[24] = "devil/0x70/0x78/0x78.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x770x77PB);
+const char pbFileDevil0x700x770x77PB[24] = "devil/0x70/0x77/0x77.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x760x76PB);
+const char pbFileDevil0x700x760x76PB[24] = "devil/0x70/0x76/0x76.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x750x75PB);
+const char pbFileDevil0x700x750x75PB[24] = "devil/0x70/0x75/0x75.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x740x74PB);
+const char pbFileDevil0x700x740x74PB[24] = "devil/0x70/0x74/0x74.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x730x73PB);
+const char pbFileDevil0x700x730x73PB[24] = "devil/0x70/0x73/0x73.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x720x72PB);
+const char pbFileDevil0x700x720x72PB[24] = "devil/0x70/0x72/0x72.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x710x71PB);
+const char pbFileDevil0x700x710x71PB[24] = "devil/0x70/0x71/0x71.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x700x700x70PB);
+const char pbFileDevil0x700x700x70PB[24] = "devil/0x70/0x70/0x70.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6F0x6FPB);
+const char pbFileDevil0x600x6F0x6FPB[24] = "devil/0x60/0x6f/0x6f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6E0x6EPB);
+const char pbFileDevil0x600x6E0x6EPB[24] = "devil/0x60/0x6e/0x6e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6D0x6DPB);
+const char pbFileDevil0x600x6D0x6DPB[24] = "devil/0x60/0x6d/0x6d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6C0x6CPB);
+const char pbFileDevil0x600x6C0x6CPB[24] = "devil/0x60/0x6c/0x6c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6B0x6BPB);
+const char pbFileDevil0x600x6B0x6BPB[24] = "devil/0x60/0x6b/0x6b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x6A0x6APB);
+const char pbFileDevil0x600x6A0x6APB[24] = "devil/0x60/0x6a/0x6a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x690x69PB);
+const char pbFileDevil0x600x690x69PB[24] = "devil/0x60/0x69/0x69.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x680x68PB);
+const char pbFileDevil0x600x680x68PB[24] = "devil/0x60/0x68/0x68.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x670x67PB);
+const char pbFileDevil0x600x670x67PB[24] = "devil/0x60/0x67/0x67.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x660x66PB);
+const char pbFileDevil0x600x660x66PB[24] = "devil/0x60/0x66/0x66.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x650x65PB);
+const char pbFileDevil0x600x650x65PB[24] = "devil/0x60/0x65/0x65.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x640x64PB);
+const char pbFileDevil0x600x640x64PB[24] = "devil/0x60/0x64/0x64.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x630x63PB);
+const char pbFileDevil0x600x630x63PB[24] = "devil/0x60/0x63/0x63.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x620x62PB);
+const char pbFileDevil0x600x620x62PB[24] = "devil/0x60/0x62/0x62.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x610x61PB);
+const char pbFileDevil0x600x610x61PB[24] = "devil/0x60/0x61/0x61.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x600x600x60PB);
+const char pbFileDevil0x600x600x60PB[24] = "devil/0x60/0x60/0x60.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5F0x5FPB);
+const char pbFileDevil0x500x5F0x5FPB[24] = "devil/0x50/0x5f/0x5f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5E0x5EPB);
+const char pbFileDevil0x500x5E0x5EPB[24] = "devil/0x50/0x5e/0x5e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5D0x5DPB);
+const char pbFileDevil0x500x5D0x5DPB[24] = "devil/0x50/0x5d/0x5d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5C0x5CPB);
+const char pbFileDevil0x500x5C0x5CPB[24] = "devil/0x50/0x5c/0x5c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5B0x5BPB);
+const char pbFileDevil0x500x5B0x5BPB[24] = "devil/0x50/0x5b/0x5b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x5A0x5APB);
+const char pbFileDevil0x500x5A0x5APB[24] = "devil/0x50/0x5a/0x5a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x590x59PB);
+const char pbFileDevil0x500x590x59PB[24] = "devil/0x50/0x59/0x59.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x580x58PB);
+const char pbFileDevil0x500x580x58PB[24] = "devil/0x50/0x58/0x58.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x570x57PB);
+const char pbFileDevil0x500x570x57PB[24] = "devil/0x50/0x57/0x57.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x560x56PB);
+const char pbFileDevil0x500x560x56PB[24] = "devil/0x50/0x56/0x56.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x550x55PB);
+const char pbFileDevil0x500x550x55PB[24] = "devil/0x50/0x55/0x55.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x540x54PB);
+const char pbFileDevil0x500x540x54PB[24] = "devil/0x50/0x54/0x54.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x530x53PB);
+const char pbFileDevil0x500x530x53PB[24] = "devil/0x50/0x53/0x53.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x520x52PB);
+const char pbFileDevil0x500x520x52PB[24] = "devil/0x50/0x52/0x52.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x510x51PB);
+const char pbFileDevil0x500x510x51PB[24] = "devil/0x50/0x51/0x51.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x500x500x50PB);
+const char pbFileDevil0x500x500x50PB[24] = "devil/0x50/0x50/0x50.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4F0x4FPB);
+const char pbFileDevil0x400x4F0x4FPB[24] = "devil/0x40/0x4f/0x4f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4E0x4EPB);
+const char pbFileDevil0x400x4E0x4EPB[24] = "devil/0x40/0x4e/0x4e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4D0x4DPB);
+const char pbFileDevil0x400x4D0x4DPB[24] = "devil/0x40/0x4d/0x4d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4C0x4CPB);
+const char pbFileDevil0x400x4C0x4CPB[24] = "devil/0x40/0x4c/0x4c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4B0x4BPB);
+const char pbFileDevil0x400x4B0x4BPB[24] = "devil/0x40/0x4b/0x4b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x4A0x4APB);
+const char pbFileDevil0x400x4A0x4APB[24] = "devil/0x40/0x4a/0x4a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x490x49PB);
+const char pbFileDevil0x400x490x49PB[24] = "devil/0x40/0x49/0x49.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x480x48PB);
+const char pbFileDevil0x400x480x48PB[24] = "devil/0x40/0x48/0x48.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x470x47PB);
+const char pbFileDevil0x400x470x47PB[24] = "devil/0x40/0x47/0x47.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x460x46PB);
+const char pbFileDevil0x400x460x46PB[24] = "devil/0x40/0x46/0x46.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x450x45PB);
+const char pbFileDevil0x400x450x45PB[24] = "devil/0x40/0x45/0x45.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x440x44PB);
+const char pbFileDevil0x400x440x44PB[24] = "devil/0x40/0x44/0x44.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x430x43PB);
+const char pbFileDevil0x400x430x43PB[24] = "devil/0x40/0x43/0x43.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x420x42PB);
+const char pbFileDevil0x400x420x42PB[24] = "devil/0x40/0x42/0x42.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x410x41PB);
+const char pbFileDevil0x400x410x41PB[24] = "devil/0x40/0x41/0x41.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x400x400x40PB);
+const char pbFileDevil0x400x400x40PB[24] = "devil/0x40/0x40/0x40.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3F0x3FPB);
+const char pbFileDevil0x300x3F0x3FPB[24] = "devil/0x30/0x3f/0x3f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3E0x3EPB);
+const char pbFileDevil0x300x3E0x3EPB[24] = "devil/0x30/0x3e/0x3e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3D0x3DPB);
+const char pbFileDevil0x300x3D0x3DPB[24] = "devil/0x30/0x3d/0x3d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3C0x3CPB);
+const char pbFileDevil0x300x3C0x3CPB[24] = "devil/0x30/0x3c/0x3c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3B0x3BPB);
+const char pbFileDevil0x300x3B0x3BPB[24] = "devil/0x30/0x3b/0x3b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x3A0x3APB);
+const char pbFileDevil0x300x3A0x3APB[24] = "devil/0x30/0x3a/0x3a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x390x39PB);
+const char pbFileDevil0x300x390x39PB[24] = "devil/0x30/0x39/0x39.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x380x38PB);
+const char pbFileDevil0x300x380x38PB[24] = "devil/0x30/0x38/0x38.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x370x37PB);
+const char pbFileDevil0x300x370x37PB[24] = "devil/0x30/0x37/0x37.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x360x36PB);
+const char pbFileDevil0x300x360x36PB[24] = "devil/0x30/0x36/0x36.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x350x35PB);
+const char pbFileDevil0x300x350x35PB[24] = "devil/0x30/0x35/0x35.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x340x34PB);
+const char pbFileDevil0x300x340x34PB[24] = "devil/0x30/0x34/0x34.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x330x33PB);
+const char pbFileDevil0x300x330x33PB[24] = "devil/0x30/0x33/0x33.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x320x32PB);
+const char pbFileDevil0x300x320x32PB[24] = "devil/0x30/0x32/0x32.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x310x31PB);
+const char pbFileDevil0x300x310x31PB[24] = "devil/0x30/0x31/0x31.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x300x300x30PB);
+const char pbFileDevil0x300x300x30PB[24] = "devil/0x30/0x30/0x30.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2F0x2FPB);
+const char pbFileDevil0x200x2F0x2FPB[24] = "devil/0x20/0x2f/0x2f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2E0x2EPB);
+const char pbFileDevil0x200x2E0x2EPB[24] = "devil/0x20/0x2e/0x2e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2D0x2DPB);
+const char pbFileDevil0x200x2D0x2DPB[24] = "devil/0x20/0x2d/0x2d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2C0x2CPB);
+const char pbFileDevil0x200x2C0x2CPB[24] = "devil/0x20/0x2c/0x2c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2B0x2BPB);
+const char pbFileDevil0x200x2B0x2BPB[24] = "devil/0x20/0x2b/0x2b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x2A0x2APB);
+const char pbFileDevil0x200x2A0x2APB[24] = "devil/0x20/0x2a/0x2a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x290x29PB);
+const char pbFileDevil0x200x290x29PB[24] = "devil/0x20/0x29/0x29.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x280x28PB);
+const char pbFileDevil0x200x280x28PB[24] = "devil/0x20/0x28/0x28.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x270x27PB);
+const char pbFileDevil0x200x270x27PB[24] = "devil/0x20/0x27/0x27.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x260x26PB);
+const char pbFileDevil0x200x260x26PB[24] = "devil/0x20/0x26/0x26.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x250x25PB);
+const char pbFileDevil0x200x250x25PB[24] = "devil/0x20/0x25/0x25.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x240x24PB);
+const char pbFileDevil0x200x240x24PB[24] = "devil/0x20/0x24/0x24.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x230x23PB);
+const char pbFileDevil0x200x230x23PB[24] = "devil/0x20/0x23/0x23.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x220x22PB);
+const char pbFileDevil0x200x220x22PB[24] = "devil/0x20/0x22/0x22.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x210x21PB);
+const char pbFileDevil0x200x210x21PB[24] = "devil/0x20/0x21/0x21.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x200x200x20PB);
+const char pbFileDevil0x200x200x20PB[24] = "devil/0x20/0x20/0x20.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1F0x1FPB);
+const char pbFileDevil0x100x1F0x1FPB[24] = "devil/0x10/0x1f/0x1f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1E0x1EPB);
+const char pbFileDevil0x100x1E0x1EPB[24] = "devil/0x10/0x1e/0x1e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1D0x1DPB);
+const char pbFileDevil0x100x1D0x1DPB[24] = "devil/0x10/0x1d/0x1d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1C0x1CPB);
+const char pbFileDevil0x100x1C0x1CPB[24] = "devil/0x10/0x1c/0x1c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1B0x1BPB);
+const char pbFileDevil0x100x1B0x1BPB[24] = "devil/0x10/0x1b/0x1b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x1A0x1APB);
+const char pbFileDevil0x100x1A0x1APB[24] = "devil/0x10/0x1a/0x1a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x190x19PB);
+const char pbFileDevil0x100x190x19PB[24] = "devil/0x10/0x19/0x19.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x180x18PB);
+const char pbFileDevil0x100x180x18PB[24] = "devil/0x10/0x18/0x18.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x170x17PB);
+const char pbFileDevil0x100x170x17PB[24] = "devil/0x10/0x17/0x17.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x160x16PB);
+const char pbFileDevil0x100x160x16PB[24] = "devil/0x10/0x16/0x16.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x150x15PB);
+const char pbFileDevil0x100x150x15PB[24] = "devil/0x10/0x15/0x15.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x140x14PB);
+const char pbFileDevil0x100x140x14PB[24] = "devil/0x10/0x14/0x14.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x130x13PB);
+const char pbFileDevil0x100x130x13PB[24] = "devil/0x10/0x13/0x13.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x120x12PB);
+const char pbFileDevil0x100x120x12PB[24] = "devil/0x10/0x12/0x12.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x110x11PB);
+const char pbFileDevil0x100x110x11PB[24] = "devil/0x10/0x11/0x11.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x100x100x10PB);
+const char pbFileDevil0x100x100x10PB[24] = "devil/0x10/0x10/0x10.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0F0x0FPB);
+const char pbFileDevil0x000x0F0x0FPB[24] = "devil/0x00/0x0f/0x0f.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0E0x0EPB);
+const char pbFileDevil0x000x0E0x0EPB[24] = "devil/0x00/0x0e/0x0e.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0D0x0DPB);
+const char pbFileDevil0x000x0D0x0DPB[24] = "devil/0x00/0x0d/0x0d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0C0x0CPB);
+const char pbFileDevil0x000x0C0x0CPB[24] = "devil/0x00/0x0c/0x0c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0B0x0BPB);
+const char pbFileDevil0x000x0B0x0BPB[24] = "devil/0x00/0x0b/0x0b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x0A0x0APB);
+const char pbFileDevil0x000x0A0x0APB[24] = "devil/0x00/0x0a/0x0a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x090x09PB);
+const char pbFileDevil0x000x090x09PB[24] = "devil/0x00/0x09/0x09.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x080x08PB);
+const char pbFileDevil0x000x080x08PB[24] = "devil/0x00/0x08/0x08.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x070x07PB);
+const char pbFileDevil0x000x070x07PB[24] = "devil/0x00/0x07/0x07.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x060x06PB);
+const char pbFileDevil0x000x060x06PB[24] = "devil/0x00/0x06/0x06.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x050x05PB);
+const char pbFileDevil0x000x050x05PB[24] = "devil/0x00/0x05/0x05.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x040x04PB);
+const char pbFileDevil0x000x040x04PB[24] = "devil/0x00/0x04/0x04.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x030x03PB);
+const char pbFileDevil0x000x030x03PB[24] = "devil/0x00/0x03/0x03.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x020x02PB);
+const char pbFileDevil0x000x020x02PB[24] = "devil/0x00/0x02/0x02.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x010x01PB);
+const char pbFileDevil0x000x010x01PB[24] = "devil/0x00/0x01/0x01.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevil0x000x000x00PB);
+const char pbFileDevil0x000x000x00PB[24] = "devil/0x00/0x00/0x00.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x152OnPB);
+const char pbFileDevilOn0x152OnPB[21] = "devil/on/0x152_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x150OnPB);
+const char pbFileDevilOn0x150OnPB[21] = "devil/on/0x150_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x14COnPB);
+const char pbFileDevilOn0x14COnPB[21] = "devil/on/0x14c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x14BOnPB);
+const char pbFileDevilOn0x14BOnPB[21] = "devil/on/0x14b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x14AOnPB);
+const char pbFileDevilOn0x14AOnPB[21] = "devil/on/0x14a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x148OnPB);
+const char pbFileDevilOn0x148OnPB[21] = "devil/on/0x148_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x147OnPB);
+const char pbFileDevilOn0x147OnPB[21] = "devil/on/0x147_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x146OnPB);
+const char pbFileDevilOn0x146OnPB[21] = "devil/on/0x146_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x145OnPB);
+const char pbFileDevilOn0x145OnPB[21] = "devil/on/0x145_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x144OnPB);
+const char pbFileDevilOn0x144OnPB[21] = "devil/on/0x144_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x143OnPB);
+const char pbFileDevilOn0x143OnPB[21] = "devil/on/0x143_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x142OnPB);
+const char pbFileDevilOn0x142OnPB[21] = "devil/on/0x142_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x141OnPB);
+const char pbFileDevilOn0x141OnPB[21] = "devil/on/0x141_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x12FOnPB);
+const char pbFileDevilOn0x12FOnPB[21] = "devil/on/0x12f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x12BOnPB);
+const char pbFileDevilOn0x12BOnPB[21] = "devil/on/0x12b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x129OnPB);
+const char pbFileDevilOn0x129OnPB[21] = "devil/on/0x129_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x126OnPB);
+const char pbFileDevilOn0x126OnPB[21] = "devil/on/0x126_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x125OnPB);
+const char pbFileDevilOn0x125OnPB[21] = "devil/on/0x125_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x124OnPB);
+const char pbFileDevilOn0x124OnPB[21] = "devil/on/0x124_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x123OnPB);
+const char pbFileDevilOn0x123OnPB[21] = "devil/on/0x123_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x122OnPB);
+const char pbFileDevilOn0x122OnPB[21] = "devil/on/0x122_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x121OnPB);
+const char pbFileDevilOn0x121OnPB[21] = "devil/on/0x121_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x120OnPB);
+const char pbFileDevilOn0x120OnPB[21] = "devil/on/0x120_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x11BOnPB);
+const char pbFileDevilOn0x11BOnPB[21] = "devil/on/0x11b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x11AOnPB);
+const char pbFileDevilOn0x11AOnPB[21] = "devil/on/0x11a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x119OnPB);
+const char pbFileDevilOn0x119OnPB[21] = "devil/on/0x119_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x118OnPB);
+const char pbFileDevilOn0x118OnPB[21] = "devil/on/0x118_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x117OnPB);
+const char pbFileDevilOn0x117OnPB[21] = "devil/on/0x117_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x116OnPB);
+const char pbFileDevilOn0x116OnPB[21] = "devil/on/0x116_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x114OnPB);
+const char pbFileDevilOn0x114OnPB[21] = "devil/on/0x114_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x110OnPB);
+const char pbFileDevilOn0x110OnPB[21] = "devil/on/0x110_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10FOnPB);
+const char pbFileDevilOn0x10FOnPB[21] = "devil/on/0x10f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10EOnPB);
+const char pbFileDevilOn0x10EOnPB[21] = "devil/on/0x10e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10DOnPB);
+const char pbFileDevilOn0x10DOnPB[21] = "devil/on/0x10d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10COnPB);
+const char pbFileDevilOn0x10COnPB[21] = "devil/on/0x10c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10BOnPB);
+const char pbFileDevilOn0x10BOnPB[21] = "devil/on/0x10b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10AOnPB);
+const char pbFileDevilOn0x10AOnPB[21] = "devil/on/0x10a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x108OnPB);
+const char pbFileDevilOn0x108OnPB[21] = "devil/on/0x108_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x103OnPB);
+const char pbFileDevilOn0x103OnPB[21] = "devil/on/0x103_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x102OnPB);
+const char pbFileDevilOn0x102OnPB[21] = "devil/on/0x102_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x101OnPB);
+const char pbFileDevilOn0x101OnPB[21] = "devil/on/0x101_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x100OnPB);
+const char pbFileDevilOn0x100OnPB[21] = "devil/on/0x100_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xFFOnPB);
+const char pbFileDevilOn0xFFOnPB[20] = "devil/on/0xff_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCFOnPB);
+const char pbFileDevilOn0xCFOnPB[20] = "devil/on/0xcf_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCEOnPB);
+const char pbFileDevilOn0xCEOnPB[20] = "devil/on/0xce_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCDOnPB);
+const char pbFileDevilOn0xCDOnPB[20] = "devil/on/0xcd_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCCOnPB);
+const char pbFileDevilOn0xCCOnPB[20] = "devil/on/0xcc_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCBOnPB);
+const char pbFileDevilOn0xCBOnPB[20] = "devil/on/0xcb_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xCAOnPB);
+const char pbFileDevilOn0xCAOnPB[20] = "devil/on/0xca_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC9OnPB);
+const char pbFileDevilOn0xC9OnPB[20] = "devil/on/0xc9_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC8OnPB);
+const char pbFileDevilOn0xC8OnPB[20] = "devil/on/0xc8_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC7OnPB);
+const char pbFileDevilOn0xC7OnPB[20] = "devil/on/0xc7_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC6OnPB);
+const char pbFileDevilOn0xC6OnPB[20] = "devil/on/0xc6_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC5OnPB);
+const char pbFileDevilOn0xC5OnPB[20] = "devil/on/0xc5_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC4OnPB);
+const char pbFileDevilOn0xC4OnPB[20] = "devil/on/0xc4_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC3OnPB);
+const char pbFileDevilOn0xC3OnPB[20] = "devil/on/0xc3_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC2OnPB);
+const char pbFileDevilOn0xC2OnPB[20] = "devil/on/0xc2_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC1OnPB);
+const char pbFileDevilOn0xC1OnPB[20] = "devil/on/0xc1_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xC0OnPB);
+const char pbFileDevilOn0xC0OnPB[20] = "devil/on/0xc0_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xB2OnPB);
+const char pbFileDevilOn0xB2OnPB[20] = "devil/on/0xb2_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xB1OnPB);
+const char pbFileDevilOn0xB1OnPB[20] = "devil/on/0xb1_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xB0OnPB);
+const char pbFileDevilOn0xB0OnPB[20] = "devil/on/0xb0_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xAFOnPB);
+const char pbFileDevilOn0xAFOnPB[20] = "devil/on/0xaf_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xAEOnPB);
+const char pbFileDevilOn0xAEOnPB[20] = "devil/on/0xae_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xADOnPB);
+const char pbFileDevilOn0xADOnPB[20] = "devil/on/0xad_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xACOnPB);
+const char pbFileDevilOn0xACOnPB[20] = "devil/on/0xac_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xABOnPB);
+const char pbFileDevilOn0xABOnPB[20] = "devil/on/0xab_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xAAOnPB);
+const char pbFileDevilOn0xAAOnPB[20] = "devil/on/0xaa_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xA9OnPB);
+const char pbFileDevilOn0xA9OnPB[20] = "devil/on/0xa9_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xA8OnPB);
+const char pbFileDevilOn0xA8OnPB[20] = "devil/on/0xa8_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xA7OnPB);
+const char pbFileDevilOn0xA7OnPB[20] = "devil/on/0xa7_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOnDammyPB);
+const char pbFileDevilOnDammyPB[18] = "devil/on/dammy.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xA1OnPB);
+const char pbFileDevilOn0xA1OnPB[20] = "devil/on/0xa1_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0xA0OnPB);
+const char pbFileDevilOn0xA0OnPB[20] = "devil/on/0xa0_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x9DOnPB);
+const char pbFileDevilOn0x9DOnPB[20] = "devil/on/0x9d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x9COnPB);
+const char pbFileDevilOn0x9COnPB[20] = "devil/on/0x9c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x9BOnPB);
+const char pbFileDevilOn0x9BOnPB[20] = "devil/on/0x9b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x9AOnPB);
+const char pbFileDevilOn0x9AOnPB[20] = "devil/on/0x9a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x99OnPB);
+const char pbFileDevilOn0x99OnPB[20] = "devil/on/0x99_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x98OnPB);
+const char pbFileDevilOn0x98OnPB[20] = "devil/on/0x98_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x97OnPB);
+const char pbFileDevilOn0x97OnPB[20] = "devil/on/0x97_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x96OnPB);
+const char pbFileDevilOn0x96OnPB[20] = "devil/on/0x96_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x95OnPB);
+const char pbFileDevilOn0x95OnPB[20] = "devil/on/0x95_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x94OnPB);
+const char pbFileDevilOn0x94OnPB[20] = "devil/on/0x94_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x93OnPB);
+const char pbFileDevilOn0x93OnPB[20] = "devil/on/0x93_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x92OnPB);
+const char pbFileDevilOn0x92OnPB[20] = "devil/on/0x92_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x91OnPB);
+const char pbFileDevilOn0x91OnPB[20] = "devil/on/0x91_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x90OnPB);
+const char pbFileDevilOn0x90OnPB[20] = "devil/on/0x90_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8FOnPB);
+const char pbFileDevilOn0x8FOnPB[20] = "devil/on/0x8f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8EOnPB);
+const char pbFileDevilOn0x8EOnPB[20] = "devil/on/0x8e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8DOnPB);
+const char pbFileDevilOn0x8DOnPB[20] = "devil/on/0x8d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8COnPB);
+const char pbFileDevilOn0x8COnPB[20] = "devil/on/0x8c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8BOnPB);
+const char pbFileDevilOn0x8BOnPB[20] = "devil/on/0x8b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x8AOnPB);
+const char pbFileDevilOn0x8AOnPB[20] = "devil/on/0x8a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x89OnPB);
+const char pbFileDevilOn0x89OnPB[20] = "devil/on/0x89_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x88OnPB);
+const char pbFileDevilOn0x88OnPB[20] = "devil/on/0x88_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x87OnPB);
+const char pbFileDevilOn0x87OnPB[20] = "devil/on/0x87_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x86OnPB);
+const char pbFileDevilOn0x86OnPB[20] = "devil/on/0x86_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x85OnPB);
+const char pbFileDevilOn0x85OnPB[20] = "devil/on/0x85_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x84OnPB);
+const char pbFileDevilOn0x84OnPB[20] = "devil/on/0x84_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x83OnPB);
+const char pbFileDevilOn0x83OnPB[20] = "devil/on/0x83_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x82OnPB);
+const char pbFileDevilOn0x82OnPB[20] = "devil/on/0x82_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x81OnPB);
+const char pbFileDevilOn0x81OnPB[20] = "devil/on/0x81_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x80OnPB);
+const char pbFileDevilOn0x80OnPB[20] = "devil/on/0x80_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7FOnPB);
+const char pbFileDevilOn0x7FOnPB[20] = "devil/on/0x7f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7EOnPB);
+const char pbFileDevilOn0x7EOnPB[20] = "devil/on/0x7e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7DOnPB);
+const char pbFileDevilOn0x7DOnPB[20] = "devil/on/0x7d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7COnPB);
+const char pbFileDevilOn0x7COnPB[20] = "devil/on/0x7c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7BOnPB);
+const char pbFileDevilOn0x7BOnPB[20] = "devil/on/0x7b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x7AOnPB);
+const char pbFileDevilOn0x7AOnPB[20] = "devil/on/0x7a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x79OnPB);
+const char pbFileDevilOn0x79OnPB[20] = "devil/on/0x79_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x78OnPB);
+const char pbFileDevilOn0x78OnPB[20] = "devil/on/0x78_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x77OnPB);
+const char pbFileDevilOn0x77OnPB[20] = "devil/on/0x77_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x76OnPB);
+const char pbFileDevilOn0x76OnPB[20] = "devil/on/0x76_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x75OnPB);
+const char pbFileDevilOn0x75OnPB[20] = "devil/on/0x75_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x74OnPB);
+const char pbFileDevilOn0x74OnPB[20] = "devil/on/0x74_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x73OnPB);
+const char pbFileDevilOn0x73OnPB[20] = "devil/on/0x73_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x72OnPB);
+const char pbFileDevilOn0x72OnPB[20] = "devil/on/0x72_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x71OnPB);
+const char pbFileDevilOn0x71OnPB[20] = "devil/on/0x71_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x70OnPB);
+const char pbFileDevilOn0x70OnPB[20] = "devil/on/0x70_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6FOnPB);
+const char pbFileDevilOn0x6FOnPB[20] = "devil/on/0x6f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6EOnPB);
+const char pbFileDevilOn0x6EOnPB[20] = "devil/on/0x6e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6DOnPB);
+const char pbFileDevilOn0x6DOnPB[20] = "devil/on/0x6d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6COnPB);
+const char pbFileDevilOn0x6COnPB[20] = "devil/on/0x6c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6BOnPB);
+const char pbFileDevilOn0x6BOnPB[20] = "devil/on/0x6b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x6AOnPB);
+const char pbFileDevilOn0x6AOnPB[20] = "devil/on/0x6a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x69OnPB);
+const char pbFileDevilOn0x69OnPB[20] = "devil/on/0x69_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x68OnPB);
+const char pbFileDevilOn0x68OnPB[20] = "devil/on/0x68_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x67OnPB);
+const char pbFileDevilOn0x67OnPB[20] = "devil/on/0x67_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x66OnPB);
+const char pbFileDevilOn0x66OnPB[20] = "devil/on/0x66_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x65OnPB);
+const char pbFileDevilOn0x65OnPB[20] = "devil/on/0x65_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x64OnPB);
+const char pbFileDevilOn0x64OnPB[20] = "devil/on/0x64_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x63OnPB);
+const char pbFileDevilOn0x63OnPB[20] = "devil/on/0x63_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x62OnPB);
+const char pbFileDevilOn0x62OnPB[20] = "devil/on/0x62_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x61OnPB);
+const char pbFileDevilOn0x61OnPB[20] = "devil/on/0x61_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x60OnPB);
+const char pbFileDevilOn0x60OnPB[20] = "devil/on/0x60_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5FOnPB);
+const char pbFileDevilOn0x5FOnPB[20] = "devil/on/0x5f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5EOnPB);
+const char pbFileDevilOn0x5EOnPB[20] = "devil/on/0x5e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5DOnPB);
+const char pbFileDevilOn0x5DOnPB[20] = "devil/on/0x5d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5COnPB);
+const char pbFileDevilOn0x5COnPB[20] = "devil/on/0x5c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5BOnPB);
+const char pbFileDevilOn0x5BOnPB[20] = "devil/on/0x5b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x5AOnPB);
+const char pbFileDevilOn0x5AOnPB[20] = "devil/on/0x5a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x59OnPB);
+const char pbFileDevilOn0x59OnPB[20] = "devil/on/0x59_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x58OnPB);
+const char pbFileDevilOn0x58OnPB[20] = "devil/on/0x58_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x57OnPB);
+const char pbFileDevilOn0x57OnPB[20] = "devil/on/0x57_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x56OnPB);
+const char pbFileDevilOn0x56OnPB[20] = "devil/on/0x56_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x55OnPB);
+const char pbFileDevilOn0x55OnPB[20] = "devil/on/0x55_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x54OnPB);
+const char pbFileDevilOn0x54OnPB[20] = "devil/on/0x54_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x53OnPB);
+const char pbFileDevilOn0x53OnPB[20] = "devil/on/0x53_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x52OnPB);
+const char pbFileDevilOn0x52OnPB[20] = "devil/on/0x52_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x51OnPB);
+const char pbFileDevilOn0x51OnPB[20] = "devil/on/0x51_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x50OnPB);
+const char pbFileDevilOn0x50OnPB[20] = "devil/on/0x50_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4FOnPB);
+const char pbFileDevilOn0x4FOnPB[20] = "devil/on/0x4f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4EOnPB);
+const char pbFileDevilOn0x4EOnPB[20] = "devil/on/0x4e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4DOnPB);
+const char pbFileDevilOn0x4DOnPB[20] = "devil/on/0x4d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4COnPB);
+const char pbFileDevilOn0x4COnPB[20] = "devil/on/0x4c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4BOnPB);
+const char pbFileDevilOn0x4BOnPB[20] = "devil/on/0x4b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x4AOnPB);
+const char pbFileDevilOn0x4AOnPB[20] = "devil/on/0x4a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x49OnPB);
+const char pbFileDevilOn0x49OnPB[20] = "devil/on/0x49_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x48OnPB);
+const char pbFileDevilOn0x48OnPB[20] = "devil/on/0x48_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x47OnPB);
+const char pbFileDevilOn0x47OnPB[20] = "devil/on/0x47_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x46OnPB);
+const char pbFileDevilOn0x46OnPB[20] = "devil/on/0x46_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x45OnPB);
+const char pbFileDevilOn0x45OnPB[20] = "devil/on/0x45_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x44OnPB);
+const char pbFileDevilOn0x44OnPB[20] = "devil/on/0x44_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x43OnPB);
+const char pbFileDevilOn0x43OnPB[20] = "devil/on/0x43_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x42OnPB);
+const char pbFileDevilOn0x42OnPB[20] = "devil/on/0x42_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x41OnPB);
+const char pbFileDevilOn0x41OnPB[20] = "devil/on/0x41_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x40OnPB);
+const char pbFileDevilOn0x40OnPB[20] = "devil/on/0x40_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3FOnPB);
+const char pbFileDevilOn0x3FOnPB[20] = "devil/on/0x3f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3EOnPB);
+const char pbFileDevilOn0x3EOnPB[20] = "devil/on/0x3e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3DOnPB);
+const char pbFileDevilOn0x3DOnPB[20] = "devil/on/0x3d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3COnPB);
+const char pbFileDevilOn0x3COnPB[20] = "devil/on/0x3c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3BOnPB);
+const char pbFileDevilOn0x3BOnPB[20] = "devil/on/0x3b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x3AOnPB);
+const char pbFileDevilOn0x3AOnPB[20] = "devil/on/0x3a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x39OnPB);
+const char pbFileDevilOn0x39OnPB[20] = "devil/on/0x39_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x38OnPB);
+const char pbFileDevilOn0x38OnPB[20] = "devil/on/0x38_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x37OnPB);
+const char pbFileDevilOn0x37OnPB[20] = "devil/on/0x37_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x36OnPB);
+const char pbFileDevilOn0x36OnPB[20] = "devil/on/0x36_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x35OnPB);
+const char pbFileDevilOn0x35OnPB[20] = "devil/on/0x35_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x34OnPB);
+const char pbFileDevilOn0x34OnPB[20] = "devil/on/0x34_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x33OnPB);
+const char pbFileDevilOn0x33OnPB[20] = "devil/on/0x33_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x32OnPB);
+const char pbFileDevilOn0x32OnPB[20] = "devil/on/0x32_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x31OnPB);
+const char pbFileDevilOn0x31OnPB[20] = "devil/on/0x31_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x30OnPB);
+const char pbFileDevilOn0x30OnPB[20] = "devil/on/0x30_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2FOnPB);
+const char pbFileDevilOn0x2FOnPB[20] = "devil/on/0x2f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2EOnPB);
+const char pbFileDevilOn0x2EOnPB[20] = "devil/on/0x2e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2DOnPB);
+const char pbFileDevilOn0x2DOnPB[20] = "devil/on/0x2d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2COnPB);
+const char pbFileDevilOn0x2COnPB[20] = "devil/on/0x2c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2BOnPB);
+const char pbFileDevilOn0x2BOnPB[20] = "devil/on/0x2b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x2AOnPB);
+const char pbFileDevilOn0x2AOnPB[20] = "devil/on/0x2a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x29OnPB);
+const char pbFileDevilOn0x29OnPB[20] = "devil/on/0x29_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x28OnPB);
+const char pbFileDevilOn0x28OnPB[20] = "devil/on/0x28_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x27OnPB);
+const char pbFileDevilOn0x27OnPB[20] = "devil/on/0x27_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x26OnPB);
+const char pbFileDevilOn0x26OnPB[20] = "devil/on/0x26_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x25OnPB);
+const char pbFileDevilOn0x25OnPB[20] = "devil/on/0x25_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x24OnPB);
+const char pbFileDevilOn0x24OnPB[20] = "devil/on/0x24_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x23OnPB);
+const char pbFileDevilOn0x23OnPB[20] = "devil/on/0x23_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x22OnPB);
+const char pbFileDevilOn0x22OnPB[20] = "devil/on/0x22_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x21OnPB);
+const char pbFileDevilOn0x21OnPB[20] = "devil/on/0x21_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x20OnPB);
+const char pbFileDevilOn0x20OnPB[20] = "devil/on/0x20_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1FOnPB);
+const char pbFileDevilOn0x1FOnPB[20] = "devil/on/0x1f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1EOnPB);
+const char pbFileDevilOn0x1EOnPB[20] = "devil/on/0x1e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1DOnPB);
+const char pbFileDevilOn0x1DOnPB[20] = "devil/on/0x1d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1COnPB);
+const char pbFileDevilOn0x1COnPB[20] = "devil/on/0x1c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1BOnPB);
+const char pbFileDevilOn0x1BOnPB[20] = "devil/on/0x1b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x1AOnPB);
+const char pbFileDevilOn0x1AOnPB[20] = "devil/on/0x1a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x19OnPB);
+const char pbFileDevilOn0x19OnPB[20] = "devil/on/0x19_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x18OnPB);
+const char pbFileDevilOn0x18OnPB[20] = "devil/on/0x18_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x17OnPB);
+const char pbFileDevilOn0x17OnPB[20] = "devil/on/0x17_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x16OnPB);
+const char pbFileDevilOn0x16OnPB[20] = "devil/on/0x16_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x15OnPB);
+const char pbFileDevilOn0x15OnPB[20] = "devil/on/0x15_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x14OnPB);
+const char pbFileDevilOn0x14OnPB[20] = "devil/on/0x14_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x13OnPB);
+const char pbFileDevilOn0x13OnPB[20] = "devil/on/0x13_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x12OnPB);
+const char pbFileDevilOn0x12OnPB[20] = "devil/on/0x12_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x11OnPB);
+const char pbFileDevilOn0x11OnPB[20] = "devil/on/0x11_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x10OnPB);
+const char pbFileDevilOn0x10OnPB[20] = "devil/on/0x10_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0FOnPB);
+const char pbFileDevilOn0x0FOnPB[20] = "devil/on/0x0f_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0EOnPB);
+const char pbFileDevilOn0x0EOnPB[20] = "devil/on/0x0e_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0DOnPB);
+const char pbFileDevilOn0x0DOnPB[20] = "devil/on/0x0d_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0COnPB);
+const char pbFileDevilOn0x0COnPB[20] = "devil/on/0x0c_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0BOnPB);
+const char pbFileDevilOn0x0BOnPB[20] = "devil/on/0x0b_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x0AOnPB);
+const char pbFileDevilOn0x0AOnPB[20] = "devil/on/0x0a_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x09OnPB);
+const char pbFileDevilOn0x09OnPB[20] = "devil/on/0x09_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x08OnPB);
+const char pbFileDevilOn0x08OnPB[20] = "devil/on/0x08_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x07OnPB);
+const char pbFileDevilOn0x07OnPB[20] = "devil/on/0x07_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x06OnPB);
+const char pbFileDevilOn0x06OnPB[20] = "devil/on/0x06_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x05OnPB);
+const char pbFileDevilOn0x05OnPB[20] = "devil/on/0x05_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x04OnPB);
+const char pbFileDevilOn0x04OnPB[20] = "devil/on/0x04_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x03OnPB);
+const char pbFileDevilOn0x03OnPB[20] = "devil/on/0x03_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x02OnPB);
+const char pbFileDevilOn0x02OnPB[20] = "devil/on/0x02_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x01OnPB);
+const char pbFileDevilOn0x01OnPB[20] = "devil/on/0x01_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileDevilOn0x00OnPB);
+const char pbFileDevilOn0x00OnPB[20] = "devil/on/0x00_on.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldJewelLostPB);
+const char pbFileFieldJewelLostPB[20] = "field/jewel_lost.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldSpeedLinePB);
+const char pbFileFieldSpeedLinePB[20] = "field/speed_line.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMakkaLostPB);
+const char pbFileFieldMakkaLostPB[20] = "field/makka_lost.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMajinHolePB);
+const char pbFileFieldMajinHolePB[20] = "field/majin_hole.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldTamaLow03PB);
+const char pbFileFieldTamaLow03PB[20] = "field/tama_low03.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldTamaLow02PB);
+const char pbFileFieldTamaLow02PB[20] = "field/tama_low02.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldTamaLow01PB);
+const char pbFileFieldTamaLow01PB[20] = "field/tama_low01.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldSPlayerPB);
+const char pbFileFieldSPlayerPB[18] = "field/s_player.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldJewel1PB);
+const char pbFileFieldJewel1PB[16] = "field/jewel1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMaka2PB);
+const char pbFileFieldMaka2PB[15] = "field/maka2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMaka1PB);
+const char pbFileFieldMaka1PB[15] = "field/maka1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldBlood2PB);
+const char pbFileFieldBlood2PB[16] = "field/blood2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldBlood1PB);
+const char pbFileFieldBlood1PB[16] = "field/blood1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPipe3PB);
+const char pbFileFieldPipe3PB[15] = "field/pipe3.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPipe2PB);
+const char pbFileFieldPipe2PB[15] = "field/pipe2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPipe1PB);
+const char pbFileFieldPipe1PB[15] = "field/pipe1.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldDantePB);
+const char pbFileFieldDantePB[15] = "field/dante.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldWpcAB);
+const char pbFileFieldWpcAB[13] = "field/wpc.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldWpcMB);
+const char pbFileFieldWpcMB[13] = "field/wpc.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldWpcTB);
+const char pbFileFieldWpcTB[13] = "field/wpc.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldTakaraMB);
+const char pbFileFieldTakaraMB[16] = "field/takara.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldTakaraTB);
+const char pbFileFieldTakaraTB[16] = "field/takara.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMatTestAB);
+const char pbFileFieldMatTestAB[18] = "field/mat_test.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMatTestMB);
+const char pbFileFieldMatTestMB[18] = "field/mat_test.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldMatTestTB);
+const char pbFileFieldMatTestTB[18] = "field/mat_test.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldHandPB);
+const char pbFileFieldHandPB[14] = "field/hand.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPcAB);
+const char pbFileFieldPcAB[12] = "field/pc.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPcMB);
+const char pbFileFieldPcMB[12] = "field/pc.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileFieldPcTB);
+const char pbFileFieldPcTB[12] = "field/pc.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE632ManiPB);
+const char pbFileEventE632ManiPB[19] = "event/e632/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634TobiraPB);
+const char pbFileEventE634TobiraPB[21] = "event/e634/tobira.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634PlayerAPB);
+const char pbFileEventE634PlayerAPB[23] = "event/e634/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634ManinejiPB);
+const char pbFileEventE634ManinejiPB[23] = "event/e634/manineji.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634MagaPB);
+const char pbFileEventE634MagaPB[19] = "event/e634/maga.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634HikawaPB);
+const char pbFileEventE634HikawaPB[21] = "event/e634/hikawa.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634AporoPB);
+const char pbFileEventE634AporoPB[20] = "event/e634/aporo.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE632PlayerAPB);
+const char pbFileEventE632PlayerAPB[23] = "event/e632/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE632HijiriPB);
+const char pbFileEventE632HijiriPB[21] = "event/e632/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE629GozuPB);
+const char pbFileEventE629GozuPB[19] = "event/e629/gozu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE629ManePB);
+const char pbFileEventE629ManePB[19] = "event/e629/mane.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE629PlayerAPB);
+const char pbFileEventE629PlayerAPB[23] = "event/e629/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635TukuePB);
+const char pbFileEventE635TukuePB[20] = "event/e635/tukue.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635TiakiPB);
+const char pbFileEventE635TiakiPB[20] = "event/e635/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635SinenDPB);
+const char pbFileEventE635SinenDPB[22] = "event/e635/sinen_d.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635SinenCPB);
+const char pbFileEventE635SinenCPB[22] = "event/e635/sinen_c.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635SinenBPB);
+const char pbFileEventE635SinenBPB[22] = "event/e635/sinen_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635SinenAPB);
+const char pbFileEventE635SinenAPB[22] = "event/e635/sinen_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635PlayerAPB);
+const char pbFileEventE635PlayerAPB[23] = "event/e635/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635FieldBPB);
+const char pbFileEventE635FieldBPB[22] = "event/e635/field_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE635FieldAPB);
+const char pbFileEventE635FieldAPB[22] = "event/e635/field_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE605TiakiPB);
+const char pbFileEventE605TiakiPB[20] = "event/e605/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE603TiakiPB);
+const char pbFileEventE603TiakiPB[20] = "event/e603/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE603PlayerBPB);
+const char pbFileEventE603PlayerBPB[23] = "event/e603/player_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE621TiakiPB);
+const char pbFileEventE621TiakiPB[20] = "event/e621/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE621PlayerAPB);
+const char pbFileEventE621PlayerAPB[23] = "event/e621/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE621BeamPB);
+const char pbFileEventE621BeamPB[19] = "event/e621/beam.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE550TiakiPB);
+const char pbFileEventE550TiakiPB[20] = "event/e550/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE601YuukoPB);
+const char pbFileEventE601YuukoPB[20] = "event/e601/yuuko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE662HijiriPB);
+const char pbFileEventE662HijiriPB[21] = "event/e662/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE662ManiPB);
+const char pbFileEventE662ManiPB[19] = "event/e662/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE659KagePB);
+const char pbFileEventE659KagePB[19] = "event/e659/kage.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE659HikariPB);
+const char pbFileEventE659HikariPB[21] = "event/e659/hikari.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE659YuukoPB);
+const char pbFileEventE659YuukoPB[20] = "event/e659/yuuko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE651YuukoPB);
+const char pbFileEventE651YuukoPB[20] = "event/e651/yuuko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE651PlayerAPB);
+const char pbFileEventE651PlayerAPB[23] = "event/e651/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE657YuukoPB);
+const char pbFileEventE657YuukoPB[20] = "event/e657/yuuko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE646HijiriPB);
+const char pbFileEventE646HijiriPB[21] = "event/e646/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE646ManiPB);
+const char pbFileEventE646ManiPB[19] = "event/e646/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE604TiakiPB);
+const char pbFileEventE604TiakiPB[20] = "event/e604/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE604IsamuPB);
+const char pbFileEventE604IsamuPB[20] = "event/e604/isamu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE604PlayerBPB);
+const char pbFileEventE604PlayerBPB[23] = "event/e604/player_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE652ManiPB);
+const char pbFileEventE652ManiPB[19] = "event/e652/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE623ManiPB);
+const char pbFileEventE623ManiPB[19] = "event/e623/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE652PlayerAPB);
+const char pbFileEventE652PlayerAPB[23] = "event/e652/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE623PlayerAPB);
+const char pbFileEventE623PlayerAPB[23] = "event/e623/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE618PlayerAPB);
+const char pbFileEventE618PlayerAPB[23] = "event/e618/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE618PlanesPB);
+const char pbFileEventE618PlanesPB[21] = "event/e618/planes.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE611PlayerBPB);
+const char pbFileEventE611PlayerBPB[23] = "event/e611/player_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE652HijiriPB);
+const char pbFileEventE652HijiriPB[21] = "event/e652/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE611DoorPB);
+const char pbFileEventE611DoorPB[19] = "event/e611/door.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE611IsamuPB);
+const char pbFileEventE611IsamuPB[20] = "event/e611/isamu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE615ManiPB);
+const char pbFileEventE615ManiPB[19] = "event/e615/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE615HikawaPB);
+const char pbFileEventE615HikawaPB[21] = "event/e615/hikawa.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE615ChairPB);
+const char pbFileEventE615ChairPB[20] = "event/e615/chair.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE619ManiPB);
+const char pbFileEventE619ManiPB[19] = "event/e619/mani.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE623HijiriPB);
+const char pbFileEventE623HijiriPB[21] = "event/e623/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE614ReikoPB);
+const char pbFileEventE614ReikoPB[20] = "event/e614/reiko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE614PlayerPB);
+const char pbFileEventE614PlayerPB[21] = "event/e614/player.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE607TiakiPB);
+const char pbFileEventE607TiakiPB[20] = "event/e607/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE619HijiriPB);
+const char pbFileEventE619HijiriPB[21] = "event/e619/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE619PlayerAPB);
+const char pbFileEventE619PlayerAPB[23] = "event/e619/player_a.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE550PlayerPB);
+const char pbFileEventE550PlayerPB[21] = "event/e550/player.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraIsamuPB);
+const char pbFileEventExtraIsamuPB[21] = "event/extra/isamu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE602PlayerBPB);
+const char pbFileEventE602PlayerBPB[23] = "event/e602/player_b.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE512IsamuPB);
+const char pbFileEventE512IsamuPB[20] = "event/e512/isamu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE512DoorPB);
+const char pbFileEventE512DoorPB[19] = "event/e512/door.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE615HijiriPB);
+const char pbFileEventE615HijiriPB[21] = "event/e615/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE634TiakiPB);
+const char pbFileEventE634TiakiPB[20] = "event/e634/tiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE616ForuneAB);
+const char pbFileEventE616ForuneAB[21] = "event/e616/forune.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE616ForuneMB);
+const char pbFileEventE616ForuneMB[21] = "event/e616/forune.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE616ForuneTB);
+const char pbFileEventE616ForuneTB[21] = "event/e616/forune.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE602HijiriPB);
+const char pbFileEventE602HijiriPB[21] = "event/e602/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE608IsamuPB);
+const char pbFileEventE608IsamuPB[20] = "event/e608/isamu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE608DoorPB);
+const char pbFileEventE608DoorPB[19] = "event/e608/door.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Player01AB);
+const char pbFileEventE505Player01AB[23] = "event/e505/player01.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Player01MB);
+const char pbFileEventE505Player01MB[23] = "event/e505/player01.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Player01TB);
+const char pbFileEventE505Player01TB[23] = "event/e505/player01.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Maga01AB);
+const char pbFileEventE505Maga01AB[21] = "event/e505/maga01.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Maga01MB);
+const char pbFileEventE505Maga01MB[21] = "event/e505/maga01.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Maga01TB);
+const char pbFileEventE505Maga01TB[21] = "event/e505/maga01.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Kurikara01AB);
+const char pbFileEventE505Kurikara01AB[25] = "event/e505/kurikara01.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Kurikara01MB);
+const char pbFileEventE505Kurikara01MB[25] = "event/e505/kurikara01.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Kurikara01TB);
+const char pbFileEventE505Kurikara01TB[25] = "event/e505/kurikara01.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505HikawaAB);
+const char pbFileEventE505HikawaAB[21] = "event/e505/hikawa.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505HikawaMB);
+const char pbFileEventE505HikawaMB[21] = "event/e505/hikawa.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505HikawaTB);
+const char pbFileEventE505HikawaTB[21] = "event/e505/hikawa.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Arliman01AB);
+const char pbFileEventE505Arliman01AB[24] = "event/e505/arliman01.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Arliman01MB);
+const char pbFileEventE505Arliman01MB[24] = "event/e505/arliman01.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE505Arliman01TB);
+const char pbFileEventE505Arliman01TB[24] = "event/e505/arliman01.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE506TengAB);
+const char pbFileEventE506TengAB[19] = "event/e506/teng.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE506TengMB);
+const char pbFileEventE506TengMB[19] = "event/e506/teng.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE506TengTB);
+const char pbFileEventE506TengTB[19] = "event/e506/teng.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503001AB);
+const char pbFileEventE503U503001AB[23] = "event/e503/u503_001.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503001MB);
+const char pbFileEventE503U503001MB[23] = "event/e503/u503_001.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503001TB);
+const char pbFileEventE503U503001TB[23] = "event/e503/u503_001.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503000AB);
+const char pbFileEventE503U503000AB[23] = "event/e503/u503_000.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503000MB);
+const char pbFileEventE503U503000MB[23] = "event/e503/u503_000.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE503U503000TB);
+const char pbFileEventE503U503000TB[23] = "event/e503/u503_000.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502002AB);
+const char pbFileEventE502U502002AB[23] = "event/e502/u502_002.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502002MB);
+const char pbFileEventE502U502002MB[23] = "event/e502/u502_002.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502002TB);
+const char pbFileEventE502U502002TB[23] = "event/e502/u502_002.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502001AB);
+const char pbFileEventE502U502001AB[23] = "event/e502/u502_001.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502001MB);
+const char pbFileEventE502U502001MB[23] = "event/e502/u502_001.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502001TB);
+const char pbFileEventE502U502001TB[23] = "event/e502/u502_001.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502000AB);
+const char pbFileEventE502U502000AB[23] = "event/e502/u502_000.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502000MB);
+const char pbFileEventE502U502000MB[23] = "event/e502/u502_000.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE502U502000TB);
+const char pbFileEventE502U502000TB[23] = "event/e502/u502_000.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EPlayerAB);
+const char pbFileEventE501EPlayerAB[23] = "event/e501/e_player.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EPlayerMB);
+const char pbFileEventE501EPlayerMB[23] = "event/e501/e_player.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EPlayerTB);
+const char pbFileEventE501EPlayerTB[23] = "event/e501/e_player.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501ETengAB);
+const char pbFileEventE501ETengAB[21] = "event/e501/e_teng.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501ETengMB);
+const char pbFileEventE501ETengMB[21] = "event/e501/e_teng.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501ETengTB);
+const char pbFileEventE501ETengTB[21] = "event/e501/e_teng.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EInkyuAB);
+const char pbFileEventE501EInkyuAB[22] = "event/e501/e_inkyu.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EInkyuMB);
+const char pbFileEventE501EInkyuMB[22] = "event/e501/e_inkyu.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EInkyuTB);
+const char pbFileEventE501EInkyuTB[22] = "event/e501/e_inkyu.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EHokutoAB);
+const char pbFileEventE501EHokutoAB[23] = "event/e501/e_hokuto.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EHokutoMB);
+const char pbFileEventE501EHokutoMB[23] = "event/e501/e_hokuto.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EHokutoTB);
+const char pbFileEventE501EHokutoTB[23] = "event/e501/e_hokuto.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EDoorAB);
+const char pbFileEventE501EDoorAB[21] = "event/e501/e_door.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EDoorMB);
+const char pbFileEventE501EDoorMB[21] = "event/e501/e_door.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE501EDoorTB);
+const char pbFileEventE501EDoorTB[21] = "event/e501/e_door.TB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraP02PB);
+const char pbFileEventExtraP02PB[19] = "event/extra/p02.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraP01PB);
+const char pbFileEventExtraP01PB[19] = "event/extra/p01.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventHogePB);
+const char pbFileEventHogePB[14] = "event/hoge.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraDanteD01PB);
+const char pbFileEventExtraDanteD01PB[25] = "event/extra/dante_d01.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraAmaraEvePPB);
+const char pbFileEventExtraAmaraEvePPB[27] = "event/extra/amara_eve_p.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraSakahagiPB);
+const char pbFileEventExtraSakahagiPB[24] = "event/extra/sakahagi.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraFutomimiPB);
+const char pbFileEventExtraFutomimiPB[24] = "event/extra/futomimi.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraNpc52PB);
+const char pbFileEventExtraNpc52PB[21] = "event/extra/npc52.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraNpc51PB);
+const char pbFileEventExtraNpc51PB[21] = "event/extra/npc51.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraF015LuiPB);
+const char pbFileEventExtraF015LuiPB[24] = "event/extra/f015_lui.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTest04PB);
+const char pbFileEventExtraTest04PB[22] = "event/extra/test04.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTest03PB);
+const char pbFileEventExtraTest03PB[22] = "event/extra/test03.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTest02PB);
+const char pbFileEventExtraTest02PB[22] = "event/extra/test02.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTest01PB);
+const char pbFileEventExtraTest01PB[22] = "event/extra/test01.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTestChiakiPB);
+const char pbFileEventExtraTestChiakiPB[27] = "event/extra/test_chiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeHPB);
+const char pbFileEventExtraManeHPB[22] = "event/extra/mane_H.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraHutomimiPB);
+const char pbFileEventExtraHutomimiPB[24] = "event/extra/hutomimi.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraLuGoPB);
+const char pbFileEventExtraLuGoPB[21] = "event/extra/lu_go.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeGPB);
+const char pbFileEventExtraManeGPB[22] = "event/extra/mane_G.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeFPB);
+const char pbFileEventExtraManeFPB[22] = "event/extra/mane_F.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeEPB);
+const char pbFileEventExtraManeEPB[22] = "event/extra/mane_E.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraThorFldPB);
+const char pbFileEventExtraThorFldPB[24] = "event/extra/thor_fld.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeDPB);
+const char pbFileEventExtraManeDPB[22] = "event/extra/mane_D.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraLuiPB);
+const char pbFileEventExtraLuiPB[19] = "event/extra/lui.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraTiaki2PB);
+const char pbFileEventExtraTiaki2PB[22] = "event/extra/tiaki2.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeCPB);
+const char pbFileEventExtraManeCPB[22] = "event/extra/mane_C.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeBPB);
+const char pbFileEventExtraManeBPB[22] = "event/extra/mane_B.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraManeAPB);
+const char pbFileEventExtraManeAPB[22] = "event/extra/mane_A.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventExtraChiakiPB);
+const char pbFileEventExtraChiakiPB[22] = "event/extra/chiaki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventTestPlayerPB);
+const char pbFileEventTestPlayerPB[21] = "event/test/player.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE550YuukoPB);
+const char pbFileEventE550YuukoPB[20] = "event/e550/yuuko.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventE550HijiriPB);
+const char pbFileEventE550HijiriPB[21] = "event/e550/hijiri.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileEventTestToolPB);
+const char pbFileEventTestToolPB[19] = "event/test/tool.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscBukabuPB);
+const char pbFileMiscBukabuPB[15] = "misc/bukabu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscKariahaPB);
+const char pbFileMiscKariahaPB[16] = "misc/kariaha.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscDoriPB);
+const char pbFileMiscDoriPB[13] = "misc/dori.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscElfPB);
+const char pbFileMiscElfPB[12] = "misc/elf.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscPapiruPB);
+const char pbFileMiscPapiruPB[15] = "misc/papiru.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscKoronPB);
+const char pbFileMiscKoronPB[14] = "misc/koron.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscInkyuPB);
+const char pbFileMiscInkyuPB[14] = "misc/inkyu.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscGyukiPB);
+const char pbFileMiscGyukiPB[14] = "misc/gyuki.PB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscColorbarAB);
+const char pbFileMiscColorbarAB[17] = "misc/colorbar.AB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscColorbarMB);
+const char pbFileMiscColorbarMB[17] = "misc/colorbar.MB";
 
-INCLUDE_RODATA(const s32, "pb/pbDebugMode", pbFileMiscColorbarTB);
+const char pbFileMiscColorbarTB[17] = "misc/colorbar.TB";
 
