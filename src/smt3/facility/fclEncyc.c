@@ -133,7 +133,7 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 cmpLoadStatusModel(void);
 extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
-extern char fclEncycBookName[];
+extern const char fclEncycBookName[];
 
 extern sdfVector4_t cmpStatusModelPos;
 
@@ -245,19 +245,19 @@ void fclEncycStartProcess(s32 mode)
 extern void ReleaseWork(fclEncyc_instance_tag *pinst);
 #endif
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRecordFmt);
+const char fclEncycRecordFmt[29] = "ENCYC:record %3d/%3d (%3d) \n";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycCalcName);
+const char fclEncycCalcName[11] = "CALC_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycDrawName);
+const char fclEncycDrawName[11] = "DRAW_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycUpdtName);
+const char fclEncycUpdtName[11] = "UPDT_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBookName);
+const char fclEncycBookName[16] = "COLLECTION BOOK";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycStartFmt);
+const char fclEncycStartFmt[27] = "ENCYC:process start (%s) \n";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRegistrationName);
+const char fclEncycRegistrationName[13] = "REGISTRATION";
 
 s32 fclEncycKillProcess(void)
 {
