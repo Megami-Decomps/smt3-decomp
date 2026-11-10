@@ -11,7 +11,7 @@
 extern u32 dds3GetKernelCount(void);
 
 extern s32 fldEncountCount;
-extern u32 fldEncountTimer;
+extern u32 fldEncountTimer[2];
 
 extern char dds3DebugLabelB[], dds3DebugLabelG[], dds3DebugLabelR[], dds3DebugFmtInt3[], dds3DebugFmtFloat3[];
 
@@ -72,8 +72,6 @@ extern s16 fldRun_MAP_BZ;
 
 extern void fldDoor_EveBtlExit(s32 field, s32 eveno);
 
-
-
 typedef struct {
     u32 flags;
     s32 stage;
@@ -87,7 +85,8 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char fldProcSequenceName[], fldProcDrawName[];
+extern const char fldProcDrawName[];
+extern char fldProcSequenceName[];
 
 extern s32 fldProcShutDownFlg;
 
@@ -115,7 +114,7 @@ extern dds3Basic_t *fldAnaBasic;
 
 extern effBlurScatterWork_t *hDistortionBlur;
 
-extern char fldProcDrawName[];
+extern const char fldProcDrawName[];
 
 extern s32 gfldPlayerSize;
 
@@ -140,7 +139,6 @@ extern fldSceneParam_t fldSceneParam;
 extern s32 gFldNowDZone;
 
 extern s32 fldProcCampWait;
-
 
 extern s32 campCheckExitState(void);
 
@@ -190,7 +188,6 @@ extern void cmpProcessStart(void);
 
 extern saddr_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
-
 extern s32 fldChkVortex(void);
 
 extern s32 fldProcCampChk(void);
@@ -235,7 +232,7 @@ extern dds3FontReqFunc_t dds3FontReqBoxTable;
 
 extern u8 dds3PadButtonState[];
 
-extern char fldKiretaLabel[];
+extern const char fldKiretaLabel[];
 
 extern fldSequenceController_t fldAutoMapSeqFlags;
 /* The retail load is its own symbol, not a field of the controller. */
@@ -445,7 +442,8 @@ s32 ProcRandomEncountCheck(void)
         fldReleaseUnitPad();
         evtKillFieldScript();
         fldEncountBtlId = 0x40A;
-        fldEncountTimer = 0;
+
+        fldEncountTimer[0] = 0;
         switch (fldGlobalBase.floor) {
         case 3: fldSetNextField(43, 200); break;
         case 4: case 5: fldSetNextField(43, 201); break;
@@ -458,7 +456,7 @@ s32 ProcRandomEncountCheck(void)
     if (fldEncountTestFlag(0x10) == 0) return 0;
     encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
-    fldEncountTimer = encounter;
+    fldEncountTimer[0] = encounter;
     fldEncountBtlId = nbEncountCalc(encounter, distance);
     if (fldEncountBtlId == 0) return 0;
     if (fldRunDanteGunFlag.enabled == 1 || distance > 9998.0f) {
@@ -476,7 +474,7 @@ s32 ProcRandomEncountCheck(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldProcess", fldKiretaLabel);
+const char fldKiretaLabel[16] = "kireta_label";
 
 INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
 #endif
@@ -909,7 +907,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
         controller->stage = 0;
         fldEncountCount++;
         gFldRndEncBtl = 1;
-        dds3AdminiCallSequence(0x13, &fldEncountTimer, 8, 1);
+        dds3AdminiCallSequence(0x13, fldEncountTimer, 8, 1);
         return -1;
     }
     switch (fldGlobalBase.word90) {
@@ -949,7 +947,6 @@ s32 ProcSequence(dds3ProcessID_t *id)
     if (fldProcCampChk() != 1) fldCamMain();
     return 0;
 }
-
 
 extern s32 nbGetEncountOn(void);
 extern void fldDbgPrint2D(s32 x, s32 y, const char *text);
@@ -1203,37 +1200,36 @@ SYMBOL_AT(s32, fldSequenceState, fldAutoMapSeqFlags, 4);
 
 SYMBOL_AT(u32, fldEncountBtlId, fldEncountTimer, 4);
 
-INCLUDE_RODATA(const s32, "field/fldProcess", fldProcDrawName);
+const char fldProcDrawName[16] = "fldProcDraw";
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldNextFieldId);
+s32 fldNextFieldId = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountCount);
+s32 fldEncountCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountSagasiFlag);
+s32 fldEncountSagasiFlag = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", hDistortionBlur);
+effBlurScatterWork_t *hDistortionBlur = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", gFldRndEncBtl);
+s32 gFldRndEncBtl = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountCheckWork);
+s32 fldEncountCheckWork = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldProcCampWait);
+s32 fldProcCampWait = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldProcAmWait);
+s32 fldProcAmWait = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", gFldStart);
+s32 gFldStart = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldProcShutDownFlg);
+s32 fldProcShutDownFlg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldNext_fld);
+s32 fldNext_fld = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldNextArea);
+s32 fldNextArea = 0;
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldAutoMapSeqFlags);
+fldSequenceController_t fldAutoMapSeqFlags = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountFlags);
+u32 fldEncountFlags = 0;
 
-SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountTimer);
+u32 fldEncountTimer[2] = { 0, 0 };
 
