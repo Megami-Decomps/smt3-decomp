@@ -237,7 +237,7 @@ extern s32 iWakeupThread(s32 thid);
 
 extern void sdfMemFreeDelayedDirect(void *aHandle);
 
-extern sdfThCB_t *func_002A87F0(s32 threadId);
+extern sdfThCB_t *sdfFindThreadNode(s32 threadId);
 
 extern s32 GetThreadId(void);
 
@@ -247,7 +247,7 @@ extern s32 SleepThread(void);
 
 extern void sdfIpuRemoveHandler(sdfHandlerNode_t *handler);
 
-extern void func_002A8758(sdfThCB_t *node);
+extern void sdfDeleteTrackedThread(sdfThCB_t *node);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
@@ -326,7 +326,7 @@ s32 sdfFreeAutoDelayed(void *allocation)
     }
 }
 
-s32 sdf_2A8258(void **slot)
+s32 sdfFreeMemorySlotFromEitherHeap(void **slot)
 {
     void *allocation = *slot;
 
@@ -400,7 +400,7 @@ void sdfIpuRemoveHandler(sdfHandlerNode_t *target) {
     }
 }
 
-void sdf_2A84D8(void)
+void sdfDrainPendingHandlers(void)
 {
     void *handler;
 
@@ -481,7 +481,7 @@ void sdfWaitVblank(s32 count)
     } while (rest > 0);
 }
 
-void func_002A8758(sdfThCB_t *node) {
+void sdfDeleteTrackedThread(sdfThCB_t *node) {
     sdfThCB_t **link;
     sdfThCB_t *current;
     s32 threadId;
@@ -504,7 +504,7 @@ void func_002A8758(sdfThCB_t *node) {
     DeleteThread(threadId);
 }
 
-sdfThCB_t *func_002A87F0(s32 threadId) {
+sdfThCB_t *sdfFindThreadNode(s32 threadId) {
     sdfThCB_t *node;
 
     if (threadId < 0) {
@@ -522,9 +522,9 @@ sdfThCB_t *func_002A87F0(s32 threadId) {
     return node;
 }
 
-void sdf_2A8858(void)
+void sdfUnlinkAndDeleteCurrentThread(void)
 {
-    func_002A8758(func_002A87F0(-1));
+    sdfDeleteTrackedThread(sdfFindThreadNode(-1));
 }
 
 s32 VblankIntcHandler(s32 cause)
