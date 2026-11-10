@@ -1618,9 +1618,9 @@ void nbSetEncountMode(s32 mode)
 {
     gencMode = mode;
 }
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawInitDone);
+u32 fldDrawInitDone = 0;
 
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDrwZBuf);
+void *fldDrwZBuf = 0;
 
 SDATA_PAD(4);
 
