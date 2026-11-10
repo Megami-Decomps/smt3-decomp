@@ -146,6 +146,9 @@ def place(version):
                     anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
+        # A C-defined object after a pad aligns itself, and the pad's section switch would send it to .text.
+        order = [e for i, e in enumerate(order) if not (
+            e[2].startswith("SDATA_PAD(") and i + 1 < len(order) and order[i + 1][2] in compiled)]
         following, placed = len(text), []
         for addr, pos, sym in reversed(order):
             pos = following if pos is None else pos
