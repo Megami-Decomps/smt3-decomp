@@ -186,7 +186,7 @@ where C has undefined behaviour.
 
 Some operations are a whole function whose body is one asm block: `Mult` (the
 quaternion product), `ToMatrix`, `SDF_QUAT_INNERPRODUCT`, `sdf_2C04B8` (the
-inverse), `sdf_2C0510`, `FromRotation` and `FromRotation_B` in
+inverse), `LengthSq`, `FromRotation` and `FromRotation_B` in
 `code_002BD340.c`, and the colour lerp in `model/mdlManager.c`. The function
 already names the operation and is called from several places, so wrapping its
 single-use body in a single-use macro would add a layer without adding a name.
@@ -212,13 +212,10 @@ names them: `Mult`, `Inverse`, `Normalize`, `SDF_QUAT_INNERPRODUCT`, `Slerp`,
 of those were placeholders or wrong until the HD metadata settled them; the
 proof and the call-site trap are in [IDB corrections](idb-corrections.md).
 
-One is still open. `sdf_2C0510` reduces vf10 to a single float, which by
-elimination would be `Length` -- the only scalar reducer left in HD's `sdfQuat`
-list -- except that its accumulator chain starts `vmulay.x ACC, vf2, vf2y`
-where the dot product uses `vadday.x`. It therefore computes
-`(x*x)*(y*y) + z*z + w*w`, which is neither a length nor a dot, and HD's
-`sdfQuat$$Length` is an empty stub. It keeps its address for a name until
-something better than elimination is available.
+`LengthSq` (0x002C0510, named after DDS's twin) reduces vf10 to a single
+float. It is the squared length by intent, but its accumulator chain starts
+`vmulay.x ACC, vf2, vf2y` where the dot product uses `vadday.x`, so retail
+computes `(x*x)*(y*y) + z*z + w*w`.
 
 ## Number-effect clipping and implicit vector state
 

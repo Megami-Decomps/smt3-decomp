@@ -133,7 +133,7 @@ sites across `basic/dds3Basic.c`, `basic/dds3EffectObjectBasic.c`, `kernel/dds3K
 and `code_002BD340.c` called it meaning the normalize, and renaming the symbol without them
 re-pointed three `jal` targets from 0x002C04E8 to 0x002C0538. The checksum caught it.
 
-`sdf_2C0510` (0x002C0510) is left alone. It reduces vf10 to one float, which by elimination
+`LengthSq` (0x002C0510) is named after its DDS twin, not from HD. It reduces vf10 to one float, which by elimination
 would make it `Length`, the only scalar reducer left in HD's `sdfQuat` list. But its
 accumulator chain starts `vmulay.x ACC, vf2, vf2y` where the dot product uses `vadday.x`, so
 it computes `(x*x)*(y*y) + z*z + w*w`, which is neither a length nor a dot. HD's

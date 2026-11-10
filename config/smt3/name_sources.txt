@@ -124,3 +124,4 @@
 0x002A8758	sdfDeleteTrackedThread	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A8758
 0x002A87F0	sdfFindThreadNode	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A87F0
 0x002A8858	sdfUnlinkAndDeleteCurrentThread	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8858
+0x002C0510	LengthSq	inferred	DDS1/2 name for the same sdfQuat function; former name sdf_2C0510; DDS effMiscQuatLengthSqVU in sdfQuat's bare method style

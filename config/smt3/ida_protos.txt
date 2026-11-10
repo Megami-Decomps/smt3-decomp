@@ -8610,7 +8610,7 @@
 0x002C0488 Mult void Mult()
 0x002C04B8 Inverse void Inverse()
 0x002C04E8 Normalize f32 Normalize()
-0x002C0510 sdf_2C0510 float sdf_2C0510()
+0x002C0510 LengthSq float LengthSq()
 0x002C0538 SDF_QUAT_INNERPRODUCT float SDF_QUAT_INNERPRODUCT()
 0x002C0560 FromRotation void FromRotation(f32 aAngle)
 0x002C05B0 FromRotation_B void FromRotation_B(f32 aAngle)
