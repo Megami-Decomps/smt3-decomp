@@ -246,9 +246,9 @@ typedef struct mdlPartTagRecord_t {
 
 
 struct mdlEffectDescriptor_t;
-extern const mdlPathPrefix_t mdlModelPathPrefix[]; /* unit-owned eight-byte "/model/" copy */
-extern const char mdlPackedBundleExt[]; /* padded unit-owned ".PB" suffix */
-extern const mdlWorkPrefix_t mdlWorkPathPrefix[]; /* padded unit-owned "work/" prefix */
+extern char mdlModelPathPrefix[]; /* unit-owned eight-byte "/model/" copy */
+extern char mdlPackedBundleExt[]; /* padded unit-owned ".PB" suffix */
+extern mdlWorkPrefix_t mdlWorkPathPrefix[]; /* padded unit-owned "work/" prefix */
 extern mdlHddFileEntry_t *mdlHddFileCount; /* retail name: linked directory entries */
 extern u8 sdfHddValid;
 extern const char _ctype_[]; /* newlib character classes: EOF slot, then 256 bytes */
@@ -1776,13 +1776,13 @@ void mdlMakeHddFileList(void) {
     }
     mdlMakeHddFileListDummy();
 }
-INCLUDE_SDATA(const s32, "model/mdlManager", mdlModelPathPrefix);
+char mdlModelPathPrefix[8] = "/model/";
 
-INCLUDE_SDATA(const s32, "model/mdlManager", mdlPackedBundleExt);
+char mdlPackedBundleExt[4] = ".PB";
 
-INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileIndexHandle);
+sdfMemHandle_t *mdlHddFileIndexHandle = NULL;
 
-INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileListHandle);
+sdfMemHandle_t *mdlHddFileListHandle = NULL;
 
-INCLUDE_SDATA(const s32, "model/mdlManager", mdlWorkPathPrefix);
+mdlWorkPrefix_t mdlWorkPathPrefix[1] = { { "work/" } };
 
