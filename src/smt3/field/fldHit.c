@@ -964,7 +964,6 @@ void fldHitChkUnitElv(f32 *position) {
     }
 }
 
-#ifdef NON_MATCHING
 void fldHitChkUnitDamage(f32 *phys_pos)
 {
     sdfVector4_t current;
@@ -1015,6 +1014,12 @@ void fldHitChkUnitDamage(f32 *phys_pos)
             f32 distance;
             f32 clearance;
             s32 inside;
+            /* Keep the damage destination in the iteration's state pointer.
+             * Qualified compiler output keeps this live address separate from
+             * the initial reset, while direct area/floor reads retain their
+             * native reloads. This reconstructs address ownership, not original
+             * source spelling; the pointer is only consumed by the flag store. */
+            fldAreaWork_t *areaState = &fldGlobalBase;
 
             if (fldGlobalBase.area >= 11) {
                 radius = fldMatterTable[index].mode2D == 1 ? 45.0f : 60.0f;
@@ -1062,18 +1067,15 @@ void fldHitChkUnitDamage(f32 *phys_pos)
                     if (!(clearance < 0.0f)) {
                         inside = 1;
                     }
-                }
-                if (inside == 1) {
-                    fldGlobalBase.wordB0 = inside;
+                    if (inside == 1) {
+                        areaState->wordB0 = inside;
+                    }
                 }
             }
             count = fldValueRecordCount;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitDamage);
-#endif
 
 #ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;

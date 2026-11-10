@@ -69,7 +69,7 @@ static inline u32 LeadingZeroBits(u32 word)
 /* Preserve the shared helper's optional remainder output. The wrapper
  * discards its quotient and returns the remainder written to its local. */
 extern const u8 libgccModdiBitLengths[256];
-extern const u8 libgccUmoddiBitLengths[256];
+extern const u8 libgccUmoddiBitLengths[];
 
 static inline u32 RemainderLeadingZeroBits(u32 word, const u8 *bitLengths)
 {
