@@ -68,6 +68,13 @@
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
             ".section .text\n")
 
+/* INCLUDE_SDATA between small-data objects defined in C: ee-gcc already
+ * believes it is in .sdata, so the section must stay .sdata afterwards. */
+#define INCLUDE_SDATA_C(TYPE, FOLDER, NAME)                    \
+    __asm__(".section .sdata\n"                                \
+            "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
+            ".section .sdata\n")
+
 /* N zero bytes of alignment padding ee-gcc put between two small-data objects
  * of one unit, where splat has no object to name (tools/include_sdata.py). */
 #define SDATA_PAD(N) __asm__(".section .sdata\n\t.space " #N "\n.section .text\n")
@@ -88,6 +95,7 @@ __asm__(".include \"macro.inc\"\n");
 #define INCLUDE_ASM(TYPE, FOLDER, NAME)
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)
 #define INCLUDE_SDATA(TYPE, FOLDER, NAME)
+#define INCLUDE_SDATA_C(TYPE, FOLDER, NAME)
 #define SDATA_PAD(N)
 #define SDATA_HOLE(N)
 #define TEXT_ALIGN(N)
