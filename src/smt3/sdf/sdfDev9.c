@@ -56,7 +56,7 @@ extern void *memcpy(void *, const void *, size_t);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-extern char sdfDev9ResidentFailMsg[];
+extern const char sdfDev9ResidentFailMsg[];
 
 extern u8 sdfDev9LoadFlag;
 
@@ -187,9 +187,9 @@ s32 sdfDecimalToPackedDigits(s32 number) {
     return packedDigits;
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfDev9", sdfDev9ResidentFailMsg);
+const char sdfDev9ResidentFailMsg[40] = "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n";
 
-INCLUDE_SDATA(const s32, "sdf/sdfDev9", sdfDev9Ready);
+u8 sdfDev9Ready = 0;
 
 SDATA_PAD(7);
 

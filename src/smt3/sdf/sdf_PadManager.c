@@ -71,7 +71,7 @@ extern s8 dds3PadBitTable[0x20];
 
 extern u8 sdfPadPressure[0x18];
 
-extern u16 sdfPadButtons[2];
+extern u16 sdfPadButtons[4];
 
 extern u16 sdfPadBitMask[0x10];
 
@@ -384,15 +384,21 @@ void sdfPadInitManager(void) {
     sdfPadManagerMode = 0;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadPortSlotPairs);
+u8 sdfPadPortSlotPairs[4] = {0, 0, 1, 0};
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
+u8 sdfPadManagerMode = 0;
 
 SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadButtons);
+u16 sdfPadButtons[4] = {0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadAnalogSticks);
+u8 sdfPadAnalogSticks[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_005518E8);
+u32 D_005518E8 = 0;
+
+u32 D_005518EC = 0;
+
+u32 D_005518F0 = 0;
+
+u32 D_005518F4 = 0;
 

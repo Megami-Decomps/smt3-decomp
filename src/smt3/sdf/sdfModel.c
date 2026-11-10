@@ -1610,7 +1610,7 @@ f32 sdfModelGetFaceDivBias(sdfModelRootNode_t *aRoot)
     }
     return sdfFaceDivBias;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfModel", corePktSoftenBias);
+u8 corePktSoftenBias = 0;
 
 SDATA_PAD(3);
 

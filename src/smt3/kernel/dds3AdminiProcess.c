@@ -449,7 +449,7 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFreeEntries);
 
 /* NON_MATCHING: 7 of 37 words differ (first at +0x3C). */
 #ifdef NON_MATCHING
-s32 fcl_103420(const char *name, void (*setState)(s32))
+s32 fclEncycConfigureMode3(const char *name, void (*setState)(s32))
 {
     s32 slot = fclEncycFindFreeSlot(name);
 
@@ -466,7 +466,7 @@ s32 fcl_103420(const char *name, void (*setState)(s32))
     return 1;
 }
 #else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103420);
+INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycConfigureMode3);
 #endif
 
 /* NON_MATCHING: 11 of 42 words differ (first at +0x8). */
@@ -497,7 +497,7 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycAllocEntry);
 
 /* NON_MATCHING: 11 of 43 words differ (first at +0x8). */
 #ifdef NON_MATCHING
-s32 fcl_103560(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy,
+s32 fclEncycConfigureMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy,
                void *userValue)
 {
     s32 slot = fclEncycFindFreeSlot(name);
@@ -515,7 +515,7 @@ s32 fcl_103560(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t des
     return 1;
 }
 #else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103560);
+INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycConfigureMode2);
 #endif
 
 

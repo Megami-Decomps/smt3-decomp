@@ -950,37 +950,37 @@ void sdfFileCmdStartThread(s32 deviceType) {
         _StartThread(thread, worker);
     }
 }
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdActiveHead);
+sdfFileCmdHandle_t *sdfFileCmdActiveHead = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeList);
+sdfFileCmdHandle_t *sdfFileCmdFreeList = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCount);
-
-SDATA_PAD(2);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheHead);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheTail);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeCount);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultDevice);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrioCheckCounter);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrio);
-
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultCreateMode);
+s16 sdfFileCmdCount = 0;
 
 SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdromPrefix);
+sdfFileCmdHandle_t *sdfFileCmdCacheHead = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdHostPrefix);
+sdfFileCmdHandle_t *sdfFileCmdCacheTail = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdPfsPrefix);
+s16 sdfFileCmdFreeCount = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdMoviePath);
+u8 sdfFileCmdDefaultDevice = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdimgPrefix);
+u8 sdfFileCmdThreadPrioCheckCounter = 0;
+
+s32 sdfFileCmdThreadPrio = 0x48;
+
+u16 sdfFileCmdDefaultCreateMode = 0x180;
+
+SDATA_PAD(2);
+
+char sdfFileCmdCdromPrefix[8] = "cdrom0:";
+
+char sdfFileCmdHostPrefix[8] = "host0:";
+
+char sdfFileCmdPfsPrefix[8] = "pfs0:";
+
+char sdfFileCmdMoviePath[8] = "/movie/";
+
+char sdfFileCmdCdimgPrefix[8] = "cdimg:";
 

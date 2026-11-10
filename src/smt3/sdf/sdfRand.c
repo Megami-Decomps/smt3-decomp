@@ -222,9 +222,9 @@ s32 sdfGetCdClock(sdfClock_t *now) {
     *now = sdfCdClockCache;
     return result;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfRand", sdfCdClock);
+u8 sdfCdClock = 0;
 
 SDATA_PAD(7);
 
-INCLUDE_SDATA(const s32, "sdf/sdfRand", sdfCdClockCache);
+sdfClock_t sdfCdClockCache = {0};
 

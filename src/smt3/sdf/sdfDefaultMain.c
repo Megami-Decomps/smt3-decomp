@@ -100,7 +100,9 @@ s32 sdfDefaultMain(void)
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", sdfDefaultCdMode);
+u32 sdfDefaultCdMode = 2;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", dds3ClosedDrawTag);
+u32 D_0054E8C0 = 0;
+
+sdfDrawTag_t *dds3ClosedDrawTag = NULL;
 

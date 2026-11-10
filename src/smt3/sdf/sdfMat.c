@@ -628,5 +628,5 @@ void sdfMatListCopyStat(sdfItemArray_t *aDst, sdfItemArray_t *aSrc)
     }
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfMat", sdfMatAllocCount);
+s32 sdfMatAllocCount = 0;
 

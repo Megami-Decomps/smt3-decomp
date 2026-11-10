@@ -535,15 +535,15 @@ void sdf3DInit(void) {
     sdfModelInitSystem();
     sdfMatInitSystem();
 }
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DLightDefault);
+addr_t sdf3DLightDefault = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DFogDefault);
+addr_t sdf3DFogDefault = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot2Tex);
+sdfTexHandle_t *sdf3DSlot2Tex = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSpecularTex);
+sdfTexHandle_t *sdf3DSpecularTex = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
+u64 sdf3DRefMapParam = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot1Tex);
+sdfTexHandle_t *sdf3DSlot1Tex = NULL;
 

@@ -245,22 +245,22 @@ extern char sdfDumpLineBuf[];
 
 extern char sdfDumpEndStr[];
 
-extern char sdfDmaDumpStartFmt[];
+extern const char sdfDmaDumpStartFmt[];
 
-extern char sdfDmaNotQwordFmt[];
+extern const char sdfDmaNotQwordFmt[];
 
-extern char sdfDmaTagLineFmt[];
+extern const char sdfDmaTagLineFmt[];
 
-extern char sdfDmaNestOverflowMsg[];
+extern const char sdfDmaNestOverflowMsg[];
 
 
 extern char *sdfDmaTagNameTable[];
 
 sdfGsMemSlice_t *sdfGsMemGetLinkHead(void);
 
-extern char sdfGsMemInfoTitle[];
+extern const char sdfGsMemInfoTitle[];
 
-extern char sdfGsMemNodeFmt[];
+extern const char sdfGsMemNodeFmt[];
 
 extern char sdfGsMemTypeFmt[];
 
@@ -511,7 +511,7 @@ void sdfSndLoadIRXModules(void) {
 }
 
 extern char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
-extern char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
+extern const char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
 
 void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount);
 
@@ -589,7 +589,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 extern s32 sceSifInitIopHeap(void);
 extern s32 sdfSndIopWorkAddr;
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndSeqMapInitMsg);
+const char sdfSndSeqMapInitMsg[18] = "sdfSndSeqMapInit\n";
 
 void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSequenceCount)
 {
@@ -1281,13 +1281,13 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaDumpStartFmt);
+const char sdfDmaDumpStartFmt[29] = "<<< DMA dump start [%p] >>>\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNotQwordFmt);
+const char sdfDmaNotQwordFmt[21] = "%p not qword align.\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaTagLineFmt);
+const char sdfDmaTagLineFmt[33] = "%08X : [%s] %08X %08X %08X %08X\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfDmaNestOverflowMsg);
+const char sdfDmaNestOverflowMsg[27] = "call stack nest overflow!\n";
 
 void sdfDumpDmaChain(sdfDmaDumpTag_t *source) {
     sdfDmaDumpTag_t *callStack[2];
@@ -1686,9 +1686,9 @@ void sdfDumpGsMemory2(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemInfoTitle);
+const char sdfGsMemInfoTitle[116] = " <<< GS memory information >>>\n -----------------------------\n address  : previous   next     type   GS-addr  size\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfGsMemNodeFmt);
+const char sdfGsMemNodeFmt[31] = " %08X : %08X %08X %8s %08X %d\n";
 
 void sdfDumpMemory(void) {
     sdfMemInfo_t info;
@@ -1719,111 +1719,111 @@ void sdfDumpChipMemory(void) {
     } while (i != 7);
     sdfPrintf(sdfDumpLineBuf, first);
 }
-INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdSmgHandle);
+s32 p2sdSmgHandle = -1;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmCallback);
+u32 p2sdPcmCallback = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmState);
+u32 p2sdPcmState = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmBusy);
+u32 p2sdPcmBusy = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfSndSendCmd_cmd_id);
+u32 sdfSndSendCmd_cmd_id = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfSifRpcThreadId);
+s32 sdfSifRpcThreadId = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdSmgBuf);
+s32 (*p2sdSmgBuf)(void) = NULL;
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagEndName);
+char sdfDmaTagEndName[8] = "END ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagRetName);
+char sdfDmaTagRetName[8] = "RET ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagCallName);
+char sdfDmaTagCallName[8] = "CALL";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagRefsName);
+char sdfDmaTagRefsName[8] = "REFS";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagRefName);
+char sdfDmaTagRefName[8] = "REF ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagNextName);
+char sdfDmaTagNextName[8] = "NEXT";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagCntName);
+char sdfDmaTagCntName[8] = "CNT ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDmaTagRefeName);
+char sdfDmaTagRefeName[8] = "REFE";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpAddrFmt);
+char sdfDumpAddrFmt[8] = "%08X : ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpPadStr);
+char sdfDumpPadStr[8] = "   ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpMidGapStr);
+char sdfDumpMidGapStr[8] = "-";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpByteSepStr);
+char sdfDumpByteSepStr[8] = " ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpByteFmt);
+char sdfDumpByteFmt[8] = "%02X";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpLineBuf);
+char sdfDumpLineBuf[2] = "\n";
 
 SDATA_PAD(6);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpEndStr);
+char sdfDumpEndStr[8] = "\n\n";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifMaskedName);
+char sdfVifMaskedName[8] = "mask";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifXferOkName);
+char sdfVifXferOkName[8] = "xfer-ok";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV4_5Name);
+char sdfVifUnpackV4_5Name[8] = "V4_5";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV4_8Name);
+char sdfVifUnpackV4_8Name[8] = "V4_8";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV4_16Name);
+char sdfVifUnpackV4_16Name[8] = "V4_16";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV4_32Name);
+char sdfVifUnpackV4_32Name[8] = "V4_32";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV3_8Name);
+char sdfVifUnpackV3_8Name[8] = "V3_8";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV3_16Name);
+char sdfVifUnpackV3_16Name[8] = "V3_16";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV3_32Name);
+char sdfVifUnpackV3_32Name[8] = "V3_32";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV2_8Name);
+char sdfVifUnpackV2_8Name[8] = "V2_8";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV2_16Name);
+char sdfVifUnpackV2_16Name[8] = "V2_16";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackV2_32Name);
+char sdfVifUnpackV2_32Name[8] = "V2_32";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackS_8Name);
+char sdfVifUnpackS_8Name[8] = "S_8";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackS_16Name);
+char sdfVifUnpackS_16Name[8] = "S_16";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifUnpackS_32Name);
+char sdfVifUnpackS_32Name[8] = "S_32";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsMruName);
+char sdfVifFlagsMruName[8] = "[mru]";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsRuName);
+char sdfVifFlagsRuName[8] = "[ru] ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsMrName);
+char sdfVifFlagsMrName[8] = "[mr] ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsRName);
+char sdfVifFlagsRName[8] = "[r]  ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsMuName);
+char sdfVifFlagsMuName[8] = "[mu] ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsUName);
+char sdfVifFlagsUName[8] = "[u]  ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsMName);
+char sdfVifFlagsMName[8] = "[m]  ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfVifFlagsNoneName);
+char sdfVifFlagsNoneName[8] = "     ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpIndentStr);
+char sdfDumpIndentStr[8] = "    ";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpWordFmt);
+char sdfDumpWordFmt[8] = "%08X";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemClutName);
+char sdfGsMemClutName[8] = "[CLUT ]";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemTexName);
+char sdfGsMemTexName[8] = "[TEX  ]";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemFrameName);
+char sdfGsMemFrameName[8] = "[FRAME]";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemFreeName);
+char sdfGsMemFreeName[8] = "[FREE ]";
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfGsMemTypeFmt);
+char sdfGsMemTypeFmt[8] = "%d";
 

@@ -141,7 +141,7 @@ extern char sdfFileCdromPrefix[];
 
 extern char * strcpy(char *, const char *);
 
-extern sdfHostPrefix_t sdfFileHostPrefix[];
+extern char sdfFileHostPrefix[];
 
 extern u8 sdfFileHddPrefix[];
 
@@ -200,7 +200,7 @@ char *sdfFileSetHostFilename(char *aDst, char *aSrc) {
         strcpy(aDst, sdfFileHostRootPath);
         return strcat(aDst, aSrc);
     }
-    *(sdfHostPrefix_t *)aDst = sdfFileHostPrefix[0];
+    *(sdfHostPrefix_t *)aDst = *(sdfHostPrefix_t *)sdfFileHostPrefix;
     return strcat(aDst, aSrc);
 }
 
@@ -394,17 +394,17 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
         SignalSema(worker->semaId);
     }
 }
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileDefaultSrcType);
+u8 sdfFileDefaultSrcType = 1;
 
 SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileSemaId);
+s32 sdfFileSemaId = -1;
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromPrefix);
+char sdfFileCdromPrefix[8] = "cdrom0:";
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHostPrefix);
+char sdfFileHostPrefix[8] = "host0:";
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHddPrefix);
+u8 sdfFileHddPrefix[8] = "pfs0:";
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromName);
+char sdfFileCdromName[8] = "cdrom";
 

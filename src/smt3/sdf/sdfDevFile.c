@@ -105,7 +105,7 @@ u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern char sdfDevLoadMsgFmt[];
+extern const char sdfDevLoadMsgFmt[];
 
 void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
@@ -229,5 +229,5 @@ void *sdfDevLoadMotion(const char *aFilename, void **aOutBody) {
     return allocation;
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfDevFile", sdfDevLoadMsgFmt);
+const char sdfDevLoadMsgFmt[15] = "%s loading...\n";
 

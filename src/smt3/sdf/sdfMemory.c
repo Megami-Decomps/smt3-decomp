@@ -500,9 +500,11 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
     return result;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfMemFullCallback);
+void (*sdfMemFullCallback)(s32 size) = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfGrDrawFirstFlag);
+u32 D_00551834 = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfFrameEvenOdd);
+u8 sdfGrDrawFirstFlag = 0;
+
+u8 sdfFrameEvenOdd = 0;
 
