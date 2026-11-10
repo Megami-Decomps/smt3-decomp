@@ -67,9 +67,9 @@ typedef struct
 
 extern datCommentEntry_t datCommentTable[];
 
-extern char rstDrawProcName[];
+extern const char rstDrawProcName[];
 
-extern char rstUpdateProcName[];
+extern const char rstUpdateProcName[];
 
 extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
 
