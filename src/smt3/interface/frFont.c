@@ -392,7 +392,7 @@ s32 frDrawFont(frFontHandle_t *pFRQ);
 
 extern s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode);
 
-s32 func_001C7E38(frFontHandle_t *pFRQ, s8 Mode, u32 Ot);
+s32 frDrawFontOt(frFontHandle_t *pFRQ, s8 Mode, u32 Ot);
 
 s32 frFlipPacketBuf(dds3ProcessID_t *id);
 
@@ -1524,7 +1524,7 @@ s32 frDrawFont(frFontHandle_t *pFRQ) {
 }
 
 s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode) {
-    return func_001C7E38(pFRQ, Mode, gFontDrawOT);
+    return frDrawFontOt(pFRQ, Mode, gFontDrawOT);
 }
 
 /* Nocturne's ASCII bearing adjustments are separate 26-entry X/Y tables. */
@@ -1536,7 +1536,7 @@ extern u32 frDrawFontWork;
 
 /* DDS1 frFontDrawGlyphChain supplies the shared child/parent traversal;
  * Nocturne adds its ASCII bearings and per-parent draw count, not DDS waits. */
-s32 func_001C7E38(frFontHandle_t *glyph, s8 mode, u32 renderFlags) {
+s32 frDrawFontOt(frFontHandle_t *glyph, s8 mode, u32 renderFlags) {
     frTextHandle_t *child;
     s32 ready = 1;
     s32 enabled = 1;

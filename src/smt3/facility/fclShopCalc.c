@@ -222,7 +222,7 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 
 
 extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color, const char *text, frFontHandle_t *previous);
 
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
@@ -257,7 +257,7 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     sprintf(buf, shpFmtCount7, num);
     frq = frwGetNumFontFRQ(pos->unk_00 + target + 0x1840, pos->unk_04 + 0x1A0, pos->unk_08, color,
                            buf, 0);
-    func_001C7E38(frq, 1, ot);
+    frDrawFontOt(frq, 1, ot);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -305,7 +305,7 @@ void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot)
         }
     }
 
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
     fclDrawSpriteRes(pos->unk_00 + 0xF90, pos->unk_04 + 0xB0,
                      pos->unk_08 << 4, NULL, 0, 4,
@@ -350,11 +350,11 @@ void shopDrawRowText(s32 x, s32 y, s32 z, u32 color, u16 item, s32 count, s32 ot
     frFontHandle_t *request;
 
     request = frwGetSmallFontFRQ2(x + 0x240, y + 0x68, z, color, pStr[item], NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
     sprintf(text, shpFmtCount7, count);
     request = frwGetSmallNumFontFRQ(x + 0x9C0, y + 0x80, z, color, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
     fclDrawSpriteRes(x + 0xE50, y + 0x98, z << 4, NULL, 0, 2,
                      ((shopDrawWork_t *)shopDrawWork)->texHandle, shopSpriteTable, ot);

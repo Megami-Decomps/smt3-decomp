@@ -2237,7 +2237,7 @@ extern void cmpDrawStatusBars(s32 x, s32 y, s32 z);
 extern u16 rstSkillSlotIsFull(datUnitWork_t *unit, cmpCursorInfo_t *slot);
 extern frFontHandle_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
 extern void frSetFontColor(frFontHandle_t *request, u32 color);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
@@ -2256,7 +2256,7 @@ s32 rstDrawStatusPanel(s8 mode, s8 showHelp)
         skill = rstSkillSlotIsFull(rstDrawWork->unk_16C, &rstDrawWork->skillSlot);
         request = frGetHelpPos(0x180, 0x9A0, 0xFFFFF, 0, skill);
         frSetFontColor(request, 0x80C08080);
-        func_001C7E38(request, 1, 0x47);
+        frDrawFontOt(request, 1, 0x47);
         frDestroyFontRequestAfter(request);
     }
     cmpDrawStatusComEx(rstDrawWork->unk_16C, 0x80, selected, showHelp,

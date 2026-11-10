@@ -50,7 +50,7 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 
 
 extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
-extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *font, s8 mode, u32 ot);
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
@@ -345,7 +345,7 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     sprintf(buf, rcvNumFormat, num);
     frq = frwGetNumFontFRQ(pos->unk_00 + target + 0x1840, pos->unk_04 + 0x1A0, pos->unk_08, color,
                            buf, 0);
-    func_001C7E38(frq, 1, ot);
+    frDrawFontOt(frq, 1, ot);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -403,7 +403,7 @@ void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
     } else {
         font = frwGetSmallFontFRQ2(textX, textY, z, color, text2[unit->id], NULL);
     }
-    func_001C7E38(font, 1, ot);
+    frDrawFontOt(font, 1, ot);
     frDestroyFontRequestAfter(font);
     cmpDrawStatusIconRow(x + (xOffsets[1] << 4), y + (yOffsets[1] << 3), z,
                          0x80808080, unit, 1, ot);

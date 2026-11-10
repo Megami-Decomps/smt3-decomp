@@ -72,7 +72,7 @@ extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
                                         frFontHandle_t *chain);
 extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *request, u32 priority);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern s32 nmeGetInputMode(nmeWork_t *work);
 extern u8 frDisableMode(u8 flag);
@@ -121,7 +121,7 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
         frSetDrawPosition(font, x * 16 + 0xF0 + i * 0x150, y * 8);
         frSetFontColor(font, color);
         frSetPriority(font, 0);
-        func_001C7E38(font, 0, 0x47);
+        frDrawFontOt(font, 0, 0x47);
         frDestroyFontRequestAfter(font);
     }
     fclDrawSpriteRes((secondX - 0x13) * 16, (secondY + 9) * 8, 0, NULL, 0, 0x11,
@@ -134,7 +134,7 @@ void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode
         frSetDrawPosition(font, secondX * 16 + 0xF0 + i * 0x150, secondY * 8);
         frSetFontColor(font, color);
         frSetPriority(font, 0);
-        func_001C7E38(font, 0, 0x47);
+        frDrawFontOt(font, 0, 0x47);
         frDestroyFontRequestAfter(font);
     }
     frEnableMode(1);
@@ -176,7 +176,7 @@ void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
         frSetDrawPosition(font, (x + 0x10) * 16 + i * 0x120, y * 8);
         frSetFontColor(font, color);
         frSetPriority(font, 0);
-        func_001C7E38(font, 0, 0x47);
+        frDrawFontOt(font, 0, 0x47);
         frDestroyFontRequestAfter(font);
     }
     cmpSetSkillListRows(-1);
@@ -225,7 +225,7 @@ extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color
 extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *request, u32 priority);
 extern void frSetFontColorNo(frFontHandle_t *request, u8 colorNo);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern u8 frDisableMode(u8 flag);
 
@@ -238,7 +238,7 @@ void nmeDrawColoredText(s8 selected)
     request = frwGetSmallFontFRQ2(0x97, 0x101, 0xFF, 0x80808080, text.question, NULL);
     frSetDrawPosition(request, 0x970, 0x808);
     frSetPriority(request, 0xFF0);
-    func_001C7E38(request, 0, 0x47);
+    frDrawFontOt(request, 0, 0x47);
     frDestroyFontRequestAfter(request);
 
     request = frwGetSmallFontFRQ2(0x9D, 0x122, 0xFF, 0x80808080, text.yes, NULL);
@@ -248,7 +248,7 @@ void nmeDrawColoredText(s8 selected)
         nmeDrawTextBox(0x9A0, 0x920, 0xFF);
     }
     frSetPriority(request, 0xFF0);
-    func_001C7E38(request, 0, 0x47);
+    frDrawFontOt(request, 0, 0x47);
     frDestroyFontRequestAfter(request);
 
     request = frwGetSmallFontFRQ2(0x9D, 0x13D, 0xFF, 0x80808080, text.no, NULL);
@@ -258,7 +258,7 @@ void nmeDrawColoredText(s8 selected)
         nmeDrawTextBox(0x9A0, 0x9F0, 0xFF);
     }
     frSetPriority(request, 0xFF0);
-    func_001C7E38(request, 0, 0x47);
+    frDrawFontOt(request, 0, 0x47);
     frDestroyFontRequestAfter(request);
 
     frDisableMode(1);
@@ -403,7 +403,7 @@ void nmeDrawCursorAt(s32 x, s32 y, s32 z, s8 mode, s32 ot)
             frSetPriority(font, z * 16);
             nmeDrawCharCell(drawX, drawY, row, column, font);
             drawX += step;
-            func_001C7E38(font, 0, 0x47);
+            frDrawFontOt(font, 0, 0x47);
             frDestroyFontRequestAfter(font);
         }
     }

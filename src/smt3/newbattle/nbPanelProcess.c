@@ -373,7 +373,7 @@ extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 extern frFontRequest_t *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, const char *pStr, frFontRequest_t *pFRQ);
 
-extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 kind);
+extern s32 frDrawFontOt(frFontHandle_t *frq, s8 mode, u32 kind);
 
 extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
 
@@ -822,7 +822,7 @@ void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32
 
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseRGBA);
     frq = (frFontHandle_t *)frwGetSmallNumFontFRQ((pXYZ->x + x) << 4, (pXYZ->y + y) << 3, 0, col, pString, 0);
-    func_001C7E38(frq, 1, 0x47);
+    frDrawFontOt(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -842,7 +842,7 @@ void nbPanelSmallNameStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ,
         frSetDrawPosition(frq, (pXYZ->x + x) << 4, (pXYZ->y + y) << 3);
         col = effMagaCylinderCalcColor(abgr, nbPanelBaseRGBA);
         frSetFontColor(frq, col);
-        func_001C7E38(frq, 1, 0x47);
+        frDrawFontOt(frq, 1, 0x47);
         frDestroyFontRequestAfter(frq);
         return;
     }
@@ -850,7 +850,7 @@ void nbPanelSmallNameStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ,
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseRGBA);
     frq = (frFontHandle_t *)frwGetSmallFontFRQ2((pXYZ->x + x) << 4, (pXYZ->y + y) << 3, 0,
                               col, text2[DDS3_GBWK->akuma[statindex].devilId], NULL);
-    func_001C7E38(frq, 1, 0x47);
+    frDrawFontOt(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -1159,7 +1159,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     sprintf(buf, nbPanelNumFormat, DDS3_GBWK->akuma[j].hp);
     c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
     gnbPnlWork = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0xB9) << 4, (y + 2) << 3, 0, c, buf, 0);
-    func_001C7E38(gnbPnlWork, 1, 0x47);
+    frDrawFontOt(gnbPnlWork, 1, 0x47);
     frDestroyFontRequestAfter(gnbPnlWork);
     nbPnl_rsetAlpha(0);
     w = 0;
@@ -1187,7 +1187,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
     sprintf(buf, nbPanelNumFormat, *(u16 *)&DDS3_GBWK->akuma[j].unk0C[2]);
     c = effMagaCylinderCalcColor(c, nbPanelBaseRGBA);
     gnbPnlWork = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0xEF) << 4, (y + 2) << 3, 0, c, buf, 0);
-    func_001C7E38(gnbPnlWork, 1, 0x47);
+    frDrawFontOt(gnbPnlWork, 1, 0x47);
     frDestroyFontRequestAfter(gnbPnlWork);
     cmpSetSkillListRows(0x13);
     if (DDS3_GBWK->akuma[j].flag & 4) {
@@ -1195,14 +1195,14 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
         frSetDrawPosition(gnbPnlWork, (x + 0x2D) << 4, (y + 4) << 3);
         c = effMagaCylinderCalcColor(0xA09DC380, nbPanelBaseRGBA);
         frSetFontColor(gnbPnlWork, c);
-        func_001C7E38(gnbPnlWork, 1, 0x47);
+        frDrawFontOt(gnbPnlWork, 1, 0x47);
         frDestroyFontRequestAfter(gnbPnlWork);
     } else {
         c = effMagaCylinderCalcColor(0xA09DC380, nbPanelBaseRGBA);
         gnbPnlWork = (frFontHandle_t *)frwGetSmallFontFRQ2((x + 0x2D) << 4, (y + 4) << 3, 0, c,
                                          text2[DDS3_GBWK->akuma[j].devilId],
                                          NULL);
-        func_001C7E38(gnbPnlWork, 1, 0x47);
+        frDrawFontOt(gnbPnlWork, 1, 0x47);
         frDestroyFontRequestAfter(gnbPnlWork);
     }
     cmpSetSkillListRows(-1);
@@ -3337,7 +3337,7 @@ void nbPanelAnalyzeRun(void)
             font = (frFontHandle_t *)frwGetSmallFontFRQ2(nbPanelPolyXYZ[18].x * 16,
                     (nbPanelPolyXYZ[18].y + 0xF8) * 8, 0, color,
                     datExplainTable[datDevilTable[pNbPanelAnalyzeUnitWork->id].race], NULL);
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
             cmpSetSkillListRows(-1);
         }
@@ -3355,14 +3355,14 @@ void nbPanelAnalyzeRun(void)
             frSetDrawPosition(font, (nbPanelPolyXYZ[19].x + 15) * 16,
                               (nbPanelPolyXYZ[19].y + 0xF6) * 8);
             frSetFontColor(font, effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA));
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
         } else {
             cmpSetSkillListRows(19);
             color = effMagaCylinderCalcColor((textColor & 0xFF) | 0xA09DC300, nbPanelBaseRGBA);
             font = (frFontHandle_t *)frwGetSmallFontFRQ2((nbPanelPolyXYZ[19].x + 15) * 16,
                     (nbPanelPolyXYZ[19].y + 0xF6) * 8, 0, color, text2[pNbPanelAnalyzeUnitWork->id], NULL);
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
             cmpSetSkillListRows(-1);
         }
@@ -3387,7 +3387,7 @@ void nbPanelAnalyzeRun(void)
                     font = (frFontHandle_t *)frwGetSmallFontFRQ2((nbPanelPolyXYZ[23].x + px) * 16,
                             (nbPanelPolyXYZ[23].y + 0xF6 + py) * 8, 0, color, text1[skill], NULL);
                     nbCenterText(font, &nbPanelPolyXYZ[23]);
-                    func_001C7E38(font, 1, 0x47);
+                    frDrawFontOt(font, 1, 0x47);
                     frDestroyFontRequestAfter(font);
                 } while (i < 8 && datDevilTable[pNbPanelAnalyzeUnitWork->id].skill[i] != 0);
             }
@@ -3429,7 +3429,7 @@ void nbPanelAnalyzeRun(void)
             font = (frFontHandle_t *)frwGetSmallFontFRQ2(nbPanelPolyXYZ[26].x * 16,
                     (nbPanelPolyXYZ[26].y + 0xF6) * 8, 0, color,
                     datExplainTable[0x50 + datDevilTable[pNbPanelAnalyzeUnitWork->id].aisyoid], NULL);
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
         }
         geometry = &D_004F0484[0];

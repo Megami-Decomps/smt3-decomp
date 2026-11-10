@@ -378,7 +378,7 @@ extern void frSetDrawPosition(void *pFRQ, s32 X, s32 Y);
 
 extern void frSetFontColor(void *pFRQ, u32 Color);
 
-extern void func_001C7E38(void *request, s32 a1, s32 a2);
+extern void frDrawFontOt(void *request, s32 a1, s32 a2);
 
 extern void *slKanjiDrawH_handle;
 
@@ -732,7 +732,7 @@ void slKanjiDrawH(s32 x, s32 y, u32 rgba, const char *moji) {
     frSetFontSpace(slKanjiDrawH_handle, 3);
     frSetDrawPosition(slKanjiDrawH_handle, x << 4, y << 4);
     frSetFontColor(slKanjiDrawH_handle, rgba);
-    func_001C7E38(slKanjiDrawH_handle, 0, 0x4A);
+    frDrawFontOt(slKanjiDrawH_handle, 0, 0x4A);
     frDestroyFontRequestAfter(slKanjiDrawH_handle);
     frSetFontDrawOT(0x48);
 }

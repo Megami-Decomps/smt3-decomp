@@ -20,7 +20,7 @@ extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color
 extern frFontHandle_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                                   const char *text, frFontHandle_t *previous);
 extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 extern void sortSkillList(cmbUnit_t *unit);
@@ -198,7 +198,7 @@ void fcl_2129F8(s32 x, s32 y, s32 priority, u32 color, s32 value, s32 ot)
     sprintf(text, "%d", value);
     request = frwGetSmallNumFontFRQ(x, y, priority, color, text, NULL);
     frSetDrawPosition(request, x - ((request->advance >> 1) << 4), y);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
@@ -210,7 +210,7 @@ s32 fclDrawStrCenterTarget(s32 x, s32 y, s32 priority, u16 width, u16 unused1, u
     request = frwGetSmallCaptionFontFRQ(x, y, priority, 0xDEFFA180, text, NULL);
     frSetDrawPosition(request, x + (((s32)width - request->advance) >> 1) * 16,
                       y);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     return frDestroyFontRequestAfter(request);
 }
 
@@ -229,7 +229,7 @@ s32 fclDrawCaption(fclPanelPos_t *panel, const char *text, s32 ot)
     }
     cmpDrawBoxF(0, panel->unk_04, panel->unk_08, width + 0x20, 0x1A,
                 0x30303080, ot);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     return frDestroyFontRequestAfter(request);
 }
 
@@ -241,7 +241,7 @@ s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
     request = frwGetSmallFontFRQ2(0x270, panel->unk_04, panel->unk_08,
                                   0xA09DC380, text, NULL);
     fclDrawSpriteRes(0, 0, 0xFFFFF, NULL, 0, 0, texList, table, ot);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     return frDestroyFontRequestAfter(request);
 }
 
@@ -320,7 +320,7 @@ void fclDrawPriceText(fclPanelPos_t *pos, u16 item, s32 ot)
     sprintf(text, fclFmtItemCount, quantity);
     request = frwGetNumFontFRQ(x + 0x7B0, y + 0x218, pos->unk_08,
                                0xA0F0EB80, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
@@ -351,7 +351,7 @@ void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 ot)
     /* The numeric baseline uses the X coordinate. */
     request = frwGetNumFontFRQ(pos->unk_00 + 0x1840, pos->unk_00 + 0x90,
                                pos->unk_08, color, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 

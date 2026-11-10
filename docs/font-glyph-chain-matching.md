@@ -5,7 +5,7 @@ Two native SMT3 bodies are exact ordinary C in `interface/frFont`:
 | Function | Address | Bytes |
 | --- | --- | ---: |
 | `frDrawEffect` | `0x001C7CB8` | 328 |
-| `func_001C7E38` (glyph-chain drawing) | `0x001C7E38` | 640 |
+| `frDrawFontOt` (glyph-chain drawing) | `0x001C7E38` | 640 |
 
 The shared algorithm comes from DDS1 `frFontAdvanceChildFadeAndGetJitter`
 and `frFontDrawGlyphChain`, `src/dds1/interface/frFont.c:687,797`, at

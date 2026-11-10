@@ -8,7 +8,7 @@
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern void frDrawFontOt(void *frq, s32 mode, s32 arg);
 
 typedef struct trmCalcWork_t {
     /* 0x0000 */ u8 flags;
@@ -101,13 +101,13 @@ void *trmGetListFont(s32 x, s32 y, s32 color, s32 d, s8 index, s8 which)
 
 extern void *trmGetListFont(s32 a, s32 b, s32 c, s32 d, s8 e, s8 f);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern void frDrawFontOt(void *frq, s32 mode, s32 arg);
 
 void trmFreeListFont(s32 a, s32 b, s32 c, s32 d, s8 e, s8 f, s32 g)
 {
     void *frq = trmGetListFont(a, b, c, d, e, f);
 
-    func_001C7E38(frq, 1, g);
+    frDrawFontOt(frq, 1, g);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -157,7 +157,7 @@ extern s32 cmpUpdateListSelection(trmPanelPos_t *panel, u8 *list, s32 row,
                                   s32 mode, s32 width, s32 ot);
 extern u32 frGetStrWidth2(void *request);
 extern void frSetDrawPosition(void *request, s32 x, s32 y);
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern void frDrawFontOt(void *frq, s32 mode, s32 arg);
 
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
                              s32 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 ot);
@@ -180,7 +180,7 @@ void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
     fclDrawSpriteSize(center + 0x450, 0xC8, panel->z << 4, width - 0x31, 0x21,
                       NULL, 0, 2, &trmDrawWork->texHandle, trmSpriteTable, ot);
     frSetDrawPosition(font, center, 0xF8);
-    func_001C7E38(font, 0, ot);
+    frDrawFontOt(font, 0, ot);
     frDestroyFontRequestAfter(font);
 }
 

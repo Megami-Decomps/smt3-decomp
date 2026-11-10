@@ -615,7 +615,7 @@ extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
 extern void cmpUpdateStatusModelLoad(u16 id);
 
-extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
+extern s32 frDrawFontOt(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern s32 D_00345D88[];
 #define D_00345D9C ((void **)(D_00345D88 + 5))
@@ -642,7 +642,7 @@ extern char trmProcessNameTrmFmt[];
 extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                                const char *text, frFontHandle_t *previous);
 
-extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
+extern s32 frDrawFontOt(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern void fmProcTrigSequence(s32 mode);
 
@@ -2673,7 +2673,7 @@ void cmpDrawHelp(fclPanelPos_t *pos, u16 index, s8 bank, s8 skipBackground, s32 
     fontColor = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
     font = frwGetHelpFRQ(pos->unk_00, pos->unk_04, pos->unk_08, bank, index, 0);
     frSetFontColor(font, fontColor);
-    func_001C7E38(font, 1, ot);
+    frDrawFontOt(font, 1, ot);
     frDestroyFontRequestAfter(font);
 }
 
@@ -2721,7 +2721,7 @@ void campDrawText(s32 id, s32 *colors)
     fclDrawSpriteRes(0, 0, 0, colors, 0, 0x23, D_00345D88, fclSpriteTable, 0x47);
     x = (0xB9 - (s32)frGetStrWidth2(font)) / 2 + 0x10;
     frSetDrawPosition(font, x * 16, 0xC8);
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
     cmpSetSkillListRows(-1);
 }
@@ -2904,7 +2904,7 @@ void campDrawNumber(void)
         sprintf(text, cmpFmtMaka, DDS3_GBWK->maka);
         font = frwGetNumFontFRQ(0x3C0, 0xC90, 0xFFFFF,
                                 fontColor, text, NULL);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
     }
 
@@ -4821,7 +4821,7 @@ void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
         }
         frSetPriority(font, 0);
         frSetFontColor(font, fclBlendColor(0x7475FF80, 0x7475FF00, alpha));
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
         fclInitPanelPos(x + 0xA00, y + 0x990, 0, 0, 0, 0, (fclPanel_t *)&panel);
         frSetMessageStepY(22);
@@ -4913,7 +4913,7 @@ void campDhDrawHeartsGauge(campDhIconGauge_t *gauge, s8 arg)
                              (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
             sprintf(text, campDhFmtAmount, amount);
             font = (frFontHandle_t *)frwGetSmallNumFontFRQ(0x5E0, y + 0x910, 0, (u32)color, text, NULL);
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
             y += 0xD0;
         }
@@ -5795,7 +5795,7 @@ void rstDrawNumber(s32 x, s32 y, s8 number)
     sprintf(text, cmpFmtDec2, number);
     font = frwGetSmallNumFontFRQ(x + 0x7B0, yBase + 0x420, 0xFFFF,
                                  0xA09DC380, text, NULL);
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 
@@ -5870,7 +5870,7 @@ void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
     font = frwGetSmallNumFontFRQ(x + 0x50, y, z, textColor, text, NULL);
     sprintf(text, cmpFmtValMax, maximum);
     font = frwGetSmallNumFontFRQ(x + 0x2C0, y, z, textColor, text, font);
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 #else
@@ -6071,7 +6071,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
         }
         font = frwGetSmallFontFRQ2((x + 0xA) * 16, (y + 0x42) * 8, 0xFFFF,
                                    raceColor, datExplainTable[level + 0x40], NULL);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
         cmpSetSkillListRows(-1);
         cmpSetSkillListRows(0x14);
@@ -6082,7 +6082,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
         frSetPriority(font, 0xFFFF0);
         frSetFontSpace(font, 2);
         frDisableMode(1);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
         cmpSetSkillListRows(-1);
     } else {
@@ -6097,7 +6097,7 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
         id = live->id;
         font = frwGetSmallFontFRQ2(nameX, (y + 0x43) * 8, 0xFFFF,
                                    textColor, text2[id], race);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
         cmpSetSkillListRows(-1);
     }
@@ -6114,12 +6114,12 @@ void cmpDrawStatusRow(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
     sprintf(text, cmpFmtDec2, datGetLevelForDraw(unit));
     number = frwGetSmallNumFontFRQ((x + 0x2C) * 16, (y + 0x62) * 8,
                                    0xFFFF, levelColor, text, NULL);
-    func_001C7E38(number, 1, 0x47);
+    frDrawFontOt(number, 1, 0x47);
     frDestroyFontRequestAfter(number);
     sprintf(text, cmpFmtExpNext, datAdvanceDevilLevel(unit) - live->exp);
     number = frwGetSmallNumFontFRQ((x + 0x7C) * 16, (y + 0x62) * 8,
                                    0xFFFF, textColor, text, NULL);
-    func_001C7E38(number, 1, 0x47);
+    frDrawFontOt(number, 1, 0x47);
     frDestroyFontRequestAfter(number);
     cmpDrawStatusIcons(spriteX, spriteY, colors, mode, unit);
 }
@@ -6307,7 +6307,7 @@ void cmpDrawParamPanel(s32 x, s32 y, s32 *colors, s8 *bonuses, datUnitWork_t *un
                             D_00345D88, fclSpriteTable, 0x47);
         sprintf(text, cmpFmtDec2, value);
         font = frwGetSmallNumFontFRQ(numberX, numberY, 0xFFFF, textColor, text, NULL);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         numberY += 0xA0;
         frDestroyFontRequestAfter(font);
         if (selected >= 0) {
@@ -6361,7 +6361,7 @@ color_ready:
     font = frwGetSmallFontFRQ2((s32)(((u32)x + 0x18u) << 4),
                                (s32)(((u32)y + 0x115u) << 3),
                                0xFFFFF, color, datExplainTable[affinity + 0x50], 0);
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 
@@ -6533,7 +6533,7 @@ void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
         font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, textColor, text1[skill], NULL);
         frSetDrawPosition(font, (x + 0x18 + column * 0x74 + (0x74 - font->advance) / 2) * 16,
                           (y + 0x13B + row * 0x16) * 8);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
     }
     cmpSetSkillListRows(-1);
@@ -6557,7 +6557,7 @@ void cmpDrawSkill(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
             font = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, textColor, text1[skills->skill[i]], NULL);
             frSetDrawPosition(font, (x + 0x101 + dx + (0x72 - font->advance) / 2) * 16,
                               (y + 0x13C + dy) * 8);
-            func_001C7E38(font, 1, 0x47);
+            frDrawFontOt(font, 1, 0x47);
             frDestroyFontRequestAfter(font);
         } else {
             fclDrawSpriteRes((x + dx) * 16, (y + dy) * 8, 0, colors, 5, 0,
@@ -6737,7 +6737,7 @@ void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
 {
     void *frq = frwGetSmallFontFRQ2(x, y, 0xFFFFFF, c, pStr[index], 0);
 
-    func_001C7E38(frq, 1, 0x47);
+    frDrawFontOt(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
 }
 
@@ -6805,7 +6805,7 @@ extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors, s32 page,
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 width,
                                                u32 color, const char *text,
                                                frFontHandle_t *previous);
-extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *font, s8 mode, u32 ot);
 extern void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot);
 extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 w, s16 h,
                             s32 work, fclPanel_t *panel);
@@ -6922,7 +6922,7 @@ void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
                     font = frwGetSmallNumFontFRQ(x + 0x810,
                                                  itemY + 0x10, 0x10,
                                                  (u32)fontColor, numberText, NULL);
-                    func_001C7E38(font, 1, 0x47);
+                    frDrawFontOt(font, 1, 0x47);
                     frDestroyFontRequestAfter(font);
                 }
 
@@ -7001,7 +7001,7 @@ void cmpDrawSkillListHeader(s32 x, s32 y, s32 c, u16 index)
 
     cmpSetSkillListRows(0x12);
     frq = frwGetSmallFontFRQ2(x, y, 0xFFFFFF, c, text1[index], 0);
-    func_001C7E38(frq, 1, 0x47);
+    frDrawFontOt(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
     cmpSetSkillListRows(-1);
 }
@@ -7063,7 +7063,7 @@ void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
     } else {
         sprintf(buffer, cmpFmtSkillCost, cmpGetSkillCost(skill, work));
         font = (frFontHandle_t *)frwGetSmallNumFontFRQ(x, y + 0x10, 0x10, (u32)textColor, buffer, NULL);
-        func_001C7E38(font, 1, 0x47);
+        frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
 
         sprite = 2;
@@ -8066,7 +8066,7 @@ s32 camp_draw_info_Process(s32 id)
     }
     frq = frwGetSmallFontFRQ2(0x100, 0xA0, 0xFFFFF, 0xA09DC380, EE_ADDR_AS(char *, cmpInfoWindow->unk_18), 0);
     campDrawInfoText(0, 0x80, 0xFFFFF, *(s32 *)((u8 *)frq + 0xC) + 0x10, 0x18, 0x30303080, 0x47);
-    func_001C7E38(frq, 1, 0x47);
+    frDrawFontOt(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
     return 0;
 }
@@ -8302,7 +8302,7 @@ void cmpDrawListItemText(s32 x, s32 y, s32 priority, u8 rowHeight,
             y += rowHeight * 8;
         }
     }
-    func_001C7E38(font, 1, ot);
+    frDrawFontOt(font, 1, ot);
     frDestroyFontRequestAfter(font);
     cmpSetSkillListRows(-1);
 }
@@ -8719,7 +8719,7 @@ void campDrawStatusRow1(s32 x, s32 y, u32 color, datUnitWork_t *unit)
     } else {
         font = frwGetSmallFontFRQ2(x, y, 0xFFFFF, color, text2[unit->id], NULL);
     }
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 #else
@@ -8775,7 +8775,7 @@ void campDrawStatusRow2(s32 inputX, s32 y, u32 color, datUnitWork_t *unit)
     drawY = y + 0x28;
     sprintf(text, cmpFmtLevel, level);
     font = frwGetSmallNumFontFRQ(drawX, drawY, 0xFFFFF, color, text, font);
-    func_001C7E38(font, 1, 0x47);
+    frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }
 

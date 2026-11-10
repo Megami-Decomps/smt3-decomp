@@ -222,7 +222,7 @@ extern void frSetMessageDefStepY(void);
 extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style,
     s32 a, s32 b, s32 alpha, u8 *text, frFontHandle_t *previous);
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
-extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *font, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
 s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
@@ -242,7 +242,7 @@ s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     font = MessageRequestNS(x, y, z, 1, 0, 0, 0x80, text, NULL);
     frSetMessageDefStepY();
     frSetFontColor(font, color);
-    func_001C7E38(font, 1, ot);
+    frDrawFontOt(font, 1, ot);
     return frDestroyFontRequestAfter(font);
 }
 
@@ -419,7 +419,7 @@ extern void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height,
                                 s32 selected, s32 ot);
 extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
                                          const char *text, frFontRequest_t *previous);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
@@ -447,7 +447,7 @@ void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     dds3DrawConfigCursor(0x1B0, y + 0x30, z, 0x1CA, 9, selected, ot);
     font = frwGetSmallFontFRQ(x + 0x340, y + 8, z, textColor,
                               dds3ConfigValueLabels[index].text, NULL);
-    func_001C7E38((frFontHandle_t *)font, 1, ot);
+    frDrawFontOt((frFontHandle_t *)font, 1, ot);
     frDestroyFontRequestAfter((frFontHandle_t *)font);
 }
 

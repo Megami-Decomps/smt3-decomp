@@ -737,7 +737,7 @@ void CalcPhaseRegistTop(fclEncyc_instance_tag *pinst)
 void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
     extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
-    extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+    extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
     extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
     extern void drawRegistSprites(fclEncyc_instance_tag *pinst);
     extern void DrawRegistListwinElem(fclEncyc_instance_tag *pinst);
@@ -748,7 +748,7 @@ void DrawPhaseRegistTop(fclEncyc_instance_tag *pinst)
 
     if (work->request != NULL) {
         cmbDrawTopSprite(0, 0x50, 0xFFFFF0, 0x47);
-        func_001C7E38(work->request, 0, 0x47);
+        frDrawFontOt(work->request, 0, 0x47);
     }
     DrawListWindowBack(&work->listWindow, &work->listPanel);
     drawRegistSprites(pinst);
@@ -1126,7 +1126,7 @@ extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
 {
     extern void cmbDrawTopSprite(s32 x, s32 y, u32 z, s32 ot);
-    extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+    extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
     extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
                            s32 alpha, s32 mode, s32 width, s32 ot);
     extern void DrawReadListwinCaption(fclEncyc_instance_tag *pinst);
@@ -1137,7 +1137,7 @@ void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
 
     if (work->requests[0] != NULL) {
         cmbDrawTopSprite(0, 0x50, 0xFFFFF0, 0x47);
-        func_001C7E38(work->requests[0], 0, 0x47);
+        frDrawFontOt(work->requests[0], 0, 0x47);
     }
     fclRbnDraw(work->ribbon, 0, 0x238, 0xFFFFF0, 0x80, 0, 0xF0, 0x47);
     DrawListWindowBack(work, &work->listPanel);
@@ -1146,10 +1146,10 @@ void DrawPhaseReadTop(fclEncyc_instance_tag *pinst)
     fclDrawPhaseHeader((u8 *)work, 0x26435480, 0, 0x47);
     lstDrawListWindowCursor(work, 0x47);
     if (work->requests[1] != NULL) {
-        func_001C7E38(work->requests[1], 0, 0x47);
+        frDrawFontOt(work->requests[1], 0, 0x47);
     }
     if (work->requests[2] != NULL) {
-        func_001C7E38(work->requests[2], 0, 0x47);
+        frDrawFontOt(work->requests[2], 0, 0x47);
     }
 }
 
@@ -1571,7 +1571,7 @@ void CalcPhaseReadExplain(fclEncyc_instance_tag *pinst)
 extern mdlObj_t *cmpGetEncycWork(void);
 extern void DrawExplainBack(s32 alpha);
 extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
-extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *font, s8 mode, u32 ot);
 
 void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
 {
@@ -1587,7 +1587,7 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
     fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY),
                0xFFFFF0, FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 4, 0x3A0, 0x47);
     DrawReadMainHelp(pinst);
-    func_001C7E38(work->explainFont, 0, 0x47);
+    frDrawFontOt(work->explainFont, 0, 0x47);
 }
 
 extern s32 GetViewModeKey(fclEncyc_instance_tag *pinst);
@@ -3400,7 +3400,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
             pos[1].x = 0x19A0;
             itfMiscDrawSpritePrim2(pos, &fclEncycListIconRightUv, g_uv_summon_back,
                                    0x00FFFFF0, 0, tag);
-            func_001C7E38(request, 0, 0x47);
+            frDrawFontOt(request, 0, 0x47);
         }
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -3576,7 +3576,7 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
             itfMiscDrawSpritePrim(pos, selected == i ? &fclEncycReadSelectOnUv : &fclEncycReadSelectOffUv,
                                 g_uv_summon_back, 0xFFFFF0,
                                 pinst->texHandle[1], 0, tag);
-            func_001C7E38(request, 0, 0x47);
+            frDrawFontOt(request, 0, 0x47);
         }
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
@@ -3620,7 +3620,7 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
     frSetDrawPosition(work->countFont, x + 0x1700, y + 8);
     frSetFontColor(work->countFont, 0x80808000 | draw.color.components[3]);
-    func_001C7E38(work->countFont, 1, 0x47);
+    frDrawFontOt(work->countFont, 1, 0x47);
 }
 
 extern u8 fclEncycRectVertexIndex[];

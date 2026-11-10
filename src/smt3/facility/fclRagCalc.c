@@ -142,7 +142,7 @@ extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color
                                                 const char *text, frFontHandle_t *previous);
 extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                            const char *text, frFontHandle_t *previous);
-extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
                                 s32 page, s32 spriteId, s32 *texList,
@@ -172,7 +172,7 @@ void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
             sprintf(text, ragNameFormat, pStr[id]);
             font = frwGetSmallFontFRQ2(x, rowY + 0x38, pos->unk_08,
                                        0x75A8EB80, text, NULL);
-            func_001C7E38(font, 1, ot);
+            frDrawFontOt(font, 1, ot);
             frDestroyFontRequestAfter(font);
             fclDrawSpriteRes(x + 0x650, rowY + 0x60,
                              pos->unk_08 << 4, NULL, 0, 1,
@@ -181,13 +181,13 @@ void ragDrawFrameEdge(fclPanelPos_t *pos, u8 kind, u8 item, s32 ot)
             sprintf(text, ragCountFormat, entries[i].count);
             font = frwGetNumFontFRQ(x + 0x740, numberY,
                                     pos->unk_08, 0x75A8EB80, text, NULL);
-            func_001C7E38(font, 1, ot);
+            frDrawFontOt(font, 1, ot);
             frDestroyFontRequestAfter(font);
 
             sprintf(text, ragCountFormat, DDS3_GBWK->stockRemainder[id]);
             font = frwGetNumFontFRQ(x + 0xB10, numberY,
                                     pos->unk_08, 0x6C81BB80, text, NULL);
-            func_001C7E38(font, 1, ot);
+            frDrawFontOt(font, 1, ot);
             frDestroyFontRequestAfter(font);
 
             fclDrawSpriteFilter(x + 0xCC0, rowY + 0x48,
@@ -246,7 +246,7 @@ extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color
 extern void fclDrawListSprite(s32 x, s32 y, s32 z, s32 width, s32 height,
                              s32 color, s32 blend, s32 ot);
 extern char *pStr[];
-extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
+extern s32 frDrawFontOt(frFontHandle_t *font, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
 void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
@@ -279,7 +279,7 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
         }
         color = cmpDrawListItemBox(cursor, i, i, disabled | (mode != 0 ? 2 : 0), 0x100);
         font = frwGetSmallFontFRQ2(x + 0x310, y + 0xC0, z, color, pStr[item], NULL);
-        func_001C7E38(font, 1, ot);
+        frDrawFontOt(font, 1, ot);
         frDestroyFontRequestAfter(font);
         fclDrawListSprite(x + 0x210, y + 0x160, z, 0x93, 2, 0x22242F80, 0, ot);
         y += cursor->StepY << 3;
@@ -320,14 +320,14 @@ void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
         char text[16];
 
         font = frwGetSmallFontFRQ2(x + 0x250, y + 0xC0, z, color, text2[devil], NULL);
-        func_001C7E38(font, 1, ot);
+        frDrawFontOt(font, 1, ot);
         frDestroyFontRequestAfter(font);
         if (!disabled && datDevilTable[devil].level < level) {
             color = 0xFFBD8380;
         }
         sprintf(text, ragCountFormat, level);
         font = frwGetSmallNumFontFRQ(x + 0x9B0, y + 0xD8, z, color, text, NULL);
-        func_001C7E38(font, 1, ot);
+        frDrawFontOt(font, 1, ot);
         frDestroyFontRequestAfter(font);
         fclDrawListSprite(x + 0x210, y + 0x160, z, 0x93, 2, 0x22242F80, 0, ot);
         y += cursor->StepY << 3;

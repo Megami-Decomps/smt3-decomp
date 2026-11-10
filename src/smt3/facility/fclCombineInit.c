@@ -2722,7 +2722,7 @@ extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
                                 const char *text, void *previous);
 extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                    const char *text, void *previous);
-extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(void *request, s8 mode, u32 ot);
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
 void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
@@ -2741,7 +2741,7 @@ void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
     x -= 0x20;
     request = frwGetSmallFontFRQ2(x, y, z, color,
                                   datExplainTable[datDevilTable[unit->id].race], NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
     x += 0x480;
     {
@@ -2751,14 +2751,14 @@ void cmbDrawUnitLevel(s32 x, s32 y, s32 z, u32 color, u32 levelColor,
         x += 0x6E0;
         request = frwGetSmallFontFRQ2(nameX, y + 8, z, color, name, NULL);
     }
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
     if (datDevilTable[unit->id].level == unit->level) {
         levelColor = color;
     }
     sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(unit));
     request = frwGetSmallNumFontFRQ(x, y + 0x18, z, levelColor, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
@@ -3033,7 +3033,7 @@ extern char *text2[];
 
 extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
 extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
-extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(void *request, s8 mode, u32 ot);
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
 
 void cmbDrawDevilStats(s32 x, s32 y, s32 z, datUnitWork_t *unit, s32 unused, u32 alpha, s32 ot)
@@ -3044,17 +3044,17 @@ void cmbDrawDevilStats(s32 x, s32 y, s32 z, datUnitWork_t *unit, s32 unused, u32
 
     sprintf(text, fclCombineStrFmt, datExplainTable[datDevilTable[unit->id].race]);
     request = frwGetSmallFontFRQ2(x + 0x300, y + 0x148, z, color, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
     sprintf(text, fclCombineStrFmt, text2[unit->id]);
     request = frwGetSmallFontFRQ2(x + 0x780, y + 0x148, z, color, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
     sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(unit));
     request = frwGetSmallNumFontFRQ(x + 0xFC0, y + 0x168, z, color, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
@@ -3065,7 +3065,7 @@ extern void *frGetCNameFRQ(s8 targetNo, s8 style, void *previous, s32 firstOptio
 extern void frSetDrawPosition(void *request, u32 x, u32 y);
 extern void frSetPriority(void *request, u32 priority);
 extern void frSetFontColor(void *request, u32 color);
-extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern s32 frDrawFontOt(void *request, s8 mode, u32 ot);
 extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                               const char *text, void *previous);
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
@@ -3079,12 +3079,12 @@ void cmbDrawDevilNameLevel(s32 x, s32 y, s32 priority, datUnitWork_t *work, s32 
     frSetDrawPosition(request, 0x1340, 0x1D0);
     frSetPriority(request, priority << 4);
     frSetFontColor(request, 0xA09DC380);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 
     sprintf(text, fclCombineNum2dFmt, datGetLevelForDraw(work));
     request = frwGetNumFontFRQ(0x1D30, 0x1C0, priority, 0xA09DC380, text, NULL);
-    func_001C7E38(request, 1, ot);
+    frDrawFontOt(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
@@ -3201,7 +3201,7 @@ s32 cmbDrawTopText(s8 index)
     fclDrawPanelSprite(0x33001, 0x47);
     cmbDrawTopSprite(0, 0, 0xFFFFF0, 0x47);
     fclDrawPanelSprite(0x5101B, 0x47);
-    func_001C7E38(request, 1, 0x47);
+    frDrawFontOt(request, 1, 0x47);
     return frDestroyFontRequestAfter(request);
 }
 #else
@@ -5800,7 +5800,7 @@ void shop_206A38(s32 x, s32 y, cmbListWork_t *list, s32 ot)
         request = frwGetSmallFontFRQ2(x, y, priority, 0xA09DC380, text2[id], NULL);
 
         y += step * 8;
-        func_001C7E38(request, 1, ot);
+        frDrawFontOt(request, 1, ot);
         frDestroyFontRequestAfter(request);
     }
 }

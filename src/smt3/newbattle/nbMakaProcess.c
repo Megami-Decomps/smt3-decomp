@@ -292,7 +292,7 @@ extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh
 extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                       const char *text, frFontHandle_t *previous);
 
-extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 flags);
+extern s32 frDrawFontOt(frFontHandle_t *frq, s8 mode, u32 flags);
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *frq);
 
@@ -436,7 +436,7 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
         }
         if (started != 0) {
             frq = frwGetNumFontFRQ((s32)((u32)dx << 4), (s32)((u32)dy << 3), 0xFF0051, col, nums[v % base], 0);
-            func_001C7E38(frq, 1, 0x48);
+            frDrawFontOt(frq, 1, 0x48);
             frDestroyFontRequestAfter(frq);
         }
         dx += 0xD;
