@@ -205,5 +205,5 @@ s32 datGetItemSlotIndex(u16 id)
     return index;
 }
 
-INCLUDE_RODATA(const s32, "interface/lstListWindow", D_0053D708);
+const char D_0053D708[9] = "Register";
 
