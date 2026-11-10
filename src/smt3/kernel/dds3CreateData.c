@@ -250,5 +250,5 @@ void stfResetUI(void)
     oStaff_UI->unk_0118 = 0;
 }
 
-INCLUDE_SDATA(const s32, "kernel/dds3CreateData", oStaff_UI);
+stfUiWork_t *oStaff_UI = 0;
 
