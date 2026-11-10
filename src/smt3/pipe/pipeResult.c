@@ -37,7 +37,7 @@ extern s32 pipeRandomMessTable[][10];
 
 extern s8 pipeMessMax;
 
-extern char D_00551808[];
+extern char pipeMessNumFmt[];
 
 extern void *pipeMessData;
 
@@ -195,7 +195,7 @@ void pipeSetMessageNum(s32 num)
 {
     char buf[32];
 
-    sprintf(buf, D_00551808, num);
+    sprintf(buf, pipeMessNumFmt, num);
     fclSetMessageVar_20743088(0, buf);
     fclStartMessage(0);
 }
@@ -205,7 +205,7 @@ void pipeStartRandomMessage(s32 index, s8 value)
     char buf[32];
 
     fclSetMessageVar_20743088(0, pStr[index]);
-    sprintf(buf, D_00551808, value);
+    sprintf(buf, pipeMessNumFmt, value);
     fclSetMessageVar_20743088(1, buf);
     fclStartMessage(1);
 }
@@ -234,7 +234,7 @@ INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551801);
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551808);
+INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessNumFmt);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
 

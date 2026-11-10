@@ -24,9 +24,9 @@ extern s32 datGetPlayerParam(s32 id);
 extern s8 camMode, CameraAction;
 extern u8 offsetStep, offsetStepCount;
 
-extern s32 D_00551738, D_0055173C;
+extern s32 pipeClearedOnStart, pipePartsFrame;
 /* ActionKey updates these two axis rates with single-precision arithmetic. */
-extern f32 D_00551744, D_00551748;
+extern f32 pipeTiltHorizontal, pipeTiltVertical;
 
 extern void *pipeObjList, *pipeObjTail;
 
@@ -429,15 +429,15 @@ void pipeStart(void)
     camMode = pipeInitDone;
     offsetCount = offset;
     CameraAction = 0;
-    D_00551738 = 0;
-    D_0055173C = 0;
+    pipeClearedOnStart = 0;
+    pipePartsFrame = 0;
     offsetStep = 0;
     offsetStepCount = 0;
     ZmakaCount = 0;
     playerDAMAGE = 0;
     rBoxNum = 0;
-    D_00551748 = 0;
-    D_00551744 = 0;
+    pipeTiltVertical = 0;
+    pipeTiltHorizontal = 0;
     attackCount = 0;
     pipeObjList = NULL;
     pipeObjTail = NULL;
@@ -571,7 +571,7 @@ void pipeLoadObjects(void)
 
     getPartsInfo(node->partsID);
     count = 0;
-    while (count < D_0055173C) {
+    while (count < pipePartsFrame) {
         info = getPartsInfo(node->partsID);
         node = node->next;
         count += info->data->frame;
@@ -583,17 +583,17 @@ void pipeLoadObjects(void)
     count = 5;
     while (count != 0 && node->id != 0xFFFF) {
         info = getPartsInfo(node->partsID);
-        if (D_0055173C < offsetCount - 400) {
+        if (pipePartsFrame < offsetCount - 400) {
             node = node->next;
-            D_0055173C += info->data->frame;
+            pipePartsFrame += info->data->frame;
         } else {
-            if (D_0055173C > offsetCount + 1520) {
+            if (pipePartsFrame > offsetCount + 1520) {
                 break;
             }
-            partsAdd(node, D_0055173C);
+            partsAdd(node, pipePartsFrame);
             count--;
             node = node->next;
-            D_0055173C += info->data->frame;
+            pipePartsFrame += info->data->frame;
         }
     }
 }
@@ -1382,24 +1382,24 @@ void ActionKey(tagPipeObject *object)
     }
 
     if (dds3PadButtonState[0x26] != 0) {
-        rate = D_00551748 - verticalStep;
+        rate = pipeTiltVertical - verticalStep;
         if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
             rate = -10.0f;
-            D_00551748 = rate;
+            pipeTiltVertical = rate;
         } else {
-            D_00551748 = rate;
+            pipeTiltVertical = rate;
         }
         object->vpos[1] -= acceleration;
         if (object->vpos[1] < -maximum) {
             object->vpos[1] = -maximum;
         }
     } else if (dds3PadButtonState[0x27] != 0) {
-        rate = D_00551748 + verticalStep;
+        rate = pipeTiltVertical + verticalStep;
         if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
             rate = 10.0f;
-            D_00551748 = rate;
+            pipeTiltVertical = rate;
         } else {
-            D_00551748 = rate;
+            pipeTiltVertical = rate;
         }
         object->vpos[1] += acceleration;
         if (object->vpos[1] > maximum) {
@@ -1407,24 +1407,24 @@ void ActionKey(tagPipeObject *object)
         }
     }
     if (dds3PadButtonState[0x24] != 0) {
-        rate = D_00551744 - horizontalStep;
+        rate = pipeTiltHorizontal - horizontalStep;
         if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
             rate = -10.0f;
-            D_00551744 = rate;
+            pipeTiltHorizontal = rate;
         } else {
-            D_00551744 = rate;
+            pipeTiltHorizontal = rate;
         }
         object->vpos[0] -= acceleration;
         if (object->vpos[0] < -maximum) {
             object->vpos[0] = -maximum;
         }
     } else if (dds3PadButtonState[0x25] != 0) {
-        rate = D_00551744 + horizontalStep;
+        rate = pipeTiltHorizontal + horizontalStep;
         if (rate < 0.0f ? rate < -10.0f : rate > 10.0f) {
             rate = 10.0f;
-            D_00551744 = rate;
+            pipeTiltHorizontal = rate;
         } else {
-            D_00551744 = rate;
+            pipeTiltHorizontal = rate;
         }
         object->vpos[0] += acceleration;
         if (object->vpos[0] > maximum) {
@@ -1432,17 +1432,17 @@ void ActionKey(tagPipeObject *object)
         }
     }
 
-    rate = D_00551748;
+    rate = pipeTiltVertical;
     if (rate != 0.0f) {
         if (rate > 0.0f) {
             rate -= 0.5f;
         } else {
             rate += 0.5f;
         }
-        D_00551748 = rate;
+        pipeTiltVertical = rate;
     }
     if (rate < 0.0f ? rate > -0.5f : rate < 0.5f) {
-        D_00551748 = 0.0f;
+        pipeTiltVertical = 0.0f;
     }
     velocity = object->vpos[1];
     if (velocity != 0.0f) {
@@ -1454,17 +1454,17 @@ void ActionKey(tagPipeObject *object)
         object->vpos[1] = 0.0f;
     }
 
-    rate = D_00551744;
+    rate = pipeTiltHorizontal;
     if (rate != 0.0f) {
         if (rate > 0.0f) {
             rate -= 0.5f;
         } else {
             rate += 0.5f;
         }
-        D_00551744 = rate;
+        pipeTiltHorizontal = rate;
     }
     if (rate < 0.0f ? rate > -0.5f : rate < 0.5f) {
-        D_00551744 = 0.0f;
+        pipeTiltHorizontal = 0.0f;
     }
     velocity = object->vpos[0];
     if (velocity != 0.0f) {
@@ -1693,15 +1693,15 @@ INCLUDE_SDATA(const s32, "pipe/pipeSection", pbHitCheckCur);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetCount);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551738);
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeClearedOnStart);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_0055173C);
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipePartsFrame);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLinkId);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551744);
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeTiltHorizontal);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551748);
+INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeTiltVertical);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeIndex);
 

@@ -848,7 +848,7 @@ extern void mymdlPosSet(tagpipeBasic *work, f32 x, f32 y, f32 z);
 extern void mdlTask(tagPipeObject *object, tagpipeBasic *model, f32 x, f32 y, f32 z);
 extern void eglSetOt(u32 ot);
 extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
-extern f32 D_00551744, D_00551748;
+extern f32 pipeTiltHorizontal, pipeTiltVertical;
 extern tagpipeBasic *MyLine;
 
 void objMdlPosSet(tagPipeObject *object)
@@ -885,7 +885,7 @@ void objMdlPosSet(tagPipeObject *object)
         mymdlPosSet(&PipeRBOX[object->mdl], position[0], position[1], position[2]);
         break;
     case 128:
-        mdlTask(object, basicMy, D_00551748, D_00551744, 0.0f);
+        mdlTask(object, basicMy, pipeTiltVertical, pipeTiltHorizontal, 0.0f);
         mdlTask(object, MyLine, -90.0f, 0.0f, 0.0f);
         mymdlPosSet(basicMy, position[0], position[1], position[2]);
         mymdlPosSet(MyLine, position[0], position[1], position[2]);

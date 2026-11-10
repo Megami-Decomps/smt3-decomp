@@ -170,3 +170,9 @@
 0x0059AD60	frameObjectList	inferred	head of the object list __register_frame_info links into; former name D_0059AD60
 0x0059AD40	ctorFrameObject	inferred	static object __do_global_ctors passes to __register_frame_info; former name D_0059AD40
 0x0052C37C	frameObjectSema	inferred	semaphore around frameObjectList; former name D_0052C37C
+0x00551738	pipeClearedOnStart	inferred	pipe word pipeStart zeroes and nothing reads; former name D_00551738
+0x0055173C	pipePartsFrame	inferred	pipe frame position up to which pipeSection has added parts (partsAdd); former name D_0055173C
+0x00551744	pipeTiltHorizontal	inferred	pipe horizontal tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551744
+0x00551748	pipeTiltVertical	inferred	pipe vertical tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551748
+0x00551700	dds3ConfigProcName	inferred	"config": process name dds3ConfigMain starts and kills; former name D_00551700
+0x00551808	pipeMessNumFmt	inferred	"%d" pipeResult formats message numbers with; former name D_00551808
