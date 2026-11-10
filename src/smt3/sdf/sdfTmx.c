@@ -578,8 +578,8 @@ extern s32 sceGetstat(const char *path, sdfSceIoStat_t *stat);
 extern s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize);
 extern s32 WakeupThread(s32 threadId);
 extern u8 sdfHddValid;
-extern char sdfIopModulePathCdrom[];
-extern char sdfIopModulePathHost[];
+extern const char sdfIopModulePathCdrom[];
+extern const char sdfIopModulePathHost[];
 extern u8 sdfFileRpcRecvBuf[];
 
 void SdfFileRpcServerThreadProc(void)
@@ -628,15 +628,15 @@ void LoadMcModules(const char *prefix, s32 moduleGroup) {
     sceMcInit();
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathCdrom);
+const char sdfIopModulePathCdrom[32] = "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1";
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathHost);
+const char sdfIopModulePathHost[27] = "pfs0:/userirx/sdfiopfl.irx";
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcserv);
+const char mcModuleNameCdMcserv[14] = "\\MCSERV.IRX;1";
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcman);
+const char mcModuleNameCdMcman[13] = "\\MCMAN.IRX;1";
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcserv);
+const char mcModuleNameMcserv[12] = "/mcserv.irx";
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcman);
+const char mcModuleNameMcman[11] = "/mcman.irx";
 
