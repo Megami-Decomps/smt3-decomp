@@ -154,3 +154,9 @@ void sdfHddInit(void)
     sceMount(sdfHddMountPoint, "hdd0:dds3,", 0, NULL, 0);
     sdfHddValid = 1;
 }
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddDevPfs);
+
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddDevHdd);
+
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddMountPoint);
+

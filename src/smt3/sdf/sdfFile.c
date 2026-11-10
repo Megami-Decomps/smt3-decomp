@@ -394,3 +394,17 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
         SignalSema(worker->semaId);
     }
 }
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileDefaultSrcType);
+
+SDATA_PAD(3);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileSemaId);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHostPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileHddPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCdromName);
+

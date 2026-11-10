@@ -514,3 +514,9 @@ s32 sdfCdInit(void)
     return sceCdMmode(sdfCdTrayMode);
 }
 
+INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdDirectPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdTrayMode);
+
+SDATA_PAD(4);
+

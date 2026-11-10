@@ -846,6 +846,13 @@ segments:
       - [0x4528B8, .sdata, sdf/sdfVu0]
       - [0x4528F8, .sdata, sdf/sdfDevCons]
       - [0x452900, .sdata, sdf/sdfPrint]
+      - [0x452910, .sdata, sdf/sdfCd]
+      - [0x452920, .sdata, sdf/sdfFile]
+      - [0x452948, .sdata, sdf/sdfFileIO]
+      - [0x452990, .sdata, sdf/sdfHdd]
+      - [0x4529A8, .sdata, sdf/sdfDev9]
+      - [0x4529B0, .sdata, sdf/sdfRand]
+      - [0x4529C0, .sdata, sdf/sdfSound]
       - [0x452B48, .sdata, sdf/sdfMovie]
       - { start: 0x452B54, type: sbss, vram: 0x551B80, name: sbss }
       - { start: 0x452B54, type: bss, vram: 0x552180, name: bss }

@@ -950,3 +950,37 @@ void sdfFileCmdStartThread(s32 deviceType) {
         _StartThread(thread, worker);
     }
 }
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdActiveHead);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeList);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCount);
+
+SDATA_PAD(2);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheHead);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheTail);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeCount);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultDevice);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrioCheckCounter);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrio);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultCreateMode);
+
+SDATA_PAD(2);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdromPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdHostPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdPfsPrefix);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdMoviePath);
+
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdimgPrefix);
+

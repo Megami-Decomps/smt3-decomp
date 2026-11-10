@@ -189,3 +189,7 @@ s32 sdfDecimalToPackedDigits(s32 number) {
 
 INCLUDE_RODATA(const s32, "sdf/sdfDev9", sdfDev9ResidentFailMsg);
 
+INCLUDE_SDATA(const s32, "sdf/sdfDev9", sdfDev9Ready);
+
+SDATA_PAD(7);
+
