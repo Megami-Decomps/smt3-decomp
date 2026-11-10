@@ -273,7 +273,7 @@ extern void nbCallNewBattle(s32 encpack, s32 code);
 
 extern s32 pack;
 
-extern char nbTestProcessName[];
+extern const char nbTestProcessName[];
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -658,9 +658,9 @@ void nbInitBattleTest(void)
 
 INCLUDE_RODATA(const s32, "newbattle/nbTest", nbTestHeartsMessage);
 
-INCLUDE_RODATA(const s32, "newbattle/nbTest", nbTestProcessName);
+const char nbTestProcessName[12] = "battle test";
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", nbBattleDummyCount);
+s32 nbBattleDummyCount = 4;
 
 INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551504);
 
