@@ -165,32 +165,34 @@ extern void nbPnl_rsetAlpha(s32 mode);
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v,
                         s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *texture);
 
-#ifdef NON_MATCHING
 void nbResultInitLabels(void)
 {
-    nbResultCaption_t *caption;
     s32 i;
     s32 age;
     s32 alpha;
     s32 height;
     s32 y;
+    s32 x;
+    u32 fade;
 
     nbPnl_setOt(0x48);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     for (i = 0; i < 64; i++) {
-        caption = &nbResultCaptions[i];
-        if (caption->flag != 0) {
-            caption->life -= SDF_FRAME_DUE(dds3GetKernelCount());
-            if (caption->life <= 0) {
-                caption->flag = 0;
+        if (nbResultCaptions[i].flag != 0) {
+            nbResultCaptions[i].life -= SDF_FRAME_DUE(dds3GetKernelCount());
+            if (nbResultCaptions[i].life <= 0) {
+                nbResultCaptions[i].flag = 0;
             } else {
-                age = 20 - caption->life;
-                y = caption->y - age;
+                x = nbResultCaptions[i].x;
+                y = nbResultCaptions[i].y;
+                age = 20 - nbResultCaptions[i].life;
+                y -= age;
                 alpha = 0x80;
                 height = 0x16;
+                fade = ((u32)age - 10u) * 12u;
                 if (age >= 11) {
-                    alpha = 0x80 - (age - 10) * 12;
+                    alpha -= (s32)fade;
                     if (alpha < 0) {
                         alpha = 0;
                     }
@@ -199,7 +201,7 @@ void nbResultInitLabels(void)
                     height = age * 5;
                     y += (0x16 - height) / 2;
                 }
-                nbPnlSprite(caption->x, y, 0x5C, height, 0xA0, 0x68,
+                nbPnlSprite(x, y, 0x5C, height, 0xA0, 0x68,
                             0x5F, 0x16, ((u32)alpha << 24) | 0x808080,
                             nbResultTex1);
             }
@@ -207,9 +209,6 @@ void nbResultInitLabels(void)
     }
     nbPnl_setOt(0x47);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
-#endif
 
 extern char *text2[];
 extern s32 rstCalcExpFromLevel(u8 index, s32 level);
