@@ -1,1 +1,5 @@
 // Relocation overrides for addresses spimdisasm pairs wrong (%hi/%lo, jump tables).
+// itfGaugeHighlightVectors holds 0x4000 as a number, not an address (falselabels.py).
+rom:0x227408 reloc:MIPS_NONE symbol:none // 00326408 outside: 0x00004000, not D_4000
+rom:0x22740C reloc:MIPS_NONE symbol:none // 0032640C outside: 0x00004000, not D_4000
+rom:0x227410 reloc:MIPS_NONE symbol:none // 00326410 outside: 0x00004000, not D_4000
