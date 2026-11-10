@@ -205,8 +205,9 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 start,
     s32 shutdown, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy, void *data);
 extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
     dds3ProcessFunc_t destroy, void *data);
-extern char fclEncycRecordFmt[], fclEncycCalcName[], fclEncycDrawName[], fclEncycUpdtName[];
-extern char fclEncycStartFmt[], fclEncycRegistrationName[], fclEncycReadingName[];
+extern const char fclEncycRecordFmt[], fclEncycCalcName[], fclEncycDrawName[], fclEncycUpdtName[];
+extern const char fclEncycStartFmt[], fclEncycRegistrationName[];
+extern char fclEncycReadingName[];
 
 #ifdef NON_MATCHING
 extern s32 fclEncycGetRatio(void);
