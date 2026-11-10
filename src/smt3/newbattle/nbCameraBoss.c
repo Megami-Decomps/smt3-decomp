@@ -1185,8 +1185,13 @@ s32 nbCameraBoss_Samael_AKUI_Run(nbCamera_t *pNbCamera)
 }
 
 
-/* NON_MATCHING: 4 of 77 words; one global load is scheduled three loads early. */
-#ifdef NON_MATCHING
+/* Native nbCameraBossVecTable names a read-only four-byte negative-zero cell.
+ * This deliberately incomplete import is used only at [0]: it retains the
+ * compiler's absolute-address literal load without inventing a larger bound
+ * or declaring the neighboring camera state const. This is a reconstruction
+ * choice, not recovered source spelling. */
+extern const f32 nbCameraSukadyNegativeZero[] FAKEMATCH_ASM_NAME("nbCameraBossVecTable");
+
 s32 nbCameraBoss_Sukady_DAIJIS_Set(nbCamera_t *pNbCamera)
 {
     u32 type;
@@ -1195,7 +1200,7 @@ s32 nbCameraBoss_Sukady_DAIJIS_Set(nbCamera_t *pNbCamera)
     type = dds3GetRandIntA(0, 3);
     switch (type) {
     case 0:
-        pNbCamera->direction.x = nbCameraBossVecTable[0];
+        pNbCamera->direction.x = nbCameraSukadyNegativeZero[0];
         pNbCamera->direction.y = 0.29f;
         pNbCamera->direction.z = 0.96f;
         pNbCamera->target.x = 11.27f;
@@ -1227,9 +1232,7 @@ s32 nbCameraBoss_Sukady_DAIJIS_Set(nbCamera_t *pNbCamera)
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sukady_DAIJIS_Set);
-#endif
+
 
 
 s32 nbCameraBoss_Baal_BAELNO_Set(nbCamera_t *pNbCamera)

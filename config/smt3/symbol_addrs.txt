@@ -13100,7 +13100,6 @@ nbCameraHelperBedSelectText = 0x00535898;
 nbCameraHelperViewerPBDir = 0x005358A8;
 nbCameraHelperPbSelectText = 0x005358C0;
 nbCameraHelperCameraHelperText = 0x005358D0;
-nbCameraHelperViewerFrameFormat = 0x005358E0;
 frTestFontText = 0x005359F8;
 itfMesDebugLabelChange = 0x00535B40;
 itfMesDebugLabelPosition = 0x00535B50;
