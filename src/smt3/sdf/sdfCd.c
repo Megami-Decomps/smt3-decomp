@@ -139,9 +139,9 @@ void *sdfCdImageGetDirData(void)
 
 extern s32 sceCdDiskReady(s32 mode);
 extern s32 sceCdGetDiskType(void);
-extern char sdfCdMsgWaitTrayClose[]; /* "wait tray close.\n" */
-extern char sdfCdMsgTrayClose[]; /* "tray close.\n" */
-extern char sdfCdMsgReadRestart[]; /* "CD read restart.\n" */
+extern const char sdfCdMsgWaitTrayClose[]; /* "wait tray close.\n" */
+extern const char sdfCdMsgTrayClose[]; /* "tray close.\n" */
+extern const char sdfCdMsgReadRestart[]; /* "CD read restart.\n" */
 
 void sdfCdWaitTrayClose(void)
 {
@@ -197,11 +197,11 @@ void sdfCdStStart(s32 lsn) {
     sdfCdCurrLsn = lsn;
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfCd", sdfCdMsgWaitTrayClose);
+const char sdfCdMsgWaitTrayClose[18] = "wait tray close.\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfCd", sdfCdMsgTrayClose);
+const char sdfCdMsgTrayClose[16] = "tray close.\n";
 
-INCLUDE_RODATA(const s32, "sdf/sdfCd", sdfCdMsgReadRestart);
+const char sdfCdMsgReadRestart[18] = "CD read restart.\n";
 
 void sdfCdStRead(s32 sectors, void *buffer)
 {
@@ -514,9 +514,9 @@ s32 sdfCdInit(void)
     return sceCdMmode(sdfCdTrayMode);
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdDirectPrefix);
+char sdfCdDirectPrefix[8] = "cdrom";
 
-INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdTrayMode);
+s32 sdfCdTrayMode = 1;
 
 SDATA_PAD(4);
 
