@@ -345,5 +345,5 @@ sdfGsMemSlice_t *sdfGsMemGetLinkTail(void) {
     return gsMemHandleLinkTail;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemory", sdfGsErrorHandler);
+void (*sdfGsErrorHandler)(s32 size, s32 type) = NULL;
 
