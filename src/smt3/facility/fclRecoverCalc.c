@@ -535,7 +535,7 @@ void rcvUpdateItemList(s32 active)
     cmpUpdateListSelection(&pos, (u8 *)rcvDrawWork + 0x20, 0, mode, 0x100, 0x47);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverCalc", D_0053D460);
+const u32 D_0053D460[4] = {0x0E, 0x0D, 0x0D, 0x0A};
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverCalc", rcvNumFormat);
+char rcvNumFormat[8] = "%7d";
 
