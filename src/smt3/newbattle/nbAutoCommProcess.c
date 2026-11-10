@@ -209,7 +209,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
-extern char nbAutoCommProcName[];
+extern const char nbAutoCommProcName[];
 
 extern s32 nbPanelAutoCheckShow(void);
 
@@ -295,5 +295,5 @@ void nbInitAutoCommProcess(nbMainProcessData_t *data)
     data->autocommproc = proc;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbAutoCommProcess", nbAutoCommProcName);
+const char nbAutoCommProcName[12] = "nb_autocomm";
 
