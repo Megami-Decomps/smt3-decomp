@@ -18,5 +18,5 @@ s32 fclChkDbgProcess(void)
     return fclDbgPID != 0;
 }
 
-INCLUDE_SDATA(const s32, "facility/fclDebug", fclDbgPID);
+u32 fclDbgPID = 0;
 

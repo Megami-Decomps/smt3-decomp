@@ -248,7 +248,7 @@ extern void nbFreeEventEntry(nbMainProcessData_t *data);
 
 extern void fileSyncAll(void);
 
-extern char nbEventProcessName[];
+extern const char nbEventProcessName[];
 
 extern void *nbEventProcess1(dds3ProcessID_t *id);
 
@@ -262,7 +262,7 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 extern s32 nbMakeBadKaifukuPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form);
 extern void nbGetEventEntry(nbMainProcessData_t *data);
 
-extern char nbEventNoFormat[];
+extern const char nbEventNoFormat[];
 
 extern void pacFileHandleFree_(void *pacHandle);
 
@@ -597,7 +597,7 @@ s32 cmpFindButtonGuideByFlag(datUnitWork_t **list, s32 cnt, s32 mask)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", nbEventNoFormat);
+const char nbEventNoFormat[24] = "\245\244\245\331\245\363\245\310\265\257\306\260 -> %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbEventProcess", nbEventProcessName);
+const char nbEventProcessName[24] = "nb_event";
 

@@ -22,14 +22,14 @@ extern s32 fclEncycTail;
 extern s32 fclEncycCount;
 extern s32 fclEncycFree;
 
-extern char dds3DebugOwnerProcessName[];  /* "DebugOwner" */
+extern const char dds3DebugOwnerProcessName[];  /* "DebugOwner" */
 
 extern char dds3AdminiProcessName[];  /* "Admini" */
 extern char dds3AdminiHistoryOpenStr[];  /* "[" */
 extern char dds3AdminiHistoryCursorStr[];  /* "*" */
 extern char dds3AdminiHistoryEndStr[];  /* "\n" */
-extern char dds3AdminiHistoryEntryFmt[];  /* "%d,0x%02X]" */
-extern char dds3AdminiRestoreMsg[];  /* "restore sequence!!\n" */
+extern const char dds3AdminiHistoryEntryFmt[];  /* "%d,0x%02X]" */
+extern const char dds3AdminiRestoreMsg[];  /* "restore sequence!!\n" */
 
 #include "sdk_libc.h"
 
@@ -695,29 +695,33 @@ dds3AdminiList_t dds3AdminiList[43] = {
     { CallTgs, ExitTgs, CheckTgs },
 };
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryEntryFmt);
+const char dds3AdminiHistoryEntryFmt[16] = "%d,0x%02X]";
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiRestoreMsg);
+const char dds3AdminiRestoreMsg[24] = "restore sequence!!\n";
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", dds3DebugOwnerProcessName);
+const char dds3DebugOwnerProcessName[24] = "DebugOwner";
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiProcessName);
+char dds3AdminiProcessName[8] = "Admini";
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryOpenStr);
+char dds3AdminiHistoryOpenStr[8] = "[";
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryCursorStr);
+char dds3AdminiHistoryCursorStr[8] = "*";
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminiHistoryEndStr);
+char dds3AdminiHistoryEndStr[4] = "\n";
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycHead);
+s32 fclEncycHead = -1;
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycTail);
+s32 fclEncycTail = -1;
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycCount);
+s32 fclEncycCount = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycFree);
+s32 fclEncycFree = -1;
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8F4);
+u8 D_0054E8F4 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3PadInitDone);
+u8 D_0054E8F5 = 0;
+
+u8 D_0054E8F6 = 0;
+
+u8 dds3PadInitDone = 0;
 

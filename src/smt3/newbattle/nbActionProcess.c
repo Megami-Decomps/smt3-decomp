@@ -11,9 +11,9 @@ extern u32 dds3GetKernelCount(void);
 #include "event.h"
 #include "motion.h"
 
-extern char nbNegoResultFmt[]; /* "nego result = %d\n" */
+extern const char nbNegoResultFmt[]; /* "nego result = %d\n" */
 
-extern char nbReturnDebugMsg[];
+extern const char nbReturnDebugMsg[];
 
 #include "sdk_libc.h"
 
@@ -102,7 +102,7 @@ typedef struct dds3LiveBattleUnitsView_t {
     datUnitWork_t units[16];
 } dds3LiveBattleUnitsView_t;
 
-extern char D_00543880[];
+extern const char D_00543880[];
 
 extern s32 evtBitCheck(s32 no);
 
@@ -110,7 +110,7 @@ extern s32 datCheckTalk(datUnitWork_t *work);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern char nbNegoDebugFmt[]; /* "NEGO p:%d e:%d\n" */
+extern const char nbNegoDebugFmt[]; /* "NEGO p:%d e:%d\n" */
 
 extern void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eformindex,
                               u32 negotype, s32 skillid);
@@ -136,17 +136,17 @@ extern s32 nbCheckSingleTargetSkill(s32 skillid);
 extern struct nbKoukaPacket_t *nbAddSakeKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                     nbFormation_t *form);
 
-extern char nbEndMsgBit10000[];
+extern const char nbEndMsgBit10000[];
 
-extern char nbEndMsgBit20000[];
+extern const char nbEndMsgBit20000[];
 
-extern char nbEndMsgBit40000[];
+extern const char nbEndMsgBit40000[];
 
-extern char nbEndMsgBit80000[];
+extern const char nbEndMsgBit80000[];
 
-extern char nbEndMsgBit100000[];
+extern const char nbEndMsgBit100000[];
 
-extern char nbEndMsgBit200000[];
+extern const char nbEndMsgBit200000[];
 
 extern void nbPlaySe(s32 no);
 
@@ -223,7 +223,7 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern char nbUnitDrawProcessName[]; /* "nb_unitdraw" */
 
-extern char nbActionProcessName[]; /* "nb_action" */
+extern const char nbActionProcessName[]; /* "nb_action" */
 
 void *nbActionProcess1(dds3ProcessID_t *id);
 
@@ -257,7 +257,7 @@ extern s32 p2sdGetPcmState(void);
 
 extern void p2sdSyncSound(void);
 
-extern char nbPcmSyncDebugMsg[];
+extern const char nbPcmSyncDebugMsg[];
 
 extern s32 nbMakeSummonPacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 side, s32 stockno,
                               s32 formindex);
@@ -1270,6 +1270,8 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
     return max;
 }
 
+const char nbKoukaListSelectFmt[40] = "\310\277\261\307\262\363\277\364=%d, select = 0x%08X\n";
+
 #ifdef NON_MATCHING
 void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32 nskill)
 {
@@ -1434,7 +1436,6 @@ void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32
     }
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbKoukaListSelectFmt);
 
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", GetKoukaList);
 #endif
@@ -1552,7 +1553,7 @@ s32 CheckArrCounter(nbActionProcessData_t *a)
 
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00543880);
+const char D_00543880[32] = "\245\242\241\274\245\352\245\336\245\363\245\253\245\246\245\363\245\277\241\274\310\257\300\270!!!\n";
 
 s32 CheckCounter(nbActionProcessData_t *a, s32 from, s32 to)
 {
@@ -3789,19 +3790,19 @@ extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 rate);
 extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
 extern void nbCameraSetTaizi(nbFormation_t *invoke, nbFormation_t *target);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaTypeFmt);
+const char nbSkillKoukaTypeFmt[24] = "\245\271\245\255\245\353\270\372\262\314\245\277\245\244\245\327 = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillCut3TimeFmt);
+const char nbSkillCut3TimeFmt[32] = "cut3 mottime:%d  endtime:%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillHpMpFmt);
+const char nbSkillHpMpFmt[32] = "\245\310\241\274\245\277\245\353\245\300\245\341\241\274\245\270 HP=%d, MP=%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaEndTimeFmt);
+const char nbSkillKoukaEndTimeFmt[32] = "skill kouka end time = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillKoukaUnlockTimeFmt);
+const char nbSkillKoukaUnlockTimeFmt[32] = "skill kouka unlock time = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbSkillNoKoukaFmt);
+const char nbSkillNoKoukaFmt[48] = "Kereijyou Koukaga nai ---------------------\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbPressDebugFmt);
+const char nbPressDebugFmt[24] = "press %f\n";
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F00);
 
@@ -3809,9 +3810,9 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F40);
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", jtbl_00543F80);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbNegoDebugFmt);
+const char nbNegoDebugFmt[16] __attribute__((section(".rodata"))) = "NEGO p:%d e:%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbNegoResultFmt);
+const char nbNegoResultFmt[24] __attribute__((section(".rodata"))) = "nego result = %d\n";
 
 void SetAction_NEGORESULT(nbActionProcessData_t *a)
 {
@@ -4092,7 +4093,7 @@ extern void nbAddHatudoEffectEndPacket(s32 startframe, saddr_t uniqueid);
 extern void nbAddPanelStockFadeOutPacket(s32 startframe, s32 uniqueid);
 extern void nbAddPanelStockEndPacket(s32 startframe, saddr_t uniqueid);
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbReturnDebugMsg);
+const char nbReturnDebugMsg[16] = "\265\242\264\324\244\267\244\336\244\271\n";
 
 void SetAction_CHECK1(nbActionProcessData_t *a)
 {
@@ -4342,19 +4343,19 @@ void SetNextActionSeq(nbActionProcessData_t *a, s32 nextseq)
     a->nextseq = nextseq;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit10000);
+const char nbEndMsgBit10000[24] = "\312\252\315\375\271\266\267\342\244\362\271\324\244\303\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit20000);
+const char nbEndMsgBit20000[24] = "\313\342\313\241\271\266\267\342\244\362\271\324\244\303\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit40000);
+const char nbEndMsgBit40000[16] = "\262\363\311\374\244\362\271\324\244\303\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit80000);
+const char nbEndMsgBit80000[16] = "\313\342\313\241\244\362\273\310\315\321\244\267\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit100000);
+const char nbEndMsgBit100000[24] = "\245\242\245\244\245\306\245\340\244\362\273\310\315\321\244\267\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbEndMsgBit200000);
+const char nbEndMsgBit200000[16] = "\276\244\264\255\244\362\271\324\244\303\244\277\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbPcmSyncDebugMsg);
+const char nbPcmSyncDebugMsg[24] = "AD-PCM\272\306\300\270\303\346!\n";
 
 void *nbActionProcess1(dds3ProcessID_t *id)
 {
@@ -4523,11 +4524,9 @@ nbActionFunc_t ActionFuncTable[24] = {
     { NULL, NULL },
 };
 
-INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbActionProcessName);
+const char nbActionProcessName[16] = "nb_action";
 
-INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
+s32 StkSelId = 0;
 
-SDATA_PAD(4);
-
-INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", nbDebugNewline);
+char nbDebugNewline[8] = "\n";
 

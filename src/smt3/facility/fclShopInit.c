@@ -46,7 +46,7 @@ typedef struct
     /* 0x2244 */ u16 sellPrice[0x22];
 } shopProcWork_t;
 
-extern char shpEventProcName[];
+extern const char shpEventProcName[];
 
 extern shopProcWork_t *shopProcWork;
 
@@ -56,9 +56,9 @@ extern void sdfTexFree(s32 aHandle);
 
 extern char shpProcName[];
 
-extern char shpDrawProcName[];
+extern const char shpDrawProcName[];
 
-extern char shpUpdateProcName[];
+extern const char shpUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -124,7 +124,7 @@ void fclShopInitItemList(void *list)
     cmpInitCursorRange((u8 *)list + 0x15C, 6, 6, 0);
 }
 
-extern char shpTexLoadMsg[];
+extern const char shpTexLoadMsg[];
 
 extern char *shpTmxPathTable[];
 extern s32 fclLoadTexture(char *pFileName);
@@ -142,9 +142,9 @@ void fclShopTexLoad(void *workp)
     printf(shpTexLoadMsg);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpEventProcName);
+const char shpEventProcName[16] = "e802_main";
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpTexLoadMsg);
+const char shpTexLoadMsg[24] = "SHOP : Tex load.\n";
 
 void fclShopTexFree(shpUpdateWork_t *pData)
 {
@@ -168,9 +168,9 @@ void fclShopInitRagTex(u8 *work)
     }
 }
 
-extern char shpMessagePathF[]; /* "/facility/scr/shop/mes_f.bf" */
+extern const char shpMessagePathF[]; /* "/facility/scr/shop/mes_f.bf" */
 
-extern char shpMessagePathG[]; /* "/facility/scr/shop/mes_g.bf" */
+extern const char shpMessagePathG[]; /* "/facility/scr/shop/mes_g.bf" */
 
 void fclShopGetTexPath(void *work, s32 mode)
 {
@@ -249,7 +249,7 @@ void shop_update_Shutdown(void)
     p2sdStopBGM(0x310000);
 }
 
-extern char shpPlaceLogFmt[];
+extern const char shpPlaceLogFmt[];
 extern cmbWork_t *fclAllocShopWork(s8 type, void *parent);
 extern s8 FclDebug(s8 mode, void *work);
 extern s32 shop_Process(dds3ProcessID_t *id);
@@ -447,33 +447,31 @@ s32 shpGetSellPrice(s32 index, s8 sell)
     return ret;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpMessagePathF);
+const char shpMessagePathF[32] = "/facility/scr/shop/mes_f.bf";
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpMessagePathG);
+const char shpMessagePathG[32] = "/facility/scr/shop/mes_g.bf";
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpPlaceLogFmt);
+const char shpPlaceLogFmt[24] = "shop : place = %d\n";
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpDrawProcName);
+const char shpDrawProcName[16] = "shop_draw";
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", shpUpdateProcName);
+const char shpUpdateProcName[24] = "shop_update";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpWork);
+cmbWork_t *shpWork = NULL;
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpProcessStat);
+s8 shpProcessStat = 0;
 
-SDATA_PAD(3);
+char shpCmdLeave[8] = "Leave";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdLeave);
+char shpCmdTalk[8] = "Talk";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdTalk);
+char shpCmdSell[8] = "Sell";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdSell);
+char shpCmdBuy[8] = "Buy";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdBuy);
+char shpProcName[8] = "shop";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpProcName);
+char shpSellText[8] = "SELL";
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpSellText);
-
-INCLUDE_SDATA(const s32, "facility/fclShopInit", shpBuyText);
+char shpBuyText[8] = "BUY";
 

@@ -92,7 +92,7 @@ extern pbProcHandle_t *blockDB;
 
 extern char pbMapPathBuf[];
 
-extern char pbMapPathPb1Format[], pbMapPathPb2Format[];
+extern const char pbMapPathPb1Format[], pbMapPathPb2Format[];
 
 extern pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent);
 
@@ -132,7 +132,7 @@ extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
-extern char pbMenuDebugOwnerName[];
+extern const char pbMenuDebugOwnerName[];
 
 extern dds3ProcessID_t *pbStartGiveupConfirm(void);
 
@@ -143,7 +143,7 @@ extern pbProcHandle_t *pbStartHelp(pbProcHandle_t *parent, s32 page);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
-extern char pbDrawBgProcName[], pbLoadMapDataProcName[];
+extern const char pbDrawBgProcName[], pbLoadMapDataProcName[];
 
 
 extern u8 pbMapNo;
@@ -229,11 +229,11 @@ extern u8 D_00551EC1;
 extern s32 (*pbMenuCheckTable[][8])(pbProcHandle_t *panel);
 extern void (*pbMenuActionTable[][8])(pbProcHandle_t *panel);
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", pbMapPathPb1Format);
+const char pbMapPathPb1Format[40] = "/pb/mapdata/data/pb1/pbMap%02d.map";
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", pbMapPathPb2Format);
+const char pbMapPathPb2Format[40] = "/pb/mapdata/data/pb2/pbMap%02d.map";
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", pbMenuDebugOwnerName);
+const char pbMenuDebugOwnerName[16] = "DebugOwner";
 
 s32 pb_proc_menu_Process(dds3ProcessID_t *id)
 {
@@ -440,5 +440,5 @@ void pbLoadSystemData(s32 num) {
     pbWaitLoadMapData(NULL);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbMenu", pbLoadMapDataProcName);
+const char pbLoadMapDataProcName[24] = "pb-load-mapdata";
 

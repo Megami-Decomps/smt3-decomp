@@ -79,7 +79,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 #include "sdk_libc.h"
 
-extern char nbActionStackErrorMsg[];
+extern const char nbActionStackErrorMsg[];
 
 extern s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index);
 
@@ -147,7 +147,7 @@ extern s32 evtBitCheck(s32 no);
 
 
 
-extern char nbEncnoFormat[]; /* "encno = %d\n" */
+extern const char nbEncnoFormat[]; /* "encno = %d\n" */
 
 extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
 
@@ -157,11 +157,11 @@ extern void nbInitResultProcess(nbMainProcessData_t *data);
 
 extern void nbBgmFadeOut(void);
 
-extern char nbFormationTypeFormat[]; /* "formationtype = %d\n" */
+extern const char nbFormationTypeFormat[]; /* "formationtype = %d\n" */
 
-extern char nbGameOverMsg[]; /* "game over !!\n" */
+extern const char nbGameOverMsg[]; /* "game over !!\n" */
 
-extern char nbLevelUpMsg[]; /* "level up !!\n" */
+extern const char nbLevelUpMsg[]; /* "level up !!\n" */
 
 extern char nbMainProcessName[]; /* "nb_main" */
 
@@ -211,7 +211,7 @@ extern s32 nbCheckBadStatusGameOver(nbMainProcessData_t *data);
 
 extern s32 nbCheckRenzokuEncount(nbMainProcessData_t *data);
 
-extern char nbBadStatusGameOverMsg[];
+extern const char nbBadStatusGameOverMsg[];
 
 extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
@@ -1199,13 +1199,13 @@ void nbSetNextPhase(s32 phase)
     nbGetMainProcessData()->nextphase = phase;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbActionStackErrorMsg);
+const char nbActionStackErrorMsg[16] = "\244\242\244\352\244\336\244\271\244\350!!\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbBadStatusGameOverMsg);
+const char nbBadStatusGameOverMsg[16] = "\301\264\260\367\271\324\306\260\311\324\307\275!!\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbGameOverMsg);
+const char nbGameOverMsg[16] = "game over !!\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbLevelUpMsg);
+const char nbLevelUpMsg[24] = "level up !!\n";
 
 void nbSetPhase(s32 phase)
 {
@@ -1671,7 +1671,7 @@ void nbKillMainProcess(void)
     nbFreeDeadMoonTex();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbEncnoFormat);
+const char nbEncnoFormat[16] = "encno = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", nbFormationTypeFormat);
+const char nbFormationTypeFormat[32] = "formationtype = %d\n";
 

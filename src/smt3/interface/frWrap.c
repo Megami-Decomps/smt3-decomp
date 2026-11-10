@@ -503,7 +503,7 @@ extern s32 frTestFontX, frTestFontY;
 extern s8 frTestFontAlpha;
 extern s8 dds3PadBitTable[];
 extern frFontHandle_t *frTestFontHandle;
-extern char frTestFontText[];
+extern const char frTestFontText[];
 extern void frSetDrawSpeed(frFontHandle_t *request, s32 speed);
 
 void fr_1CAC50(void)
@@ -530,5 +530,5 @@ void fr_1CAC50(void)
     frSetFontColor(frTestFontHandle, 0x80808000 | (u8)frTestFontAlpha);
 }
 
-INCLUDE_RODATA(const s32, "interface/frWrap", frTestFontText);
+const char frTestFontText[24] = "\204\231\204\232\201\206\204\231\204\232\201\214\200\340\200\342\200\376";
 

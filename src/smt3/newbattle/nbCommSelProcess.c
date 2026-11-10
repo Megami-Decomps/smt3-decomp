@@ -138,7 +138,7 @@ typedef struct nbCommSelProcessData_t {
     s32 openwait;
 } nbCommSelProcessData_t;
 
-extern char nbCommSelProcessName[];
+extern const char nbCommSelProcessName[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -297,7 +297,7 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCommSelProcess", nbCommSelProcessName);
+const char nbCommSelProcessName[24] = "nb_commsel";
 
 void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
 {
@@ -1796,7 +1796,7 @@ void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
     data->CommSelProcessID = id;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", nbCommSelNumFormat);
+char nbCommSelNumFormat[4] = "%3d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", D_00551134);
+s16 D_00551134 = 0;
 

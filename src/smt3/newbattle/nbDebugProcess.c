@@ -209,7 +209,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern char nbDebugProcessName[];
+extern const char nbDebugProcessName[];
 
 extern void *nbDebugProcess1(dds3ProcessID_t *id);
 
@@ -343,8 +343,8 @@ extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
 extern const char *nbBadStatusNames[12];
-extern const char nbDebugStrFmt[];
-extern const char nbDebugNoStatusLabel[];
+extern char nbDebugStrFmt[];
+extern char nbDebugNoStatusLabel[];
 extern sdfGrOt_t sdfGrOtTable[];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
@@ -362,7 +362,7 @@ extern void DispBadStatus(s32 x, s32 y, u32 status, s32 color);
 
 extern s32 nbDebugStockCursor;
 extern s32 nbDebugStockBase;
-extern const char nbDebugEmptyStockLabel[];
+extern char nbDebugEmptyStockLabel[];
 extern char *text2[];
 
 #ifdef NON_MATCHING
@@ -458,7 +458,7 @@ typedef struct {
 } nbDebugUnitLabels_t;
 extern nbDebugUnitLabels_t nbDebugUnitLabelTable;
 extern const char nbDebugIdFmt[], nbDebugLevelFmt[], nbDebugHpFmt[], nbDebugMpFmt[];
-extern const char nbDebugBadLabel[], nbDebugPairFmt[];
+extern char nbDebugBadLabel[], nbDebugPairFmt[];
 extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 extern u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr);
 
@@ -664,10 +664,10 @@ s32 SelectBad(nbDebugProcessData_t *d)
 extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 typedef struct { const char *name[4]; } nbDebugMotionNames_t;
 extern nbDebugMotionNames_t nbDebugMotionNames;
-extern const char nbDebugTypeFmt[];
-extern const char nbDebugDataFmt[];
-extern const char nbDebugBFrameFmt[];
-extern const char nbDebugHFrameFmt[];
+extern char nbDebugTypeFmt[];
+extern char nbDebugDataFmt[];
+extern char nbDebugBFrameFmt[];
+extern char nbDebugHFrameFmt[];
 extern s32 nbDebugMotionFieldCursor;
 extern s32 nbDebugMotionCursor;
 extern s32 slSelectMotIndex;
@@ -784,7 +784,7 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
 }
 
 extern const char *nbDebugMotionLabels[];
-extern const char nbDebugIndexFmt[];
+extern char nbDebugIndexFmt[];
 
 #ifdef NON_MATCHING
 s32 SelectMot(nbDebugProcessData_t *d, s32 active)
@@ -855,7 +855,7 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMot);
 #endif
 
-extern const char nbDebugHexIndexFmt[];
+extern char nbDebugHexIndexFmt[];
 extern s32 devilbase;
 extern s32 devilcur;
 
@@ -1183,143 +1183,143 @@ void nbInitDebugProcess(nbMainProcessData_t *data)
     data->debugproc = id;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbDebugProcess", nbDebugProcessName);
+const char nbDebugProcessName[24] = "nb_debug";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", menucur);
+s32 menucur = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", badcur);
+s32 badcur = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionCursor);
+s32 nbDebugMotionCursor = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", slSelectMotIndex);
+s32 slSelectMotIndex = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionFieldCursor);
+s32 nbDebugMotionFieldCursor = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStockCursor);
+s32 nbDebugStockCursor = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStockBase);
+s32 nbDebugStockBase = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugEmptyStockLabel);
+char nbDebugEmptyStockLabel[8] = "EMPTY";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusDead);
+char nbBadStatusDead[8] = "DEAD";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusStone);
+char nbBadStatusStone[8] = "STONE";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusFly);
+char nbBadStatusFly[8] = "FLY";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusCharm);
+char nbBadStatusCharm[8] = "CHARM";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusPoison);
+char nbBadStatusPoison[8] = "POISON";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusClose);
+char nbBadStatusClose[8] = "CLOSE";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusBind);
+char nbBadStatusBind[8] = "BIND";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusPanic);
+char nbBadStatusPanic[8] = "PANIC";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusSleep);
+char nbBadStatusSleep[8] = "SLEEP";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusFreeze);
+char nbBadStatusFreeze[8] = "FREEZE";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbBadStatusShock);
+char nbBadStatusShock[8] = "SHOCK";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugStrFmt);
+char nbDebugStrFmt[8] = "%s";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugNoStatusLabel);
+char nbDebugNoStatusLabel[8] = "-----";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountDmg);
+char nbDebugCountDmg[8] = "DMG   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi0);
+char nbDebugCountAi0[8] = "AI0   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi1);
+char nbDebugCountAi1[8] = "AI1   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAi2);
+char nbDebugCountAi2[8] = "AI2   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountBatk);
+char nbDebugCountBatk[8] = "BATK  ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountMatk);
+char nbDebugCountMatk[8] = "MATK  ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountEsc);
+char nbDebugCountEsc[8] = "ESC   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountDef);
+char nbDebugCountDef[8] = "DEF   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHit);
+char nbDebugCountHit[8] = "HIT   ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHyooff);
+char nbDebugCountHyooff[8] = "HYOOFF";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountKaeoff);
+char nbDebugCountKaeoff[8] = "KAEOFF";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountJyuoff);
+char nbDebugCountJyuoff[8] = "JYUOFF";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountHamoff);
+char nbDebugCountHamoff[8] = "HAMOFF";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountMref);
+char nbDebugCountMref[8] = "MREF  ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountBref);
+char nbDebugCountBref[8] = "BREF  ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAtkx2);
+char nbDebugCountAtkx2[8] = "ATKx2 ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountTarget);
+char nbDebugCountTarget[8] = "TARGET";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountKCnt);
+char nbDebugCountKCnt[8] = "K_CNT ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountPCnt);
+char nbDebugCountPCnt[8] = "P_CNT ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugCountAisyo);
+char nbDebugCountAisyo[8] = "AISYO ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoButu);
+char nbDebugAisyoButu[8] = "BUTU";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoKaen);
+char nbDebugAisyoKaen[8] = "KAEN";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHyou);
+char nbDebugAisyoHyou[8] = "HYOU";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoDeng);
+char nbDebugAisyoDeng[8] = "DENG";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoShog);
+char nbDebugAisyoShog[8] = "SHOG";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoBann);
+char nbDebugAisyoBann[8] = "BANN";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHama);
+char nbDebugAisyoHama[8] = "HAMA";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoJyus);
+char nbDebugAisyoJyus[8] = "JYUS";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoMary);
+char nbDebugAisyoMary[8] = "MARY";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSnke);
+char nbDebugAisyoSnke[8] = "SNKE";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSsin);
+char nbDebugAisyoSsin[8] = "SSIN";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoJiba);
+char nbDebugAisyoJiba[8] = "JIBA";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoNego);
+char nbDebugAisyoNego[8] = "NEGO";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoRec);
+char nbDebugAisyoRec[8] = "REC ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoHojo);
+char nbDebugAisyoHojo[8] = "HOJO";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugAisyoSpec);
+char nbDebugAisyoSpec[8] = "SPEC";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugBadLabel);
+char nbDebugBadLabel[8] = "BAD : ";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugPairFmt);
+char nbDebugPairFmt[8] = "%s:%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameNormal);
+char nbDebugMotionNameNormal[8] = "NORMAL";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNamePause);
+char nbDebugMotionNamePause[8] = "PAUSE";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameOut);
+char nbDebugMotionNameOut[8] = "OUT";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugMotionNameStop);
+char nbDebugMotionNameStop[8] = "STOP";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugTypeFmt);
+char nbDebugTypeFmt[8] = "TYPE:%s";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugDataFmt);
+char nbDebugDataFmt[8] = "DATA:%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugBFrameFmt);
+char nbDebugBFrameFmt[8] = "H_1 :%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugHFrameFmt);
+char nbDebugHFrameFmt[8] = "H_2 :%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugIndexFmt);
+char nbDebugIndexFmt[8] = "%02d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbDebugProcess", nbDebugHexIndexFmt);
+char nbDebugHexIndexFmt[8] = "0x%02X";
 

@@ -384,7 +384,7 @@ extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 extern s32 fldItemBoxRndTable[];
 
 
-extern char fldFixCameraMissingMsg[];
+extern const char fldFixCameraMissingMsg[];
 
 extern void resetCamTgtPlayer(void);
 
@@ -771,7 +771,7 @@ extern void evtEnableMoonDraw(void);
 extern void evtDisableMoonDraw2(void);
 extern void evtEnableMoonDraw2(void);
 
-INCLUDE_RODATA(const s32, "field/fldCommand", fldFixCameraMissingMsg);
+const char fldFixCameraMissingMsg[48] __attribute__((aligned(16))) = "\304\352\305\300\245\253\245\341\245\351ERR:\245\253\245\341\245\351\245\352\245\275\241\274\245\271\244\254\270\253\311\325\244\253\244\351\244\312\244\244\n";
 
 s32 fldCommand_SET_ALLPANEL(void)
 {

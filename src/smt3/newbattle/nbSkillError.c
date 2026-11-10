@@ -225,9 +225,9 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern char nbEventNoFormat[];
 
-extern char nbModelPackNameFormat[];
+extern const char nbModelPackNameFormat[];
 
-extern char nbModelPackLoadFormat[];
+extern const char nbModelPackLoadFormat[];
 
 extern void pacFileHandleFree_(void *pacHandle);
 
@@ -783,7 +783,7 @@ typedef struct {
 } nbPackEntry_t;
 
 extern nbStatWork_t *nbSetFormEntry(s32 id);
-extern char nbFormEntryLoadFormat[];
+extern const char nbFormEntryLoadFormat[];
 
 typedef struct {
     u8 reserved00[0x10];
@@ -851,9 +851,9 @@ zero:
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbModelPackNameFormat);
+const char nbModelPackNameFormat[24] = "/npackl/BU%03X.LB";
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbModelPackLoadFormat);
+const char nbModelPackLoadFormat[32] = "\245\346\245\313\245\303\245\310\245\321\245\303\245\257\306\311\244\337\271\376\244\337 %s\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbSkillError", nbFormEntryLoadFormat);
+const char nbFormEntryLoadFormat[32] = "\245\346\245\313\245\303\245\310\245\307\245\263\241\274\245\311 (%d, %d)\n";
 

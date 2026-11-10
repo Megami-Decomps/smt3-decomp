@@ -647,11 +647,11 @@ s32 nbE901Process_1(dds3ProcessID_t *id)
     nbUpdateEventProcessData(id);
     return 0;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901Basic);
+dds3Basic_t *nbE901Basic = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE901", bedbasic);
+void *bedbasic = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901Encno);
+s32 nbE901Encno = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE901", nbE901ModelPackNo);
+s32 nbE901ModelPackNo = 0;
 

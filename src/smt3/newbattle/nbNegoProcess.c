@@ -312,7 +312,7 @@ extern void nbNegoDebugPrint(nbNegoProcessData_t *n);
 
 extern s32 nbCheckNegoMessage(nbNegoProcessData_t *n);
 
-extern char nbMsgEndStr[];
+extern const char nbMsgEndStr[];
 
 extern void nbNegoShutdown(dds3ProcessID_t *id);
 
@@ -956,8 +956,8 @@ s32 nbGetNegoYaruStone(datUnitWork_t *w)
     return 0;
 }
 
-extern char nbInfoSelectFmt[];
-extern char nbInfoCountFmt[];
+extern const char nbInfoSelectFmt[];
+extern const char nbInfoCountFmt[];
 
 s32 nbGetInfoMsg(s32 infotype)
 {
@@ -1074,8 +1074,8 @@ extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(u32 x, u32 y, u32 z, s32 attr, const char *format, ...);
 extern sdfGrOt_t sdfGrOtTable[];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
-extern char nbDebugNowFmt[];
-extern char nbDebugHistoryFmt[];
+extern const char nbDebugNowFmt[];
+extern const char nbDebugHistoryFmt[];
 extern char nbDebugHistoryStr[];
 extern char nbNegoIdFmt[];
 
@@ -1118,10 +1118,10 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern char nbDebugSelectFmt[];
-extern char nbDebugSelectStr[];
-extern char nbDebugEnterStr[];
-extern char nbDebugRandomStr[];
+extern const char nbDebugSelectFmt[];
+extern const char nbDebugSelectStr[];
+extern const char nbDebugEnterStr[];
+extern const char nbDebugRandomStr[];
 extern char nbDebugEndStr[];
 
 void nbNegoDebugPrint2(nbNegoProcessData_t *n)
@@ -1375,25 +1375,25 @@ typedef struct itfMesResource_t itfMesResource_t;
 extern s32 itfMesMngInitialize(itfMesResource_t *message);
 extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E38);
+const u8 D_00544E38[16] = {0x21, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbInfoSelectFmt);
+const char nbInfoSelectFmt[40] = "select info usemestype = %d mesno =%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbInfoCountFmt);
+const char nbInfoCountFmt[40] = "normal_mesno = %d jouken_mesno = %d  \n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugNowFmt);
+const char nbDebugNowFmt[16] = "Now:%d_%d";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugHistoryFmt);
+const char nbDebugHistoryFmt[16] = "%d_%d (%d)";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugSelectFmt);
+const char nbDebugSelectFmt[32] = "SELECT NEXT NEGO (%d_%d)";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugSelectStr);
+const char nbDebugSelectStr[24] = "SELECT NEXT NEGO";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugEnterStr);
+const char nbDebugEnterStr[16] __attribute__((aligned(16))) = "RR = ENTER";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbDebugRandomStr);
+const char nbDebugRandomStr[16] = "RL = RANDOM";
 
-INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", nbMsgEndStr);
+const char nbMsgEndStr[16] = "msg end\n";
 
 nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pformindex,
                                       s32 eformindex, s32 negotype, s32 skillid)
@@ -1498,11 +1498,11 @@ void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eform
     dds3LinkProcess(actdata->data->MainProcessID, id);
     actdata->data->negoproc = id;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbDebugHistoryStr);
+char nbDebugHistoryStr[8] = "HISTORY";
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbNegoIdFmt);
+char nbNegoIdFmt[8] = "%d_%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbDebugEndStr);
+char nbDebugEndStr[8] = "END";
 
-INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", nbNegoProcessName);
+char nbNegoProcessName[8] = "nb_nego";
 

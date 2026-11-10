@@ -204,11 +204,11 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535BD0);
+const char D_00535BD0[24] = "/font/sample/bg02.tmx";
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535BE8);
+const char D_00535BE8[24] = "/font/sample/bg01.tmx";
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535C00);
+const char D_00535C00[24] = "/font/sample/bg00.tmx";
 
 void itfDebugPrintMark(void) {
     printf("********* AAAA ********\n");
@@ -639,99 +639,99 @@ void func_001D2638(f32 *delta) {
     }
 }
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", pbMyCharScale);
+const sdfVector4Unaligned_t pbMyCharScale = {0.4f, 0.4f, 0.4f, 1.0f};
 
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", pbDrawMyCharacterProcName);
+const char pbDrawMyCharacterProcName[24] = "pb-draw-mycharacter";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", testMsgTexIndex);
+s32 testMsgTexIndex = 3;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", testMsgTexture);
+void *testMsgTexture = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F518);
+char D_0054F518[8] = "POINT";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F520);
+char D_0054F520[8] = "SCALE";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F528);
+char D_0054F528[8] = "ALPHA";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOnText);
+char pbDebugBlurOnText[8] = " ON";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOffText);
+char pbDebugBlurOffText[8] = "OFF";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel2CursorMark);
+char pbDebugPanel2CursorMark[8] = ">";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel2RowFormat);
+char pbDebugPanel2RowFormat[8] = " %s";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurValueFormat);
+char pbDebugBlurValueFormat[8] = "%9d";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugBlurOffsetFormat);
+char pbDebugBlurOffsetFormat[8] = "%4d,%4d";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F560);
+char D_0054F560[8] = "S: ";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F568);
+char D_0054F568[8] = "A: ";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F570);
+char D_0054F570[8] = "B: ";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F578);
+char D_0054F578[8] = "G: ";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F580);
+char D_0054F580[4] = "R: ";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F584);
+u8 D_0054F584 = 1;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3Title);
+char pbDebugPanel3Title[8] = "FILTER:";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3CursorMark);
+char pbDebugPanel3CursorMark[8] = ">";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugPanel3RowFormat);
+char pbDebugPanel3RowFormat[8] = " %s";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugChannelFormat);
+char pbDebugChannelFormat[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5A8);
+char D_0054F5A8[8] = "%4d";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapCallbacks);
+extern s32 func_001D35F0(s16 x, s16 y, s32 mode);
+extern u8 pbFindBlockSlot(s16 x, s16 y, s32 mode);
+s32 (*pbMapCallbacks[2])(s16 x, s16 y, s32 mode) = {func_001D35F0, (s32 (*)(s16, s16, s32))pbFindBlockSlot};
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbNeighborOffsets);
+s8 pbNeighborOffsets[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbProcNameFormat);
+char pbProcNameFormat[4] = "%s\n";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapWork);
+void *pbMapWork = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMenuItemCount);
+s32 D_0054F5C8 = 0x1C0;
 
-SDATA_PAD(2);
+s32 D_0054F5CC = 0;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D4);
+u8 pbMenuItemCount[2] = {0x08, 0x04};
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMoveCharList);
+s32 D_0054F5D4 = 0;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", blockDB);
+u32 pbMoveCharList = 1;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", bmap);
+void *blockDB = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", goal);
+void *bmap = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", record);
+void *goal = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", mapCursor);
+void *record = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5F0);
+void *mapCursor = NULL;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", degree_mode);
+s32 D_0054F5F0 = 0;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbGameKeyState);
+u8 degree_mode = 0;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapCursorWork);
+u8 pbGameKeyState = 0;
 
-SDATA_PAD(4);
+f32 pbMapCursorWork = 0.0;
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardInitFormat);
+char pbMCardInitFormat[8] = "%d\n";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardNewline);
+char pbMCardNewline[8] = "\n";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", g_pdebug_0);
+void *g_pdebug_0 = NULL;
 
-SDATA_PAD(4);
+char pbDebugMenuCursorMark[8] = ">";
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugMenuCursorMark);
-
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugFloatFormat);
+char pbDebugFloatFormat[8] = "%f";
 

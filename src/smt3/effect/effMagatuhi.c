@@ -468,6 +468,7 @@ extern s8 dds3PadStickStatusPrev[2][2];
 
 extern s8 dds3PadStickStatusState[2][2];
 
+extern u8 D_003200B8[];
 extern effDebugMenu_t *effDebugMenu;
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -2296,6 +2297,8 @@ void InitMagatuhiEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
+const char D_00533EF0[16] __attribute__((aligned(16))) = "EFFECT VIEWER";
+
 #ifdef NON_MATCHING
 extern u8 sdfPadAnalogSticks[8];
 extern void *memcpy(void *dst, const void *src, size_t size);
@@ -2594,7 +2597,6 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
     return menu;
 }
 #else
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00533EF0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", dblurUpdateHandle);
 #endif
@@ -3168,131 +3170,131 @@ s32 dds3_1AACF8(void) {
     return effDebugEnabled;
 }
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534090);
+const char D_00534090[16] = "test.bed";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340A0);
+const char D_005340A0[16] __attribute__((aligned(16))) = "012402.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340B0);
+const char D_005340B0[16] = "DAMAGE.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340C0);
+const char D_005340C0[16] = "MLTEST.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340D0);
+const char D_005340D0[16] = "BTEST0.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340E0);
+const char D_005340E0[16] = "TEST2.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340F0);
+const char D_005340F0[16] = "TEST.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534100);
+const char D_00534100[16] __attribute__((aligned(16))) = "test.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534110);
+const char D_00534110[16] __attribute__((aligned(16))) = "ww02.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534120);
+const char D_00534120[16] __attribute__((aligned(16))) = "smoke08.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534130);
+const char D_00534130[16] = "smoke07.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534140);
+const char D_00534140[16] = "smoke.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534150);
+const char D_00534150[16] = "SPVIEW3.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534160);
+const char D_00534160[16] = "SPVIEW2.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534170);
+const char D_00534170[16] = "SPVIEW.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534180);
+const char D_00534180[16] = "MULTI00.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534190);
+const char D_00534190[16] = "STAGE12.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341A0);
+const char D_005341A0[16] = "TEST.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341B0);
+const char D_005341B0[16] __attribute__((aligned(16))) = "MAKATORA020.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341C0);
+const char D_005341C0[16] = "RING01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341D0);
+const char D_005341D0[16] = "RBALL01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341E0);
+const char D_005341E0[16] = "RBALL02.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005341F0);
+const char D_005341F0[16] = "BBALL01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534200);
+const char D_00534200[16] = "NIIKI21B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534210);
+const char D_00534210[16] = "NIIKI20B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534220);
+const char D_00534220[16] = "NIIKI11B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534230);
+const char D_00534230[16] = "NIIKI10B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534240);
+const char D_00534240[16] = "NIIKI01B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534250);
+const char D_00534250[16] = "NIIKI00B.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534260);
+const char D_00534260[16] = "NIIKI01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534270);
+const char D_00534270[16] = "NIIKI00.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534280);
+const char D_00534280[16] = "HOUDEN0.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534290);
+const char D_00534290[16] = "DIKIRA20.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342A0);
+const char D_005342A0[16] = "SSE3.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342B0);
+const char D_005342B0[16] __attribute__((aligned(16))) = "SSE2.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342C0);
+const char D_005342C0[16] __attribute__((aligned(16))) = "SSE1.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342D0);
+const char D_005342D0[16] __attribute__((aligned(16))) = "SSE0.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342E0);
+const char D_005342E0[16] __attribute__((aligned(16))) = "SSF3.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005342F0);
+const char D_005342F0[16] __attribute__((aligned(16))) = "SSF2.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534300);
+const char D_00534300[16] __attribute__((aligned(16))) = "SSF1.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534310);
+const char D_00534310[16] __attribute__((aligned(16))) = "SSF0.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534320);
+const char D_00534320[16] __attribute__((aligned(16))) = "RINGF2.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534330);
+const char D_00534330[16] = "RINGF1.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534340);
+const char D_00534340[16] = "RINGF0.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534350);
+const char D_00534350[16] = "SLTFIRE.P2A";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534360);
+const char D_00534360[16] = "HC_TEST.PB";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534370);
+const char D_00534370[16] = "PARAMETER INIT";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534380);
+const char D_00534380[16] = "CENTER MOVE";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534390);
+const char D_00534390[16] = "MULTI BLUR";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343A0);
+const char D_005343A0[16] = "DISTORTION BLUR";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343B0);
+const char D_005343B0[16] = "MULTI FILTER";
 
-INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343C0);
+const char D_005343C0[16] = "RIPPLE BLUR";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugEnabled);
+s8 effDebugEnabled = 0;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugActive);
+s8 effDebugActive = 1;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugCameraAllowed);
+s8 effDebugCameraAllowed = 1;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugMenu);
+effDebugMenu_t *effDebugMenu = (effDebugMenu_t *)&D_003200B8;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugStopTimer);
+u32 effDebugStopTimer = 0;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugRunTimer);
+u32 effDebugRunTimer = 0;
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugTitleFormat);
+char effDebugTitleFormat[8] = "%s";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugLabelFormat);
+char effDebugLabelFormat[8] = "%7s:";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugTrueText);
+char effDebugTrueText[8] = "ON";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugFalseText);
+char effDebugFalseText[8] = "OFF";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", effDebugHeaderFormat);
+char effDebugHeaderFormat[8] = "%-s";
 
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F258);
+char D_0054F258[8] = "SW0.P2A";
 

@@ -449,11 +449,12 @@ void nmeDrawModeTabs(s8 mode)
     }
 }
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeColoredText);
+extern const char nmeConfirmQuestion[], nmeConfirmYes[], nmeConfirmNo[];
+const nmeColoredTextStrings_t nmeColoredText = {nmeConfirmQuestion, nmeConfirmYes, nmeConfirmNo};
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeAutoMemoryLabel);
+const char nmeAutoMemoryLabel[16] = "AUTO MEMORY";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeMenuMemoryLabel);
+const char nmeMenuMemoryLabel[16] = "MENU MEMORY";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Calc", nmeVibrationLabel);
+const char nmeVibrationLabel[16] = "VIBRATION";
 
