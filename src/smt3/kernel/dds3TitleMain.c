@@ -25,8 +25,6 @@ extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 extern s32 titleFreeWork(s32 arg);
 
-
-
 extern mselGlobalWork_t *gGlobal;
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
@@ -36,7 +34,6 @@ extern char mselLevelLabel[];
 extern char mselLevelFormat[];
 extern char *datExplainTable[];
 extern char *text2[];
-
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 
@@ -597,7 +594,6 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
     *value = (v & ~0xFF) | level;
 }
 
-
 extern datDevilFormat_t datDevilTable[];
 
 void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
@@ -639,25 +635,27 @@ const char mselTitleCursor1Line0[22] = "A level of difficulty";
 
 s32 dds3TitleMovieCount = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD40);
+s32 D_0054FD3C = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", gGlobal);
+u32 D_0054FD40 = 0x0000EA80;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", fldWmapEnabled);
+mselGlobalWork_t *gGlobal = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelLabel);
+s32 fldWmapEnabled = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelFormat);
+char mselLevelLabel[3] = "Lv";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD60);
+char mselLevelFormat[4] = "%2d";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD68);
+char D_0054FD60[3] = "QA";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD70);
+char D_0054FD68[8] = "Planner";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD78);
+char D_0054FD70[6] = "Sales";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD80);
+char D_0054FD78[8] = "Artwork";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD88);
+char D_0054FD80[6] = "Staff";
+
+char D_0054FD88[2] = " ";
 
