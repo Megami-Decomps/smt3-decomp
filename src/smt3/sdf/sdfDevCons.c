@@ -589,7 +589,7 @@ void sdfDevSetPrintCB(u32 *aCB, u32 aX, u32 aY, u32 aZ, s32 aAttr)
     sdfPktSetCmd(aCB, aAttr);
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfDevCons", devConsTop);
+sdfDevConsCB_tag *devConsTop = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDevCons", alreadyInitDevCons);
+s32 alreadyInitDevCons = 0;
 
