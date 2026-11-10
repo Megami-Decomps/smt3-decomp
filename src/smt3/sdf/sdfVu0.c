@@ -365,7 +365,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadPortSlotPairs);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadManagerMode);
 
-INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518D5);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadButtons);
 

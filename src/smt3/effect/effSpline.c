@@ -383,7 +383,7 @@ void effSetChanStep(dds3SplineWalk_t *pWalk, f32 step)
 }
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitActive);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F371);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitFrames);
 
@@ -399,13 +399,13 @@ INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraEditUp);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraCRSetPlayerFormRequestFlag);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F38D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraState_CommandRoot_OrderIndex);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraPressRunFlag);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F395);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraPressThrough);
 
@@ -425,7 +425,7 @@ INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Kagu_MJINKO_Type);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Pish_MUHENK_Type);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3B9);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Pish_MUHENK_Frame);
 

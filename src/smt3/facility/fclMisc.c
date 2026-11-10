@@ -619,7 +619,7 @@ INCLUDE_SDATA(const s32, "facility/fclMisc", gSelMsgNo);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", gSelMsgPos);
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC5D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrFee);
 

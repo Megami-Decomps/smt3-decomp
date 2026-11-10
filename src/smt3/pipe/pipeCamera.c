@@ -522,5 +522,5 @@ s32 pipeCheckLevel(s32 level, s32 type)
 }
 INCLUDE_SDATA(const s32, "pipe/pipeCamera", pipe_Camera);
 
-INCLUDE_SDATA(const s32, "pipe/pipeCamera", D_005517FC);
+SDATA_PAD(4);
 

@@ -1711,5 +1711,5 @@ INCLUDE_SDATA(const s32, "field/fldEveHit", gFldInf_WpExit);
 
 INCLUDE_SDATA(const s32, "field/fldEveHit", fldDoorExitFlag);
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", D_0054EDE5);
+SDATA_PAD(3);
 

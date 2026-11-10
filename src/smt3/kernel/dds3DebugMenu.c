@@ -16,7 +16,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickState);
 
 INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickStatusState);
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E914);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E918);
 

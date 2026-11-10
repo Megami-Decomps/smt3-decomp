@@ -1578,7 +1578,7 @@ INCLUDE_SDATA(const s32, "field/fldCamera", fldElvCameraScene);
 
 INCLUDE_SDATA(const s32, "field/fldCamera", fldCamElvState);
 
-INCLUDE_SDATA(const s32, "field/fldCamera", D_0054ECC4);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldCamera", fldHitChkMatter);
 

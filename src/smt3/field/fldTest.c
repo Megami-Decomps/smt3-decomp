@@ -3471,7 +3471,7 @@ INCLUDE_SDATA(const s32, "field/fldTest", fldMsgRe1KO);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldRunDanteSe_asise);
 
-INCLUDE_SDATA(const s32, "field/fldTest", D_0054EADC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsg2A);
 

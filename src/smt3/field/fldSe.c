@@ -1035,7 +1035,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowLife);
 
 INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowW);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EFE4);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldSe", slDDS3To31Flg);
 
@@ -1111,7 +1111,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", slFileSelPulsePhase);
 
 INCLUDE_SDATA(const s32, "field/fldSe", slFileSelWork);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F07C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldSe", slNum2dFmt);
 

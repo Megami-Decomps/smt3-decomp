@@ -386,7 +386,7 @@ INCLUDE_RODATA(const s32, "movie/MovieViewer", cmpCampTmxPath);
 
 INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerPhase);
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", D_0054FDB4);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerFmtWord);
 

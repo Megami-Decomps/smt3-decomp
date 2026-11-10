@@ -8049,5 +8049,5 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", BlinkMultiBlurCount);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", effPCPBufuLight_Start);
 
-INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0054F1ED);
+SDATA_PAD(3);
 

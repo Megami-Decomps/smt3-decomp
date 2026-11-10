@@ -4527,7 +4527,7 @@ INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", nbActionProcessName);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", StkSelId);
 
-INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", D_00551124);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "newbattle/nbActionProcess", nbDebugNewline);
 

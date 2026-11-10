@@ -201,7 +201,7 @@ INCLUDE_RODATA(const s32, "sdf/sdfPrint", sdfPrintIopBindErrMsg);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551901);
+SDATA_PAD(7);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintStrFmt);
 
@@ -209,11 +209,11 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfCdDirectPrefix);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfCdTrayMode);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_0055191C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileDefaultSrcType);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551921);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileSemaId);
 
@@ -231,7 +231,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdFreeList);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCount);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551952);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCacheHead);
 
@@ -247,7 +247,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdThreadPrio);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdDefaultCreateMode);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551966);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfFileCmdCdromPrefix);
 
@@ -267,11 +267,11 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfHddMountPoint);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDev9Ready);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519A9);
+SDATA_PAD(7);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfCdClock);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519B1);
+SDATA_PAD(7);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfCdClockCache);
 
@@ -289,7 +289,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfSifRpcThreadId);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", p2sdSmgBuf);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519DC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagEndName);
 
@@ -319,7 +319,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpByteFmt);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpLineBuf);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A4A);
+SDATA_PAD(6);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpEndStr);
 

@@ -13067,7 +13067,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", campWork);
 
 INCLUDE_SDATA(const s32, "code_0022C578", campExitState);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDD5);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDD8);
 
@@ -13113,7 +13113,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", campStatusPanel);
 
 INCLUDE_SDATA(const s32, "code_0022C578", campInfoWork);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE7C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "code_0022C578", campDhFmtAmount);
 
@@ -13121,11 +13121,11 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmpStatTimer);
 
 INCLUDE_SDATA(const s32, "code_0022C578", rstHeartsMasterPhase);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE8E);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmbBirthPanel);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE94);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtDec2);
 
@@ -13147,7 +13147,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelLoadState);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpInfoWindow);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FECC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtHpMp);
 
@@ -13169,7 +13169,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusGroup);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelId);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEF2);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmpModelHandle);
 
@@ -13181,7 +13181,7 @@ INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF08);
 
 INCLUDE_SDATA(const s32, "code_0022C578", campStatusActive);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF14);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "code_0022C578", cmbRaceTable);
 

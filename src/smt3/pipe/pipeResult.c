@@ -232,7 +232,7 @@ s32 pipeGetRandomMessage(void)
 }
 INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551801);
+SDATA_PAD(7);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessNumFmt);
 
@@ -242,7 +242,7 @@ INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessDataAddr);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", D_00551815);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeExpectedMaka);
 

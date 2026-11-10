@@ -907,5 +907,5 @@ INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeFlag);
 
 INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeLoadDone);
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", D_00551544);
+SDATA_PAD(4);
 

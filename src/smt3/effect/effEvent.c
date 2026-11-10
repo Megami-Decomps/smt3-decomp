@@ -1923,7 +1923,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F318);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", mfilterDone);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F31D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F320);
 
@@ -1935,7 +1935,7 @@ INCLUDE_SDATA(const s32, "effect/effEvent", hEffEveCPSmokeBill01Tex);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", hEffEveCPSmokeBill02Tex);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F33C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameEvent);
 

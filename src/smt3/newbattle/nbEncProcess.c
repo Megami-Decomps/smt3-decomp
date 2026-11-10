@@ -1008,5 +1008,5 @@ INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbEncProcessName);
 
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbBadCurseTimer);
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", D_0055155C);
+SDATA_PAD(4);
 

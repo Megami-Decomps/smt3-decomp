@@ -1622,7 +1622,7 @@ INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawInitDone);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDrwZBuf);
 
-INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC4C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtDec);
 

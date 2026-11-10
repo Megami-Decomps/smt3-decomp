@@ -1416,5 +1416,5 @@ INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_DAMAGE03_D3P);
 
 INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_ATTACK01_D3P);
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", D_005517DC);
+SDATA_PAD(4);
 

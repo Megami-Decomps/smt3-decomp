@@ -124,7 +124,7 @@ dds3ProcessID_t *evtInitSky(void)
 }
 INCLUDE_SDATA(const s32, "event/evtSky", skyanime);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F902);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "event/evtSky", fldbokasi);
 
@@ -166,7 +166,7 @@ INCLUDE_SDATA(const s32, "event/evtSky", D_0054F990);
 
 INCLUDE_SDATA(const s32, "event/evtSky", evtMenuDisp_cnt);
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F99C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "event/evtSky", evtScrollUpMark);
 

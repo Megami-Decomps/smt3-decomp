@@ -1797,7 +1797,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFileBuf1);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", pFldNextFileDataF2);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EBBC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtResPath);
 
@@ -1827,11 +1827,11 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldBtlNextField);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldBtlNextArea);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EBFC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC00);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC01);
+SDATA_PAD(7);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtTbPath);
 

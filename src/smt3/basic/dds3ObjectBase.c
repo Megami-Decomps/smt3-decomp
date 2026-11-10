@@ -913,5 +913,5 @@ INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseTiakiANodeName);
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", frMessageCode);
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054EA02);
+SDATA_PAD(6);
 

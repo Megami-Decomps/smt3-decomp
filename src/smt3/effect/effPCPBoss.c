@@ -5031,7 +5031,7 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGYTexRefCount);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGY_RFrame);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1FC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeFrames);
 

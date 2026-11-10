@@ -2407,7 +2407,7 @@ INCLUDE_SDATA(const s32, "interface/frFont", gMessageRequestResult);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gMessageSpaceX);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F409);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gMessageStepY);
 
@@ -2417,17 +2417,17 @@ INCLUDE_SDATA(const s32, "interface/frFont", frSpaceAdvanceOffset);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gModeFlag);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F41D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gFontDrawOT);
 
 INCLUDE_SDATA(const s32, "interface/frFont", frSetFontString_style);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F425);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "interface/frFont", frDrawFontWork);
 
-INCLUDE_SDATA(const s32, "interface/frFont", D_0054F42C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "interface/frFont", frEmptyString);
 

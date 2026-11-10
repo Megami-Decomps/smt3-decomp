@@ -360,13 +360,13 @@ INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLJyocyuEffFilePath);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLSelectedName);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0FC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBedDirName);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutCount);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F10C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutAllFmt);
 

@@ -631,7 +631,7 @@ s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
 }
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieStreamSema);
 
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_00551B4C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieIpsExt);
 

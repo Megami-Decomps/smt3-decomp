@@ -364,7 +364,7 @@ void dds3CrossfadeEnd(void) {
 }
 INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeRunFlag);
 
-INCLUDE_SDATA(const s32, "effect/effPacket", D_0054F0C1);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeFrame);
 

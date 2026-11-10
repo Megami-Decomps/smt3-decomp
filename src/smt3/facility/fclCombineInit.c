@@ -5819,7 +5819,7 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF50);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", gProcessStat_0);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAD5);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAD8);
 
@@ -5835,7 +5835,7 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmpSkillCursor);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB0C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineNum2dFmt);
 
@@ -5845,5 +5845,5 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbActionMode);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbActionStep);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FB1D);
+SDATA_PAD(3);
 

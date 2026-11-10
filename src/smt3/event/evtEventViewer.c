@@ -2585,7 +2585,7 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_file_minor);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", winoff_x);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F82A);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_camera);
 

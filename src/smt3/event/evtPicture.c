@@ -414,7 +414,7 @@ void evtPicturePriProcessInit(void)
 }
 INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriList);
 
-INCLUDE_SDATA(const s32, "event/evtPicture", D_0054F8EC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "event/evtPicture", evtPictureProcName);
 

@@ -249,7 +249,7 @@ INCLUDE_SDATA(const s32, "interface/frName", frTestFontY);
 
 INCLUDE_SDATA(const s32, "interface/frName", frTestFontAlpha);
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F469);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "interface/frName", frTestFontTexture);
 

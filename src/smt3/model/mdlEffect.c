@@ -1479,7 +1479,7 @@ INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable);
 
 INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable2);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", D_0054F734);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorGlyphTemplate);
 

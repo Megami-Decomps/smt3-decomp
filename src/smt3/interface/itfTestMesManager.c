@@ -697,7 +697,7 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapWork);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMenuItemCount);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D2);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5D4);
 
@@ -721,7 +721,7 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbGameKeyState);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMapCursorWork);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F5FC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardInitFormat);
 
@@ -729,7 +729,7 @@ INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbMCardNewline);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", g_pdebug_0);
 
-INCLUDE_SDATA(const s32, "interface/itfTestMesManager", D_0054F614);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "interface/itfTestMesManager", pbDebugMenuCursorMark);
 

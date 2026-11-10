@@ -1233,7 +1233,7 @@ INCLUDE_SDATA(const s32, "field/fldProcess", fldAutoMapSeqFlags);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountFlags);
 
-INCLUDE_SDATA(const s32, "field/fldProcess", D_0054EB8C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldProcess", fldEncountTimer);
 

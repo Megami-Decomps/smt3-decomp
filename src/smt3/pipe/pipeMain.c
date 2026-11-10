@@ -137,11 +137,11 @@ INCLUDE_SDATA(const s32, "pipe/pipeMain", mapPrev);
 
 INCLUDE_SDATA(const s32, "pipe/pipeMain", debugMode);
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", D_00551711);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "pipe/pipeMain", SectionIndex);
 
 INCLUDE_SDATA(const s32, "pipe/pipeMain", pipeInitDone);
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", D_00551719);
+SDATA_PAD(7);
 

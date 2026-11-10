@@ -948,7 +948,7 @@ INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispTimer);
 
 INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispState);
 
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7A4);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7A8);
 

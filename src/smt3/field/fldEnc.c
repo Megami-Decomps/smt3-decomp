@@ -187,7 +187,7 @@ INCLUDE_SDATA(const s32, "field/fldEnc", encDrawState);
 
 INCLUDE_SDATA(const s32, "field/fldEnc", gencOn);
 
-INCLUDE_SDATA(const s32, "field/fldEnc", D_0054EC7C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldEnc", fldEncDrawName);
 

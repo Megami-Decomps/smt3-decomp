@@ -479,5 +479,5 @@ INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914TargetBasic);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914Basic);
 
-INCLUDE_SDATA(const s32, "newbattle/nbE914", D_00551644);
+SDATA_PAD(4);
 

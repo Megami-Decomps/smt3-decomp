@@ -392,7 +392,7 @@ INCLUDE_SDATA(const s32, "result/rstinit", GBWK_1);
 
 INCLUDE_SDATA(const s32, "result/rstinit", gProcessStat_4);
 
-INCLUDE_SDATA(const s32, "result/rstinit", D_0054FCED);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "result/rstinit", rstProcName);
 

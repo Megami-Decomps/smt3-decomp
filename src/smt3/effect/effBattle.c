@@ -1071,7 +1071,7 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
 }
 INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkillRun);
 
-INCLUDE_SDATA(const s32, "effect/effBattle", D_0054F0CD);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effBattle", effBTLFieldColorProcess);
 

@@ -921,5 +921,5 @@ void nbInitAiScript(nbActionProcessData_t *a, s32 no)
 }
 INCLUDE_SDATA(const s32, "newbattle/nbAiScript", btl_ai_rot_cnt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbAiScript", D_005514EC);
+SDATA_PAD(4);
 

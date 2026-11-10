@@ -299,7 +299,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfReqDrawDelayCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfReqDrawDelaySleepCount);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_0055188E);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfDrawReqQueueIndex);
 
@@ -309,7 +309,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfDrawFrameCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", corePktSoftenBias);
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", D_0055189D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGsMemIO", sdfMatAllocCount);
 

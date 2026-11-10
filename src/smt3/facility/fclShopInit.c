@@ -461,7 +461,7 @@ INCLUDE_SDATA(const s32, "facility/fclShopInit", shpWork);
 
 INCLUDE_SDATA(const s32, "facility/fclShopInit", shpProcessStat);
 
-INCLUDE_SDATA(const s32, "facility/fclShopInit", D_0054FB25);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "facility/fclShopInit", shpCmdLeave);
 

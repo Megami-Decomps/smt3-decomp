@@ -267,7 +267,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3RunCount);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3SoftResetFlag);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E809);
+SDATA_PAD(1);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3SoftResetDisableFlag);
 
@@ -291,7 +291,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3LastDrawFrameCount);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3VblanksPerFrame);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E82E);
+SDATA_PAD(2);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3KernelDebugSign);
 
@@ -303,5 +303,5 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3DrawFirstProcessName);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", dds3DrawProcessFlag);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelMain", D_0054E849);
+SDATA_PAD(7);
 

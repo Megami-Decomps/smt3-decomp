@@ -266,7 +266,7 @@ const char pipeObjectLoadMsg[40] = "ObjectData Loading [%s]....OK\n";
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLoadState);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551724);
+SDATA_PAD(4);
 
 s32 pipeLoadSection(s32 index)
 {
@@ -1707,7 +1707,7 @@ INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeIndex);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", attackCount);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551751);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", myMaka);
 
@@ -1725,7 +1725,7 @@ INCLUDE_SDATA(const s32, "pipe/pipeSection", CameraAction);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", camMode);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551765);
+SDATA_PAD(1);
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", myStatus);
 

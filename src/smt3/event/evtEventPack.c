@@ -661,7 +661,7 @@ INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C840);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FABC);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", evtLoadStartMessage);
 

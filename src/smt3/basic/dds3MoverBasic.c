@@ -209,5 +209,5 @@ u32 BasicTypeToItemType(u32 type)
 
 INCLUDE_SDATA(const s32, "basic/dds3MoverBasic", dds3MoverCount);
 
-INCLUDE_SDATA(const s32, "basic/dds3MoverBasic", D_0054E9CC);
+SDATA_PAD(4);
 

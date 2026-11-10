@@ -742,7 +742,7 @@ INCLUDE_SDATA(const s32, "facility/fclRagInit", GBWK_0);
 
 INCLUDE_SDATA(const s32, "facility/fclRagInit", gProcessStat_1);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB75);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "facility/fclRagInit", ragMenuTextLeave);
 

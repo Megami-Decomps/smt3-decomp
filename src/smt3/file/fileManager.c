@@ -786,7 +786,7 @@ INCLUDE_RODATA(const s32, "file/fileManager", D_00548758);
 
 INCLUDE_SDATA(const s32, "file/fileManager", fileCallbackStatus);
 
-INCLUDE_SDATA(const s32, "file/fileManager", D_0055164C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "file/fileManager", fileManagerProcName);
 

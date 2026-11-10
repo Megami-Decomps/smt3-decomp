@@ -4151,7 +4151,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPnlDrawFlag);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPnlCnt);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551174);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551178);
 
@@ -4183,7 +4183,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGBaseColor);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTOmit);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511AD);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_1_Process);
 
@@ -4223,7 +4223,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTARate_E);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTAOnly);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511F9);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511FC);
 
@@ -4235,7 +4235,7 @@ INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockABGR);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockFadeFlag);
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551209);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockFrame);
 

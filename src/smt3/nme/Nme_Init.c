@@ -540,7 +540,7 @@ INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeProcessId);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", gProcessStat);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_0055165D);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameChiaki);
 

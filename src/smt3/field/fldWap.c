@@ -1715,5 +1715,5 @@ INCLUDE_SDATA(const s32, "field/fldWap", scriptlabel);
 
 INCLUDE_SDATA(const s32, "field/fldWap", gFldWapPanel);
 
-INCLUDE_SDATA(const s32, "field/fldWap", D_0054EE0C);
+SDATA_PAD(4);
 

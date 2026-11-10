@@ -780,7 +780,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2323);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit162);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA15);
+SDATA_PAD(1);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3NewGameSavedHalf0C);
 
@@ -790,7 +790,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA1C);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", DDS3_GBWK);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA24);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqTable);
 

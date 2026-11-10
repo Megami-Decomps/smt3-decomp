@@ -639,7 +639,7 @@ INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DEA8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", dds3TitleMovieCount);
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD3C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD40);
 
@@ -647,7 +647,7 @@ INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", gGlobal);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", fldWmapEnabled);
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD4C);
+SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelLabel);
 

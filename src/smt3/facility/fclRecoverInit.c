@@ -283,7 +283,7 @@ INCLUDE_SDATA(const s32, "facility/fclRecoverInit", shutdownfunc);
 
 INCLUDE_SDATA(const s32, "facility/fclRecoverInit", gProcessStat_2);
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", D_0054FBB5);
+SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdLeave);
 
