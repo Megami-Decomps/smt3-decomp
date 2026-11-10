@@ -70,9 +70,9 @@ extern s32 evtBitCheck(s32 eventNo);
 extern char *stfMpicFileTable[];
 extern char *stfPicFileTable[];
 /* Padded shared asset-path pool remains in its native data owner. */
-extern char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
-extern char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
-extern char stfMPath01[], stfMPath02[], stfMPath03[], stfMPath04[];
+extern const char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
+extern const char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
+extern const char stfMPath01[], stfMPath02[], stfMPath03[], stfMPath04[];
 extern void frwLoadStaffFont(void);
 
 /* Load the selected staff-roll texture set and shared font resources. */
