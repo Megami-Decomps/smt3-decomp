@@ -251,7 +251,6 @@ s32 pbPopRecord(pbProcHandle_t *panel, pbProcHandle_t **characters, pbProcHandle
 }
 
 
-#ifdef NON_MATCHING
 s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
 {
     pbRecord_t *rec = panel->data.record;
@@ -261,6 +260,7 @@ s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
     pbMapWork_t *map;
     s32 position;
     u32 i;
+    FAKEMATCH_ASM_REG(s32, snapshotIndex, "$12");
 
     rec->slot[rec->pos].flag[2] = group->count;
     if (rec->slot[rec->pos].blocks != NULL) {
@@ -270,10 +270,13 @@ s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
     position = rec->pos;
     slots = rec->slot;
     slots[position].blocks = cells;
+    /* Native keeps an unscaled snapshot index independently of the result.
+     * The binding ends at the floor lookup, before the cleanup callback. */
+    snapshotIndex = position;
+    i = 0;
     if (group->count != 0) {
         map = pbMapWork;
         entry = group->blockEntries;
-        i = 0;
         do {
             cells[i].x = group->cellX + entry->x;
             cells[i].y = group->cellY + entry->y;
@@ -281,19 +284,26 @@ s32 pbAddRecord_blk(pbProcHandle_t *panel, pbGroupData_t *group)
             entry++;
         } while (++i < group->count);
     }
-    if (slots[position].floors != NULL) {
-        sdfChipFreeDelayedDirect(slots[position].floors);
+    {
+    /* Retain the actual floor slot in its native call-free home.  Express
+     * each slot address as its real byte offset plus the actual EE array
+     * address: typed pointer addition otherwise commutes the native add.
+     * These are target compiler aids, not original-source claims. */
+    u32 floorOffset = snapshotIndex * sizeof(*slots);
+    FAKEMATCH_ASM_REG(pbRecordSlot_t *, floorSlot, "$2") = EE_ADDR_AS(pbRecordSlot_t *, floorOffset + EE_ADDR(slots));
+    if (floorSlot->floors != NULL) {
+        u32 clearedOffset;
+        pbRecordSlot_t *clearedSlot;
+        sdfChipFreeDelayedDirect(floorSlot->floors);
+        clearedOffset = rec->pos * sizeof(*slots);
+        clearedSlot = EE_ADDR_AS(pbRecordSlot_t *, clearedOffset + EE_ADDR(rec->slot));
+        clearedSlot->flag[3] = 0;
+        clearedSlot->floors = NULL;
         position = rec->pos;
-        slots = rec->slot;
-        slots[position].flag[3] = 0;
-        slots[position].floors = NULL;
-        position = rec->pos;
+    }
     }
     return position;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_blk);
-#endif
 
 s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
 {
