@@ -150,46 +150,49 @@ extern s32 fldHitChkSlope;
 
 extern collision_s *fldMatterTable;
 
-/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
- * field underground facility, field unknown realm savestates, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Select a valid fallback hit only in the -1 arm. Keeping that observation
+ * separate from the selected row preserves the native entry dataflow; an
+ * eager copy followed by reusing the observation is folded by the first
+ * CSE pass. This ordinary branch structure needs no register constraint. */
 void fldCamCalcSaka(void)
 {
-    s32 index = fldHitChkSlope;
-    collision_s *collision;
-    sdfVector3_t offset;
+    s32 observedIndex = fldHitChkSlope;
+    s32 index;
     f32 xs[3], ys[3], zs[3];
+    sdfVector3_t offset;
     f32 x, z;
     f32 pi;
 
     fldGlobalBase.float130 = 0.0f;
     fldCamDirLock = 0.0f;
-    if (index == -1) {
-        index = fldHitChkMatter;
-        if (index < 0) return;
+    if (observedIndex == -1) {
+        s32 matterIndex = fldHitChkMatter;
+        if (matterIndex < 0) return;
+        index = matterIndex;
+    } else {
+        index = observedIndex;
     }
     if (fldMatterTable == NULL) return;
-    collision = &fldMatterTable[index];
-    if (collision->matter != NULL) {
-        offset.x = collision->matter->poseset->pos.x;
-        offset.y = collision->matter->poseset->pos.y;
-        offset.z = collision->matter->poseset->pos.z;
+
+    if (fldMatterTable[index].matter != NULL) {
+        offset.x = fldMatterTable[index].matter->poseset->pos.x;
+        offset.y = fldMatterTable[index].matter->poseset->pos.y;
+        offset.z = fldMatterTable[index].matter->poseset->pos.z;
     } else {
         offset.x = 0.0f;
         offset.y = 0.0f;
         offset.z = 0.0f;
     }
     pi = 3.14f;
-    xs[0] = collision->point[0][0] + offset.x;
-    ys[0] = collision->point[0][1] + offset.y;
-    zs[0] = collision->point[0][2] + offset.z;
-    xs[1] = collision->point[1][0] + offset.x;
-    ys[1] = collision->point[1][1] + offset.y;
-    zs[1] = collision->point[1][2] + offset.z;
-    xs[2] = collision->point[2][0] + offset.x;
-    ys[2] = collision->point[2][1] + offset.y;
-    zs[2] = collision->point[2][2] + offset.z;
+    xs[0] = fldMatterTable[index].point[0][0] + offset.x;
+    ys[0] = fldMatterTable[index].point[0][1] + offset.y;
+    zs[0] = fldMatterTable[index].point[0][2] + offset.z;
+    xs[1] = fldMatterTable[index].point[1][0] + offset.x;
+    ys[1] = fldMatterTable[index].point[1][1] + offset.y;
+    zs[1] = fldMatterTable[index].point[1][2] + offset.z;
+    xs[2] = fldMatterTable[index].point[2][0] + offset.x;
+    ys[2] = fldMatterTable[index].point[2][1] + offset.y;
+    zs[2] = fldMatterTable[index].point[2][2] + offset.z;
     x = fldGlobalBase.x - sdfSin(fldCamPitch * pi / 180.0f) *
         fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
     z = fldGlobalBase.z - sdfCos(fldCamPitch * pi / 180.0f) *
@@ -201,9 +204,6 @@ void fldCamCalcSaka(void)
         fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
     fldGlobalBase.float130 = fldGlobalBase.y - fldCamCalcSlopeOffset(x, z, xs, ys, zs);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCamera", fldCamCalcSaka);
-#endif
 
 extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 
