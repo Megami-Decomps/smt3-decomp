@@ -250,43 +250,327 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
 
 /* The loaded model is identified by its root node name, and the matching table
  * supplies the 17 part names whose node indices the control keeps. */
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HijriParts);
+const dds3UnitPartTable_t dds3HijriParts = {
+    "hijri",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HijBParts);
+const dds3UnitPartTable_t dds3HijBParts = {
+    "hij_b",
+    {
+        "hij \x90\xd2\x92\xc5""1",
+        "hij \x90\xd2\x92\xc5""3",
+        "hij \x90\xd2\x92\xc5""4",
+        "hij \x8e\xf1",
+        "hij Head",
+        "hij L Thigh",
+        "hij L Calf",
+        "hij L Foot",
+        "hij R Thigh",
+        "hij R Calf",
+        "hij R Foot",
+        "hij L UpperArm",
+        "hij L Forearm",
+        "hij L Hand",
+        "hij R UpperArm",
+        "hij R Forearm",
+        "hij R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3PlayerAParts);
+const dds3UnitPartTable_t dds3PlayerAParts = {
+    "player_a",
+    {
+        "p_a",
+        "p_a \x90\xd2\x92\xc5""1",
+        "p_a \x90\xd2\x92\xc5""2",
+        "p_a \x8e\xf1",
+        "p_a Head",
+        "p_a L Thigh",
+        "p_a L Calf",
+        "p_a L Foot",
+        "p_a R Thigh",
+        "p_a R Calf",
+        "p_a R Foot",
+        "p_a L UpperArm",
+        "p_a L Forearm",
+        "p_a L Hand",
+        "p_a R UpperArm",
+        "p_a R Forearm",
+        "p_a R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3PlayerBParts);
+const dds3UnitPartTable_t dds3PlayerBParts = {
+    "player_b",
+    {
+        "p_b",
+        "p_b \x90\xd2\x92\xc5""1",
+        "p_b \x90\xd2\x92\xc5""2",
+        "p_b \x8e\xf1",
+        "p_b Head",
+        "p_b L Thigh",
+        "p_b L Calf",
+        "p_b L Foot",
+        "p_b R Thigh",
+        "p_b R Calf",
+        "p_b R Foot",
+        "p_b L UpperArm",
+        "p_b L Forearm",
+        "p_b L Hand",
+        "p_b R UpperArm",
+        "p_b R Forearm",
+        "p_b R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3TiakiParts);
+const dds3UnitPartTable_t dds3TiakiParts = {
+    "tiaki",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3YuukoParts);
+const dds3UnitPartTable_t dds3YuukoParts = {
+    "yuuko",
+    {
+        "yuuko_bip \x90\xd2\x92\xc5""1",
+        "yuuko_bip \x90\xd2\x92\xc5""3",
+        "yuuko_bip \x90\xd2\x92\xc5""4",
+        "yuuko_bip \x8e\xf1",
+        "yuuko_bip Head",
+        "yuuko_bip L Thigh",
+        "yuuko_bip L Calf",
+        "yuuko_bip L Foot",
+        "yuuko_bip R Thigh",
+        "yuuko_bip R Calf",
+        "yuuko_bip R Foot",
+        "yuuko_bip L UpperArm",
+        "yuuko_bip L Forearm",
+        "yuuko_bip L Hand",
+        "yuuko_bip R UpperArm",
+        "yuuko_bip R Forearm",
+        "yuuko_bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0053001C);
+const dds3UnitPartTable_t dds3IsamuParts = {
+    "isamu",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530020);
+const dds3UnitPartTable_t dds3IsamuFParts = {
+    "isamu_f",
+    {
+        "isam_f_b",
+        "isam_f_ \x90\xd2\x92\xc5""3",
+        "isam_f_ \x90\xd2\x92\xc5""4",
+        "isam_f_ \x8e\xf1",
+        "isam_f_ Head",
+        "isam_f_ L Thigh",
+        "isam_f_ L Calf",
+        "isam_f_ L Foot",
+        "isam_f_ R Thigh",
+        "isam_f_ R Calf",
+        "isam_f_ R Foot",
+        "isam_f_ L UpperArm",
+        "isam_f_ L Forearm",
+        "isam_f_ L Hand",
+        "isam_f_ R UpperArm",
+        "isam_f_ R Forearm",
+        "isam_f_ R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530040);
+const dds3UnitPartTable_t dds3IsamuFzParts = {
+    "isamu_fz",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530054);
+const dds3UnitPartTable_t dds3HikawaParts = {
+    "hikawa",
+    {
+        "hik \x90\xd2\x92\xc5""1",
+        "hik \x90\xd2\x92\xc5""3",
+        "hik \x90\xd2\x92\xc5""4",
+        "hik \x8e\xf1",
+        "hik Head",
+        "hik L Thigh",
+        "hik L Calf",
+        "hik L Foot",
+        "hik R Thigh",
+        "hik R Calf",
+        "hik R Foot",
+        "hik L UpperArm",
+        "hik L Forearm",
+        "hik L Hand",
+        "hik R UpperArm",
+        "hik R Forearm",
+        "hik R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530068);
+const dds3UnitPartTable_t dds3Model113Parts = {
+    "0x113",
+    {
+        "Body",
+        "B Spine",
+        "B Spine1",
+        "B Neck",
+        "B Head",
+        "B L Thigh",
+        "B L Calf",
+        "B L Foot",
+        "B R Thigh",
+        "B R Calf",
+        "B R Foot",
+        "B L UpperArm",
+        "B L Forearm",
+        "B L Hand",
+        "B R UpperArm",
+        "B R Forearm",
+        "B R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuParts);
+const dds3UnitPartTable_t dds3TiakiBParts = {
+    "tiaki_b",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuFParts);
+const dds3UnitPartTable_t dds3MajyoParts = {
+    "majyo",
+    {
+        "Bip \x90\xd2\x92\xc5""1",
+        "Bip \x90\xd2\x92\xc5""3",
+        "Bip \x90\xd2\x92\xc5""4",
+        "Bip \x8e\xf1",
+        "Bip Head",
+        "Bip L Thigh",
+        "Bip L Calf",
+        "Bip L Foot",
+        "Bip R Thigh",
+        "Bip R Calf",
+        "Bip R Foot",
+        "Bip L UpperArm",
+        "Bip L Forearm",
+        "Bip L Hand",
+        "Bip R UpperArm",
+        "Bip R Forearm",
+        "Bip R Hand",
+    },
+};
 
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3IsamuFzParts);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HikawaParts);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3Model113Parts);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3TiakiBParts);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3MajyoParts);
-
-INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", dds3HutomimiParts);
+const dds3UnitPartTable_t dds3HutomimiParts = {
+    "hutomimi",
+    {
+        "hbk \x90\xd2\x92\xc5""1",
+        "hbk \x90\xd2\x92\xc5""3",
+        "hbk \x90\xd2\x92\xc5""4",
+        "hbk \x8e\xf1",
+        "hb Head",
+        "hb L Thigh",
+        "hb L Calf",
+        "hb L Foot",
+        "hb R Thigh",
+        "hb R Calf",
+        "hb R Foot",
+        "hb L UpperArm",
+        "hb L Forearm",
+        "hb L Hand",
+        "hb R UpperArm",
+        "hb R Forearm",
+        "hb R Hand",
+    },
+};
 
 void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
 {
@@ -899,19 +1183,17 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *pObjectBasic, u32 svs)
     control->svs = svs;
 }
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseHijBNodeName);
+char dds3ObjectBaseHijBNodeName[6] = "hij_b";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseIsamFNodeName);
+char dds3ObjectBaseIsamFNodeName[7] = "isam_f";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseAradiaNodeName);
+char dds3ObjectBaseAradiaNodeName[7] = "aradia";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseYuukoPNodeName);
+char dds3ObjectBaseYuukoPNodeName[8] = "yuuko_p";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseChiakiNodeName);
+char dds3ObjectBaseChiakiNodeName[7] = "chiaki";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", dds3ObjectBaseTiakiANodeName);
+char dds3ObjectBaseTiakiANodeName[8] = "tiaki_a";
 
-INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", frMessageCode);
-
-SDATA_PAD(6);
+u16 frMessageCode = 0;
 
