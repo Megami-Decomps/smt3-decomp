@@ -68,11 +68,8 @@ extern s32 stfDrawStaffText(f32 x, f32 y, s32 style, u32 color, const char *text
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
 extern void GetoStaffUI(void);
-extern void dds3AdminiCallSequence(s32 kind, void *arg, s32 a, s32 b);
+extern void dds3AdminiCallSequence(s32 kind, void *arg, u32 size, s32 mode);
 
-/* NON_MATCHING: 155 of 181 words match at the native size. Explicit shared
- * exits retain both signed bounds; the return delay slot still differs. */
-#ifdef NON_MATCHING
 s32 stfMain2(dds3ProcessID_t *id)
 {
     char buf[128];
@@ -95,7 +92,14 @@ s32 stfMain2(dds3ProcessID_t *id)
                 if (stfStaffRollTable[i].text1 == NULL) {
                     sprintf(buf, stfTextFormat, stfStaffRollTable[i].text0);
                     w = stfDrawText(1, 0x80808080, buf);
-                    stfDrawStaffText(0x100 - w / 2, y, stfStaffRollTable[i].style0, 0x80808080, buf);
+                    {
+                        /* Keep the half-width through the centered coordinate
+                         * calculation; the final float argument is its consumer. */
+                        FAKEMATCH_ASM_REG(s32, centeredX, "$3");
+                        centeredX = w / 2;
+                        centeredX = 0x100 - centeredX;
+                        stfDrawStaffText(centeredX, y, stfStaffRollTable[i].style0, 0x80808080, buf);
+                    }
                     continue;
                 }
                 sprintf(buf, stfTextFormat, stfStaffRollTable[i].text0);
@@ -125,7 +129,13 @@ s32 stfMain2(dds3ProcessID_t *id)
         oStaff_UI->unk_0118 = 0;
         oStaff_UI->scrollY = 0;
         oStaff_UI->reserved00F4 = 0;
-        oStaff_UI->unk_0110 = 0;
+        {
+            /* A live pointer operand keeps this final reset store after
+             * the preceding resets, without a general memory barrier. */
+            stfUiWork_t *resetWork = oStaff_UI;
+            FAKEMATCH_ASM_LIVE(resetWork);
+            resetWork->unk_0110 = 0;
+        }
         goto done;
     }
 
@@ -137,16 +147,29 @@ scroll:
               * 0x3Cu + 0x12Cu)) {
         dds3FadeOut(0, 0, 0, 0x28);
     }
-    if ((s32)((u32)stfStaffRollTable[0xB4].y + 0xE0u) / 0x1E + 6 < oStaff_UI->scrollY / 0x3C) {
-        arg = 0x2B4;
-        dds3AdminiCallSequence(7, &arg, 4, 0);
+    {
+        /* Preserve the actual wrapped numerator/result lifetime. Compute the
+         * independent scroll quotient first to retain the native divide order.
+         * These local constraints reconstruct codegen, not original spelling. */
+        FAKEMATCH_ASM_REG(s32, endRow, "$2");
+        s32 scrollBlock;
+        endRow = (s32)((u32)stfStaffRollTable[0xB4].y + 0xE0u);
+        scrollBlock = oStaff_UI->scrollY / 0x3C;
+        endRow = endRow / 0x1E + 6;
+        if (endRow < scrollBlock) {
+            arg = 0x2B4;
+            dds3AdminiCallSequence(7, &arg, 4, 0);
+        }
     }
 done:
-    return 0;
+    /* Qualified ee-gcc 2.96 sched2 dumps show this one-pass return
+     * retains the loop-end/return-use dependency ahead of the restores,
+     * giving the native zero-return delay fills. This is a compiler-shape
+     * reconstruction, not evidence of the original source spelling. */
+    do {
+        return 0;
+    } while (0);
 }
-#else
-INCLUDE_ASM(const s32, "staff/stfMain", stfMain2);
-#endif
 
 extern void stfGetUIField(s32, s32, s32);
 extern void ObjDispOff(void);
