@@ -148,9 +148,9 @@ s32 pbMkdirMCard(s32 port, s32 slot, const char *dirName) {
 extern const char pbMCardNewline[];
 extern const char pbMCardOpenLog[];
 extern const char pbMCardOpenErrLog[];
-INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardOpenLog);
+const char pbMCardOpenLog[35] = "\tregist open command. return = %d\n";
 
-INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardOpenErrLog);
+const char pbMCardOpenErrLog[36] = "\tcan't open a file < %s > err = %d\n";
 
 const char pbMCardReadLog[40] __attribute__((aligned(8))) = "\tregist read command. return = %d\n";
 const char pbMCardReadErrLog[40] __attribute__((aligned(8))) = "\tcan't read a file < %s > err = %d\n";
@@ -193,9 +193,9 @@ s32 pbReadMCard(s32 port, s32 slot, char *fileName, void *buffer, s32 size)
 }
 
 extern s32 sceMcWrite(s32 fd, const void *buffer, s32 size);
-INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardCloseLog);
+const char pbMCardCloseLog[36] = "\tregist close command. return = %d\n";
 
-INCLUDE_RODATA(const s32, "pb/pbMCard", pbMCardCloseErrLog);
+const char pbMCardCloseErrLog[37] = "\tcan't close a file < %s > err = %d\n";
 
 const char pbMCardWriteLog[40] __attribute__((aligned(8))) = "\tregist write command. return = %d\n";
 const char pbMCardWriteErrLog[40] __attribute__((aligned(8))) = "\tcan't write a file < %s > err = %d\n";
