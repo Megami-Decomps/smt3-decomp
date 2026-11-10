@@ -520,7 +520,5 @@ s32 pipeCheckLevel(s32 level, s32 type)
     }
     return ret;
 }
-INCLUDE_SDATA(const s32, "pipe/pipeCamera", pipe_Camera);
-
-SDATA_PAD(4);
+dds3Basic_t *pipe_Camera = 0;
 
