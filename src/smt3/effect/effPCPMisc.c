@@ -2366,7 +2366,7 @@ void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 /* vf10 = vf10 * vf11 through the primary matrix bank. */
 void Mult(void);
 
-extern const u8 effPCPMakkaUnitY[16];
+extern const f32 effPCPMakkaUnitY[4];
 
 /* The model root's node list, whose item array sits at 0x0C. */
 typedef struct {
@@ -7903,7 +7903,7 @@ void effPCPAnalyzeBEDDelete(effPCPAnalyzeBED_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_RODATA(const s32, "effect/effPCPMisc", effPCPMakkaUnitY);
+const f32 effPCPMakkaUnitY[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *hData) {
     effEveBEDParams_t place;
@@ -8045,9 +8045,9 @@ void effPCPFLEACHBlurDraw(effPCPFLEACHBlur_tag *work)
 void effPCPFLEACHBlurSetColor(effPCPFLEACHBlur_tag *hData, u32 abgr) {
     hData->abgr = abgr;
 }
-INCLUDE_SDATA(const s32, "effect/effPCPMisc", BlinkMultiBlurCount);
+s32 BlinkMultiBlurCount = 0;
 
-INCLUDE_SDATA(const s32, "effect/effPCPMisc", effPCPBufuLight_Start);
+s8 effPCPBufuLight_Start = 0;
 
 SDATA_PAD(3);
 
