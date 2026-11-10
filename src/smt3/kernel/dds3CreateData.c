@@ -70,35 +70,35 @@ extern s32 evtBitCheck(s32 eventNo);
 extern char *stfMpicFileTable[];
 extern char *stfPicFileTable[];
 /* Padded shared asset-path pool remains in its native data owner. */
-extern char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
-extern char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
-extern char stfMPath01[], stfMPath02[], stfMPath03[], stfMPath04[];
+extern const char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
+extern const char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
+extern const char stfMPath01[], stfMPath02[], stfMPath03[], stfMPath04[];
 extern void frwLoadStaffFont(void);
 
 /* Load the selected staff-roll texture set and shared font resources. */
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath01);
+const char stfMlinePath01[23] = "/staff/stf_mline01.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath02);
+const char stfMlinePath02[23] = "/staff/stf_mline02.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath03);
+const char stfMlinePath03[23] = "/staff/stf_mline03.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMlinePath04);
+const char stfMlinePath04[23] = "/staff/stf_mline04.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath01);
+const char stfMPath01[19] = "/staff/stf_m01.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath02);
+const char stfMPath02[19] = "/staff/stf_m02.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath03);
+const char stfMPath03[19] = "/staff/stf_m03.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfMPath04);
+const char stfMPath04[19] = "/staff/stf_m04.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath01);
+const char stfLinePath01[22] = "/staff/stf_line01.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath02);
+const char stfLinePath02[22] = "/staff/stf_line02.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath03);
+const char stfLinePath03[22] = "/staff/stf_line03.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/dds3CreateData", stfLinePath04);
+const char stfLinePath04[22] = "/staff/stf_line04.tmx";
 
 void stfFreeFiles(void)
 {
@@ -250,5 +250,5 @@ void stfResetUI(void)
     oStaff_UI->unk_0118 = 0;
 }
 
-INCLUDE_SDATA(const s32, "kernel/dds3CreateData", oStaff_UI);
+stfUiWork_t *oStaff_UI = 0;
 

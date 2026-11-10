@@ -243,5 +243,9 @@ void func_001C62F8(u32 messageCode) {
     frSpaceAdvanceOffset = messageCode;
 }
 
-INCLUDE_SDATA(const s32, "interface/fmGslCont", D_0054F3F8);
+char D_0054F3F8[6] = "FRAME";
+
+s8 fmFontMemInitialized = 0;
+
+s32 D_0054F400 = 0;
 

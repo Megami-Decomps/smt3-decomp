@@ -152,9 +152,9 @@ typedef struct effBTLColorRow_t {
 } effBTLColorRow_t;
 
 extern effBTLColorRow_t effBTLFieldColorTable[];
-extern f32 effBTLCutBaseRotate[4];
-extern f32 effBTLCutRotateA[4];
-extern f32 effBTLCutRotateB[4];
+extern const f32 effBTLCutBaseRotate[4];
+extern const f32 effBTLCutRotateA[4];
+extern const f32 effBTLCutRotateB[4];
 extern void effBTLPointLightSet(void *pLight, void *pFormation);
 extern void effBTLModelColorSet(void *pModel, void *pFormation);
 extern void effBTLPartGetPositionPtr(void *pFormation, effBTLAimParams_t *pPosPtr, sdfVector4_t *pPos);
@@ -439,16 +439,16 @@ void effBTLCutSetCameraState(effBTLCut_t *hBTLCutEffect) {
 }
 
 /* Canonical declaration of the provider defined below. */
-extern char effBTLShakeFormat[];
+extern const char effBTLShakeFormat[];
 u32 effBTLSkillGetInvokeParty(void);
 
-INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutBaseRotate);
+const f32 effBTLCutBaseRotate[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutRotateA);
+const f32 effBTLCutRotateA[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattle", effBTLCutRotateB);
+const f32 effBTLCutRotateB[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattle", effBTLShakeFormat);
+const char effBTLShakeFormat[28] = "effBattle : shake over[%d]\n";
 
 void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfVector4_t position;
@@ -1069,17 +1069,15 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
     effBTLModelShowInit();
     effBTLSystemPartHandleCreate();
 }
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkillRun);
+s8 effBTLSkillRun = 0;
 
-SDATA_PAD(3);
+s32 effBTLFieldColorProcess = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLFieldColorProcess);
+s32 effBTLSkyFilterAlphaTarget = 0x80;
 
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkyFilterAlphaTarget);
+s32 effBTLSkyFilterAlphaBase = 0x80;
 
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkyFilterAlphaBase);
+u16 effBTLSkyFilterFrame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkyFilterFrame);
-
-INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkyFilterFrameMax);
+u16 effBTLSkyFilterFrameMax = 0;
 

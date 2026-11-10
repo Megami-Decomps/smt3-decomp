@@ -133,7 +133,7 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 extern s32 cmpLoadStatusModel(void);
 extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
-extern char fclEncycBookName[];
+extern const char fclEncycBookName[];
 
 extern sdfVector4_t cmpStatusModelPos;
 
@@ -205,8 +205,9 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 start,
     s32 shutdown, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy, void *data);
 extern s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update,
     dds3ProcessFunc_t destroy, void *data);
-extern char fclEncycRecordFmt[], fclEncycCalcName[], fclEncycDrawName[], fclEncycUpdtName[];
-extern char fclEncycStartFmt[], fclEncycRegistrationName[], fclEncycReadingName[];
+extern const char fclEncycRecordFmt[], fclEncycCalcName[], fclEncycDrawName[], fclEncycUpdtName[];
+extern const char fclEncycStartFmt[], fclEncycRegistrationName[];
+extern char fclEncycReadingName[];
 
 #ifdef NON_MATCHING
 extern s32 fclEncycGetRatio(void);
@@ -244,19 +245,19 @@ void fclEncycStartProcess(s32 mode)
 extern void ReleaseWork(fclEncyc_instance_tag *pinst);
 #endif
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRecordFmt);
+const char fclEncycRecordFmt[29] = "ENCYC:record %3d/%3d (%3d) \n";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycCalcName);
+const char fclEncycCalcName[11] = "CALC_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycDrawName);
+const char fclEncycDrawName[11] = "DRAW_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycUpdtName);
+const char fclEncycUpdtName[11] = "UPDT_ENCYC";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBookName);
+const char fclEncycBookName[16] = "COLLECTION BOOK";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycStartFmt);
+const char fclEncycStartFmt[27] = "ENCYC:process start (%s) \n";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycRegistrationName);
+const char fclEncycRegistrationName[13] = "REGISTRATION";
 
 s32 fclEncycKillProcess(void)
 {
@@ -3581,7 +3582,7 @@ void DrawReadListwinElem(fclEncyc_instance_tag *pinst)
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
 
-extern itfColor_t fclEncycMoneyBaseColor;
+extern const itfColor_t fclEncycMoneyBaseColor;
 extern itfColor_t fclEncycMoneyBoxUv;
 extern itfColor_t fclEncycMoneyOverlayUv;
 
@@ -3976,6 +3977,14 @@ extern char fclEncycRowFmt[];
 extern void DebugRemoveRecord(s32 id);
 extern void DebugUpdateListwin(fclEncyc_instance_tag *pinst);
 
+const itfColor_t fclEncycMoneyBaseColor = {{0x80, 0x80, 0x80, 0x80}};
+
+const char D_0053D838[16] = "DISP VIEW PARAM";
+
+const char D_0053D848[13] = "VIEWMODE KEY";
+
+const char D_0053D858[15] = "DEVIL REGISTER";
+
 #ifdef NON_MATCHING
 s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                       sdfDrawTag_t *tag)
@@ -4059,13 +4068,9 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycMoneyBaseColor);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D838);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D848);
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D858);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
 #endif
@@ -4076,7 +4081,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
 extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr,
                           const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
-extern char fclEncycViewKeyFmt[];
+extern const char fclEncycViewKeyFmt[];
 
 s32 DebugProcViewkey(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                      sdfDrawTag_t *tag)
@@ -4193,33 +4198,33 @@ void DebugUpdateListwin(fclEncyc_instance_tag *pinst)
                       ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
     drawEncycRatio(&work->requests[2], 1);
 }
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycViewKeyFmt);
+const char fclEncycViewKeyFmt[21] = "VIEWMODE KEY TYPE %d";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundDevilIdFmt);
+const char fclEncycBoundDevilIdFmt[16] = "ID     : 0x%03X";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundRadiusFmt);
+const char fclEncycBoundRadiusFmt[12] = "RADIUS : %f";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", fclEncycBoundAngleFmt);
+const char fclEncycBoundAngleFmt[12] = "DEGREE : %f";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8E0);
+const char D_0053D8E0[15] = "OFFSET : X=%3d";
 
-INCLUDE_RODATA(const s32, "facility/fclEncyc", D_0053D8F0);
+const char D_0053D8F0[15] = "       : Y=%3d";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pinst);
+fclEncyc_instance_tag *g_pinst = NULL;
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pdebug);
+fclEncycDebugWork_t *g_pdebug = NULL;
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", D_0054FCB0);
+char D_0054FCB0[5] = "View";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycReadingName);
+char fclEncycReadingName[8] = "READING";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum3Fmt);
+char fclEncycNum3Fmt[4] = "%3d";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycBlank);
+char fclEncycBlank[2] = " ";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum6Fmt);
+char fclEncycNum6Fmt[4] = "%6d";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycNum7Fmt);
+char fclEncycNum7Fmt[4] = "%7d";
 
-INCLUDE_SDATA(const s32, "facility/fclEncyc", fclEncycMarkerOn);
+char fclEncycMarkerOn[2] = ">";
 

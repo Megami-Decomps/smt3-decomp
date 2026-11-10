@@ -179,9 +179,9 @@ void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse)
     }
 }
 
-extern char mselBgTexPath[];
+extern const char mselBgTexPath[];
 
-extern char mselDevilSelectTexPath[];
+extern const char mselDevilSelectTexPath[];
 
 void mselLoadBackground(void)
 {
@@ -208,9 +208,9 @@ void mselFreeTextures(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", mselBgTexPath);
+const char mselBgTexPath[20] = "/title/mslct_bg.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", mselDevilSelectTexPath);
+const char mselDevilSelectTexPath[24] = "/title/select_devil.tmx";
 
 const char mselDataFilePath[] = "/title/mseldata.bmd";
 
@@ -696,431 +696,431 @@ void mselStartGame(void)
     dds3AdminiCallSequence(7, &field, 4, 0);
 }
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DF90);
+const char D_0053DF90[19] = "Presented by Atlus";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DFA8);
+const char D_0053DFA8[14] = "Jesse Farrell";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DFB8);
+const char D_0053DFB8[10] = "Carl Chen";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DFC8);
+const char D_0053DFC8[13] = "Wayne Carter";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DFD8);
+const char D_0053DFD8[21] = "Aron Brent Gutierrez";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053DFF0);
+const char D_0053DFF0[17] = "Assistant Editor";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E008);
+const char D_0053E008[18] = "William Alexander";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E020);
+const char D_0053E020[13] = "Chief Editor";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E030);
+const char D_0053E030[13] = "James Kuroki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E040);
+const char D_0053E040[11] = "Translator";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E050);
+const char D_0053E050[15] = "Gail Salamanca";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E060);
+const char D_0053E060[18] = "Marketing Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E078);
+const char D_0053E078[16] = "Hiroyuki Tanaka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E088);
+const char D_0053E088[20] = "Project Coordinator";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0A0);
+const char D_0053E0A0[9] = "Yu Namba";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0B0);
+const char D_0053E0B0[15] = "Project Leader";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0C0);
+const char D_0053E0C0[13] = "Sonoko Saito";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0D0);
+const char D_0053E0D0[16] = "Product Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0E0);
+const char D_0053E0E0[18] = "U.S. Localization";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E0F8);
+const char D_0053E0F8[11] = "Cozy Okada";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E108);
+const char D_0053E108[13] = "Naoya Harano";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E118);
+const char D_0053E118[19] = "Executive Producer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E130);
+const char D_0053E130[18] = "Hideyuki Yokoyama";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E148);
+const char D_0053E148[11] = "Supervisor";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E158);
+const char D_0053E158[15] = "Nobuyuki Okude";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E168);
+const char D_0053E168[16] = "General Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E178);
+const char D_0053E178[23] = "R&D1 NEW Project Staff";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E190);
+const char D_0053E190[17] = "Atsushi Watanabe";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E1A8);
+const char D_0053E1A8[19] = "Aki Ooba (Pikuko) ";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E1C0);
+const char D_0053E1C0[14] = "Yoko Nakamura";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E1D0);
+const char D_0053E1D0[15] = "Special Thanks";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E1E0);
+const char D_0053E1E0[11] = "AVANT INC.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E1F0);
+const char D_0053E1F0[15] = "SHIROGUMI INC.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E200);
+const char D_0053E200[24] = "DIGITAL MEDIA LAB.,INC.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E218);
+const char D_0053E218[14] = "Yuji Sakamoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E228);
+const char D_0053E228[17] = "Takuya Matsumoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E240);
+const char D_0053E240[15] = "Tatsuya Yabuta";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E250);
+const char D_0053E250[10] = "Corporate";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E260);
+const char D_0053E260[14] = "Sound Creator";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E270);
+const char D_0053E270[13] = "Kohei Magome";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E280);
+const char D_0053E280[15] = "Akihiro Yokota";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E290);
+const char D_0053E290[17] = "Yoshiko Miyahara";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E2A8);
+const char D_0053E2A8[17] = "Mitsuru Sasamori";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E2C0);
+const char D_0053E2C0[14] = "Takumi Mizuno";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E2D0);
+const char D_0053E2D0[14] = "Katsumi Miura";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E2E0);
+const char D_0053E2E0[11] = "Keiko Kato";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E2F0);
+const char D_0053E2F0[20] = "Yoshinori Yoshimoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E308);
+const char D_0053E308[11] = "Yusuke Eto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E318);
+const char D_0053E318[14] = "Shin Miyahara";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E328);
+const char D_0053E328[13] = "Daisuke Kuki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E338);
+const char D_0053E338[14] = "Yukari Yokoro";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E348);
+const char D_0053E348[18] = "Shigenori Soejima";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E360);
+const char D_0053E360[9] = "Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E370);
+const char D_0053E370[14] = "Yasuaki Nagai";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E380);
+const char D_0053E380[14] = "Masaya Takano";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E390);
+const char D_0053E390[20] = "Michishito Ishizuka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E3A8);
+const char D_0053E3A8[11] = "Programmer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E3B8);
+const char D_0053E3B8[16] = "Tomohiro Hosoya";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E3C8);
+const char D_0053E3C8[11] = "Yosuke Uda";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E3D8);
+const char D_0053E3D8[17] = "Tatsuya Watanabe";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E3F0);
+const char D_0053E3F0[16] = "Shinya Korenaga";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E400);
+const char D_0053E400[9] = "Aki Ooba";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E410);
+const char D_0053E410[16] = "Yuichiro Tanaka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E420);
+const char D_0053E420[11] = "Azusa Kido";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E430);
+const char D_0053E430[15] = "Daisuke Kanada";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E440);
+const char D_0053E440[24] = "(kimura nakaji office) ";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E458);
+const char D_0053E458[14] = "Nakaji Kimura";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E468);
+const char D_0053E468[16] = "Katsura Hashino";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E478);
+const char D_0053E478[15] = "Original Staff";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E488);
+const char D_0053E488[13] = "Kaori Takano";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E498);
+const char D_0053E498[15] = "Takenobu Ishii";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E4A8);
+const char D_0053E4A8[10] = "Yuji Goto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E4B8);
+const char D_0053E4B8[16] = "Ikuya Kobayashi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E4C8);
+const char D_0053E4C8[13] = "Makoto Nishi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E4D8);
+const char D_0053E4D8[13] = "Akio Koshiba";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E4E8);
+const char D_0053E4E8[17] = "Daisuke Hasegawa";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E500);
+const char D_0053E500[15] = "Kouji Yamamoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E510);
+const char D_0053E510[16] = "Masashi Komatsu";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E520);
+const char D_0053E520[13] = "Noriko Tabei";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E530);
+const char D_0053E530[15] = "Rintaro Murata";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E540);
+const char D_0053E540[15] = "Kazuhiro Yamao";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E550);
+const char D_0053E550[16] = "Daizo Shimamura";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E560);
+const char D_0053E560[10] = "Promotion";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E570);
+const char D_0053E570[15] = "Kyoko Yasumura";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E580);
+const char D_0053E580[16] = "Masato Ichimiya";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E590);
+const char D_0053E590[14] = "Satoshi Koike";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5A0);
+const char D_0053E5A0[16] = "Eiichiro Iizuka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5B0);
+const char D_0053E5B0[10] = "Marketing";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5C0);
+const char D_0053E5C0[13] = "Jun Yamamoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5D0);
+const char D_0053E5D0[20] = "CS Division Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5E8);
+const char D_0053E5E8[16] = "Syunsuke Aikawa";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E5F8);
+const char D_0053E5F8[15] = "Humihito Ishii";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E608);
+const char D_0053E608[16] = "Masao Nagashima";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E618);
+const char D_0053E618[19] = "Takafumi Fuchigami";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E630);
+const char D_0053E630[18] = "STUDIO BRACE INC.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E648);
+const char D_0053E648[17] = "Manual Corporate";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E660);
+const char D_0053E660[17] = "Gensuke Fujisawa";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E678);
+const char D_0053E678[18] = "Masayoshi Akasaka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E690);
+const char D_0053E690[16] = "Masaki Sakadume";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E6A0);
+const char D_0053E6A0[18] = "Takahiro Kawabata";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E6B8);
+const char D_0053E6B8[12] = "Kengo Honjo";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E6C8);
+const char D_0053E6C8[23] = "DIGITAL HEARTS CO.,LTD";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E6E0);
+const char D_0053E6E0[16] = "Debug Corporate";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E6F0);
+const char D_0053E6F0[16] = "Masaru Watanabe";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E700);
+const char D_0053E700[16] = "Masahide Takaya";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E710);
+const char D_0053E710[9] = "Debugger";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E720);
+const char D_0053E720[13] = "Kenichi Goto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E730);
+const char D_0053E730[15] = "Chief Debugger";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E740);
+const char D_0053E740[14] = "Debug Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E750);
+const char D_0053E750[16] = "Hirohito Shindo";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E760);
+const char D_0053E760[16] = "Shinjo Kanakogi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E770);
+const char D_0053E770[14] = "Naoto Hiraoka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E780);
+const char D_0053E780[19] = "Production Manager";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E798);
+const char D_0053E798[23] = "INTERNATIONAL LIMITED.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E7B0);
+const char D_0053E7B0[16] = "FONTWORKS JAPAN";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E7C0);
+const char D_0053E7C0[22] = "Font Design Corporate";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E7D8);
+const char D_0053E7D8[16] = "Bingo Morihashi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E7E8);
+const char D_0053E7E8[16] = "Hakuei Yamamoto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E7F8);
+const char D_0053E7F8[14] = "Hiroyuki Nara";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E808);
+const char D_0053E808[12] = "Ikeno Daigo";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E818);
+const char D_0053E818[15] = "Hideaki Itsuno";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E828);
+const char D_0053E828[16] = "Tsuyoshi Tanaka";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E838);
+const char D_0053E838[9] = "Producer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E848);
+const char D_0053E848[42] = "(C) CAPCOM CO., LTD. ALL RIGHTS RESERVED.";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E878);
+const char D_0053E878[24] = "R&D in cooperation with";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E890);
+const char D_0053E890[17] = "Kenichi Tsuchiya";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E8A8);
+const char D_0053E8A8[15] = "Toshiko Tasaki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E8B8);
+const char D_0053E8B8[20] = "Composition & Sound";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E8D0);
+const char D_0053E8D0[15] = "Masayoshi Suto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E8E0);
+const char D_0053E8E0[19] = "Interface Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E8F8);
+const char D_0053E8F8[17] = "Masakatsu Suzuki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E910);
+const char D_0053E910[16] = "Effect Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E920);
+const char D_0053E920[11] = "Akiko Koto";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E930);
+const char D_0053E930[25] = "Battle & Effect Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E950);
+const char D_0053E950[17] = "Yasuhiro Shibuya";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E968);
+const char D_0053E968[13] = "Yuki Inagaki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E978);
+const char D_0053E978[15] = "Shuji Fukasawa";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E988);
+const char D_0053E988[13] = "Aki Sonoyama";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E998);
+const char D_0053E998[15] = "Field Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E9A8);
+const char D_0053E9A8[13] = "Masayuki Doi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E9B8);
+const char D_0053E9B8[22] = "Field Design Director";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E9D0);
+const char D_0053E9D0[17] = "Megumi Shiraishi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053E9E8);
+const char D_0053E9E8[20] = "Devil CG Supervisor";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA00);
+const char D_0053EA00[15] = "Yoichi Yoshida";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA10);
+const char D_0053EA10[12] = "Taku Aoyagi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA20);
+const char D_0053EA20[12] = "Kaori Okita";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA30);
+const char D_0053EA30[23] = "Devil Graphic Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA48);
+const char D_0053EA48[18] = "Devil CG Director";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA60);
+const char D_0053EA60[18] = "Kokichi Takahashi";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA78);
+const char D_0053EA78[12] = "Mumon Usuda";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA88);
+const char D_0053EA88[12] = "Naoya Maeda";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EA98);
+const char D_0053EA98[14] = "Kazuhisa Wada";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EAA8);
+const char D_0053EAA8[15] = "Event Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EAB8);
+const char D_0053EAB8[21] = "Event Scene Director";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EAD0);
+const char D_0053EAD0[14] = "Masayuki Higo";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EAE0);
+const char D_0053EAE0[15] = "Nobuyoshi Miwa";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EAF0);
+const char D_0053EAF0[19] = "Support Programmar";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB08);
+const char D_0053EB08[14] = "Takaaki Ikeda";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB18);
+const char D_0053EB18[21] = "Interface Programmer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB30);
+const char D_0053EB30[16] = "Toshiyuki Niida";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB40);
+const char D_0053EB40[18] = "Effect Programmer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB58);
+const char D_0053EB58[16] = "Main Programmer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB68);
+const char D_0053EB68[17] = "Shuetsu Kadowaki";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB80);
+const char D_0053EB80[10] = "Daiki Ito";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EB90);
+const char D_0053EB90[11] = "Sawao Kato";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBA0);
+const char D_0053EBA0[14] = "Field Planner";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBB0);
+const char D_0053EBB0[15] = "Mitsuru Hirata";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBC0);
+const char D_0053EBC0[15] = "System Planner";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBD0);
+const char D_0053EBD0[14] = "Event Planner";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBE0);
+const char D_0053EBE0[13] = "Shoji Meguro";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EBF0);
+const char D_0053EBF0[14] = "Main Composer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC00);
+const char D_0053EC00[14] = "Makoto Kitano";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC10);
+const char D_0053EC10[18] = "Design Supervisor";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC28);
+const char D_0053EC28[12] = "Eiji Ishida";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC38);
+const char D_0053EC38[15] = "Chief Designer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC48);
+const char D_0053EC48[15] = "Satoshi Ooyama";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC58);
+const char D_0053EC58[17] = "Chief Programmer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC70);
+const char D_0053EC70[14] = "Shigeo Komori";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC80);
+const char D_0053EC80[13] = "Shogo Isogai";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EC90);
+const char D_0053EC90[16] = "Scenario Writer";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ECA0);
+const char D_0053ECA0[15] = "Kazuyuki Yamai";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ECB0);
+const char D_0053ECB0[9] = "Director";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ECC0);
+const char D_0053ECC0[14] = "Kazuma Kaneko";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ECD0);
+const char D_0053ECD0[18] = "Creative Director";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ECE8);
+const char D_0053ECE8[21] = "/staff/stf_pic15.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED00);
+const char D_0053ED00[21] = "/staff/stf_pic14.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED18);
+const char D_0053ED18[21] = "/staff/stf_pic13.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED30);
+const char D_0053ED30[21] = "/staff/stf_pic12.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED48);
+const char D_0053ED48[21] = "/staff/stf_pic11.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED60);
+const char D_0053ED60[21] = "/staff/stf_pic10.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED78);
+const char D_0053ED78[21] = "/staff/stf_pic09.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053ED90);
+const char D_0053ED90[21] = "/staff/stf_pic08.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EDA8);
+const char D_0053EDA8[21] = "/staff/stf_pic07.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EDC0);
+const char D_0053EDC0[21] = "/staff/stf_pic06.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EDD8);
+const char D_0053EDD8[21] = "/staff/stf_pic05.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EDF0);
+const char D_0053EDF0[21] = "/staff/stf_pic04.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE08);
+const char D_0053EE08[21] = "/staff/stf_pic03.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE20);
+const char D_0053EE20[21] = "/staff/stf_pic02.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE38);
+const char D_0053EE38[21] = "/staff/stf_pic01.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE50);
+const char D_0053EE50[22] = "/staff/stf_mpic15.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE68);
+const char D_0053EE68[22] = "/staff/stf_mpic14.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE80);
+const char D_0053EE80[22] = "/staff/stf_mpic13.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EE98);
+const char D_0053EE98[22] = "/staff/stf_mpic12.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EEB0);
+const char D_0053EEB0[22] = "/staff/stf_mpic11.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EEC8);
+const char D_0053EEC8[22] = "/staff/stf_mpic10.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EEE0);
+const char D_0053EEE0[22] = "/staff/stf_mpic09.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EEF8);
+const char D_0053EEF8[22] = "/staff/stf_mpic08.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF10);
+const char D_0053EF10[22] = "/staff/stf_mpic07.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF28);
+const char D_0053EF28[22] = "/staff/stf_mpic06.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF40);
+const char D_0053EF40[22] = "/staff/stf_mpic05.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF58);
+const char D_0053EF58[22] = "/staff/stf_mpic04.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF70);
+const char D_0053EF70[22] = "/staff/stf_mpic03.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EF88);
+const char D_0053EF88[22] = "/staff/stf_mpic02.tmx";
 
-INCLUDE_RODATA(const s32, "kernel/ModeSelect", D_0053EFA0);
+const char D_0053EFA0[22] = "/staff/stf_mpic01.tmx";
 

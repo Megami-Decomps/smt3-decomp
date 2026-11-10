@@ -453,7 +453,7 @@ void dds3TitleUpdateFade(void)
 
 
 extern char D_0053DD68[];
-extern char dds3TitleProcName[];
+extern const char dds3TitleProcName[];
 extern void *pacLoad(const char *path);
 extern void pacSync(void *request);
 extern s32 pacFileHandleFree_(void *request);
@@ -583,23 +583,23 @@ s32 titleFreeWork(s32 arg)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "sound/sndManager", dds3TitleProcName);
+const char dds3TitleProcName[10] = "titleProc";
 
-INCLUDE_RODATA(const s32, "sound/sndManager", D_0053DDA8);
+const char D_0053DDA8[27] = "Title Movie frameCount==0\n";
 
-INCLUDE_SDATA(const s32, "sound/sndManager", sndInitDone);
+s8 sndInitDone = 0;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", sndPathPrefix);
+char sndPathPrefix[8] = "/sound/";
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD20);
+s32 D_0054FD20 = 0;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD24);
+s32 D_0054FD24 = 0;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", titleWork);
+dds3TitleWork_t *titleWork = NULL;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", D_0054FD2C);
+s32 D_0054FD2C = 0;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", dds3TitleMenuPhase);
+f32 dds3TitleMenuPhase = 0.0f;
 
-INCLUDE_SDATA(const s32, "sound/sndManager", dds3TitleFadeLevel);
+f32 dds3TitleFadeLevel = 0.0f;
 

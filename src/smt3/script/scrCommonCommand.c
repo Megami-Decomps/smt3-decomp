@@ -5,7 +5,6 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
-
 static inline f32 scrFabsf(f32 x)
 {
     f32 r;
@@ -30,12 +29,11 @@ typedef struct
 } scrVec4_t;
 
 extern s8 dds3PadBitTable[];
-extern char scrRunNoProcessMsg[];
+extern const char scrRunNoProcessMsg[];
 
 #include "sdk_libc.h"
 
 extern void datDebugPrintf(const char *fmt, ...);
-
 
 extern s32 scrGetIntPara(s32 n);
 extern f32 scrGetFloatPara(s32 n);
@@ -393,7 +391,7 @@ s32 scrCommand_SCENE_LIGHT_RGB(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "script/scrCommonCommand", scrRunNoProcessMsg);
+const char scrRunNoProcessMsg[68] = "\242\250\267\331\271\360:SCR_RUN()\244\263\244\316\245\263\245\336\245\363\245\311\244\317\245\327\245\355\245\273\245\271\267\277\245\271\245\257\245\352\245\327\245\310\244\307\244\316\244\337\315\255\270\372\244\307\244\271\241\243\n";
 
 s32 scrCommand_SCENE_LIGHT_DIR(void)
 {

@@ -537,7 +537,7 @@ void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 
     ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
 }
 
-INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorMat);
+sdfMat_t *effDebugSelectCursorMat = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorAngle);
+f32 effDebugSelectCursorAngle = 0.0f;
 

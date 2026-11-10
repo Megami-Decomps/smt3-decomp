@@ -412,11 +412,9 @@ void evtPicturePriProcessInit(void)
     dds3SetProcessData(evtPicturePriList, tbl);
     evtPicturePriClear();
 }
-INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriList);
+void *evtPicturePriList = 0;
 
-SDATA_PAD(4);
+char evtPictureProcName[8] = "Picture";
 
-INCLUDE_SDATA(const s32, "event/evtPicture", evtPictureProcName);
-
-INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriProcName);
+char evtPicturePriProcName[7] = "picpri";
 

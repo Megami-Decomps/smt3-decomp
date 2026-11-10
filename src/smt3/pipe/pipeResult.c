@@ -51,7 +51,6 @@ extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 
-
 s32 pipeResultSection(void)
 {
     s32 finished = 0;
@@ -184,7 +183,6 @@ void pipeMessInit(void) {
     }
 }
 
-
 void pipeFreeMessage(void)
 {
     fclDestroyMessage();
@@ -230,19 +228,15 @@ s32 pipeGetRandomMessage(void)
 {
     return pipeRandomMessTable[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
 }
-INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
+u8 ResultIndex = 0;
 
-SDATA_PAD(7);
+char pipeMessNumFmt[3] = "%d";
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessNumFmt);
+void *pipeMessData = NULL;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
+u32 pipeMessDataAddr = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessDataAddr);
+s8 pipeMessCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
-
-SDATA_PAD(3);
-
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeExpectedMaka);
+s32 pipeExpectedMaka = 0;
 

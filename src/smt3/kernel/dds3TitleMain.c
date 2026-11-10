@@ -25,8 +25,6 @@ extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 extern s32 titleFreeWork(s32 arg);
 
-
-
 extern mselGlobalWork_t *gGlobal;
 
 extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
@@ -36,7 +34,6 @@ extern char mselLevelLabel[];
 extern char mselLevelFormat[];
 extern char *datExplainTable[];
 extern char *text2[];
-
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 
@@ -597,7 +594,6 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
     *value = (v & ~0xFF) | level;
 }
 
-
 extern datDevilFormat_t datDevilTable[];
 
 void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
@@ -629,39 +625,37 @@ void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE50);
+const char mselTitleCursor0Line0[32] = "An average level of difficulty.";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE70);
+const char mselTitleCursor1Line2[21] = "the thrill of death.";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE88);
+const char mselTitleCursor1Line1[27] = "suitable for those seeking";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DEA8);
+const char mselTitleCursor1Line0[22] = "A level of difficulty";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", dds3TitleMovieCount);
+s32 dds3TitleMovieCount = 0;
 
-SDATA_PAD(4);
+s32 D_0054FD3C = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD40);
+u32 D_0054FD40 = 0x0000EA80;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", gGlobal);
+mselGlobalWork_t *gGlobal = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", fldWmapEnabled);
+s32 fldWmapEnabled = 0;
 
-SDATA_PAD(4);
+char mselLevelLabel[3] = "Lv";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelLabel);
+char mselLevelFormat[4] = "%2d";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelFormat);
+char D_0054FD60[3] = "QA";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD60);
+char D_0054FD68[8] = "Planner";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD68);
+char D_0054FD70[6] = "Sales";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD70);
+char D_0054FD78[8] = "Artwork";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD78);
+char D_0054FD80[6] = "Staff";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD80);
-
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD88);
+char D_0054FD88[2] = " ";
 

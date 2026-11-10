@@ -511,7 +511,7 @@ void InitSpriteViewerProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", dds3EffectDirPathFormat);
+char dds3EffectDirPathFormat[8] = "pfs0:%s";
 
-INCLUDE_SDATA(const s32, "newbattle/nbCameraHelper", dds3EffectResourcePathFormat);
+char dds3EffectResourcePathFormat[5] = "%s%s";
 
