@@ -230,9 +230,7 @@ s32 pipeGetRandomMessage(void)
 {
     return pipeRandomMessTable[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
 }
-INCLUDE_SDATA(const s32, "pipe/pipeResult", ResultIndex);
-
-SDATA_PAD(7);
+u8 ResultIndex = 0;
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessNumFmt);
 
@@ -241,8 +239,6 @@ INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessDataAddr);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
-
-SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeExpectedMaka);
 
