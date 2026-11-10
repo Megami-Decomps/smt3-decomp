@@ -14,7 +14,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern saddr_t stfShutDown(void);
 
-extern char stfProcName[];
+extern const char stfProcName[];
 
 extern u16 dds3VblanksPerFrame;
 extern u32 dds3GetKernelCount(void);
@@ -420,57 +420,57 @@ s32 stfInit(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfProcName);
+const char stfProcName[16] = "staffProc";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle2M);
+const char stfMovieTitle2M[32] = "cdrom0:/movie/title2M.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle1M);
+const char stfMovieTitle1M[32] = "cdrom0:/movie/title1M.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE616M);
+const char stfMovieE616M[32] = "cdrom0:/movie/e616_m.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMoviePeephole);
+const char stfMoviePeephole[32] = "cdrom0:/movie/peephole.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE731);
+const char stfMovieE731[24] = "cdrom0:/movie/e731.ipu";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE727);
+const char stfMovieE727[24] = "cdrom0:/movie/e727.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle3);
+const char stfMovieTitle3[32] = "cdrom0:/movie/title3.ipu";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE686);
+const char stfMovieE686[24] = "cdrom0:/movie/e686.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE684);
+const char stfMovieE684[24] = "cdrom0:/movie/e684.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE688);
+const char stfMovieE688[24] = "cdrom0:/movie/e688.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle2);
+const char stfMovieTitle2[32] = "cdrom0:/movie/title2.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieMenu);
+const char stfMovieMenu[24] = "cdrom0:/movie/menu.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE676);
+const char stfMovieE676[24] = "cdrom0:/movie/e676.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE617);
+const char stfMovieE617[24] = "cdrom0:/movie/e617.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle1);
+const char stfMovieTitle1[32] = "cdrom0:/movie/title1.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e674);
+const char stfMovieFile_e674[24] = "cdrom0:/movie/e674.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e673_020);
+const char stfMovieFile_e673_020[32] = "cdrom0:/movie/e673_020.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_gOver);
+const char stfMovieFile_gOver[32] = "cdrom0:/movie/g_over.ipu";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e658);
+const char stfMovieFile_e658[24] = "cdrom0:/movie/e658.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804_i);
+const char stfMovieFile_e804_i[32] = "cdrom0:/movie/e804_i.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804_f);
+const char stfMovieFile_e804_f[32] = "cdrom0:/movie/e804_f.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804);
+const char stfMovieFile_e804[24] = "cdrom0:/movie/e804.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e616);
+const char stfMovieFile_e616[24] = "cdrom0:/movie/e616.IPS";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e500_002);
+const char stfMovieFile_e500_002[32] = "cdrom0:/movie/e500_002.ipu";
 
-INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_dds);
+const char stfMovieFile_dds[24] = "cdrom0:/movie/dds.IPS";
 
-INCLUDE_SDATA(const s32, "staff/stfMain", stfTextFormat);
+char stfTextFormat[4] = "%s";
 
