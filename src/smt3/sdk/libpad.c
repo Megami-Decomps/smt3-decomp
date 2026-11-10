@@ -142,7 +142,7 @@ extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
 extern int scePadGetModVersion(void);
 extern int scePadInit2(int mode);
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padDmaFailMsg);
+const char padDmaFailMsg[72] = "libpad: sceSifSetDma faild\n\000\000\000\000\000libpad: tPadDma Structure Invalid\n";
 
 int scePadInit(int mode)
 {
@@ -328,13 +328,13 @@ int scePadGetState(int port, int slot)
     return d->state;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameError);
+const char padStateNameError[8] __attribute__((section(".rodata"))) = "ERROR";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameStable);
+const char padStateNameStable[8] __attribute__((section(".rodata"))) = "STABLE";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameExecCmd);
+const char padStateNameExecCmd[8] __attribute__((section(".rodata"))) = "EXECCMD";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameFindCtp1);
+const char padStateNameFindCtp1[16] = "FINDCTP1";
 
 void scePadStateIntToStr(u32 state, char *str)
 {
@@ -653,11 +653,11 @@ int scePadSetWarningLevel(int level)
     return padRpcPacket.slot;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padStateNameDisconnect);
+const char padStateNameDisconnect[16] = "DISCONNECT";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameBusy);
+const char padRequestNameBusy[8] __attribute__((section(".rodata"))) = "BUSY";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameFailed);
+const char padRequestNameFailed[8] __attribute__((section(".rodata"))) = "FAILED";
 
-INCLUDE_RODATA(const s32, "sdk/libpad", padRequestNameComplete);
+const char padRequestNameComplete[16] = "COMPLETE";
 
