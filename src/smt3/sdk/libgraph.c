@@ -412,35 +412,35 @@ s32 sceGsSyncPath(s32 mode, u16 timeout)
     }
 }
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathDma1Msg);
+const char sceGsSyncPathDma1Msg[48] = "sceGsSyncPath: DMA Ch.1 does not terminate\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1ChcrFmt);
+const char sceGsDumpD1ChcrFmt[16] = "\t<D1_CHCR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1TadrFmt);
+const char sceGsDumpD1TadrFmt[16] = "D1_TADR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1MadrFmt);
+const char sceGsDumpD1MadrFmt[16] = "D1_MADR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD1QwcFmt);
+const char sceGsDumpD1QwcFmt[16] = "D1_QWC=%08x>\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2ChcrFmt);
+const char sceGsDumpD2ChcrFmt[16] = "\t<D2_CHCR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2TadrFmt);
+const char sceGsDumpD2TadrFmt[16] = "D2_TADR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2MadrFmt);
+const char sceGsDumpD2MadrFmt[16] = "D2_MADR=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpD2QwcFmt);
+const char sceGsDumpD2QwcFmt[16] = "D2_QWC=%08x>\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpVif1StatFmt);
+const char sceGsDumpVif1StatFmt[24] = "\t<VIF1_STAT=%08x:";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsDumpGifStatFmt);
+const char sceGsDumpGifStatFmt[24] = "GIF_STAT=%08x>\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathDma2Msg);
+const char sceGsSyncPathDma2Msg[48] = "sceGsSyncPath: DMA Ch.2 does not terminate\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathVif1Msg);
+const char sceGsSyncPathVif1Msg[48] = "sceGsSyncPath: VIF1 does not terminate\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathVu1Msg);
+const char sceGsSyncPathVu1Msg[40] = "sceGsSyncPath: VU1 does not terminate\r\n";
 
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsSyncPathGifMsg);
+const char sceGsSyncPathGifMsg[48] = "sceGsSyncPath: GIF does not terminate\r\n";
 
 s32 sceGsSetDefLoadImage(sceGsLoadImage *p, s16 dbp, s16 dbw, s16 dpsm, s16 dsax, s16 dsay,
                          s16 rrw, s16 rrh)
@@ -838,7 +838,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
 
 }
 #else
-INCLUDE_RODATA(const s32, "sdk/libgraph", sceGsExecLoadImageDma2Msg);
+const char sceGsExecLoadImageDma2Msg[64] = "sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n";
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 #endif
