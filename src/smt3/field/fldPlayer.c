@@ -2355,31 +2355,31 @@ void fldPlayerSdwOff(void) {
     dds3ObjectBaseOffFlag(ctl->handle, 0x200);
 }
 
-/* NON_MATCHING: 121 of 144 words differ (first at +0x28). */
-#ifdef NON_MATCHING
 s32 fldPlayerFastSet(void)
 {
     fldUnitControl_t *ctl = fldGetUnitControl();
     sdfVector4_t pos;
     f32 probe[3];
     dds3PoseSet_t *pose;
+    /* Keep the entry area observation separate from the later publication
+     * addresses. This reconstruction constraint ends before the pose getter;
+     * the pointer is initialized below and never lives across a call. */
+    FAKEMATCH_ASM_REG(fldAreaWork_t *, areaState, "$3");
 
     fldPlayerFastMode = 0;
     if (l_UseCollision == 0) {
         return 0;
     }
-    if (fldGlobalBase.area < 0xA) {
+    areaState = &fldGlobalBase;
+    if (areaState->area < 0xA) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(&pos);
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        probe[0] = pos.x;
-        probe[1] = pos.y + 20.0f;
-        probe[2] = pos.z;
-        fldGlobalBase.x = pos.x;
-        fldGlobalBase.y = pos.y + 20.0f;
-        fldGlobalBase.z = pos.z;
+        probe[0] = fldGlobalBase.x = pos.x;
+        probe[1] = fldGlobalBase.y = pos.y + 20.0f;
+        probe[2] = fldGlobalBase.z = pos.z;
         fldHitChkUnit(probe);
         if (fldGlobalBase.hitValid != 0) {
             fldGlobalBase.x = fldGlobalBase.hitX;
@@ -2390,8 +2390,7 @@ s32 fldPlayerFastSet(void)
             }
             pos.x = fldGlobalBase.x;
             pos.y = fldGlobalBase.y;
-            pos.z = fldGlobalBase.hitZ;
-            fldGlobalBase.z = fldGlobalBase.hitZ;
+            pos.z = fldGlobalBase.z = fldGlobalBase.hitZ;
             dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
             fldGlobalBase.hitValid = 0;
         }
@@ -2406,12 +2405,9 @@ s32 fldPlayerFastSet(void)
         fldGlobalBase.prevX = fldGlobalBase.x;
         fldGlobalBase.prevY = fldGlobalBase.y;
         fldGlobalBase.prevZ = fldGlobalBase.z;
-        probe[0] = pos.x;
-        probe[1] = pos.y + 10.0f;
-        probe[2] = pos.z;
-        fldGlobalBase.x = pos.x;
-        fldGlobalBase.y = pos.y + 10.0f;
-        fldGlobalBase.z = pos.z;
+        probe[0] = fldGlobalBase.x = pos.x;
+        probe[1] = fldGlobalBase.y = pos.y + 10.0f;
+        probe[2] = fldGlobalBase.z = pos.z;
         fldHitChkUnit(probe);
         if (fldGlobalBase.hitValid != 0) {
             fldGlobalBase.x = fldGlobalBase.hitX;
@@ -2431,9 +2427,6 @@ s32 fldPlayerFastSet(void)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerFastSet);
-#endif
 
 void fldPlayerMotReset(void) {
     dds3Basic_t *unit;

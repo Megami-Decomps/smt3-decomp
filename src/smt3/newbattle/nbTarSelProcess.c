@@ -127,28 +127,64 @@ void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y)
                 color, data->pnltex[3]);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formindex)
 {
     nbMainProcessData_t *data = GetTarSelProcessData()->data;
     nbFormation_t *form = &data->form[formindex];
-    s32 reversed = (data->stat & 8) != 0;
+    s32 reversed;
     s32 allowed = 1;
     u32 stat;
 
+    if (data->stat & 8) {
+        reversed = 1;
+    } else {
+        reversed = 0;
+    }
+
+    /* Qualified ee-gcc 2.96 stock .02.jump dumps: the shared range test
+     * (pseudo 103, branch 171) keeps both friend paths at one rejection
+     * block. Separate structured assignments instead if-convert the second
+     * friend arm (157, 351-353), losing retail's shared test at 0x25DB28.
+     * Plain/dumped whole assembly and objects agree in production, SKIP_ASM
+     * and retained-C contexts. These forward continuations reconstruct that
+     * compiler block shape, not the historical source spelling. */
     if (ctype != 2) {
+        s32 within;
+
         allowed = 0;
         if ((carea & 3) == 3) {
-            allowed = 1;
-        } else if (carea & 1) {
-            allowed = reversed ? (u32)formindex - 4 < 10 : formindex < 4;
-        } else if (carea & 2) {
-            allowed = reversed ? formindex < 4 : (u32)formindex - 4 < 10;
+            goto acceptArea;
         }
+        if (carea & 1) {
+            switch (reversed) {
+            case 0:
+                goto checkFriend;
+            case 1:
+                within = (u32)formindex - 4 < 10;
+                goto checkRange;
+            }
+        } else if (carea & 2) {
+            switch (reversed) {
+            case 0:
+                goto checkEnemy;
+            case 1:
+                goto checkFriend;
+            }
+        }
+        goto checkRules;
+checkFriend:
+        within = formindex < 4;
+checkRange:
+        if (!within) {
+            goto checkRules;
+        }
+acceptArea:
+        allowed = 1;
+        goto checkRules;
+checkEnemy:
+        allowed = (u32)formindex - 4 < 10;
     }
+checkRules:
     if (allowed && (crule & 1)) {
         allowed = targetForm == formindex;
     }
@@ -160,8 +196,14 @@ s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formind
         if (!(stat & 1)) {
             allowed = (crule & 4) != 0 && (stat & 0x800) != 0;
         }
+        /* Keep the live status snapshot distinct from its earlier active-bit
+         * test. This target-specific constraint preserves the native second
+         * bit extraction without changing the value or emitting instructions. */
+        FAKEMATCH_ASM_LIVE(stat);
         if (allowed && (crule & 8)) {
-            allowed = (stat & 1) == 0;
+            u32 active = stat & 1;
+
+            allowed = active == 0;
         }
         if (allowed && (stat & 0x40) && (data->party[form->partyindex].flag & 0x38)) {
             allowed = 0;
@@ -169,9 +211,6 @@ s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formind
     }
     return allowed;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFormCursor);
-#endif
 
 extern s32 CheckFormCursor(s32 targetForm, s32 ctype, s32 crule, s32 carea, s32 formindex);
 
