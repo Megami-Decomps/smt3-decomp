@@ -69,9 +69,9 @@ extern const char nbCameraHelperViewerPBDir[];
 
 extern u32 nbCameraStartAnimWaitFrames;
 
-extern char nbCameraHelperMsgNotTarget[];
+extern const char nbCameraHelperMsgNotTarget[];
 
-extern char nbCameraHelperMsgNotEye[];
+extern const char nbCameraHelperMsgNotEye[];
 
 #include "sdk_libc.h"
 
@@ -378,6 +378,13 @@ extern void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode);
 extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
 extern s32 nbCameraCheckNiidaCamera(void);
 
+const char nbCameraHelperMsgNotTarget[40] = "nbCameraHelper:Not Target Helper\n";
+const char nbCameraHelperMsgNotEye[32] = "nbCameraHelper:Not Eye Helper\n";
+const char nbCameraHelperBedSelectText[16] = "BED SELECT";
+const char nbCameraHelperViewerPBDir[24] = "/efftool/camera/pb/";
+const char nbCameraHelperPbSelectText[16] = "PB SELECT";
+const char nbCameraHelperCameraHelperText[16] = "CAMERA HELPER";
+
 #ifdef NON_MATCHING
 /* NON_MATCHING: 48 of 83 words match; 332 bytes emitted against retail 336. */
 void nbCameraHelperViewer_Draw(void *pData)
@@ -415,18 +422,6 @@ void nbCameraHelperViewer_Draw(void *pData)
     nbCameraHelperRun(nbCameraHelperViewerCurrent);
 }
 #else
-INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotTarget);
-
-INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotEye);
-
-INCLUDE_RODATA(const s32, "code_001C55F8", D_00535898);
-
-INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperViewerPBDir);
-
-INCLUDE_RODATA(const s32, "code_001C55F8", D_005358C0);
-
-INCLUDE_RODATA(const s32, "code_001C55F8", D_005358D0);
-
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_Draw);
 #endif
 
