@@ -36,7 +36,7 @@ extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
 extern const char sdfMovieIpsExt[];
 
-void movie_2C5080(const char *aStr)
+void sdfPrintTextLine(const char *aStr)
 {
     puts(aStr);
 }

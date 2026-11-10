@@ -9,7 +9,7 @@ extern void sdfChipFreeDirect(void *aPtr);
 extern sdfItemArray_t *sdfItemArrayNew(s32 aInitCapa, s32 aElemSize, s32 aGrowStep);
 extern void sdfItemArrayFree(sdfItemArray_t *aArray);
 extern void sdfItemArrayGrow(sdfItemArray_t *aArray);
-extern void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity);
+extern void sdfDevResizeBufferedRequest(sdfItemArray_t *aArray, s32 aCapacity);
 
 extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
 extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
@@ -110,7 +110,7 @@ void sdfTexListSetCapacity(sdfItemArray_t *aList, s32 aCapa, s32 aReleaseItems)
         } while (i != count);
         aList->count = aCapa;
     }
-    func_002BFF98(aList, aCapa);
+    sdfDevResizeBufferedRequest(aList, aCapa);
 }
 
 sdfItemArray_t *sdfTexListDup(sdfItemArray_t *aList)
