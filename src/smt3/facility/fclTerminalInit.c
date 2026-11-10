@@ -67,12 +67,11 @@ extern trmTerminalWork_t *GBWK_3;
 
 extern void sdfTexFree(s32 aHandle);
 
+extern const char trmCalcProcessName[];
 
-extern char trmCalcProcessName[];
+extern const char trmDrawProcessName[];
 
-extern char trmDrawProcessName[];
-
-extern char trmUpdateProcessName[];
+extern const char trmUpdateProcessName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -182,7 +181,7 @@ s32 trmGetEventNo(s32 update, trmTerminalWork_t *work)
     return event;
 }
 
-extern char trmProcessNameMainFmt[]; /* "e%d_main" */
+extern const char trmProcessNameMainFmt[]; /* "e%d_main" */
 
 extern char trmProcessNameTrmFmt[];
 
@@ -313,7 +312,7 @@ extern s32 trmTerminalNoList[32];
 extern s16 D_002FC1A2[][2];
 extern s32 evtBitCheck(s32 no);
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmProcessNameMainFmt);
+const char trmProcessNameMainFmt[16] = "e%d_main";
 
 void fclTerminalScanCommands(trmTerminalWork_t *work)
 {
@@ -357,7 +356,6 @@ void fclTerminalInitList(void *list, s8 count, s32 handle)
     cmpInitCursorRange(cursor, (u8)count, 7, 0);
     cmpInitCursorLayout(cursor, 0x2E, 7, 0x98, 0x19, 0x1D);
 }
-
 
 extern u32 trmMenuTextTable[];
 extern void fclInitCursorWindow(void *cursor, void *data, u8 count);
@@ -440,7 +438,6 @@ void fclTerminalLoadTextures(void *work)
     }
     printf("TERMINAL : Tex load.\n");
 }
-
 
 void fclTerminalFreeTextures(void *work)
 {
@@ -652,29 +649,29 @@ void trmResetCursor(void)
     trmCalcWork->pad_2217 = 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmCalcProcessName);
+const char trmCalcProcessName[16] = "terminal";
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmDrawProcessName);
+const char trmDrawProcessName[16] = "terminal_draw";
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", trmUpdateProcessName);
+const char trmUpdateProcessName[16] = "terminal_update";
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D670);
+const char D_0053D670[16] = "AMALA LINK";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", GBWK_3);
+trmTerminalWork_t *GBWK_3 = NULL;
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", gProcessStat_3);
+s8 gProcessStat_3 = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMode);
+s8 trmMode = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelLeave);
+char trmMenuLabelLeave[8] = "Leave";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelTalk);
+char trmMenuLabelTalk[8] = "Talk";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmMenuLabelSave);
+char trmMenuLabelSave[8] = "Save";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmProcessNameTrmFmt);
+char trmProcessNameTrmFmt[8] = "e%d_trm";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", trmHexLineFmt);
+char trmHexLineFmt[8] = "%x\n";
 
-INCLUDE_SDATA(const s32, "facility/fclTerminalInit", D_0054FC30);
+char D_0054FC30[8] = "SAVE";
 
