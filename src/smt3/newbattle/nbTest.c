@@ -651,13 +651,17 @@ const char nbTestProcessName[12] = "battle test";
 
 s32 nbBattleDummyCount = 4;
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551504);
+s32 D_00551504 = 201;
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", pack);
+s32 D_00551508 = 1;
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", f);
+s32 pack = 1;
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", D_00551514);
+u32 f = 1;
 
-INCLUDE_SDATA(const s32, "newbattle/nbTest", test_phearts);
+s32 D_00551514 = 0;
+
+s32 D_00551518 = 0;
+
+s32 test_phearts = 28;
 
