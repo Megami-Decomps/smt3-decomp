@@ -51,6 +51,9 @@
 0x001E9168	evtCommandStartBgmWithFade	inferred	DDS name for the same script command, calls the bgm fade starter
 0x001E9298	evtOpcodeRefreshTaskData	inferred	DDS name for the same script command slot
 0x001E92F8	evtCommandSetDrawFlagWhileWaiting	inferred	DDS name; sets dds3DrawFlag 0x2000000 until the command timer passes its argument
+0x001FA158	evtStartBgmBySoundIdAndFade	inferred	DDS twin name
+0x001FA310	evtRefreshTaskEffectTexture	inferred	DDS twin name
+0x001FA398	evtSpawnResourceObject	inferred	DDS twin name
 0x002197B0	ApplyChangeListIndex	inferred	Reconstructed fclEncyc name; native extent ends at the independent ApplyEdgeListCursor entry after the restored-frame tail call.
 0x002198D8	ApplyEdgeListCursor	inferred	Independent frameless edge-correction entry reached after ApplyChangeListIndex restores its frame; name agrees with the reconstructed fclEncyc source.
 0x00239FA0	uiDrawUniformRgbRange	inferred	Existing DDS descriptive name; audited relocation-only native counterpart repeats one color for three triangle vertices; was cmp_239FA0.

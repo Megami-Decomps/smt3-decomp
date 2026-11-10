@@ -60,9 +60,9 @@ extern s32 evtPlayEventBgm(s32 eventId, s32 variation);
 extern void evtTransEventBgm(s32 eventId, s32 variation);
 extern s32 evtStopEventBgm(s32 eventId, s32 variation);
 extern s32 evtPlaySe(s32 eventno, s32 seno);
-extern s32 func_001FA158(s32 eventId, s32 variation);
+extern s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 variation);
 extern void datAddKotowariPoint(s32 type, s32 point);
-extern void func_001FA310(s32 taskId, s32 key);
+extern void evtRefreshTaskEffectTexture(s32 taskId, s32 key);
 
 extern s32 scrGetMessageHandle(void);
 
@@ -2973,7 +2973,7 @@ u32 evtCommandStartBgmWithFade(void) {
 
     eventId = scrGetIntPara(0);
     fade = scrGetIntPara(1);
-    func_001FA158(eventId, fade);
+    evtStartBgmBySoundIdAndFade(eventId, fade);
     return 1;
 }
 
@@ -3020,7 +3020,7 @@ u32 evtOpcodeRefreshTaskData(void) {
 
     task = scrGetIntPara(0);
     value = scrGetIntPara(1);
-    func_001FA310(task, value);
+    evtRefreshTaskEffectTexture(task, value);
     return 1;
 }
 

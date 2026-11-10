@@ -231,7 +231,7 @@ void *evtGetResorceData(u32 eventno, s32 rid) {
     return NULL;
 }
 
-void func_001FA310(s32 taskId, s32 key) {
+void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     evtPackProcessData_t *data = evtGetPackProcessData(taskId);
     void *address = evtGetResorceData(taskId, key);
     sdfTexHandle_t *texture;
@@ -262,7 +262,7 @@ extern void *dds3AddBEDEffectObjectBasic2(void *data, void *pos, void *rot);
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 extern void effEveBEDCutSetScale(void *hEveBEDCut, f32 scale);
 
-void *evt_1FA398(s32 taskId, s32 key, s32 modelId) {
+void *evtSpawnResourceObject(s32 taskId, s32 key, s32 modelId) {
     sdfVector4_t position;
     sdfVector4_t scale;
     void *resource;

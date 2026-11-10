@@ -133,7 +133,7 @@ s32 evtPlaySe(s32 eventno, s32 seno)
     return soundIndex;
 }
 
-s32 func_001FA158(s32 eventId, s32 variation)
+s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 variation)
 {
     s32 sound;
 
