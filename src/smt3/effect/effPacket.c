@@ -362,11 +362,9 @@ void dds3CrossfadeEnd(void) {
     dds3CrossfadeRunFlag = 0;
     printf("dds3CrossfadeEnd\n");
 }
-INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeRunFlag);
+s8 dds3CrossfadeRunFlag = 0;
 
-SDATA_PAD(3);
+u32 dds3CrossfadeFrame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeFrame);
-
-INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeFrameMax);
+u32 dds3CrossfadeFrameMax = 0;
 
