@@ -2580,7 +2580,9 @@ void nmeDrawBox(s32 color, s32 unused, s32 flag)
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, color, flag);
 }
 
-void nmeDrawSizedSprite(u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 color, s32 size,
+/* Native callers pass full argument words. Narrow only at the rendering
+ * consumer, retaining this provider's byte and halfword conversions. */
+void nmeDrawSizedSprite(s32 id, s32 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 color, s32 size,
                         s32 ot)
 {
     s32 colors[4];
@@ -2590,7 +2592,7 @@ void nmeDrawSizedSprite(u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 colo
     colors[1] = color;
     colors[2] = color;
     colors[3] = color;
-    fclDrawSpriteSize(-(half * 16), -(half * 8), 0, size + 0x200, size + 0x1C0, colors, id, idx,
+    fclDrawSpriteSize(-(half * 16), -(half * 8), 0, size + 0x200, size + 0x1C0, colors, (u8)id, (u16)idx,
                       texs, tbl, ot);
 }
 
@@ -2645,29 +2647,26 @@ void nmeDrawFrame(s32 type, s32 frame)
     nmeDrawQuadPanel(0x9192FF4C, 0x88D8FC33, pulse, 7);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq33, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void nmeDrawBlendText(s32 sprite, s32 page, sdfTexHandle_t **textures,
                       fclSpriteTbl_t *table, u32 color, s32 frame, s32 ot)
 {
     s32 pulse = nmeLerp(100, frame % 0x100, 0x100);
     s32 phase = frame % 0x300;
+    /* This real percent divisor is established before the size phase. */
+    s32 percent = 100;
     s32 size = nmeLerp(0x8C, phase, 0x300);
     s32 shade;
 
-    nmeLerp2(0x100, phase, 0x300);
+    /* Repeat the actual remainder, as nmeDrawFrame does: native retains
+     * its second division check even when the remainder itself is shared. */
+    nmeLerp2(0x100, frame % 0x300, 0x300);
     nmeDrawSizedSprite(sprite, page, (s32 *)textures, table, 0x80808080, 0, ot);
     nmeDrawSizedSprite(sprite, page, (s32 *)textures, table, 0x80808080, size, ot);
-    shade = fclBlendColor(0x35, 0x1C, pulse * 0x100 / 100);
+    shade = fclBlendColor(0x35, 0x1C, pulse * 0x100 / percent);
     nmeDrawBox(shade, pulse, ot);
     nmeDrawBlendQuad(pulse, ot);
     nmeDrawQuadPanel(0x756E6866, 0x14140A66, pulse * 2, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
-#endif
 
 extern frFontRequest_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8 mode);
 extern void frSetFontColor(frFontHandle_t *request, u32 color);
