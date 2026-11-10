@@ -698,7 +698,7 @@ void rstClearResultWork(void)
     D_00345D9C[0] = NULL;
 }
 
-extern char cmpCampTmxPath[];
+extern const char cmpCampTmxPath[];
 
 void cmpTexLoad(void)
 {
