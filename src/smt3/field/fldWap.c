@@ -19,10 +19,7 @@
 
 extern u32 dds3GetKernelCount(void);
 
-
 typedef struct devState_t devState_t;
-
-
 
 extern u32 fldDrawInitDone;
 
@@ -99,7 +96,6 @@ extern s32 fldSkyFilterPrev;
 extern f32 fldSkyFilterRate;
 
 extern f32 fldSkyFilterTime;
-
 
 extern addr_t fldItemBoxObjBuf;
 
@@ -178,7 +174,6 @@ extern doormovetbl_s fldDoorTable[256];
 
 /* The 0xA0 scene request block dds3AdminiCallSequence(6, ...) takes. */
 
-
 extern void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                               s32 bgm, s32 camMode, const char *camName);
 
@@ -241,7 +236,6 @@ extern s32 fldWmWarpMode;
 extern s32 gFldWapPanel;
 
 extern s32 gFldKyouseiTalk;
-
 
 extern u8 fldWarpLabel[];
 
@@ -570,7 +564,7 @@ extern void fldPlayerCalc_FastStart(void);
 extern void fldSetSceneParam3(fldSceneParam_t *param, s32 field, s32 area, const char *name);
 extern void fldSetSceneParam5(fldSceneParam_t *param, s32 field, s32 area, const char *name,
                              s32 bgm, const char *script);
-extern char fldElevatorPosName[], fldElevatorStartLabel[];
+extern const char fldElevatorPosName[], fldElevatorStartLabel[];
 
 void fldDoor_Warp(const char *name)
 {
@@ -723,12 +717,12 @@ extern void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadAr
 extern void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                             s32 bgm, const char *FoceScript);
 /* Shared with fldDoor_Warp; both native strings have retained padding. */
-extern char fldElevatorPosName[]; /* "01pos_01" */
-extern char fldElevatorStartLabel[]; /* "elvstart_label" */
+extern const char fldElevatorPosName[]; /* "01pos_01" */
+extern const char fldElevatorStartLabel[]; /* "elvstart_label" */
 
-INCLUDE_RODATA(const s32, "field/fldWap", fldElevatorPosName);
+const char fldElevatorPosName[16] = "01pos_01";
 
-INCLUDE_RODATA(const s32, "field/fldWap", fldElevatorStartLabel);
+const char fldElevatorStartLabel[24] = "elvstart_label";
 
 INCLUDE_RODATA(const s32, "field/fldWap", jtbl_00531F40);
 
@@ -863,7 +857,6 @@ void fldDoor_WarpEx(s32 ex_no) {
         }
     }
 }
-
 
 extern s16 fldTerminalTable[][2];
 extern s16 fldAllCnt[][2];
@@ -1541,7 +1534,6 @@ void fldSetupDoorScenes(void)
 #undef LOAD_DOOR_ANGLE
 #undef SET_DOOR_DIRECTION
 
-
 void fldFindDoorEvent(s32 id) {
     doormovework_s *e;
     doormovetbl_s *entry;
@@ -1697,23 +1689,23 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
 void func_00144288(void) {
 }
 
-INCLUDE_SDATA(const s32, "field/fldWap", gFldWap_after_nextidx);
+s32 gFldWap_after_nextidx = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", gFld_ElvTakasa);
+u32 gFld_ElvTakasa = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", fldDoorWarpTarget);
+s32 fldDoorWarpTarget = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseArea);
+s32 fldDoorSiseArea = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseState);
+s32 fldDoorSiseState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseZone);
+s32 fldDoorSiseZone = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", fldDoorSiseSub);
+s32 fldDoorSiseSub = 0;
 
-INCLUDE_SDATA(const s32, "field/fldWap", scriptlabel);
+s32 scriptlabel = -1;
 
-INCLUDE_SDATA(const s32, "field/fldWap", gFldWapPanel);
+s32 gFldWapPanel = 0;
 
 SDATA_PAD(4);
 
