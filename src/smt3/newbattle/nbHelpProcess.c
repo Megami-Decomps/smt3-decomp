@@ -625,5 +625,5 @@ void nbInitHelpProcess(nbMainProcessData_t *data)
     data->helpproc = proc;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbHelpProcess", nbHelpProcessName);
+char nbHelpProcessName[8] = "nb_help";
 
