@@ -384,7 +384,7 @@ extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camer
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fovy);
 extern s32 D_00550F80;
-extern char *D_00550F78;
+extern char *nbDebugFreeCameraName;
 extern char *nbDebugGameCameraName;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
@@ -450,7 +450,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
     if (camera->name != NULL) {
         name = camera->name;
     } else {
-        name = (data->stat & 0x20) ? nbDebugGameCameraName : D_00550F78;
+        name = (data->stat & 0x20) ? nbDebugGameCameraName : nbDebugFreeCameraName;
     }
     if (data->debug == 1) {
         tag = dds3FontReqAllocDrawTag();
