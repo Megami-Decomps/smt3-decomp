@@ -561,15 +561,21 @@ void dds3FontReqListCount(void)
     }
 }
 
-void dds3FontReqDestroy(dds3FontReqString_t *req)
+/* Both concrete requests embed the callback base as their first member.
+ * Recover that enclosing allocation at the typed callback boundary. */
+void dds3FontReqDestroy(dds3FontReq_t *base)
 {
+    dds3FontReqString_t *req = (dds3FontReqString_t *)base;
+
     frDestroyFontRequestAfter(req->frq);
     sdfChipFreeDirect(req);
 }
 
-s32 dds3FontReqDrawFont(dds3FontReqString_t *req)
+void dds3FontReqDrawFont(dds3FontReq_t *base)
 {
-    return frDrawFont(req->frq);
+    dds3FontReqString_t *req = (dds3FontReqString_t *)base;
+
+    frDrawFont(req->frq);
 }
 
 dds3FontReq_t *dds3FontReqAddString(s32 x, s32 y, char *str)
@@ -593,13 +599,16 @@ void dds3FontReqSetColorNo(dds3FontReqString_t *req, u8 colorno)
     frSetFontColorNo(req->frq, colorno);
 }
 
-void dds3FontReqFree(dds3FontReqBox_t *req)
+void dds3FontReqFree(dds3FontReq_t *base)
 {
+    dds3FontReqBox_t *req = (dds3FontReqBox_t *)base;
+
     sdfChipFreeDirect(req);
 }
 
-void dds3FontReqDrawBoxLine(dds3FontReqBox_t *req)
+void dds3FontReqDrawBoxLine(dds3FontReq_t *base)
 {
+    dds3FontReqBox_t *req = (dds3FontReqBox_t *)base;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
 
