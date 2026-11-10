@@ -158,3 +158,15 @@
 0x00551B28	sdfGsMemTexName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5F8/D_00438CE8; former name D_00551B28
 0x00551B30	sdfGsMemFrameName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD600/D_00438CF0; former name D_00551B30
 0x00551B38	sdfGsMemFreeName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD608/D_00438CF8; former name D_00551B38
+0x002DA308	_localeconv_r	inferred	newlib _localeconv_r: returns &localeconvData, between _setlocale_r and setlocale; former name func_002DA308
+0x001001C8	_exit	inferred	crt0 _exit: tail-calls Exit(0); abort calls it with 1; former name func_001001C8
+0x002D6678	_vfprintf_r	inferred	DDS1/2 name for the same newlib function (DDS1 0x00303468); former name func_002D6678
+0x00552178	libcErrno	inferred	newlib's global errno: _sbrk_r clears it, calls sbrk and copies it into r->_errno; former name D_00552178
+0x0052BB28	dtorListCursor	inferred	__do_global_dtors' static cursor into the destructor list; former name D_0052BB28
+0x0052BB2C	dtorFrameDeregistered	inferred	__do_global_dtors' static flag guarding __deregister_frame_info; former name D_0052BB2C
+0x0052D940	__EH_FRAME_BEGIN__	inferred	start of .eh_frame, passed to __register_frame_info/__deregister_frame_info; former name D_0052D940
+0x002F5600	__CTOR_LIST__	inferred	constructor list walked by __do_global_ctors (count word, then entries); former name D_002F5600
+0x0059AD58	mainCtorsDone	inferred	__main's static flag: run __do_global_ctors once; former name D_0059AD58
+0x0059AD60	frameObjectList	inferred	head of the object list __register_frame_info links into; former name D_0059AD60
+0x0059AD40	ctorFrameObject	inferred	static object __do_global_ctors passes to __register_frame_info; former name D_0059AD40
+0x0052C37C	frameObjectSema	inferred	semaphore around frameObjectList; former name D_0052C37C

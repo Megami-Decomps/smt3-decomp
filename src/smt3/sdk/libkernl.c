@@ -3841,7 +3841,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
 
 extern s32 mallocSema;
-extern s32 D_0052C37C;
+extern s32 frameObjectSema;
 
 void supplement_crt0(void)
 {
@@ -3853,7 +3853,7 @@ void supplement_crt0(void)
     second.maxCount = 1;
     second.initCount = 1;
     mallocSema = CreateSema(&first);
-    D_0052C37C = CreateSema(&second);
+    frameObjectSema = CreateSema(&second);
 }
 
 INCLUDE_ASM(const s32, "sdk/libkernl", Copy);

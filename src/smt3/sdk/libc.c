@@ -219,7 +219,7 @@ extern void *_signal_r(_reent *r, s32 sig, void *handler);
 
 extern char *_setlocale_r(_reent *r, s32 category, const char *locale);
 
-extern void *func_002DA308(_reent *r);
+extern void *_localeconv_r(_reent *r);
 
 extern void _cleanup_r(_reent *r);
 
@@ -235,11 +235,11 @@ extern long strtol(const char *s, char **end, s32 base);
 
 extern s32 raise(s32 sig);
 
-extern void func_001001C8(s32 code) __attribute__((noreturn));
+extern void _exit(s32 code) __attribute__((noreturn));
 
 extern u8 localeconvData[] __attribute__((section(".data")));
 
-extern s32 D_00552178 __attribute__((section(".data")));
+extern s32 libcErrno __attribute__((section(".data")));
 
 extern s32 mallocLockCount __attribute__((section(".data")));
 
@@ -330,19 +330,19 @@ extern void __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
-extern void (**D_0052BB28)(void) __attribute__((section(".data")));
+extern void (**dtorListCursor)(void) __attribute__((section(".data")));
 
-extern s32 D_0052BB2C __attribute__((section(".data")));
+extern s32 dtorFrameDeregistered __attribute__((section(".data")));
 
-extern s32 D_0052C37C __attribute__((section(".data")));
+extern s32 frameObjectSema __attribute__((section(".data")));
 
-extern u8 D_0052D940[] __attribute__((section(".data")));
+extern u8 __EH_FRAME_BEGIN__[] __attribute__((section(".data")));
 
-extern void (*D_002F5600[])(void) __attribute__((section(".data")));
+extern void (*__CTOR_LIST__[])(void) __attribute__((section(".data")));
 
-extern s32 D_0059AD58 __attribute__((section(".data")));
+extern s32 mainCtorsDone __attribute__((section(".data")));
 
-extern object *D_0059AD60 __attribute__((section(".data")));
+extern object *frameObjectList __attribute__((section(".data")));
 
 typedef struct fp_number_type {
     s32 class;
@@ -359,7 +359,7 @@ extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
-extern s32 func_002D6678(_reent *r, FILE *fp, const char *fmt, va_list ap);
+extern s32 _vfprintf_r(_reent *r, FILE *fp, const char *fmt, va_list ap);
 
 typedef union f32_bits {
     f32 f;
@@ -386,7 +386,7 @@ extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df
 void abort(void) {
     while (1) {
         raise(6);
-        func_001001C8(1);
+        _exit(1);
     }
 }
 
@@ -576,7 +576,7 @@ s32 _printf_r(_reent *r, const char *fmt, ...) {
     va_list ap;
 
     va_start(ap, fmt);
-    return func_002D6678(r, r->_stdout, fmt, ap);
+    return _vfprintf_r(r, r->_stdout, fmt, ap);
 }
 
 s32 printf(const char *fmt, ...) {
@@ -756,10 +756,10 @@ sortLoop:
 void *_sbrk_r(_reent *r, s32 incr) {
     void *result;
 
-    D_00552178 = 0;
+    libcErrno = 0;
     result = sbrk(incr);
-    if (result == (void *)-1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    if (result == (void *)-1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -867,10 +867,10 @@ s32 __sigtramp(s32 sig) {
 s32 _kill_r(_reent *r, s32 pid, s32 sig) {
     s32 result;
 
-    D_00552178 = 0;
+    libcErrno = 0;
     result = kill(pid, sig);
-    if (result == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    if (result == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -1112,7 +1112,7 @@ s32 vfprintf(FILE *fp, const char *fmt, va_list ap)
             __sinit(fp->_data);
         }
     } while (0);
-    return func_002D6678(fp->_data, fp, fmt, ap);
+    return _vfprintf_r(fp->_data, fp, fmt, ap);
 }
 
 /* NON_MATCHING: formatter control flow, frame and allocation remain different. */
@@ -1144,7 +1144,7 @@ extern const char printfSpaces[16];
 extern const char printfZeros[16];
 
 /* Native output uses eight vectors and a 348-byte digit workspace. */
-s32 func_002D6678(_reent *r, FILE *fp, const char *format, va_list ap)
+s32 _vfprintf_r(_reent *r, FILE *fp, const char *format, va_list ap)
 {
     char exponentBuffer[16];
     __suio uio;
@@ -1596,7 +1596,7 @@ INCLUDE_RODATA(const s32, "sdk/libc", printfSpaces);
 
 INCLUDE_RODATA(const s32, "sdk/libc", printfZeros);
 
-INCLUDE_ASM(const s32, "sdk/libc", func_002D6678);
+INCLUDE_ASM(const s32, "sdk/libc", _vfprintf_r);
 #endif
 
 extern char *_dtoa_r(_reent *r, f64 value, s32 mode, s32 digits,
@@ -2837,7 +2837,7 @@ char *_setlocale_r(_reent *r, s32 category, const char *locale)
     return localeCName;
 }
 
-void *func_002DA308(_reent *r) {
+void *_localeconv_r(_reent *r) {
     return localeconvData;
 }
 
@@ -2846,7 +2846,7 @@ char *setlocale(s32 category, const char *locale) {
 }
 
 void *localeconv(void) {
-    return func_002DA308(_impure_ptr);
+    return _localeconv_r(_impure_ptr);
 }
 
 extern s32 _fstat_r(_reent *r, s32 fd, struct stat *buf);
@@ -3498,9 +3498,9 @@ s32 __sclose(void *cookie) {
 long _write_r(_reent *r, s32 fd, const char *buf, s32 n) {
     long result;
 
-    D_00552178 = 0;
-    if ((result = write(fd, buf, n)) == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    libcErrno = 0;
+    if ((result = write(fd, buf, n)) == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -3510,10 +3510,10 @@ INCLUDE_ASM(const s32, "sdk/libc", _calloc_r);
 s32 _close_r(_reent *r, s32 fd) {
     s32 result;
 
-    D_00552178 = 0;
+    libcErrno = 0;
     result = close(fd);
-    if (result == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    if (result == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -3521,10 +3521,10 @@ s32 _close_r(_reent *r, s32 fd) {
 s32 _fstat_r(_reent *r, s32 fd, struct stat *buf) {
     s32 result;
 
-    D_00552178 = 0;
+    libcErrno = 0;
     result = fstat(fd, buf);
-    if (result == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    if (result == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -3532,10 +3532,10 @@ s32 _fstat_r(_reent *r, s32 fd, struct stat *buf) {
 long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence) {
     long result;
 
-    D_00552178 = 0;
+    libcErrno = 0;
     result = lseek(fd, offset, whence);
-    if (result == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    if (result == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
@@ -3543,9 +3543,9 @@ long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence) {
 long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
     long result;
 
-    D_00552178 = 0;
-    if ((result = read(fd, buf, n)) == -1 && D_00552178 != 0) {
-        r->_errno = D_00552178;
+    libcErrno = 0;
+    if ((result = read(fd, buf, n)) == -1 && libcErrno != 0) {
+        r->_errno = libcErrno;
     }
     return result;
 }
