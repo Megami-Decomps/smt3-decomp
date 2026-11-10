@@ -585,7 +585,7 @@ void evtKillEventPack(s32 eventno) {
 }
 
 /* Drain every event-pack process at the priority used during creation. */
-void evt_1FAD40(void) {
+void evtKillAllEventPack(void) {
     dds3ProcessID_t *task;
 
     while (task = dds3SearchProcessPriority(DDS3_PRIORITY_EVENT_PACK), task != NULL) {

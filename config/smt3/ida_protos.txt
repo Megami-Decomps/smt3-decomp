@@ -4813,7 +4813,7 @@
 0x001FAB80 evtWaitEventPackLoad void __fastcall evtWaitEventPackLoad(dds3ProcessID_t *)
 0x001FAC78 evtLoadEventPack dds3ProcessID_t *evtLoadEventPack(s32 eventno)
 0x001FAD08 evtKillEventPack void evtKillEventPack(s32 eventno)
-0x001FAD40 evt_1FAD40 __int64 evt_1FAD40()
+0x001FAD40 evtKillAllEventPack __int64 evtKillAllEventPack()
 0x001FAD78 cmbEnableMenuEntry2 __int64 cmbEnableMenuEntry2()
 0x001FAE00 cmbEnableMenuEntry6 __int64 cmbEnableMenuEntry6()
 0x001FAE80 fclCombineDisableCmdZensyo void fclCombineDisableCmdZensyo()
