@@ -1166,9 +1166,16 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
     }
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectEventDefaultParameters);
+const dds3EffectEventParameters_t dds3EffectEventDefaultParameters = {
+    {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, 100.0f, 100.0f, 1.0f, 0x80808080};
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectMagaSCAreaDefault);
+const effMagaSCArea_t dds3EffectMagaSCAreaDefault = {
+    {{0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, -500.0f, 0.0f, 0.0f}}, {300.0f, 300.0f}};
 
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", dds3EffectMagaP4PointDefault);
+const effMagaP4Point_t dds3EffectMagaP4PointDefault = {
+    {{0.0f, 0.0f, 0.0f, 0.0f},
+     {100.0f, -200.0f, 0.0f, 0.0f},
+     {100.0f, -400.0f, 0.0f, 0.0f},
+     {0.0f, -600.0f, 0.0f, 0.0f}},
+    {100.0f, 100.0f, 100.0f, 100.0f}};
 
