@@ -426,13 +426,13 @@ void ragDrawList3(s8 mode)
     fclDrawPhaseHeader((u8 *)ragDrawWork + 0x34AC, 0x80808080, 0, 0x47);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleMitama);
+const char ragExchangeTitleMitama[16] __attribute__((aligned(16))) = "MITAMA EXCHANGE";
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleSoul);
+const char ragExchangeTitleSoul[16] = "SOUL EXCHANGE";
 
-INCLUDE_RODATA(const s32, "facility/fclRagCalc", ragExchangeTitleItem);
+const char ragExchangeTitleItem[16] = "ITEM EXCHANGE";
 
-INCLUDE_SDATA(const s32, "facility/fclRagCalc", ragNameFormat);
+char ragNameFormat[8] = "%s";
 
-INCLUDE_SDATA(const s32, "facility/fclRagCalc", ragCountFormat);
+char ragCountFormat[8] = "%2d";
 

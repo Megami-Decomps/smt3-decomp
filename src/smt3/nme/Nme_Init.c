@@ -12,9 +12,9 @@ extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
 extern char nmeCalcProcessName[];
 
-extern char nmeDrawProcessName[];
+extern const char nmeDrawProcessName[];
 
-extern char nmeUpdateProcessName[];
+extern const char nmeUpdateProcessName[];
 
 extern s8 gProcessStat;
 
@@ -38,7 +38,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void frLoadFontData(s32 style, const char *filename);
 extern void nmeInitNameRows(s8 target, nmeWork_t *work);
-extern char nmeFontPath[];
+extern const char nmeFontPath[];
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -236,9 +236,9 @@ void nmeInitCursor(s8 mode, nmeWork_t *work)
 }
 
 
-extern char nmeTexFile01[];
-extern char nmeTexFile02[];
-extern char nmeTexFile03[];
+extern const char nmeTexFile01[];
+extern const char nmeTexFile02[];
+extern const char nmeTexFile03[];
 extern char *nmeCharTexFile[4];
 extern char *nmeAltCharTexFile __attribute__((section(".data")));
 extern s32 fclLoadTexture(char *filename);
@@ -270,7 +270,7 @@ extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
 extern void nmeInitCursor(s8 mode, nmeWork_t *work);
 extern void nmeTexLoad(s8 mode, nmeWork_t *work);
 extern void frLoadFontData(s32 style, const char *filename);
-extern char nmeFontPath[];
+extern const char nmeFontPath[];
 
 nmeWork_t *nmeLoadFont(s8 target, s8 mode, s32 parent)
 {
@@ -522,49 +522,48 @@ s32 nme_298698(void)
     return done;
 }
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeFontPath);
+const char nmeFontPath[24] = "/font/name_ent.fnt";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile01);
+const char nmeTexFile01[24] = "/name/tmx/name_01.tmx";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile02);
+const char nmeTexFile02[24] = "/name/tmx/name_02.tmx";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeTexFile03);
+const char nmeTexFile03[24] = "/name/tmx/name_03.tmx";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeDrawProcessName);
+const char nmeDrawProcessName[16] = "name_draw";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeUpdateProcessName);
+const char nmeUpdateProcessName[16] = "name_update";
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", nmeConfirmQuestion);
+const char nmeConfirmQuestion[16] = "Is this okay\?";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeProcessId);
+nmeWork_t *nmeProcessId = NULL;
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", gProcessStat);
+s8 gProcessStat = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameChiaki);
+char nmeDefaultNameChiaki[8] = "Chiaki";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameIsamu);
+char nmeDefaultNameIsamu[8] = "Isamu";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameNitta);
+char nmeDefaultNameNitta[8] = "Nitta";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameYuko);
+char nmeDefaultNameYuko[8] = "Yuko";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeDefaultNameTakao);
+char nmeDefaultNameTakao[8] = "Takao";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeEmptyName);
+char nmeEmptyName[8] = "";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeCalcProcessName);
+char nmeCalcProcessName[8] = "name";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeNameTextTemplate);
+s8 nmeNameTextTemplate[8] = { '0', '0' };
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeConfirmYes);
+char nmeConfirmYes[8] = "Yes";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeConfirmNo);
+char nmeConfirmNo[8] = "No";
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeCursorSkip);
+s8 nmeCursorSkip[8] = { 1, 1 };
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", nmeMoveTextTemplate);
+s8 nmeMoveTextTemplate[4] = { '0', '0' };
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", mccb);
+u32 mccb = 0;
 

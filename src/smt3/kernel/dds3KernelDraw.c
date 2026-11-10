@@ -2209,51 +2209,48 @@ void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
     *x3 = ((s32)(screen.x * 16.0f) - 0x7000) >> 4;
     *y3 = ((s32)(screen.y * 16.0f) - 0x7900) >> 3;
 }
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
+u32 egl_OT_Offset = 0x47;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3BackColor);
+u32 dds3BackColor = 0x80000000;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTex);
+u32 dds3RenderTex = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTexHandle);
+sdfGsMemSlice_t *dds3RenderTexHandle = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTexture);
+sdfTexHandle_t *dds3RenderTexture = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTexWidth);
+u16 dds3RenderTexWidth = 0x80;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderTexHeight);
+u16 dds3RenderTexHeight = 0x80;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3RenderDrawEnv);
+u32 dds3RenderDrawEnv = 0x80305060;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3DrawFlag);
+u32 dds3DrawFlag = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurFlag);
+u8 dds3ScreenBlurFlag = 0;
 
-SDATA_PAD(1);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurAlpha);
+s16 dds3ScreenBlurAlpha = 0x60;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurScale);
+s16 dds3ScreenBlurScale = 0x10;
 
-SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3ScreenBlurOfsX);
+s32 dds3ScreenBlurOfsX[2] = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeFlag);
+u16 dds3QuakeFlag = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeFrame);
+s16 dds3QuakeFrame = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeXRange);
+u16 dds3QuakeXRange = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeYRange);
+u16 dds3QuakeYRange = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", fadergba);
+u8 fadergba[4] = { 0, 0, 0, 0 };
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", distblurovercnt);
+u32 distblurovercnt = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", ripblurovercnt);
+u32 ripblurovercnt = 0;
 
-SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", dds3QuakeGainTable);
+dds3QuakeGain_t dds3QuakeGainTable[1] = { { { 0.59999996423721313477f, 0.59999996423721313477f } } };
 

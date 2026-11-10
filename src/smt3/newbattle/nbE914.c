@@ -255,7 +255,7 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern void nbDelAllKoukaPacketType(s32 type);
 
-extern char D_005468D8[];
+extern const char D_005468D8[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -473,11 +473,11 @@ s32 nbE915_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE914", D_005468D8);
+const char D_005468D8[16] = "\245\331\245\353\245\274\245\326\245\326\273\340\313\264\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914TargetBasic);
+dds3Basic_t *nbE914TargetBasic = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE914", nbE914Basic);
+dds3Basic_t *nbE914Basic = NULL;
 
 SDATA_PAD(4);
 

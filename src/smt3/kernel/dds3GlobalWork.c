@@ -768,31 +768,35 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     }
     return packet;
 }
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3GlobalWorkProcName);
+char dds3GlobalWorkProcName[5] = "GBWK";
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2211);
+s8 slNewGameBit2208 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2212);
+s8 slNewGameBit2209 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2213);
+s8 slNewGameBit2210 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit2323);
+s8 slNewGameBit2211 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", slNewGameBit162);
+s8 slNewGameBit2212 = 0;
 
-SDATA_PAD(1);
+s8 slNewGameBit2213 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3NewGameSavedHalf0C);
+s8 slNewGameBit2323 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA18);
+s8 slNewGameBit162 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_0054EA1C);
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", DDS3_GBWK);
+u16 dds3NewGameSavedHalf0C = 0;
 
-SDATA_PAD(4);
+s32 D_0054EA18 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqTable);
+sdfMemHandle_t *D_0054EA1C = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", dds3FontReqBoxTable);
+dds3GlobalWork_t *DDS3_GBWK = NULL;
+
+
+dds3FontReqFunc_t dds3FontReqTable = { dds3FontReqDestroy, dds3FontReqDrawFont };
+
+dds3FontReqFunc_t dds3FontReqBoxTable = { dds3FontReqFree, dds3FontReqDrawBoxLine };
 

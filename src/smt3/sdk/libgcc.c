@@ -1191,9 +1191,9 @@ typedef union __attribute__((packed)) {
 
 INCLUDE_RODATA(const s32, "sdk/libgcc", libgccDfInvalidResult);
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", libgccCieAugEmpty);
+const char libgccCieAugEmpty[8] __attribute__((section(".rodata"))) = "";
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", libgccCieAugEh);
+const char libgccCieAugEh[8] __attribute__((section(".rodata"))) = "eh";
 
 u8 *libc_2D2D90(u8 *p, frameStateInternal_t *state, cieInfo_t *info, u32 *location)
 {

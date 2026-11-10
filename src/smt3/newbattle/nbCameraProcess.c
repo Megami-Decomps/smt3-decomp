@@ -685,18 +685,18 @@ extern char nbCameraStateNameNegoTaizi[];
 extern char nbCameraStateNameNegoTarget[];
 extern char nbCameraStateNameNegoHojo[];
 extern char nbCameraStateNameNegoEnd[];
-extern char D_005344A0[];
+extern char nbCameraStateNameGameOver[];
 extern char nbCameraStateNameResult[];
 extern char nbCameraStateNamePlayerSide[];
 extern char nbCameraStateNameEnemySide[];
 extern char nbCameraStateNameEnd[];
 extern char nbCameraStateNameEvent[];
-extern char D_00534470[];
+extern char nbCameraStateNameEveTarget[];
 extern char nbCameraStateNameEnemyBad[];
 extern char nbCameraStateNameScript1Shot[];
 extern char nbCameraStateNameScriptBougai[];
 extern char nbCameraStateNameScriptFix[];
-extern char D_00534420[];
+extern char nbCameraStateNameDebugShotAll[];
 
 nbCameraStateEntry_t nbCameraStateTable[30] = {
     { nbCameraStateNameWait, NULL, NULL, 0, { 0, 0, 0 } },
@@ -717,16 +717,16 @@ nbCameraStateEntry_t nbCameraStateTable[30] = {
     { nbCameraStateNameNegoTarget, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc, 0, { 0, 0, 0 } },
     { nbCameraStateNameNegoHojo, nbCameraState_NegoHojo_Init, nbCameraState_NegoHojo_Calc, 0, { 0, 0, 0 } },
     { nbCameraStateNameNegoEnd, NULL, NULL, 0, { 0, 0, 0 } },
-    { D_005344A0, NULL, NULL, 0, { 0, 0, 0 } },
+    { nbCameraStateNameGameOver, NULL, NULL, 0, { 0, 0, 0 } },
     { nbCameraStateNameResult, NULL, NULL, 0, { 0, 0, 0 } },
     { nbCameraStateNamePlayerSide, nbCameraState_PlayerSide_Init, NULL, 0, { 0, 0, 0 } },
     { nbCameraStateNameEnemySide, nbCameraState_EnemySide_Init, NULL, 0, { 0, 0, 0 } },
     { nbCameraStateNameEnd, nb_1B3470, nb_1B3490, 0, { 0, 0, 0 } },
     { nbCameraStateNameEvent, NULL, NULL, 0, { 0, 0, 0 } },
-    { D_00534470, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc2, 0, { 0, 0, 0 } },
+    { nbCameraStateNameEveTarget, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc2, 0, { 0, 0, 0 } },
     { nbCameraStateNameEnemyBad, nbCameraState_EnemyBad_Init, nbCameraState_EnemyBad_Calc, 1, { 0, 0, 0 } },
     { nbCameraStateNameScript1Shot, nbCameraState_NegoTarget_Init, nbCameraState_NegoTarget_Calc2, 0, { 0, 0, 0 } },
     { nbCameraStateNameScriptBougai, nbCameraState_NegoBougai_Init2, nbCameraState_NegoBougai_Calc, 0, { 0, 0, 0 } },
     { nbCameraStateNameScriptFix, NULL, NULL, 0, { 0, 0, 0 } },
-    { D_00534420, nbCameraState_DebugShotAll_Init, NULL, 0, { 0, 0, 0 } },
+    { nbCameraStateNameDebugShotAll, nbCameraState_DebugShotAll_Init, NULL, 0, { 0, 0, 0 } },
 };

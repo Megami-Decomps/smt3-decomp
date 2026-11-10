@@ -96,9 +96,9 @@ extern void dds3EffectDelete(void *pData);
 
 extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-extern char fldNpcPlFormatB[];
+extern const char fldNpcPlFormatB[];
 
-extern char fldNpcPlFormat[];
+extern const char fldNpcPlFormat[];
 
 extern s32 sdfFileOpen(const char *aFileName);
 
@@ -541,6 +541,10 @@ extern sdfTexHandle_t *sdfTexSet(void *aTex);
 /* NON_MATCHING: 294 of 416 words differ at the native 1664-byte size, which
  * the draft reproduces exactly; see docs/matching/field/fld_Npc.md. */
 
+const sdfVector4_t fldItemBoxAddScale = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+const sdfVector4_t fldItemBoxAddAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
+
 #ifdef NON_MATCHING
 
 void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
@@ -679,9 +683,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
 
 #else
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxAddScale);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxAddAxis);
 
 INCLUDE_ASM(const s32, "field/fld_Npc", fldItemBoxAdd);
 
@@ -1001,7 +1003,7 @@ extern s32 nbGetEncountCnt(void);
 extern s32 nbGetEncountMax(s32 id);
 void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, f32 angle);
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldItemBoxCalcAxis);
+const sdfVector4_t fldItemBoxCalcAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 void fldEADraw(void) {
     s32 offset;
@@ -1803,11 +1805,11 @@ void fldGetEAEntry(const fldNpcPalette_t *src) {
     memcpy(fldNpcLightTable, src, sizeof(*src));
 }
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcModelStartAxis);
+const sdfVector4_t fldNpcModelStartAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcUnitName);
+const char fldNpcUnitName[16] = "NPC_UNIT";
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcPlFormatB);
+const char fldNpcPlFormatB[16] = "%sF%03db.NPL";
 
-INCLUDE_RODATA(const s32, "field/fld_Npc", fldNpcPlFormat);
+const char fldNpcPlFormat[16] = "%sF%03d.NPL";
 

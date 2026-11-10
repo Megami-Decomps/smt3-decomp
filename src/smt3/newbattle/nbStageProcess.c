@@ -502,7 +502,9 @@ void nbStageSp(void)
         }
     }
 }
-INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", nbNiidaCameraName);
+extern char nbNiidaCameraText[], nbEventCameraText[];
 
-INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", nbEventCameraName);
+char *nbNiidaCameraName = nbNiidaCameraText;
+
+char *nbEventCameraName = nbEventCameraText;
 

@@ -213,7 +213,7 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
 
 extern char *text2[];
 extern s32 rstCalcExpFromLevel(u8 index, s32 level);
-extern const char D_005510F0[], D_005510F8[];
+extern const char nbResultFmt2d[], nbResultFmt6d[];
 extern frFontHandle_t *nbResultFontHandle;
 extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
@@ -341,7 +341,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                     nbResultTex1);
         fontColor = rewardColor | alpha;
         level = nbResultScoreTable[scoreIndex].l_lv;
-        sprintf(buf, D_005510F0, level < 100 ? level : 99);
+        sprintf(buf, nbResultFmt2d, level < 100 ? level : 99);
         nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x3C) << 4, (y + 0x10) << 3,
                                                             0, fontColor, buf, NULL);
         frDrawFontEx(nbResultFontHandle, 1);
@@ -352,7 +352,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
         if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
             if (nbResultScoreTable[scoreIndex].lvupanmcnt >= 6) {
                 alpha = (nbResultScoreTable[scoreIndex].lvupanmcnt * 128 - 640) / 10;
-                sprintf(buf, D_005510F8, expNextLevel - exp);
+                sprintf(buf, nbResultFmt6d, expNextLevel - exp);
                 fontColor = 0xA09DC380;
                 nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                     (x + 0x11D) << 4, (y + 7) << 3, 0, rewardColor | alpha, buf, NULL);
@@ -361,7 +361,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                 frDestroyFontRequestAfter(nbResultFontHandle);
             }
         } else {
-            sprintf(buf, D_005510F8, expNextLevel - exp);
+            sprintf(buf, nbResultFmt6d, expNextLevel - exp);
             nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                 (x + 0x11D) << 4, (y + 7) << 3, 0, fontColor, buf, NULL);
             frDrawFontEx(nbResultFontHandle, 1);
@@ -647,7 +647,7 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
                 nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
                             0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
                             nbResultTex1);
-                sprintf(numberText, D_005510F0, itemCount[i]);
+                sprintf(numberText, nbResultFmt2d, itemCount[i]);
                 font = frwGetSmallNumFontFRQ(0x1AC0, ty2,
                                              0, 0xA09DC380, numberText, NULL);
                 nbResultFontRequest = font;
@@ -685,14 +685,14 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     if (((s32)nbResultTimer) >= 29) {
         scoreY = ((s32)nbResultTimer) < 43 ? ((s32)nbResultTimer) - 28 : 15;
         color = rewardColor | ((scoreY * 128) / 15);
-        sprintf(numberText, D_005510F8, nbGetKakutokuExp(data));
+        sprintf(numberText, nbResultFmt6d, nbGetKakutokuExp(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x348, 0,
                                      color,
                                      numberText, 0);
         nbResultFontRequest = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
         frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
-        sprintf(numberText, D_005510F8, nbGetKakutokuMaka(data));
+        sprintf(numberText, nbResultFmt6d, nbGetKakutokuMaka(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x448, 0,
                                      color,
                                      numberText, 0);
@@ -906,7 +906,7 @@ extern s32 nbResultState;
 extern void nbFindTobiwarpLabel(nbMainProcessData_t *data);
 extern void nbBgmFadeOut(void);
 extern void nbIncResultCounter(void);
-extern char nbResultDoneMsg[];
+extern const char nbResultDoneMsg[];
 
 /* Qualified reorg traces: the preceding C reward routine removes $2 from
  * the fall-through live set, preserving the final plain loading-state branch. */
@@ -1001,7 +1001,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,
                                           void *work);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbResultDoneMsg);
+const char nbResultDoneMsg[16] = "pac1 done\n";
 
 void nbInitResultProcess(nbMainProcessData_t *data)
 {
@@ -1016,17 +1016,21 @@ void nbLoadStageSky(void)
     fldSkyBattle();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageLightName);
+const char nbStageLightName[16] = "BTL_DEF_LIGHT";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbNiidaCameraPos);
+const sdfVector4Unaligned_t nbNiidaCameraPos = { 0.0f, -100.0f, -600.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbEventCameraPos);
+const char nbNiidaCameraText[16] = "NIIDA CAMERA";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultPos);
+const sdfVector4Unaligned_t nbEventCameraPos = { 0.0f, -100.0f, -600.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultRot);
+const char nbEventCameraText[16] = "EVENT CAMERA";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageProcessName);
+const f32 nbStageCameraDefaultPos[4] = { 213.0f, -276.669983f, -636.839966f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageDrawProcessName);
+const f32 nbStageCameraDefaultRot[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+const char nbStageProcessName[16] = "nb_stage";
+
+const char nbStageDrawProcessName[24] = "nb_draw_stage";
 

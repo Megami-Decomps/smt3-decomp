@@ -217,7 +217,7 @@ extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char nbE910EndMsg[];
+extern const char nbE910EndMsg[];
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -358,5 +358,5 @@ s32 nbE910_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE909", nbE910EndMsg);
+const char nbE910EndMsg[16] = "\245\253\245\260\245\304\245\301\273\340\313\264\n";
 

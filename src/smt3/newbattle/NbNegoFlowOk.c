@@ -217,7 +217,7 @@ extern s32 datGetPlayerLevel(void);
 
 
 
-extern char nbNegoLevelFormat[];
+extern const char nbNegoLevelFormat[];
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -405,7 +405,7 @@ s32 Flow9_10(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowOk", nbNegoLevelFormat);
+const char nbNegoLevelFormat[32] = "plv = %d, elv = %d\n";
 
 s32 Flow9_11(nbNegoProcessData_t *n)
 {

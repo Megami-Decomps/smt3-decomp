@@ -33,7 +33,7 @@ extern s32 sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
 
 extern void sdfFileClose(s32 aHandle);
 
-extern char fldAllTblPath[];
+extern const char fldAllTblPath[];
 
 extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldNpcOverrides[], fldTerminalTable[];
 
@@ -245,7 +245,7 @@ void fldResetSequenceParams(void)
     fldGlobalBase.wordC8 = 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldGlobal", fldAllTblPath);
+const char fldAllTblPath[32] = "/fld/f/bin/FLDALL.TBL";
 
 s32 dds3EffectFldCharToType(s32 charId)
 {

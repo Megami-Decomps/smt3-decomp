@@ -16,7 +16,7 @@
 
 extern evtViewerInfo_t *viewerinfo;
 
-extern char evtFrameVarName[];
+extern const char evtFrameVarName[];
 
 extern char evtFrameNumFmt[];
 
@@ -120,7 +120,7 @@ dds3ProcessID_t *evtInitFrameVar(void)
     return dds3StartProcess(evtFrameVarName, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", evtFrameVarName);
+const char evtFrameVarName[24] = "FrameVar";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", D_0053BCB0);
+const char evtFrameHeadSoftenBias[16] = "SOFTEN_BIAS";
 

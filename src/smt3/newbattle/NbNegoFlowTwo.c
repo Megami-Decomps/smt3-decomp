@@ -482,10 +482,10 @@ s32 Flow6_8(nbNegoProcessData_t *n)
 }
 
 extern s32 nbGetNegoRequestType(s32 reqtype);
-extern char nbNegoRequestTypeFormat[];
+extern const char nbNegoRequestTypeFormat[];
 #include "sdk_libc.h"
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoRequestTypeFormat);
+const char nbNegoRequestTypeFormat[16] = "request = %d\n";
 
 s32 Flow6_9(nbNegoProcessData_t *n)
 {
@@ -757,10 +757,10 @@ s32 Flow6_21(nbNegoProcessData_t *n)
     return 0;
 }
 
-extern char nbNegoNowSelectFormat[];
+extern const char nbNegoNowSelectFormat[];
 extern void nbMakaDispOff(void);
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoNowSelectFormat);
+const char nbNegoNowSelectFormat[24] = "select = %d\n";
 
 s32 Flow6_70(nbNegoProcessData_t *n)
 {
@@ -1587,9 +1587,9 @@ s32 Flow6_52(nbNegoProcessData_t *n)
 extern void nbCameraSetHojo(nbFormation_t *hojo, nbFormation_t *target1,
                             nbFormation_t *target2);
 extern void nbDispSkillName(s32 id);
-extern char nbNegoHojoFormat[];
+extern const char nbNegoHojoFormat[];
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", nbNegoHojoFormat);
+const char nbNegoHojoFormat[40] = "\312\344\275\365\245\271\245\255\245\353\310\257\306\260! p[%d] id[%04X]\n";
 
 s32 Flow6_53(nbNegoProcessData_t *n)
 {

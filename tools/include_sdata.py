@@ -147,6 +147,9 @@ def place(version):
         compiled = {s for _, _, s in anchors}
         defined = compiled & {m.group(1) for m in DATA_DEF.finditer(text)}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
+        # A C-defined object after a pad aligns itself, and the pad's section switch would send it to .text.
+        order = [e for i, e in enumerate(order) if not (
+            e[2].startswith("SDATA_PAD(") and i + 1 < len(order) and order[i + 1][2] in compiled)]
         following, placed = len(text), []
         # cc1 keeps emitting into .sdata after a C variable, so a variable that follows
         # an asm chunk (which ends in .text) needs SDATA_RESUME, and aligns itself,

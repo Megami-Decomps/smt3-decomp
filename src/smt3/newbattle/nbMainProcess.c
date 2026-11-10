@@ -384,7 +384,7 @@ extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camer
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fovy);
 extern s32 D_00550F80;
-extern char *D_00550F78;
+extern char *nbDebugFreeCameraName;
 extern char *nbDebugGameCameraName;
 extern char D_00550F88[];
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
@@ -450,7 +450,7 @@ void nbDebugCamera(nbMainProcessData_t *data)
     if (camera->name != NULL) {
         name = camera->name;
     } else {
-        name = (data->stat & 0x20) ? nbDebugGameCameraName : D_00550F78;
+        name = (data->stat & 0x20) ? nbDebugGameCameraName : nbDebugFreeCameraName;
     }
     if (data->debug == 1) {
         tag = dds3FontReqAllocDrawTag();
@@ -464,13 +464,13 @@ extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern char *nbDebugPhaseNameTable[];
 extern char *nbActionTypeNameTable[];
-extern char D_00551060[]; /* "Turn:%d", shared small-data strings. */
-extern char D_00551068[]; /* "ENEMY" */
-extern char D_00551070[]; /* "PLAYER" */
+extern char nbDebugTurnFmt[]; /* "Turn:%d", shared small-data strings. */
+extern char nbDebugEnemyName[]; /* "ENEMY" */
+extern char nbDebugPlayerName[]; /* "PLAYER" */
 extern char D_00551078[]; /* "." */
-extern char D_00551080[]; /* "EXP :%d" */
-extern char D_00551088[]; /* "MAKA:%d" */
-extern char D_00551090[]; /* "SUMM:%d" */
+extern char nbDebugExpFmt[]; /* "EXP :%d" */
+extern char nbDebugMakaFmt[]; /* "MAKA:%d" */
+extern char nbDebugSummFmt[]; /* "SUMM:%d" */
 
 void nbDebugMainProcess(nbMainProcessData_t *data)
 {
@@ -485,11 +485,11 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 0, "STAT:%08X", data->stat)));
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Phase:%d", data->phase)));
         y += 0x60;
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, D_00551060, data->turn)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, nbDebugTurnFmt, data->turn)));
         if (data->stat & 8) {
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 6, D_00551068, data->turn)));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 6, nbDebugEnemyName, data->turn)));
         } else {
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 5, D_00551070, data->turn)));
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7880, y, 0xFFFF80, 5, nbDebugPlayerName, data->turn)));
         }
         y += 0x60;
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, y, 0xFFFF80, 0, "Press:%2.3f", data->press3)));
@@ -589,14 +589,14 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
             }
             y += 0x60;
         }
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7D40, 0xFFFF80, 0, D_00551080, data->exp)));
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7DA0, 0xFFFF80, 0, D_00551088, data->maka)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7D40, 0xFFFF80, 0, nbDebugExpFmt, data->exp)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, 0x7DA0, 0xFFFF80, 0, nbDebugMakaFmt, data->maka)));
         y = 0x7E00;
         for (i = 0; i < 4; i++) {
             sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y, 0xFFFF80, 0, "ITEM:0x%02X", data->item[i])));
             y += 0x60;
         }
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y + 0x60, 0xFFFF80, 0, D_00551090, data->nakamayobi)));
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7D00, y + 0x60, 0xFFFF80, 0, nbDebugSummFmt, data->nakamayobi)));
         y = 0x7D40;
         for (i = 0; i < 8; i++) {
             if (i < data->actionstackp) {
@@ -614,7 +614,7 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
 
 
 extern char nbDebugCountFormat[], nbDebugSlotHeader[], nbDebugEventTimeFormat[], nbDebugEventSeqFormat[], nbDebugEventSeqTimeFormat[];
-extern char D_00551098[], D_005510A0[], D_005510A8[], D_005510B0[];
+extern char D_00551098[], nbDebugCharFmt[], D_005510A8[], D_005510B0[];
 
 #ifdef NON_MATCHING
 void DebugDisp2(nbMainProcessData_t *data)
@@ -654,7 +654,7 @@ void DebugDisp2(nbMainProcessData_t *data)
             }
         }
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x8160,
-                                                0xFFFF80, 0, D_005510A0, glyph)));
+                                                0xFFFF80, 0, nbDebugCharFmt, glyph)));
     }
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x81C0, 0xFFFF80, 0xE,
@@ -679,7 +679,7 @@ void DebugDisp2(nbMainProcessData_t *data)
             attr = 2;
         }
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x81C0,
-                                                0xFFFF80, attr, D_005510A0, glyph)));
+                                                0xFFFF80, attr, nbDebugCharFmt, glyph)));
     }
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8220, 0xFFFF80, 0xE,
@@ -691,7 +691,7 @@ void DebugDisp2(nbMainProcessData_t *data)
         glyph = order < 0 ? '.' : (order < 10 ? order + 0x30 : order + 0x37);
         attr = i == selected ? 4 : 0;
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x8220,
-                                                0xFFFF80, attr, D_005510A0, glyph)));
+                                                0xFFFF80, attr, nbDebugCharFmt, glyph)));
     }
 
     eventProcess = data->EventProcessID;
