@@ -175,7 +175,7 @@ s32 sdfBcdToDecimal(s32 aBcd)
 /* Pack positive decimal digits into nibbles; non-positive input returns zero.
  * The original signed shifts and lack of an overflow check are retained.
  */
-s32 sdf_2BFE08(s32 number) {
+s32 sdfDecimalToPackedDigits(s32 number) {
     s32 digitShift = 0;
     s32 packedDigits = 0;
     while (number > 0) {

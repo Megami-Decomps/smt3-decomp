@@ -64,3 +64,8 @@
 0x0054A3B0	mcModuleNameCdMcman	inferred	"\MCMAN.IRX;1", an LoadMcModules name; DDS1/2 same object
 0x0054A3C0	mcModuleNameMcserv	inferred	"/mcserv.irx", an LoadMcModules name; DDS1/2 same object
 0x0054A3D0	mcModuleNameMcman	inferred	"/mcman.irx", an LoadMcModules name; DDS1/2 same object
+0x00109D80	scrCreateProcessWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109D80
+0x00109DD0	scrCreateTaskWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109DD0
+0x00109E38	scrCreateProcessAtFirstProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109E38
+0x00109FD0	scrStartProcessProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name func_00109FD0
+0x002BFE08	sdfDecimalToPackedDigits	inferred	DDS1/2 name for the same sdfDev9 function; former name sdf_2BFE08
