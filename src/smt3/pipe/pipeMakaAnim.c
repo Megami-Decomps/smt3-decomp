@@ -487,7 +487,7 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
     } while (--i >= 0);
 }
 
-INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", makaSingleEaseTable);
+const makaEaseTable_t makaSingleEaseTable = { { 0.4f, 0.8f, 0.83f, 0.86f, 0.89f, 0.95f, 1.0f } };
 
-INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", makaMultiEaseTable);
+const makaEaseTable_t makaMultiEaseTable = { { 0.4f, 0.8f, 0.83f, 0.86f, 0.89f, 0.95f, 1.0f } };
 
