@@ -3426,7 +3426,7 @@
 0x001AE668 effEVECombParSmokeCreate effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam)
 0x001AE860 effEVECombParSmokeDelete void effEVECombParSmokeDelete(effEVECombParSmoke_t *pCombParSmoke)
 0x001AE8A8 effEVECombParSmokePartInit void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, u32 index)
-0x001AEC58 eff_1AEC58 __int64 __fastcall eff_1AEC58(int)
+0x001AEC58 effEventUpdateBillboardParticles __int64 __fastcall effEventUpdateBillboardParticles(int)
 0x001AF070 effEVECombParSmokeDraw void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke)
 0x001AFBA8 effEVECombParSmokeSetPosition void effEVECombParSmokeSetPosition(effEVECombParSmoke_t *pCombParSmoke, sdfVector4_t pPos)
 0x001AFBB8 effEVECombParSmokeSetZtest void effEVECombParSmokeSetZtest(effEVECombParSmoke_t *pCombParSmoke, u8 test)

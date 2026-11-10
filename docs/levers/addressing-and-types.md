@@ -1280,7 +1280,7 @@
   array row above: contiguous four-byte slots mean plain locals that spill.
 - Two locals that both spill take their stack slots in **declaration** order,
   and their load order in the prologue follows the statement order separately.
-  In `eff_1AEC58` retail gives `0x30` to the `u8 repeat` and `0x34` to the `u32`
+  In `effEventUpdateBillboardParticles` retail gives `0x30` to the `u8 repeat` and `0x34` to the `u32`
   particle count; declaring `repeat` first is exact and declaring it last swaps
   both slots and their four reloads (5 of 262 words). The statement order is a
   second, independent lever on the same pair: reading the particle pointer before

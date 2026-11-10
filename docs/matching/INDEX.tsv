@@ -98,7 +98,7 @@ EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/
 evtAddFrameInfo	event/evtEventViewer	0x540	305 of 336 words match	docs/matching/event/evtEventViewer.md	206
 EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	278
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
-func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
+evtPollEffectFrameControl	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	78 of 78 words match	docs/matching/event/evtEventViewerMenu.md	58
 evtSaveViewerHeader	event/evtEventViewerMenu	0x400	256 of 256 words match	docs/matching/event/evtEventViewerMenu.md	93
 evtMoonProcess2	event/evtMoon	0x119C	13 of 996 words match	docs/matching/event/evtMoon.md	3

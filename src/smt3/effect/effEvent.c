@@ -493,7 +493,7 @@ void Eve_EffectDraw(void) {
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
-s32 func_001AD6E8(void) {
+s32 effUpdateCh72Params(void) {
     u8 ready = D_0054F2C5;
 
     if (D_0054F2C5 == 0) {
@@ -1081,10 +1081,10 @@ void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, s32 index) 
     particle->shift_s = pCombParSmoke->head.lateralSpeed * (dds3GetRandFloatA(dds3EffectBase) * pCombParSmoke->head.lateralSpeedRandomness + (1.0f - pCombParSmoke->head.lateralSpeedRandomness));
 }
 
-void eff_1AEC58(effEVECombParSmoke_t *work);
+void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work);
 
 /* vu0 routine: advance and draw every live particle of one smoke set. */
-void eff_1AEC58(effEVECombParSmoke_t *work) {
+void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work) {
     sdfVector4_t offset;
     sdfVector4_t origin;
     f32 side[EFF_EVENT_VECTOR_COMPONENTS];
@@ -1770,7 +1770,7 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
 }
 
 /* Copy XYZ from four float4 rows without touching destination W, then copy four trailing scalars. */
-void func_001B0730(effChan_t *channel, f32 *source) {
+void effCopyVertRows(effChan_t *channel, f32 *source) {
     f32 *sourceRow;
     u32 rowIndex;
     f32 *scalarCursor;

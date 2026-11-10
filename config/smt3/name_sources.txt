@@ -35,6 +35,9 @@
 0x001AC3D8	effEvaluateSlotBezierPosition	inferred	DDS1/2 name for the same effDebug function; former name func_001AC3D8
 0x001AC4C8	effInitSlotTail	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4C8
 0x001AC4F0	effGetSlotAt	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4F0
+0x001AD6E8	effUpdateCh72Params	inferred	DDS1/2 name for the same effEvent function; former name func_001AD6E8
+0x001AEC58	effEventUpdateBillboardParticles	inferred	DDS1/2 name for the same effEvent function; former name eff_1AEC58
+0x001B0730	effCopyVertRows	inferred	DDS1/2 name for the same effEvent function; former name func_001B0730
 0x001B09C0	effSplRun	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B09C0
 0x001B0A60	effSplCalc	inferred	DDS1/2 name for the same effSpline function; former name func_001B0A60
 0x001B0B90	effSplCalcRegist	inferred	DDS1/2 name for the same effSpline function; former name func_001B0B90
@@ -51,6 +54,7 @@
 0x001E9168	evtCommandStartBgmWithFade	inferred	DDS name for the same script command, calls the bgm fade starter
 0x001E9298	evtOpcodeRefreshTaskData	inferred	DDS name for the same script command slot
 0x001E92F8	evtCommandSetDrawFlagWhileWaiting	inferred	DDS name; sets dds3DrawFlag 0x2000000 until the command timer passes its argument
+0x001F79A8	evtPollEffectFrameControl	inferred	DDS1/2 name for the same evtEventViewerMenu function; former name func_001F79A8
 0x001FA158	evtStartBgmBySoundIdAndFade	inferred	DDS twin name
 0x001FA310	evtRefreshTaskEffectTexture	inferred	DDS twin name
 0x001FA398	evtSpawnResourceObject	inferred	DDS twin name

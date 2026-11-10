@@ -1,6 +1,6 @@
 # Matching notes: event/evtEventViewerMenu
 
-## func_001F79A8 (event/evtEventViewerMenu, 0xE4)
+## evtPollEffectFrameControl (event/evtEventViewerMenu, 0xE4)
 
 20 of 56 words differ in the current 224-byte emitted body, against retail's
 228 bytes; four native bytes are uncovered. The fallback explicitly declares

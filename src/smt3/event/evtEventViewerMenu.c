@@ -97,7 +97,7 @@ extern s8 framelist_xcnt[];
 s32 evtFrameListHead(void *tag, s32 ox, s32 oy);
 void evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
 
-extern s32 func_001AD6E8(void);
+extern s32 effUpdateCh72Params(void);
 
 extern s32 mblurProcess(void);
 
@@ -1173,13 +1173,13 @@ s32 evtViewerExit(void)
 }
 /* NON_MATCHING: 20 of 56 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-s32 func_001F79A8(void)
+s32 evtPollEffectFrameControl(void)
 {
     s32 busy = 1;
 
     switch (viewerinfo->framelist_target->type) {
     case 0xD:
-        busy = func_001AD6E8();
+        busy = effUpdateCh72Params();
         break;
     case 0xE:
         busy = mblurProcess();
@@ -1216,7 +1216,7 @@ s32 func_001F79A8(void)
     return 1;
 }
 #else
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", func_001F79A8);
+INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtPollEffectFrameControl);
 #endif
 
 s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y)
