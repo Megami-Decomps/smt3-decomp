@@ -12,7 +12,7 @@ extern u32 dds3GetKernelCount(void);
 
 struct pipeTextureFile_t;
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 
 extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);

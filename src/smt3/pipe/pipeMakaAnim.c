@@ -7,7 +7,7 @@
 
 struct pipeTextureFile_t;
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *memset(void *a, s32 b, size_t c);
 

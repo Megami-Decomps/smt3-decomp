@@ -14,7 +14,7 @@ extern f32 pipeCamShake[], pipeCameraPos[];
 
 extern dds3Basic_t *pipe_Camera;
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern u32 dds3AllocObjectId(void);
 

@@ -50,3 +50,17 @@
 0x2cf730	acosf	evidence	Native libm routine pairs with DDS at 0x2fa1c0 over 20 bytes with only address relocations masked; former name __ieee754_acosf. Wrapper identity follows its verified kernel target.
 0x2cf748	atan2f	evidence	Native libm routine pairs with DDS at 0x2fa1f0 over 20 bytes with only address relocations masked; former name func_002CF748. Wrapper identity follows its verified kernel target.
 0x2cf760	__ieee754_acosf	evidence	Native libm routine pairs with DDS at 0x2fa208 over 1060 bytes with only address relocations masked; former name func_002CF760. Wrapper identity follows its verified kernel target.
+0x002FA240	sdfViewMatrix	inferred	DDS1/2 name for the same view matrix (mdlManager, effMath)
+0x002F5C20	kwlnHeldTextureTargetVector	inferred	DDS1/2 name; LookAtMatrix target in dds3KernelProcess and effPacket
+0x002F5C30	kwlnHeldTextureEyeVector	inferred	DDS1/2 name; LookAtMatrix eye in dds3KernelProcess and effPacket
+0x0031F3E0	effScatterTriangleIndices	inferred	DDS1/2 name for the same effPCPScatter index table
+0x005518E0	sdfPadAnalogSticks	inferred	DDS1/2 name; four stick bytes per pad written by sdf_PadManager
+0x005520A8	sdfPendingQueueSlots	inferred	DDS1/2 name for the same sdfDelayedResrc slot array
+0x00551828	sdfTickCallback	inferred	DDS1/2 name for the same sdfSystem callback
+0x00529630	sdf3DUpVector	inferred	{0, 1, 0, 0}, the fallback axis in sdf3DMakeLightParallelPacket; DDS1/2 same object
+0x005293A0	sdfImageSetTexFlushPacket	inferred	DMA end tag plus a GIF A+D TEXFLUSH write chained after an image upload; DDS1/2 same object
+0x00551B50	sdfMovieIpsExt	inferred	".ips" extension compared in sdfMovie; DDS1/2 same object
+0x0054A3A0	mcModuleNameCdMcserv	inferred	"\MCSERV.IRX;1", an LoadMcModules name; DDS1/2 same object
+0x0054A3B0	mcModuleNameCdMcman	inferred	"\MCMAN.IRX;1", an LoadMcModules name; DDS1/2 same object
+0x0054A3C0	mcModuleNameMcserv	inferred	"/mcserv.irx", an LoadMcModules name; DDS1/2 same object
+0x0054A3D0	mcModuleNameMcman	inferred	"/mcman.irx", an LoadMcModules name; DDS1/2 same object

@@ -4,7 +4,7 @@
 #include "basic.h"
 #include "motion.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
                              s32 (*drawExit)(void *), void (*deleteExit)(void *), void *p);

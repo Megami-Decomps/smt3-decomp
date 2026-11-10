@@ -2685,7 +2685,7 @@ void SetCameraLightParam(fclEncyc_instance_tag *pinst)
 }
 
 extern dds3DrawBank_t dds3DrawEnv[];
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern sdfVector4_t aViewEye, aViewTarget, aViewDown;
 extern sdfVector4_t fclEncycLightColor, fclEncycLightDir, fclEncycAmbientColor, fclEncycFogColor;
 extern sdfVector4_t D_00345F60;
@@ -2737,10 +2737,10 @@ void func_0021B480(fclEncyc_instance_tag *pinst)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&eye);
     LookAtMatrix((f32 *)&target, (f32 *)&eye, (f32 *)&aViewDown);
-    SDF_VU0_STOREMATRIX_NOMEM(&D_002FA240);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     sdf3DMakeViewportPacket(&dds3DrawEnv[frame].viewport,
-                            &dds3ScreenParam, &D_002FA240);
-    sdf3DSetCamera(&dds3ScreenParam, &D_002FA240);
+                            &dds3ScreenParam, &sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
 
@@ -2769,7 +2769,7 @@ extern void FromRotation_B(f32 angle);
 extern void Mult(void);
 extern f32 sdfSin(f32 angle);
 extern f32 sdfCos(f32 angle);
-extern f32 D_00529630[4];
+extern f32 sdf3DUpVector[4];
 extern f32 fclEncycPanStepX[4];
 extern f32 fclEncycPanStepY[4];
 
@@ -2795,11 +2795,11 @@ void ControlModel(fclEncyc_instance_tag *pinst, mdlObj_t *model, s32 key)
 
     mdlGetRotate(model);
     if ((key & 2) != 0) {
-        SDF_VU0_LOADVECTOR_B(D_00529630);
+        SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
         FromRotation_B(-SDF_FRAME_STEP(0.034906583f));
         Mult();
     } else if ((key & 4) != 0) {
-        SDF_VU0_LOADVECTOR_B(D_00529630);
+        SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
         FromRotation_B(SDF_FRAME_STEP(0.034906583f));
         Mult();
     }

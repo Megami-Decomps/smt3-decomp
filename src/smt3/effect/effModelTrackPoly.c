@@ -837,7 +837,7 @@ void effSwordTrackPolygonDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
 #ifdef NON_MATCHING
 /* 307 of 584 words match, 277 differ, first at +0x270: the reload register for
  * the spilled history pointer in the run-loop head, two words short overall. */
-extern f32 D_002FA240[16];
+extern f32 sdfViewMatrix[16];
 extern f32 aViewEye[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern void MultMatrixRev(f32 *matrix);
@@ -914,7 +914,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
         runCounts[0] = pointCount;
         runCounts[1] = 0;
     }
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev(dds3ScreenParam.TM.m);
     for (run = 0; run < 2; run++) {
         vertices = history->pVertex + starts[run];

@@ -33,7 +33,7 @@ extern s32 _gp, sdfThreadSema, sdfVblankFlag, sdfCoreDrawBuffSize;
 
 extern u8 sdfPadManagerMode, sdfSystemThreadStack[], sdfVblankThreadStack[];
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern sdfThCB_t *sdfVblankThreadId;
 
@@ -439,8 +439,8 @@ void sdfSystemThreadProc(void) {
             sdfPadWork();
         }
         sdfFileCmdThreadCheckPrio();
-        if (D_00551828 != NULL) {
-            D_00551828();
+        if (sdfTickCallback != NULL) {
+            sdfTickCallback();
         }
     }
 }
@@ -582,7 +582,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfDmacHandlerTable);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfCoreDrawBuffSize);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSystem", D_00551828);
+INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfTickCallback);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfVblankFlag);
 

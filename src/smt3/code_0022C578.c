@@ -7204,7 +7204,7 @@ extern sdf3DInitPacket_t cmpViewInitPacket[2];
 extern sdfDrawTag_t cmpLightTag[2];
 extern sdf3DLightParallelPacket_t cmpLightPacket[2];
 extern sdf3DViewportPacket_t cmpViewportPacket[2];
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern f32 aViewDown[4];
@@ -7221,11 +7221,11 @@ void cmpDrawSetup3DView(void)
 
     sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
     LookAtMatrix(aViewTarget, aViewEye, aViewDown);
-    SDF_VU0_STOREMATRIX(&D_002FA240);
+    SDF_VU0_STOREMATRIX(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfDrawTagInit(&cmpViewTag[i]);
         sdf3DLinkInitPacket(&cmpViewTag[i], &cmpViewInitPacket[i]);
-        sdf3DMakeViewportPacket(&cmpViewportPacket[i], (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+        sdf3DMakeViewportPacket(&cmpViewportPacket[i], (sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
         sdfDrawTagLink(&cmpViewTag[i], EE_ADDR(&cmpViewportPacket[i]));
         sdfDrawTagInit(&cmpLightTag[i]);
         sdf3DMakeLightParallelPacket(&cmpLightPacket[i], dds3LightParam.parallel, &dds3AmbientColor);
@@ -10089,8 +10089,8 @@ void func_0023FCC0(void)
     SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
     SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
     SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
-    SDF_VU0_LOADMATRIX(&D_002FA240);
-    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
 }
 
 void cmpModelInit(void)
@@ -10395,10 +10395,10 @@ void cmpSetStatusModelParam(void)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&eye);
     LookAtMatrix((f32 *)&target, (f32 *)&eye, aViewDown);
-    SDF_VU0_STOREMATRIX_NOMEM(&D_002FA240);
+    SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
     sdf3DMakeViewportPacket((sdf3DViewportPacket_t *)((u8 *)&dds3DrawEnv[frame] + 0x1520),
-                          (sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
-    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &D_002FA240);
+                          (sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
+    sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
 }
 
 extern void cmpSetStatusModelPose(mdlObj_t *model);

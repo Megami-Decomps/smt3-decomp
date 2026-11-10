@@ -5,7 +5,7 @@
 #include "motion.h"
 #include "pipe.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern f32 sdfSin(f32 aRadius);
 

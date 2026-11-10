@@ -95,7 +95,7 @@ extern struct sdf3DScreenParam_t dds3ScreenParam;
 
 extern u8 aProjMatrix[];
 
-extern u8 D_002FA240[];
+extern u8 sdfViewMatrix[];
 
 extern void InversMatrix(void);
 
@@ -1152,7 +1152,7 @@ void fldAutoMapDrawOneArea(void)
     rsetTest(1, 0, 0x80, 1, 1, 1, 1, 1);
     aDrawBoxF(0, 0, 0x200, 0xE0, 0x80, 0x80, 0xA2, 0x80);
     rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
-    sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
     D_0054EE98 += D_0054C4AC;
     fldAutoMapBobPhase += SDF_FRAME_STEP(fldAutoMapBobRate);
     SDF_VU0_COPYVECTOR(&rect, &fldAutoMapRect);
@@ -1337,7 +1337,7 @@ void fldAutoMapDrawOneArea(void)
         frDrawFontEx(fldAutoMapFontReq, 1);
         frDestroyFontRequestAfter(fldAutoMapFontReq);
     }
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
 }
 #else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawOneArea);
@@ -1355,8 +1355,8 @@ void fldAutoMapDrawWindow(void) {
                 fldAutoMapWindowTex[0]);
     fldAutoMapBgScroll = fldAutoMapBgScroll - 1.0f;
     fldAutoMapDrawBgOfsRF(255.0f, 250.0f, fldAutoMapBgScroll);
-    sdf3DSetCamera(&dds3ScreenParam, D_002FA240);
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    sdf3DSetCamera(&dds3ScreenParam, sdfViewMatrix);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     rsetOtOfs(0x51);
     rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
     rsetAlpha(0);

@@ -34,7 +34,7 @@ s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, voi
 extern s32 movieStreamSema;
 extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
-extern const char D_00551B50[];
+extern const char sdfMovieIpsExt[];
 
 void movie_2C5080(const char *aStr)
 {
@@ -522,7 +522,7 @@ void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *desc, const char 
     ext = strrchr(path, '.');
     isPac = 0;
     if (ext != NULL) {
-        isPac = strcasecmp(ext, D_00551B50) == 0;
+        isPac = strcasecmp(ext, sdfMovieIpsExt) == 0;
     }
     stream->mode = isPac;
     fmt.loopMode = 0;
@@ -633,5 +633,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieStreamSema);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_00551B4C);
 
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_00551B50);
+INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieIpsExt);
 

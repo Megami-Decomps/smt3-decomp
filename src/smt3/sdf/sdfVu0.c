@@ -369,7 +369,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518D5);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadButtons);
 
-INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518E0);
+INCLUDE_SDATA(const s32, "sdf/sdfVu0", sdfPadAnalogSticks);
 
 INCLUDE_SDATA(const s32, "sdf/sdfVu0", D_005518E1);
 

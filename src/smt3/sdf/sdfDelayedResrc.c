@@ -43,7 +43,7 @@ void *sdfChipAllocDirect(s32 aSize);
 
 extern s32 EIntr(void);
 
-extern saddr_t D_005520A8[2];
+extern saddr_t sdfPendingQueueSlots[2];
 
 extern s32 DIntr(void);
 
@@ -175,11 +175,11 @@ void sdfDelayedResrcProc(void) {
 
     sdfDelayedResrcFlag = 1;
     WaitSema(sdfDelayedResrcSemaId);
-    sdfDelayedResrcRelease(EE_ADDR_AS(sdfDelayedResrcChunk_t *, D_005520A8[0]));
+    sdfDelayedResrcRelease(EE_ADDR_AS(sdfDelayedResrcChunk_t *, sdfPendingQueueSlots[0]));
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
-        D_005520A8[slotIndex] = D_005520A8[slotIndex + 1];
+        sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
     }
-    D_005520A8[SDF_PENDING_LAST_SLOT] = EE_ADDR_S(sdfDelayedResrcClose());
+    sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = EE_ADDR_S(sdfDelayedResrcClose());
     SignalSema(sdfDelayedResrcSemaId);
     sdfDelayedResrcFlag = 0;
 }
@@ -194,7 +194,7 @@ u64 sdfDelayedResrcCheckFunc(void) {
         return 1;
     }
     slotIndex = 0;
-    slotCursor = D_005520A8;
+    slotCursor = sdfPendingQueueSlots;
     do {
         if (*slotCursor != 0) {
             return 1;

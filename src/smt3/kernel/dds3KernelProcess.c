@@ -48,11 +48,11 @@ s32 dds3FirstProcess(dds3ProcessID_t *id)
 extern u32 dds3RenderTex, dds3RenderDrawEnv, dds3BackColor;
 extern dds3LightState_t dds3LightParam, dds3LightParam2;
 extern sdf3DLight_t *dds3RenderLightParallel[];
-extern sdfVector4_t dds3RenderAmbientColor, D_002F5C20, D_002F5C30, effPCPBossTexRect;
+extern sdfVector4_t dds3RenderAmbientColor, kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect;
 extern sdfVector4_t fldAutoMapRect, fldAutoMapEye, fldAutoMapUp, aViewTarget, aViewEye, aViewDown;
 extern f32 dds3QuakeOffset[4];
 extern sdf3DScreenParam_t dds3RenderScreenParam, dds3ScreenParam, dds3ScreenParam2;
-extern sdfMatrix4_t dds3RenderViewportMatrix, aProjMatrix, D_002FA240;
+extern sdfMatrix4_t dds3RenderViewportMatrix, aProjMatrix, sdfViewMatrix;
 extern sdf3DFogParam_t dds3RenderFogParam;
 extern sdfModelOt_t D_002F69B8[];
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
@@ -93,7 +93,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
             sdfDrawTag_t *renderTag;
             sdf3DFogPacket_t *renderFog;
             sdf3DMakeScreenParam(&dds3RenderScreenParam);
-            LookAtMatrix(&D_002F5C20, &D_002F5C30, &effPCPBossTexRect);
+            LookAtMatrix(&kwlnHeldTextureTargetVector, &kwlnHeldTextureEyeVector, &effPCPBossTexRect);
             SDF_VU0_STOREMATRIX(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket(&dds3DrawEnv[frame].renderViewport, &dds3RenderScreenParam, &dds3RenderViewportMatrix);
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], &dds3DrawEnv[frame].renderTag);
@@ -136,9 +136,9 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(eye);
     LookAtMatrix((const void *)target, (const void *)eye, &aViewDown);
-    SDF_VU0_STOREMATRIX(&D_002FA240);
-    sdf3DMakeViewportPacket(&dds3DrawEnv[frame].viewport, &dds3ScreenParam, &D_002FA240);
-    sdf3DSetCamera(&dds3ScreenParam, &D_002FA240);
+    SDF_VU0_STOREMATRIX(&sdfViewMatrix);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[frame].viewport, &dds3ScreenParam, &sdfViewMatrix);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
     sdfGrOtTable[7].regFunc(&sdfGrOtTable[7], &dds3DrawEnv[frame].drawTag);
     sceneTag = dds3FontReqAllocDrawTag();
     sceneFog = EE_ADDR_AS(sdf3DFogPacket_t *, sdfGrAllocPacketBuff(0x50));

@@ -186,7 +186,7 @@ extern sdfTexHandle_t *sdfDevLoadTex(const char *filename);
  * consumed by pbInitGameCamera. */
 extern f32 pbGameCameraParam[3][4];
 extern f32 pbCameraVec[3][4];
-extern sdfVector4_t aViewDown, D_00529630;
+extern sdfVector4_t aViewDown, sdf3DUpVector;
 extern void dds3SetLightColor(s32 frame, s32 no, f32 *color);
 extern void dds3SetLightDir(s32 frame, s32 no, f32 *direction);
 extern void dds3SetAmbientColor(s32 frame, f32 *color);
@@ -255,7 +255,7 @@ void pbLoadTextures(s32 mode, s32 stage)
     pbCameraVec[2][1] = 0.0f;
     pbCameraVec[2][2] = 0.0f;
     pbCameraVec[2][3] = 0.0f;
-    SDF_VU0_COPYVECTOR(&aViewDown, &D_00529630);
+    SDF_VU0_COPYVECTOR(&aViewDown, &sdf3DUpVector);
 
     light.x = 1.0f;
     light.y = 1.0f;

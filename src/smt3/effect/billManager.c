@@ -68,7 +68,7 @@ extern f32 dds3BillboardTagParam[4];
 extern f32 dds3BillboardUpAxis[4];
 
 extern sdf3DScreenParam_t dds3ScreenParam;
-extern f32 D_002FA240[16];
+extern f32 sdfViewMatrix[16];
 extern void MultMatrixRev(f32 *aMatrix);
 extern f32 atan2f(f32 y, f32 x);
 
@@ -1386,7 +1386,7 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     sdfVector4_t origin;
     sdfVector4_t tip;
 
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_LOADVECTOR(pPos);
     SDF_VU0_COPYVECTOR_A_TO_C();

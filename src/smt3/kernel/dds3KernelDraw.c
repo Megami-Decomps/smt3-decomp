@@ -289,7 +289,7 @@ extern u32 eglLineColors[];
 extern sdf3DScreenParam_t dds3RenderScreenParam;
 extern sdf3DLight_t *dds3RenderLightParallel[];
 extern sdfVector4_t dds3RenderAmbientColor;
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern sdfMatrix4_t dds3RenderViewportMatrix;
 extern sdfGsMemSlice_t *dds3ZBuffHandles[];
 extern sdfGrFrameSet_t dds3RenderTexId;
@@ -380,7 +380,7 @@ void dds3InitDrawEnvSub(s32 i)
     *(u32 *)((u8 *)&dds3DrawEnv[i] + 0x1410) = dds3BackColor;
     sdfGrLinkStdDrawEnv(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].preDrawTag,
         &dds3DrawEnv[i].stdEnv);
-    sdf3DMakeViewportPacket(&dds3DrawEnv[i].viewport, &dds3ScreenParam, &D_002FA240);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[i].viewport, &dds3ScreenParam, &sdfViewMatrix);
     sdfDrawTagLink(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].viewport);
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].light, dds3LightParam.parallel,
         &dds3AmbientColor);
@@ -2195,7 +2195,7 @@ void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
     point.y = x2;
     point.z = y2;
     point.w = 1.0f;
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(&point);

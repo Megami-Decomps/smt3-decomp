@@ -456,7 +456,7 @@ void fldPlayerCalc_Hit(void) {
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
 extern sdfVector4_t fldWarpRunAxis;
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern f32 EulerAngleAxisY(void);
 extern void InversMatrix(void);
 extern void FromRotation(f32 angle);
@@ -535,7 +535,7 @@ void fldPlayerCalc_WarpRun(void)
     dds3GetRotPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&rotation);
     EulerAngleAxisY();
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     InversMatrix();
     control->moveFlag = 0;
     angle = R360_LR(fldGlobalBase.camAngle, fldPlayerWarpState);
@@ -693,7 +693,7 @@ extern u32 fldPlayerMoveStateSaved;
 extern f32 fldCamPitch, fldCamLength, fldCamPitchTarget;
 extern f32 fldNmlGunSpeedScale0, fldNmlPi0, fldNmlGunSpeedScale1, fldNmlPi1;
 extern f32 fldNmlPi2, fldNmlPitchStep, fldNmlPi3, fldNmlPi4;
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 #include "sdk_libc.h"
 
 extern s32 fldEncountTestFlag(u32 flag);
@@ -889,7 +889,7 @@ s32 fldPlayerCalc_Nml(void)
     dds3GetRotPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&rotation);
     EulerAngleAxisY();
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     InversMatrix();
     control->moveFlag = 0;
     oldMotion = model->current.h.motionIndex;
@@ -1382,7 +1382,7 @@ extern s32 fldWmapMatterLast, fldWmapBlendStep;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, fldWmapPosFrom, fldWmapPosTo;
 extern sdfVector4Unaligned_t fldWm2Scale, fldWm2WorkInit;
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
 extern void fldStatusSet(void);
@@ -1453,7 +1453,7 @@ s32 fldPlayerCalc_Wm2(void)
     if ((left || right || down || up) && l_UseCollision != 0) {
         fldGlobalBase.y = position.y + SDF_FRAME_STEP(3.0f);
     }
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     InversMatrix();
     control->moveFlag = 0;
     dds3GetPosPoseSet(control->handle);
@@ -1705,7 +1705,7 @@ extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;
 extern s32 fldCamSvsState;
 extern f32 fldCamPitchTarget, fldSyukanGunSpeedScale, fldSyukanPi0, fldSyukanPi1, fldSyukanPi2;
 extern f32 fldCamPitch;
-extern sdfMatrix4_t D_002FA240;
+extern sdfMatrix4_t sdfViewMatrix;
 extern s32 fldCamMiwatasiChk(void);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3FadeIn2(s32 frames);
@@ -1916,7 +1916,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
     dds3GetRotPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&rotation);
     EulerAngleAxisY();
-    SDF_VU0_LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     InversMatrix();
     motion = 8;
     control->moveFlag = 0;

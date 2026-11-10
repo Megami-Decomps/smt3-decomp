@@ -213,7 +213,7 @@ extern s8 dds3PadButtonState[];
 
 extern s8 dds3PadBitTable[];
 
-extern f32 D_002FA240[16];
+extern f32 sdfViewMatrix[16];
 
 extern u8 aViewEye[];
 
@@ -946,7 +946,7 @@ void mdlSetEffectScaleSub(mdlObj_t *aHandle, dds3ModelEffectCtrlr_t *aEffect, fl
 void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
 {
     if (context->pad->stepUpA != 0) {
-        SDF_VU0_LOADVECTOR_MTXCOL(D_002FA240 + 1);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         ToMatrix();
         SDF_VU0_LOADVECTOR( position);
@@ -954,7 +954,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR( position);
     } else if (context->pad->stepDownA != 0) {
-        SDF_VU0_LOADVECTOR_MTXCOL(D_002FA240 + 1);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         ToMatrix();
         SDF_VU0_LOADVECTOR( position);
@@ -963,7 +963,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_STOREVECTOR( position);
     }
     if (context->pad->stepUpB != 0) {
-        SDF_VU0_LOADVECTOR_MTXCOL(D_002FA240);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         ToMatrix();
         SDF_VU0_LOADVECTOR( position);
@@ -971,7 +971,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR( position);
     } else if (context->pad->stepDownB != 0) {
-        SDF_VU0_LOADVECTOR_MTXCOL(D_002FA240);
+        SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         ToMatrix();
         SDF_VU0_LOADVECTOR( position);

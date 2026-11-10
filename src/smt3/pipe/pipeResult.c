@@ -6,7 +6,7 @@
 #include "basic.h"
 #include "motion.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 extern s32 GetRBoxNum(void);
 extern s32 GetDamage(void);
 extern s8 pipeMessCount;

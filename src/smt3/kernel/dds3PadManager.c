@@ -80,7 +80,7 @@ void dds3PadInitialize(void) {
 }
 
 extern s8 dds3PadBitTable[32];
-extern u8 D_005518E0[8];
+extern u8 sdfPadAnalogSticks[8];
 extern void dds3UpdateVibrationSlots(void);
 extern void effPadVibeFadeUpdate(void);
 extern f32 acosf(f32 x);
@@ -114,8 +114,8 @@ void dds3RunProcessList(void)
             }
         }
         for (key = 0; key < 2; key++) {
-            stick[key * 2] = D_005518E0[pad * 4 + key * 2];
-            stick[key * 2 + 1] = D_005518E0[pad * 4 + key * 2 + 1];
+            stick[key * 2] = sdfPadAnalogSticks[pad * 4 + key * 2];
+            stick[key * 2 + 1] = sdfPadAnalogSticks[pad * 4 + key * 2 + 1];
         }
         for (key = 0; key < 2; key++) {
             dds3PadStickPrev[pad * 4 + key * 2] = stick[key * 2];

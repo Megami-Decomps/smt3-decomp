@@ -5,7 +5,7 @@
 #include "motion.h"
 #include "camp.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 

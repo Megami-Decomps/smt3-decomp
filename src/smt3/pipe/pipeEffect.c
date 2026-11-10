@@ -7,7 +7,7 @@
 #include "motion.h"
 #include "sdfFrame.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 
 

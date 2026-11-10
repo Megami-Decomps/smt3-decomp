@@ -7,7 +7,7 @@
 #include "pipe.h"
 #include "sdfFrame.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(mdlObj_t *aHandle, s32 aGroup);
 

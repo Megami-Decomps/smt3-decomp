@@ -12,7 +12,7 @@
 
 extern f32 aViewEye[];
 
-extern f32 D_002FA240[];
+extern f32 sdfViewMatrix[];
 
 extern f32 dds3ScreenParam[];
 
@@ -426,7 +426,7 @@ s32 nbClipEffectNum(s32 screenPosition[4])
 
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
     SDF_VU0_GET_ROW2();

@@ -102,7 +102,7 @@ sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 
 void MultMatrixRev(const void *aMatrix);
 
-extern u8 D_002FA240[];
+extern u8 sdfViewMatrix[];
 
 extern sdf3DScreenParam_t dds3ScreenParam;
 
@@ -341,7 +341,7 @@ void fldPoint3To2(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
     sdfVector4_t vec = { z3, x2, y2, 1.0f };
     sdfVector4_t result;
 
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)&vec);
@@ -376,7 +376,7 @@ void fldPoint3To2H(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
 }
 
 void fldPoint3To2_A(void) {
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
 }
@@ -1367,7 +1367,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 num) {
     f32 screenX;
     f32 screenY;
 
-    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_LOADMATRIX(sdfViewMatrix);
     InversMatrix();
     fldPoint3To2(&screenX, &screenY, x, y, z);
     if (screenX < -4000.0f || screenX > 4000.0f ||

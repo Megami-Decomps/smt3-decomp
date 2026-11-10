@@ -65,7 +65,7 @@ extern u64 sdf3DRefMapParam;
 
 extern u8 sdfPadCb_0[];
 
-extern u8 D_005518E0[8];
+extern u8 sdfPadAnalogSticks[8];
 
 extern s8 dds3PadBitTable[0x20];
 
@@ -333,7 +333,7 @@ void sdfPadWork(void) {
             }
             dds3PadBitTable[padIndex * 0x10 + bitIndex] = state;
         }
-        memcpy(&D_005518E0[padIndex * 4], entry->stick, 4);
+        memcpy(&sdfPadAnalogSticks[padIndex * 4], entry->stick, 4);
         memcpy(&sdfPadPressure[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure,
                SDF_PAD_PRESSURE_COUNT);
     }
@@ -379,7 +379,7 @@ void sdfPadInitManager(void) {
         entry->actDataBack = 0;
     }
     memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
-    memset(D_005518E0, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
+    memset(sdfPadAnalogSticks, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
     memset(sdfPadPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
     sdfPadManagerMode = 0;
 }

@@ -4,7 +4,7 @@
 #include "basic.h"
 #include "motion.h"
 
-extern void (*D_00551828)(void);
+extern void (*sdfTickCallback)(void);
 
 s32 pipeSelectSection(void)
 {

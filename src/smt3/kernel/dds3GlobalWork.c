@@ -683,8 +683,8 @@ u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 
     return packet;
 }
 
-extern f32 D_00529630[4];
-extern sdfMatrix4_t D_002FA240;
+extern f32 sdf3DUpVector[4];
+extern sdfMatrix4_t sdfViewMatrix;
 extern const f32 dds3PrimLineOutline[13][4];
 extern const f32 dds3PrimLineScale[4];
 extern const u8 dds3PrimLinePairs[20][2];
@@ -714,7 +714,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
         axis[1] = 0.0f;
         SDF_VU0_LOADVECTOR_B(axis);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_00529630);
+        SDF_VU0_LOADVECTOR_B(sdf3DUpVector);
     }
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
@@ -726,7 +726,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_SET_ROW1();
     SDF_VU0_RESET_ROW3();
-    MultMatrixRev(&D_002FA240);
+    MultMatrixRev(&sdfViewMatrix);
     SDF_VU0_LOADVECTOR(dds3PrimLineScale);
     SDF_VU0_SCALE_XYZ_REV();
     axis[0] = (f32)x;

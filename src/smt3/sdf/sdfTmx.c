@@ -632,11 +632,11 @@ INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathCdrom);
 
 INCLUDE_RODATA(const s32, "sdf/sdfTmx", sdfIopModulePathHost);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A3A0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcserv);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A3B0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameCdMcman);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A3C0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcserv);
 
-INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0054A3D0);
+INCLUDE_RODATA(const s32, "sdf/sdfTmx", mcModuleNameMcman);
 
