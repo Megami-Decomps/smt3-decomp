@@ -70,3 +70,40 @@ The no-call paging tail also forwards the current page base rather than
 performing retail's second load, and its conditional-store control flow
 still differs. Explicit branch arms alone did not resolve that tail. These
 are source/output observations; no compiler-pass trace is claimed.
+
+## SelectMotData (newbattle/nbDebugProcess, 0x434)
+
+269 of 269 words match at 1,076 bytes. The four-row editor retains the
+pre-allocation label snapshot, callback-sensitive cursor and field reads,
+increment-before-decrement behavior and signed byte/halfword conditions.
+Editing uses the selected motion snapshot; committing reloads the current
+process data, form and motion selection after callbacks. The inherited
+valid display type domain is 0..3 and the selected motion domain is 0..25;
+this reconstruction does not add bounds that retail lacks.
+
+A pixel-space y induction starts at 370 and advances by 12. Each print uses
+`(y << 3) + 0x7900`, producing the native four GS coordinates. Qualified stock
+loop output reduces the four affine expressions to separate induction
+registers. One empty operand keeps the real `50 * 16` x offset at its four
+print consumers. Each signed halfword decrement condition has a block-local
+initialized `$2` binding: native `lh`, `blez`, then the unsigned load in its
+delay slot. That value dies before the decrement overwrites `$2`, with no
+intervening call. These localized constraints emit no instructions and make
+no memory-barrier or original-source-spelling claim.
+
+The unsigned byte/halfword representations use promoted `s32` arithmetic
+and narrow only at the native stores; the record fields remain `u8`, `s8`
+and `s16`. Ordinary RAM accesses replace inherited volatile casts. Local
+`sdfDevPrintf` and `frwGetSmallFontFRQ` declarations now agree with their
+canonical provider types, including `frFontHandle_t *`; no provider, shared
+header, object layout, compiler flag or unit boundary changes.
+
+Complete-owner checks give 16 match, 0 differ with all 15 compiled peers and
+owned data preserved. Separate production, SKIP_ASM and strict retained-C
+contexts pass wrapper/plain/stock-dump whole-assembly and raw-object parity
+at the resolved compiler paths, without normalization. The retained owner
+has 16 matching and four still-differing bodies; only SelectMotData is
+promoted. Ordered relocations retain the original providers and ordering.
+Independent semantic review and an extracted-source host fixture cover
+526,890 cases, with seven behavior-changing negative controls rejected.
+The host fixture establishes logical behavior, not target allocation.

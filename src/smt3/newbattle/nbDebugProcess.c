@@ -341,7 +341,7 @@ void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 m
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
-extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
+extern void *sdfDevPrintf(u32 x, u32 y, u32 color, s32 attr, const char *format, ...);
 extern const char *nbBadStatusNames[12];
 extern const char nbDebugStrFmt[];
 extern const char nbDebugNoStatusLabel[];
@@ -350,9 +350,8 @@ SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 
 extern const char *nbDebugMenuLabels[];
-typedef struct frFontRequest_t frFontRequest_t;
-extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
-                                        const char *text, frFontRequest_t *request);
+extern frFontHandle_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                        const char *text, frFontHandle_t *request);
 extern s32 frDrawFont(frFontHandle_t *request);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 extern void dds3ConsPanelTagLinkZ(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy, s32 z);
@@ -370,7 +369,7 @@ extern char *text2[];
 s32 nbDebugStockSelect(void)
 {
     sdfDrawTag_t *tag;
-    frFontRequest_t *request;
+    frFontHandle_t *request;
     fldAnahoriAkuma_t *unit;
     s32 i, y, color, attr, base, result, index;
     u32 flags;
@@ -470,7 +469,7 @@ void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form)
     datUnitWork_t *work;
     nbParty_t *party;
     sdfDrawTag_t *tag;
-    frFontRequest_t *request;
+    frFontHandle_t *request;
     char flags[6];
     s32 i, y, n;
     u32 aisyo;
@@ -546,7 +545,7 @@ s32 SelectMenu(nbDebugProcessData_t *d)
 
     for (i = 0; i < 5; i++, label++, y += 12 * 16) {
         u32 color = i == menucur ? 0xFF0080 : 0xFFFFFF80;
-        frFontRequest_t *request = frwGetSmallFontFRQ(x * 16, y, 0xFF0001, color, *label, NULL);
+        frFontHandle_t *request = frwGetSmallFontFRQ(x * 16, y, 0xFF0001, color, *label, NULL);
         frDrawFont((frFontHandle_t *)request);
         frDestroyFontRequestAfter((frFontHandle_t *)request);
     }
@@ -673,7 +672,6 @@ extern s32 nbDebugMotionFieldCursor;
 extern s32 nbDebugMotionCursor;
 extern s32 slSelectMotIndex;
 
-#ifdef NON_MATCHING
 s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
 {
     nbDebugMotionNames_t typeNames;
@@ -682,10 +680,10 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     nbUnitVisualMotions_t *visual;
     nbUnitMotion_t *motion;
     s32 i, y, attr, result, selected;
+    s32 x = 50 * 16;
     s32 byteValue;
-    s32 halfValue;
-    u8 byteBits;
-    u16 halfBits;
+    s32 byteBits;
+    s32 halfBits;
 
     typeNames = nbDebugMotionNames;
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
@@ -694,94 +692,96 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     dds3ConsPanelTagLinkZ(tag, 0x2E, 0x16E, 12, 5, 0xFF0000);
     visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
     motion = &visual->motions[slSelectMotIndex + nbDebugMotionCursor];
-    y = 0x8490;
+    /* Pixel-space induction lets the compiler form each GS y coordinate. */
+    y = 370;
     for (i = 0; i < 4; i++) {
-        selected = *(volatile s32 *)&nbDebugMotionFieldCursor;
-        attr = active && i == selected ? 4 : 0;
+        /* Keep the real GS x offset at its loop consumers. */
+        FAKEMATCH_ASM_LIVE(x);
+        attr = active && i == nbDebugMotionFieldCursor ? 4 : 0;
         switch (i) {
         case 0:
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, (y << 3) + 0x7900, 0xFFFF80, attr,
                                                  nbDebugTypeFmt, typeNames.name[motion->type])));
             break;
         case 1:
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, (y << 3) + 0x7900, 0xFFFF80, attr,
                                                  nbDebugDataFmt, motion->data)));
             break;
         case 2:
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, (y << 3) + 0x7900, 0xFFFF80, attr,
                                                  nbDebugBFrameFmt, motion->bframe)));
             break;
         case 3:
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7320, y, 0xFFFF80, attr,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, (y << 3) + 0x7900, 0xFFFF80, attr,
                                                  nbDebugHFrameFmt, motion->hframe)));
             break;
         }
-        y += 0x60;
+        y += 12;
     }
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    if (!active) {
-        return 0;
-    }
-    result = dds3SelectMenu(0, 1, 4, 1, 4, NULL, NULL, NULL, &nbDebugMotionFieldCursor);
-    if (result == -1) {
-        return -1;
-    }
-    selected = *(volatile s32 *)&nbDebugMotionFieldCursor;
-    if (result == 1) {
-        SetMotion(d->data, d->form, slSelectMotIndex + nbDebugMotionCursor, 0);
-        return 1;
-    }
-    switch (selected) {
-    case 0:
-        if ((dds3PadButtonState[5] & 2) && motion->type < 3) {
-            motion->type++;
+    if (active) {
+        result = dds3SelectMenu(0, 1, 4, 1, 4, NULL, NULL, NULL, &nbDebugMotionFieldCursor);
+        if (result == -1) {
+            return -1;
         }
-        if ((dds3PadButtonState[4] & 2) && motion->type != 0) {
-            motion->type--;
+        selected = nbDebugMotionFieldCursor;
+        if (result == 1) {
+            SetMotion(d->data, d->form, slSelectMotIndex + nbDebugMotionCursor, 0);
+            return 1;
         }
-        break;
-    case 1:
-        if (dds3PadButtonState[5] & 2) {
-            motion->data = (u8)motion->data + 1;
-        }
-        if (dds3PadButtonState[4] & 2) {
-            byteValue = ((volatile nbUnitMotion_t *)motion)->data;
-            byteBits = *(volatile u8 *)&motion->data;
-            if (byteValue >= 0) {
-                motion->data = byteBits - 1;
+        switch (selected) {
+        case 0:
+            if ((dds3PadButtonState[5] & 2) && motion->type < 3) {
+                motion->type++;
             }
-        }
-        break;
-    case 2:
-        if (dds3PadButtonState[5] & 2) {
-            motion->bframe = (u16)motion->bframe + 1;
-        }
-        if (dds3PadButtonState[4] & 2) {
-            halfValue = ((volatile nbUnitMotion_t *)motion)->bframe;
-            halfBits = *(volatile u16 *)&motion->bframe;
-            if (halfValue > 0) {
-                motion->bframe = halfBits - 1;
+            if ((dds3PadButtonState[4] & 2) && motion->type != 0) {
+                motion->type--;
             }
-        }
-        break;
-    case 3:
-        if (dds3PadButtonState[5] & 2) {
-            motion->hframe = (u16)motion->hframe + 1;
-        }
-        if (dds3PadButtonState[4] & 2) {
-            halfValue = ((volatile nbUnitMotion_t *)motion)->hframe;
-            halfBits = *(volatile u16 *)&motion->hframe;
-            if (halfValue > 0) {
-                motion->hframe = halfBits - 1;
+            break;
+        case 1:
+            if (dds3PadButtonState[5] & 2) {
+                motion->data = (u8)motion->data + 1;
             }
+            if (dds3PadButtonState[4] & 2) {
+                byteValue = motion->data;
+                byteBits = (u8)motion->data;
+                if (byteValue >= 0) {
+                    motion->data = byteBits - 1;
+                }
+            }
+            break;
+        case 2:
+            if (dds3PadButtonState[5] & 2) {
+                motion->bframe = (u16)motion->bframe + 1;
+            }
+            if (dds3PadButtonState[4] & 2) {
+                /* Localized native condition-register constraint; no call
+                 * occurs before this initialized field value is consumed. */
+                FAKEMATCH_ASM_REG(s32, halfValue, "$2") = motion->bframe;
+                halfBits = (u16)motion->bframe;
+                if (halfValue > 0) {
+                    motion->bframe = halfBits - 1;
+                }
+            }
+            break;
+        case 3:
+            if (dds3PadButtonState[5] & 2) {
+                motion->hframe = (u16)motion->hframe + 1;
+            }
+            if (dds3PadButtonState[4] & 2) {
+                /* Localized native condition-register constraint; no call
+                 * occurs before this initialized field value is consumed. */
+                FAKEMATCH_ASM_REG(s32, halfValue, "$2") = motion->hframe;
+                halfBits = (u16)motion->hframe;
+                if (halfValue > 0) {
+                    motion->hframe = halfBits - 1;
+                }
+            }
+            break;
         }
-        break;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMotData);
-#endif
 
 extern const char *nbDebugMotionLabels[];
 extern const char nbDebugIndexFmt[];
@@ -790,7 +790,7 @@ extern const char nbDebugIndexFmt[];
 s32 SelectMot(nbDebugProcessData_t *d, s32 active)
 {
     sdfDrawTag_t *tag;
-    frFontRequest_t *request;
+    frFontHandle_t *request;
     s32 i, y, yText, attr, color, result, base, selected;
     u8 button;
 
@@ -867,7 +867,7 @@ extern s32 devilcur;
 s32 SelectDevil(nbDebugProcessData_t *d)
 {
     sdfDrawTag_t *tag;
-    frFontRequest_t *request;
+    frFontHandle_t *request;
     s32 i, y, yText, attr, color, result, base, selected;
     u8 button;
     s32 xText = 0xE6;

@@ -279,6 +279,7 @@ SetCommCursor2	newbattle/nbCommSelProcess	0x21C	135 of 135 words match	docs/matc
 DispHelpPanel	newbattle/nbCommSelProcess	0x1E8	122 of 122 words match	docs/matching/newbattle/nbCommSelProcess.md	177
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 SelectDevil	newbattle/nbDebugProcess	0x218	79 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
+SelectMotData	newbattle/nbDebugProcess	0x434	269 of 269 words match	docs/matching/newbattle/nbDebugProcess.md	74
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
 nbFindBadCurseTarget	newbattle/nbEncProcess	0x18C		docs/matching/newbattle/nbEncProcess.md	31
