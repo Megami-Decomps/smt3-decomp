@@ -1551,9 +1551,10 @@ frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *pfont);
 #ifdef NON_MATCHING
 extern s32 CountLineMessage(frFontHandle_t *pfont_top, frFontHandle_t *pfont);
 extern u32 frGetMessageResult(u32 Flag);
-extern void GetLastMessagePara(frFontHandle_t *pfont, message_tag *pmessage);
-extern void RaiseMessageSpeedMax(frFontHandle_t *pfont);
 #endif
+
+void GetLastMessagePara(frFontHandle_t *pfont, message_tag *pmessage);
+void RaiseMessageSpeedMax(frFontHandle_t *pfont);
 
 void ReadytoMessage(instanceMes_tag *panel) {
     message_tag *mes = &panel->message;

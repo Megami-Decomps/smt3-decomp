@@ -514,11 +514,11 @@ void nbInitEncProcess(nbMainProcessData_t *data)
     data->encproc = id;
 }
 
-/* NON_MATCHING: 18 of 41 words differ (first at +0x0). */
-#ifdef NON_MATCHING
 void nbCollectBadCurseUnits(nbActionProcessData_t *a)
 {
-    s8 candidates[16];
+    /* The native frame reserves 32 candidate bytes, as do Flow1_22 and
+     * CheckKoketaNego despite their ten-slot scans. This scan uses only 16. */
+    s8 candidates[32];
     s32 count = 0;
     s32 i;
     nbMainProcessData_t *data = a->data;
@@ -529,13 +529,14 @@ void nbCollectBadCurseUnits(nbActionProcessData_t *a)
         }
     }
     if (count > 0) {
-        s32 selected = candidates[dds3GetRandIntA(NULL, count)];
-        a->data->form[selected].stat |= 8;
+        /* Reuse the formation index after its loop value is dead. Qualified
+         * stock RTL shares pseudo 86 across these disjoint definitions;
+         * global allocation gives it $6 rather than separate $4/$3 values.
+         * This explains compiler behavior, not original source spelling. */
+        i = candidates[dds3GetRandIntA(0, count)];
+        a->data->form[i].stat |= 8;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbCollectBadCurseUnits);
-#endif
 
 void nbMarkBadCurseUnits(nbActionProcessData_t *a)
 {

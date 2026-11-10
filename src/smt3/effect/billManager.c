@@ -498,10 +498,7 @@ void dds3BillboardLinkOt(void) {
     dds3BillboardTag = NULL;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * f045_1, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Paired quads retain each child's eight native UV halfword transfers. */
 extern f32 dds3MultiBillboardUpAxis[4];
 extern f32 dds3MultiBillboardTagParam[4];
 extern void sdfGrSetFrameMaskRGB(const u8 *env, void *packet, s32 context);
@@ -514,40 +511,49 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
     sdfVector4_t direction;
     f32 dot;
     sdfPrimTransPacket_t *blend;
+    /* Use the actual DMA-word subobject, retaining its anonymous member type.
+     * The direct union-access spelling changes the native store schedule;
+     * this pointer is a reconstruction aid, not a second packet view. */
+    typeof(blend->header.dmaWords) *dma;
     sdfBillBoardBatch_t *batch;
     dds3BillResource_tag *child;
     void *packet;
+    void *framePacket;
+    void *geometry;
     sdfTexPacket_t *texture;
     s32 length, index;
+    u32 primaryColor, secondaryColor;
     f32 x, y, halfWidth, halfHeight, cosine, sine, cornerX, cornerY;
 
     if (node->packetList == NULL) {
         node->packetList = sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(node->packetList);
-        packet = sdfGrAllocPacketBuff(0x40);
-        sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameMaskSource, packet, 0);
-        sdfDrawTagLinkRefGif(node->packetList, EE_ADDR(packet));
+        framePacket = sdfGrAllocPacketBuff(0x40);
+        sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameMaskSource, framePacket, 0);
+        sdfDrawTagLinkRefGif(node->packetList, EE_ADDR(framePacket));
         blend = sdfGrAllocPacketBuff(0x40);
+        dma = &blend->header.dmaWords;
         blend->elem.test.reg = 0x47;
         blend->elem.alpha.data = 0x44;
         blend->elem.alpha.reg = 0x42;
-        blend->header.dmaWords.tag = 3;
-        blend->header.dmaWords.vif = 0x5000000310000000ULL;
+        dma->tag = 3;
+        dma->vif = 0x5000000310000000ULL;
         blend->header.giftag.parm = 0x1000000000008002ULL;
         blend->header.giftag.regs = 0xE;
         blend->elem.test.data = 0x51001;
         sdfDrawTagLink(node->packetList, EE_ADDR(blend));
         blend = sdfGrAllocPacketBuff(0x40);
-        blend->header.dmaWords.tag = 3;
-        blend->header.dmaWords.vif = 0x5000000310000000ULL;
+        dma = &blend->header.dmaWords;
+        dma->tag = 3;
+        dma->vif = 0x5000000310000000ULL;
         blend->header.giftag.parm = 0x1000000000008002ULL;
         blend->header.giftag.regs = 0xE;
         blend->elem.test.data = 0x51001;
         blend->elem.test.reg = 0x48;
         switch (node->kind) {
-        case 1: blend->elem.alpha.data = 0x54; break;
         case 2: blend->elem.alpha.data = 0x58; break;
         case 3: blend->elem.alpha.data = 0x52; break;
+        case 1: blend->elem.alpha.data = 0x54; break;
         }
         blend->elem.alpha.reg = 0x43;
         sdfDrawTagLink(node->packetList, EE_ADDR(blend));
@@ -561,7 +567,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         length = sdfTexGetPacketCtx2Length(node->children[1]->hTex);
         sdf3DMakeDirectRefPacket(packet, EE_ADDR(texture), length);
         sdfDrawTagLinkRef(node->packetList, EE_ADDR(packet));
-        packet = sdfGrAllocPacketBuff(0x38);
+        geometry = sdfGrAllocPacketBuff(0x38);
         if (node->cameraFacingMode == 1) {
             SDF_VU0_LOADVECTOR(aViewTarget);
             SDF_VU0_LOADVECTOR_B(aViewEye);
@@ -579,20 +585,38 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         } else {
             SDF_VU0_STOREIDENTITY(matrix);
         }
-        sdfBillBoardMakeTMPacket(packet, matrix);
-        sdfDrawTagLink(node->packetList, EE_ADDR(packet));
+        sdfBillBoardMakeTMPacket(geometry, matrix);
+        sdfDrawTagLink(node->packetList, EE_ADDR(geometry));
         node->next = dds3MultiBillboardPairList;
         dds3MultiBillboardPairList = node;
     }
-    child = node->children[0];
-    index = node->children[1]->batch->count;
-    batch = child->batch;
-    memcpy(&batch->uv[index], &child->uv, sizeof(child->uv));
-    batch->color[index] = node->colors[0];
     child = node->children[1];
     batch = child->batch;
-    memcpy(&batch->uv[index], &child->uv, sizeof(child->uv));
-    batch->color[index] = node->colors[1];
+    index = batch->count;
+    primaryColor = node->colors[0];
+    child = node->children[0];
+    batch = child->batch;
+    batch->color[index] = primaryColor;
+    batch->uv[index].components[0] = child->uv.components[0];
+    batch->uv[index].components[1] = child->uv.components[1];
+    batch->uv[index].components[2] = child->uv.components[2];
+    batch->uv[index].components[3] = child->uv.components[3];
+    batch->uv[index].components[4] = child->uv.components[4];
+    batch->uv[index].components[5] = child->uv.components[5];
+    batch->uv[index].components[6] = child->uv.components[6];
+    batch->uv[index].components[7] = child->uv.components[7];
+    secondaryColor = node->colors[1];
+    child = node->children[1];
+    batch = child->batch;
+    batch->color[index] = secondaryColor;
+    batch->uv[index].components[0] = child->uv.components[0];
+    batch->uv[index].components[1] = child->uv.components[1];
+    batch->uv[index].components[2] = child->uv.components[2];
+    batch->uv[index].components[3] = child->uv.components[3];
+    batch->uv[index].components[4] = child->uv.components[4];
+    batch->uv[index].components[5] = child->uv.components[5];
+    batch->uv[index].components[6] = child->uv.components[6];
+    batch->uv[index].components[7] = child->uv.components[7];
     x = child->cx * obj->childScaleX;
     y = child->cy * obj->childScaleY;
     halfWidth = child->width * obj->childScaleX;
@@ -627,9 +651,6 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
     batch->count = (s32)((u32)batch->count + 1);
     if (batch->count == 7) dds3MultiBillboardPktLink(node);
 }
-#else
-INCLUDE_ASM(const s32, "effect/billManager", dds3MultiBillboardTagLink);
-#endif
 
 void dds3MultiBillboardPktLink(billRenderPair_t *hResource) {
     u32 colors[8][2];
@@ -645,22 +666,22 @@ void dds3MultiBillboardPktLink(billRenderPair_t *hResource) {
     for (i = 0; i < count; i++) {
         colors[i][0] = batch[0]->color[i];
         colors[i][1] = batch[1]->color[i];
-        uv[i][0] = batch[0]->uv[i][0].u;
-        uv[i][1] = batch[0]->uv[i][0].v;
-        uv[i][4] = batch[0]->uv[i][1].u;
-        uv[i][5] = batch[0]->uv[i][1].v;
-        uv[i][8] = batch[0]->uv[i][2].u;
-        uv[i][9] = batch[0]->uv[i][2].v;
-        uv[i][12] = batch[0]->uv[i][3].u;
-        uv[i][13] = batch[0]->uv[i][3].v;
-        uv[i][2] = batch[1]->uv[i][0].u;
-        uv[i][3] = batch[1]->uv[i][0].v;
-        uv[i][6] = batch[1]->uv[i][1].u;
-        uv[i][7] = batch[1]->uv[i][1].v;
-        uv[i][10] = batch[1]->uv[i][2].u;
-        uv[i][11] = batch[1]->uv[i][2].v;
-        uv[i][14] = batch[1]->uv[i][3].u;
-        uv[i][15] = batch[1]->uv[i][3].v;
+        uv[i][0] = batch[0]->uv[i].components[0];
+        uv[i][1] = batch[0]->uv[i].components[1];
+        uv[i][4] = batch[0]->uv[i].components[2];
+        uv[i][5] = batch[0]->uv[i].components[3];
+        uv[i][8] = batch[0]->uv[i].components[4];
+        uv[i][9] = batch[0]->uv[i].components[5];
+        uv[i][12] = batch[0]->uv[i].components[6];
+        uv[i][13] = batch[0]->uv[i].components[7];
+        uv[i][2] = batch[1]->uv[i].components[0];
+        uv[i][3] = batch[1]->uv[i].components[1];
+        uv[i][6] = batch[1]->uv[i].components[2];
+        uv[i][7] = batch[1]->uv[i].components[3];
+        uv[i][10] = batch[1]->uv[i].components[4];
+        uv[i][11] = batch[1]->uv[i].components[5];
+        uv[i][14] = batch[1]->uv[i].components[6];
+        uv[i][15] = batch[1]->uv[i].components[7];
     }
     packet = sdfMultiBillBoardMakeN((const u128 *)batch[1]->centre, colors, uv, batch[1]->offset, count, NULL);
     sdfDrawTagLink(hResource->packetList, EE_ADDR(packet));

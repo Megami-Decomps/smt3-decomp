@@ -50,10 +50,19 @@ typedef struct
 {
     sdfVector4_t centre[15];
     u32 color[15];
-    UV_t uv[15][4];
+    billUvQuad_t uv[15]; /* Eight native UV halfwords per quad. */
     f32 offset[15][8]; /* Four flat X/Y corner pairs per quad. */
     s32 count;
 } sdfBillBoardBatch_t;
+
+typedef char sdfBillBoardBatch_size_must_be_0x400[
+    sizeof(sdfBillBoardBatch_t) == 0x400 ? 1 : -1];
+typedef char sdfBillBoardBatch_uv_at_0x12C[
+    (u32)&((sdfBillBoardBatch_t *)0)->uv == 0x12C ? 1 : -1];
+typedef char sdfBillBoardBatch_offset_at_0x21C[
+    (u32)&((sdfBillBoardBatch_t *)0)->offset == 0x21C ? 1 : -1];
+typedef char sdfBillBoardBatch_count_at_0x3FC[
+    (u32)&((sdfBillBoardBatch_t *)0)->count == 0x3FC ? 1 : -1];
 
 /* The tail of BillboardLoadTex's 1100-byte allocation, whose first 1024 bytes
  * are the batch. uv, cx, cy, width and height come from the texture's size. */
