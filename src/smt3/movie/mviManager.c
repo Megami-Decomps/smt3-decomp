@@ -75,7 +75,7 @@ s32 movieDrawProc(void)
 
 extern void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *descriptor, const char *path);
 
-extern char movieDrawProcName[];
+extern const char movieDrawProcName[];
 
 void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor)
 {
@@ -121,7 +121,7 @@ s32 movieMan_Process(void)
 
 extern void sdfIpuInit(void);
 
-extern char movieManProcName[];
+extern const char movieManProcName[];
 
 void *dds3StartMovieManager(void)
 {
@@ -201,7 +201,7 @@ typedef struct
 
 extern u8 sdfHddValid;
 
-extern char movieDirPath[];
+extern const char movieDirPath[];
 
 extern char movieExtIpu[];
 
@@ -326,13 +326,13 @@ void movieDebugDrawInfo(void)
                       0xFF0080, 0);
     }
 }
-INCLUDE_RODATA(const s32, "movie/mviManager", movieDrawProcName);
+const char movieDrawProcName[16] = "movieDraw";
 
-INCLUDE_RODATA(const s32, "movie/mviManager", movieManProcName);
+const char movieManProcName[16] = "movieMan";
 
-INCLUDE_RODATA(const s32, "movie/mviManager", movieDirPath);
+const char movieDirPath[16] = "pfs0:/movie";
 
-INCLUDE_SDATA(const s32, "movie/mviManager", PlayingNo);
+saddr_t PlayingNo = 0;
 
 INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIpu);
 
