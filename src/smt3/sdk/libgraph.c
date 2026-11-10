@@ -574,6 +574,8 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
  * reusing the local, which local CSE cannot share across the block; and each
  * case body computes the byte remainder, then the quadword remainder, then the
  * DMA count, which halved the instruction-order difference. */
+const char sceGsExecLoadImageDma2Msg[64] = "sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n";
+
 #ifdef NON_MATCHING
 extern const char sceGsExecStoreImageDma1Msg[];
 extern const char sceGsExecStoreImageGsMsg[];
@@ -838,7 +840,6 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
 
 }
 #else
-const char sceGsExecLoadImageDma2Msg[64] = "sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n";
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 #endif

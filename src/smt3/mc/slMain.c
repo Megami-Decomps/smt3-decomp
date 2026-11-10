@@ -2370,6 +2370,20 @@ extern char D_00311450[][0x20], D_00311850[][0x20];
 extern void cmpSetSkillListRows(s32 rows);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
 
+const char slSaveDirFmt[20] = "BASLUS-%05d-dds3-%d";
+
+const char slConvert03Msg[38] = "==== Memoca ConvertStart!! 03-> ====\n";
+
+const char slConvert04Msg[31] = "==== ConvertStart!! 04-> ====\n";
+
+const char slFldProcSequenceName[16] = "fldProcSequence";
+
+const char slIconPath[13] = "/mc/dds3.ico";
+
+const char slIconSysName[9] = "icon.sys";
+
+const char slBaseIconName[9] = "base.ico";
+
 #ifdef NON_MATCHING
 s32 slFileSelDraw(s32 id)
 {
@@ -2575,19 +2589,6 @@ s32 slFileSelDraw(s32 id)
     return 0;
 }
 #else
-const char slSaveDirFmt[20] = "BASLUS-%05d-dds3-%d";
-
-const char slConvert03Msg[38] = "==== Memoca ConvertStart!! 03-> ====\n";
-
-const char slConvert04Msg[31] = "==== ConvertStart!! 04-> ====\n";
-
-const char slFldProcSequenceName[16] = "fldProcSequence";
-
-const char slIconPath[13] = "/mc/dds3.ico";
-
-const char slIconSysName[9] = "icon.sys";
-
-const char slBaseIconName[9] = "base.ico";
 
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 #endif

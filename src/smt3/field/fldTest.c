@@ -501,6 +501,8 @@ s32 fldElvCheckEnd(void)
 /* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
  * field underground facility, field unknown realm savestates, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+const char fldTestDrawName[16] = "fldTestDraw";
+
 #ifdef NON_MATCHING
 extern volatile s8 dds3PadButtonState[];
 
@@ -574,7 +576,6 @@ void fldElvDrawFloorNum(void)
     fldElvGetFloorDigits(380, 26, display);
 }
 #else
-const char fldTestDrawName[16] = "fldTestDraw";
 
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
 #endif
@@ -3264,6 +3265,8 @@ s32 fldRunEncountChk(void)
     return 0;
 }
 
+const sdfVector4_t fldRunDanteAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
+
 #ifdef NON_MATCHING
 extern fldDanteDoor_t fldDanteDoor0, fldDanteDoor1, fldDanteDoor2;
 extern fldDanteDoor_t fldDanteDoor4, fldDanteDoor5, fldDanteDoor6;
@@ -3413,7 +3416,6 @@ void fldRunDanteStanceSet(s32 stance)
     }
 }
 #else
-const sdfVector4_t fldRunDanteAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
 #endif

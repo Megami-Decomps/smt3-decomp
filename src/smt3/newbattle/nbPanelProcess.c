@@ -1060,6 +1060,8 @@ extern frFontHandle_t *gnbPnlWork;
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * battle unknown realm savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+const s32 D_00545300[8] = {1, 1, 13, 1, 25, 1, 36, 1};
+
 #ifdef NON_MATCHING
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
@@ -1250,8 +1252,6 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 }
 
 #else
-
-const s32 D_00545300[8] = {1, 1, 13, 1, 25, 1, 36, 1};
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
@@ -4173,7 +4173,7 @@ s32 nbPnlDrawFlag = 0;
 
 f32 nbPnlCnt = 0.0f;
 
-s32 D_00551178[2] = {0x4D, 0x25};
+nbPanelPoint_t D_00551178 = {0x4D, 0x25};
 
 u32 nbPanelBaseABGR = 0x80808080;
 

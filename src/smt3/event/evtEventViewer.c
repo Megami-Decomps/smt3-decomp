@@ -1790,6 +1790,22 @@ s32 EnterObjList(void)
     return 0;
 }
 
+const char evtFrameFadeBlackOut[16] = "BLACK OUT";
+
+const char evtFrameFadeBlackIn[16] = "BLACK IN";
+
+const char evtFrameFadeWhiteOut[16] = "WHITE OUT";
+
+const char evtFrameFadeWhiteIn[16] = "WHITE IN";
+
+const char evtViewerUnitVshadowOn[16] = "VSHADOW ON";
+
+const char evtViewerUnitMshadowOn[16] = "MSHADOW ON";
+
+const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
+
+const char evtViewerUnitDispOff[16] = "DISP OFF";
+
 #ifdef NON_MATCHING
 extern char *evtViewerDeleteConfirmNames[], *evtViewerTransModeNames[], *evtViewerUnitControlNames[];
 extern char *evtFrameListTable[], *evtFrameFadeNames[];
@@ -2071,21 +2087,6 @@ s32 EnterFrameList(s32 action)
     return 0;
 }
 #else
-const char evtFrameFadeBlackOut[16] = "BLACK OUT";
-
-const char evtFrameFadeBlackIn[16] = "BLACK IN";
-
-const char evtFrameFadeWhiteOut[16] = "WHITE OUT";
-
-const char evtFrameFadeWhiteIn[16] = "WHITE IN";
-
-const char evtViewerUnitVshadowOn[16] = "VSHADOW ON";
-
-const char evtViewerUnitMshadowOn[16] = "MSHADOW ON";
-
-const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
-
-const char evtViewerUnitDispOff[16] = "DISP OFF";
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 #endif
