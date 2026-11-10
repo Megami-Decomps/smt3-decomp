@@ -291,21 +291,21 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", p2sdSmgBuf);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519DC);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519E0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagEndName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519E8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagRetName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519F0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagCallName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_005519F8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagRefsName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A00);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagRefName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A08);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagNextName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A10);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagCntName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A18);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDmaTagRefeName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpAddrFmt);
 
@@ -327,59 +327,59 @@ INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifMaskedName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifXferOkName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A68);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV4_5Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A70);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV4_8Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A78);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV4_16Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A80);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV4_32Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A88);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV3_8Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A90);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV3_16Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551A98);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV3_32Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AA0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV2_8Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AA8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV2_16Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AB0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackV2_32Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AB8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackS_8Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AC0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackS_16Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AC8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifUnpackS_32Name);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AD0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsMruName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AD8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsRuName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AE0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsMrName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AE8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsRName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AF0);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsMuName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551AF8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsUName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B00);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsMName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B08);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfVifFlagsNoneName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpIndentStr);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfDumpWordFmt);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B20);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfGsMemClutName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B28);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfGsMemTexName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B30);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfGsMemFrameName);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00551B38);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfGsMemFreeName);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfGsMemTypeFmt);
 

@@ -125,3 +125,36 @@
 0x002A87F0	sdfFindThreadNode	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A87F0
 0x002A8858	sdfUnlinkAndDeleteCurrentThread	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8858
 0x002C0510	LengthSq	inferred	DDS1/2 name for the same sdfQuat function; former name sdf_2C0510; DDS effMiscQuatLengthSqVU in sdfQuat's bare method style
+0x005519E0	sdfDmaTagEndName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4B0/D_00438BA0; former name D_005519E0
+0x005519E8	sdfDmaTagRetName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4B8/D_00438BA8; former name D_005519E8
+0x005519F0	sdfDmaTagCallName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4C0/D_00438BB0; former name D_005519F0
+0x005519F8	sdfDmaTagRefsName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4C8/D_00438BB8; former name D_005519F8
+0x00551A00	sdfDmaTagRefName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4D0/D_00438BC0; former name D_00551A00
+0x00551A08	sdfDmaTagNextName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4D8/D_00438BC8; former name D_00551A08
+0x00551A10	sdfDmaTagCntName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4E0/D_00438BD0; former name D_00551A10
+0x00551A18	sdfDmaTagRefeName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4E8/D_00438BD8; former name D_00551A18
+0x00551A68	sdfVifUnpackV4_5Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD538/D_00438C28; former name D_00551A68
+0x00551A70	sdfVifUnpackV4_8Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD540/D_00438C30; former name D_00551A70
+0x00551A78	sdfVifUnpackV4_16Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD548/D_00438C38; former name D_00551A78
+0x00551A80	sdfVifUnpackV4_32Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD550/D_00438C40; former name D_00551A80
+0x00551A88	sdfVifUnpackV3_8Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD558/D_00438C48; former name D_00551A88
+0x00551A90	sdfVifUnpackV3_16Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD560/D_00438C50; former name D_00551A90
+0x00551A98	sdfVifUnpackV3_32Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD568/D_00438C58; former name D_00551A98
+0x00551AA0	sdfVifUnpackV2_8Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD570/D_00438C60; former name D_00551AA0
+0x00551AA8	sdfVifUnpackV2_16Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD578/D_00438C68; former name D_00551AA8
+0x00551AB0	sdfVifUnpackV2_32Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD580/D_00438C70; former name D_00551AB0
+0x00551AB8	sdfVifUnpackS_8Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD588/D_00438C78; former name D_00551AB8
+0x00551AC0	sdfVifUnpackS_16Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD590/D_00438C80; former name D_00551AC0
+0x00551AC8	sdfVifUnpackS_32Name	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD598/D_00438C88; former name D_00551AC8
+0x00551AD0	sdfVifFlagsMruName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5A0/D_00438C90; former name D_00551AD0
+0x00551AD8	sdfVifFlagsRuName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5A8/D_00438C98; former name D_00551AD8
+0x00551AE0	sdfVifFlagsMrName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5B0/D_00438CA0; former name D_00551AE0
+0x00551AE8	sdfVifFlagsRName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5B8/D_00438CA8; former name D_00551AE8
+0x00551AF0	sdfVifFlagsMuName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5C0/D_00438CB0; former name D_00551AF0
+0x00551AF8	sdfVifFlagsUName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5C8/D_00438CB8; former name D_00551AF8
+0x00551B00	sdfVifFlagsMName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5D0/D_00438CC0; former name D_00551B00
+0x00551B08	sdfVifFlagsNoneName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5D8/D_00438CC8; former name D_00551B08
+0x00551B20	sdfGsMemClutName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5F0/D_00438CE0; former name D_00551B20
+0x00551B28	sdfGsMemTexName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5F8/D_00438CE8; former name D_00551B28
+0x00551B30	sdfGsMemFrameName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD600/D_00438CF0; former name D_00551B30
+0x00551B38	sdfGsMemFreeName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD608/D_00438CF8; former name D_00551B38
