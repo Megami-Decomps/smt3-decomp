@@ -34,7 +34,7 @@ s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, voi
 extern s32 movieStreamSema;
 extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
-extern const char sdfMovieIpsExt[];
+extern char sdfMovieIpsExt[];
 
 void sdfPrintTextLine(const char *aStr)
 {
@@ -629,9 +629,7 @@ s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
     }
     return aMov->decodeCb.activeBuffCount == 0;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieStreamSema);
+s32 movieStreamSema = -1;
 
-SDATA_PAD(4);
-
-INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieIpsExt);
+char sdfMovieIpsExt[4] = ".ips";
 
