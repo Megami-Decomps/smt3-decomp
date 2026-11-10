@@ -728,15 +728,15 @@ void fclStartRecoverEvent(s8 value)
     evtStartEvent(0x321);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath03);
+const char rcvTmxPath03[35] = "/facility/tmx/recover/recov_03.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath02);
+const char rcvTmxPath02[35] = "/facility/tmx/recover/recov_02.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvTmxPath01);
+const char rcvTmxPath01[35] = "/facility/tmx/recover/recov_01.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdRemoveCurse);
+const char rcvCmdRemoveCurse[13] = "Remove Curse";
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdCureStatus);
+const char rcvCmdCureStatus[12] = "Cure Status";
 
-INCLUDE_RODATA(const s32, "facility/fclRagUpdate", rcvCmdHealHpMp);
+const char rcvCmdHealHpMp[11] = "Heal HP/MP";
 
