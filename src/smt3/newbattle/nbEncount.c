@@ -18,14 +18,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 
-
-
-
-
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-
-
-
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -100,8 +93,6 @@ typedef struct nbMainProcessData_t
     nbPacHandle_t *modelpack;
     void *modelpackbuf;
 } nbMainProcessData_t;
-
-
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
 typedef struct nbActionProcessData_t
@@ -223,8 +214,6 @@ extern s32 nbGetUnitID(datUnitWork_t *work);
 
 extern s32 datGetPlayerLevel(void);
 
-
-
 extern nbEncountEntry_t nbEncountTable[];
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
@@ -309,7 +298,7 @@ extern s32 nbEncountMaxBase;
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
 #include "sdk_libc.h"
 
-extern char nbEncountMaxFormat[];
+extern const char nbEncountMaxFormat[];
 
 s32 nbGetEncountMax(s32 id)
 {
@@ -493,7 +482,7 @@ s32 nbGetUnitWorkFromAction(nbFormation_t *form)
     return nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbEncount", nbEncountMaxFormat);
+const char nbEncountMaxFormat[32] = "\245\250\245\363\245\253\245\246\245\363\245\310\316\250 %d/%d\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncount", nbEncountMax);
+s32 nbEncountMax = 0;
 
