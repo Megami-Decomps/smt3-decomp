@@ -729,5 +729,5 @@ void sdfTexInit(void)
     sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, (sdfDelayedResrcFreeFunc)sdfTexFree);
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfTex", sdfTexHandleLink);
+sdfTexHandle_t *sdfTexHandleLink = NULL;
 
