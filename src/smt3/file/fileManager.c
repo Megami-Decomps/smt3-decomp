@@ -764,15 +764,15 @@ void fileSysInit(void) {
     p2sdSmgBuf = fileManager;
 }
 
-const char D_00546900[24] = "/name/tmx/kyara_01.tmx";
+const char nmeKyaraTmxPath01[24] = "/name/tmx/kyara_01.tmx";
 
-const char D_00546918[24] = "/name/tmx/kyara_04.tmx";
+const char nmeKyaraTmxPath04[24] = "/name/tmx/kyara_04.tmx";
 
-const char D_00546930[24] = "/name/tmx/kyara_03.tmx";
+const char nmeKyaraTmxPath03[24] = "/name/tmx/kyara_03.tmx";
 
-const char D_00546948[24] = "/name/tmx/kyara_02.tmx";
+const char nmeKyaraTmxPath02[24] = "/name/tmx/kyara_02.tmx";
 
-const char D_00546960[24] = "/name/tmx/kyara_05.tmx";
+const char nmeKyaraTmxPath05[24] = "/name/tmx/kyara_05.tmx";
 
 const u8 D_00546978[7048] = {
     0x80, 0xE0, 0x83, 0xD5, 0x83, 0xD6, 0x83, 0xD7, 0x83, 0xD8, 0x83, 0xD9, 0x83, 0xDA, 0x83, 0xDB,

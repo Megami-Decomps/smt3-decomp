@@ -2425,6 +2425,7 @@ u8 frSetFontString_style = 0;
 u32 frDrawFontWork = 0;
 
 SDATA_PAD(4);
+
 INCLUDE_SDATA(const s32, "interface/frFont", frEmptyString);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0054F438);

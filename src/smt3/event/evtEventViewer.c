@@ -2071,21 +2071,21 @@ s32 EnterFrameList(s32 action)
     return 0;
 }
 #else
-const char D_0053B700[16] = "BLACK OUT";
+const char evtFrameFadeBlackOut[16] = "BLACK OUT";
 
-const char D_0053B710[16] = "BLACK IN";
+const char evtFrameFadeBlackIn[16] = "BLACK IN";
 
-const char D_0053B720[16] = "WHITE OUT";
+const char evtFrameFadeWhiteOut[16] = "WHITE OUT";
 
-const char D_0053B730[16] = "WHITE IN";
+const char evtFrameFadeWhiteIn[16] = "WHITE IN";
 
-const char D_0053B740[16] = "VSHADOW ON";
+const char evtViewerUnitVshadowOn[16] = "VSHADOW ON";
 
-const char D_0053B750[16] = "MSHADOW ON";
+const char evtViewerUnitMshadowOn[16] = "MSHADOW ON";
 
-const char D_0053B760[16] = "SHADOW OFF";
+const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
 
-const char D_0053B770[16] = "DISP OFF";
+const char evtViewerUnitDispOff[16] = "DISP OFF";
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 #endif
@@ -2596,35 +2596,35 @@ char evtViewerCameraNameFormat[3] = "%s";
 
 s32 capwait = 0;
 
-char D_0054F840[3] = "NO";
+char evtViewerStrNo[3] = "NO";
 
-char D_0054F848[4] = "YES";
+char evtViewerStrYes[4] = "YES";
 
-char D_0054F850[3] = "ON";
+char evtViewerStrOn[3] = "ON";
 
-char D_0054F858[4] = "OFF";
+char evtViewerStrOff[4] = "OFF";
 
-char D_0054F860[4] = "SUB";
+char evtViewerStrSub[4] = "SUB";
 
-char D_0054F868[4] = "ADD";
+char evtViewerStrAdd[4] = "ADD";
 
-char D_0054F870[7] = "NORMAL";
+char evtViewerStrNormal[7] = "NORMAL";
 
-char D_0054F878[8] = "ALLSTOP";
+char evtFrameFadeNameAllStop[8] = "ALLSTOP";
 
-char D_0054F880[6] = "VOLUP";
+char evtFrameFadeNameVolUp[6] = "VOLUP";
 
-char D_0054F888[8] = "VOLDOWN";
+char evtFrameFadeNameVolDown[8] = "VOLDOWN";
 
-char D_0054F890[6] = "TRANS";
+char evtFrameFadeNameTrans[6] = "TRANS";
 
-char D_0054F898[8] = "FADEOUT";
+char evtFrameFadeNameFadeOut[8] = "FADEOUT";
 
-char D_0054F8A0[7] = "FADEIN";
+char evtFrameFadeNameFadeIn[7] = "FADEIN";
 
-char D_0054F8A8[5] = "PLAY";
+char evtFrameFadeNamePlay[5] = "PLAY";
 
-char D_0054F8B0[8] = "DISP ON";
+char evtViewerUnitControlNameDispOn[8] = "DISP ON";
 
 char evtViewerProcNameSlight[7] = "slight";
 

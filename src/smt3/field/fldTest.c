@@ -3464,10 +3464,8 @@ dds3Basic_t *fldRunTama3Basic = NULL;
 s32 fldRunTamaNext = 0;
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldDataNgMsg);
-SDATA_RESUME();
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsg1KO);
-SDATA_RESUME();
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsgRe1KO);
 SDATA_RESUME();
@@ -3475,7 +3473,7 @@ SDATA_RESUME();
 s32 fldRunDanteSe_asise = 0;
 
 SDATA_PAD(4);
-SDATA_RESUME();
+
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsg2A);
 SDATA_RESUME();
 

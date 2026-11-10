@@ -1416,4 +1416,5 @@ PIPE_EFF_t *pipe_DAMAGE03_D3P = 0;
 
 PIPE_EFF_t *pipe_ATTACK01_D3P = 0;
 
+SDATA_PAD(4);
 

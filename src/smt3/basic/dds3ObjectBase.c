@@ -1197,3 +1197,5 @@ char dds3ObjectBaseTiakiANodeName[8] = "tiaki_a";
 
 u16 frMessageCode = 0;
 
+SDATA_PAD(6);
+

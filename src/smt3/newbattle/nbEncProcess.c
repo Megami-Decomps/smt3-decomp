@@ -1008,4 +1008,5 @@ char nbEncProcessName[7] = "nb_enc";
 
 s32 nbBadCurseTimer = 0;
 
+SDATA_PAD(4);
 
