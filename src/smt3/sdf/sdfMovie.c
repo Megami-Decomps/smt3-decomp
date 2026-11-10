@@ -631,5 +631,7 @@ s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
 }
 s32 movieStreamSema = -1;
 
+SDATA_PAD(4);
+
 char sdfMovieIpsExt[4] = ".ips";
 
