@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "camp.h"
 
 extern void (*D_00551828)(void);
 
@@ -47,19 +48,19 @@ extern s8 dds3PadButtonState[];
 
 extern s32 cmpGetPressedButton(s32 mask);
 
-extern s32 cmpMoveCursor(u8 *cursor, s32 dir);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 dir);
 
 extern s32 cmpChkPadPressUpDown(void);
 
-extern s32 cmpDisablePadBitStop(u8 *work, s32 bits, s32 stop);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 dds3GetConfigFlag(u32 index, s32 *table);
 
-extern void dds3ToggleConfigFlag(u32 index, s32 *table);
+extern s32 dds3ToggleConfigFlag(u32 index, s32 *table);
 
-extern void dds3UpdateConfigCursor(void);
+extern s32 dds3UpdateConfigCursor(void);
 
 extern void dds3ScrollConfigList(void);
 
@@ -132,15 +133,9 @@ s32 dds3DrawConfig(void *PID)
     return 0;
 }
 
-/* NON_MATCHING: 27 of 119 overlapping words match; 476 bytes against retail's 492;
- * entry read of GBWK[0] is reused in the switch arms instead of reloaded. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq17, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 dds3UpdateConfig(void *PID)
 {
-    u16 button = cmpGetPressedButton(0xF3);
+    s32 button = (u16)cmpGetPressedButton(0xF3);
     s32 playSE = 1;
     s32 index;
 
@@ -151,51 +146,50 @@ s32 dds3UpdateConfig(void *PID)
     switch (button) {
     case 1:
         if (index == 3) {
-            GBWK[0] |= 0x10;
-        } else {
-            playSE = 0;
+            goto terminate;
         }
+    no_sound:
+        playSE = 0;
         break;
     case 2:
+    terminate:
         GBWK[0] |= 0x10;
         break;
     case 0x40:
         if (dds3PadButtonState[0x24] >= 0) {
-            playSE = 0;
-            break;
-        }
-        if (dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8)) != 0) {
-            playSE = 0;
-            break;
-        }
-        goto toggle;
-    case 0x80:
-        if (dds3PadButtonState[0x25] >= 0) {
-            playSE = 0;
-            break;
+            goto no_sound;
         }
         if (dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8)) == 0) {
-            playSE = 0;
+            if (index == 3) {
+                goto no_sound;
+            }
+            dds3ToggleConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
             break;
         }
-    toggle:
+        goto no_sound;
+    case 0x80:
+        if (dds3PadButtonState[0x25] >= 0) {
+            goto no_sound;
+        }
+        if (dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8)) == 0) {
+            goto no_sound;
+        }
         if (index == 3) {
-            playSE = 0;
-            break;
+            goto no_sound;
         }
         dds3ToggleConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
         break;
     case 0x10:
-        cmpMoveCursor(GBWK + 0x1C, -1);
+        cmpMoveCursor((cmpCursorInfo_t *)(GBWK + 0x1C), -1);
         break;
     case 0x20:
-        cmpMoveCursor(GBWK + 0x1C, 1);
+        cmpMoveCursor((cmpCursorInfo_t *)(GBWK + 0x1C), 1);
         break;
     }
     if (cmpChkPadPressUpDown() == 0) {
-        cmpMoveCursor(GBWK + 0x1C, 0);
+        cmpMoveCursor((cmpCursorInfo_t *)(GBWK + 0x1C), 0);
     }
-    button = cmpDisablePadBitStop(GBWK + 0x1C, button, 0x30);
+    button = (u16)cmpDisablePadBitStop((cmpPadStopWork_t *)(GBWK + 0x1C), button, 0x30);
     dds3UpdateConfigCursor();
     dds3ScrollConfigList();
     if (playSE) {
@@ -203,9 +197,6 @@ s32 dds3UpdateConfig(void *PID)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3ConfigMain", dds3UpdateConfig);
-#endif
 
 INCLUDE_SDATA(const s32, "kernel/dds3ConfigMain", D_00551700);
 
