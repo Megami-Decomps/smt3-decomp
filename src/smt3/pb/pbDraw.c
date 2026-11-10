@@ -127,7 +127,7 @@ void pbSetExitPos(pbProcHandle_t *p, s32 x, s32 y) {
 }
 
 
-extern char pbDrawMapbaseProcName[]; /* "pb-draw-mapbase", followed by two aligned empty strings. */
+extern const char pbDrawMapbaseProcName[]; /* "pb-draw-mapbase", followed by two aligned empty strings. */
 
 pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
@@ -197,7 +197,7 @@ extern u32 dds3DrawFlag;
 extern void pbResetKeyState(void);
 extern void p2sdPlayBGM(s32 track);
 
-INCLUDE_RODATA(const s32, "pb/pbDraw", pbDrawMapbaseProcName);
+const char pbDrawMapbaseProcName[24] = "pb-draw-mapbase";
 
 void pbLoadTextures(s32 mode, s32 stage)
 {
