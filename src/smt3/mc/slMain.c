@@ -129,11 +129,11 @@ extern u32 gslDrawFlagBg;
 
 s32 slExitToTitleSub(void);
 
-extern char slFldProcSequenceName[];
+extern const char slFldProcSequenceName[];
 
 s32 slExitToTitle2(void);
 
-extern char slIconPath[];
+extern const char slIconPath[];
 
 fileRequest_t *fileLoad(const char *filename);
 
@@ -173,7 +173,7 @@ slMcResult_t sdfMcFuncChdir1(void);
 
 void sdfMcSetSlotFlags(s32 request, s32 slot, s32 mask);
 
-extern char slIconSysName[];
+extern const char slIconSysName[];
 
 extern u8 slDirEntries[];
 
@@ -211,7 +211,7 @@ extern s32 slSaveData_writeFile(void);
 
 void slKillLoadProcess(void);
 
-extern char slBaseIconName[];
+extern const char slBaseIconName[];
 
 extern s32 slSaveWriteEnd_baseIcon(void);
 
@@ -289,7 +289,7 @@ u32 fileGetLoadSize(const fileRequest_t *fileHandle);
 
 s32 fileHandleFree(fileRequest_t *fileHandle);
 
-extern char slCalcName[];
+extern const char slCalcName[];
 
 extern u32 gslExitType;
 
@@ -323,7 +323,7 @@ extern s32 slDDS3To31Flg;
 
 #include "sdk_libc.h"
 
-extern char slSaveDirFmt[];
+extern const char slSaveDirFmt[];
 
 extern s8 D_00569743[];
 
@@ -609,8 +609,8 @@ typedef struct {
     fclencyceelem_t encyclopedia[184];
 } slConvertWork_t;
 
-extern char slConvert03Msg[];
-extern char slConvert04Msg[];
+extern const char slConvert03Msg[];
+extern const char slConvert04Msg[];
 
 void slVersionConvert_Step3(void)
 {
@@ -2575,19 +2575,19 @@ s32 slFileSelDraw(s32 id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "mc/slMain", slSaveDirFmt);
+const char slSaveDirFmt[20] = "BASLUS-%05d-dds3-%d";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slConvert03Msg);
+const char slConvert03Msg[38] = "==== Memoca ConvertStart!! 03-> ====\n";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slConvert04Msg);
+const char slConvert04Msg[31] = "==== ConvertStart!! 04-> ====\n";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slFldProcSequenceName);
+const char slFldProcSequenceName[16] = "fldProcSequence";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slIconPath);
+const char slIconPath[13] = "/mc/dds3.ico";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slIconSysName);
+const char slIconSysName[9] = "icon.sys";
 
-INCLUDE_RODATA(const s32, "mc/slMain", slBaseIconName);
+const char slBaseIconName[9] = "base.ico";
 
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 #endif
@@ -2965,7 +2965,7 @@ extern char slYesLabel[];
 extern char slNoLabel[];
 extern char slNewCycleMsg3[];
 
-INCLUDE_RODATA(const s32, "mc/slMain", slCalcName);
+const char slCalcName[13] = "FileMentCalc";
 
 void slQueryYesNoDraw(void)
 {
