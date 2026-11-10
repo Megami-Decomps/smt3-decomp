@@ -1765,5 +1765,5 @@ void nbInitKoukaProcess(nbMainProcessData_t *data)
     data->KoukaProcessID = id;
 }
 
-INCLUDE_SDATA(const s32, "newbattle/nbKoukaProcess", nbPcmLoadNameFormat);
+char nbPcmLoadNameFormat[4] = "%s\n";
 
