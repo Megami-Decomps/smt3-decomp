@@ -2358,15 +2358,15 @@ void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
                   origin, dds3AllocObjectId(), 0, id);
     fldItemBoxObjCount++;
 }
-INCLUDE_SDATA(const s32, "field/fldHit", fldItemBoxObjCount);
+s32 fldItemBoxObjCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldHit", fldMatterTable);
+collision_s *fldMatterTable = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldHit", fldValueRecordCount);
+s32 fldValueRecordCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldHit", fldPlaneCount);
+s32 fldPlaneCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldHit", fldItemBoxObjBufHandle);
+addr_t fldItemBoxObjBufHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldHit", fldMatterTableHandle);
+addr_t fldMatterTableHandle = 0;
 
