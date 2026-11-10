@@ -1165,7 +1165,7 @@ extern char *pstr[];
 extern s32 datGetPlayerLNDLevel(datUnitWork_t *unit);
 extern void rstSetDevilRegistered(s8 id);
 extern void rstSetHeartsMasterPhase(void);
-extern char rstPlayerRaceFormat[]; /* Format occupies a padded 32-byte span. */
+extern const char rstPlayerRaceFormat[]; /* Format occupies a padded 32-byte span. */
 
 void rstUpdateSeqHeartsMaster(void)
 {
@@ -1220,7 +1220,7 @@ extern s32 rstUpdateSeqDestroySkill(void);
 extern void fclUpdateMessage(void);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 
-INCLUDE_RODATA(const s32, "result/rstupdate", rstPlayerRaceFormat);
+const char rstPlayerRaceFormat[32] = "Player race = %d\n";
 
 s32 rstUpdate(dds3ProcessID_t *id)
 {
@@ -1295,25 +1295,25 @@ void func_002262D8(void) {
 void func_002262E0(void) {
 }
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DCD0);
+const char D_0053DCD0[24] __attribute__((aligned(16))) = "from the beginning.";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DCE8);
+const char D_0053DCE8[16] = "Start the game";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DCF8);
+const char D_0053DCF8[16] = "from a save.";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD08);
+const char D_0053DD08[16] = "of the game.";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD18);
+const char D_0053DD18[24] = "Adjust the settings";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD30);
+const char D_0053DD30[24] = "coming from Atlus.";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD48);
+const char D_0053DD48[16] = "the latest game";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD58);
+const char D_0053DD58[16] = "Check out";
 
-INCLUDE_RODATA(const s32, "result/rstupdate", dds3TitleTexPath);
+const char dds3TitleTexPath[24] = "/title/titletex.LB";
 
-INCLUDE_SDATA(const s32, "result/rstupdate", rstParamValueFormat);
+char rstParamValueFormat[8] = "%d";
 
-INCLUDE_SDATA(const s32, "result/rstupdate", D_0054FD08);
+char D_0054FD08[8] = "1";
 
