@@ -70,7 +70,7 @@
 
 /* N zero bytes of alignment padding ee-gcc put between two small-data objects
  * of one unit, where splat has no object to name (tools/include_sdata.py). */
-#define SDATA_PAD(N) __asm__(".section .sdata\n\t.space " #N "\n.section .text\n")
+#define SDATA_PAD(N) __asm__(".pushsection .sdata\n\t.space " #N "\n.popsection\n")
 
 /* Raise this unit's .text alignment to 2^N, for a unit whose original object
  * was aligned more strictly than its own code needs. The retail link pads up
