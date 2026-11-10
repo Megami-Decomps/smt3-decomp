@@ -282,10 +282,10 @@ Resolved:
 - `basic/dds3CameraObjectBasic` start, settled at the applied 0x00112370. Its start
   bracket is [0x00112280, 0x001123D0], 4 retail functions wide, which excludes the
   superseded 0x00112500 and leaves 0x00112370 and 0x001123D0 as the candidates. The
-  code picks between them: `func_00112370` calls `dds3InitPoseSet`, allocates 0x90
+  code picks between them: `dds3CameraObjectBasicConstructor` calls `dds3InitPoseSet`, allocates 0x90
   bytes and stores the result at `basic->workdata`, and 0x90 is exactly the unit's
   `dds3CameraObjectBasicWorkData_t` (a 64-byte matrix, four 16-byte vectors, a pointer
-  and three words). `func_001123D0` is its destructor, calling `dds3FreePoseSet` and
+  and three words). `dds3CameraObjectBasicDestructor` is its destructor, calling `dds3FreePoseSet` and
   freeing the same allocation, so it cannot be the first function of the file. The
   function before, `dds3ObjectBaseSetControlBasicSvs`, ends exactly at 0x00112370.
 - `evtPolygonMovie` to `evtPicture` pins at exactly the doc's 0x001F3A70.

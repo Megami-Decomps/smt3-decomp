@@ -31,7 +31,7 @@ extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 void MakeCamera(dds3Basic_t *pBasic);
 
-s32 func_00112370(dds3Basic_t *basic)
+s32 dds3CameraObjectBasicConstructor(dds3Basic_t *basic)
 {
     dds3CameraObjectBasicWorkData_t *work;
     dds3ObjectBaseControlWorkData_t *control;
@@ -46,7 +46,7 @@ s32 func_00112370(dds3Basic_t *basic)
     return 1;
 }
 
-void func_001123D0(dds3Basic_t *basic)
+void dds3CameraObjectBasicDestructor(dds3Basic_t *basic)
 {
     dds3CameraObjectBasicWorkData_t *work;
 
@@ -57,7 +57,7 @@ void func_001123D0(dds3Basic_t *basic)
 }
 
 /* Publish only the selected scene camera; consume its pending FOV update. */
-s32 func_00112410(dds3Basic_t *basic)
+s32 dds3CameraObjectBasicMainProcedure(dds3Basic_t *basic)
 {
     dds3PoseSet_t *pose;
     dds3CameraObjectBasicWorkData_t *work;
@@ -81,7 +81,7 @@ s32 func_00112410(dds3Basic_t *basic)
     return 1;
 }
 
-s32 func_001124F8(void)
+s32 dds3CameraObjectBasicDrawProcedure(void)
 {
     return 1;
 }
