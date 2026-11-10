@@ -944,41 +944,38 @@ void nbCountActiveUnits(void)
     }
 }
 
-#ifdef NON_MATCHING
 extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 void nbSetupBattleUnits(nbMainProcessData_t *data, s32 encno)
 {
-    nbEncountForm_t *entry = &nbEncountFormTable[encno];
-    datUnitWork_t *work;
-    s32 count = 0;
+    nbEncountForm_t *entry;
+    s32 count;
     s32 i;
-    s32 nakamayobi;
 
     for (i = 0; i < 10; i++) {
         data->form[i + 4].stat = 0x200;
         data->party[i + 4].flag = 0;
     }
+    count = 0;
+    entry = &nbEncountFormTable[encno];
     for (i = 0; i < 10; i++) {
         if (entry->id[i] != 0) {
             datSetDevilWork(entry->id[i], &data->enemyunit[count]);
-            work = &data->enemyunit[count];
-            work->flag |= 2;
-            work->maxhp = datDevilTable[entry->id[i]].maxhp;
-            work->hp = datDevilTable[entry->id[i]].hp;
-            work->maxmp = datDevilTable[entry->id[i]].maxmp;
-            work->mp = datDevilTable[entry->id[i]].mp;
+            data->enemyunit[count].flag |= 2;
+            data->enemyunit[count].maxhp = datDevilTable[entry->id[i]].maxhp;
+            data->enemyunit[count].hp = datDevilTable[entry->id[i]].hp;
+            data->enemyunit[count].maxmp = datDevilTable[entry->id[i]].maxmp;
+            data->enemyunit[count].mp = datDevilTable[entry->id[i]].mp;
             nbAddUnitStock(data, 1, count, i + 4);
             count++;
         }
     }
     nbSetEnemyFormation(data);
-    nakamayobi = entry->nakamayobi;
-    data->nakamayobi = nakamayobi != 0 ? nakamayobi : -1;
+    if (nbEncountFormTable[encno].nakamayobi != 0)
+        data->nakamayobi = nbEncountFormTable[encno].nakamayobi;
+    else
+        data->nakamayobi = -1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetupBattleUnits);
-#endif
 
 void nbSetPlayerStartData(nbMainProcessData_t *data)
 {

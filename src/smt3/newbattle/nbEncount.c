@@ -263,34 +263,36 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 extern s32 evtGetAgeOfMoon(void);
 extern s32 evtBitCheck(s32 no);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * field underground facility savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 nbGetEncountJoken(s32 id)
 {
-    nbEncountEntry_t *entry = &nbEncountTable[id];
-    s32 first = 0;
-    s32 second = 0;
+    s32 first;
+    s32 second;
 
-    if (entry->moonchk != 0 &&
-        ((entry->moonchk >> evtGetAgeOfMoon()) & 1) != 0) {
-        return entry->table2;
+    if (nbEncountTable[id].moonchk != 0 &&
+        ((nbEncountTable[id].moonchk >> evtGetAgeOfMoon()) & 1) != 0) {
+        return nbEncountTable[id].table2;
     }
-    if (entry->eventbit1 != 0) {
-        first = evtBitCheck(entry->eventbit1);
+    if (nbEncountTable[id].eventbit1 != 0) {
+        first = evtBitCheck(nbEncountTable[id].eventbit1);
+    } else {
+        first = 0;
     }
-    if (entry->eventbit2 != 0) {
-        second = evtBitCheck(entry->eventbit2);
+    if (nbEncountTable[id].eventbit2 != 0) {
+        second = evtBitCheck(nbEncountTable[id].eventbit2);
+    } else {
+        second = 0;
     }
-    if (first == 0) {
-        return entry->table1[second != 0 ? 2 : 0];
+    if (first == 0 && second == 0) {
+        return nbEncountTable[id].table1[0];
     }
-    return entry->table1[second != 0 ? 3 : 1];
+    if (first != 0 && second == 0) {
+        return nbEncountTable[id].table1[1];
+    }
+    if (first == 0 && second != 0) {
+        return nbEncountTable[id].table1[2];
+    }
+    return nbEncountTable[id].table1[3];
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
-#endif
 
 extern s32 nbGetEncountJoken(s32 id);
 
