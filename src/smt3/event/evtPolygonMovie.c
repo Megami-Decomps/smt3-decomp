@@ -98,8 +98,8 @@ extern void dds3MoverBasicSetPath(dds3Basic_t *mover, dds3Basic_t *path);
 extern void dds3MoverBasicMakePath(dds3Basic_t *mover);
 extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern u32 dds3DrawFlag;
-extern char evtPolygonMovieStartMsg[];
-extern char evtPolygonMovieMapMsg[];
+extern const char evtPolygonMovieStartMsg[];
+extern const char evtPolygonMovieMapMsg[];
 void evtPolygonMovieShutdown(dds3ProcessID_t *id);
 void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file);
 evtPolygonMovieWork_t *InitPolygonMovieWorkData(void);
@@ -1110,9 +1110,9 @@ s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id)
     return set;
 }
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", evtPolygonMovieStartMsg);
+const char evtPolygonMovieStartMsg[40] = "\245\335\245\352\245\264\245\363\245\340\241\274\245\323\241\274\245\271\245\277\241\274\245\310 (%d,%d)\n";
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", evtPolygonMovieMapMsg);
+const char evtPolygonMovieMapMsg[16] = "\244\336\244\303\244\327 (%d_%d)\n";
 
 saddr_t evtPolygonMovieProcess1(dds3ProcessID_t *id)
 {
@@ -1879,9 +1879,9 @@ dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
     return work->processId;
 }
 
-INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);
+saddr_t evtCameraFrameState = 0;
 
-INCLUDE_SDATA(const s32, "event/evtPolygonMovie", nowfovy);
+f32 nowfovy = 10;
 
-INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraLastFrame);
+s32 evtCameraLastFrame = -1;
 
