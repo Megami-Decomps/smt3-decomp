@@ -2297,7 +2297,7 @@ void InitMagatuhiEditorProcess(void) {
 }
 
 #ifdef NON_MATCHING
-extern u8 D_005518E2[];
+extern u8 sdfPadAnalogSticks[8];
 extern void *memcpy(void *dst, const void *src, size_t size);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
@@ -2517,8 +2517,8 @@ effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *menu)
         }
         type = item->type;
         if (type == 16) {
-            axisX = (s8)(D_005518E2[0] + 0x80);
-            axisY = (s8)(D_005518E2[1] + 0x80);
+            axisX = (s8)(sdfPadAnalogSticks[2] + 0x80);
+            axisY = (s8)(sdfPadAnalogSticks[3] + 0x80);
             if ((axisX < 0 ? -axisX : axisX) >= 65) {
                 changed = 1;
                 ((s32 *)item->value)[0] = fcvtws((f32)((s32 *)item->value)[0] + (f32)axisX * 6.0f * 0.0078125f);
