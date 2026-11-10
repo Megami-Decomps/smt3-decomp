@@ -8591,7 +8591,7 @@
 0x002BFA20 sdfHddPowerOffHandler void sdfHddPowerOffHandler(void *aArg)
 0x002BFA38 sdfHddInit void sdfHddInit()
 0x002BFBD8 sdfDev9LoadModule void sdfDev9LoadModule()
-0x002BFC58 sdf_2BFC58 __int64 __fastcall sdf_2BFC58(__int64, __int64)
+0x002BFC58 sdfZeroMem __int64 __fastcall sdfZeroMem(__int64, __int64)
 0x002BFCE8 sdfZeroMemQuad __int64 __fastcall sdfZeroMemQuad(__int64, __int64)
 0x002BFD60 sdfStrdupChip __int64 __fastcall sdfStrdupChip(__int64)
 0x002BFDD0 sdfBcdToDecimal __int64 __fastcall sdfBcdToDecimal(__int64)

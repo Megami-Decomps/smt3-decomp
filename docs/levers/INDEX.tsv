@@ -440,7 +440,7 @@ docs/levers/impossible.md	152		| sdfTexSetPacket | ordinary C plus the bit-lengt
 docs/levers/impossible.md	153	addi	| release_movieobj2 | **matched.** Ordinary C plus the idiom twice;
 docs/levers/impossible.md	154	$16 $18 cfc2 ctc2 pextlb	| corePktVu0Run | assembly throughout:
 docs/levers/impossible.md	155	j jal pextlb pextlh vitof0	| corePktEmitRefMapPass | assembly throughout:
-docs/levers/impossible.md	156	jr	| sdf_2BFC58 | a computed jr into an unrolled sq block, as above.
+docs/levers/impossible.md	156	jr	| sdfZeroMem | a computed jr into an unrolled sq block, as above.
 docs/levers/local-vectors.md	53	$f0	### Preserve both sphere results in the top-view camera setter nbCameraShot_InvokeTargetPartyTop2_Set matches all 720 bytes with separate radius and height…
 docs/levers/loop-rotation.md	38	beql	### Sentinel exit and per-mode effect lifetime (fldRunEffSet) field/fldTest::fldRunEffSet (300 instruction bytes) walks a null-terminated array of effect…
 docs/levers/scalar-spills.md	28		Index the three parallel arrays by the compact target slot.

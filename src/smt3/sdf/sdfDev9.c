@@ -88,7 +88,7 @@ void sdfDev9LoadModule(void) {
 #ifdef NON_MATCHING
 extern void *memset(void *dst, s32 value, size_t size);
 
-u64 sdf_2BFC58(void *dst, s32 size)
+u64 sdfZeroMem(void *dst, s32 size)
 {
     addr_t address = EE_ADDR(dst);
     s32 index, i, counter;
@@ -113,7 +113,7 @@ u64 sdf_2BFC58(void *dst, s32 size)
     return entry;
 }
 #else
-INCLUDE_ASM(const s32, "sdf/sdfDev9", sdf_2BFC58);
+INCLUDE_ASM(const s32, "sdf/sdfDev9", sdfZeroMem);
 #endif
 
 /* Clear `count` quadwords at dst: four per pass, then a falling 3/2/1

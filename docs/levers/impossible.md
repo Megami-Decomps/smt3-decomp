@@ -51,7 +51,7 @@ by C:
   would drop the other's bytes. That is a boundary problem, not a matching
   one.
 
-`sdf/sdfDev9`'s `sdf_2BFC58` is a hand-written quadword clear. Its body carries
+`sdf/sdfDev9`'s `sdfZeroMem` is a hand-written quadword clear. Its body carries
 `neg $2, $3`, `add $2, $2, $3` and `addi $3, $3, -0x8`, and cc1 only ever emits
 `subu`, `addu` and `addiu`. It also jumps into the middle of an eight-`sq`
 unrolled block through `jr $2` on a computed label address, which no C
@@ -153,7 +153,7 @@ instructions cc1 cannot select are not only `addi`:
 | `release_movieobj2` | **matched.** Ordinary C plus the idiom twice; see [../movie-frame-matching.md](../movie-frame-matching.md). The row is kept because this page is what the `addi` grep points at. |
 | `corePktVu0Run` | assembly throughout: `ctc2`, `vlqi`, `vilwr`, `cfc2`, `pextlb`, and a poll loop on the VIF1 and DMA status registers at 0x10008000 and 0x10003800. The frame exists because it needs `$16`-`$18`, not because it was compiled. |
 | `corePktEmitRefMapPass` | assembly throughout: a dozen VU0 macro-mode ops on vf24-vf26 and vf10, two `pextlb`/`pextlh`/`vitof0` colour unpacks, and a tail `j corePktEmitTexTrisCtx2`. The frame is for the `jal corePktLerpUVColorChain`. |
-| `sdf_2BFC58` | a computed `jr` into an unrolled `sq` block, as above. |
+| `sdfZeroMem` | a computed `jr` into an unrolled `sq` block, as above. |
 
 **The other sixteen are frameless leaf routines**, `corePktLoadVerts` and the
 fifteen beside it. Every one now carries a C reference implementation behind

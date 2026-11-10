@@ -176,3 +176,4 @@
 0x00551748	pipeTiltVertical	inferred	pipe vertical tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551748
 0x00551700	dds3ConfigProcName	inferred	"config": process name dds3ConfigMain starts and kills; former name D_00551700
 0x00551808	pipeMessNumFmt	inferred	"%d" pipeResult formats message numbers with; former name D_00551808
+0x002BFC58	sdfZeroMem	inferred	zeroes size bytes at dst with quad stores when both are 16-aligned, else memset; sibling of sdfZeroMemQuad; DDS1 func_002E73F0, DDS2 func_00340298; former name sdf_2BFC58
