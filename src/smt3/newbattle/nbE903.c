@@ -19,14 +19,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 
-
-
-
-
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-
-
-
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -253,8 +246,6 @@ extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 
 extern void nbResetFormPosRot(nbFormation_t *form);
 
-
-
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
@@ -270,9 +261,9 @@ extern char nbModelPackNameFormat[];
 
 extern char nbModelPackLoadFormat[];
 
-extern char nbE903EndMessage[];
+extern const char nbE903EndMessage[];
 
-extern char nbE904EndMessage[];
+extern const char nbE904EndMessage[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -329,7 +320,6 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 length, s32 coltype);
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
-
 
 s32 Parts1(nbEventProcessData_t *ed)
 {
@@ -422,9 +412,9 @@ s32 PartsWait(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903StockIds);
+const s32 nbE903StockIds[4] = { 282, 281, 280, 279 };
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903FormIndices);
+const s32 nbE903FormIndices[4] = { 0, 1, 3, 4 };
 
 s32 PartsEffect2(nbEventProcessData_t *ed)
 {
@@ -580,15 +570,15 @@ s32 nbE904_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE903EndMessage);
+const char nbE903EndMessage[40] = "\245\242\245\353\245\323\245\252\245\363\245\321\241\274\245\304\300\270\244\337\275\320\244\267\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbE903", nbE904EndMessage);
+const char nbE904EndMessage[16] = "\245\320\245\242\245\353\273\340\313\264\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903CurBasic);
+dds3Basic_t *nbE903CurBasic = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic0);
+dds3Basic_t *nbE903Basic0 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic1);
+dds3Basic_t *nbE903Basic1 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE903", nbE903Basic2);
+dds3Basic_t *nbE903Basic2 = NULL;
 
