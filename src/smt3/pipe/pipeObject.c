@@ -735,7 +735,7 @@ extern void mymdlSetMotion(tagpipeBasic *work, f32 frame);
 extern void mymdlAlphaSet(tagpipeBasic *work, u8 alpha);
 extern tagpipeBasic *MyLine;
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", objOptionWays);
+const u8 objOptionWays[16] = { 0x5F, 0x63, 0x58, 0x56, 0x5D, 0x52, 0x5B, 0x54, 0x39, 0x30, 0x3B, 0x2E, 0x35, 0x2A, 0x33, 0x2C };
 
 const char objDbgAddEml[24] = "EML %d ADD OBJECT\n";
 const char objDbgAddEms[24] = "EMS %d ADD OBJECT\n";
@@ -1368,53 +1368,52 @@ s32 texRelease(tagPipeTexture *texPtr)
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", hWorkArea);
+void *hWorkArea = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", WorkAreaPtr);
+u8 *WorkAreaPtr = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PartsWork);
+tagpipeParts *PartsWork = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeCur);
+tagpipeBasic *PipeCur = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeCur2);
+tagpipeBasic *PipeCur2 = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeLine);
+tagpipeBasic *PipeLine = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", ObjWork);
+tagPipeObject *ObjWork = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", basicMy);
+tagpipeBasic *basicMy = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", MyLine);
+tagpipeBasic *MyLine = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeEMS);
+tagpipeBasic *PipeEMS = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeEML);
+tagpipeBasic *PipeEML = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeRBOX);
+tagpipeBasic *PipeRBOX = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeMaka1);
+tagpipeBasic *PipeMaka1 = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeZMaka);
+tagpipeBasic *PipeZMaka = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeDMaka);
+tagpipeBasic *PipeDMaka = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", PipeDRBOX);
+tagpipeBasic *PipeDRBOX = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", MakaTex);
+tagPipeTexture *MakaTex = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", makaWork);
+void *makaWork = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_CELL01_D3P);
+PIPE_EFF_t *pipe_CELL01_D3P = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_BREAK01_D3P);
+PIPE_EFF_t *pipe_BREAK01_D3P = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_BREAK02_D3P);
+PIPE_EFF_t *pipe_BREAK02_D3P = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_DAMAGE01_D3P);
+PIPE_EFF_t *pipe_DAMAGE01_D3P = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_DAMAGE03_D3P);
+PIPE_EFF_t *pipe_DAMAGE03_D3P = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeObject", pipe_ATTACK01_D3P);
+PIPE_EFF_t *pipe_ATTACK01_D3P = 0;
 
-SDATA_PAD(4);
 
