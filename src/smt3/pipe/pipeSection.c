@@ -266,8 +266,6 @@ const char pipeObjectLoadMsg[40] = "ObjectData Loading [%s]....OK\n";
 
 INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLoadState);
 
-SDATA_PAD(4);
-
 s32 pipeLoadSection(s32 index)
 {
     tagPipeMidiList midiList = {{0x670000, 0x9530000}};
