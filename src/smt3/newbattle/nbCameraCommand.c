@@ -10,7 +10,7 @@
 
 #include "sdk_libc.h"
 
-extern char nbCameraGroundChkFormat[]; /* Padded ground-collision diagnostic. */
+extern const char nbCameraGroundChkFormat[]; /* Padded ground-collision diagnostic. */
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -821,5 +821,5 @@ void nbCameraState_Command_KORONZCheck(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraCommand", nbCameraGroundChkFormat);
+const char nbCameraGroundChkFormat[40] = "nbCameraCommandGroundChk:%f\n";
 

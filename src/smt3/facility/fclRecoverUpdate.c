@@ -604,11 +604,11 @@ s32 rcvUpdate(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmTmxPath);
+const char trmTmxPath[40] = "/facility/tmx/terminal/tminl_01.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelAmalaLink);
+const char trmMenuLabelAmalaLink[16] = "Amala Link";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelPursueHijiri);
+const char trmMenuLabelPursueHijiri[16] = "Pursue Hijiri";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", trmMenuLabelLinkToTerminal);
+const char trmMenuLabelLinkToTerminal[24] = "Link to terminal";
 

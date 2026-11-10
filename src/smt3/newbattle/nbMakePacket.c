@@ -246,7 +246,7 @@ typedef struct nbKoukaProcessData_t
 
 
 
-extern char nbCutLengthFormat[]; /* "カット長 = %d\n" */
+extern const char nbCutLengthFormat[]; /* "カット長 = %d\n" */
 
 extern nbKoukaProcessData_t *nbGetKoukaProcessData(void);
 
@@ -433,7 +433,7 @@ struct effBTLCut_t;
 extern void effBTLCutSetCutEndFrame(struct effBTLCut_t *cut, s32 frame);
 extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, saddr_t uniqueid, s32 se);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", nbCutLengthFormat);
+const char nbCutLengthFormat[16] = "\245\253\245\303\245\310\304\271 = %d\n";
 
 nbKoukaPacket_t *nbAddHatudoEffectKoukaPacket(s32 startframe, s32 framelength,
     saddr_t uniqueid, nbFormation_t *form, s32 type, s32 mottype, s32 skillid)

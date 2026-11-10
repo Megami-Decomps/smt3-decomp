@@ -15,7 +15,7 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-extern char fldTitleProcName[];
+extern const char fldTitleProcName[];
 #include "sdk_libc.h"
 
 extern s32 fldTitleState, fldTitlePhase, fldTitleFld, fldTitleWaitFrames;
@@ -28,7 +28,7 @@ extern s32 fldTitle_Process(dds3ProcessID_t *id);
 
 dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
-extern char fldTitleMiniProcName[];
+extern const char fldTitleMiniProcName[];
 
 extern sdfTexHandle_t *fldTitleMiniTex;
 
@@ -298,7 +298,7 @@ void fldTitle_Shutdown(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldTitle", fldTitleProcName);
+const char fldTitleProcName[16] = "fldTitle";
 
 void fldTitleStart(s32 fld, s32 waittime)
 {
@@ -510,7 +510,7 @@ void fldTitleMini_Shutdown(void) {
 extern s32 fldTitleMiniFld;
 extern s32 evtBitCheck(s32 no);
 
-INCLUDE_RODATA(const s32, "field/fldTitle", fldTitleMiniProcName);
+const char fldTitleMiniProcName[16] = "fldTitleMini";
 
 void fldTitleMiniStart(s32 fld)
 {

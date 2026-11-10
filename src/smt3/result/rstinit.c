@@ -9,7 +9,7 @@
 #include "kernel.h"
 #include "sdfFrame.h"
 
-extern void dds3KillProcessName(char *name, s32 shutdowntimer);
+extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
@@ -33,15 +33,15 @@ extern rstData_t *GBWK_1;
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
 extern void *memset(void *a, s32 b, size_t c);
 
-extern char rstMsgDestroyEvoAct[];
+extern const char rstMsgDestroyEvoAct[];
 
 extern s8 gProcessStat_4;
 
 extern char rstProcName[];
 
-extern char rstDrawProcName[];
+extern const char rstDrawProcName[];
 
-extern char rstUpdateProcName[];
+extern const char rstUpdateProcName[];
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 extern void fclClearFlag(s8 index);
@@ -169,9 +169,9 @@ void rstCreateTargetList(rstData_t *work)
 /* Allocations, cursors and the texture are installed by rstInit. */
 
 
-extern char rstScriptPath[]; /* "/result2/scr/message.bf" */
-extern char rstMessagePath[]; /* "/result2/mes_data.bmd" */
-extern char rstTexturePath[]; /* "/result2/tmx/lvup_02.tmx" */
+extern const char rstScriptPath[]; /* "/result2/scr/message.bf" */
+extern const char rstMessagePath[]; /* "/result2/mes_data.bmd" */
+extern const char rstTexturePath[]; /* "/result2/tmx/lvup_02.tmx" */
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
@@ -184,7 +184,7 @@ extern void fclInitMessage(void *message);
 extern void fclSetSelMessagePos(s32 pos);
 extern void cmpStartProcessPanelEff(s32 mode);
 extern void rstSetStatusModelReady(s32 ready);
-extern sdfTexHandle_t *fclLoadTexture(char *pFileName);
+extern sdfTexHandle_t *fclLoadTexture(const char *pFileName);
 extern void rstSetResultWork(sdfTexHandle_t *texture);
 extern void dds3FadeIn(s32 a, s32 b, s32 c, s32 frames);
 extern s32 p2sdPlayBGM(s32 id);
@@ -261,7 +261,7 @@ extern s32 rstCalc(dds3ProcessID_t *id);
 extern s32 rstDraw(dds3ProcessID_t *id);
 extern s32 rstUpdate(dds3ProcessID_t *id);
 extern void rstDestroyResult2(dds3ProcessID_t *id);
-extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
+extern dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startTimer,
                                          s32 shutdownTimer, dds3ProcessFunc_t process,
                                          dds3ProcessFunc_t shutdown, void *work);
 
@@ -376,25 +376,23 @@ void rstSetEvoState(void)
     EventStart->unk_22E6 = 2;
 }
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstMsgDestroyEvoAct);
+const char rstMsgDestroyEvoAct[24] = "Destroy evo act!!!\n";
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstScriptPath);
+const char rstScriptPath[24] = "/result2/scr/message.bf";
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstMessagePath);
+const char rstMessagePath[24] = "/result2/mes_data.bmd";
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstTexturePath);
+const char rstTexturePath[32] = "/result2/tmx/lvup_02.tmx";
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstDrawProcName);
+const char rstDrawProcName[16] = "result2_draw";
 
-INCLUDE_RODATA(const s32, "result/rstinit", rstUpdateProcName);
+const char rstUpdateProcName[16] = "result2_update";
 
-INCLUDE_SDATA(const s32, "result/rstinit", GBWK_1);
+rstData_t *GBWK_1 = NULL;
 
-INCLUDE_SDATA(const s32, "result/rstinit", gProcessStat_4);
+s8 gProcessStat_4 = 0;
 
-SDATA_PAD(3);
+char rstProcName[8] = "result2";
 
-INCLUDE_SDATA(const s32, "result/rstinit", rstProcName);
-
-INCLUDE_SDATA(const s32, "result/rstinit", D_0054FCF8);
+u32 D_0054FCF8[2] = {0xCA81F784, 0x00000000};
 

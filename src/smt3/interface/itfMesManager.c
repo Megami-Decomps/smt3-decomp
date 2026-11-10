@@ -1354,13 +1354,13 @@ u16 itfMesMngGetStatManager(void) {
     return itfMesMngManager.flags;
 }
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelChange);
+const char itfMesDebugLabelChange[16] = "CHANGE INSTANCE";
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelPosition);
+const char itfMesDebugLabelPosition[16] = "POSITION";
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelRightBottom);
+const char itfMesDebugLabelRightBottom[16] = "RIGHT-BOTTOM";
 
-INCLUDE_RODATA(const s32, "interface/itfMesManager", itfMesDebugLabelLeftTop);
+const char itfMesDebugLabelLeftTop[16] = "LEFT-TOP";
 
 s32 itfMesMngDebugProc(void) {
     window_tag *panel;
@@ -2715,23 +2715,26 @@ itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow) {
     }
     return pflow;
 }
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesFmtInt);
+char itfMesFmtInt[8] = "%d";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLabelAlpha);
+char itfMesDebugLabelAlpha[8] = "ALPHA";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesSelectionMarkers);
+extern char itfMesMarkerEdit[];
+extern char itfMesMarkerSelect[];
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerEdit);
+char *itfMesSelectionMarkers[2] = {itfMesMarkerSelect, itfMesMarkerEdit};
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerSelect);
+char itfMesMarkerEdit[8] = "* ";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugItemFormat);
+char itfMesMarkerSelect[8] = "> ";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesMarkerNone);
+char itfMesDebugItemFormat[8] = "%s%-5s";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugFadeFormat);
+char itfMesMarkerNone[8] = "  ";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLineVertIndex);
+char itfMesDebugFadeFormat[8] = "( %3d )";
 
-INCLUDE_SDATA(const s32, "interface/itfMesManager", itfMesDebugLineColorIndex);
+u8 itfMesDebugLineVertIndex[5] = {0, 1, 2, 3, 0};
+
+u8 itfMesDebugLineColorIndex[5] = {0, 0, 0, 0, 0};
 

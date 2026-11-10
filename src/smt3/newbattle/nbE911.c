@@ -206,7 +206,7 @@ typedef struct nbNegoProcessData_t
 
 #include "sdk_libc.h"
 
-extern char nbE911EndMsg[];
+extern const char nbE911EndMsg[];
 
 
 
@@ -606,17 +606,17 @@ s32 nbE912_Wait1(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE911", nbE911EndMsg);
+const char nbE911EndMsg[24] = "\245\320\245\242\245\353\313\342\262\246\244\316\271\346\316\341\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Light0);
+nbE911Light_t *nbE911Light0 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Light1);
+nbE911Light_t *nbE911Light1 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911UnitCur);
+dds3Basic_t *nbE911UnitCur = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit0);
+dds3Basic_t *nbE911Unit0 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit1);
+dds3Basic_t *nbE911Unit1 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE911", nbE911Unit2);
+dds3Basic_t *nbE911Unit2 = NULL;
 

@@ -306,8 +306,7 @@ typedef struct {
     s16 eventBit;
 } fldNpcOverride_t;
 
-typedef struct { char name[12][24]; } fldNpcPathGroup1_t;
-typedef struct { char name[24][24]; } fldNpcPathGroup2_t;
+#include "fldNpcPath.h"
 typedef union {
     struct {
         fldNpcPathGroup1_t first;

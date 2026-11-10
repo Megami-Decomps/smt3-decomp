@@ -180,7 +180,7 @@ extern void movieViewerScanDir(void);
 
 extern s32 MovieViewerProc(dds3ProcessID_t *process);
 
-extern char movieViewerProcName[];
+extern const char movieViewerProcName[];
 
 void InitMovieViewer(void)
 {
@@ -189,7 +189,7 @@ void InitMovieViewer(void)
         dds3StartProcess(movieViewerProcName, 0x2B02, 1, 0, MovieViewerProc, NULL, NULL);
 }
 
-extern char movieViewerProcName[];
+extern const char movieViewerProcName[];
 
 extern void movieViewerFree(void);
 
@@ -287,7 +287,7 @@ extern char movieViewerBlankByte[];
 
 /* The memory window: a cursor over the eight nibbles of either source address,
  * the word above and the 8x8 block below. */
-INCLUDE_RODATA(const s32, "movie/MovieViewer", movieViewerProcName);
+const char movieViewerProcName[16] = "movieViewer";
 
 s32 movieViewerDebugDraw(void)
 {
@@ -374,23 +374,21 @@ s32 movieViewerDebugDraw(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F438);
+const char D_0053F438[16] = "Magatama";
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F448);
+const char D_0053F448[16] = "SP Items";
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F458);
+const char D_0053F458[16] = "Part with";
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F468);
+const char D_0053F468[16] = "Return to stock";
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", cmpCampTmxPath);
+const char cmpCampTmxPath[24] = "/camp/tmx/camp_01.tmx";
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerPhase);
+s32 movieViewerPhase = 0;
 
-SDATA_PAD(4);
+char movieViewerFmtWord[8] = "%08X";
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerFmtWord);
+char movieViewerFmtByte[8] = "%02X";
 
-INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerFmtByte);
-
-INCLUDE_SDATA(const s32, "movie/MovieViewer", movieViewerBlankByte);
+char movieViewerBlankByte[8] = "**";
 

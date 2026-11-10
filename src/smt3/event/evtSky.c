@@ -122,119 +122,119 @@ dds3ProcessID_t *evtInitSky(void)
     fldSkySetFilter(0, 1, 0);
     return dds3StartProcess(evtSkyProcName, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
 }
-INCLUDE_SDATA(const s32, "event/evtSky", skyanime);
+u16 skyanime = 0;
 
-SDATA_PAD(2);
+SDATA_HOLE(2);
 
-INCLUDE_SDATA(const s32, "event/evtSky", fldbokasi);
+s32 fldbokasi = 0;
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtSkyProcName);
+char evtSkyProcName[8] = "sky";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFrameNumFmt);
+char evtFrameNumFmt[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F918);
+char D_0054F918[8] = "PRESET";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F920);
+char D_0054F920[8] = "STOP";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F928);
+char D_0054F928[8] = "DATA";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F930);
+char D_0054F930[8] = "MODE";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F938);
+char D_0054F938[8] = "SW";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F940);
+char D_0054F940[8] = "LINK";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F948);
+char D_0054F948[8] = "END";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F950);
+char D_0054F950[8] = "NO";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F958);
+char D_0054F958[8] = "VOLUME";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F960);
+char D_0054F960[8] = "FOVY";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F968);
+char D_0054F968[8] = "HOKAN";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F970);
+char D_0054F970[8] = "SCALE";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F978);
+char D_0054F978[8] = "ALPHA";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F980);
+char D_0054F980[8] = "RANGE";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F988);
+char D_0054F988[8] = "LENGTH";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054F990);
+char D_0054F990[8] = "START";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtMenuDisp_cnt);
+s32 evtMenuDisp_cnt = 0;
 
-SDATA_PAD(4);
+SDATA_HOLE(4);
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtScrollUpMark);
+char evtScrollUpMark[8] = "^";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtScrollDownMark);
+char evtScrollDownMark[8] = "v";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtIndentInt);
+char evtFmtIndentInt[8] = "     %d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtStr);
+char evtFmtStr[8] = "%s";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtSpaceStr);
+char evtFmtSpaceStr[8] = " %s";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtNameExt);
+char evtFmtNameExt[8] = "[%s.%s]";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtChar);
+char evtFmtChar[8] = "%c";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtLabelEvent);
+char evtLabelEvent[8] = " EVENT";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtEventNo);
+char evtFmtEventNo[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtLabelCut);
+char evtLabelCut[8] = "   CUT";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtCutNo);
+char evtFmtCutNo[8] = "%03d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtLabelName);
+char evtLabelName[8] = "NAME:";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA00);
+char D_0054FA00[8] = "ALLSTOP";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA08);
+char D_0054FA08[8] = "VOLUP";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA10);
+char D_0054FA10[8] = "VOLDOWN";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA18);
+char D_0054FA18[8] = "TRANS";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA20);
+char D_0054FA20[8] = "FADEOUT";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA28);
+char D_0054FA28[8] = "FADEIN";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA30);
+char D_0054FA30[8] = "PLAY";
 
-INCLUDE_SDATA(const s32, "event/evtSky", D_0054FA38);
+char D_0054FA38[8] = "DISP ON";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtInt4);
+char evtFmtInt4[8] = "%4d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtStrEllipsis);
+char evtStrEllipsis[8] = "...";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtStrOn);
+char evtStrOn[8] = "ON ";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtStrOff);
+char evtStrOff[8] = "OFF";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameNormal);
+char evtBlendNameNormal[8] = "NORMAL";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameAdd);
+char evtBlendNameAdd[8] = "ADD";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtBlendNameSub);
+char evtBlendNameSub[8] = "SUB";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtFloat1);
+char evtFmtFloat1[8] = "%.1f";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtInt);
+char evtFmtInt[8] = "%d";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtName11);
+char evtFmtName11[8] = "%-.11s";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtPlayerNo);
+char evtFmtPlayerNo[8] = "P%d:";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtFmtIndentStr);
+char evtFmtIndentStr[8] = "   %s";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtMsgSaveOpenError);
+char evtMsgSaveOpenError[8] = "err\n";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtPfsDevice);
+char evtPfsDevice[8] = "pfs:";
 
-INCLUDE_SDATA(const s32, "event/evtSky", evtPackNameFormat);
+char evtPackNameFormat[8] = "e%03d_p";
 

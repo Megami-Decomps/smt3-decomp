@@ -29,7 +29,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern s8 gProcessStat_2;
 
-extern char rcvEventProcName[];
+extern const char rcvEventProcName[];
 
 #include "sdk_libc.h"
 
@@ -42,9 +42,9 @@ extern void sdfTexFree(s32 aHandle);
 
 extern char rcvCalcProcName[];
 
-extern char rcvDrawProcName[];
+extern const char rcvDrawProcName[];
 
-extern char rcvUpdateProcName[];
+extern const char rcvUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -120,7 +120,7 @@ typedef struct
     /* 0x44E0 */ u8 panel[0x40];
 } fclRecoverWork_t;
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvEventProcName);
+const char rcvEventProcName[16] = "e801_main";
 
 void fclRecoverLoadTextures(void *workp)
 {
@@ -269,33 +269,31 @@ s32 rcv_20DBE8(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvDrawProcName);
+const char rcvDrawProcName[16] = "recover_draw";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvUpdateProcName);
+const char rcvUpdateProcName[24] = "recover_update";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvRemoveCurseText);
+const char rcvRemoveCurseText[16] = "REMOVE CURSE";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvCureStatusText);
+const char rcvCureStatusText[16] = "CURE STATUS";
 
-INCLUDE_RODATA(const s32, "facility/fclRecoverInit", rcvHealHpMpText);
+const char rcvHealHpMpText[16] = "HEAL HP/MP";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", shutdownfunc);
+rcvWork_t *shutdownfunc = NULL;
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", gProcessStat_2);
+s8 gProcessStat_2 = 0;
 
-SDATA_PAD(3);
+char rcvCmdLeave[8] = "Leave";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdLeave);
+char rcvCmdTalk[8] = "Talk";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdTalk);
+char rcvCmdRevive[8] = "Revive";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdRevive);
+char rcvCmdHeal[8] = "Heal";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCmdHeal);
+char rcvCalcProcName[8] = "recover";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvCalcProcName);
+char rcvReviveText[8] = "REVIVE";
 
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvReviveText);
-
-INCLUDE_SDATA(const s32, "facility/fclRecoverInit", rcvHealText);
+char rcvHealText[8] = "HEAL";
 

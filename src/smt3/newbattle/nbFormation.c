@@ -242,7 +242,7 @@ extern void nbFormDispOn(s32 formindex);
 
 extern void Mult(void);
 
-extern f32 nbFormRotScale[4];
+extern const f32 nbFormRotScale[4];
 
 extern f32 nbFormRotPose[4];
 
@@ -704,7 +704,7 @@ void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
     }
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbFormation", nbFormRotScale);
+const f32 nbFormRotScale[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 #endif
@@ -1115,7 +1115,7 @@ s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
     }
     return ret;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbFormation", nbFormPartyInterval);
+f32 nbFormPartyInterval = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbFormation", nbFormEnemyInterval);
+f32 nbFormEnemyInterval = 0.0f;
 

@@ -348,95 +348,95 @@ void effBTLPointLightRun(void)
         break;
     }
 }
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLPointLightProcess);
+u32 effBTLPointLightProcess = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0E4);
+INCLUDE_SDATA_C(const s32, "effect/effBattleLight", D_0054F0E4);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLFieldColorOn);
+s8 effBTLFieldColorOn = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F1);
+s8 D_0054F0F1 = 0;
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLJyocyuEffFilePath);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLSelectedName);
+INCLUDE_SDATA_C(const s32, "effect/effBattleLight", effBTLSelectedName);
 
-SDATA_PAD(4);
+SDATA_HOLE(4);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBedDirName);
+char effBedDirName[8] = "/sobed/";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutCount);
+s32 effBTLCutCount = 0;
 
-SDATA_PAD(4);
+SDATA_HOLE(4);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCutAllFmt);
+char effBTLCutAllFmt[8] = " ALL:%d";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut1Fmt);
+char effBTLCut1Fmt[8] = "CUT1:%d";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut2Fmt);
+char effBTLCut2Fmt[8] = "CUT2:%d";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLCut3Fmt);
+char effBTLCut3Fmt[8] = "CUT3:%d";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLPartyIndex);
+s32 effBTLPartyIndex = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLUnitLightOn);
+u8 effBTLUnitLightOn = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLDebugSphereOn);
+u8 effBTLDebugSphereOn = 1;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F138);
+char D_0054F138[8] = "Z";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F140);
+char D_0054F140[8] = "Y";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F148);
+char D_0054F148[8] = "X";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F150);
+char D_0054F150[8] = "DIR";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F158);
+char D_0054F158[8] = "HEIGHT";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F160);
+char D_0054F160[8] = "TARGET";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F168);
+u32 D_0054F168[2] = {0, 0};
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F170);
+char D_0054F170[8] = "ON/OFF";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F178);
+char D_0054F178[8] = "B";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F180);
+char D_0054F180[8] = "G";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F188);
+char D_0054F188[2] = "R";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F18A);
+u8 D_0054F18A = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLLightSaved);
+u8 effBTLLightSaved = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLLightColor);
+u32 effBTLLightColor = 0x007E5C5E;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F190);
+u32 D_0054F190 = 0x00808080;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F198);
+char D_0054F198[8] = "ENDLESS";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1A0);
+char D_0054F1A0[8] = "BASE";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1A8);
+char D_0054F1A8[8] = "A";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1B0);
+char D_0054F1B0[8] = "FILTER";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1B8);
+char D_0054F1B8[8] = "LIGHT";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1C0);
+u8 D_0054F1C0 = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLDebugCameraAllEdit);
+u8 effBTLDebugCameraAllEdit = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLDebugCameraAllTable);
+u8 effBTLDebugCameraAllTable = 1;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1C3);
+u8 D_0054F1C3 = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1C8);
+char D_0054F1C8[8] = "C DEBUG";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1D0);
+char D_0054F1D0[8] = "EFFECT";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1D8);
+char D_0054F1D8[8] = "SYSTEM";
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F1E0);
+u32 D_0054F1E0 = 0x10602000;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effPartModelSerial);
+s32 effPartModelSerial = 0;
 

@@ -42,15 +42,15 @@ extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 
 
 extern void fclDrawBG(fclSprite_t *pSprite, s32 OtNo);
 
-extern char dds3ConfigRestoreBackupMsg[];
+extern const char dds3ConfigRestoreBackupMsg[];
 
 
 
 extern void dds3DrawConfigPanel(s32 id);
 
-extern char dds3ConfigSaveBackupMsg[];
+extern const char dds3ConfigSaveBackupMsg[];
 
-extern char dds3ConfigBgPath[];
+extern const char dds3ConfigBgPath[];
 
 extern void *slLoadProcId;
 
@@ -581,31 +581,31 @@ void *dds3AllocConfigWork(s32 mode)
     return work;
 }
 
-INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigSaveBackupMsg);
+const char dds3ConfigSaveBackupMsg[24] = "Cfg gbl to bak!\n";
 
-INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigRestoreBackupMsg);
+const char dds3ConfigRestoreBackupMsg[24] = "Cfg bak to gbl!\n";
 
-INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigBarSprites);
+const s32 dds3ConfigBarSprites[3][4] = {{0x15, 0x16, 0x17, 0x18}, {0x15, 0x16, 0x17, 0x18}, {0x15, 0x16, 0x17, 0x18}};
 
-INCLUDE_RODATA(const s32, "code_0029B780", dds3ConfigBgPath);
+const char dds3ConfigBgPath[24] = "/title/cfg_bg.tmx";
 
-INCLUDE_SDATA(const s32, "code_0029B780", slLoadKillFlag);
+s8 slLoadKillFlag = 0;
 
-INCLUDE_SDATA(const s32, "code_0029B780", slLoadDoneFlag);
+s8 slLoadDoneFlag = 0;
 
-INCLUDE_SDATA(const s32, "code_0029B780", slLoadProcId);
+void *slLoadProcId = 0;
 
-INCLUDE_SDATA(const s32, "code_0029B780", slYesLabel);
+char slYesLabel[8] = "Yes";
 
-INCLUDE_SDATA(const s32, "code_0029B780", slNoLabel);
+char slNoLabel[8] = "No";
 
-INCLUDE_SDATA(const s32, "code_0029B780", slNoFileLabel);
+char slNoFileLabel[8] = "No File";
 
-INCLUDE_SDATA(const s32, "code_0029B780", slNewCycleMsg3);
+char slNewCycleMsg3[8] = "";
 
-INCLUDE_SDATA(const s32, "code_0029B780", slCycleLabel);
+char slCycleLabel[8] = "cycle";
 
-INCLUDE_SDATA(const s32, "code_0029B780", D_005516F0);
+char D_005516F0[8] = "BACK";
 
-INCLUDE_SDATA(const s32, "code_0029B780", dds3ConfigValue);
+s32 dds3ConfigValue[2] = {0, 0};
 

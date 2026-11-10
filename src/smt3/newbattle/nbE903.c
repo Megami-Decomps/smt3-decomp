@@ -255,7 +255,7 @@ extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char nbE902EndMessage[];
+extern const char nbE902EndMessage[];
 
 extern char nbModelPackNameFormat[];
 

@@ -254,7 +254,7 @@ extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 extern s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index);
 
 
-extern char nbAiTblFormat[];
+extern const char nbAiTblFormat[];
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -1794,9 +1794,9 @@ void nbRunAi(nbActionProcessData_t *a)
     nbRunAiSub(a, no);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbAi", nbAiTblFormat);
+const char nbAiTblFormat[16] = "AItbl = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545850);
+const char D_00545850[24] = "\200\367\201\205\201\211\206\352\200\342\201\204\200\342\201\251";
 
-INCLUDE_RODATA(const s32, "newbattle/nbAi", D_00545868);
+const char D_00545868[24] = "\201\304\201\312\201\331\204\377\205\200";
 

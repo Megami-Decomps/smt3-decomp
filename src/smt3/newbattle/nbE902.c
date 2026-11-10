@@ -291,7 +291,7 @@ extern s32 evtBitCheck(s32 no);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char nbE902EndMessage[];
+extern const char nbE902EndMessage[];
 
 extern u8 pNbCamera[];
 
@@ -551,5 +551,5 @@ s32 nbE903_Wait1(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE902", nbE902EndMessage);
+const char nbE902EndMessage[24] = "\245\252\245\363\245\256\245\347\245\246\245\256\312\254\277\310!\n";
 
