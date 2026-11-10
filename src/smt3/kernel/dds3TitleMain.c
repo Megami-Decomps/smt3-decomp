@@ -629,25 +629,21 @@ void mselMakeSaveText(s32 *devilIds, u32 color, u32 nameColor)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE50);
+const char mselTitleCursor0Line0[32] = "An average level of difficulty.";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE70);
+const char mselTitleCursor1Line2[21] = "the thrill of death.";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DE88);
+const char mselTitleCursor1Line1[27] = "suitable for those seeking";
 
-INCLUDE_RODATA(const s32, "kernel/dds3TitleMain", D_0053DEA8);
+const char mselTitleCursor1Line0[22] = "A level of difficulty";
 
-INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", dds3TitleMovieCount);
-
-SDATA_PAD(4);
+s32 dds3TitleMovieCount = 0;
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", D_0054FD40);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", gGlobal);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", fldWmapEnabled);
-
-SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3TitleMain", mselLevelLabel);
 
