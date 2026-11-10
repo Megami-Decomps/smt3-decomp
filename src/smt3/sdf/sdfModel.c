@@ -19,8 +19,9 @@ typedef struct
 extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 extern void ToMatrix(void);
 extern void MultMatrixRevNoArg(void);
-extern void MultMatrixRev(void *aMatrix);
-extern void sdf3DPrimSetTmPacket(void *aPacket);
+extern void MultMatrixRev(const void *aMatrix);
+struct sdf3DTmPacketData_t;
+extern void sdf3DPrimSetTmPacket(struct sdf3DTmPacketData_t *aPacket);
 extern void sdfModelSetOtCallbacks(sdfGrOt_t *aOt);
 
 
@@ -48,7 +49,7 @@ extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
 extern const char sdfModelDefaultName[];
 
-extern void *sdfGrAllocPacketBuff(s32 aSize);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, addr_t aHeadPacket, addr_t aTailPacket);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
@@ -563,7 +564,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
         }
         j++;
     } while (j != 2);
-    buf = sdfGrAllocPacketBuff((used * 16 + 0x10) * listCount + 0x40);
+    buf = EE_ADDR_AS(void *, sdfGrAllocPacketBuff((used * 16 + 0x10) * listCount + 0x40));
     tag = sdfModelSetMatRefPacket(aNode->root, matIndex, buf, aId);
     *(u64 *)tag = 0x10000001;
     *(u64 *)&tag->dat0 = (u64)0x6002C000 << 32;
@@ -946,7 +947,7 @@ s32 sdfModelCheckBounds(const f32 *aMinMax) {
     return result;
 }
 
-extern void sdfMatListUpdatePacket(sdfMatList_t *aMatList, s32 aId);
+extern void sdfMatListUpdatePacket(sdfItemArray_t *aMatList, s32 aId);
 extern void *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
@@ -960,7 +961,7 @@ extern void sdfCoreDrawSetFog(void *fog);
 extern void *sdfCorePacketGen(sdfModelNode_t *node, void *packet_p, u32 attr_mask, u32 color,
                               f32 fdSoften, f32 fdBias, s32 frame_id, s32 reverse);
 
-/* The 0xC0-byte packet a temp-linked node builds: the tm REF, the 128 bytes
+/* The 0xC0-byte packet a temp-linked node builds: the tm CNT tag, the 128 bytes
  * VU1 reads through it, and the draw parameters that close it. */
 typedef struct QWORD_ALIGNED
 {
@@ -970,16 +971,13 @@ typedef struct QWORD_ALIGNED
 } sdfModelTempDrawPacket_t;
 
 /* vu0 routine: each node's screen transform, and its w lane as the sort key. */
-/* NON_MATCHING: 163 of 282 words match at the exact size (first differing word
- * at +0x60). */
-#ifdef NON_MATCHING
 void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
 {
     sdfDrawTag_t *tags[4];
     s32 i;
     s32 frame;
     u32 rootColor;
-    u32 color;
+    s32 color;
     u32 drawAttr;
     u32 attr;
     void *light;
@@ -993,13 +991,13 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
     f32 bias;
 
     frame = (s8)sdfFrameId;
-    sdfMatListUpdatePacket(root->matList, frame);
+    sdfMatListUpdatePacket((sdfItemArray_t *)root->matList, frame);
     rootColor = root->color;
     light = root->light;
-    fog = root->fog;
     if (light == NULL) {
         light = sdf3DLightDefault;
     }
+    fog = root->fog;
     if (fog == NULL) {
         fog = sdf3DFogDefault;
     }
@@ -1012,18 +1010,27 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
         soften = sdfFaceDivSoften;
         bias = sdfFaceDivBias;
     }
-    softenParm = softenBias << 16;
     drew = 0;
     for (i = 0; i < root->nodeList->count; i++) {
         sdfModelNode_t *node = root->nodeList->items[i];
         sdfModelNodeDef_t *def = node->shape;
         sdfModelBounds_t *bounds;
         struct sdfShapeHeader_t **list;
-        struct sdfShapeHeader_t *header;
+        /* One real stream address: first the typed header, then its actual
+         * void-pointer array. These phases do not overlap. Qualified ee-gcc
+         * 2.96 expansion keeps both phases in one pseudo, removing the
+         * separate header lifetime before allocation. */
+        void *packetCursor;
         sdfDrawTag_t *tag;
         f32 *matrix;
         f32 zValue;
-        s32 j;
+        /* The same OT-slot index is initialized for clear, select and flush.
+         * Qualified 2.96 RTL keeps these phases in one pseudo through
+         * allocation; this reconstructs codegen, not original spelling. */
+        s32 slotIndex;
+
+        softenParm = softenBias;
+        softenParm <<= 16;
 
         if (def == NULL) {
             continue;
@@ -1054,22 +1061,31 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
             color = node->color;
         }
         attr = drawAttr & node->drawAttr;
-        for (j = 0; j != 4; j++) {
-            tags[j] = NULL;
+        for (slotIndex = 0; slotIndex != 4; slotIndex++) {
+            tags[slotIndex] = NULL;
         }
         sdfCoreDrawSetZBias(root->zBias);
-        semiTrans = (s32)color < 0;
-        parmTag = ((u64)(attr | softenParm) << 32) | 0x6102C000;
-        while ((header = *list++) != NULL) {
-            s32 otIndex;
-            sdfShapePacket_t **packets;
+        while ((packetCursor = *list++) != NULL) {
+            u32 headerInfo;
             sdfShapePacket_t *pkt;
 
-            otIndex = (*(u32 *)header & 0xFFFF0000) >> 16;
-            if (otIndex == 0) {
-                otIndex = semiTrans == 0;
+            semiTrans = 0;
+            if (color < 0) {
+                semiTrans = 1;
             }
-            tag = tags[otIndex];
+            parmTag = ((u64)(attr | softenParm) << 32) | 0x6102C000;
+
+            headerInfo = *(u32 *)packetCursor;
+            /* Retail loads the whole packed count/priority word. The empty
+             * input prevents combine from narrowing this read to a halfword;
+             * this is a compiler constraint, not original-source evidence. */
+            FAKEMATCH_ASM_READ(headerInfo);
+            slotIndex = headerInfo >> 16;
+            if (slotIndex == 0) {
+                slotIndex = semiTrans == 0;
+            }
+            packetCursor = ((struct sdfShapeHeader_t *)packetCursor)->packet;
+            tag = tags[slotIndex];
             if (tag == NULL) {
                 sdfModelTempDrawPacket_t *buf;
 
@@ -1077,13 +1093,14 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 *(f32 *)&tag->z = zValue;
                 tag->lightPacket = EE_ADDR(light);
                 tag->fogPacket = EE_ADDR(fog);
-                tags[otIndex] = tag;
-                buf = sdfGrAllocPacketBuff(sizeof(*buf));
+                tags[slotIndex] = tag;
+                buf = EE_ADDR_AS(sdfModelTempDrawPacket_t *, sdfGrAllocPacketBuff(sizeof(*buf)));
                 *(u64 *)&buf->tmTag = 0x10000008;
                 *(u64 *)&buf->tmTag.dat0 = (u64)0x6C07C000 << 32;
                 SDF_VU0_LOADMATRIX(matrix);
-                sdf3DPrimSetTmPacket(buf->tm);
+                sdf3DPrimSetTmPacket((struct sdf3DTmPacketData_t *)buf->tm);
                 *(u64 *)&buf->parm.next = 0x20000002;
+                *(u64 *)&buf->parm.next.dat0 = parmTag;
                 buf->parm.unpackColor = 0x6E01C002;
                 buf->parm.color = color;
                 buf->parm.unpackParm = 0x6003C003;
@@ -1092,25 +1109,30 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 buf->parm.faceDivBias = bias;
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
-                *(u64 *)&buf->parm.next.dat0 = parmTag;
                 sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(&buf->parm));
             }
-            packets = (sdfShapePacket_t **)header->packet;
-            while ((pkt = *packets++) != NULL) {
+            for (;;) {
+                void **nextPacket = packetCursor;
+
+                pkt = *nextPacket++;
+                packetCursor = nextPacket;
+                if (pkt == NULL) {
+                    break;
+                }
                 if (pkt->packetType == PACKET_TYPE_NORMAL) {
                     u32 packed;
                     u16 matIndex;
                     sdfDmaTag_t *buf;
                     sdfDmaTag_t *body;
 
-                    buf = sdfGrAllocPacketBuff(0x30);
+                    buf = EE_ADDR_AS(sdfDmaTag_t *, sdfGrAllocPacketBuff(0x30));
                     packed = *(u32 *)&pkt->packetSize;
                     matIndex = packed >> 16;
                     packed &= 0xFFFF;
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
-                    *(u64 *)body = SDF_DMA_TAG(EE_ADDR(pkt->dataBody),
-                                               packed | 0x30000000);
+                    *(u64 *)body = SDF_DMA_TAG_WORD_FIRST(packed | 0x30000000,
+                                                        EE_ADDR(pkt->dataBody));
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
@@ -1118,22 +1140,24 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 }
             }
         }
-        for (j = 0; j != 4; j++) {
-            tag = tags[j];
+        for (slotIndex = 0; slotIndex != 4; slotIndex++) {
+            tag = tags[slotIndex];
             if (tag != NULL) {
+                sdfGrOt_t **slot = ot + slotIndex;
+
                 drew = 1;
-                ot[j]->regFunc(ot[j], tag);
+                (*slot)->regFunc(*slot, tag);
             }
-            tags[j] = NULL;
+            /* Redundant cleanup retained for retail's copied live-clear trace:
+             * sw zero at 0x002B1D3C, also in matched sdfModelLinkOt's flush
+             * at 0x002B21BC. The initial clear above is the live template. */
+            tags[slotIndex] = NULL;
         }
     }
     if (drew != 0) {
         root->flags |= SDF_MODEL_FLAG_DREW;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
-#endif
 
 /* DDS engine donor: dds-decomp (redthing1), sdfModelBuildNodeResourcePackets. */
 /* vu0 routine: each node's screen transform, and its w lane as the sort key. */
@@ -1163,7 +1187,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
         sdfModelTempPacketLinkOt(aOt, aRoot);
     }
     frame = (s8)sdfFrameId;
-    sdfMatListUpdatePacket(aRoot->matList, frame);
+    sdfMatListUpdatePacket((sdfItemArray_t *)aRoot->matList, frame);
     rootColor = aRoot->color;
     light = aRoot->light;
     if (light == NULL) {
@@ -1240,7 +1264,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                 tag->lightPacket = EE_ADDR(light);
                 tags[j] = tag;
                 tag->fogPacket = EE_ADDR(fog);
-                buf = sdfGrAllocPacketBuff(sizeof(*buf));
+                buf = EE_ADDR_AS(sdfModelNodeDrawPacket_t *, sdfGrAllocPacketBuff(sizeof(*buf)));
                 sdfModelSetTmRefPacket(node, &buf->tmRef, frame);
                 *(u64 *)&buf->parm.next = 0x20000002;
                 *(u64 *)&buf->parm.next.dat0 = parmTag;
@@ -1257,7 +1281,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
             switch (header->type) {
             case MODEL_PACKET_HEADER_TYPE_NORMAL:
                 if (reverse == 0) {
-                    sdfDmaTag_t *ref = sdfGrAllocPacketBuff(0x20);
+                    sdfDmaTag_t *ref = EE_ADDR_AS(sdfDmaTag_t *, sdfGrAllocPacketBuff(0x20));
 
                     QUAD_ZERO(*(u128 *)&ref[1]);
                     ref->qwc = 0;

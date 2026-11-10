@@ -191,73 +191,62 @@ question is never solved:
 
 ## sdfModelTempPacketLinkOt (sdf/sdfModel, 0x468)
 
-One hundred sixty-three of 282 words match at the exact 1128-byte size, first
-difference at +0x60. The draft's body is believed right: the node walk,
-the format-1 shape list, the screen transform, the bounds reject, the four
-draw-tag slots, the 0xC0 temp packet and the ordering-table flush all appear
-in retail's order with retail's operands.
+Matched at 0x002B1950: all 282 words / 1,128 bytes. The complete owner has
+53 matching functions. The node walk, format-1 shape list, screen transform,
+bounds rejection, four draw-tag slots, 0xC0 temporary packet and OT callbacks
+remain the native operations. No compiler flags, shared headers or provider
+implementations change.
 
-The function shares almost its whole skeleton with `sdfModelLinkOt` below,
-which is at 61 words: the prologue (frame id, `sdfMatListUpdatePacket`, the
-light and fog defaults, the face-division terms), the per-node transform and
-`sdfModelCheckBounds`, the local-colour select, the `drawAttr` mask, the
-four-slot clear loop, `sdfCoreDrawSetZBias`, the `movz` on a zero
-ordering-table index, the draw-parameter packet and the flush loop are one
-source template in both. Everything learned on one carried to the other, so
-fix them together.
+The source uses two locals across successive roles:
 
-### The mat-ref packet write, and what it recovered
+- `slotIndex` serves the four-slot clear loop, the selected header priority
+  and the four-slot flush loop. Each phase assigns it before use. The native
+  unchecked priority indexing is unchanged.
+- `packetCursor` first identifies a shape header, then its actual packet
+  pointer array. The header is accessed through its real header type, and
+  array traversal uses `void **` over the actual `void *` elements. It is not
+  an integer offset into an unrelated subobject. Both values have real consumers; no fixed
+  register, dummy use or cross-call clobber assumption is introduced. Qualified
+  expansion keeps both cursor phases in one pseudo, and the real slot-index
+  phases share one pseudo through allocation.
 
-The inner `PACKET_TYPE_NORMAL` block is the same code as
-`sdfModelSetOneSkinDrawPacket`'s header, and it wants the same two properties:
-the packet word is one `u32` narrowed in place, and it is read **after** the
-`sdfGrAllocPacketBuff` call, which is where retail's `lw $16, 0x4($18)`,
-`srl $5, $16, 16` and `andi $16, $16, 0xFFFF` sit:
+Retail reads the header's packed count/priority as a word, then takes its
+high half. Stock compiler dumps show the ordinary `lw` plus shift at `life`
+and a narrowed halfword load after `combine`. An input-only empty constraint
+on the initialized header word preserves the native width. This is a local
+compiler reconstruction aid, not evidence of the original source spelling.
+The packet's packed size/material word is separately read after allocation,
+then narrowed in place for the native material reference and QWC consumers.
 
-    buf = sdfGrAllocPacketBuff(0x30);
-    packed = *(u32 *)&pkt->packetSize;
-    matIndex = packed >> 16;
-    packed &= 0xFFFF;
-    body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
+The DMA tag uses the existing word-first composition macro. The parameter-tag
+assignment is staged before the remaining temporary-packet fields; emitted
+stores retain retail ordering. These preserve native operands, stores and
+callback ordering. The 0xC0 allocation contains the 0x80-byte transform payload at +0x10 and the
+0x30-byte parameter packet at +0x90. The inner 0x30-byte allocation leaves
+room for the material reference, body reference and terminating DMA tag.
 
-That single change took the function from 54 of 282 words and eight excess
-bytes to 163 of 282 at the exact 1128-byte size, first difference at +0x60. A
-separate `u16 qwc = packed;` is what cost the rest: `packed`'s references drop
-below the allocator's threshold and the whole body's registers rotate.
+The terminal slot clear is genuinely source-dead: the local array never
+escapes, and the next eligible node initializes every slot before reading it.
+Retail nevertheless retains its `sw zero` at 0x002B1D3C. The live initial
+clear at 0x002B1B0C and exact same-owner `sdfModelLinkOt` cleanup at 0x002B21BC
+supply the copied shape. This is the narrowly documented native-dead-code
+exception, consistent with the already matched unread W store in
+[fldHitWM_Mask](../field/fldHit.md), not an invented consumer. Removing only
+this clear leaves 36 differing target words at the same extent; that control
+corroborates necessity, not policy permission.
 
-What is not established, and is the whole residual here:
+Owner-local declarations follow the actual allocator, transform, matrix and
+material-list providers. Integer packet-buffer addresses are explicitly
+converted to the real destination pointer types. These corrections preserve
+the complete emitted owner, including the other guarded drafts.
 
-- The light and fog default block at +0x60 has the colour spill and the
-  `lw %gp_rel(sdf3DLightDefault)` the other way round, and the two default
-  addresses in swapped registers (`$4`/`$3` against the draft's `$2`/`$4`),
-  which renames the two `movz` pairs that follow. Both `movz` selects and
-  their frame slots are otherwise retail's.
-- The node loop's cursors are rotated: retail walks the shape list in `$20`
-  and keeps the header in `$19`, the draft uses `$17` and `$19`, which shifts
-  the whole temp-packet block by one word from +0x210 to +0x2F8.
-- The `while ((header = *list++) != NULL)` test comes out `bnel` with the
-  header load in the likely slot, where retail emits `bne` plus
-  `addiu $20, $20, 0x4` in a real delay slot.
+The final source has independently reviewed semantics and complete-owner
+code/data checks. Whole assembly and raw ELF output agree between ordinary,
+dump-enabled and strict compiler invocations within each production,
+SKIP_ASM and retained-C context. The full retail build and repository regression gates
+pass. Private compiler traces and retail data are not published.
 
-- Retail holds nine values in saved registers across the node loop: `aRoot`
-  in `$23`, the node, the matrix pointer `node + 0xC0` in `$30`, the shape
-  list cursor, the header cursor, the draw tag, `attr`, the packet and the
-  `0x0FFFFFFF` mask. The draft needs ten, so `aRoot` takes `$30`, the matrix
-  pointer spills to the frame instead, and every saved register after it is
-  renamed. Which tenth value the draft is carrying is not identified.
-- `otIndex` comes from `lw` of the header's first word plus `srl 16`, where
-  the draft emits `lhu` at +2. gcc narrows a word load whose only use is
-  `>> 16`. Eight spellings ruled out here: `*(u32 *)header >> 16`, through a
-  `u32` local, `((u32 *)header)[0] >> 16`, a `u32 info` struct member,
-  `*cursor++ >> 16`, `/ 0x10000`, `(u32)*(s32 *)header >> 16` and
-  `(x << 0) >> 16`. In a small test function `(w & 0xFFFF0000) >> 16` does
-  keep the word load, but in this function it is narrowed anyway; a second
-  live use of the low half is the only form that held.
-- The sign test on the colour is `slti`, not `srl 31`; see the shared
-  dead end in the `sdfModelLinkOt` entry.
-
-Also corrected while drafting: `sdfDrawTagLink2` takes three arguments
-(tag, packet, range tail), not two. The unit's old two-argument `extern` is
-replaced and `sdfModelLinkShapedDrawPacket`'s draft call above now passes
-the final tag as the third argument; that draft's own word count is
-unchanged.
+Earlier partial-score and tenth-live-value notes are superseded: the current
+baseline and retail both use a 0xC0 frame with nine saved GPRs. The closed
+word-extraction spellings need not be repeated; the qualified combine result
+identifies the read-width decision directly.
