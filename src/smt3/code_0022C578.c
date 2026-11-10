@@ -11557,45 +11557,56 @@ void func_00242320(s8 value, u8 *work)
     work[0x2124] = value;
 }
 
-/* NON_MATCHING: 16 of 38 words differ, exact size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq26, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-s32 cmpCursorSlotIsSelectable(datUnitWork_t *unit, u16 mask, s8 flag)
+/* The alternate mask value feeds the final availability test. This empty
+ * operand preserves the native branch-shaped selection in ee-gcc. It emits
+ * no instructions and is a local reconstruction
+ * aid, not evidence of the original source spelling. */
+s32 cmpCursorSlotIsSelectable(datUnitWork_t *unit, u16 inputMask, s8 flag)
 {
+    u32 mask = inputMask;
     s32 flags = unit->flag;
     s32 test;
+    s32 allowed;
 
     if ((flags & 1) != 0) {
-        if (flag != 0 && (flags & 2) != 0 && (mask & 0x20) == 0) {
-            goto no;
+        if (flag != 0 && (flags & 2) != 0) {
+            allowed = mask & 0x20;
+            if (allowed == 0) {
+                goto no;
+            }
         }
-        if ((flags & 0x10) != 0 && (mask & 0x40) == 0) {
-            goto no;
+        if ((flags & 0x10) != 0) {
+            allowed = mask & 0x40;
+            if (allowed == 0) {
+                goto no;
+            }
         }
-        if ((unit->badstatus & 0x800) != 0 && (mask & 0x80) == 0) {
-            goto no;
+        if ((unit->badstatus & 0x800) != 0) {
+            allowed = mask & 0x80;
+            if (allowed == 0) {
+                goto no;
+            }
         }
-        if ((flags & 4) != 0) {
+        test = flags & 4;
+        if (test != 0) {
             test = mask & 4;
         } else {
             test = mask & 8;
+            FAKEMATCH_ASM_LIVE(test);
         }
         if (test == 0) {
             goto no;
         }
         return 1;
     }
-    if ((mask & 0x10) != 0) {
+    allowed = mask & 0x10;
+    if (allowed != 0) {
         return 1;
     }
 no:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpCursorSlotIsSelectable);
-#endif
+
 
 s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 {
