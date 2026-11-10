@@ -95,4 +95,13 @@ __asm__(".include \"macro.inc\"\n");
 
 #endif
 
+/* Declaration of a const object defined later in the unit. ee-gcc treats an
+ * extern const as read-only data and addresses it differently, so the retail
+ * build must keep the plain extern; a native compiler rejects the mismatch. */
+#ifdef NON_MATCHING
+#define EXTERN_LATE_CONST extern const
+#else
+#define EXTERN_LATE_CONST extern
+#endif
+
 #endif /* INCLUDE_ASM_H */

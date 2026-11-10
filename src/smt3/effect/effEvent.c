@@ -308,7 +308,7 @@ extern void ToMatrix(void);
 extern void MultMatrixNoArg(void);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *aRoot, s32 aId);
-extern sdfVector4_t effUnitY;
+EXTERN_LATE_CONST sdfVector4_t effUnitY;
 void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *pPosPtr);
 void dds3EffectPartSetPosition(dds3EffectPart_t *hEffPart, void *pPos);
 void dds3EffectPartDraw(dds3EffectPart_t *hEffPart);

@@ -822,7 +822,7 @@ extern f32 sdfSin(f32 angle);
 extern void Mult(void);
 extern void mdlSetScale(mdlObj_t *model);
 extern void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *form, f32 height);
-extern effPCPBossVector_t D_00533DA0;
+EXTERN_LATE_CONST effPCPBossVector_t D_00533DA0;
 extern sdfGrOt_t sdfGrOtTable[];
 
 void effPCPBossONGYDraw(effPCPBossONGY_t *work)
@@ -1470,7 +1470,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
 void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work);
 
 #ifdef NON_MATCHING
-extern effPCPBossVector_t D_00533DC0;
+EXTERN_LATE_CONST effPCPBossVector_t D_00533DC0;
 extern void nbFormDispOff2(nbFormation_t *form);
 
 void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)

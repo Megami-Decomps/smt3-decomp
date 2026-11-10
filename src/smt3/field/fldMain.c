@@ -184,9 +184,9 @@ extern void fldPlayerCalc_Hit(void);
 
 extern void fldHitChkUnit(sdfVector4_t *phys_pos);
 
-extern sdfVector4_t fldCameraLookAt;
+EXTERN_LATE_CONST sdfVector4_t fldCameraLookAt;
 
-extern sdfVector4_t fldCameraInitTm;
+EXTERN_LATE_CONST sdfVector4_t fldCameraInitTm;
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(u32 id, sdfVector4_t *campos, sdfVector4_t *tm, sdfVector4_t *lookat);
 

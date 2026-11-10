@@ -300,7 +300,7 @@ extern s32 fldAutoMapHomeX;
 
 extern s32 fldAutoMapHomeZ;
 
-extern sdfVector4_t fldAutoMapSeqUp;
+EXTERN_LATE_CONST sdfVector4_t fldAutoMapSeqUp;
 
 extern sdfVector4_t fldAutoMapEye;
 
@@ -1508,7 +1508,7 @@ u32 fldAutoMapChkMode(void) {
 
 /* These are the existing native .data flag and camera/vector records. */
 extern u8 dds3PadStickStatusState[2][2];
-extern sdfVector4_t fldAutoMapCalcUp;
+EXTERN_LATE_CONST sdfVector4_t fldAutoMapCalcUp;
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewTarget;
 extern sdfVector4_t aViewDown;

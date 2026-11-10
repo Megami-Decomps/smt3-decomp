@@ -4705,7 +4705,7 @@ typedef struct
     f32 v[4];
 } cmbPanelScale_t;
 
-extern cmbPanelScale_t cmbPanelScaleTable;
+EXTERN_LATE_CONST cmbPanelScale_t cmbPanelScaleTable;
 
 f32 cmbGetPanelScale(s32 mode)
 {

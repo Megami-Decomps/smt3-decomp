@@ -1698,7 +1698,7 @@ INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Wm2);
  * to turnRight (387) and not turnLeft (381), so retail's set needs turnLeft to
  * outrank turnRight too and is not reachable from this source. */
 #ifdef NON_MATCHING
-extern const volatile sdfVector4Unaligned_t fldNmlSyukanAxis;
+extern const sdfVector4Unaligned_t fldNmlSyukanAxis;
 extern u8 dds3PadStickState[2][2][2];
 extern s8 dds3PadButtonState[];
 extern s32 fldPlayerMoveState, fldPlayerSyukanState, fldSyukanState;

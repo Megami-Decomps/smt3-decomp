@@ -320,7 +320,7 @@ void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTa
 }
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 type, s32 context);
-extern itfColor_t fclRibbonBaseColor;
+EXTERN_LATE_CONST itfColor_t fclRibbonBaseColor;
 
 void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
               s32 alpha, sdfDrawTag_t *tag)
