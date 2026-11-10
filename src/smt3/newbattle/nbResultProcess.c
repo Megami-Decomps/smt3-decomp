@@ -906,7 +906,7 @@ extern s32 nbResultState;
 extern void nbFindTobiwarpLabel(nbMainProcessData_t *data);
 extern void nbBgmFadeOut(void);
 extern void nbIncResultCounter(void);
-extern char nbResultDoneMsg[];
+extern const char nbResultDoneMsg[];
 
 /* Qualified reorg traces: the preceding C reward routine removes $2 from
  * the fall-through live set, preserving the final plain loading-state branch. */
@@ -1001,7 +1001,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 a, s32 b,
                                           void *work);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbResultDoneMsg);
+const char nbResultDoneMsg[16] = "pac1 done\n";
 
 void nbInitResultProcess(nbMainProcessData_t *data)
 {
@@ -1016,17 +1016,21 @@ void nbLoadStageSky(void)
     fldSkyBattle();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageLightName);
+const char nbStageLightName[16] = "BTL_DEF_LIGHT";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbNiidaCameraPos);
+const sdfVector4Unaligned_t nbNiidaCameraPos = { 0.0f, -100.0f, -600.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbEventCameraPos);
+const char nbNiidaCameraText[16] = "NIIDA CAMERA";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultPos);
+const sdfVector4Unaligned_t nbEventCameraPos = { 0.0f, -100.0f, -600.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageCameraDefaultRot);
+const char nbEventCameraText[16] = "EVENT CAMERA";
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageProcessName);
+const f32 nbStageCameraDefaultPos[4] = { 213.0f, -276.669983f, -636.839966f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", nbStageDrawProcessName);
+const f32 nbStageCameraDefaultRot[4] = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+const char nbStageProcessName[16] = "nb_stage";
+
+const char nbStageDrawProcessName[24] = "nb_draw_stage";
 
