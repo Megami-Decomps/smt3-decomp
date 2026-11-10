@@ -232,7 +232,7 @@ extern s32 nbBgmFadeState;
 
 extern void p2sdStopBGM(s32 no);
 
-extern void func_002C1E70(s32 no);
+extern void sdfSndSendChannelGroupCommand150(s32 no);
 
 extern char nbBgmStopFormat[];
 
@@ -879,12 +879,12 @@ void nbBgmStop(void)
 
 void nb_28DE10(void)
 {
-    func_002C1E70(0x7F);
+    sdfSndSendChannelGroupCommand150(0x7F);
 }
 
 void nb_28DE28(void)
 {
-    func_002C1E70(0);
+    sdfSndSendChannelGroupCommand150(0);
 }
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", nbBgmStopFormat);

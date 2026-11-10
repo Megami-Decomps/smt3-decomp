@@ -98,3 +98,11 @@
 0x002C60E0	sdfPacMarkPhaseFinished	inferred	DDS1/2 name for the same sdfPacDecode function; former name func_002C60E0
 0x002B2628	sdfChunkFindById	inferred	DDS1/2 name for the same sdfModel function; former name func_002B2628
 0x001DD9C0	mdlProjectPoints	inferred	DDS1/2 name for the same mdlManager function; former name mdl_1DD9C0
+0x002C22B0	sdfSndSendChannelGroupCommand110Duplicate	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C22B0; DDS name sndSendChannelGroupCommand110Duplicate with the sdfSnd prefix
+0x002C21A8	sdfSndSendChannelGroupCommand110	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21A8; DDS name sndSendChannelGroupCommand110 with the sdfSnd prefix
+0x002C1E40	sdfSndSendChannelGroupCommand140	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E40; DDS name sndSendChannelGroupCommand140 with the sdfSnd prefix
+0x002C1E10	sdfSndSendChannelControlCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E10; DDS name sndSendChannelControlCommand with the sdfSnd prefix
+0x002C1D78	sdfSndSendFilenameCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1D78; DDS name sndSendFilenameCommand with the sdfSnd prefix
+0x002C17D8	sdfSndDispatchCommandWithoutPayload	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C17D8; DDS name sndDispatchCommandWithoutPayload with the sdfSnd prefix
+0x002C1788	sdfSndQueueNoPayloadCommand210	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1788; DDS name sndQueueNoPayloadCommand210 with the sdfSnd prefix
+0x002C1E70	sdfSndSendChannelGroupCommand150	inferred	DDS1/2 name for the same sdfSound function; former name func_002C1E70; DDS name sndSendChannelGroupCommand150 with the sdfSnd prefix
