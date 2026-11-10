@@ -108,7 +108,6 @@ rpcPacket *_sceRpcGetPacket(rpcQueue *queue)
     return NULL;
 }
 
-
 void _sceRpcFreePacket(rpcPacket *p)
 {
     u32 flags = p->w[4];
@@ -203,7 +202,7 @@ extern s32 WaitSema(s32 sema);
 extern s32 DeleteSema(s32 sema);
 extern s32 scePrintf(const char *format, ...);
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 length);
-extern char sceSifMModeErrorString[];
+extern const char sceSifMModeErrorString[];
 
 s32 sceSifMBindRpcParam(rpcClient *client, u32 serverId, s32 mode, u32 arg0, u32 arg1, u32 arg2);
 
@@ -318,7 +317,7 @@ s32 sceSifMUnBindRpc(rpcClient *client, s32 mode)
 
 extern void sceSifWriteBackDCache(void *address, s32 size);
 
-INCLUDE_RODATA(const s32, "sdk/libmrpc", sceSifMModeErrorString);
+const char sceSifMModeErrorString[40] = "mode must be 0 in this version.\n";
 
 s32 sceSifMCallRpc(rpcClient *client, u32 function, u32 mode,
                    void *send, s32 sendSize, void *receive, s32 receiveSize,
