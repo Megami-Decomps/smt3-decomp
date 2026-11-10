@@ -23,9 +23,7 @@ extern s32 pipeCheckLevel(s32 level, s32 type);
 
 extern void pipeEndSection(void);
 
-
 extern void DEBUG_PRINT(const char *str, ...);
-
 
 extern void *dds3SearchProcessName(const char *namestr);
 
@@ -52,6 +50,7 @@ s32 MainPipe(void *aProcId)
     switch (SectionIndex) {
     case 1:
         if (mapIndex == 0) {
+
             SectionIndex = 0x102;
         } else if (pipeLoadSection(mapIndex - 1) != 0) {
             SectionIndex = 0x101;
@@ -131,17 +130,16 @@ s32 ChkPipe(void)
 void DEBUG_PRINT(const char *str, ...) {
 }
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", mapIndex);
+s32 mapIndex = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", mapPrev);
+s32 mapPrev = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", debugMode);
+s8 debugMode = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", SectionIndex);
+s32 SectionIndex = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeMain", pipeInitDone);
+u8 pipeInitDone = 0;
 
 SDATA_PAD(7);
 
