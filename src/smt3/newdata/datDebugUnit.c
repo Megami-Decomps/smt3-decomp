@@ -12,7 +12,7 @@ extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
-extern const char datDebugStockItemFmt[];
+extern char datDebugStockItemFmt[];
 
 typedef struct {
     u8 reserved0000[0x1914];
@@ -52,13 +52,13 @@ void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
     }
 }
 
-extern const char datDebugUnitIndexFmt[];
-extern const char datDebugEmptyLabel[];
-extern const char datDebugIdFmt[];
-extern const char datDebugPartyMark[];
-extern const char datDebugLevelFmt[];
-extern const char datDebugHpMpFmt[];
-extern const char datDebugBadStatusFmt[];
+extern char datDebugUnitIndexFmt[];
+extern char datDebugEmptyLabel[];
+extern char datDebugIdFmt[];
+extern char datDebugPartyMark[];
+extern char datDebugLevelFmt[];
+extern char datDebugHpMpFmt[];
+extern char datDebugBadStatusFmt[];
 extern const char *nbUnitBadStatusNames[13];
 
 void DispUnit1(s32 unit, s32 x, s32 y, sdfDrawTag_t *tag)
@@ -147,7 +147,7 @@ s32 datDebugUnitProcess(dds3ProcessID_t *id)
 
 extern const char *const datDebugKotowariLabels[];
 extern const char datDebugKotowariTitle[];
-extern const char datDebugKotowariFmt[];
+extern char datDebugKotowariFmt[];
 extern s32 datDebugMenuCursor;
 extern s8 dds3PadButtonState[];
 extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
@@ -205,181 +205,187 @@ s32 datDebugDrawSelectMenu(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariLabels);
+extern char datDebugKotowariYosuga[], datDebugKotowariMusubi[], datDebugKotowariSizima[];
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariTitle);
+const char *const datDebugKotowariLabels[3] = { datDebugKotowariYosuga, datDebugKotowariMusubi, datDebugKotowariSizima };
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugDeadScriptName);
+const char datDebugKotowariTitle[16] = "KOTOWARI EDIT";
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugInvisibleName);
+const char datDebugFreeCameraText[16] = "FREE CAMERA";
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugNegoResultName);
+const char datDebugGameCameraText[16] = "GAME CAMERA";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugStockItemFmt);
+const char datDebugDeadScriptName[16] = "DEADSCRIPT";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameNone);
+const char datDebugInvisibleName[16] = "INVISIBLE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameDead);
+const char datDebugNegoResultName[16] = "NEGORESULT";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameStone);
+char datDebugStockItemFmt[8] = "%d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameFly);
+char nbUnitBadStatusNameNone[8] = "------";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePara);
+char nbUnitBadStatusNameDead[8] = "DEAD";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameCharm);
+char nbUnitBadStatusNameStone[8] = "STONE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePoison);
+char nbUnitBadStatusNameFly[8] = "FLY";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameClose);
+char nbUnitBadStatusNamePara[8] = "PARA";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameBind);
+char nbUnitBadStatusNameCharm[8] = "CHARM";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNamePanic);
+char nbUnitBadStatusNamePoison[8] = "POISON";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameSleep);
+char nbUnitBadStatusNameClose[8] = "CLOSE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameFreeze);
+char nbUnitBadStatusNameBind[8] = "BIND";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbUnitBadStatusNameShock);
+char nbUnitBadStatusNamePanic[8] = "PANIC";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugUnitIndexFmt);
+char nbUnitBadStatusNameSleep[8] = "SLEEP";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugEmptyLabel);
+char nbUnitBadStatusNameFreeze[8] = "FREEZE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugIdFmt);
+char nbUnitBadStatusNameShock[8] = "SHOCK";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugPartyMark);
+char datDebugUnitIndexFmt[8] = "[%2d] ";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugLevelFmt);
+char datDebugEmptyLabel[8] = "EMPTY";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugHpMpFmt);
+char datDebugIdFmt[8] = "%03X ";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugBadStatusFmt);
+char datDebugPartyMark[8] = "P";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugMenuCursor);
+char datDebugLevelFmt[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariYosuga);
+char datDebugHpMpFmt[8] = "%3d/%3d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariMusubi);
+char datDebugBadStatusFmt[4] = "%s";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariSizima);
+s32 datDebugMenuCursor = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugKotowariFmt);
+char datDebugKotowariYosuga[8] = "YOSUGA";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F78);
+char datDebugKotowariMusubi[8] = "MUSUBI";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugGameCameraName);
+char datDebugKotowariSizima[8] = "SIZIMA";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F80);
+char datDebugKotowariFmt[8] = "%s  %3d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F88);
+char *nbDebugFreeCameraName = datDebugFreeCameraText;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameEnd);
+char *nbDebugGameCameraName = datDebugGameCameraText;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAto);
+s32 D_00550F80 = 1;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameCheck3);
+char D_00550F88[8] = "%s";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameCheck1);
+char nbDebugPhaseNameEnd[8] = "END";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAutotar);
+char nbDebugPhaseNameAto[8] = "ATO";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAuto);
+char nbDebugPhaseNameCheck3[8] = "CHECK3";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameReturn);
+char nbDebugPhaseNameCheck1[8] = "CHECK1";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameEscape);
+char nbDebugPhaseNameAutotar[8] = "AUTOTAR";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameWait);
+char nbDebugPhaseNameAuto[8] = "AUTO";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameBadwait);
+char nbDebugPhaseNameReturn[8] = "RETURN";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameNego);
+char nbDebugPhaseNameEscape[8] = "ESCAPE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameSkill);
+char nbDebugPhaseNameWait[8] = "WAIT";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameReady);
+char nbDebugPhaseNameBadwait[8] = "BADWAIT";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameStksel);
+char nbDebugPhaseNameNego[8] = "NEGO";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameTarsel);
+char nbDebugPhaseNameSkill[8] = "SKILL";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameBad);
+char nbDebugPhaseNameReady[8] = "READY";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAiscr);
+char nbDebugPhaseNameStksel[8] = "STKSEL";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAi);
+char nbDebugPhaseNameTarsel[8] = "TARSEL";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameComm);
+char nbDebugPhaseNameBad[8] = "BAD";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameNon);
+char nbDebugPhaseNameAiscr[8] = "AISCR";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameDeads);
+char nbDebugPhaseNameAi[8] = "AI";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameCnter);
+char nbDebugPhaseNameComm[8] = "COMM";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameKoke);
+char nbDebugPhaseNameNon[8] = "NON";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameBinjo);
+char nbDebugActionNameDeads[8] = "DEADS";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameInoti);
+char nbDebugActionNameCnter[8] = "CNTER";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameNorm);
+char nbDebugActionNameKoke[8] = "KOKE";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugTurnFmt);
+char nbDebugActionNameBinjo[8] = "BINJO";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugEnemyName);
+char nbDebugActionNameInoti[8] = "INOTI";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPlayerName);
+char nbDebugActionNameNorm[8] = "NORM";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551078);
+char nbDebugTurnFmt[8] = "Turn:%d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugExpFmt);
+char nbDebugEnemyName[8] = "ENEMY";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugMakaFmt);
+char nbDebugPlayerName[8] = "PLAYER";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugSummFmt);
+char D_00551078[8] = ".";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551098);
+char nbDebugExpFmt[8] = "EXP :%d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugCharFmt);
+char nbDebugMakaFmt[8] = "MAKA:%d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510A8);
+char nbDebugSummFmt[8] = "SUMM:%d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510B0);
+char D_00551098[8] = "P>";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbMainProcessName);
+char nbDebugCharFmt[8] = "%c";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbMaeProcessName);
+char D_005510A8[8] = "F>";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbAtoProcessName);
+char D_005510B0[8] = "O>";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTimer);
+char nbMainProcessName[8] = "nb_main";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTobiwarpLabel);
+char nbMaeProcessName[8] = "nb_mae";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultState);
+char nbAtoProcessName[8] = "nb_ato";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultBestScore);
+u32 nbResultTimer = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultStep);
+s32 nbResultTobiwarpLabel = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultCounter);
+s32 nbResultState = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510E8);
+s32 nbResultBestScore = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultFmt2d);
+s32 nbResultStep = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultFmt6d);
+u32 nbResultCounter = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbTobiwarpLabelIdx);
+s32 D_005510E8 = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551100);
+char nbResultFmt2d[8] = "%2d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTex1);
+char nbResultFmt6d[4] = "%6d";
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTex2);
+s32 nbTobiwarpLabelIdx = 0;
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultTexHandle);
+f32 D_00551100 = 0.0f;
+
+sdfTexHandle_t *nbResultTex1 = NULL;
+
+sdfTexHandle_t *nbResultTex2 = NULL;
+
+sdfTexHandle_t *nbResultTexHandle = NULL;
 
