@@ -373,7 +373,7 @@ extern char nbE912EndText[];
 
 extern char nbE913EndText[];
 
-extern char D_005468C8[];
+extern const char D_005468C8[];
 
 extern char D_005468D8[];
 
