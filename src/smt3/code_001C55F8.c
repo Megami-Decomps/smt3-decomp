@@ -278,7 +278,7 @@ s32 nbCameraHelperViewer_PB_Init(s32 pData)
     return pData;
 }
 
-/* Callback slots follow the viewer record used by func_001AA310. */
+/* Callback slots follow the viewer record used by effDebugResetMenu. */
 typedef struct effDebugViewer_t {
     u8 reserved00[0x18];
     struct effDebugViewer_t *replacement;

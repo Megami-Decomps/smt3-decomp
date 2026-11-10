@@ -34,7 +34,7 @@ This looks like the ruled-out "pure instruction scheduling" row: the registers
 and the instructions agree and only their order in one block does not.
 
 
-## func_001AA6D0 (effect/effMagatuhi, 0x628)
+## effDebugMoveCamera (effect/effMagatuhi, 0x628)
 
 377 of 394 words match at the native 1,576-byte size and 0x40 frame.
 The pad-driven camera controller remains guarded, using existing VU0 macros

@@ -1117,14 +1117,14 @@
   exact.
 - A run of stores inside a loop whose addresses are hoisted base pointers has
   **two** orders to get right, and they run opposite ways. The stores themselves
-  follow the right-rotation rule (`func_001AA5A0` writes the word array, then
+  follow the right-rotation rule (`effDebugClearPad` writes the word array, then
   `dds3PadButtonPrev`, then `dds3PadButtonState`, and retail emits Prev, State,
   word), while the order of the three hoisted `%hi`/`%lo` base pairs in the
   preheader follows the source order directly. Both fall out of one statement
   order, so sweep the permutations rather than reasoning about either rule alone:
   all six were measured and only one is exact.
 - A single-statement guard arm belongs in the `else` even when the statement is a
-  *store*, not just an index computation. `eff_1AA3B0`'s pad toggle written
+  *store*, not just an index computation. `effDebugUpdate`'s pad toggle written
   `if (a == 0 || b != 0) { a ^= 1; } else { b = 1; }` is 15 of 104 words out and
   one word long; inverted to `if (a != 0 && b == 0) { b = 1; } else { a ^= 1; }`
   it is exact. In the same function a cached `u8` local for the toggled global is
@@ -1147,7 +1147,7 @@
   production report when it carries no exemption comment. `check_unit.py`'s
   `inline_asm_share` skips any function whose definition is preceded within three
   lines by a `vu0 routine:` or `libvu0:` comment, which is why the VU0-dense
-  setters in `effect/effMagatuhi` count. `func_001AA6D0` there is 223 VU0
+  setters in `effect/effMagatuhi` count. `effDebugMoveCamera` there is 223 VU0
   instructions of 394 and needs that comment to earn anything.
 
 - A `(s16)` cast on a `u16` struct field compiles to a bare `lh`, not to `lhu`

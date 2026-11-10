@@ -89,9 +89,9 @@ extern u8 mfilterDefaultParam[];
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
 extern u8 rblurDefaultParam[];
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
-extern s8 D_0054F2C5;
+extern s8 effRectangleBlurSetupReady;
 /* The result slot must be valid whenever the create callback is present. */
-extern effDebugMenu_t D_003203E0;
+extern effDebugMenu_t effRectangleBlurSetupRecord;
 extern void *memcpy(void *, const void *, size_t);
 extern void effDebugAllocDrawTag(void);
 extern void effDebugLinkDrawTag(void);
@@ -494,10 +494,10 @@ void Eve_EffectDraw(void) {
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
 s32 effUpdateCh72Params(void) {
-    u8 ready = D_0054F2C5;
+    u8 ready = effRectangleBlurSetupReady;
 
-    if (D_0054F2C5 == 0) {
-        effDebugMenu_t *state = &D_003203E0;
+    if (effRectangleBlurSetupReady == 0) {
+        effDebugMenu_t *state = &effRectangleBlurSetupRecord;
 
         if (state->create != NULL) {
             *state->param = state->create(state->source);
@@ -508,18 +508,18 @@ s32 effUpdateCh72Params(void) {
             }
         }
         ready = 1;
-        D_0054F2C5 = ready;
+        effRectangleBlurSetupReady = ready;
     }
     if (ready != 0) {
-        dblurUpdateHandle(&D_003203E0);
+        dblurUpdateHandle(&effRectangleBlurSetupRecord);
         effDebugAllocDrawTag();
-        effDebugDrawMenu(&D_003203E0);
+        effDebugDrawMenu(&effRectangleBlurSetupRecord);
         effDebugLinkDrawTag();
     }
     if (dds3PadBitTable[3] < 0) {
-        D_0054F2C5 = 0;
+        effRectangleBlurSetupReady = 0;
     }
-    return D_0054F2C5;
+    return effRectangleBlurSetupReady;
 }
 
 /* Expose this screen-draw setup block; no parameter copy is made. */
@@ -1899,7 +1899,7 @@ void *D_0054F2B8[2] = { &evtUnityCalcArea, NULL };
 
 char effLabelBlur[5] = "BLUR";
 
-s8 D_0054F2C5 = 0;
+s8 effRectangleBlurSetupReady = 0;
 
 u32 D_0054F2C8[2] = { 0, 0 };
 

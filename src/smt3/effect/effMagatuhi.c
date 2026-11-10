@@ -678,17 +678,17 @@ dds3MagatuhiPar_tag *dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work);
 void InitMagatuhiEditorProcess(void);
 void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross);
 
-effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer);
+effDebugMenu_t *effDebugResetMenu(effDebugMenu_t *viewer);
 
-s32 func_001AA5A0(void);
+s32 effDebugClearPad(void);
 
 effDebugMenu_t *dblurUpdateHandle(effDebugMenu_t *pMenu);
 
 void effDebugDrawMenu(effDebugMenu_t *menu);
 
-void func_001AA6D0(void);
+void effDebugMoveCamera(void);
 
-s32 eff_1AA3B0(void);
+s32 effDebugUpdate(void);
 
 void effDebugAllocDrawTag(void);
 
@@ -704,11 +704,11 @@ void effDebugDrawRectFull(void);
 
 void effDebugPrintf(const char *text);
 
-s32 eff_1AA550(void);
+s32 effDebugDraw(void);
 
 void effDebugSetPos(s32 x, s32 y);
 void effDebugSetAttr(u32 attributes);
-s32 dds3_1AACF8(void);
+s32 effDebugIsEnabled(void);
 /* Debug filesystem mode opens the formatted pfs0 directory; otherwise reset built-in iteration.
    Return the native directory-open result, or zero for built-in mode. */
 s32 dds3EffectDirOpen(void *name);
@@ -2881,7 +2881,7 @@ void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
                                           0x80806020)));
 }
 
-effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {
+effDebugMenu_t *effDebugResetMenu(effDebugMenu_t *viewer) {
     void (*destroy)(void *);
     void *(*create)(void *);
 
@@ -2916,7 +2916,7 @@ effDebugMenu_t *func_001AA310(effDebugMenu_t *viewer) {
 void effDebugInit(void) {
 }
 
-s32 eff_1AA3B0(void) {
+s32 effDebugUpdate(void) {
     if (dds3PadBitTable[0xF] < 0) {
         if ((u8)effDebugEnabled != 0 && effDebugActive == 0) {
             effDebugActive = 1;
@@ -2941,7 +2941,7 @@ s32 eff_1AA3B0(void) {
             SDF_VU0_COPYVECTOR(aViewEye, effMagaSavedViewEye);
             SDF_VU0_COPYVECTOR(aViewDown, effMagaSavedViewDown);
             if (effDebugCameraAllowed == 1) {
-                func_001AA6D0();
+                effDebugMoveCamera();
             }
         }
     }
@@ -2951,7 +2951,7 @@ s32 eff_1AA3B0(void) {
     return 0;
 }
 
-s32 eff_1AA550(void) {
+s32 effDebugDraw(void) {
     if (effDebugEnabled == 0) {
         return 0;
     }
@@ -2967,7 +2967,7 @@ s32 eff_1AA550(void) {
 void func_001AA598(void) {
 }
 
-s32 func_001AA5A0(void) {
+s32 effDebugClearPad(void) {
     s32 i;
     s32 j;
     s32 k;
@@ -3005,7 +3005,7 @@ extern u8 sdfPadAnalogSticks[8];
 extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
 
 /* vu0 routine: pad-driven camera translation and axis rotation. */
-void func_001AA6D0(void)
+void effDebugMoveCamera(void)
 {
     sdfVector4_t axis;
     /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
@@ -3163,10 +3163,10 @@ void func_001AA6D0(void)
     }
 }
 #else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA6D0);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugMoveCamera);
 #endif
 
-s32 dds3_1AACF8(void) {
+s32 effDebugIsEnabled(void) {
     return effDebugEnabled;
 }
 

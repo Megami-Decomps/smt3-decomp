@@ -28,6 +28,12 @@
 0x0016E120	effBTLModelInvokeGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeGroupHide
 0x0016E1F8	effBTLModelTargetGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetGroupHide
 0x0016E2A0	effBTLModelInvokePartyShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokePartyShow
+0x001AA310	effDebugResetMenu	inferred	destroys the menu's param, steps to the parent and recreates it; DDS twin 0x18CE30 is an empty stub
+0x001AA3B0	effDebugUpdate	inferred	pad toggles for the effect debug menu, menu update and debug camera; DDS twin 0x18CE40
+0x001AA550	effDebugDraw	inferred	draws effDebugMenu between effDebugAllocDrawTag and effDebugLinkDrawTag; DDS twin 0x18CE48
+0x001AA5A0	effDebugClearPad	inferred	clears pad button and stick state while the debug menu is active; DDS twin 0x18CE58
+0x001AA6D0	effDebugMoveCamera	inferred	pad-driven debug camera move, called from effDebugUpdate; DDS twin 0x18CE60
+0x001AACF8	effDebugIsEnabled	inferred	returns effDebugEnabled; DDS twin 0x18CE68
 0x001AC068	effMathResetBezierSlot	inferred	DDS1/2 name for the same effMath function; former name func_001AC068
 0x001AC0A8	effCreateSlotArray	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC0A8
 0x001AC138	effReleaseSlotArrayAllocation	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC138
@@ -132,6 +138,7 @@
 0x0031DDC0	effPCPMultiFilterExpDataList	inferred	effPartPCPDataTable[26], param list for kateg 26 (effPCPMultiFilterExp); former name D_0031DDC0
 0x0031DDC8	effPCPBlinkMultiBlurDataList	inferred	effPartPCPDataTable[27], param list for kateg 27 (effPCPBlinkMultiBlur); former name D_0031DDC8
 0x0031F3E0	effScatterTriangleIndices	inferred	DDS1/2 name for the same effPCPScatter index table
+0x003203E0	effRectangleBlurSetupRecord	inferred	DDS name; effDebugMenu_t set up and drawn by effUpdateCh72Params
 0x005293A0	sdfImageSetTexFlushPacket	inferred	DMA end tag plus a GIF A+D TEXFLUSH write chained after an image upload; DDS1/2 same object
 0x00529630	sdf3DUpVector	inferred	{0, 1, 0, 0}, the fallback axis in sdf3DMakeLightParallelPacket; DDS1/2 same object
 0x0052BAA0	ipuDefaultQuantizerMatrices	inferred	libipu: sceIpuInit 0x002CDA58 pairs with DDS1 0x002F5618; loads five 16-byte quantizer chunks. All 0x50 initial bytes agree.
@@ -155,6 +162,7 @@
 0x0054A3D0	mcModuleNameMcman	inferred	"/mcman.irx", an LoadMcModules name; DDS1/2 same object
 0x0054B550	_ctype_	inferred	newlib: unique 257-byte EOF-plus-character-class table, byte-identical to DDS1 0x003B7990; _strtol_r and mdlManager FileUpper index its character flags from +1.
 0x0054F0F4	effBTLJyocyuEffFilePath	inferred	const char* passed to sdfDevLoadFileEx in SetJyocyuData, result to effBTLCreate; former name D_0054F0F4
+0x0054F2C5	effRectangleBlurSetupReady	inferred	DDS name; readiness byte of effUpdateCh72Params
 0x0054F370	nbCameraStartReadWaitActive	inferred	set on state 1 to 2 handoff, gates D_0054F374 counter; former name D_0054F370
 0x0054F374	nbCameraStartReadWaitFrames	inferred	printed as Read Wait; former name D_0054F374
 0x0054F378	nbCameraStartAnimWaitActive	inferred	gates D_0054F37C counter; former name D_0054F378

@@ -3311,7 +3311,7 @@ char *effMakeBedPath(char *path)
 extern void dds3EffectFileListWindowDraw(void *window);
 extern u32 dds3EffectFileListWindowGetState(void *window);
 extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
-extern void *func_001AA310(void *viewer);
+extern void *effDebugResetMenu(void *viewer);
 extern char effBedSelectBuf[];
 extern char *effBTLSelectedName;
 
@@ -3321,7 +3321,7 @@ void eff_174D38(void)
     if (dds3EffectFileListWindowGetState(effBedFileListWindow) == 1) {
         dds3EffectFileListWindowGetFilename(effBedFileListWindow, effBedSelectBuf);
         effBTLSelectedName = effBedSelectBuf;
-        nbHelperViewer = func_001AA310(nbHelperViewer);
+        nbHelperViewer = effDebugResetMenu(nbHelperViewer);
     }
 }
 
