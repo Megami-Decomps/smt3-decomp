@@ -14,9 +14,6 @@ extern void *memset(void *a, s32 b, size_t c);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-
-
-
 extern u16 myStatus;
 
 extern s32 datGetPlayerParam(s32 id);
@@ -50,10 +47,6 @@ extern void pipeInitSection(void);
 
 extern void pipeFreeLink(tagPipeLinkInfo *pInfo);
 
-
-
-
-
 extern tagPipeLinkInfo linkHeader00;
 
 extern tagPipePosTable pipePosData;
@@ -65,7 +58,6 @@ extern s32 offsetCount;
 extern void EmSound(tagPipeObject *objPtr);
 
 extern void MySound(tagPipeObject *objPtr);
-
 
 extern u32 dds3BackColor;
 
@@ -80,7 +72,6 @@ extern void pipeDataRelease(void);
 extern void pipeEffRelease(void);
 
 extern s32 PipeTexRelease(void);
-
 
 extern void DEBUG_PRINT(const char *str, ...);
 
@@ -97,9 +88,6 @@ extern void pipeBulrLimit(void);
 extern tagPipeObject *ObjWork;
 
 extern s32 ZmakaCount;
-
-
-
 
 extern s32 playerDAMAGE;
 
@@ -145,7 +133,7 @@ s32 pipe_Section(void)
 }
 
 extern const sdfVector4_t D_00548910;
-INCLUDE_RODATA(const s32, "pipe/pipeSection", D_00548910);
+const sdfVector4_t D_00548910 = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 const char pipeAreaName[16] = "pipeArea";
 extern s32 pipeIndex;
@@ -264,9 +252,8 @@ const char pipeFileFormat[24] = "/pipe/PIPE_%02d.DAT";
 const char pipePosTableLoadMsg[40] = "PosTableData Loading [%s]....OK\n";
 const char pipeObjectLoadMsg[40] = "ObjectData Loading [%s]....OK\n";
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLoadState);
+u32 pipeLoadState = 0;
 
-SDATA_PAD(4);
 
 s32 pipeLoadSection(s32 index)
 {
@@ -442,6 +429,7 @@ void pipeStart(void)
     pipeObjList = NULL;
     pipeObjTail = NULL;
     pipeMyMakaCount = 0;
+
     myMaka = 0;
     makaInit();
     objInitMyAdd();
@@ -598,7 +586,6 @@ void pipeLoadObjects(void)
     }
 }
 
-
 extern void MyAction(tagPipeObject *object);
 extern void objMdlAlphaSet(tagPipeObject *object, u8 alpha);
 extern f32 vecNormalize(f32 *vector);
@@ -644,7 +631,6 @@ void MyTask(tagPipeObject *object)
     }
     objMdlPosSet(object);
 }
-
 
 extern void pipeEffSet(tagPipeObject *, s32);
 extern void ActionBound(tagPipeObject *);
@@ -1117,7 +1103,6 @@ void ActionSlide(tagPipeObject *object)
     }
 }
 
-
 extern tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension);
 extern f32 vecNormalize(f32 *vector);
 
@@ -1542,8 +1527,6 @@ tagPipeObject *HITCHECK_CUR(tagPipeObject *object, f32 extension)
 INCLUDE_ASM(const s32, "pipe/pipeSection", HITCHECK_CUR);
 #endif
 
-
-
 extern tagMakaObject *makaWork;
 extern void MyDraw(tagPipeObject *object);
 extern void makaDraw(tagMakaObject *makaPtr);
@@ -1589,7 +1572,6 @@ void ObjectDraw(void)
      * the native jal and epilogue (CONTRIBUTING matching-rule exception). */
     i = 0;
 }
-
 
 void MyDraw(tagPipeObject *object) {
 }
@@ -1689,53 +1671,51 @@ void PlayerStatusSetUp(void)
         }
     }
 }
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pbHitCheckCur);
+volatile s32 pbHitCheckCur = 150;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetCount);
+s32 offsetCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeClearedOnStart);
+s32 pipeClearedOnStart = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipePartsFrame);
+s32 pipePartsFrame = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeLinkId);
+s32 pipeLinkId = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeTiltHorizontal);
+f32 pipeTiltHorizontal = 0.0f;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeTiltVertical);
+f32 pipeTiltVertical = 0.0f;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeIndex);
+s32 pipeIndex = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", attackCount);
+u8 attackCount = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", myMaka);
+s32 myMaka = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", ZmakaCount);
+s32 ZmakaCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", playerDAMAGE);
+s32 playerDAMAGE = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", rBoxNum);
+s8 rBoxNum = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetStep);
+u8 offsetStep = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", offsetStepCount);
+u8 offsetStepCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", CameraAction);
+s8 CameraAction = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", camMode);
+s8 camMode = 0;
 
-SDATA_PAD(1);
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", myStatus);
+u16 myStatus = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeObjList);
+void *pipeObjList = NULL;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeObjTail);
+void *pipeObjTail = NULL;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551770);
+u32 D_00551770 = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", pipeMyMakaCount);
+s32 pipeMyMakaCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeSection", D_00551778);
+s32 D_00551778 = 1;
 
