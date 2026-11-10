@@ -272,7 +272,7 @@ extern s32 evtCommand_EFFMG2_LOAD();
 extern s32 evtCommand_EFFMG2_BE();
 extern s32 evtCommand_EFFMG1_POS();
 extern s32 evtCommand_EFFMG2_POS();
-extern s32 evt_1E9168();
+extern s32 evtCommandStartBgmWithFade();
 extern s32 evtCommand_CAM_ROT_Q();
 extern s32 evtCommand_FIELD_ANIME_START();
 extern s32 evtCommand_FIELD_ANIME_STOP();
@@ -383,7 +383,7 @@ extern s32 scrCommand_RIP_BLUR_PARA();
 extern s32 scrCommand_RIP_BLUR_RGBA();
 extern s32 scrCommand_RIP_BLUR_AREA();
 extern s32 scrCommand_RIP_BLUR_SWAP();
-extern s32 evt_1E9298();
+extern s32 evtOpcodeRefreshTaskData();
 extern s32 evt_1E92D8();
 extern s32 evtCommand_EFFECT_PRESET();
 extern s32 nbCommand_AI_CHK_MYMP();
@@ -417,7 +417,7 @@ extern s32 evtCommand_CALL_BATTLE2();
 extern s32 evtCommand_EFFBED_BE_EVO();
 extern s32 evtCommand_EFFBED_START_EVO();
 extern s32 nbCommand_AI_CHK_ESCAPE();
-extern s32 evt_1E92F8();
+extern s32 evtCommandSetDrawFlagWhileWaiting();
 extern s32 movie_22B8F0();
 extern s32 prm_BOSS_PRESS_REC();
 extern s32 prm_NAKAMA_GET_PARAM();
@@ -713,7 +713,7 @@ const scrCommandTable_t scrCommandTable[544] = {
     {evtCommand_EFFMG2_BE, 2},
     {evtCommand_EFFMG1_POS, 3},
     {evtCommand_EFFMG2_POS, 5},
-    {evt_1E9168, 2},
+    {evtCommandStartBgmWithFade, 2},
     {evtCommand_CAM_ROT_Q, 5},
     {evtCommand_FIELD_ANIME_START, 1},
     {evtCommand_FIELD_ANIME_STOP, 1},
@@ -824,7 +824,7 @@ const scrCommandTable_t scrCommandTable[544] = {
     {scrCommand_RIP_BLUR_RGBA, 4},
     {scrCommand_RIP_BLUR_AREA, 3},
     {scrCommand_RIP_BLUR_SWAP, 1},
-    {evt_1E9298, 2},
+    {evtOpcodeRefreshTaskData, 2},
     {evt_1E92D8, 0},
     {evtCommand_EFFECT_PRESET, 1},
     {nbCommand_AI_CHK_MYMP, 1},
@@ -858,7 +858,7 @@ const scrCommandTable_t scrCommandTable[544] = {
     {evtCommand_EFFBED_BE_EVO, 3},
     {evtCommand_EFFBED_START_EVO, 3},
     {nbCommand_AI_CHK_ESCAPE, 0},
-    {evt_1E92F8, 1},
+    {evtCommandSetDrawFlagWhileWaiting, 1},
     {movie_22B8F0, 0},
     {0, 0},
     {0, 0},

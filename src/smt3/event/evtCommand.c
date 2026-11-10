@@ -2967,7 +2967,7 @@ u32 evtCommand_SE_PLAY_E(void) {
     return 1;
 }
 
-u32 evt_1E9168(void) {
+u32 evtCommandStartBgmWithFade(void) {
     s32 eventId;
     s32 fade;
 
@@ -3014,7 +3014,7 @@ s32 evt_1E9270(void)
     return 1;
 }
 
-u32 evt_1E9298(void) {
+u32 evtOpcodeRefreshTaskData(void) {
     s32 task;
     s32 value;
 
@@ -3029,7 +3029,7 @@ u32 evt_1E92D8(void) {
     return 1;
 }
 
-u32 evt_1E92F8(void)
+u32 evtCommandSetDrawFlagWhileWaiting(void)
 {
     if (scrGetIntPara(0) <= 0) {
         dds3DrawFlag |= 0x2000000;

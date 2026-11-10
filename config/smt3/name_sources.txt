@@ -1,4 +1,19 @@
 # addr	name	evidence|inferred	note
+0x001001C8	_exit	inferred	crt0 _exit: tail-calls Exit(0); abort calls it with 1; former name func_001001C8
+0x00103420	fclEncycConfigureMode3	inferred	DDS1/2 kwlnConfigureNamedSlotMode3 twin (0x00103400), same body; sibling fclEncycAllocEntry; former name fcl_103420
+0x00103560	fclEncycConfigureMode2	inferred	DDS1/2 kwlnConfigureNamedSlotMode2 twin (0x00103540), same body; sibling fclEncycAllocEntry; former name fcl_103560
+0x00104170	dds3PadVibrationReset	inferred	DDS1/2 kwlnPadResetMotorLevelsAndOutput twin (0x00104130), same body; former name dds3_104170
+0x00109D80	scrCreateProcessWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109D80
+0x00109DD0	scrCreateTaskWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109DD0
+0x00109E38	scrCreateProcessAtFirstProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109E38
+0x00109FD0	scrStartProcessProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name func_00109FD0
+0x00116BB8	dds3GlobalWorkDestroy	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116BB8.
+0x00116C08	dds3GlobalWorkMainProc	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116C08.
+0x001621A0	effScaleSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621A0
+0x001621C8	effCloneSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621C8
+0x00162248	effFreeSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_00162248
+0x00162270	effInitParticleRecord	inferred	DDS1/2 name for the same parManager function; former name func_00162270
+0x00168A50	polyBandLayoutRing	inferred	DDS1/2 name for the same polyManager function; former name func_00168A50
 0x0016CB98	effBTLModelGroupGetMaxLength	inferred	Retail takes center pointer and group mask, computes distance plus radius and scales a single member by 1.33; matches reconstructed HD GroupGetMaxLength
 0x0016CD98	effBTLModelGroupGetWidthX	inferred	Retail scans X extrema and returns their span; matches reconstructed HD GroupGetWidthX
 0x0016CE78	effBTLModelGroupGetSphere	inferred	Retail wrapper tail-calls GroupGetSphere2; excludes following four-byte alignment
@@ -13,14 +28,108 @@
 0x0016E120	effBTLModelInvokeGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokeGroupHide
 0x0016E1F8	effBTLModelTargetGroupHide	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelTargetGroupHide
 0x0016E2A0	effBTLModelInvokePartyShow	inferred	Independent retail prologue and return; calls and control flow agree with smt-ret/smt3-reconstructed-sources src/effBattleMisc.c effBTLModelInvokePartyShow
+0x001AC068	effMathResetBezierSlot	inferred	DDS1/2 name for the same effMath function; former name func_001AC068
+0x001AC0A8	effCreateSlotArray	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC0A8
+0x001AC138	effReleaseSlotArrayAllocation	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC138
+0x001AC150	effStepActiveBezierSlot	inferred	DDS1/2 name for the same effDebug function; former name func_001AC150
+0x001AC3D8	effEvaluateSlotBezierPosition	inferred	DDS1/2 name for the same effDebug function; former name func_001AC3D8
+0x001AC4C8	effInitSlotTail	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4C8
+0x001AC4F0	effGetSlotAt	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4F0
+0x001B09C0	effSplRun	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B09C0
+0x001B0A60	effSplCalc	inferred	DDS1/2 name for the same effSpline function; former name func_001B0A60
+0x001B0B90	effSplCalcRegist	inferred	DDS1/2 name for the same effSpline function; former name func_001B0B90
+0x001B0CC0	effSplRewind	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CC0
+0x001B0CD0	effSplSetStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CD0
+0x001B1238	effCreateChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B1238
+0x001B12B0	effReleaseInterpolationChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12B0
+0x001B12D0	effAdvanceChanCursor	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12D0
+0x001B1370	effSampleChannelBezier	inferred	DDS1/2 name for the same effSpline function; former name func_001B1370
+0x001B1478	effClearChanCursor	inferred	DDS1/2 name for the same effSpline function; former name func_001B1478
+0x001B1488	effSetChanStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B1488
 0x001B9240	nbCameraShot_CommandFixPos_Calc2	inferred	Independent retail prologue at the tail-call target after Set2; camera/formation arguments and calculation flow agree with smt-ret/smt3-reconstructed-sources src/nbCameraCommand.c
+0x001DD9C0	mdlProjectPoints	inferred	DDS1/2 name for the same mdlManager function; former name mdl_1DD9C0
+0x001E9168	evtCommandStartBgmWithFade	inferred	DDS name for the same script command, calls the bgm fade starter
+0x001E9298	evtOpcodeRefreshTaskData	inferred	DDS name for the same script command slot
+0x001E92F8	evtCommandSetDrawFlagWhileWaiting	inferred	DDS name; sets dds3DrawFlag 0x2000000 until the command timer passes its argument
 0x002197B0	ApplyChangeListIndex	inferred	Reconstructed fclEncyc name; native extent ends at the independent ApplyEdgeListCursor entry after the restored-frame tail call.
 0x002198D8	ApplyEdgeListCursor	inferred	Independent frameless edge-correction entry reached after ApplyChangeListIndex restores its frame; name agrees with the reconstructed fclEncyc source.
+0x00239FA0	uiDrawUniformRgbRange	inferred	Existing DDS descriptive name; audited relocation-only native counterpart repeats one color for three triangle vertices; was cmp_239FA0.
+0x002A8258	sdfFreeMemorySlotFromEitherHeap	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8258
+0x002A84D8	sdfDrainPendingHandlers	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A84D8
+0x002A8758	sdfDeleteTrackedThread	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A8758
+0x002A87F0	sdfFindThreadNode	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A87F0
+0x002A8858	sdfUnlinkAndDeleteCurrentThread	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8858
+0x002B2628	sdfChunkFindById	inferred	DDS1/2 name for the same sdfModel function; former name func_002B2628
+0x002BD300	sdfPktSetCmd	inferred	DDS1/2 name for the same sdfDevCons function; former name func_002BD300
+0x002BFC58	sdfZeroMem	inferred	zeroes size bytes at dst with quad stores when both are 16-aligned, else memset; sibling of sdfZeroMemQuad; DDS1 func_002E73F0, DDS2 func_00340298; former name sdf_2BFC58
+0x002BFE08	sdfDecimalToPackedDigits	inferred	DDS1/2 name for the same sdfDev9 function; former name sdf_2BFE08
+0x002BFF98	sdfDevResizeBufferedRequest	inferred	DDS1/2 name for the same sdfMisc function; former name func_002BFF98
+0x002C0510	LengthSq	inferred	DDS1/2 name for the same sdfQuat function; former name sdf_2C0510; DDS effMiscQuatLengthSqVU in sdfQuat's bare method style
+0x002C1788	sdfSndQueueNoPayloadCommand210	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1788; DDS name sndQueueNoPayloadCommand210 with the sdfSnd prefix
+0x002C17D8	sdfSndDispatchCommandWithoutPayload	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C17D8; DDS name sndDispatchCommandWithoutPayload with the sdfSnd prefix
+0x002C1D78	sdfSndSendFilenameCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1D78; DDS name sndSendFilenameCommand with the sdfSnd prefix
+0x002C1E10	sdfSndSendChannelControlCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E10; DDS name sndSendChannelControlCommand with the sdfSnd prefix
+0x002C1E40	sdfSndSendChannelGroupCommand140	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E40; DDS name sndSendChannelGroupCommand140 with the sdfSnd prefix
+0x002C1E70	sdfSndSendChannelGroupCommand150	inferred	DDS1/2 name for the same sdfSound function; former name func_002C1E70; DDS name sndSendChannelGroupCommand150 with the sdfSnd prefix
+0x002C1EA0	sdfSndReleaseMidiTrack	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EA0; DDS name sndReleaseMidiTrack with the sdfSnd prefix
+0x002C1EF8	sdfSndGetTrackBalanceFirstComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EF8; DDS name sndGetTrackBalanceFirstComponent with the sdfSnd prefix
+0x002C1F10	sdfSndGetTrackBalanceSecondComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F10; DDS name sndGetTrackBalanceSecondComponent with the sdfSnd prefix
+0x002C1F28	sdfSndGetNonnegativeEntryBalance	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F28; DDS name sndGetNonnegativeEntryBalance with the sdfSnd prefix
+0x002C1F50	sdfSndGetMidiChannelTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F50; DDS name sndGetMidiChannelTable with the sdfSnd prefix
+0x002C1F60	sdfSndGetTrackSlotTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F60; DDS name sndGetTrackSlotTable with the sdfSnd prefix
+0x002C1F70	sdfSndGetMidiStateWordPair	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F70; DDS name sndGetMidiStateWordPair with the sdfSnd prefix
+0x002C1F90	sdfSndCopyGroupedMidiStateBytes	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F90; DDS name sndCopyGroupedMidiStateBytes with the sdfSnd prefix
+0x002C21A8	sdfSndSendChannelGroupCommand110	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21A8; DDS name sndSendChannelGroupCommand110 with the sdfSnd prefix
+0x002C21D8	sdfSndSetChannelCount	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21D8; DDS name sdfSoundSetChannelCount with the sdfSnd prefix
+0x002C2280	sdfSndGetCommandStatus	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C2280; DDS name sdfSoundGetCommandStatus with the sdfSnd prefix
+0x002C22B0	sdfSndSendChannelGroupCommand110Duplicate	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C22B0; DDS name sndSendChannelGroupCommand110Duplicate with the sdfSnd prefix
+0x002C2618	sdfSndSetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C2618; DDS name sdfSoundSetTableEntry with the sdfSnd prefix
+0x002C27F8	sdfSndGetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C27F8; DDS name sdfSoundGetTableEntry with the sdfSnd prefix
+0x002C5080	sdfPrintTextLine	inferred	DDS1/2 name for the same sdfMovie function; former name movie_2C5080
+0x002C60E0	sdfPacMarkPhaseFinished	inferred	DDS1/2 name for the same sdfPacDecode function; former name func_002C60E0
+0x002C6D58	sdfPacResetOutputToAllocationEntry	inferred	DDS1/2 name for the same sdfPacDecode function; former name func_002C6D58
+0x002CD680	ipuWriteFromIpuChcr	evidence	Native SDK routine paired with DDS; was gcc2_compiled__7. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x2cf730	acosf	evidence	Native libm routine pairs with DDS at 0x2fa1c0 over 20 bytes with only address relocations masked; former name __ieee754_acosf. Wrapper identity follows its verified kernel target.
+0x2cf748	atan2f	evidence	Native libm routine pairs with DDS at 0x2fa1f0 over 20 bytes with only address relocations masked; former name func_002CF748. Wrapper identity follows its verified kernel target.
+0x2cf760	__ieee754_acosf	evidence	Native libm routine pairs with DDS at 0x2fa208 over 1060 bytes with only address relocations masked; former name func_002CF760. Wrapper identity follows its verified kernel target.
+0x002D1550	fptodp	evidence	Native SDK routine paired with DDS; was sdfFloatToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
 0x002D1B38	dpcmp	inferred	Native double-comparison wrapper: unpacks both arguments and calls __fpcmp_parts_df (0x002D3638); matching compiler uses dpcmp. Curated correction; IDB update pending.
+0x002D1CE0	__make_dp	evidence	Native SDK routine paired with DDS; was dptoul. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1D10	dptofp	evidence	Native SDK routine paired with DDS; was sdfDoubleToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D1D68	dptoul	evidence	Native SDK routine paired with DDS; was sdfDoubleToUInt. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002D3398	__muldi3	inferred	Compiler 64-bit product libcall; native combines low-word product and cross terms into the low 64 bits; binary64 multiplication and strtol accumulation call this address.
+0x002D6600	vfprintf	evidence	Native 116-byte wrapper installs FILE reentrancy and initializes stdio, restores its frame and tail-calls the independent formatter at 0x002D6678; four alignment bytes follow.
+0x002D6678	_vfprintf_r	inferred	DDS1/2 name for the same newlib function (DDS1 0x00303468); former name func_002D6678
+0x002DA308	_localeconv_r	inferred	newlib _localeconv_r: returns &localeconvData, between _setlocale_r and setlocale; former name func_002DA308
+0x002DBAA0	SetGsCrt	evidence	Native SDK routine paired with DDS; was libc_2DBAA0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DBCB0	DeleteThread	evidence	Native SDK routine paired with DDS; was libc_2DBCB0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DBCC0	_StartThread	evidence	Native SDK routine paired with DDS; was StartThread. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
+0x002DC2C0	_ExecOSD	evidence	Native SDK routine paired with DDS; was libc_2DC2C0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
 0x002E5320	__divdi3	inferred	Compiler signed 64-bit quotient libcall; native normalizes both operand signs, runs unsigned division and reapplies their combined sign; printf repeatedly divides its signed value by 10 through this address.
+0x002E6048	__udivdi3	inferred	Compiler unsigned 64-bit quotient libcall; native unsigned normalization, divu quotient digits and unsigned correction; strtol cutoff division calls this address.
 0x002E6C48	dpdiv	inferred	compiler binary64 division libcall; native provider unpacks both operands, divides mantissas and repacks; _ratio calls this address
+0x002F5600	__CTOR_LIST__	inferred	constructor list walked by __do_global_ctors (count word, then entries); former name D_002F5600
+0x002F56C0	dds3PadButtonHoldCounters	inferred	per-key hold counters dds3PadManager counts; DDS1 0x003243C0; former name D_002F56C0
+0x002F57C0	dds3PadStickHoldCounters	inferred	per-stick hold counters dds3PadManager counts; DDS1 0x003244C0; former name D_002F57C0
+0x002F5C20	dds3RenderTargetVector	inferred	LookAtMatrix target in dds3KernelProcess and effPacket, beside dds3RenderLightParallel/AmbientColor; was kwlnHeldTextureTargetVector from DDS1/2
+0x002F5C30	dds3RenderEyeVector	inferred	LookAtMatrix eye in dds3KernelProcess and effPacket; was kwlnHeldTextureEyeVector from DDS1/2
+0x002F69B8	sdfModelOtTable	inferred	sdfModelOt_t[11]; DDS kwlnSceneSurfaceSets[10] is a different layout, not reused; DDS macro D_002F69B8 stays; former name D_002F69B8
+0x002FA240	sdfViewMatrix	inferred	DDS1/2 name for the same view matrix (mdlManager, effMath)
+0x0031DD20	effPCPThunderSpherePolyDataList	inferred	effPartPCPDataTable[0], NULL-terminated param list for kateg 0 (EffectPCPFuncTable[0] = effPCPThunderSpherePoly); former name D_0031DD20
+0x0031DD48	effPCPThunderPolyDataList	inferred	effPartPCPDataTable[1], param list for kateg 1 (effPCP_ThunderPoly); former name D_0031DD48
+0x0031DDA0	effPCPThunderRadiatePolyDataList	inferred	effPartPCPDataTable[2], param list for kateg 2 (effPCP_ThunderRadiatePoly); former name D_0031DDA0
+0x0031DDA8	effPCPMultiBlurExpDataList	inferred	effPartPCPDataTable[10], param list for kateg 10 (effPCPMultiBlurExp); former name D_0031DDA8
+0x0031DDB0	effPCPSparkleSphereDataList	inferred	effPartPCPDataTable[13], param list for kateg 13 (effPCPSparkleSphere); former name D_0031DDB0
+0x0031DDB8	effPCPFlashPolySphereDataList	inferred	effPartPCPDataTable[14], param list for kateg 14 (effPCPFlashPolySphere); former name D_0031DDB8
+0x0031DDC0	effPCPMultiFilterExpDataList	inferred	effPartPCPDataTable[26], param list for kateg 26 (effPCPMultiFilterExp); former name D_0031DDC0
+0x0031DDC8	effPCPBlinkMultiBlurDataList	inferred	effPartPCPDataTable[27], param list for kateg 27 (effPCPBlinkMultiBlur); former name D_0031DDC8
+0x0031F3E0	effScatterTriangleIndices	inferred	DDS1/2 name for the same effPCPScatter index table
+0x005293A0	sdfImageSetTexFlushPacket	inferred	DMA end tag plus a GIF A+D TEXFLUSH write chained after an image upload; DDS1/2 same object
+0x00529630	sdf3DUpVector	inferred	{0, 1, 0, 0}, the fallback axis in sdf3DMakeLightParallelPacket; DDS1/2 same object
 0x0052BAA0	ipuDefaultQuantizerMatrices	inferred	libipu: sceIpuInit 0x002CDA58 pairs with DDS1 0x002F5618; loads five 16-byte quantizer chunks. All 0x50 initial bytes agree.
 0x0052BAF0	ipuDefaultVqClut	inferred	libipu: sceIpuInit loads two 16-byte VQ CLUT chunks after the quantizer matrices. All 0x20 initial bytes agree with DDS1.
+0x0052BB28	dtorListCursor	inferred	__do_global_dtors' static cursor into the destructor list; former name D_0052BB28
+0x0052BB2C	dtorFrameDeregistered	inferred	__do_global_dtors' static flag guarding __deregister_frame_info; former name D_0052BB2C
 0x0052BE28	_impure_ptr	inferred	newlib: active reentrancy pointer passed by malloc/free and stdio wrappers; initialized to 0x0052BB38. DDS1 names the same four-byte pointer at 0x0039BFD0.
 0x0052BE30	__malloc_av_	inferred	newlib: _malloc_r 0x002D3BE8 pairs with DDS1 0x002FF830. Bin links and top chunk use the same 0x408-byte layout; initialized self-relative links agree.
 0x0052C238	__malloc_trim_threshold	inferred	newlib: allocator state immediately after the bin array, same relative layout and initial bytes as DDS1; trim threshold starts at 0x20000.
@@ -30,101 +139,36 @@
 0x0052C258	__malloc_max_total_mem	inferred	newlib: allocator total-memory high-water mark, same relative offset and initial bytes as DDS1.
 0x0052C260	__malloc_current_mallinfo	inferred	newlib: _malloc_trim_r addresses these mallinfo totals; 0x28-byte state follows the high-water marks, same layout and initial bytes as DDS1.
 0x0052C2A8	sbrkBreak	inferred	sbrk 0x002DC5A0 pairs with DDS1 0x0030B120; the same loads/stores address this current break with interrupts disabled.
-0x0054B550	_ctype_	inferred	newlib: unique 257-byte EOF-plus-character-class table, byte-identical to DDS1 0x003B7990; _strtol_r and mdlManager FileUpper index its character flags from +1.
-0x002CD680	ipuWriteFromIpuChcr	evidence	Native SDK routine paired with DDS; was gcc2_compiled__7. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002D1550	fptodp	evidence	Native SDK routine paired with DDS; was sdfFloatToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002D1CE0	__make_dp	evidence	Native SDK routine paired with DDS; was dptoul. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002D1D10	dptofp	evidence	Native SDK routine paired with DDS; was sdfDoubleToULong. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002D1D68	dptoul	evidence	Native SDK routine paired with DDS; was sdfDoubleToUInt. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002DBAA0	SetGsCrt	evidence	Native SDK routine paired with DDS; was libc_2DBAA0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002DBCB0	DeleteThread	evidence	Native SDK routine paired with DDS; was libc_2DBCB0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002DBCC0	_StartThread	evidence	Native SDK routine paired with DDS; was StartThread. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x002DC2C0	_ExecOSD	evidence	Native SDK routine paired with DDS; was libc_2DC2C0. Packing helper identity uses the four-field record and __pack_df, not the old name-only archive attribution.
-0x00116BB8	dds3GlobalWorkDestroy	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116BB8.
-0x00116C08	dds3GlobalWorkMainProc	inferred	HD original dds3GlobalWork.c identity: GBWK task destruction or its registered runtime/playtime tick callback; was func_00116C08.
-0x002D3398	__muldi3	inferred	Compiler 64-bit product libcall; native combines low-word product and cross terms into the low 64 bits; binary64 multiplication and strtol accumulation call this address.
-0x002E6048	__udivdi3	inferred	Compiler unsigned 64-bit quotient libcall; native unsigned normalization, divu quotient digits and unsigned correction; strtol cutoff division calls this address.
-0x002D6600	vfprintf	evidence	Native 116-byte wrapper installs FILE reentrancy and initializes stdio, restores its frame and tail-calls the independent formatter at 0x002D6678; four alignment bytes follow.
-0x002D6678	func_002D6678	evidence	Independent 0x290-byte frame at direct printf/sprintf reentrant call target after the restored-frame vfprintf tail jump; core ends at 0x002D7CE8. Existing generic identity retained.
-0x00239FA0	uiDrawUniformRgbRange	inferred	Existing DDS descriptive name; audited relocation-only native counterpart repeats one color for three triangle vertices; was cmp_239FA0.
-0x2cf730	acosf	evidence	Native libm routine pairs with DDS at 0x2fa1c0 over 20 bytes with only address relocations masked; former name __ieee754_acosf. Wrapper identity follows its verified kernel target.
-0x2cf748	atan2f	evidence	Native libm routine pairs with DDS at 0x2fa1f0 over 20 bytes with only address relocations masked; former name func_002CF748. Wrapper identity follows its verified kernel target.
-0x2cf760	__ieee754_acosf	evidence	Native libm routine pairs with DDS at 0x2fa208 over 1060 bytes with only address relocations masked; former name func_002CF760. Wrapper identity follows its verified kernel target.
-0x002FA240	sdfViewMatrix	inferred	DDS1/2 name for the same view matrix (mdlManager, effMath)
-0x002F5C20	dds3RenderTargetVector	inferred	LookAtMatrix target in dds3KernelProcess and effPacket, beside dds3RenderLightParallel/AmbientColor; was kwlnHeldTextureTargetVector from DDS1/2
-0x002F5C30	dds3RenderEyeVector	inferred	LookAtMatrix eye in dds3KernelProcess and effPacket; was kwlnHeldTextureEyeVector from DDS1/2
-0x0031F3E0	effScatterTriangleIndices	inferred	DDS1/2 name for the same effPCPScatter index table
-0x005518E0	sdfPadAnalogSticks	inferred	DDS1/2 name; four stick bytes per pad written by sdf_PadManager
-0x005520A8	sdfPendingQueueSlots	inferred	DDS1/2 name for the same sdfDelayedResrc slot array
-0x00551828	sdfTickCallback	inferred	DDS1/2 name for the same sdfSystem callback
-0x00529630	sdf3DUpVector	inferred	{0, 1, 0, 0}, the fallback axis in sdf3DMakeLightParallelPacket; DDS1/2 same object
-0x005293A0	sdfImageSetTexFlushPacket	inferred	DMA end tag plus a GIF A+D TEXFLUSH write chained after an image upload; DDS1/2 same object
-0x00551B50	sdfMovieIpsExt	inferred	".ips" extension compared in sdfMovie; DDS1/2 same object
+0x0052C37C	frameObjectSema	inferred	semaphore around frameObjectList; former name D_0052C37C
+0x0052D940	__EH_FRAME_BEGIN__	inferred	start of .eh_frame, passed to __register_frame_info/__deregister_frame_info; former name D_0052D940
 0x0054A3A0	mcModuleNameCdMcserv	inferred	"\MCSERV.IRX;1", an LoadMcModules name; DDS1/2 same object
 0x0054A3B0	mcModuleNameCdMcman	inferred	"\MCMAN.IRX;1", an LoadMcModules name; DDS1/2 same object
 0x0054A3C0	mcModuleNameMcserv	inferred	"/mcserv.irx", an LoadMcModules name; DDS1/2 same object
 0x0054A3D0	mcModuleNameMcman	inferred	"/mcman.irx", an LoadMcModules name; DDS1/2 same object
-0x00109D80	scrCreateProcessWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109D80
-0x00109DD0	scrCreateTaskWithDefaultOption	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109DD0
-0x00109E38	scrCreateProcessAtFirstProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name scr_109E38
-0x00109FD0	scrStartProcessProcedure	inferred	DDS1/2 name for the same scrScriptProcess function; former name func_00109FD0
-0x002BFE08	sdfDecimalToPackedDigits	inferred	DDS1/2 name for the same sdfDev9 function; former name sdf_2BFE08
-0x001B1488	effSetChanStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B1488
-0x001B1478	effClearChanCursor	inferred	DDS1/2 name for the same effSpline function; former name func_001B1478
-0x001B1370	effSampleChannelBezier	inferred	DDS1/2 name for the same effSpline function; former name func_001B1370
-0x001B0CD0	effSplSetStep	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CD0
-0x001B0CC0	effSplRewind	inferred	DDS1/2 name for the same effSpline function; former name func_001B0CC0
-0x001B0B90	effSplCalcRegist	inferred	DDS1/2 name for the same effSpline function; former name func_001B0B90
-0x001B0A60	effSplCalc	inferred	DDS1/2 name for the same effSpline function; former name func_001B0A60
-0x001B12D0	effAdvanceChanCursor	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12D0
-0x001B12B0	effReleaseInterpolationChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12B0
-0x001B1238	effCreateChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B1238
-0x001B09C0	effSplRun	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B09C0
-0x001AC4F0	effGetSlotAt	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4F0
-0x001AC4C8	effInitSlotTail	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4C8
-0x001AC3D8	effEvaluateSlotBezierPosition	inferred	DDS1/2 name for the same effDebug function; former name func_001AC3D8
-0x001AC150	effStepActiveBezierSlot	inferred	DDS1/2 name for the same effDebug function; former name func_001AC150
-0x001AC068	effMathResetBezierSlot	inferred	DDS1/2 name for the same effMath function; former name func_001AC068
-0x00168A50	polyBandLayoutRing	inferred	DDS1/2 name for the same polyManager function; former name func_00168A50
-0x00162270	effInitParticleRecord	inferred	DDS1/2 name for the same parManager function; former name func_00162270
-0x00162248	effFreeSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_00162248
-0x001621C8	effCloneSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621C8
-0x001621A0	effScaleSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621A0
-0x001AC138	effReleaseSlotArrayAllocation	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC138
-0x001AC0A8	effCreateSlotArray	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC0A8
-0x002BFF98	sdfDevResizeBufferedRequest	inferred	DDS1/2 name for the same sdfMisc function; former name func_002BFF98
-0x002C5080	sdfPrintTextLine	inferred	DDS1/2 name for the same sdfMovie function; former name movie_2C5080
-0x002C6D58	sdfPacResetOutputToAllocationEntry	inferred	DDS1/2 name for the same sdfPacDecode function; former name func_002C6D58
-0x002C60E0	sdfPacMarkPhaseFinished	inferred	DDS1/2 name for the same sdfPacDecode function; former name func_002C60E0
-0x002B2628	sdfChunkFindById	inferred	DDS1/2 name for the same sdfModel function; former name func_002B2628
-0x001DD9C0	mdlProjectPoints	inferred	DDS1/2 name for the same mdlManager function; former name mdl_1DD9C0
-0x002C22B0	sdfSndSendChannelGroupCommand110Duplicate	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C22B0; DDS name sndSendChannelGroupCommand110Duplicate with the sdfSnd prefix
-0x002C21A8	sdfSndSendChannelGroupCommand110	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21A8; DDS name sndSendChannelGroupCommand110 with the sdfSnd prefix
-0x002C1E40	sdfSndSendChannelGroupCommand140	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E40; DDS name sndSendChannelGroupCommand140 with the sdfSnd prefix
-0x002C1E10	sdfSndSendChannelControlCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1E10; DDS name sndSendChannelControlCommand with the sdfSnd prefix
-0x002C1D78	sdfSndSendFilenameCommand	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1D78; DDS name sndSendFilenameCommand with the sdfSnd prefix
-0x002C17D8	sdfSndDispatchCommandWithoutPayload	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C17D8; DDS name sndDispatchCommandWithoutPayload with the sdfSnd prefix
-0x002C1788	sdfSndQueueNoPayloadCommand210	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1788; DDS name sndQueueNoPayloadCommand210 with the sdfSnd prefix
-0x002C1E70	sdfSndSendChannelGroupCommand150	inferred	DDS1/2 name for the same sdfSound function; former name func_002C1E70; DDS name sndSendChannelGroupCommand150 with the sdfSnd prefix
-0x002C27F8	sdfSndGetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C27F8; DDS name sdfSoundGetTableEntry with the sdfSnd prefix
-0x002C2618	sdfSndSetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C2618; DDS name sdfSoundSetTableEntry with the sdfSnd prefix
-0x002C2280	sdfSndGetCommandStatus	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C2280; DDS name sdfSoundGetCommandStatus with the sdfSnd prefix
-0x002C21D8	sdfSndSetChannelCount	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21D8; DDS name sdfSoundSetChannelCount with the sdfSnd prefix
-0x002C1F90	sdfSndCopyGroupedMidiStateBytes	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F90; DDS name sndCopyGroupedMidiStateBytes with the sdfSnd prefix
-0x002C1F70	sdfSndGetMidiStateWordPair	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F70; DDS name sndGetMidiStateWordPair with the sdfSnd prefix
-0x002C1F60	sdfSndGetTrackSlotTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F60; DDS name sndGetTrackSlotTable with the sdfSnd prefix
-0x002C1F50	sdfSndGetMidiChannelTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F50; DDS name sndGetMidiChannelTable with the sdfSnd prefix
-0x002C1F28	sdfSndGetNonnegativeEntryBalance	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F28; DDS name sndGetNonnegativeEntryBalance with the sdfSnd prefix
-0x002C1F10	sdfSndGetTrackBalanceSecondComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F10; DDS name sndGetTrackBalanceSecondComponent with the sdfSnd prefix
-0x002C1EF8	sdfSndGetTrackBalanceFirstComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EF8; DDS name sndGetTrackBalanceFirstComponent with the sdfSnd prefix
-0x002C1EA0	sdfSndReleaseMidiTrack	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EA0; DDS name sndReleaseMidiTrack with the sdfSnd prefix
-0x002BD300	sdfPktSetCmd	inferred	DDS1/2 name for the same sdfDevCons function; former name func_002BD300
-0x002A8258	sdfFreeMemorySlotFromEitherHeap	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8258
-0x002A84D8	sdfDrainPendingHandlers	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A84D8
-0x002A8758	sdfDeleteTrackedThread	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A8758
-0x002A87F0	sdfFindThreadNode	inferred	DDS1/2 name for the same sdfSystem function; former name func_002A87F0
-0x002A8858	sdfUnlinkAndDeleteCurrentThread	inferred	DDS1/2 name for the same sdfSystem function; former name sdf_2A8858
-0x002C0510	LengthSq	inferred	DDS1/2 name for the same sdfQuat function; former name sdf_2C0510; DDS effMiscQuatLengthSqVU in sdfQuat's bare method style
+0x0054B550	_ctype_	inferred	newlib: unique 257-byte EOF-plus-character-class table, byte-identical to DDS1 0x003B7990; _strtol_r and mdlManager FileUpper index its character flags from +1.
+0x0054F0F4	effBTLJyocyuEffFilePath	inferred	const char* passed to sdfDevLoadFileEx in SetJyocyuData, result to effBTLCreate; former name D_0054F0F4
+0x0054F370	nbCameraStartReadWaitActive	inferred	set on state 1 to 2 handoff, gates D_0054F374 counter; former name D_0054F370
+0x0054F374	nbCameraStartReadWaitFrames	inferred	printed as Read Wait; former name D_0054F374
+0x0054F378	nbCameraStartAnimWaitActive	inferred	gates D_0054F37C counter; former name D_0054F378
+0x0054F37C	nbCameraStartAnimWaitFrames	inferred	counter passed to nbCameraStartAnimWaitFormat; former name D_0054F37C
+0x0054F380	nbCameraStartBAFrame	inferred	reset in Start_BA_Set, ++ in Start_BA_Animation; former name D_0054F380
+0x0054F384	nbCameraEditDist	inferred	nbCameraCommand.c CAMERA EDIT DIST; former name D_0054F384
+0x0054F388	nbCameraEditUp	inferred	nbCameraCommand.c CAMERA EDIT UP; former name D_0054F388
+0x0054F3A0	nbCameraBossVecTable	inferred	f32 table read at [0],[12],[13] in nbCameraBoss.c; weak name; former name D_0054F3A0
+0x0054F3C8	nbCameraBoss_Beru_HAENO1_DirY	inferred	element 0 into direction.y in nbCameraBoss.c; confirm unit is Beru HAENO1; former name D_0054F3C8
+0x0054F3DC	nbCameraHelperViewerCurrent	inferred	helper created from nbCameraHelperViewerMode; former name D_0054F3DC
+0x0054F3E0	nbCameraHelperViewerStateHandle	inferred	handle locked into nbCameraHelperViewerState; former name D_0054F3E0
+0x0054F3E4	nbCameraHelperViewerTargetHandle	inferred	handle locked into nbCameraHelperViewerHandle; former name D_0054F3E4
+0x0054F3E8	nbCameraHelperViewerShowFrame	inferred	gates frame count text; former name D_0054F3E8
+0x0054F3E9	nbCameraHelperViewerShowLines	inferred	gates eye/target path lines; former name D_0054F3E9
+0x00551700	dds3ConfigProcName	inferred	"config": process name dds3ConfigMain starts and kills; former name D_00551700
+0x00551738	pipeClearedOnStart	inferred	pipe word pipeStart zeroes and nothing reads; former name D_00551738
+0x0055173C	pipePartsFrame	inferred	pipe frame position up to which pipeSection has added parts (partsAdd); former name D_0055173C
+0x00551744	pipeTiltHorizontal	inferred	pipe horizontal tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551744
+0x00551748	pipeTiltVertical	inferred	pipe vertical tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551748
+0x00551808	pipeMessNumFmt	inferred	"%d" pipeResult formats message numbers with; former name D_00551808
+0x00551828	sdfTickCallback	inferred	DDS1/2 name for the same sdfSystem callback
+0x005518E0	sdfPadAnalogSticks	inferred	DDS1/2 name; four stick bytes per pad written by sdf_PadManager
 0x005519E0	sdfDmaTagEndName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4B0/D_00438BA0; former name D_005519E0
 0x005519E8	sdfDmaTagRetName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4B8/D_00438BA8; former name D_005519E8
 0x005519F0	sdfDmaTagCallName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD4C0/D_00438BB0; former name D_005519F0
@@ -158,51 +202,9 @@
 0x00551B28	sdfGsMemTexName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD5F8/D_00438CE8; former name D_00551B28
 0x00551B30	sdfGsMemFrameName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD600/D_00438CF0; former name D_00551B30
 0x00551B38	sdfGsMemFreeName	inferred	String in sdfDmaTagNameTable/sdfGrVifUnpackNames or the GS memory dump, named with DDS1/2 D_003BD608/D_00438CF8; former name D_00551B38
-0x002DA308	_localeconv_r	inferred	newlib _localeconv_r: returns &localeconvData, between _setlocale_r and setlocale; former name func_002DA308
-0x001001C8	_exit	inferred	crt0 _exit: tail-calls Exit(0); abort calls it with 1; former name func_001001C8
-0x002D6678	_vfprintf_r	inferred	DDS1/2 name for the same newlib function (DDS1 0x00303468); former name func_002D6678
+0x00551B50	sdfMovieIpsExt	inferred	".ips" extension compared in sdfMovie; DDS1/2 same object
+0x005520A8	sdfPendingQueueSlots	inferred	DDS1/2 name for the same sdfDelayedResrc slot array
 0x00552178	libcErrno	inferred	newlib's global errno: _sbrk_r clears it, calls sbrk and copies it into r->_errno; former name D_00552178
-0x0052BB28	dtorListCursor	inferred	__do_global_dtors' static cursor into the destructor list; former name D_0052BB28
-0x0052BB2C	dtorFrameDeregistered	inferred	__do_global_dtors' static flag guarding __deregister_frame_info; former name D_0052BB2C
-0x0052D940	__EH_FRAME_BEGIN__	inferred	start of .eh_frame, passed to __register_frame_info/__deregister_frame_info; former name D_0052D940
-0x002F5600	__CTOR_LIST__	inferred	constructor list walked by __do_global_ctors (count word, then entries); former name D_002F5600
+0x0059AD40	ctorFrameObject	inferred	static object __do_global_ctors passes to __register_frame_info; former name D_0059AD40
 0x0059AD58	mainCtorsDone	inferred	__main's static flag: run __do_global_ctors once; former name D_0059AD58
 0x0059AD60	frameObjectList	inferred	head of the object list __register_frame_info links into; former name D_0059AD60
-0x0059AD40	ctorFrameObject	inferred	static object __do_global_ctors passes to __register_frame_info; former name D_0059AD40
-0x0052C37C	frameObjectSema	inferred	semaphore around frameObjectList; former name D_0052C37C
-0x00551738	pipeClearedOnStart	inferred	pipe word pipeStart zeroes and nothing reads; former name D_00551738
-0x0055173C	pipePartsFrame	inferred	pipe frame position up to which pipeSection has added parts (partsAdd); former name D_0055173C
-0x00551744	pipeTiltHorizontal	inferred	pipe horizontal tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551744
-0x00551748	pipeTiltVertical	inferred	pipe vertical tilt, stepped by the pad and clamped to +-10, passed to mdlTask; former name D_00551748
-0x00551700	dds3ConfigProcName	inferred	"config": process name dds3ConfigMain starts and kills; former name D_00551700
-0x00551808	pipeMessNumFmt	inferred	"%d" pipeResult formats message numbers with; former name D_00551808
-0x002BFC58	sdfZeroMem	inferred	zeroes size bytes at dst with quad stores when both are 16-aligned, else memset; sibling of sdfZeroMemQuad; DDS1 func_002E73F0, DDS2 func_00340298; former name sdf_2BFC58
-0x0054F370	nbCameraStartReadWaitActive	inferred	set on state 1 to 2 handoff, gates D_0054F374 counter; former name D_0054F370
-0x0054F374	nbCameraStartReadWaitFrames	inferred	printed as Read Wait; former name D_0054F374
-0x0054F378	nbCameraStartAnimWaitActive	inferred	gates D_0054F37C counter; former name D_0054F378
-0x0054F37C	nbCameraStartAnimWaitFrames	inferred	counter passed to nbCameraStartAnimWaitFormat; former name D_0054F37C
-0x0054F380	nbCameraStartBAFrame	inferred	reset in Start_BA_Set, ++ in Start_BA_Animation; former name D_0054F380
-0x0054F384	nbCameraEditDist	inferred	nbCameraCommand.c CAMERA EDIT DIST; former name D_0054F384
-0x0054F388	nbCameraEditUp	inferred	nbCameraCommand.c CAMERA EDIT UP; former name D_0054F388
-0x0054F3A0	nbCameraBossVecTable	inferred	f32 table read at [0],[12],[13] in nbCameraBoss.c; weak name; former name D_0054F3A0
-0x0054F3C8	nbCameraBoss_Beru_HAENO1_DirY	inferred	element 0 into direction.y in nbCameraBoss.c; confirm unit is Beru HAENO1; former name D_0054F3C8
-0x0054F3DC	nbCameraHelperViewerCurrent	inferred	helper created from nbCameraHelperViewerMode; former name D_0054F3DC
-0x0054F3E0	nbCameraHelperViewerStateHandle	inferred	handle locked into nbCameraHelperViewerState; former name D_0054F3E0
-0x0054F3E4	nbCameraHelperViewerTargetHandle	inferred	handle locked into nbCameraHelperViewerHandle; former name D_0054F3E4
-0x0054F3E8	nbCameraHelperViewerShowFrame	inferred	gates frame count text; former name D_0054F3E8
-0x0054F3E9	nbCameraHelperViewerShowLines	inferred	gates eye/target path lines; former name D_0054F3E9
-0x002F69B8	sdfModelOtTable	inferred	sdfModelOt_t[11]; DDS kwlnSceneSurfaceSets[10] is a different layout, not reused; DDS macro D_002F69B8 stays; former name D_002F69B8
-0x0054F0F4	effBTLJyocyuEffFilePath	inferred	const char* passed to sdfDevLoadFileEx in SetJyocyuData, result to effBTLCreate; former name D_0054F0F4
-0x0031DD20	effPCPThunderSpherePolyDataList	inferred	effPartPCPDataTable[0], NULL-terminated param list for kateg 0 (EffectPCPFuncTable[0] = effPCPThunderSpherePoly); former name D_0031DD20
-0x0031DD48	effPCPThunderPolyDataList	inferred	effPartPCPDataTable[1], param list for kateg 1 (effPCP_ThunderPoly); former name D_0031DD48
-0x0031DDA0	effPCPThunderRadiatePolyDataList	inferred	effPartPCPDataTable[2], param list for kateg 2 (effPCP_ThunderRadiatePoly); former name D_0031DDA0
-0x0031DDA8	effPCPMultiBlurExpDataList	inferred	effPartPCPDataTable[10], param list for kateg 10 (effPCPMultiBlurExp); former name D_0031DDA8
-0x0031DDB0	effPCPSparkleSphereDataList	inferred	effPartPCPDataTable[13], param list for kateg 13 (effPCPSparkleSphere); former name D_0031DDB0
-0x0031DDB8	effPCPFlashPolySphereDataList	inferred	effPartPCPDataTable[14], param list for kateg 14 (effPCPFlashPolySphere); former name D_0031DDB8
-0x0031DDC0	effPCPMultiFilterExpDataList	inferred	effPartPCPDataTable[26], param list for kateg 26 (effPCPMultiFilterExp); former name D_0031DDC0
-0x0031DDC8	effPCPBlinkMultiBlurDataList	inferred	effPartPCPDataTable[27], param list for kateg 27 (effPCPBlinkMultiBlur); former name D_0031DDC8
-0x00103420	fclEncycConfigureMode3	inferred	DDS1/2 kwlnConfigureNamedSlotMode3 twin (0x00103400), same body; sibling fclEncycAllocEntry; former name fcl_103420
-0x00103560	fclEncycConfigureMode2	inferred	DDS1/2 kwlnConfigureNamedSlotMode2 twin (0x00103540), same body; sibling fclEncycAllocEntry; former name fcl_103560
-0x00104170	dds3PadVibrationReset	inferred	DDS1/2 kwlnPadResetMotorLevelsAndOutput twin (0x00104130), same body; former name dds3_104170
-0x002F56C0	dds3PadButtonHoldCounters	inferred	per-key hold counters dds3PadManager counts; DDS1 0x003243C0; former name D_002F56C0
-0x002F57C0	dds3PadStickHoldCounters	inferred	per-stick hold counters dds3PadManager counts; DDS1 0x003244C0; former name D_002F57C0
