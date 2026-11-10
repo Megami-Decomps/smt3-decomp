@@ -190,7 +190,7 @@ void dds3DeleteCameraObjectBasic(dds3Basic_t *pBasic)
 }
 
 /* vu0 routine: return the camera matrix in vf28-vf31. */
-void func_00112888(dds3Basic_t *basic)
+void dds3CameraObjectBasicLoadCameraTM(dds3Basic_t *basic)
 {
     SDF_VU0_LOADMATRIX(&((dds3CameraObjectBasicWorkData_t *)basic->workdata)->cameraTM);
 }
@@ -268,7 +268,7 @@ u32 dds3CameraObjectBasicGetMode(dds3Basic_t *pBasic)
     return work->mode;
 }
 
-void func_00112A18(dds3Basic_t *basic, u32 mode)
+void dds3CameraObjectBasicSetMode(dds3Basic_t *basic, u32 mode)
 {
     dds3CameraObjectBasicWorkData_t *work = basic->workdata;
 
