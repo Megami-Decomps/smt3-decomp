@@ -48,7 +48,7 @@ s32 dds3FirstProcess(dds3ProcessID_t *id)
 extern u32 dds3RenderTex, dds3RenderDrawEnv, dds3BackColor;
 extern dds3LightState_t dds3LightParam, dds3LightParam2;
 extern sdf3DLight_t *dds3RenderLightParallel[];
-extern sdfVector4_t dds3RenderAmbientColor, kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect;
+extern sdfVector4_t dds3RenderAmbientColor, dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect;
 extern sdfVector4_t fldAutoMapRect, fldAutoMapEye, fldAutoMapUp, aViewTarget, aViewEye, aViewDown;
 extern f32 dds3QuakeOffset[4];
 extern sdf3DScreenParam_t dds3RenderScreenParam, dds3ScreenParam, dds3ScreenParam2;
@@ -93,7 +93,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
             sdfDrawTag_t *renderTag;
             sdf3DFogPacket_t *renderFog;
             sdf3DMakeScreenParam(&dds3RenderScreenParam);
-            LookAtMatrix(&kwlnHeldTextureTargetVector, &kwlnHeldTextureEyeVector, &effPCPBossTexRect);
+            LookAtMatrix(&dds3RenderTargetVector, &dds3RenderEyeVector, &effPCPBossTexRect);
             SDF_VU0_STOREMATRIX(&dds3RenderViewportMatrix);
             sdf3DMakeViewportPacket(&dds3DrawEnv[frame].renderViewport, &dds3RenderScreenParam, &dds3RenderViewportMatrix);
             sdfGrOtTable[1].regFunc(&sdfGrOtTable[1], &dds3DrawEnv[frame].renderTag);

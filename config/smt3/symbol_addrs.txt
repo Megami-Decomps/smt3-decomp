@@ -1175,8 +1175,8 @@ D_0031DDC0 = 0x0031DDC0; // type:u32 size:0x8
 D_0031DDC8 = 0x0031DDC8; // type:u32 size:0x8
 
 // Data named after the DDS1/2 object at the same use.
-kwlnHeldTextureTargetVector = 0x002F5C20;
-kwlnHeldTextureEyeVector = 0x002F5C30;
+dds3RenderTargetVector = 0x002F5C20;
+dds3RenderEyeVector = 0x002F5C30;
 effScatterTriangleIndices = 0x0031F3E0;
 sdfImageSetTexFlushPacket = 0x005293A0;
 sdf3DUpVector = 0x00529630;

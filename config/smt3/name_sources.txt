@@ -51,8 +51,8 @@
 0x2cf748	atan2f	evidence	Native libm routine pairs with DDS at 0x2fa1f0 over 20 bytes with only address relocations masked; former name func_002CF748. Wrapper identity follows its verified kernel target.
 0x2cf760	__ieee754_acosf	evidence	Native libm routine pairs with DDS at 0x2fa208 over 1060 bytes with only address relocations masked; former name func_002CF760. Wrapper identity follows its verified kernel target.
 0x002FA240	sdfViewMatrix	inferred	DDS1/2 name for the same view matrix (mdlManager, effMath)
-0x002F5C20	kwlnHeldTextureTargetVector	inferred	DDS1/2 name; LookAtMatrix target in dds3KernelProcess and effPacket
-0x002F5C30	kwlnHeldTextureEyeVector	inferred	DDS1/2 name; LookAtMatrix eye in dds3KernelProcess and effPacket
+0x002F5C20	dds3RenderTargetVector	inferred	LookAtMatrix target in dds3KernelProcess and effPacket, beside dds3RenderLightParallel/AmbientColor; was kwlnHeldTextureTargetVector from DDS1/2
+0x002F5C30	dds3RenderEyeVector	inferred	LookAtMatrix eye in dds3KernelProcess and effPacket; was kwlnHeldTextureEyeVector from DDS1/2
 0x0031F3E0	effScatterTriangleIndices	inferred	DDS1/2 name for the same effPCPScatter index table
 0x005518E0	sdfPadAnalogSticks	inferred	DDS1/2 name; four stick bytes per pad written by sdf_PadManager
 0x005520A8	sdfPendingQueueSlots	inferred	DDS1/2 name for the same sdfDelayedResrc slot array

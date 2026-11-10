@@ -524,7 +524,7 @@ extern void ReverseMatrix(void);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
-extern u8 kwlnHeldTextureTargetVector[], kwlnHeldTextureEyeVector[];
+extern u8 dds3RenderTargetVector[], dds3RenderEyeVector[];
 extern u8 effPCPBossTexRect[];
 extern u8 effPCPBossLookDown[];
 extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void *pMatrix);
@@ -722,14 +722,14 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         return;
     }
     effPCPBossONGY_RFrame = count;
-    SDF_VU0_COPYVECTOR(kwlnHeldTextureTargetVector, target);
+    SDF_VU0_COPYVECTOR(dds3RenderTargetVector, target);
     scale = height / sdfAtan(effPCPBossONGYFovy * 0.5f);
     distance.x = scale;
     distance.y = scale;
     distance.z = scale;
     distance.w = 0.0f;
     SDF_VU0_LOADVECTOR(aViewEye);
-    SDF_VU0_LOADVECTOR_B(kwlnHeldTextureTargetVector);
+    SDF_VU0_LOADVECTOR_B(dds3RenderTargetVector);
     SDF_VU0_COPYVECTOR_B_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
@@ -737,7 +737,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
     SDF_VU0_MULVECTOR();
     SDF_VU0_COPYVECTOR_C_TO_B();
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(kwlnHeldTextureEyeVector);
+    SDF_VU0_STOREVECTOR(dds3RenderEyeVector);
     SDF_VU0_COPYVECTOR(effPCPBossTexRect, aViewDown);
     forms = nbGetMainProcessData()->form;
     found = NULL;
@@ -908,7 +908,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     sdf3DPrimLinkTm(tag, 0);
     sdfMatSetTex(work->pMat, dds3GetRenderTexture());
     sdf3DPrimLinkMat(tag, work->pMat, 0);
-    LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect);
+    LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
     ReverseMatrix();
     rate = (f32)work->frame / SDF_FRAMES_F(12.0f);
     effPCPBossWork.color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
@@ -1105,7 +1105,7 @@ void effPCPBossONGY2Draw(effPCPBossONGY_t *work)
     sdf3DPrimLinkTm(tag, 0);
     sdfMatSetTex(work->pMat, dds3GetRenderTexture());
     sdf3DPrimLinkMat(tag, work->pMat, 0);
-    LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect);
+    LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
     ReverseMatrix();
     effPCPBossWork.color = 0x80808080;
     effPCPBossWork.positions = points;
@@ -1322,7 +1322,7 @@ void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work,
     SDF_VU0_LOADVECTOR(center);
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(tag, 0);
-    LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect);
+    LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
     ReverseMatrix();
     yStep = height / 100.0f;
     angle = work->radian;
@@ -1415,7 +1415,7 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
     SDF_VU0_LOADVECTOR(center);
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(tag, 0);
-    LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, effPCPBossTexRect);
+    LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
     ReverseMatrix();
     width = width * 0.5f;
     height = height * 0.5f;
@@ -1544,10 +1544,10 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
                 startRate = 1.0f;
             }
         }
-        SDF_VU0_LOADVECTOR(kwlnHeldTextureEyeVector);
+        SDF_VU0_LOADVECTOR(dds3RenderEyeVector);
         SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        SDF_VU0_LOADVECTOR(kwlnHeldTextureTargetVector);
+        SDF_VU0_LOADVECTOR(dds3RenderTargetVector);
         SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
