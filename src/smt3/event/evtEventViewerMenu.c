@@ -804,21 +804,21 @@ extern char *evtItemFadeNames[];
 extern char *evtDispModeNames[];
 extern void *memcpy(void *, const void *, size_t);
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtFadeNameBlackOut);
+const char evtFadeNameBlackOut[10] = "BLACK OUT";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtFadeNameBlackIn);
+const char evtFadeNameBlackIn[9] = "BLACK IN";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtFadeNameWhiteOut);
+const char evtFadeNameWhiteOut[10] = "WHITE OUT";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtFadeNameWhiteIn);
+const char evtFadeNameWhiteIn[9] = "WHITE IN";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtDispNameVShadowOn);
+const char evtDispNameVShadowOn[11] = "VSHADOW ON";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtDispNameMShadowOn);
+const char evtDispNameMShadowOn[11] = "MSHADOW ON";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtDispNameShadowOff);
+const char evtDispNameShadowOff[11] = "SHADOW OFF";
 
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", evtDispNameOff);
+const char evtDispNameOff[9] = "DISP OFF";
 
 void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtFrameInfo_t *f)
 {
