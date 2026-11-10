@@ -2035,55 +2035,62 @@ u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFl
     return result;
 }
 
-#ifdef NON_MATCHING
+extern u16 cmbFindBirthResult(u16 devilId, u8 direction);
+
 s32 cmbGetCombineResultEx(cmbUnit_t *first, cmbUnit_t *second, s8 inverted, s8 levelFlag,
                           u16 *ids, u8 *races, u8 *kind)
 {
-    s32 result = cmbCheckUnlockedPair(ids[0], ids[1]);
-    s32 type = 7;
-    u8 race0;
-    u8 race1;
-    s32 other;
-    s32 spirit;
-    s32 direction;
+    s32 value = cmbCheckUnlockedPair(ids[0], ids[1]);
+    s32 type;
+    /* These live scalar phases are disjoint: scratch holds the spirit
+     * index, then its direction; the ordinary path retains levelFlag.
+     * value holds the result ID, or the other input's index until its lookup.
+     * Expansion (00.rtl) shares each pair's pseudo; global allocation (20.greg)
+     * gives them the native saved homes. Splitting either pair changes those
+     * homes in qualified whole-owner plain/dump assembly and raw-ELF pairs.
+     * This is a reconstruction aid, not evidence of original source spelling. */
+    s32 scratch;
 
-    if (result == 0) {
-        race0 = races[0];
-        race1 = races[1];
-        if ((race0 == 7 || race1 == 7) && race0 != 0x26 && race1 != 0x26) {
-            if (race0 == race1) {
-                result = cmbFindPairEntry(ids[0], ids[1]);
+    if (value == 0) {
+        if ((races[0] == 7 || races[1] == 7) && races[0] != 0x26 && races[1] != 0x26) {
+            if (races[0] == races[1]) {
+                value = cmbFindPairEntry(ids[0], ids[1]);
                 type = 3;
             } else {
-                other = race0 != 7;
-                spirit = !other;
-                direction = cmbFindRaceEntry(ids[other], races[spirit]);
+                scratch = races[0] != 7;
+                value = !scratch;
+                scratch = cmbFindRaceEntry(ids[scratch], races[value]);
                 if (inverted != 0) {
-                    if (direction == 1) direction = 2;
-                    else if (direction == 2) direction = 1;
+                    switch (scratch) {
+                    case 1:
+                        scratch = 2;
+                        break;
+                    case 2:
+                        scratch = 1;
+                        break;
+                    }
                 }
-                result = cmbFindBirthResult(ids[spirit], (u8)direction);
-                type = direction == 2 ? 6 : 5;
+                value = cmbFindBirthResult(ids[value], (u8)scratch);
+                type = scratch == 2 ? 6 : 5;
             }
-        } else if ((race0 == 8 || race1 == 8) && race0 != race1) {
-            result = race0 == 8 ? ids[1] : ids[0];
+        } else if ((races[0] == 8 || races[1] == 8) && races[0] != races[1]) {
+            value = races[0] == 8 ? ids[1] : ids[0];
             type = 2;
-        } else if (race0 == race1) {
-            result = cmbLookupCombine(ids[0], ids[1], inverted);
+        } else if (races[0] == races[1]) {
+            value = cmbLookupCombine(ids[0], ids[1], inverted);
             type = 4;
         } else {
-            result = cmbCalcCombineResult(first, second, inverted, levelFlag);
+            value = cmbCalcCombineResult(first, second, inverted, levelFlag);
             type = 1;
         }
+    } else {
+        type = 7;
     }
     if (kind != NULL) {
         *kind = type;
     }
-    return result;
+    return value;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetCombineResultEx);
-#endif
 
 extern s32 cmbGetLevelUpCount(datUnitWork_t *work, u32 exp);
 

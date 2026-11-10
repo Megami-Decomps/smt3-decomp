@@ -47,7 +47,7 @@ extern u32 mccb;
 
 void sdfMcSetSlotIndex(s32 request, s32 selectedSlot);
 
-s8 sdfMcGetSlotIndex(s32 request);
+s32 sdfMcGetSlotIndex(s32 request);
 
 u32 sdfMcGetSlotFlags(s32 request, s32 slot);
 
@@ -399,6 +399,9 @@ typedef struct slFileName_t {
 
 
 
+/* The 0x34-byte save preview: the renderer reads playTime as a word and
+ * endcnt/newfile as signed halfwords. The last count is for the encoded
+ * player name, not map state (nmeBuildNameFont and slCopyNonZero). */
 typedef struct slFileRec_t {
     s8 verstr[3];
     s8 ver;
@@ -406,17 +409,17 @@ typedef struct slFileRec_t {
     s8 tmnlId;
     s8 level;
     s8 mode;
-    s8 playTime[4];
-    s8 endcnt[2];
-    s8 newfile[2];
+    s32 playTime;
+    s16 endcnt;
+    s16 newfile;
     slFileName_t name;
-    s8 mapOpen;
+    s8 nameLength;
     s8 unk25[15];
 } slFileRec_t;
+SIZE_CHECK(slFileRecSizeCheck, slFileRec_t, 0x34);
 
 
 
-#define SL_REC ((u8 (*)[52])slFileRecs)
 #define SL_FILE_HEAD ((GameFileInfo_t *)DDS3_GBWK)
 
 extern slFileRec_t slFileRecs[];
@@ -1118,10 +1121,11 @@ s32 slHeadLoadProc_closeFile(void) {
     if (status == SL_MC_RESULT_SUCCESS) {
         index = slChooseSaveIndex;
         head = &slFileRecs[index];
-        *head = *(slFileRec_t *)slLoadFileHandle;
+        /* The file loader supplies serialized bytes, not a typed record. */
+        memcpy(head, slLoadFileHandle, sizeof(*head));
         if (head->ver == 1) {
             memset(&slFileRecs[index].name, 0, 0x14);
-            slFileRecs[index].mapOpen = 0;
+            slFileRecs[index].nameLength = 0;
         }
         sdfMemFreeDirect(slLoadFileFd);
         return slChooseData_getCardInfoNext();
@@ -2005,12 +2009,10 @@ s32 slSaveWriteEnd_saveData(void) {
                           slSaveWriteEnd_baseIcon, &baseIconFileHandle);
 }
 
-/* NON_MATCHING: 106 of 142 words, exact size; one register renaming through the record copy. */
-#ifdef NON_MATCHING
 s32 slSaveData_writeFile(void) {
     char path[0x50];
     GameFileInfo_t *hdr;
-    u8 *rec;
+    slFileRec_t *rec;
     s32 slot = sdfMcGetSlotIndex(mccb);
 
     mcMakeFileName(path, slot);
@@ -2027,23 +2029,28 @@ s32 slSaveData_writeFile(void) {
     } else {
         SL_FILE_HEAD->mode = 0;
     }
-    SL_FILE_HEAD->work = *(slFileWork_t *)((u8 *)DDS3_GBWK + 0x6604);
-    SL_FILE_HEAD->autoMapOpen = *((u8 *)DDS3_GBWK + 0x6654);
+    /* The legacy work/autoMapOpen header fields hold 20 encoded-name bytes
+     * and their count. nmeBuildNameFont writes these source members. Copying
+     * bytes preserves both native alignment-sensitive tails without reading
+     * a byte array through a fabricated aggregate type. */
+    memcpy(&SL_FILE_HEAD->work, &DDS3_GBWK->nameCode[0x88], sizeof(SL_FILE_HEAD->work));
+    SL_FILE_HEAD->autoMapOpen = DDS3_GBWK->nameCode[0xD8];
     hdr = SL_FILE_HEAD;
-    rec = SL_REC[slot];
-    rec[0] = hdr->verstr[0];
-    SL_REC[slot][1] = hdr->verstr[1];
-    SL_REC[slot][2] = hdr->verstr[2];
-    rec[3] = hdr->ver;
-    rec[4] = hdr->TmnlMode;
-    rec[5] = hdr->TmnlId;
-    rec[6] = hdr->Lv;
-    *(s32 *)&SL_REC[slot][8] = hdr->PlayTime;
-    *(u16 *)&rec[12] = hdr->endcnt;
-    *(u16 *)&rec[14] = hdr->newfile;
-    rec[7] = hdr->mode;
-    *(slFileName_t *)&SL_REC[slot][0x10] = *(slFileName_t *)&hdr->work;
-    SL_REC[slot][0x24] = hdr->autoMapOpen;
+    rec = &slFileRecs[slot];
+    rec->verstr[0] = hdr->verstr[0];
+    slFileRecs[slot].verstr[1] = hdr->verstr[1];
+    slFileRecs[slot].verstr[2] = hdr->verstr[2];
+    rec->ver = hdr->ver;
+    rec->tmnlMode = hdr->TmnlMode;
+    rec->tmnlId = hdr->TmnlId;
+    rec->level = hdr->Lv;
+    /* This source order gives the native lhu/lw/sh/sw transfer order. */
+    rec->endcnt = hdr->endcnt;
+    slFileRecs[slot].playTime = hdr->PlayTime;
+    rec->newfile = hdr->newfile;
+    rec->mode = hdr->mode;
+    memcpy(&slFileRecs[slot].name, &hdr->work, sizeof(slFileRecs[slot].name));
+    slFileRecs[slot].nameLength = hdr->autoMapOpen;
     slSaveDataBuff = EE_ADDR(DDS3_GBWK);
     slSaveDataSize = 0x1A510;
     if (gSlSaveMode == 0 || gSlSaveMode == 2) {
@@ -2051,9 +2058,6 @@ s32 slSaveData_writeFile(void) {
     }
     return slSaveWriteFile(path, &slSaveDataBuff, &slSaveDataSize, slSaveWriteEnd_baseIcon, 0);
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slSaveData_writeFile);
-#endif
 
 saddr_t slSaveData_deleteIconSys(void) {
     u32 entry = mccb;
@@ -2428,7 +2432,6 @@ s32 slFileSelDraw(s32 id)
             s32 spriteV;
             u32 color = 0xA09DC380;
             slFileRec_t *record = &slFileRecs[row];
-            GameFileInfo_t *info = (GameFileInfo_t *)(void *)record;
             char number[16];
             u8 name[18];
 
@@ -2454,7 +2457,7 @@ s32 slFileSelDraw(s32 id)
                             gslMode == 1 ? slNoFileLabel : slNewFileLabel);
             } else if (state == 2) {
                 slKanjiDraw(offset + 0xCD, (y + 0xD) / 2, 0xCB819A80, slCorruptedFileLabel);
-            } else if (*(volatile s16 *)&info->newfile != 0) {
+            } else if (*(volatile s16 *)&record->newfile != 0) {
                 slKanjiDraw(offset + 0x52, (y + 6) / 2, 0xA09DC380, slNewCycleLabel);
             }
 
@@ -2503,7 +2506,7 @@ s32 slFileSelDraw(s32 id)
                 continue;
             }
 
-            if (*(volatile s16 *)&info->newfile == 0) {
+            if (*(volatile s16 *)&record->newfile == 0) {
                 u8 level;
                 cmpSetSkillListRows(18);
                 slKanjiDraw(0x46, textY, color,
@@ -2514,7 +2517,7 @@ s32 slFileSelDraw(s32 id)
                 slKanjiDrawN(0x6D, (y + 5) / 2, color, number);
             }
             {
-                s32 time = *(volatile s32 *)&info->PlayTime;
+                s32 time = *(volatile s32 *)&record->playTime;
                 if (time > 0x066FEBF8) {
                     time = 0x066FEBF8;
                 }
@@ -2525,11 +2528,11 @@ s32 slFileSelDraw(s32 id)
             }
             if (slDDS3To31Flg == 0) {
                 s32 cycle;
-                if (*(volatile s16 *)&info->newfile == 0) {
+                if (*(volatile s16 *)&record->newfile == 0) {
                     fldKanjiDraw(0x14D, (y + 0x1D) / 2, color,
                                  (const u8 *)(record->mode != 0 ? D_0054F098 : D_0054F0A0));
                 }
-                cycle = *(volatile s16 *)&info->endcnt + 1;
+                cycle = *(volatile s16 *)&record->endcnt + 1;
                 if (cycle <= 0) {
                     cycle = 1;
                 }
@@ -2544,14 +2547,14 @@ s32 slFileSelDraw(s32 id)
                 }
             }
             {
-                s16 newFile = *(volatile s16 *)&info->newfile;
-                u16 newFileAgain = *(volatile u16 *)&info->newfile;
+                s16 newFile = *(volatile s16 *)&record->newfile;
+                u16 newFileAgain = *(volatile u16 *)&record->newfile;
                 if (newFile == 0) {
-                    if (record->mapOpen > 0) {
+                    if (record->nameLength > 0) {
                         memset(name, 0, sizeof(name));
-                        slCopyNonZero(name, (u8 *)record->name.ch, record->mapOpen);
+                        slCopyNonZero(name, (u8 *)record->name.ch, record->nameLength);
                         slKanjiDraw(0x94, (y + 4) / 2, color, (const char *)name);
-                        newFileAgain = *(volatile u16 *)&info->newfile;
+                        newFileAgain = *(volatile u16 *)&record->newfile;
                     }
                     if (newFileAgain == 0) {
                         DrwSprite2D(0x52, y + 9, 0x19, 0xD, 0x89, spriteV + 0x2D,

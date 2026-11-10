@@ -307,82 +307,102 @@ void resetCamNormal(void) {
 INCLUDE_ASM(const s32, "field/fldCamera", resetCamNormal);
 #endif
 
-/* NON_MATCHING: 207 of 215 words differ, at 860 bytes against 864. */
-#ifdef NON_MATCHING
+/* Compiler reconstruction, not recovered source spelling: the initial angle
+ * conversion uses its real scalar-field address rather than the later full
+ * camera-state base. Qualified CSE dumps retain the distinct HIGH quantities
+ * and the later base/constant loads. The three local homes die at the initial
+ * store, before the pose call; none relies on a call-clobbered value surviving.
+ * Vector copies name their actual four-float memory so unrelated camera state
+ * remains available across them. Native scratch W lanes are left untouched. */
 void resetCamNormal2(void) {
-    sdfVector4_t eye;
-    sdfVector4_t eyeBase;
-    sdfVector4_t tgt;
-    f32 ta[4] __attribute__((aligned(16)));
-    f32 tb[4] __attribute__((aligned(16)));
-    f32 hitpos[4] __attribute__((aligned(16)));
-    sdfVector4_t pos;
+    union {
+        u128 q;
+        f32 f[4];
+    } eye, eyeBase, tgt, ta, tb, hitpos, pos;
     fldFollowCameraControl_t *control;
     fldUnitControl_t *unit;
     fldAreaWork_t *gb;
     dds3Basic_t *node;
-    f32 ofs;
+    f32 ofs, heightOffset;
     f32 dx;
     f32 dy;
-    f32 dz;
+    f32 backX, backY, backZ;
+    f32 ratio, scale;
     f32 len;
+    f32 *targetPosition;
 
     control = fldGetFollowCameraControl();
     unit = fldGetUnitControl();
     dds3GetRotPoseSet(unit->handle);
-    fldGlobalBase.camAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+    {
+        f32 radians = EulerAngleAxisY();
+        FAKEMATCH_ASM_REG(f32 *, angleField, "$2") = &fldGlobalBase.camAngle;
+        FAKEMATCH_ASM_REG(f32, halfTurn, "$f1") = 180.0f;
+        FAKEMATCH_ASM_REG(f32, pi, "$f2") = 3.14f;
+        *angleField = radians * halfTurn / pi;
+    }
     dds3GetPosPoseSet(unit->handle);
-    SDF_VU0_STOREVECTOR(&pos);
+    SDF_VU0_STOREVECTOR_F32(pos.f);
     gb = &fldGlobalBase;
     gb->prevX = gb->x;
     gb->prevY = gb->y;
     gb->prevZ = gb->z;
-    gb->x = pos.x;
-    gb->y = pos.y;
-    gb->z = pos.z;
-    eye.x = gb->x -
+    gb->x = pos.f[0];
+    gb->y = pos.f[1];
+    gb->z = pos.f[2];
+    eye.f[0] = gb->x -
         sdfSin((gb->camAngle + 180.0f) * 3.14f / 180.0f);
-    eye.y = gb->y +
+    eye.f[1] = gb->y +
         fldCamParamTable[gb->cameraParamIndex].eyeHeight;
-    eye.z = gb->z +
+    eye.f[2] = gb->z +
         sdfCos((gb->camAngle + 180.0f) * 3.14f / 180.0f);
-    tgt.x = gb->x + sdfSin(fldCamPitch * 3.14f / 180.0f) *
+    tgt.f[0] = gb->x + sdfSin(fldCamPitch * 3.14f / 180.0f) *
         fldCamParamTable[gb->cameraParamIndex].distance;
-    tgt.y = gb->y +
+    tgt.f[1] = gb->y +
         fldCamParamTable[gb->cameraParamIndex].targetHeight;
-    tgt.z = gb->z + sdfCos(fldCamPitch * 3.14f / 180.0f) *
+    tgt.f[2] = gb->z + sdfCos(fldCamPitch * 3.14f / 180.0f) *
         fldCamParamTable[gb->cameraParamIndex].distance;
-    SDF_VU0_COPYVECTOR(fldCamEye, &eye);
-    SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
-    eyeBase.x = gb->x;
-    eyeBase.y = gb->y +
-        fldCamParamTable[gb->cameraParamIndex].eyeHeight;
-    eyeBase.z = gb->z;
+    SDF_VU0_COPYVECTOR_F32(fldCamEye, &eye);
+    /* Materialize the real scratch address before the destination address.
+     * Its ordinary lifetime spans the copies and the final pose setter. */
+    targetPosition = tgt.f;
+    SDF_VU0_COPYVECTOR_F32(fldCamTarget, targetPosition);
     ofs = fldCamDist;
+    heightOffset = ofs + (fldCamDirLock - ofs) * 0.0625f;
     fldCamDist = fldCamDirLock;
-    tgt.y = tgt.y + (ofs + (fldCamDirLock - ofs) * 0.0625f);
-    SDF_VU0_COPYVECTOR(&ta, &eyeBase);
-    SDF_VU0_COPYVECTOR(&tb, &tgt);
-    fldHitChkCamera(tb, ta, hitpos);
-    dx = hitpos[0] - eyeBase.x;
-    dy = hitpos[1] - eyeBase.y;
-    dz = hitpos[2] - eyeBase.z;
-    len = fsqrtf(dx * dx + dy * dy + dz * dz);
-    fldCamHeight = len * (fldCamHeightTarget / fldCamParamTable2);
-    tgt.x = eyeBase.x - (eyeBase.x - hitpos[0]) / len * fldCamHeight;
-    tgt.y = eyeBase.y - (eyeBase.y - hitpos[1]) / len * fldCamHeight;
-    tgt.z = eyeBase.z - (eyeBase.z - hitpos[2]) / len * fldCamHeight;
-    dds3SetPosPoseSet(control->handle, &tgt);
-    SDF_VU0_COPYVECTOR(fldCamEye, &eye);
-    SDF_VU0_COPYVECTOR(fldCamTarget, &tgt);
+    tgt.f[1] += heightOffset;
+    eyeBase.f[0] = gb->x;
+    eyeBase.f[1] = gb->y +
+        fldCamParamTable[gb->cameraParamIndex].eyeHeight;
+    eyeBase.f[2] = gb->z;
+    SDF_VU0_COPYVECTOR_F32(&ta, &eyeBase);
+    SDF_VU0_COPYVECTOR_F32(&tb, targetPosition);
+    fldHitChkCamera(tb.f, ta.f, hitpos.f);
+    ratio = fldCamHeightTarget / fldCamParamTable2;
+    dx = hitpos.f[0] - eyeBase.f[0];
+    dy = hitpos.f[1] - eyeBase.f[1];
+    backX = eyeBase.f[0] - hitpos.f[0];
+    backY = eyeBase.f[1] - hitpos.f[1];
+    backZ = eyeBase.f[2] - hitpos.f[2];
+    {
+        /* Local allocation aid on the live Z delta, ending at inline sqrt.
+         * This is not a hardware requirement; no call crosses its lifetime. */
+        FAKEMATCH_ASM_REG(f32, dz, "$f1") = hitpos.f[2] - eyeBase.f[2];
+        len = fsqrtf(dx * dx + dy * dy + dz * dz);
+    }
+    node = control->handle;
+    scale = len * ratio;
+    fldCamHeight = scale;
+    tgt.f[1] = eyeBase.f[1] - backY / len * scale;
+    tgt.f[2] = eyeBase.f[2] - backZ / len * scale;
+    tgt.f[0] = eyeBase.f[0] - backX / len * scale;
+    dds3SetPosPoseSet(node, (const sdfVector4_t *)targetPosition);
+    SDF_VU0_COPYVECTOR_F32(fldCamEye, &eye);
+    SDF_VU0_COPYVECTOR_F32(fldCamTarget, targetPosition);
     node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCamera", resetCamNormal2);
-#endif
-
 void fldCamGetPhokanParam(void) {
     f32 angle;
 
