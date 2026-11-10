@@ -17,8 +17,6 @@
 #define D_ENABLER ((volatile u32 *)0x1000F520)
 #define D_ENABLEW ((volatile u32 *)0x1000F590)
 
-
-
 /* The four byte fields select D_CTRL's channel numbers: STS (bits 4-5), STD
  * (bits 6-7), MFD (bits 2-3) and the release cycle (bit 1, bits 8-9). */
 typedef struct {
@@ -323,11 +321,11 @@ int sceDmaRestart(sceDmaChan *chan, u32 chcr)
     return (old >> 8) & 1;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaChanResetFlag);
+const int sceDmaChanResetFlag[10] = { 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 
-INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaStsBits);
+const u8 sceDmaStsBits[16] = { 0, 0, 0, 3, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0 };
 
-INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaStdBits);
+const u8 sceDmaStdBits[16] = { 0, 1, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-INCLUDE_RODATA(const s32, "sdk/libdma", sceDmaMfdBits);
+const u8 sceDmaMfdBits[16] = { 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
