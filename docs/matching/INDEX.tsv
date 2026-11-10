@@ -210,7 +210,7 @@ mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/Mod
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4	111 of 113 words match	docs/matching/kernel/dds3AdminiProcess.md	3
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8	120 of 122 words match	docs/matching/kernel/dds3AdminiProcess.md	39
-fcl_103420, fclEncycAllocEntry and fcl_103560	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/matching/kernel/dds3AdminiProcess.md	62
+fclEncycConfigureMode3, fclEncycAllocEntry and fclEncycConfigureMode2	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	32 of 43 words match	docs/matching/kernel/dds3AdminiProcess.md	62
 dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMain.md	3
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3

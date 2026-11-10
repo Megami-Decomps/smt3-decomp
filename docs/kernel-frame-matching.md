@@ -1,10 +1,11 @@
 # Kernel frame draw process
 
 `dds3DrawProcess` at `0x00102448` is exact ordinary C (872 bytes). The source
-adapts Megami-Decomps/dds-decomp's `kwlnRenderFrame` in
+adapts Megami-Decomps/dds-decomp's `dds3DrawProcess` in
 `src/dds1/game/code_00101B08.c` and the two-corner payload from
-`include/kwln_sprite.h`, at commit
-`f79f86dc00f7fbd266fd5144e71faa86bef12aa4`. The donor worktree differs in this
+`include/dds3_effect_sprite.h` (named `kwlnRenderFrame` and `kwln_sprite.h`
+at commit
+`f79f86dc00f7fbd266fd5144e71faa86bef12aa4`). The donor worktree differs in this
 unit only by a trailing blank line; its function and payload header are the
 committed donor, not a new SMT3 contribution.
 

@@ -201,3 +201,8 @@
 0x0031DDB8	effPCPFlashPolySphereDataList	inferred	effPartPCPDataTable[14], param list for kateg 14 (effPCPFlashPolySphere); former name D_0031DDB8
 0x0031DDC0	effPCPMultiFilterExpDataList	inferred	effPartPCPDataTable[26], param list for kateg 26 (effPCPMultiFilterExp); former name D_0031DDC0
 0x0031DDC8	effPCPBlinkMultiBlurDataList	inferred	effPartPCPDataTable[27], param list for kateg 27 (effPCPBlinkMultiBlur); former name D_0031DDC8
+0x00103420	fclEncycConfigureMode3	inferred	DDS1/2 kwlnConfigureNamedSlotMode3 twin (0x00103400), same body; sibling fclEncycAllocEntry; former name fcl_103420
+0x00103560	fclEncycConfigureMode2	inferred	DDS1/2 kwlnConfigureNamedSlotMode2 twin (0x00103540), same body; sibling fclEncycAllocEntry; former name fcl_103560
+0x00104170	dds3PadVibrationReset	inferred	DDS1/2 kwlnPadResetMotorLevelsAndOutput twin (0x00104130), same body; former name dds3_104170
+0x002F56C0	dds3PadButtonHoldCounters	inferred	per-key hold counters dds3PadManager counts; DDS1 0x003243C0; former name D_002F56C0
+0x002F57C0	dds3PadStickHoldCounters	inferred	per-stick hold counters dds3PadManager counts; DDS1 0x003244C0; former name D_002F57C0

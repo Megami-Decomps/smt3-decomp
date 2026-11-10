@@ -84,7 +84,7 @@ to precede `control->modelHandle = obj;`.
   order decides which address-base temp gcc creates first, and that decides
   which register holds `%lo(symbol)` against the scaled index, which rotates
   every later temp and therefore most of the function. **Ascending field
-  offset is the order to try first**: `fcl_103420` in
+  offset is the order to try first**: `fclEncycConfigureMode3` in
   `kernel/dds3AdminiProcess` writes one argument and zeroes six fields, and
   went from 23 of 37 differing words written in the obvious order (`kind`
   then the argument store) to 7 on ascending offset; its two siblings went
