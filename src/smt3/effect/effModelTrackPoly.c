@@ -87,7 +87,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern sdfGrOt_t sdfGrOtTable[];
-SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x5A0);
+SYMBOL_AT(sdfGrOt_t, effPolyOt, sdfGrOtTable, 0x5A0);
 extern u32 dds3GetFrameID(void);
 extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
@@ -713,7 +713,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         packet[4] = 6;
         packet[5] = 0x42;
         sdfDrawTagLink(list2, EE_ADDR(packet));
-        D_002F64B8.regFunc(&D_002F64B8, list2);
+        effPolyOt.regFunc(&effPolyOt, list2);
         packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -722,7 +722,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(list, EE_ADDR(packet));
-        D_002F64B8.regFunc(&D_002F64B8, list);
+        effPolyOt.regFunc(&effPolyOt, list);
     }
 }
 

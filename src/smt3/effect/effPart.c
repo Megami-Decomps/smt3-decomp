@@ -53,7 +53,7 @@ void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern dds3EffectFunc_t dds3EffectFuncTable[7];
 
-extern void *D_002F69B8[4];
+extern void *sdfModelOtTable[4];
 
 extern s32 effPartModelSerial;
 
@@ -105,7 +105,7 @@ extern s8 effBTLFieldColorOn;
 
 extern s8 D_0054F0F1;
 
-extern const char *D_0054F0F4;
+extern const char *effBTLJyocyuEffFilePath;
 
 extern u8 effBTLDebugCameraAllEdit;
 
@@ -263,7 +263,7 @@ mdlObj_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
 
 void dds3EffectPartModelDraw(mdlObj_t *hData)
 {
-    mdlLink(hData, D_002F69B8);
+    mdlLink(hData, sdfModelOtTable);
 }
 
 void dds3EffectPartModelDelete(mdlObj_t *hData)
@@ -440,14 +440,14 @@ effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 
 }
 
 
-extern void *D_0031DD20[];
-extern void *D_0031DD48[];
-extern void *D_0031DDA0[];
-extern void *D_0031DDA8[];
-extern void *D_0031DDB0[];
-extern void *D_0031DDB8[];
-extern void *D_0031DDC0[];
-extern void *D_0031DDC8[];
+extern void *effPCPThunderSpherePolyDataList[];
+extern void *effPCPThunderPolyDataList[];
+extern void *effPCPThunderRadiatePolyDataList[];
+extern void *effPCPMultiBlurExpDataList[];
+extern void *effPCPSparkleSphereDataList[];
+extern void *effPCPFlashPolySphereDataList[];
+extern void *effPCPMultiFilterExpDataList[];
+extern void *effPCPBlinkMultiBlurDataList[];
 
 void *dds3EffectLoad(void *);
 void dds3EffectDraw(void *);
@@ -1074,13 +1074,13 @@ void effPCP_HBED2_SetRotateMatrix(void *, void *);
 void effPCP_HBED2_SetColor(void *, u32);
 
 void **effPartPCPDataTable[28] = {
-    (void **)&D_0031DD20, (void **)&D_0031DD48, (void **)&D_0031DDA0, NULL,
+    (void **)&effPCPThunderSpherePolyDataList, (void **)&effPCPThunderPolyDataList, (void **)&effPCPThunderRadiatePolyDataList, NULL,
     NULL, NULL, NULL, NULL,
-    NULL, NULL, (void **)&D_0031DDA8, NULL,
-    NULL, (void **)&D_0031DDB0, (void **)&D_0031DDB8, NULL,
+    NULL, NULL, (void **)&effPCPMultiBlurExpDataList, NULL,
+    NULL, (void **)&effPCPSparkleSphereDataList, (void **)&effPCPFlashPolySphereDataList, NULL,
     NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL,
-    NULL, NULL, (void **)&D_0031DDC0, (void **)&D_0031DDC8,
+    NULL, NULL, (void **)&effPCPMultiFilterExpDataList, (void **)&effPCPBlinkMultiBlurDataList,
 };
 dds3EffectFunc_t dds3EffectFuncTable[7] = {
     { dds3EffectLoad, dds3EffectDraw, dds3EffectDelete, dds3EffectCopy, dds3EffectSetPosition, dds3EffectSetScale, dds3EffectSetRotateMatrix, dds3EffectSetRGBA, NULL, NULL },

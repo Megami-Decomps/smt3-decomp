@@ -422,7 +422,7 @@ struct sdfGrOt_t {
     u32 pad;
 };
 
-extern struct sdfGrOt_t *D_002F69B8[4];
+extern struct sdfGrOt_t *sdfModelOtTable[4];
 
 extern u8 effPCPZiodin01Vec[];
 
@@ -2709,12 +2709,12 @@ void effPCPHama01Draw(effPCPHama01_tag *hData) {
         dds3EffectPartSetScale(hData->pair[slotIndex][0], hData->scale * 1.5f);
         dds3EffectPartSetScale(hData->pair[slotIndex][1], 1.75f);
         mdlSetColor(obj[1], hData->abgr);
-        mdlLink(obj[0], D_002F69B8);
+        mdlLink(obj[0], sdfModelOtTable);
         sdfModelGetMarkPos(obj[0]->modelRoot, 1);
         posp = &pos;
         SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
-        mdlLink(obj[1], D_002F69B8);
+        mdlLink(obj[1], sdfModelOtTable);
         if (hData->frame > SDF_FRAMES(0x18)) {
             dds3EffectPartSetPosition(hData->shared[slotIndex], posp);
             dds3EffectPartDraw(hData->shared[slotIndex]);
@@ -2823,10 +2823,10 @@ void effPCPHama02Draw(effPCPHama02_tag *hData) {
             dds3EffectPartSetScale(hData->handle[i * 2], hData->scale * 1.5f);
             dds3EffectPartSetScale(hData->handle[i * 2 + 1], 1.5f);
             mdlSetColor(obj[1], hData->color);
-            mdlLink(obj[0], D_002F69B8);
+            mdlLink(obj[0], sdfModelOtTable);
             sdfModelGetMarkPos(obj[0]->modelRoot, 1);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], D_002F69B8);
+            mdlLink(obj[1], sdfModelOtTable);
         }
     }
 }
@@ -2936,7 +2936,7 @@ void effPCPHamaonDraw(effPCPHamaon_tag *hData) {
     SDF_VU0_LOADVECTOR(hData);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(hData->base, hData->scale);
-    mdlLink(anchor, D_002F69B8);
+    mdlLink(anchor, sdfModelOtTable);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (hData->remainingDelay[i][j] != 0) {
@@ -2947,7 +2947,7 @@ void effPCPHamaonDraw(effPCPHamaon_tag *hData) {
             mdlSetColor(obj, hData->color);
             sdfModelGetMarkPos(anchor->modelRoot, i * 4 + j + 1);
             mdlSetPosition(obj);
-            mdlLink(obj, D_002F69B8);
+            mdlLink(obj, sdfModelOtTable);
         }
     }
 }
@@ -3042,11 +3042,11 @@ void effPCPMHanma01Draw(effPCPMHanma01_tag *hData) {
             SDF_VU0_LOADVECTOR(hData);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], hData->abgr);
-            mdlLink(obj[0], D_002F69B8);
+            mdlLink(obj[0], sdfModelOtTable);
             sdfModelGetMarkPos(obj[0]->modelRoot, 1);
             SDF_VU0_STOREVECTOR_NOMEM(&vec);
             mdlSetPosition(obj[1]);
-            mdlLink(obj[1], D_002F69B8);
+            mdlLink(obj[1], sdfModelOtTable);
         }
     }
 }
@@ -3129,7 +3129,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
     scale = hData->scale * 1.5f;
     dds3EffectPartSetScale(hData->secondaryHandle, scale);
     dds3EffectPartSetPosition(hData->secondaryHandle, hData->vectorWords);
-    mdlLink(model, D_002F69B8);
+    mdlLink(model, sdfModelOtTable);
     captureRow = hData->historyCount;
     if (captureRow < 25 && SDF_FRAME_DUE(hData->updateCount - 1)) {
         for (point = 0; point < 7; point++) {
@@ -3224,7 +3224,7 @@ void effPCPHwave01Draw(effPCPHwave01_tag *hData) {
     SDF_VU0_LOADVECTOR(hData->pos);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(hData->hD3P, hData->abgr);
-    mdlLink(obj, D_002F69B8);
+    mdlLink(obj, sdfModelOtTable);
     sdfModelGetMarkPos(obj->modelRoot, 1);
     SDF_VU0_STOREVECTOR_MEMOPS(vec);
     dds3EffectPartSetPosition(hData->hD3P, &vec);
@@ -5277,7 +5277,7 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
     }
     dds3EffectPartSetRotateMatrix(work->headHandle, matrix);
     dds3EffectPartSetColor(work->headHandle, color);
-    mdlLink(model, D_002F69B8);
+    mdlLink(model, sdfModelOtTable);
     /* pos and pos_old hold the last two retail ticks' marks, so the trail segment spans one tick. */
     SDF_FRAME_WHEN(work->frame, SDF_VU0_COPYVECTOR(work->pos_old, work->pos));
     SDF_FRAME_WHEN(work->frame, sdfModelGetMarkPos(model->modelRoot, 1));
@@ -6964,7 +6964,7 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
                 SDF_VU0_LOADVECTOR_MEMOPS(scaleVec.x);
                 effPCPMakkaUpdateNode(node);
                 sdfModelEvalTm(inner);
-                sdfModelLinkOt(D_002F69B8, inner);
+                sdfModelLinkOt(sdfModelOtTable, inner);
             }
         }
     }
@@ -7771,7 +7771,7 @@ void effPCPHelperBEDDraw(effPCPHelperBED_tag *hData) {
         mdlSetPosition(model);
         SDF_VU0_LOADVECTOR(scale);
         mdlSetScale(model);
-        mdlLink(model, D_002F69B8);
+        mdlLink(model, sdfModelOtTable);
         count = hData->count;
         fadeIn = SDF_FRAMES(hData->param.fade_in);
         fadeOut = SDF_FRAMES(hData->param.fade_out);

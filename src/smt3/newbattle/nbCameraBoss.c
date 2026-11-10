@@ -59,7 +59,7 @@ extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
 extern void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
-extern f32 D_0054F3A0[];
+extern f32 nbCameraBossVecTable[];
 
 /* The per-shot parameters the nbCameraShot_*_Set2 family reads; 0x30 on the
  * stack at every call site. */
@@ -94,7 +94,7 @@ extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
 extern void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
-extern f32 D_0054F3A0[];
+extern f32 nbCameraBossVecTable[];
 
 extern void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 
@@ -1195,7 +1195,7 @@ s32 nbCameraBoss_Sukady_DAIJIS_Set(nbCamera_t *pNbCamera)
     type = dds3GetRandIntA(0, 3);
     switch (type) {
     case 0:
-        pNbCamera->direction.x = D_0054F3A0[0];
+        pNbCamera->direction.x = nbCameraBossVecTable[0];
         pNbCamera->direction.y = 0.29f;
         pNbCamera->direction.z = 0.96f;
         pNbCamera->target.x = 11.27f;
@@ -2890,7 +2890,7 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     nbCameraBoss_BSBERU_E915_Frame++;
 }
 
-extern const f32 D_0054F3C8[];
+extern const f32 nbCameraBoss_Beru_HAENO1_DirY[];
 
 extern void effBTLModelLoadRotate(nbFormation_t *form);
 
@@ -2943,7 +2943,7 @@ s32 nbCameraBoss_Beru_HAENO1_Set(nbCamera_t *pNbCamera)
             effBTLModelAllHide();
             effBTLModelInvokeShow();
             pNbCamera->direction.x = -0.3f;
-            pNbCamera->direction.y = D_0054F3C8[0];
+            pNbCamera->direction.y = nbCameraBoss_Beru_HAENO1_DirY[0];
             pNbCamera->direction.z = 0.96f;
             pNbCamera->target.x = 319.26996f;
             pNbCamera->target.y = -169.19f;
@@ -3053,7 +3053,7 @@ s32 nbCameraBoss_BSLUSI_Command_Calc(nbCamera_t *pNbCamera, nbFormation_t *pCmdF
     target.y = center.y + dir.y * 550.0f;
     target.z = center.z + dir.z * 550.0f;
     if (target.y > 0.0f) {
-        target.y = D_0054F3A0[12];
+        target.y = nbCameraBossVecTable[12];
     }
     SDF_VU0_LOADVECTOR(pNbCamera);
     SDF_VU0_LOADVECTOR_B(&target);
@@ -3317,7 +3317,7 @@ s32 nbCameraBoss_Lusi_ASIKIK_Set(nbCamera_t *pNbCamera)
     from.x = 0.0f;
     from.y = 0.25f;
     from.z = 0.97f;
-    to.x = D_0054F3A0[13];
+    to.x = nbCameraBossVecTable[13];
     to.y = -0.43f;
     to.z = 0.9f;
     SDF_VU0_LOADVECTOR(&from);

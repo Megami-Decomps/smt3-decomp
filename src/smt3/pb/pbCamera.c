@@ -144,7 +144,7 @@ extern void pbSetModelPos(mdlObj_t *model, const f32 *pos);
 extern void mdlLink(mdlObj_t *model, void *ot);
 extern void mdlGetPosition(mdlObj_t *model);
 extern void fldDrawMaruKage(u32 fade, f32 x, f32 y, f32 z, f32 radius);
-extern u8 D_002F69B8[];
+extern u8 sdfModelOtTable[];
 
 s32 pb_draw_mycharacter_Process(dds3ProcessID_t *id)
 {
@@ -165,7 +165,7 @@ s32 pb_draw_mycharacter_Process(dds3ProcessID_t *id)
     }
     if (chara->flg != 0) {
         pbSetModelPos(chara->model, &chara->pos.x);
-        mdlLink(chara->model, D_002F69B8);
+        mdlLink(chara->model, sdfModelOtTable);
         mdlGetPosition(chara->model);
         SDF_VU0_STOREVECTOR(&pos);
         fldDrawMaruKage(0x80, pos.x, pos.y - 1.0f, pos.z, 20.0f);

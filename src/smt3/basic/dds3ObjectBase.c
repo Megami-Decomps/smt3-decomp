@@ -32,7 +32,7 @@ extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm,
 extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 z, u32 r, u32 g,
                        u32 b, u32 a);
 extern void mdlLink(void *aHandle, sdfModelOt_t *aModelOt);
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern s32 fldGetAnimeFlag(s32 area, s32 floor, s32 bit);
 extern void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame);
 extern void sdfMotionNext(sdfMotionCtrlr_t *aCtrlr);
@@ -663,7 +663,7 @@ void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBa
     rsetOtOfs(0x41);
     rsetTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     rsetFrameMaskRgbOn();
-    mdlLink(control->pModel, &D_002F69B8[8]);
+    mdlLink(control->pModel, &sdfModelOtTable[8]);
     rsetOtOfs(0x43);
     rsetFrameMaskRgbOff();
     rsetAlpha(0);

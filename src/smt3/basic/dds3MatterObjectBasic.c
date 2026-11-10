@@ -246,7 +246,7 @@ s32 dds3MatterObjectBasicMainProcedure(dds3Basic_t *basic) {
     return 1;
 }
 
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern dds3Basic_t *fldUnitControlHandle;
 extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
@@ -260,7 +260,7 @@ s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
     if (work->OtLinkIdx == -1) {
         rsetOtOfs(0x27);
         rsetTest(1, 5, 0x60, 1, 0, 0, 1, 2);
-        dds3ObjectBaseModelLinkOt(&D_002F69B8[0], basic);
+        dds3ObjectBaseModelLinkOt(&sdfModelOtTable[0], basic);
         rsetOtOfs(0x27);
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     } else {
@@ -273,17 +273,17 @@ s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
                 if (dds3ObjectBaseCheckFlag(fldUnitControlHandle, 1)) {
                     u32 color = basic->color;
                     basic->color = 0x80808080;
-                    dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+                    dds3ObjectBaseModelLinkOt(&sdfModelOtTable[work->OtLinkIdx], basic);
                     basic->color = color;
                 } else {
-                    dds3ObjectBaseModelLinkOt(&D_002F69B8[7], basic);
+                    dds3ObjectBaseModelLinkOt(&sdfModelOtTable[7], basic);
                 }
             } else {
-                dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+                dds3ObjectBaseModelLinkOt(&sdfModelOtTable[work->OtLinkIdx], basic);
             }
             break;
         }
-        dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+        dds3ObjectBaseModelLinkOt(&sdfModelOtTable[work->OtLinkIdx], basic);
         rsetOtOfs(0x22);
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     }

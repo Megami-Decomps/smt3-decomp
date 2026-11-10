@@ -247,7 +247,7 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *basic) {
     return 1;
 }
 
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
 extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
 extern void fldSdwDraw(dds3Basic_t *basic);
@@ -277,9 +277,9 @@ s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *basic) {
 
     work = basic->workdata;
     if (work->ot == -1) {
-        dds3ObjectBaseModelLinkOt(&D_002F69B8[0], basic);
+        dds3ObjectBaseModelLinkOt(&sdfModelOtTable[0], basic);
     } else {
-        dds3ObjectBaseModelLinkOt(&D_002F69B8[work->ot], basic);
+        dds3ObjectBaseModelLinkOt(&sdfModelOtTable[work->ot], basic);
     }
 
     if (!dds3ObjectBaseCheckFlag(basic, 0x400) ||

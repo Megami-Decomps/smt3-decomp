@@ -52,8 +52,8 @@ extern f32 sdfAtan(f32 aX);
 extern u32 effBTLModelGetInvokeGroupNumber(void);
 extern f32 nbCameraGetSummonNear(void);
 extern f32 nbCameraGetSummonFar(void);
-extern f32 D_0054F384;
-extern f32 D_0054F388;
+extern f32 nbCameraEditDist;
+extern f32 nbCameraEditUp;
 extern s8 dds3PadBitTable[];
 extern u32 effBTLDebug_CameraAllEditCheck(void);
 extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
@@ -398,24 +398,24 @@ void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
     bodyRadius = target->r * target->scl;
     if (effBTLDebug_CameraAllEditCheck() != 0) {
         if ((dds3PadBitTable[4] & 2) != 0) {
-            D_0054F384 -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+            nbCameraEditDist -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
         } else if ((dds3PadBitTable[5] & 2) != 0) {
-            D_0054F384 += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+            nbCameraEditDist += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
         }
         if ((dds3PadBitTable[6] & 2) != 0) {
-            D_0054F388 -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+            nbCameraEditUp -= dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
         } else if ((dds3PadBitTable[7] & 2) != 0) {
-            D_0054F388 += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
+            nbCameraEditUp += dds3PadBitTable[3] != 0 ? 10.0f : 1.0f;
         }
         effDebugPointDraw2(&targetCenter, 0x80008080);
-        bodyRadius = D_0054F384 * target->scl;
-        targetCenter.y += (D_0054F388 - table->up) * target->scl;
+        bodyRadius = nbCameraEditDist * target->scl;
+        targetCenter.y += (nbCameraEditUp - table->up) * target->scl;
         unitWork = nbGetUnitWorkFromFormindex(target->formindex);
         sprintf(debugText, "CAMERA EDIT:\n");
         effDebugStringDraw(0x18, 0xC8, 0, debugText);
-        sprintf(debugText, " DIST:[%-3.3f]\n", D_0054F384);
+        sprintf(debugText, " DIST:[%-3.3f]\n", nbCameraEditDist);
         effDebugStringDraw(0x18, 0xD4, 0, debugText);
-        sprintf(debugText, " UP  :[%-3.3f]\n", D_0054F388);
+        sprintf(debugText, " UP  :[%-3.3f]\n", nbCameraEditUp);
         effDebugStringDraw(0x18, 0xE0, 0, debugText);
         sprintf(debugText, " ID  ;[%Xd]\n", unitWork->id);
         effDebugStringDraw(0x18, 0xEC, 0, debugText);

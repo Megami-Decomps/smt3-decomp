@@ -177,3 +177,27 @@
 0x00551700	dds3ConfigProcName	inferred	"config": process name dds3ConfigMain starts and kills; former name D_00551700
 0x00551808	pipeMessNumFmt	inferred	"%d" pipeResult formats message numbers with; former name D_00551808
 0x002BFC58	sdfZeroMem	inferred	zeroes size bytes at dst with quad stores when both are 16-aligned, else memset; sibling of sdfZeroMemQuad; DDS1 func_002E73F0, DDS2 func_00340298; former name sdf_2BFC58
+0x0054F370	nbCameraStartReadWaitActive	inferred	set on state 1 to 2 handoff, gates D_0054F374 counter; former name D_0054F370
+0x0054F374	nbCameraStartReadWaitFrames	inferred	printed as Read Wait; former name D_0054F374
+0x0054F378	nbCameraStartAnimWaitActive	inferred	gates D_0054F37C counter; former name D_0054F378
+0x0054F37C	nbCameraStartAnimWaitFrames	inferred	counter passed to nbCameraStartAnimWaitFormat; former name D_0054F37C
+0x0054F380	nbCameraStartBAFrame	inferred	reset in Start_BA_Set, ++ in Start_BA_Animation; former name D_0054F380
+0x0054F384	nbCameraEditDist	inferred	nbCameraCommand.c CAMERA EDIT DIST; former name D_0054F384
+0x0054F388	nbCameraEditUp	inferred	nbCameraCommand.c CAMERA EDIT UP; former name D_0054F388
+0x0054F3A0	nbCameraBossVecTable	inferred	f32 table read at [0],[12],[13] in nbCameraBoss.c; weak name; former name D_0054F3A0
+0x0054F3C8	nbCameraBoss_Beru_HAENO1_DirY	inferred	element 0 into direction.y in nbCameraBoss.c; confirm unit is Beru HAENO1; former name D_0054F3C8
+0x0054F3DC	nbCameraHelperViewerCurrent	inferred	helper created from nbCameraHelperViewerMode; former name D_0054F3DC
+0x0054F3E0	nbCameraHelperViewerStateHandle	inferred	handle locked into nbCameraHelperViewerState; former name D_0054F3E0
+0x0054F3E4	nbCameraHelperViewerTargetHandle	inferred	handle locked into nbCameraHelperViewerHandle; former name D_0054F3E4
+0x0054F3E8	nbCameraHelperViewerShowFrame	inferred	gates frame count text; former name D_0054F3E8
+0x0054F3E9	nbCameraHelperViewerShowLines	inferred	gates eye/target path lines; former name D_0054F3E9
+0x002F69B8	sdfModelOtTable	inferred	sdfModelOt_t[11]; DDS kwlnSceneSurfaceSets[10] is a different layout, not reused; DDS macro D_002F69B8 stays; former name D_002F69B8
+0x0054F0F4	effBTLJyocyuEffFilePath	inferred	const char* passed to sdfDevLoadFileEx in SetJyocyuData, result to effBTLCreate; former name D_0054F0F4
+0x0031DD20	effPCPThunderSpherePolyDataList	inferred	effPartPCPDataTable[0], NULL-terminated param list for kateg 0 (EffectPCPFuncTable[0] = effPCPThunderSpherePoly); former name D_0031DD20
+0x0031DD48	effPCPThunderPolyDataList	inferred	effPartPCPDataTable[1], param list for kateg 1 (effPCP_ThunderPoly); former name D_0031DD48
+0x0031DDA0	effPCPThunderRadiatePolyDataList	inferred	effPartPCPDataTable[2], param list for kateg 2 (effPCP_ThunderRadiatePoly); former name D_0031DDA0
+0x0031DDA8	effPCPMultiBlurExpDataList	inferred	effPartPCPDataTable[10], param list for kateg 10 (effPCPMultiBlurExp); former name D_0031DDA8
+0x0031DDB0	effPCPSparkleSphereDataList	inferred	effPartPCPDataTable[13], param list for kateg 13 (effPCPSparkleSphere); former name D_0031DDB0
+0x0031DDB8	effPCPFlashPolySphereDataList	inferred	effPartPCPDataTable[14], param list for kateg 14 (effPCPFlashPolySphere); former name D_0031DDB8
+0x0031DDC0	effPCPMultiFilterExpDataList	inferred	effPartPCPDataTable[26], param list for kateg 26 (effPCPMultiFilterExp); former name D_0031DDC0
+0x0031DDC8	effPCPBlinkMultiBlurDataList	inferred	effPartPCPDataTable[27], param list for kateg 27 (effPCPBlinkMultiBlur); former name D_0031DDC8

@@ -913,7 +913,7 @@ typedef struct fclEncycModelLink_t {
     sdfGrOt_t *tables[4];
 } fclEncycModelLink_t;
 
-extern fclEncycModelLink_t D_002F69B8[];
+extern fclEncycModelLink_t sdfModelOtTable[];
 extern s32 cmpDrawStatusModel(void *links);
 extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
     s32 alpha, s32 mode, s32 width, s32 ot);
@@ -932,7 +932,7 @@ void DrawPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
         cmpDrawStatusComEx2(&work->units[1], FCL_ENCYC_DRAWN(work->phase.xNow), 0,
             (u8)(alpha - 0x20), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
     }
-    cmpDrawStatusModel(D_002F69B8);
+    cmpDrawStatusModel(sdfModelOtTable);
     fclRbnDraw(work->ribbon, 0, 0x58, 0xFFFFF0, 0x80, 0, -0x80, 0x47);
     DrawRegistKeyHelp(pinst);
 }
@@ -1682,7 +1682,7 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
                 InitModelPosRot(model, modelId);
                 pinst->stat |= 0x400;
             }
-            mdlLink(model, D_002F69B8);
+            mdlLink(model, sdfModelOtTable);
         }
     } else {
         if (cmpGetEncycWork() != 0) {

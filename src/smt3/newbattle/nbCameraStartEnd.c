@@ -38,20 +38,20 @@ extern void nbCameraState_Start_BA_Set(nbCamera_t *pNbCamera);
 
 extern s32 nbCameraStartState;
 
-extern u32 D_0054F37C;
+extern u32 nbCameraStartAnimWaitFrames;
 
 
 extern char nbCameraStartAnimWaitFormat[];
 
 #include "sdk_libc.h"
 
-extern u8 D_0054F370;
+extern u8 nbCameraStartReadWaitActive;
 
-extern u32 D_0054F374;
+extern u32 nbCameraStartReadWaitFrames;
 
-extern u8 D_0054F378;
+extern u8 nbCameraStartAnimWaitActive;
 
-extern u32 D_0054F37C;
+extern u32 nbCameraStartAnimWaitFrames;
 
 extern nbCamera_t pNbCamera;
 
@@ -73,7 +73,7 @@ extern dds3Bezier4PPart_t nbCameraStartBAState;
 extern s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out);
 extern f32 nbCameraStepIncrement;
 extern f32 nbCameraStepLimit;
-extern s32 D_0054F380;
+extern s32 nbCameraStartBAFrame;
 extern sdfVector4_t nbCameraAxisX;
 extern f32 sdfAtan(f32 aX);
 extern f32 nbCameraGetBossDistance(void);
@@ -253,8 +253,8 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
         }
         if (pending == 0) {
             nbCameraStartState = 2;
-            D_0054F370 = 1;
-            D_0054F378 = 1;
+            nbCameraStartReadWaitActive = 1;
+            nbCameraStartAnimWaitActive = 1;
         }
         break;
     case 2:
@@ -296,11 +296,11 @@ void nbCameraState_Start_Animation(nbCamera_t *pNbCamera)
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 
     nbCameraStartFrame++;
-    if (D_0054F370 != 0) {
-        D_0054F374++;
+    if (nbCameraStartReadWaitActive != 0) {
+        nbCameraStartReadWaitFrames++;
     }
-    if (D_0054F378 != 0) {
-        D_0054F37C++;
+    if (nbCameraStartAnimWaitActive != 0) {
+        nbCameraStartAnimWaitFrames++;
     }
 }
 
@@ -563,7 +563,7 @@ void nbCameraState_Start_BA_Set(nbCamera_t *pNbCamera)
     nbCameraStepLimit = 0.03333333135f;
     nbCameraStepIncrement = 0.0030555553f;
     nbCameraStartState = 0;
-    D_0054F380 = 0;
+    nbCameraStartBAFrame = 0;
     nbCameraState_Start_BA_Animation(pNbCamera);
 }
 
@@ -625,7 +625,7 @@ void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera)
         data->stat |= 0x2000;
     }
     effBTLModelAllShow();
-    D_0054F380++;
+    nbCameraStartBAFrame++;
 }
 
 void nbCameraState_Start_Init(void)
@@ -635,10 +635,10 @@ void nbCameraState_Start_Init(void)
     } else {
         nbCameraState_Start_Set(&pNbCamera);
     }
-    D_0054F370 = 0;
-    D_0054F374 = 0;
-    D_0054F378 = 0;
-    D_0054F37C = 0;
+    nbCameraStartReadWaitActive = 0;
+    nbCameraStartReadWaitFrames = 0;
+    nbCameraStartAnimWaitActive = 0;
+    nbCameraStartAnimWaitFrames = 0;
 }
 
 void nbCameraState_Start_Calc(void)
@@ -657,14 +657,14 @@ s32 nb_1B33F0(void)
 
 s32 nbCameraStart(void)
 {
-    if (D_0054F370 != 0) {
-        D_0054F370 = 0;
-        printf("nbCameraStart:Read Wait = %d ****\n", D_0054F374);
+    if (nbCameraStartReadWaitActive != 0) {
+        nbCameraStartReadWaitActive = 0;
+        printf("nbCameraStart:Read Wait = %d ****\n", nbCameraStartReadWaitFrames);
     }
-    if (D_0054F378 != 0) {
+    if (nbCameraStartAnimWaitActive != 0) {
         if (nbCameraStartState == 5) {
-            D_0054F378 = 0;
-            printf(nbCameraStartAnimWaitFormat, D_0054F37C);
+            nbCameraStartAnimWaitActive = 0;
+            printf(nbCameraStartAnimWaitFormat, nbCameraStartAnimWaitFrames);
         }
     }
     return nbCameraStartState == 5;

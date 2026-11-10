@@ -203,8 +203,8 @@ extern void fldEncountSetFlag(u32 flag);
 
 extern void fldReleaseUnitPad(void);
 
-extern u8 D_002F69B8[];
-#define D_002F6A18 ((sdfGrOt_t **)(D_002F69B8 + 0x60))
+extern u8 sdfModelOtTable[];
+#define D_002F6A18 ((sdfGrOt_t **)(sdfModelOtTable + 0x60))
 
 extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1,
                            sdfGrOt_t *aOt2, sdfGrOt_t *aOt3);

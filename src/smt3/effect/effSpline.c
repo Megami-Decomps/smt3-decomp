@@ -381,21 +381,21 @@ void effSetChanStep(dds3SplineWalk_t *pWalk, f32 step)
 {
     pWalk->step = step;
 }
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F370);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitActive);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F371);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F374);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitFrames);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F378);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartAnimWaitActive);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F37C);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartAnimWaitFrames);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F380);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartBAFrame);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F384);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraEditDist);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F388);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraEditUp);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraCRSetPlayerFormRequestFlag);
 
@@ -411,7 +411,7 @@ INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraPressThrough);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBossCutFlag);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3A0);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBossVecTable);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSARI_MASEHA_Frame);
 
@@ -433,7 +433,7 @@ INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSBERU_E915_Frame);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSBERU_E915_Rate);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3C8);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Beru_HAENO1_DirY);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSLUSI_Type);
 
@@ -441,15 +441,15 @@ INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3D4);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerMode);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3DC);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerCurrent);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3E0);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerStateHandle);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3E4);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerTargetHandle);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3E8);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerShowFrame);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3E9);
+INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerShowLines);
 
 INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3F0);
 

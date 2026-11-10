@@ -5129,7 +5129,7 @@ s32 cmbFindUnitScene(mdlObj_t *work)
 }
 
 extern const char *cmbCameraPointNames[];
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 
 void cmbUpdateCameraPos(void)
 {
@@ -5157,7 +5157,7 @@ void cmbUpdateCameraPos(void)
     cmbFindUnitScene(CMB_GBWK->actionData[index].model);
     cmbDrawActionModel(CMB_GBWK->actionData[index].model,
                        (u16)CMB_GBWK->actionData[index].id,
-                       CMB_GBWK->cameraPosition, 0x80808080, D_002F69B8);
+                       CMB_GBWK->cameraPosition, 0x80808080, sdfModelOtTable);
 }
 
 extern s8 cmbActionStep;

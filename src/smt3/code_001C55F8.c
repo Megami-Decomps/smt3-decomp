@@ -49,7 +49,7 @@ extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *pFilename);
 /* 128-byte party records; this unit only reads the formation index. */
 
 
-extern f32 D_0054F3A0[];
+extern f32 nbCameraBossVecTable[];
 
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, u32 aId);
 
@@ -67,7 +67,7 @@ extern void dds3EffectFileListWindowSetWindowColor(void *hEffFLWin, u32 frame_c,
 
 extern const char nbCameraHelperViewerPBDir[];
 
-extern u32 D_0054F37C;
+extern u32 nbCameraStartAnimWaitFrames;
 
 extern char nbCameraHelperMsgNotTarget[];
 
@@ -77,27 +77,27 @@ extern char nbCameraHelperMsgNotEye[];
 
 extern s32 nbCameraBossCutFlag;
 
-extern f32 D_0054F3A0[];
+extern f32 nbCameraBossVecTable[];
 
 extern char *nbCameraHelperViewerMode;
 
-extern nbCameraHelper_tag *D_0054F3DC;
+extern nbCameraHelper_tag *nbCameraHelperViewerCurrent;
 
-extern sdfMemHandle_t *D_0054F3E0;
+extern sdfMemHandle_t *nbCameraHelperViewerStateHandle;
 
-extern sdfMemHandle_t *D_0054F3E4;
+extern sdfMemHandle_t *nbCameraHelperViewerTargetHandle;
 
 extern sdfVector4_t *nbCameraHelperViewerState;
 
 extern sdfVector4_t *nbCameraHelperViewerHandle;
 
-extern u8 D_0054F370;
+extern u8 nbCameraStartReadWaitActive;
 
-extern u32 D_0054F374;
+extern u32 nbCameraStartReadWaitFrames;
 
-extern u8 D_0054F378;
+extern u8 nbCameraStartAnimWaitActive;
 
-extern u32 D_0054F37C;
+extern u32 nbCameraStartAnimWaitFrames;
 
 extern nbCamera_t pNbCamera;
 
@@ -349,28 +349,28 @@ s32 nbCameraHelperViewer_Init(s32 pData)
     s32 size;
 
     if (nbCameraHelperViewerMode != NULL) {
-        if (D_0054F3DC != NULL) {
-            nbCameraHelperDelete(D_0054F3DC);
-            if (D_0054F3E0 != NULL) {
-                sdfMemFreeDirect(D_0054F3E0);
+        if (nbCameraHelperViewerCurrent != NULL) {
+            nbCameraHelperDelete(nbCameraHelperViewerCurrent);
+            if (nbCameraHelperViewerStateHandle != NULL) {
+                sdfMemFreeDirect(nbCameraHelperViewerStateHandle);
             }
-            if (D_0054F3E4 != NULL) {
-                sdfMemFreeDirect(D_0054F3E4);
+            if (nbCameraHelperViewerTargetHandle != NULL) {
+                sdfMemFreeDirect(nbCameraHelperViewerTargetHandle);
             }
         }
-        D_0054F3DC = nbCameraHelperCreate(nbCameraHelperViewerMode);
+        nbCameraHelperViewerCurrent = nbCameraHelperCreate(nbCameraHelperViewerMode);
         nbCameraHelperViewerMode = NULL;
-        size = nbCameraHelperLength(D_0054F3DC) * 16;
-        D_0054F3E0 = sdfMemAllocDirect(size);
-        nbCameraHelperViewerState = sdfMemLock(D_0054F3E0);
-        D_0054F3E4 = sdfMemAllocDirect(size);
-        nbCameraHelperViewerHandle = sdfMemLock(D_0054F3E4);
+        size = nbCameraHelperLength(nbCameraHelperViewerCurrent) * 16;
+        nbCameraHelperViewerStateHandle = sdfMemAllocDirect(size);
+        nbCameraHelperViewerState = sdfMemLock(nbCameraHelperViewerStateHandle);
+        nbCameraHelperViewerTargetHandle = sdfMemAllocDirect(size);
+        nbCameraHelperViewerHandle = sdfMemLock(nbCameraHelperViewerTargetHandle);
     }
     return pData;
 }
 
-extern u8 D_0054F3E8;
-extern u8 D_0054F3E9;
+extern u8 nbCameraHelperViewerShowFrame;
+extern u8 nbCameraHelperViewerShowLines;
 extern const char nbCameraHelperViewerFrameFormat[];
 
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
@@ -388,20 +388,20 @@ void nbCameraHelperViewer_Draw(void *pData)
     u16 i;
     sdfVector4_t *eye;
     sdfVector4_t *target;
-    if (D_0054F3DC == NULL) {
+    if (nbCameraHelperViewerCurrent == NULL) {
         return;
     }
-    if (D_0054F3E8 != 0) {
-        sprintf(buf, nbCameraHelperViewerFrameFormat, D_0054F3DC->frame,
-                nbCameraHelperLength(D_0054F3DC));
+    if (nbCameraHelperViewerShowFrame != 0) {
+        sprintf(buf, nbCameraHelperViewerFrameFormat, nbCameraHelperViewerCurrent->frame,
+                nbCameraHelperLength(nbCameraHelperViewerCurrent));
         effDebugStringDraw(0x12C, 0x3C, 0, buf);
     }
-    frame = D_0054F3DC->frame;
-    eye = &D_0054F3DC->eye;
-    target = &D_0054F3DC->target;
+    frame = nbCameraHelperViewerCurrent->frame;
+    eye = &nbCameraHelperViewerCurrent->eye;
+    target = &nbCameraHelperViewerCurrent->target;
     SDF_VU0_COPYVECTOR(&nbCameraHelperViewerState[frame - 1], eye);
     SDF_VU0_COPYVECTOR(&nbCameraHelperViewerHandle[frame - 1], target);
-    if (D_0054F3E9 != 0 && nbCameraCheckNiidaCamera() == 0) {
+    if (nbCameraHelperViewerShowLines != 0 && nbCameraCheckNiidaCamera() == 0) {
         last = frame - 1;
         for (i = 0; i < last; i++) {
             effDebugLineDraw2(&nbCameraHelperViewerState[i],
@@ -409,10 +409,10 @@ void nbCameraHelperViewer_Draw(void *pData)
             effDebugLineDraw2(&nbCameraHelperViewerHandle[i],
                               &nbCameraHelperViewerHandle[i + 1], 0x80004080);
         }
-        effDebugPointDraw2(&D_0054F3DC->eye, 0x80800000);
-        effDebugPointDraw2(&D_0054F3DC->target, 0x80000080);
+        effDebugPointDraw2(&nbCameraHelperViewerCurrent->eye, 0x80800000);
+        effDebugPointDraw2(&nbCameraHelperViewerCurrent->target, 0x80000080);
     }
-    nbCameraHelperRun(D_0054F3DC);
+    nbCameraHelperRun(nbCameraHelperViewerCurrent);
 }
 #else
 INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotTarget);

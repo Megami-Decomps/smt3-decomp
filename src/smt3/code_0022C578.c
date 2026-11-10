@@ -6683,7 +6683,7 @@ typedef struct
     /* 0x00 */ u8 unk_00[0x10];
 } cmpModelLink_t;
 
-extern cmpModelLink_t D_002F69B8[];
+extern cmpModelLink_t sdfModelOtTable[];
 
 extern void cmpDrawStatusRow(s32, s32, s32 *, s32, datUnitWork_t *);
 extern void cmpDrawParamPanel(s32, s32, s32 *, s8 *, datUnitWork_t *, s8, s8, s8);
@@ -6747,7 +6747,7 @@ void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
                          fclSpriteTable, 0x47);
     }
     if (full != 0) {
-        cmpDrawStatusModel(D_002F69B8);
+        cmpDrawStatusModel(sdfModelOtTable);
     }
     cmpAdvanceStatusAnim();
 }
@@ -7669,7 +7669,7 @@ void cmp_23AA28(f32 *a, f32 *rot, void *model, s32 index)
 {
     func_0023A9A8(a, model);
     func_0023A9F0(rot, model);
-    mdlLink(model, &D_002F69B8[index]);
+    mdlLink(model, &sdfModelOtTable[index]);
 }
 
 void func_0023AA88(s32 value)

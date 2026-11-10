@@ -356,7 +356,7 @@ INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLFieldColorOn);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F1);
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0F4);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLJyocyuEffFilePath);
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLSelectedName);
 

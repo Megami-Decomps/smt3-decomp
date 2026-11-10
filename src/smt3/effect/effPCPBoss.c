@@ -602,7 +602,7 @@ extern void mdlSetPosition(mdlObj_t *aHandle);
 extern void mdlLink(mdlObj_t *aHandle, void *aModelOt);
 extern void sdfDrawTagInit(sdfDrawTag_t *aTag);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern f32 aViewEye[4], aViewTarget[4];
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern void effPCP_BED_MatrixToQuaternion(f32 matrix[4][4]);
@@ -692,7 +692,7 @@ void effPCPBossONGYTexRenderEnd(void)
 #ifdef NON_MATCHING
 extern f32 effPCPBossONGYFovy;
 extern f32 aViewDown[4];
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern sdf3DLightParallelPacket_t effPCPBossTexLightPacket;
 extern f32 sdfAtan(f32 value);
 extern u32 mdlGetColor(mdlObj_t *model);
@@ -773,7 +773,7 @@ void effPCPBossONGYModelTexRender(const void *target, nbFormation_t *unused, f32
         model->inner->light = &effPCPBossTexLightPacket;
         mdlSetColor(model, 0x80808080);
     }
-    mdlLink(effPCPBossTexHandle, &D_002F69B8[10]);
+    mdlLink(effPCPBossTexHandle, &sdfModelOtTable[10]);
 }
 #else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYModelTexRender);
@@ -1837,7 +1837,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
     scaleVector.w = 0.0f;
     SDF_VU0_LOADVECTOR(&scaleVector);
     mdlSetScale(model);
-    mdlLink(model, D_002F69B8);
+    mdlLink(model, sdfModelOtTable);
     if (work->drawTrail) {
         colorStart = work->trailColorStartFrame;
         if (frame > colorStart) {
@@ -3777,9 +3777,9 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     packet[3] = 0xE;
     packet[5] = 0x47;
     sdfDrawTagLink(tag, EE_ADDR(packet));
-    ot = D_002F69B8[7].ot[1];
+    ot = sdfModelOtTable[7].ot[1];
     ot->regFunc(ot, tag);
-    mdlLink(model, &D_002F69B8[7]);
+    mdlLink(model, &sdfModelOtTable[7]);
 
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
@@ -3791,7 +3791,7 @@ void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
     packet[3] = 0xE;
     packet[5] = 0x47;
     sdfDrawTagLink(tag, EE_ADDR(packet));
-    ot = D_002F69B8[7].ot[1];
+    ot = sdfModelOtTable[7].ot[1];
     ot->regFunc(ot, tag);
     hData->frame++;
 }

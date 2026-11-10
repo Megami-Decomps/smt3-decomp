@@ -212,7 +212,7 @@ extern s8 effBTLFieldColorOn;
 
 extern s8 D_0054F0F1;
 
-extern const char *D_0054F0F4;
+extern const char *effBTLJyocyuEffFilePath;
 
 extern u8 effBTLDebugCameraAllEdit;
 
@@ -1585,7 +1585,7 @@ typedef struct {
 } effHansyaLights_t;
 
 extern f32 D_005334C0[];
-extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t sdfModelOtTable[];
 extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
 extern void nbMakeUnitDrawMatrix(nbFormation_t *formation);
 extern void mdlLink(mdlObj_t *model, void *ot);
@@ -1670,7 +1670,7 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
         sdf3DMakeLightParallelPacket(&work->lightPacket, (sdf3DLight_t **)lights.lights, &ambient);
         model = dds3EffectPartGetHandle(work->hPart);
         model->inner->light = &work->lightPacket;
-        mdlLink(model, D_002F69B8);
+        mdlLink(model, sdfModelOtTable);
         dds3EffectPartDraw(work->hPart2);
         frame = work->frame;
     }
@@ -3149,7 +3149,7 @@ s32 effBTLFieldColorIsOn(void)
 
 s32 eff_174898(void)
 {
-    return EE_ADDR_S(D_0054F0F4);
+    return EE_ADDR_S(effBTLJyocyuEffFilePath);
 }
 
 #ifdef NON_MATCHING
