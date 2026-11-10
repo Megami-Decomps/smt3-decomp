@@ -614,9 +614,9 @@ extern void effPCPHelperBEDSetColor(void *hData, u32 abgr);
 extern void effPCPHelperBEDSetScale(void *hData, f32 scale);
 extern effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *pParam);
 extern effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED);
-extern u8 D_00533E10[];
-extern u8 D_00533DD0[];
-extern u8 D_00533DE0[];
+extern const f32 D_00533E10[];
+extern const f32 D_00533DD0[];
+extern const f32 D_00533DE0[];
 extern void Mult(void);
 extern void ToMatrix(void);
 extern void MultMatrixNoArg(void);
@@ -5011,33 +5011,32 @@ void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurPrimTriStrip
 INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
 #endif
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DA0);
+const effPCPBossVector_t D_00533DA0 = { .f = { 0.0f, 1.0f, 0.0f, 0.0f } };
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DB0);
+const f32 D_00533DB0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DC0);
+const effPCPBossVector_t D_00533DC0 = { .f = { 0.0f, 1.0f, 0.0f, 0.0f } };
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DD0);
+const f32 D_00533DD0[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DE0);
+const f32 D_00533DE0[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", effPCPDANTE_ThunderProcessName);
+const char effPCPDANTE_ThunderProcessName[32] = "eff_DANTE_thunder";
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
+const f32 D_00533E10[8] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossTexHandle);
+void *effPCPBossTexHandle = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGYTexRefCount);
+s32 effPCPBossONGYTexRefCount = 0;
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGY_RFrame);
+s32 effPCPBossONGY_RFrame = 0;
 
-SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeFrames);
+s32 effPadVibeFrames[2] = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeRemain);
+s32 effPadVibeRemain[2] = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibePower);
+u8 effPadVibePower[2] = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPadVibeFadeIn);
+u8 effPadVibeFadeIn[2] = { 0, 0 };
 
