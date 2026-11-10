@@ -41,7 +41,7 @@ extern s32 nbCameraStartState;
 extern u32 nbCameraStartAnimWaitFrames;
 
 
-extern char nbCameraStartAnimWaitFormat[];
+extern const char nbCameraStartAnimWaitFormat[];
 
 #include "sdk_libc.h"
 
@@ -691,5 +691,5 @@ void func_001B34B0(const void *src)
     memcpy(D_0056B270, src, 0x58);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", nbCameraStartAnimWaitFormat);
+const char nbCameraStartAnimWaitFormat[48] = "nbCameraStart\241\247Anim Wait = %d ****\n";
 
