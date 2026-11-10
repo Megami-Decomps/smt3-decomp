@@ -13,8 +13,8 @@ extern u32 dds3GetKernelCount(void);
 
 extern void Mult(void);
 
-extern f32 nbRotOffset[];
-extern char nbModelLoadErrorText[];
+extern const sdfVector4_t nbRotOffset;
+extern const char nbModelLoadErrorText[];
 
 extern f32 nbPartyRotation[];
 
@@ -121,7 +121,7 @@ extern s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t 
 
 extern char nbUnitProcessName[];
 
-extern char nbUnitDrawProcessName[]; /* "nb_unitdraw" */
+extern const char nbUnitDrawProcessName[]; /* "nb_unitdraw" */
 
 void *nbUnitProcess2(dds3ProcessID_t *id);
 
@@ -1043,7 +1043,7 @@ void UpdateFormPosRot(nbFormation_t *form)
         pose = form->basic->poseset;
         SDF_VU0_COPYVECTOR(&form->pos, &pose->pos);
         SDF_VU0_LOADVECTOR(&pose->rot);
-        SDF_VU0_LOADVECTOR_B(nbRotOffset);
+        SDF_VU0_LOADVECTOR_B(&nbRotOffset);
         Mult();
         SDF_VU0_STOREVECTOR(&form->rot);
     }
@@ -1369,9 +1369,9 @@ extern sdfVector4_t nbUnitBaseScale;
 extern void RunSake(nbMainProcessData_t *data, nbFormation_t *form);
 extern void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work);
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbRotOffset);
+const sdfVector4_t nbRotOffset __attribute__((aligned(16))) = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbModelLoadErrorText);
+const char nbModelLoadErrorText[32] = "\306\261\244\270\245\342\245\307\245\353\244\317\244\261\241\274\244\363!!\n";
 
 void *nbUnitProcess2(dds3ProcessID_t *id)
 {
@@ -1477,7 +1477,7 @@ void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", nbUnitDrawProcessName);
+const char nbUnitDrawProcessName[24] = "nb_unitdraw";
 
-INCLUDE_SDATA(const s32, "newbattle/nbUnitProcess", nbUnitProcessName);
+char nbUnitProcessName[8] = "nb_unit";
 
