@@ -26,9 +26,9 @@ s32 fclGetFlag(s8 index);
 
 extern void rcvReviveUnit(datUnitWork_t *work);
 
-extern char rcvDrawProcName[];
+extern const char rcvDrawProcName[];
 
-extern char rcvUpdateProcName[];
+extern const char rcvUpdateProcName[];
 
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *font);
 
