@@ -1151,65 +1151,65 @@ f32 fldVecDot(const sdfVector4Unaligned_t *a, const sdfVector4Unaligned_t *b)
 {
     return a->x * b->x + a->y * b->y + a->z * b->z;
 }
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyDefault);
+void *fldSkyDefault = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyDefaultData);
+void *fldSkyDefaultData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyDataTable);
+fldSkyData_t *fldSkyDataTable = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gFilterAlpha);
+s32 gFilterAlpha = 0x80;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gFilterAnime);
+s32 gFilterAnime = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gFilterAnimeCntF);
+f32 gFilterAnimeCntF = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gFilterAnimeOfsA);
+s32 gFilterAnimeOfsA = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterPrev);
+s32 fldSkyFilterPrev = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilter);
+s32 fldSkyFilter = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterRate);
+f32 fldSkyFilterRate = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterTime);
+f32 fldSkyFilterTime = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTable);
+u32 fldSkyTable = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gSkyTblAnime);
+s32 gSkyTblAnime = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gSkyTblAnimeCntI);
+f32 gSkyTblAnimeCntI = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", gSkyTblBaseIdx);
+s32 gSkyTblBaseIdx = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblUpperIdx);
+s32 fldSkyTblUpperIdx = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeSaved);
+s32 fldSkyFilterAnimeSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeCntFSaved);
+f32 fldSkyFilterAnimeCntFSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterAnimeOfsASaved);
+s32 fldSkyFilterAnimeOfsASaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterPrevSaved);
+s32 fldSkyFilterPrevSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterSaved);
+s32 fldSkyFilterSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterRateSaved);
+f32 fldSkyFilterRateSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyFilterTimeSaved);
+f32 fldSkyFilterTimeSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTableIdx);
+u32 fldSkyTableIdx = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblAnimeSaved);
+s32 fldSkyTblAnimeSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblAnimeCntISaved);
+f32 fldSkyTblAnimeCntISaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTblBaseIdxSaved);
+s32 fldSkyTblBaseIdxSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyLightMaTbl);
+u32 fldSkyLightMaTbl = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldSkyTableSaved);
+s32 fldSkyTableSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldHitMatterIndex);
+s32 fldHitMatterIndex = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSky", fldItemBoxObjBuf);
+addr_t fldItemBoxObjBuf = 0;
 
