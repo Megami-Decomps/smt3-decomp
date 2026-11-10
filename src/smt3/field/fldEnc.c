@@ -181,13 +181,11 @@ f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
     result = angle;
     return result;
 }
-INCLUDE_SDATA(const s32, "field/fldEnc", gencStageInnAlp);
+s32 gencStageInnAlp = 0x80;
 
-INCLUDE_SDATA(const s32, "field/fldEnc", encDrawState);
+s32 encDrawState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEnc", gencOn);
+s32 gencOn = 0;
 
-SDATA_PAD(4);
-
-INCLUDE_SDATA(const s32, "field/fldEnc", fldEncDrawName);
+char fldEncDrawName[8] = "encProc";
 
