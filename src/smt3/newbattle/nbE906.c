@@ -251,7 +251,7 @@ extern u16 nbE907SavedPartyCount[];
 
 extern char nbModelFileName[];
 
-extern char nbBossPackPathFormat[];
+extern const char nbBossPackPathFormat[];
 
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
@@ -259,7 +259,7 @@ extern void func_0024D938(void *e);
 
 extern u32 dds3DrawFlag;
 
-extern char nbE907EndMessage[];
+extern const char nbE907EndMessage[];
 
 
 
@@ -648,17 +648,17 @@ s32 nbE907_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE906", nbBossPackPathFormat);
+const char nbBossPackPathFormat[32] = "/model/devil/boss/0x%x.PB";
 
-INCLUDE_RODATA(const s32, "newbattle/nbE906", nbE907EndMessage);
+const char nbE907EndMessage[16] = "\311\272\316\256\277\300\312\321\277\310\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE906", nbE906FocusBasic);
+dds3Basic_t *nbE906FocusBasic = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE906", nbE906Basic0);
+dds3Basic_t *nbE906Basic0 = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE906", nbE906Basic1);
+dds3Basic_t *nbE906Basic1 = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE906", nbE906Basic2);
+dds3Basic_t *nbE906Basic2 = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE906", nbE906Basic3);
+dds3Basic_t *nbE906Basic3 = NULL;
 
