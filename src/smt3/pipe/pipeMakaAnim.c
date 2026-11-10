@@ -424,16 +424,15 @@ void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);
 #endif
 
-#ifdef NON_MATCHING
 void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 {
     f32 origin[2];
     s8 cells[16];
     s16 positions[16];
-    s32 width = makaGetBarWidth(value);
-    s32 i;
-    s32 previous = 0;
+    s32 i = makaGetBarWidth(value);
+    s32 width;
     s16 step = 0;
+    s32 previous = 0;
     s16 position = 0;
     f32 spriteWidth;
     f32 spriteHeight;
@@ -443,21 +442,26 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
     origin[0] = x;
     origin[1] = y;
 
-    i = width;
+    width = i;
     do {
-        cells[i] = makaGetBarCell(value, i);
+        s32 returnedCell;
+        /* SMT3 allocation aid: the initialized provider result passes through
+         * the native v1 copy before its byte store and signed-byte test. This
+         * binding ends at the ordinary scalar copy, before any later call;
+         * it is not a claim about the original source spelling. */
+        {
+            FAKEMATCH_ASM_REG(s32, callResult, "$3") = makaGetBarCell(value, i);
+            FAKEMATCH_ASM_LIVE(callResult);
+            returnedCell = callResult;
+        }
+        cells[i] = returnedCell;
         if (i == width) {
             step = 0;
         } else if (previous == 9 && cells[i] == 9) {
             step = (s16)(s32)(sx * 20.0f);
-            /* SMT3 reconstruction constraint: preserve this live narrowed
-             * spacing through the distinct 20-pixel conversion tail. Qualified
-             * full-owner RTL shows jump2 merging it without this operand;
-             * retail keeps that conversion separate from the 14/16 path.
-             * The value feeds position below; no fixed register or barrier. */
-            FAKEMATCH_ASM_LIVE(step);
-        } else if ((previous > 0 && cells[i] > 0) ||
-                   (previous == 0 && cells[i] == 0)) {
+        } else if (previous > 0 && cells[i] > 0) {
+            step = (s16)(s32)(sx * 14.0f);
+        } else if (previous == 0 && cells[i] == 0) {
             step = (s16)(s32)(sx * 14.0f);
         } else if (previous == 0 || cells[i] == 0) {
             step = (s16)(s32)(sx * 16.0f);
@@ -482,9 +486,6 @@ void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
                       color, color, color, color, MakaTex[1].th);
     } while (--i >= 0);
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawBar);
-#endif
 
 INCLUDE_RODATA(const s32, "pipe/pipeMakaAnim", makaSingleEaseTable);
 

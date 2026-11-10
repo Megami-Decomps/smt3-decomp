@@ -1269,8 +1269,6 @@ void ActionDeath(tagPipeObject *object)
     objMdlAlphaSet(object, (u8)object->count);
 }
 
-/* NON_MATCHING: 6 of 80 words differ; see docs/matching/pipe/pipeSection.md. */
-#ifdef NON_MATCHING
 extern void objMdlSclSet(tagPipeObject *object, f32 scale);
 
 void ActionZMotion(tagPipeObject *object)
@@ -1289,13 +1287,24 @@ void ActionZMotion(tagPipeObject *object)
         limitedCount = 0x64;
     }
     if (limitedCount >= 0) {
+        f32 weightedX;
+        f32 weightedY;
         complement = 100 - limitedCount;
         complementWeight = (f32)complement;
         countWeight = (f32)limitedCount;
         object->offset = data->offset;
-        object->pos[0] = (object->pos[0] * countWeight +
+        weightedX = object->pos[0] * countWeight;
+        weightedY = object->pos[1] * countWeight;
+        /* SMT3 scheduling aid for the two real weighted position terms.
+         * Stock sched1 puts the count conversion first in ordinary C. This
+         * paired live operand retains the complementary-first schedule and
+         * waits for both products, leaving the offset store its native issue
+         * slot. Each term feeds its axis sum below; no call crosses either
+         * lifetime. This does not establish the original source spelling. */
+        FAKEMATCH_ASM_LIVE_F32_PAIR(weightedX, weightedY);
+        object->pos[0] = (weightedX +
                           data->pos[0] * complementWeight) / 100.0f;
-        object->pos[1] = (object->pos[1] * countWeight +
+        object->pos[1] = (weightedY +
                           data->pos[1] * complementWeight) / 100.0f;
         if (count > 0) {
             object->count = (s16)((f32)count - 8.33333301544189453125f);
@@ -1310,16 +1319,12 @@ void ActionZMotion(tagPipeObject *object)
                      ((countWeight - 50.000003814697265625f) / 16.666660308837890625f) *
                          0.800000011920928955078125f + 0.199999988079071044921875f);
         /* Like ObjectDraw, retain jal plus epilogue. Qualified cc1probe:
-         * reset187 survives sibling selection, then disappears in life13;
+         * the count reset survives sibling selection, then disappears in life13;
          * the no-reset control tail-calls. Output parity passes. See
          * docs/CONTRIBUTING.md for this narrow local-reset exception. */
         limitedCount = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionZMotion);
-#endif
-
 extern s8 dds3PadButtonState[];
 
 void ActionKey(tagPipeObject *object)

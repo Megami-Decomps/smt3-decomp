@@ -166,6 +166,9 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_F32
 #define FAKEMATCH_ASM_LIVE_F32(value) __asm__("" : "+f" (value))
 #endif
+#ifndef FAKEMATCH_ASM_LIVE_F32_PAIR
+#define FAKEMATCH_ASM_LIVE_F32_PAIR(first, second) __asm__("" : "+f" (first), "+f" (second))
+#endif
 /* The _VOLATILE forms hold the constraint where cc1 would otherwise drop it. */
 #ifndef FAKEMATCH_ASM_LIVE_VOLATILE
 #define FAKEMATCH_ASM_LIVE_VOLATILE(value) __asm__ volatile ("" : "+r" (value))

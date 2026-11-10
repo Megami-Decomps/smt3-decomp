@@ -4800,8 +4800,12 @@ void campDhDrawHelpTextAlt(s32 x, s32 y, s32 z, s32 alpha)
     cmpDrawBoxGDefault(x + 0x1710, y + 0xAF8, 0, 52, 5, colors, 0x47);
 }
 
-/* NON_MATCHING: 4 of 86 words differ; see docs/matching/code_0022C578.md. */
-#ifdef NON_MATCHING
+/* The captured font X coordinate uses its native saved register. At the
+ * draw-position consumer, the short-lived font argument binding preserves
+ * native argument ordering; $4 is not live across any preceding call.
+ * These SMT3-only allocation/scheduling aids emit no instructions and do
+ * not establish historical source spelling. The ordinary control swaps
+ * four coordinate words; coordinate-only control rotates three arguments. */
 extern u8 frEnableMode(s32 flag);
 extern u8 frDisableMode(u8 flag);
 extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
@@ -4811,14 +4815,20 @@ extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *font, u32 priority);
 extern void frSetMessageStepY(u32 step);
 extern void frSetMessageDefStepY(void);
+/* EE prefix-initializer view: the canonical provider takes fclPanel_t*,
+ * but its complete native body only stores X/Y/Z/W/H/Col at offsets
+ * 0x00/04/08/0C/0E/10. It performs no reads, calls, pointer escape or
+ * full-object operation. Explicit casts at this owner's calls retain the
+ * existing 0x20-byte prefix storage; they do not assert ISO C compatibility
+ * between fclPanelPos_t and the full panel type. */
 extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work,
-    fclPanelPos_t *pPanelPos);
+    fclPanel_t *pPanelPos);
 
 void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
 {
     fclPanelPos_t panel;
     frFontHandle_t *font;
-    u32 fontX = x + 0x2A0;
+    FAKEMATCH_ASM_REG(u32, fontX, "$19") = x + 0x2A0;
     u32 fontY = y + 0x7F0;
 
     if (index != 0) {
@@ -4826,20 +4836,22 @@ void campDhDrawHelpText(s32 x, s32 y, s32 z, s32 alpha, s8 index)
         font = frLinkFontString((u8 *)pstr[index], 0, 0, 0, NULL);
         frDisableMode(1);
         frSetFontSpace(font, 3);
-        frSetDrawPosition(font, fontX, fontY);
+        {
+            FAKEMATCH_ASM_REG(frFontHandle_t *, drawFont, "$4") = font;
+            FAKEMATCH_ASM_READ(fontX);
+            frSetDrawPosition(drawFont, fontX, fontY);
+        }
         frSetPriority(font, 0);
         frSetFontColor(font, fclBlendColor(0x7475FF80, 0x7475FF00, alpha));
         func_001C7E38(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
-        fclInitPanelPos(x + 0xA00, y + 0x990, 0, 0, 0, 0, &panel);
+        fclInitPanelPos(x + 0xA00, y + 0x990, 0, 0, 0, 0, (fclPanel_t *)&panel);
         frSetMessageStepY(22);
         cmpDrawHelp(&panel, (u16)index, 2, 1, alpha, 0x47);
         frSetMessageDefStepY();
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
-#endif
+
 
 extern const u32 campDhGaugePalette[];
 extern char campDhFmtAmount[];
@@ -6821,7 +6833,7 @@ extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 width,
 extern s32 func_001C7E38(frFontHandle_t *font, s8 mode, u32 ot);
 extern void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot);
 extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 w, s16 h,
-                            s32 work, fclPanelPos_t *panel);
+                            s32 work, fclPanel_t *panel);
 extern void cmpDrawHelp(fclPanelPos_t *panel, u16 index, s8 bank,
                         s8 skipBackground, s32 alpha, u32 ot);
 extern void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor);
@@ -6944,7 +6956,7 @@ void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor,
             }
             row++;
         }
-        fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, &helpPanel);
+        fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, (fclPanel_t *)&helpPanel);
         cmpDrawHelp(&helpPanel, campWork->itemId[cursor->unk_22 + (u8)cursor->unk_24],
                     1, 0, foldedAlpha, 0x47);
         cmpSetSkillListRows(-1);
@@ -7159,7 +7171,7 @@ void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor, datUnitWork_t *uni
                             (u16 *)unit, liveUnit->skill[i], alpha);
         y += 0xB8;
     }
-    fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, &helpPosition);
+    fclInitPanelPos(0x120, 0x988, 0x10, 0, 0, 0, (fclPanel_t *)&helpPosition);
     {
         u8 row = liveCursor->unk_24;
         s16 offset = cursor->unk_22;
@@ -8110,13 +8122,13 @@ void cmpSetCrossGeneralVal(u8 *work, s8 value)
     work[0x50] = value;
 }
 
-extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanelPos_t *pPanelPos);
+extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
 void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 {
     u8 *work = panel;
 
-    fclInitPanelPos(b, c, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 4));
+    fclInitPanelPos(b, c, 0x10, 0, 0, 0, (fclPanel_t *)(work + 4));
     *(s32 *)work = d;
     *(s32 *)(work + 0x20) = g;
     *(s32 *)(work + 0x18) = e;
@@ -8135,7 +8147,7 @@ void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32
         memcpy(work, work + 0x2C, 0x58);
 #endif
         work[0x24] = -1;
-        fclInitPanelPos(x, y, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 0x30));
+        fclInitPanelPos(x, y, 0x10, 0, 0, 0, (fclPanel_t *)(work + 0x30));
         *(void **)(work + 0x2C) = func;
         *(s32 *)(work + 0x4C) = alpha;
         *(void **)(work + 0x44) = data;
