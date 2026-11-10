@@ -19,14 +19,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 typedef struct fileRequest fileRequest_t;
 
-
-
-
-
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-
-
-
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -234,9 +227,7 @@ extern void p2sdStopBGM(s32 no);
 
 extern void sdfSndSendChannelGroupCommand150(s32 no);
 
-extern char nbBgmStopFormat[];
-
-
+extern const char nbBgmStopFormat[];
 
 extern u8 datModelParamTable[];
 
@@ -268,11 +259,11 @@ extern void p2sdSetPcmBuffer(void *buf, u32 size);
 
 extern void datDebugPrintf(const char *format, ...);
 
-extern char nbNegoSeOkMsg[];
+extern const char nbNegoSeOkMsg[];
 
-extern char nbMidiDebugFmt[];
+extern const char nbMidiDebugFmt[];
 
-extern char nbMotSeOkMsg[];
+extern const char nbMotSeOkMsg[];
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -495,11 +486,11 @@ extern char nbMidiPath[];
 
 extern fileRequest_t *fileLoad(const char *path);
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbNegoSeOkMsg);
+const char nbNegoSeOkMsg[16] = "negoSE_ok!\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMidiDebugFmt);
+const char nbMidiDebugFmt[16] = "MIDI=0x%08X\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMotSeOkMsg);
+const char nbMotSeOkMsg[16] = "motSE_ok!\n";
 
 s32 nbLoadMidiFile(s32 no)
 {
@@ -836,11 +827,11 @@ void nbSetMaeFlag(s32 code)
 }
 
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMaeMidiTable1);
+const u16 nbMaeMidiTable1[16] = { 0, 0x16, 0, 0x17, 0, 0x18, 0, 0x19, 0, 0x1a, 0, 0x1b, 0, 0x1c, 0, 0 };
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545C58);
+const u16 D_00545C58[16] = { 0, 0x20, 0, 0x21, 0, 0x22, 0, 0x23, 0, 0x24, 0, 0x25, 0, 0x26, 0, 0x27 };
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbMaeMidiTable2);
+const u16 nbMaeMidiTable2[20] = { 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 0xa, 0, 0xb, 0, 0xc, 0, 0, 0, 0 };
 
 INCLUDE_ASM(const s32, "newbattle/nbSound", nbSetMaeFlag);
 #endif
@@ -887,25 +878,25 @@ void nb_28DE28(void)
     sdfSndSendChannelGroupCommand150(0);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbBgmStopFormat);
+const char nbBgmStopFormat[24] = "nbBgmStop(%d,%d)\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbSound", nbUnitLoadTimeFormat);
+const char nbUnitLoadTimeFormat[72] = ">>>>>>>>>>>>>>>>> UNIT LOAD TIME = %d frame <<<<<<<<<<<<<<<<<<\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", bgmno);
+s32 bgmno = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbBgmSaved);
+s32 nbBgmSaved = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbBgmFadeState);
+s32 nbBgmFadeState = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbResultCount);
+s32 nbResultCount = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeMidiNo);
+s32 nbMaeMidiNo = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeSubMidiNo);
+s32 nbMaeSubMidiNo = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeFlag);
+s32 nbMaeFlag = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeLoadDone);
+s32 nbMaeLoadDone = 0;
 
 SDATA_PAD(4);
 
