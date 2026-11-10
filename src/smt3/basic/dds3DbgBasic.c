@@ -130,9 +130,9 @@ saddr_t dds3DebugBasic(dds3ProcessID_t *id) {
     }
     return 0;
 }
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicPosLabel);
+char dds3BasicPosLabel[8] = "POS  :";
 
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicRotLabel);
+char dds3BasicRotLabel[8] = "ROT  :";
 
-INCLUDE_SDATA(const s32, "basic/dds3DbgBasic", dds3BasicSclLabel);
+char dds3BasicSclLabel[8] = "SCL  :";
 
