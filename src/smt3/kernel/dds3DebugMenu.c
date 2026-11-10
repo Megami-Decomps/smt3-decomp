@@ -4,27 +4,29 @@
 
 void dds3InitDebugSystem(void) {
 }
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickPrev);
+u8 dds3PadStickPrev[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickStatusPrev);
+s8 dds3PadStickStatusPrev[4] = {0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E904);
+u8 D_0054E904 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E907);
+u8 D_0054E905 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickState);
+u8 D_0054E906 = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", dds3PadStickStatusState);
+u8 D_0054E907 = 0;
 
-SDATA_PAD(4);
+u8 dds3PadStickState[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E918);
+u8 dds3PadStickStatusState[4] = {0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E920);
+s32 D_0054E918[2] = {1, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E928);
+u32 D_0054E920[2] = {0, 0};
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E930);
+char D_0054E928[8] = "TGS";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugMenu", D_0054E938);
+char D_0054E930[8] = "PIPE";
+
+char D_0054E938[8] = "FIELD";
 
