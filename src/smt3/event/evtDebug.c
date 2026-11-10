@@ -211,6 +211,14 @@ void evtChkEndProcess(void)
     evtFreeStage();
 }
 
+const char evtSceneDispNameCamera[16] = "CAMERA_O";
+
+const char evtSceneDispNameMatter[16] = "MATTER_O";
+
+const char evtSceneDispNameEffect[16] = "EFFECT_O";
+
+const char evtSceneDispNameStatic[16] = "STATIC_M";
+
 #ifdef NON_MATCHING
 typedef struct {
     const char *name;
@@ -378,13 +386,6 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameCamera);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameMatter);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameEffect);
-
-INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispNameStatic);
 
 INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispRows);
 
