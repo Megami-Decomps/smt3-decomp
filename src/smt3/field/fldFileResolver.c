@@ -1779,71 +1779,67 @@ void fldHojiDebugView2(void) {
 void fldFileAddrResetMode(u32 mode) {
     gFldFileResetMode = mode;
 }
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldTexList);
+u32 fldTexList = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", FildMaskObj);
+u8 *FildMaskObj = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", mat_black);
+u8 *mat_black = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", mat_white);
+u8 *mat_white = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", mat_line);
+u8 *mat_line = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", gFldFileResetMode);
+u32 gFldFileResetMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", gFldFileF1);
+fileRequest_t *gFldFileF1 = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFileBuf1);
+fileRequest_t *fldFileBuf1 = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", pFldNextFileDataF2);
+fileRequest_t *pFldNextFileDataF2 = NULL;
 
-SDATA_PAD(4);
+char fldFmtResPath[8] = "%s%s";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtResPath);
+sdfMemHandle_t *fldFieldPackData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFieldPackData);
+addr_t fldScriptBufHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldScriptBufHandle);
+addr_t fldNextTbHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextTbHandle);
+addr_t fldFileBufF1 = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFileBufF1);
+addr_t fldFileBuf2 = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFileBuf2);
+u32 fldNextTbData = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextTbData);
+u32 fldNextF1Data = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextF1Data);
+u32 fldNextF2Data = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextF2Data);
+u32 fldNextTbSize = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextTbSize);
+u32 fldNextF1Size = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextF1Size);
+u32 fldNextF2Size = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldNextF2Size);
+u32 fldBtlNextField = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldBtlNextField);
+u32 fldBtlNextArea = 0;
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldBtlNextArea);
+u8 D_0054EC00[1] = { 0x00 };
 
-SDATA_PAD(4);
+char fldFmtTbPath[8] = "%s.TB";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EC00);
+char fldFmtF2Path[8] = "%s.f2";
 
-SDATA_PAD(7);
+char fldFmtF1Path[8] = "%s.f1";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtTbPath);
+char fldFmtRowLabel[8] = "%02d";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtF2Path);
+char fldFmtDot[8] = ".";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtF1Path);
+char fldFmtInt[8] = "%d";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtRowLabel);
+char D_0054EC38[8] = "";
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtDot);
-
-INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFmtInt);
-
-INCLUDE_SDATA(const s32, "field/fldFileResolver", rsetFrameMaskOtOffset);
+s32 rsetFrameMaskOtOffset = 0x28;
 
