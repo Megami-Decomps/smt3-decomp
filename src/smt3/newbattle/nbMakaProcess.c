@@ -277,7 +277,7 @@ extern void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 n);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern char *nbDigitStringTable[10];
+extern char *const nbDigitStringTable[10];
 
 extern void nbPnl_setOt(s32 ot);
 
@@ -583,27 +583,30 @@ void nbStartEventPacks(nbMainProcessData_t *data)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakaProcess", nbDigitStringTable);
+extern char nbDigitString0[], nbDigitString1[], nbDigitString2[], nbDigitString3[], nbDigitString4[],
+    nbDigitString5[], nbDigitString6[], nbDigitString7[], nbDigitString8[], nbDigitString9[];
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbMakaProcessName);
+char *const nbDigitStringTable[10] = { nbDigitString0, nbDigitString1, nbDigitString2, nbDigitString3, nbDigitString4, nbDigitString5, nbDigitString6, nbDigitString7, nbDigitString8, nbDigitString9 };
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString0);
+char nbMakaProcessName[8] = "nb_maka";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString1);
+char nbDigitString0[2] = "0";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString2);
+char nbDigitString1[2] = "1";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString3);
+char nbDigitString2[2] = "2";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString4);
+char nbDigitString3[2] = "3";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString5);
+char nbDigitString4[2] = "4";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString6);
+char nbDigitString5[2] = "5";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString7);
+char nbDigitString6[2] = "6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString8);
+char nbDigitString7[2] = "7";
 
-INCLUDE_SDATA(const s32, "newbattle/nbMakaProcess", nbDigitString9);
+char nbDigitString8[2] = "8";
+
+char nbDigitString9[2] = "9";
 
