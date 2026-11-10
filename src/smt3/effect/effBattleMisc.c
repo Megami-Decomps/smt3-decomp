@@ -568,13 +568,14 @@ void effBTLModelLook(nbFormation_t *pFormation, sdfVector4_t *pTargetPos) {
     nbSetFormRot(pFormation, &rotate);
 }
 
-/* NON_MATCHING: 2 of 68 words differ (first at +0x98). */
-#ifdef NON_MATCHING
 void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle) {
     sdfVector4_t direction;
     sdfVector4_t center;
     sdfVector4_t rotate;
     f32 x;
+    f32 tangent;
+    f32 z;
+    f32 absDirection;
 
     effBTLModelGetSphereCenter(pFormation);
     SDF_VU0_STOREVECTOR(&center);
@@ -583,21 +584,26 @@ void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 a
     if (direction.x == 0.0f && direction.z == 0.0f) {
         return;
     }
-    x = (sdfSin(angle) / sdfCos(angle)) * direction.z;
-    if (fabsf(direction.x) < fabsf(x)) {
+    tangent = sdfSin(angle) / sdfCos(angle);
+
+    z = direction.z;
+    absDirection = fabsf(direction.x);
+    /* Target-specific scheduling aid: keep the live magnitude and Z together
+     * so abs.s precedes the atan2 argument copy. This emits no instructions
+     * and does not claim the original source spelling. */
+    FAKEMATCH_ASM_LIVE_F32_PAIR(absDirection, z);
+    x = tangent * z;
+    if (absDirection < fabsf(x)) {
         x = direction.x;
     } else if (0.0f <= direction.x) {
         x = fabsf(x);
     } else {
         x = -fabsf(x);
     }
-    FromEuler(0.0f, sdfAtan2(x, direction.z), 0.0f);
+    FromEuler(0.0f, sdfAtan2(x, z), 0.0f);
     SDF_VU0_STOREVECTOR_NOMEM(&rotate);
     nbSetFormRot(pFormation, &rotate);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelLook2);
-#endif
 
 void effBTLModelGroupLook(u32 group, sdfVector4_t *pPos) {
     nbFormation_t *form;
