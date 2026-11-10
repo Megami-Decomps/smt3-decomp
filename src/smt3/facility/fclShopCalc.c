@@ -648,7 +648,7 @@ s32 shop_draw_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "facility/fclShopCalc", shpFmtCount7);
+char shpFmtCount7[4] = "%7d";
 
-INCLUDE_SDATA(const s32, "facility/fclShopCalc", shpFmtCount2);
+char shpFmtCount2[4] = "%2d";
 
