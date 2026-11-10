@@ -209,11 +209,11 @@ INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariLabels);
 
 INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugKotowariTitle);
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543230);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugDeadScriptName);
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543240);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugInvisibleName);
 
-INCLUDE_RODATA(const s32, "newdata/datDebugUnit", D_00543250);
+INCLUDE_RODATA(const s32, "newdata/datDebugUnit", datDebugNegoResultName);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", datDebugStockItemFmt);
 
@@ -275,75 +275,75 @@ INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F80);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F88);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F90);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameEnd);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550F98);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAto);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FA0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameCheck3);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FA8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameCheck1);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FB0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAutotar);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FB8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAuto);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FC0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameReturn);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FC8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameEscape);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FD0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameWait);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FD8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameBadwait);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FE0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameNego);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FE8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameSkill);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FF0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameReady);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00550FF8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameStksel);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551000);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameTarsel);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551008);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameBad);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551010);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAiscr);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551018);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameAi);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551020);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameComm);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551028);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPhaseNameNon);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551030);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameDeads);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551038);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameCnter);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551040);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameKoke);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551048);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameBinjo);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551050);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameInoti);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551058);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugActionNameNorm);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551060);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugTurnFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551068);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugEnemyName);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551070);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugPlayerName);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551078);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551080);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugExpFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551088);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugMakaFmt);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551090);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugSummFmt);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_00551098);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510A0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbDebugCharFmt);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510A8);
 
@@ -369,9 +369,9 @@ INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultCounter);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510E8);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510F0);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultFmt2d);
 
-INCLUDE_SDATA(const s32, "newdata/datDebugUnit", D_005510F8);
+INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbResultFmt6d);
 
 INCLUDE_SDATA(const s32, "newdata/datDebugUnit", nbTobiwarpLabelIdx);
 

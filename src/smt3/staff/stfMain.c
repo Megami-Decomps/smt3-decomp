@@ -422,55 +422,55 @@ s32 stfInit(void)
 
 INCLUDE_RODATA(const s32, "staff/stfMain", stfProcName);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F110);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle2M);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F130);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle1M);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F150);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE616M);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F170);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMoviePeephole);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F190);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE731);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F1A8);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE727);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F1C0);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle3);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F1E0);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE686);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F1F8);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE684);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F210);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE688);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F228);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle2);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F248);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieMenu);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F260);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE676);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F278);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieE617);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F290);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieTitle1);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F2B0);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e674);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F2C8);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e673_020);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F2E8);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_gOver);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F308);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e658);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F320);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804_i);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F340);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804_f);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F360);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e804);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F378);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e616);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F390);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_e500_002);
 
-INCLUDE_RODATA(const s32, "staff/stfMain", D_0053F3B0);
+INCLUDE_RODATA(const s32, "staff/stfMain", stfMovieFile_dds);
 
 INCLUDE_SDATA(const s32, "staff/stfMain", stfTextFormat);
 

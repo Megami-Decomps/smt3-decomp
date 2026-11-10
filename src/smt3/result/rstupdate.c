@@ -1311,7 +1311,7 @@ INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD48);
 
 INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD58);
 
-INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DD68);
+INCLUDE_RODATA(const s32, "result/rstupdate", dds3TitleTexPath);
 
 INCLUDE_SDATA(const s32, "result/rstupdate", rstParamValueFormat);
 

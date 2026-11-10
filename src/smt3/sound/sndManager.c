@@ -452,7 +452,7 @@ void dds3TitleUpdateFade(void)
 }
 
 
-extern char D_0053DD68[];
+extern char dds3TitleTexPath[];
 extern char dds3TitleProcName[];
 extern void *pacLoad(const char *path);
 extern void pacSync(void *request);
@@ -466,7 +466,7 @@ s32 titleLoadTextures(void)
 
     titleWork->texHandle[4] = titleWork->texHandle[3] = titleWork->texHandle[2] =
         titleWork->texHandle[1] = titleWork->texHandle[0] = 0;
-    request = pacLoad(D_0053DD68);
+    request = pacLoad(dds3TitleTexPath);
     pacSync(request);
     for (entry = request->pac.resrcHead; entry != NULL; entry = entry->next) {
         switch (index) {

@@ -1821,7 +1821,7 @@ void effEveAPP4Randomize(effEmit_t *hEffect) {
     } while (recordIndex < recordCount);
 }
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534420);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameDebugShotAll);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScriptFix);
 
@@ -1831,13 +1831,13 @@ INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScript1Shot);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemyBad);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534470);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEveTarget);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemySide);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNamePlayerSide);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344A0);
+INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameGameOver);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoEnd);
 
@@ -1891,33 +1891,33 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F298);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2A0);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2A8);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelScale);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2B0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelRotate);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2B8);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2C0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelBlur);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2C8);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2D0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelArea);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2D8);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelBlend);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2E0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelDistor);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2E8);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelSpeed);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2F0);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelIntval);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2F8);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelWidth);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F300);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelNumber);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F308);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F310);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelFilter);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F318);
 
@@ -1927,7 +1927,7 @@ SDATA_PAD(3);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F320);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F328);
+INCLUDE_SDATA(const s32, "effect/effEvent", effLabelDistS);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", EffEveCPSmokeCount);
 

@@ -2766,11 +2766,11 @@ extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB30);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopTextSacrifice);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB48);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopText2ndDemon);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CB60);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopText1stDemon);
 
 void cmbDrawStockIcon(s32 x, s32 y, s32 z, s8 icon, u32 ot)
 {
@@ -5262,13 +5262,13 @@ void cmbUpdateTimeTable(void)
     work->actionFrame = (s32)((u32)work->actionFrame + 1);
 }
 #else
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD28);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName04);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD38);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName03);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD48);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName02);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CD58);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName01);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineDevilModelFmt);
 
@@ -5813,23 +5813,23 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclE807MainName);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbMovieProcessName);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF30);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", shpTmxPath02);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF50);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", shpTmxPath01);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", gProcessStat_0);
 
 SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAD8);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuLeave);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAE0);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuTalk);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAE8);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuFuse);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAF0);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuQuit);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", D_0054FAF8);
+INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuView);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
 

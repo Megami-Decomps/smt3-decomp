@@ -213,7 +213,7 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
 
 extern char *text2[];
 extern s32 rstCalcExpFromLevel(u8 index, s32 level);
-extern const char D_005510F0[], D_005510F8[];
+extern const char nbResultFmt2d[], nbResultFmt6d[];
 extern frFontHandle_t *nbResultFontHandle;
 extern frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 firstOption);
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
@@ -341,7 +341,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                     nbResultTex1);
         fontColor = rewardColor | alpha;
         level = nbResultScoreTable[scoreIndex].l_lv;
-        sprintf(buf, D_005510F0, level < 100 ? level : 99);
+        sprintf(buf, nbResultFmt2d, level < 100 ? level : 99);
         nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ((x + 0x3C) << 4, (y + 0x10) << 3,
                                                             0, fontColor, buf, NULL);
         frDrawFontEx(nbResultFontHandle, 1);
@@ -352,7 +352,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
         if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
             if (nbResultScoreTable[scoreIndex].lvupanmcnt >= 6) {
                 alpha = (nbResultScoreTable[scoreIndex].lvupanmcnt * 128 - 640) / 10;
-                sprintf(buf, D_005510F8, expNextLevel - exp);
+                sprintf(buf, nbResultFmt6d, expNextLevel - exp);
                 fontColor = 0xA09DC380;
                 nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                     (x + 0x11D) << 4, (y + 7) << 3, 0, rewardColor | alpha, buf, NULL);
@@ -361,7 +361,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
                 frDestroyFontRequestAfter(nbResultFontHandle);
             }
         } else {
-            sprintf(buf, D_005510F8, expNextLevel - exp);
+            sprintf(buf, nbResultFmt6d, expNextLevel - exp);
             nbResultFontHandle = (frFontHandle_t *)frwGetSmallNumFontFRQ(
                 (x + 0x11D) << 4, (y + 7) << 3, 0, fontColor, buf, NULL);
             frDrawFontEx(nbResultFontHandle, 1);
@@ -647,7 +647,7 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
                 nbPnlSprite(0x197, 0x6B + i * 0x1A, 0x0B, 0x0B,
                             0xAC, 0x12, 0x0B, 0x0B, 0x80808080,
                             nbResultTex1);
-                sprintf(numberText, D_005510F0, itemCount[i]);
+                sprintf(numberText, nbResultFmt2d, itemCount[i]);
                 font = frwGetSmallNumFontFRQ(0x1AC0, ty2,
                                              0, 0xA09DC380, numberText, NULL);
                 nbResultFontRequest = font;
@@ -685,14 +685,14 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     if (((s32)nbResultTimer) >= 29) {
         scoreY = ((s32)nbResultTimer) < 43 ? ((s32)nbResultTimer) - 28 : 15;
         color = rewardColor | ((scoreY * 128) / 15);
-        sprintf(numberText, D_005510F8, nbGetKakutokuExp(data));
+        sprintf(numberText, nbResultFmt6d, nbGetKakutokuExp(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x348, 0,
                                      color,
                                      numberText, 0);
         nbResultFontRequest = font;
         frDrawFontEx((frFontHandle_t *)font, 1);
         frDestroyFontRequestAfter((frFontHandle_t *)nbResultFontRequest);
-        sprintf(numberText, D_005510F8, nbGetKakutokuMaka(data));
+        sprintf(numberText, nbResultFmt6d, nbGetKakutokuMaka(data));
         font = frwGetSmallNumFontFRQ(0x7A0, 0x448, 0,
                                      color,
                                      numberText, 0);
