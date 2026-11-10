@@ -254,7 +254,7 @@ extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smo
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char nbE908EndMessage[];
+extern const char nbE908EndMessage[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -453,11 +453,11 @@ s32 nbE908_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE907", nbE908EndMessage);
+const char nbE908EndMessage[12] = "\xC9\xBA\xCE\xAE\xBF\xC0\xBB\xE0\xCB\xB4\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE907", nbE907CameraModel);
+dds3Basic_t *nbE907CameraModel = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE907", nbE907Model);
+dds3Basic_t *nbE907Model = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE907", D_0055160C);
+dds3Basic_t *D_0055160C = NULL;
 
