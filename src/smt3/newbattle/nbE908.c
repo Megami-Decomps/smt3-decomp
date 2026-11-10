@@ -250,7 +250,7 @@ extern u16 nbE908SavedPartyCount[];
 
 extern char nbE908ModelPath[];
 
-extern char nbE908ModelPathFormat[];
+extern const char nbE908ModelPathFormat[];
 
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
@@ -278,7 +278,7 @@ extern void nbMaeWaitStep(void);
 
 extern s32 nbMakeModelPackName(s32 no);
 
-extern char D_00546860[];
+extern const char D_00546860[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -557,11 +557,11 @@ s32 nbE909_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE908", nbE908ModelPathFormat);
+const char nbE908ModelPathFormat[26] = "/model/devil/boss/0x%x.PB";
 
-INCLUDE_RODATA(const s32, "newbattle/nbE908", D_00546860);
+const char D_00546860[14] = "\xA5\xAB\xA5\xB0\xA5\xC4\xA5\xC1\xCA\xD1\xBF\xC8\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE908", nbE908CameraBasic);
+dds3Basic_t *nbE908CameraBasic = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE908", nbE908SceneBasic);
+dds3Basic_t *nbE908SceneBasic = NULL;
 
