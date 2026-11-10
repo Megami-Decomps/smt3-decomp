@@ -535,3 +535,15 @@ void sdf3DInit(void) {
     sdfModelInitSystem();
     sdfMatInitSystem();
 }
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DLightDefault);
+
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DFogDefault);
+
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot2Tex);
+
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSpecularTex);
+
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
+
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSlot1Tex);
+

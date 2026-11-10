@@ -627,3 +627,6 @@ void sdfMatListCopyStat(sdfItemArray_t *aDst, sdfItemArray_t *aSrc)
         sdfMatCopyStat(EE_ADDR_AS(sdfMat_t *, dst[i]), EE_ADDR_AS(sdfMat_t *, src[i]));
     }
 }
+
+INCLUDE_SDATA(const s32, "sdf/sdfMat", sdfMatAllocCount);
+

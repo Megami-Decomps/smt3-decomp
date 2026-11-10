@@ -1137,3 +1137,27 @@ void sdfDrawSync(void) {
         sdfWaitVblank(0);
     }
 }
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameFlag);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawSyncFlag);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCounter);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawPublishFlag);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameId);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrBufferSlot);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelayCount);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelaySleepCount);
+
+SDATA_PAD(2);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawReqQueueIndex);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameTagHead);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCount);
+

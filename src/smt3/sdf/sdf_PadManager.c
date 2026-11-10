@@ -384,3 +384,15 @@ void sdfPadInitManager(void) {
     sdfPadManagerMode = 0;
 }
 
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadPortSlotPairs);
+
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
+
+SDATA_PAD(3);
+
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadButtons);
+
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadAnalogSticks);
+
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_005518E8);
+
