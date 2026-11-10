@@ -28,7 +28,7 @@ typedef struct
 
 
 extern u32 dds3GetKernelCount(void);
-extern char fclCombineUpdateName[];
+extern const char fclCombineUpdateName[];
 
 extern char fclCombineCalcName[];
 
@@ -157,7 +157,7 @@ extern cmbSmokeParam_t cmbSmokeParamTable[];
 
 extern rcvWork_t *shutdownfunc;
 
-extern char fclE807MainName[];
+extern const char fclE807MainName[];
 
 extern void sortSkillList(cmbUnit_t *unit);
 
@@ -562,8 +562,8 @@ extern void fclSetCursorList(void *work, s32 mode);
 extern void evtDisableMoonCalc(void);
 extern void cmpModelInit(void);
 extern fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s8 type, s8 speed);
-extern char fclCombineScriptPath[];
-extern char fclCombineExplainPath[];
+extern const char fclCombineScriptPath[];
+extern const char fclCombineExplainPath[];
 extern u8 D_0032D1A8[];
 extern u8 D_0032D1B8[];
 extern u8 D_0032D1C8[];
@@ -651,9 +651,9 @@ extern void evtEnableMoonDraw(void);
 extern s32 fclEncycWork(void);
 extern s32 cmbCalcSequence(void);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineScriptPath);
+const char fclCombineScriptPath[40] = "/facility/scr/combine/message.bf";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineExplainPath);
+const char fclCombineExplainPath[40] = "/facility/msg/combine/collect.bmd";
 
 s32 fclCombineCalc(void)
 {
@@ -1268,11 +1268,11 @@ extern u16 cmpGetStatusModelId(void);
 extern void cmpSetModelReloadFlag(void);
 extern void campFreeStatusModel(void);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineUpdateName);
+const char fclCombineUpdateName[24] = "combine_update";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C950);
+const u32 D_0053C950[14] = { 0xef0001, 0, 0x10000, 0xee0000, 0, 1, 0xe60000, 0x30000, 0xe70099, 0x1340000, 0x710004, 0x10900bf, 0x15c, 0 };
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053C988);
+const u32 D_0053C988[42] = { 2, 0xcc, 1, 0x2c, 0x14, 4, 1, 1, 0x35, 0x1f, 2, 0x9a, 0x44, 0x2f, 0x14, 4, 0x37, 1, 0x37, 0x1f, 2, 0x9a, 0x59, 0x3b, 0x14, 4, 0x6f, 1, 0x43, 0x1f, 2, 0xca, 0x44, 0x35, 0x14, 4, 0xb3, 1, 0x3f, 0x1f, 0, 0 };
 
 void cmbSeqSetPhase(void)
 {
@@ -2766,11 +2766,11 @@ extern fclSpriteTbl_t cmbSpriteTable[];
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopTextSacrifice);
+const char cmbTopTextSacrifice[24] = "Select the sacrifice.";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopText2ndDemon);
+const char cmbTopText2ndDemon[24] = "Select the 2nd demon.";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbTopText1stDemon);
+const char cmbTopText1stDemon[32] = "Select the 1st demon.";
 
 void cmbDrawStockIcon(s32 x, s32 y, s32 z, s8 icon, u32 ot)
 {
@@ -3776,7 +3776,7 @@ void cmbUpdateStockCursor(void)
                                             button, 0x30));
 }
 
-extern char fclCombineSeqChangeMsg[];
+extern const char fclCombineSeqChangeMsg[];
 void cmbChangeSequence(void)
 {
     s32 button = cmpGetPressedButton(0x237) & 0xFFFF;
@@ -4377,7 +4377,7 @@ s32 cmbHandleDebugExit(void)
 
 extern void fclSetPanelAnimState(void *anim, u8 state);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineSeqChangeMsg);
+const char fclCombineSeqChangeMsg[32] = "Sequence change...\n";
 
 s32 cmbUpdatePanelAnim(void)
 {
@@ -4587,7 +4587,7 @@ s32 cmbActionExists(void *work)
 
 extern void mdlGetFilebase(s32 aMajor, s32 aMinor, char *aName, s32 aNameLeng);
 
-extern char fclCombineDevilModelFmt[];
+extern const char fclCombineDevilModelFmt[];
 
 saddr_t cmbMakeModelPath(u16 id, s32 *size)
 {
@@ -4605,7 +4605,7 @@ void cmbInitActionData(s32 id, cmbActionData_t *data)
     data->id = id;
 }
 
-extern char fclCombineLoadModelFmt[];
+extern const char fclCombineLoadModelFmt[];
 
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 
@@ -4621,8 +4621,8 @@ void cmbLoadActionModel(s32 id, cmbActionData_t *data)
 }
 
 extern void mdlFree(struct mdlObj_t *model);
-extern char fclCombineFreePackFmt[];
-extern char fclCombineFreeHandleFmt[];
+extern const char fclCombineFreePackFmt[];
+extern const char fclCombineFreeHandleFmt[];
 
 void cmbFreeActionModel(void *model)
 {
@@ -4643,8 +4643,8 @@ void cmbFreeActionModel(void *model)
 
 extern struct mdlObj_t *mdlLoad(u32 major, u32 minor);
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
-extern char fclCombineHandleMdlLoadFmt[];
-extern char fclCombineHandleMemFmt[];
+extern const char fclCombineHandleMdlLoadFmt[];
+extern const char fclCombineHandleMemFmt[];
 
 struct mdlObj_t *cmbGetActionModelHandle(cmbActionData_t *data)
 {
@@ -5055,7 +5055,7 @@ extern void mdlSetColorWithEffect(struct mdlObj_t *model, u32 color);
 extern f32 cmbActionTargetModel[3];
 extern f32 cmbTargetModelId;
 extern s8 cmbActionMode;
-extern char fclCombineTargetModelName[];
+extern const char fclCombineTargetModelName[];
 
 void cmbLoadTargetModel(s32 drawTarget, s32 drawModels, f32 scale)
 {
@@ -5230,6 +5230,30 @@ typedef struct
 
 extern cmbTimeTable_t cmbTimeTable[];
 
+const char cmbAkumaposName04[16] = "akumapos_04";
+
+const char cmbAkumaposName03[16] = "akumapos_03";
+
+const char cmbAkumaposName02[16] = "akumapos_02";
+
+const char cmbAkumaposName01[16] = "akumapos_01";
+
+const char fclCombineDevilModelFmt[24] = "/model/devil/on/%s.PB";
+
+const char fclCombineLoadModelFmt[40] = "Load model resource to memory : 0x%03X\n";
+
+const char fclCombineFreePackFmt[32] = "Free model pack data : 0x%03X\n";
+
+const char fclCombineFreeHandleFmt[32] = "Free model handle : 0x%03X\n";
+
+const char fclCombineHandleMdlLoadFmt[40] = "Get model handle from mdlLoad : 0x%03X\n";
+
+const char fclCombineHandleMemFmt[40] = "Get model handle from memory : 0x%03X\n";
+
+const cmbPanelScale_t cmbPanelScaleTable = { { 36.0f, 10.0f, 16.0f, 12.0f } };
+
+const char fclCombineTargetModelName[16] = "target.PB";
+
 #ifdef NON_MATCHING
 void cmbUpdateTimeTable(void)
 {
@@ -5262,29 +5286,17 @@ void cmbUpdateTimeTable(void)
     work->actionFrame = (s32)((u32)work->actionFrame + 1);
 }
 #else
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName04);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName03);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName02);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbAkumaposName01);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineDevilModelFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineLoadModelFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineFreePackFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineFreeHandleFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMdlLoadFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineHandleMemFmt);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbPanelScaleTable);
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclCombineTargetModelName);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 #endif
@@ -5417,8 +5429,8 @@ extern f32 cmbActionTargetModel[3];
 extern f32 cmbTargetModelId;
 extern s8 cmbActionMode;
 extern s8 cmbActionStep;
-extern char cmbInitActionMsg[];
-extern char cmbInitActionModeFmt[];
+extern const char cmbInitActionMsg[];
+extern const char cmbInitActionModeFmt[];
 
 void cmbInitAction(void)
 {
@@ -5549,7 +5561,7 @@ s32 cmbChkActScript(void)
     return dds3SearchProcessName(fclE807MainName) != NULL;
 }
 
-extern char cmbMovieProcessName[];
+extern const char cmbMovieProcessName[];
 
 s32 cmbChkPolygonMovie(void)
 {
@@ -5801,23 +5813,23 @@ void shopStartEvent(s8 value)
     evtStartEvent(0x322);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbBgmStopMsg);
+const char cmbBgmStopMsg[24] = "ACT BGM END ...\n";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbBgmPlayMsg);
+const char cmbBgmPlayMsg[24] = "ACT BGM START!!!\n";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbInitActionMsg);
+const char cmbInitActionMsg[24] = "Init action data!!!\n";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbInitActionModeFmt);
+const char cmbInitActionModeFmt[24] = "Time table no = %d\n";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", fclE807MainName);
+const char fclE807MainName[16] = "e807_main";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", cmbMovieProcessName);
+const char cmbMovieProcessName[16] = "PolygonMovie";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", shpTmxPath02);
+const char shpTmxPath02[32] = "/facility/tmx/shop/shop_02.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclCombineInit", shpTmxPath01);
+const char shpTmxPath01[32] = "/facility/tmx/shop/shop_01.tmx";
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", gProcessStat_0);
+s8 gProcessStat_0 = 0;
 
 SDATA_PAD(3);
 
@@ -5833,7 +5845,7 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuView);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmpSkillCursor);
+cmpSkillList_t *cmpSkillCursor = NULL;
 
 SDATA_PAD(4);
 
@@ -5841,9 +5853,9 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineNum2dFmt);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineStrFmt);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbActionMode);
+s8 cmbActionMode = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbActionStep);
+s8 cmbActionStep = 0;
 
 SDATA_PAD(3);
 
