@@ -115,6 +115,7 @@
 0x002F5C30	dds3RenderEyeVector	inferred	LookAtMatrix eye in dds3KernelProcess and effPacket; was kwlnHeldTextureEyeVector from DDS1/2
 0x002F69B8	sdfModelOtTable	inferred	sdfModelOt_t[11]; DDS kwlnSceneSurfaceSets[10] is a different layout, not reused; DDS macro D_002F69B8 stays; former name D_002F69B8
 0x002FA240	sdfViewMatrix	inferred	DDS1/2 name for the same view matrix (mdlManager, effMath)
+0x0030A2D8	fldSceneBgmTrackTable	inferred	MIDI bank id << 16 (0x00460000), read by fldSe.c bgm mode case 2; DDS fldSceneBgmTrackTable (dds1 0x0033EAE8) is the same table with 36 entries
 0x0031DD20	effPCPThunderSpherePolyDataList	inferred	effPartPCPDataTable[0], NULL-terminated param list for kateg 0 (EffectPCPFuncTable[0] = effPCPThunderSpherePoly); former name D_0031DD20
 0x0031DD48	effPCPThunderPolyDataList	inferred	effPartPCPDataTable[1], param list for kateg 1 (effPCP_ThunderPoly); former name D_0031DD48
 0x0031DDA0	effPCPThunderRadiatePolyDataList	inferred	effPartPCPDataTable[2], param list for kateg 2 (effPCP_ThunderRadiatePoly); former name D_0031DDA0

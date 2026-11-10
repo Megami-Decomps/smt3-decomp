@@ -46,7 +46,7 @@ extern void p2sdStopSe(u32);
 
 extern s32 fldSeBgmId;
 
-extern s32 D_0030A2D8[];
+extern s32 fldSceneBgmTrackTable[];
 
 extern s32 fldBgmReloadStep;
 
@@ -589,7 +589,7 @@ void fld_1457F8(s32 mode) {
         fldSeBgmId = mode;
         break;
     case 2:
-        mode = D_0030A2D8[0] + 1;
+        mode = fldSceneBgmTrackTable[0] + 1;
         p2sdPlayBGM(mode);
         fldSeBgmId = mode;
         break;
