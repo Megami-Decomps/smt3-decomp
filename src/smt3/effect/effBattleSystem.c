@@ -58,9 +58,9 @@ extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatr
 extern void dds3EffectPartSetDirection(effPartHandle_t *hEffPart, void *pMatrix);
 extern void Mult(void);
 extern void ToMatrix(void);
-extern f32 D_00533510[4];
-extern f32 D_005335E0[4];
-extern f32 D_00533680[4];
+extern const f32 D_00533510[4];
+extern const f32 D_005335E0[4];
+extern const f32 D_00533680[4];
 
 typedef struct
 {
@@ -91,7 +91,7 @@ extern s32 sdfFileRead(void *handle, void *dst, s32 size);
 extern void sdfFileClose(void *handle);
 #include "sdk_libc.h"
 
-extern char effBTLFileFmt[];
+extern const char effBTLFileFmt[];
 
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
@@ -1584,7 +1584,7 @@ typedef struct {
     sdf3DLight_t *lights[3];
 } effHansyaLights_t;
 
-extern f32 D_005334C0[];
+extern const f32 D_005334C0[];
 extern sdfModelOt_t sdfModelOtTable[];
 extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
 extern void nbMakeUnitDrawMatrix(nbFormation_t *formation);
@@ -2710,127 +2710,127 @@ void effBTLSystemCut1DataFree(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLFileFmt);
+const char effBTLFileFmt[24] = "effBTLSys:file[%s]\n";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533318);
+const char D_00533318[32] = "/battle/d3p/FREEZE01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533338);
+const char D_00533338[24] = "/battle/d3p/SLEEP.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533350);
+const char D_00533350[24] = "/battle/d3p/PANIC.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533368);
+const char D_00533368[24] = "/battle/d3p/CLOSE2.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533380);
+const char D_00533380[24] = "/battle/d3p/CLOSE.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533398);
+const char D_00533398[24] = "/battle/d3p/POISON.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005333B0);
+const char D_005333B0[32] = "/battle/d3p/CHAHEART.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005333D0);
+const char D_005333D0[24] = "/battle/d3p/CHARM.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005333E8);
+const char D_005333E8[24] = "/battle/d3p/CURSE1.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533400);
+const char D_00533400[24] = "/battle/d3p/DOKURO.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533418);
+const char D_00533418[32] = "/battle/d3p/STONEB01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533438);
+const char D_00533438[24] = "/battle/d3p/STONEB.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533450);
+const char D_00533450[24] = "/battle/d3p/STONEB.PB";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533468);
+const char D_00533468[32] = "/battle/d3p/HANSYA_M.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533488);
+const char D_00533488[32] = "/battle/d3p/HANSYA_A.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005334A8);
+const char D_005334A8[24] = "/battle/d3p/HANSYA.PB";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005334C0);
+const f32 D_005334C0[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005334D0);
+const char D_005334D0[32] = "/battle/d3p/KYU_BLUR.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005334F0);
+const char D_005334F0[32] = "/battle/d3p/KYU_RING.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533510);
+const f32 D_00533510[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533520);
+const char D_00533520[24] = "/battle/bed/return.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533538);
+const char D_00533538[32] = "/battle/d3p/RSMOKE01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533558);
+const char D_00533558[32] = "/battle/d3p/YSMOKE01.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533578);
+const char D_00533578[24] = "/battle/d3p/FPS3B.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533590);
+const char D_00533590[24] = "/battle/d3p/FPRE2B.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005335A8);
+const char D_005335A8[24] = "/battle/d3p/FPSE02.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005335C0);
+const char D_005335C0[32] = "/battle/d3p/DAMAGE02.D3P";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005335E0);
+const f32 D_005335E0[4] = {0.0f, 1.0f, 0.0f, 0.0f};
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005335F0);
+const char D_005335F0[24] = "/battle/d3p/RPE2D.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533608);
+const char D_00533608[24] = "/battle/d3p/RPE2C.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533620);
+const char D_00533620[24] = "/battle/d3p/RPE2B.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533638);
+const char D_00533638[24] = "/battle/d3p/RPE2A.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533650);
+const char D_00533650[24] = "/battle/d3p/FE01.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533668);
+const char D_00533668[24] = "/battle/d3p/FPSE03.PCF";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533680);
+const f32 D_00533680[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533690);
+const char D_00533690[24] = "/battle/bed/encount.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005336A8);
+const char D_005336A8[32] = "/battle/bed/nego_kai.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005336C8);
+const char D_005336C8[32] = "/battle/bed/nego_kyu.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005336E8);
+const char D_005336E8[32] = "/battle/bed/nego_stone.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533708);
+const char D_00533708[24] = "/battle/bed/lusi.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533720);
+const char D_00533720[24] = "/battle/bed/beru.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533738);
+const char D_00533738[24] = "/battle/bed/meta.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533750);
+const char D_00533750[24] = "/battle/bed/isam2_a.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533768);
+const char D_00533768[24] = "/battle/bed/isam1_a.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533780);
+const char D_00533780[24] = "/battle/bed/ken.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533798);
+const char D_00533798[24] = "/battle/bed/kagu2.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005337B0);
+const char D_005337B0[24] = "/battle/bed/kagu1.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005337C8);
+const char D_005337C8[24] = "/battle/bed/isam2.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005337E0);
+const char D_005337E0[24] = "/battle/bed/isam1.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005337F8);
+const char D_005337F8[24] = "/battle/bed/ariman2.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533810);
+const char D_00533810[24] = "/battle/bed/ariman1.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533828);
+const char D_00533828[24] = "/battle/bed/mudo01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533840);
+const char D_00533840[24] = "/battle/bed/hama01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533858);
+const char D_00533858[32] = "/battle/bed/megido01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533878);
+const char D_00533878[24] = "/battle/bed/zan01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533890);
+const char D_00533890[24] = "/battle/bed/jio01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338A8);
+const char D_005338A8[24] = "/battle/bed/bufu01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338C0);
+const char D_005338C0[24] = "/battle/bed/agi01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338D8);
+const char D_005338D8[32] = "/battle/bed/hanyou01.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338F8);
+const char D_005338F8[32] = "/battle/bed/hojyoUP01.BED";
 
 void *effBTLSystemCut1Create(nbFormation_t *pFormation, s32 index)
 {
@@ -2991,9 +2991,9 @@ void effBTLSystemInit(void)
     sdfMemFreeDirect(archiveHandle);
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLSysLogFmt);
+const char effBTLSysLogFmt[16] = "effBTLSys:[%s]\n";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", effBTLSysPath);
+const char effBTLSysPath[24] = "/battle/BTLSYS.PAC";
 
 void effBTLSystemEnd(void)
 {
@@ -3295,7 +3295,7 @@ void func_00174C50(u32 color)
     effDebugPointDraw(&center);
 }
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A40);
+const char D_00533A40[16] = "BED SELECT";
 
 char *effMakeBedPath(char *path)
 {
@@ -3668,61 +3668,61 @@ extern char effBTLPlayerSphereLabel[0x20];
 extern char effBTLEnemySphereLabel[0x20];
 extern f32 effBTLModelGroupGetSphereOld(u32 group);
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A60);
+const char D_00533A60[16] = "CYLINDER";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A70);
+const char D_00533A70[16] = "POINT LIGHT";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A80);
+const char D_00533A80[16] = "MODEL COLOR";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533A90);
+const char D_00533A90[16] = "MODEL EDIT";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AA0);
+const char D_00533AA0[16] = "FIELD EDIT";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AB0);
+const char D_00533AB0[16] = "C HELPER VIEW";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AC0);
+const char D_00533AC0[16] = "C ALL TABLE";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AD0);
+const char D_00533AD0[16] = "C ALL EDIT ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AE0);
+const char D_00533AE0[16] = "C P COLL";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533AF0);
+const char D_00533AF0[16] = "C S COLL";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B00);
+const char D_00533B00[16] = "C C COLL";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B10);
+const char D_00533B10[16] = "FIELD COLOR";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B20);
+const char D_00533B20[16] = "EFFECT MENU";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B30);
+const char D_00533B30[16] = "HATUDOU.BED ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B40);
+const char D_00533B40[16] = "BTL_TEST.BED";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B50);
+const char D_00533B50[16] = "ALLHANSYA   ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B60);
+const char D_00533B60[16] = "AUTO        ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B70);
+const char D_00533B70[16] = "ENEMYCOMM   ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B80);
+const char D_00533B80[16] = "ALLHIT      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533B90);
+const char D_00533B90[16] = "SKILLDEBUG  ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BA0);
+const char D_00533BA0[16] = "BOUGAI      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BB0);
+const char D_00533BB0[16] = "JDEBUG      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BC0);
+const char D_00533BC0[16] = "NEGO        ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BD0);
+const char D_00533BD0[16] = "EFFECT      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BE0);
+const char D_00533BE0[16] = "CHANGE      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533BF0);
+const char D_00533BF0[16] = "DAMAGE      ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C00);
+const char D_00533C00[16] = "PRESS       ";
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C10);
+const char D_00533C10[16] = "SYSTEM MENU";
 
 void effBTLDebugPrintDistance(void)
 {
@@ -3890,5 +3890,5 @@ effBTLSystemFunc_t effBTLSystemTable[30] = {
     { (void * (*)(nbFormation_t *))effBTLSys_Nego_Stone_Create, (void (*)(void *))effBTLSys_Nego_Stone_Delete, (void (*)(void *))effBTLSys_Nego_Stone_Delete2, NULL, (void (*)(void *))effBTLSys_Nego_Stone_Draw, (u32 (*)(void *))effBTLSys_Nego_Stone_GetLength, effBTLSys_Nego_Stone_DataLoad, effBTLSys_Nego_Stone_DataFree, effBTLSys_Nego_Stone_PartHandleCreate, effBTLSys_Nego_Stone_PartHandleDelete, 0x80808080, 1, { 0, 0, 0 }, 1, effBTLSystem_Nego_Stone_PartList },
 };
 
-INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C40);
+const char D_00533C40[16] = "DEBUG MENU";
 
