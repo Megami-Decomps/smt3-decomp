@@ -30,8 +30,6 @@ extern s32 dds3ConfigValue[2];
 
 extern void dds3DrawConfigPanel(s32 id);
 
-
-
 extern char dds3ConfigProcName[];
 
 extern s8 dds3ConfigState;
@@ -198,5 +196,5 @@ s32 dds3UpdateConfig(void *PID)
     return 0;
 }
 
-INCLUDE_SDATA(const s32, "kernel/dds3ConfigMain", dds3ConfigProcName);
+char dds3ConfigProcName[8] = "config";
 
