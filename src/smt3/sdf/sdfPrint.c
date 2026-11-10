@@ -137,7 +137,7 @@ void sdfPrintRpcThread(void)
 }
 
 
-extern char sdfPrintIopBindErrMsg[];
+extern const char sdfPrintIopBindErrMsg[];
 
 #include "sdk_libc.h"
 
@@ -197,11 +197,11 @@ s32 sdfPrintf(const char *str, ...) {
     sdfPuts(buffer);
     return length;
 }
-INCLUDE_RODATA(const s32, "sdf/sdfPrint", sdfPrintIopBindErrMsg);
+const char sdfPrintIopBindErrMsg[16] = "rpc bind error\n";
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
+s8 sdfPrintIopFlag = 0;
 
 SDATA_PAD(7);
 
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintStrFmt);
+char sdfPrintStrFmt[4] = "%s";
 
