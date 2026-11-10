@@ -343,5 +343,5 @@ void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize)
     }
 }
 
-INCLUDE_SDATA(const s32, "pipe/pipeEffect", pipeBulrLimitValue);
+s32 pipeBulrLimitValue = 0;
 
