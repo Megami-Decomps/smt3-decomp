@@ -780,19 +780,19 @@ void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag) {
     stateWords[7] = 0x42;
     sdfDrawTagLink(pdrawtag, packet);
 }
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelMesWinLineVertexIndex);
+u8 itfPanelMesWinLineVertexIndex[8] = {0, 1, 2, 3, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelSelWinLineVertexIndex);
+u8 itfPanelSelWinLineVertexIndex[8] = {0, 1, 2, 3, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPlainRectVertexIndex);
+u8 itfPanelPlainRectVertexIndex[8] = {0, 1, 2, 3, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPlainRectColorIndex);
+u8 itfPanelPlainRectColorIndex[8] = {0, 0, 1, 1, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPera1RectVertexIndex);
+u8 itfPanelPera1RectVertexIndex[8] = {0, 1, 2, 3, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelPera1RectColorIndex);
+u8 itfPanelPera1RectColorIndex[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelLeftFadeStripVertexIndex);
+u8 itfPanelLeftFadeStripVertexIndex[8] = {0, 3, 1, 4, 2, 5, 0, 0};
 
-INCLUDE_SDATA(const s32, "interface/itfPanel", itfPanelLeftFadeStripColorIndex);
+u8 itfPanelLeftFadeStripColorIndex[8] = {1, 1, 1, 1, 0, 0, 0, 0};
 
