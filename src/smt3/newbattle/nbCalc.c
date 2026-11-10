@@ -290,7 +290,7 @@ extern s32 nbGetEscapeSwitch(nbMainProcessData_t *data);
 
 extern f32 nbGetHojoRitu(s32 formindex, s32 type);
 
-extern char D_00544D30[];
+extern const char D_00544D30[];
 extern s32 datGetNormalAtkPow(datUnitWork_t *work);
 
 
@@ -1303,7 +1303,7 @@ s32 nbGetDeadType(s32 nskill, s32 sformindex, s32 dformindex)
     return 0;
 }
 
-extern char D_00544BF8[];
+extern const char D_00544BF8[];
 
 s32 nbCheckStoneDead(s32 nskill, s32 dformindex)
 {
@@ -1469,9 +1469,9 @@ s32 nbGetAisyoTable(s32 formindex)
 extern u32 datAisyoTable[248][16];
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544BF8);
+const char D_00544BF8[24] = "\300\320\262\275\260\354\267\342\263\316\316\250 =%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544C10);
+const char D_00544C10[32] = "\245\320\245\303\245\310\245\271\245\306\241\274\245\277\245\271\262\363\311\374\263\316\316\250 = %d\n";
 
 u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr)
 {
@@ -2484,7 +2484,7 @@ typedef struct { f32 factor[6]; } nbCheckSenseiFactors_t;
 
 extern nbEncountEntry_t nbEncountTable[];
 extern const nbCheckSenseiFactors_t D_00544D58;
-extern char D_00544D70[];
+extern const char D_00544D70[];
 
 s32 nbCheckSensei(nbMainProcessData_t *data)
 {
@@ -2908,15 +2908,15 @@ s32 nbGetKakutokuMaka(nbMainProcessData_t *data)
     return maka;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D30);
+const char D_00544D30[40] = "\262\363\311\374 waza = %d, atkritu = %f \262\363\311\374\303\315=%d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D58);
+const nbCheckSenseiFactors_t D_00544D58 = { { 1.0f, 0.9f, 0.79999995231628417969f, 0.59999996423721313477f, 0.0f, 3.0f } };
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544D70);
+const char D_00544D70[56] = "\300\350\300\251\316\250 Plv = %d, Elv = %d, Tbl = %d, z = %d, rnd = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
+const char D_00544DA8[56] = "\245\320\245\303\245\257\245\242\245\277\245\303\245\257\263\316\316\250 X = %d, Y = %d, B = %d rand = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
+const char D_00544DE0[16] = "\306\250\301\366\316\250 = %d\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
+const char D_00544DF0[32] = "renzoku ritu = %d, index = %d\n";
 
