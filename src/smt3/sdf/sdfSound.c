@@ -515,12 +515,11 @@ extern char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
 
 void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount);
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 39 of 45 words match at the exact 180-byte size. */
 void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount)
 {
     p2sdLoadEntry_t *slot;
     s32 address;
+    s32 emptyId;
     s32 i;
 
     sdfSndWork.header = aVoiceCount;
@@ -535,19 +534,17 @@ void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount)
     printf(sdfSndIopSizeMsg);
     address = sdfSndIopAlloc(0x24E00);
     sdfSndWork.opaque1D0 = 0;
+    emptyId = -1;
     sdfSndWork.opaque1D4 = 0;
     sdfSndWork.channels[0].iopWorkAddress = address;
     slot = sdfSndWork.slots;
     for (i = 6; i >= 0; i--) {
-        slot->unk0 = -1;
+        slot->unk0 = emptyId;
         slot->unk4 = 0;
         slot->unk5 = 0;
         slot++;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfSound", sdfSndVoiceMapInit);
-#endif
 
 void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 {
@@ -588,6 +585,8 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 
 extern s32 sceSifInitIopHeap(void);
 extern s32 sdfSndIopWorkAddr;
+
+INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndIopSizeMsg);
 
 INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndSeqMapInitMsg);
 

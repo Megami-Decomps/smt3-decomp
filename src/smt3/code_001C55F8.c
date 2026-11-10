@@ -371,50 +371,12 @@ s32 nbCameraHelperViewer_Init(s32 pData)
 
 extern u8 nbCameraHelperViewerShowFrame;
 extern u8 nbCameraHelperViewerShowLines;
-extern const char nbCameraHelperViewerFrameFormat[];
 
 extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
 extern void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode);
 extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
 extern s32 nbCameraCheckNiidaCamera(void);
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 48 of 83 words match; 332 bytes emitted against retail 336. */
-void nbCameraHelperViewer_Draw(void *pData)
-{
-    char buf[0x70];
-    u16 frame;
-    s32 last;
-    u16 i;
-    sdfVector4_t *eye;
-    sdfVector4_t *target;
-    if (nbCameraHelperViewerCurrent == NULL) {
-        return;
-    }
-    if (nbCameraHelperViewerShowFrame != 0) {
-        sprintf(buf, nbCameraHelperViewerFrameFormat, nbCameraHelperViewerCurrent->frame,
-                nbCameraHelperLength(nbCameraHelperViewerCurrent));
-        effDebugStringDraw(0x12C, 0x3C, 0, buf);
-    }
-    frame = nbCameraHelperViewerCurrent->frame;
-    eye = &nbCameraHelperViewerCurrent->eye;
-    target = &nbCameraHelperViewerCurrent->target;
-    SDF_VU0_COPYVECTOR(&nbCameraHelperViewerState[frame - 1], eye);
-    SDF_VU0_COPYVECTOR(&nbCameraHelperViewerHandle[frame - 1], target);
-    if (nbCameraHelperViewerShowLines != 0 && nbCameraCheckNiidaCamera() == 0) {
-        last = frame - 1;
-        for (i = 0; i < last; i++) {
-            effDebugLineDraw2(&nbCameraHelperViewerState[i],
-                              &nbCameraHelperViewerState[i + 1], 0x80804000);
-            effDebugLineDraw2(&nbCameraHelperViewerHandle[i],
-                              &nbCameraHelperViewerHandle[i + 1], 0x80004080);
-        }
-        effDebugPointDraw2(&nbCameraHelperViewerCurrent->eye, 0x80800000);
-        effDebugPointDraw2(&nbCameraHelperViewerCurrent->target, 0x80000080);
-    }
-    nbCameraHelperRun(nbCameraHelperViewerCurrent);
-}
-#else
 INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotTarget);
 
 INCLUDE_RODATA(const s32, "code_001C55F8", nbCameraHelperMsgNotEye);
@@ -427,8 +389,48 @@ INCLUDE_RODATA(const s32, "code_001C55F8", D_005358C0);
 
 INCLUDE_RODATA(const s32, "code_001C55F8", D_005358D0);
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_Draw);
-#endif
+void nbCameraHelperViewer_Draw(void *pData)
+{
+    char buf[0x70];
+    u16 frame;
+    s32 last;
+    u16 i;
+    nbCameraHelper_tag *helper = nbCameraHelperViewerCurrent;
+    sdfVector4_t *eye;
+    sdfVector4_t *target;
+    if (helper == NULL) {
+        return;
+    }
+    if (nbCameraHelperViewerShowFrame != 0) {
+        sprintf(buf, "FRAME: %d/%d", nbCameraHelperViewerCurrent->frame,
+                nbCameraHelperLength(helper));
+        effDebugStringDraw(0x12C, 0x3C, 0, buf);
+        helper = nbCameraHelperViewerCurrent;
+    }
+    /* Keep the same helper for both aligned four-float copies. */
+    frame = helper->frame;
+    eye = &helper->eye;
+    target = &helper->target;
+    SDF_VU0_COPYVECTOR_F32(&nbCameraHelperViewerState[frame - 1], eye);
+    SDF_VU0_COPYVECTOR_F32(&nbCameraHelperViewerHandle[frame - 1], target);
+    if (nbCameraHelperViewerShowLines != 0) {
+        if (nbCameraCheckNiidaCamera() == 0) {
+            last = frame - 1;
+            for (i = 0; i < last; i++) {
+                effDebugLineDraw2(&nbCameraHelperViewerState[i],
+                                  &nbCameraHelperViewerState[i + 1], 0x80804000);
+                effDebugLineDraw2(&nbCameraHelperViewerHandle[i],
+                                  &nbCameraHelperViewerHandle[i + 1], 0x80004080);
+            }
+            effDebugPointDraw2(&nbCameraHelperViewerCurrent->eye, 0x80800000);
+            effDebugPointDraw2(&nbCameraHelperViewerCurrent->target, 0x80000080);
+        }
+        /* Any camera/debug callback may replace the current helper. */
+        helper = nbCameraHelperViewerCurrent;
+    }
+    nbCameraHelperRun(helper);
+}
+
 
 
 void nbCameraHelperViewer_End(void) {
