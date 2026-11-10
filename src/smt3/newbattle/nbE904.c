@@ -250,7 +250,7 @@ extern u16 nbE905SavedPartyCount[];
 
 extern char nbBossModelPath[];
 
-extern char nbBossModelPathFmt[];
+extern const char nbBossModelPathFmt[];
 
 extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
@@ -270,7 +270,7 @@ extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smo
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char D_005467E0[];
+extern const char D_005467E0[];
 
 extern s32 nbMaeCheckDone(void);
 
@@ -658,13 +658,13 @@ s32 nbE905_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE904", nbBossModelPathFmt);
+const char nbBossModelPathFmt[26] = "/model/devil/boss/0x%x.PB";
 
-INCLUDE_RODATA(const s32, "newbattle/nbE904", D_005467E0);
+const char D_005467E0[16] = { 0xA5, 0xA2, 0xA1, 0xBC, 0xA5, 0xEA, 0xA5, 0xDE, 0xA5, 0xF3, 0xCA, 0xD1, 0xBF, 0xC8, 0x0A, 0x00 };
 
-INCLUDE_SDATA(const s32, "newbattle/nbE904", nbCameraBasic);
+dds3Basic_t *nbCameraBasic = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE904", nbMotionBasicFirst);
+dds3Basic_t *nbMotionBasicFirst = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE904", nbMotionBasicSecond);
+dds3Basic_t *nbMotionBasicSecond = 0;
 
