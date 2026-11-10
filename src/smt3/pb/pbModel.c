@@ -485,7 +485,7 @@ void pbSetPrimMatrix(sdfVector4_t *rot, f32 *pos, void *prim) {
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s8 pbNeighborOffsets[4][2];
-extern s32 pbNeighborBitIndex[];
+extern const s32 pbNeighborBitIndex[];
 
 u8 pbFindBlockSlot(s16 x, s16 y, s32 mode)
 {
@@ -694,6 +694,8 @@ void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * seq38, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
+const s32 pbNeighborBitIndex[6] = { 3, 4, 1, 2, 0, 0 };
+
 #ifdef NON_MATCHING
 extern sdfVector2_t pbMapUvSpecial23[], pbMapUvSpecial5[], pbMapUvSpecial4[], pbMapUvSpecial1[];
 extern u32 pbMapSpecialColorTable[];
@@ -786,8 +788,6 @@ s32 pbDrawMapPolyTransformed(sdfVector4_t *base, u8 drawFlags, s32 special, sdfD
     return request.pointCount;
 }
 #else
-INCLUDE_RODATA(const s32, "pb/pbModel", pbNeighborBitIndex);
-
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPolyTransformed);
 #endif
 
@@ -826,11 +826,11 @@ s32 pbDrawMapBlock(s32 x, s32 y, s32 flags, s32 special,
     return result;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetXNeg);
+const f64 pbMapOffsetXNeg __attribute__((section(".rodata"))) = 0.19999999999999998335;
 
-INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetXPos);
+const f64 pbMapOffsetXPos __attribute__((section(".rodata"))) = 0.19999999999999998335;
 
-INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetZNeg);
+const f64 pbMapOffsetZNeg __attribute__((section(".rodata"))) = 0.19999999999999998335;
 
-INCLUDE_RODATA(const s32, "pb/pbModel", pbMapOffsetZPos);
+const f64 pbMapOffsetZPos __attribute__((section(".rodata"))) = 0.19999999999999998335;
 
