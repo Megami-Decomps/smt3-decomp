@@ -106,3 +106,15 @@
 0x002C17D8	sdfSndDispatchCommandWithoutPayload	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C17D8; DDS name sndDispatchCommandWithoutPayload with the sdfSnd prefix
 0x002C1788	sdfSndQueueNoPayloadCommand210	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1788; DDS name sndQueueNoPayloadCommand210 with the sdfSnd prefix
 0x002C1E70	sdfSndSendChannelGroupCommand150	inferred	DDS1/2 name for the same sdfSound function; former name func_002C1E70; DDS name sndSendChannelGroupCommand150 with the sdfSnd prefix
+0x002C27F8	sdfSndGetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C27F8; DDS name sdfSoundGetTableEntry with the sdfSnd prefix
+0x002C2618	sdfSndSetTableEntry	inferred	DDS1/2 name for the same sdfSound function; former name sdf_2C2618; DDS name sdfSoundSetTableEntry with the sdfSnd prefix
+0x002C2280	sdfSndGetCommandStatus	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C2280; DDS name sdfSoundGetCommandStatus with the sdfSnd prefix
+0x002C21D8	sdfSndSetChannelCount	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C21D8; DDS name sdfSoundSetChannelCount with the sdfSnd prefix
+0x002C1F90	sdfSndCopyGroupedMidiStateBytes	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F90; DDS name sndCopyGroupedMidiStateBytes with the sdfSnd prefix
+0x002C1F70	sdfSndGetMidiStateWordPair	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F70; DDS name sndGetMidiStateWordPair with the sdfSnd prefix
+0x002C1F60	sdfSndGetTrackSlotTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F60; DDS name sndGetTrackSlotTable with the sdfSnd prefix
+0x002C1F50	sdfSndGetMidiChannelTable	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F50; DDS name sndGetMidiChannelTable with the sdfSnd prefix
+0x002C1F28	sdfSndGetNonnegativeEntryBalance	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F28; DDS name sndGetNonnegativeEntryBalance with the sdfSnd prefix
+0x002C1F10	sdfSndGetTrackBalanceSecondComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1F10; DDS name sndGetTrackBalanceSecondComponent with the sdfSnd prefix
+0x002C1EF8	sdfSndGetTrackBalanceFirstComponent	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EF8; DDS name sndGetTrackBalanceFirstComponent with the sdfSnd prefix
+0x002C1EA0	sdfSndReleaseMidiTrack	inferred	DDS1/2 name for the same sdfSound function; former name p2sd_2C1EA0; DDS name sndReleaseMidiTrack with the sdfSnd prefix

@@ -1366,7 +1366,7 @@ submission index at +0x19, rather than an unrelated MIDI-table view.
 The sound work view accounts for SMT3's seven track slots and opaque words
 at +0x1D8/+0x1DC; its two 24-byte MIDI state groups begin at +0x560 with
 a 0x20-byte stride. These offsets differ from the DDS reference layouts.
-`p2sd_2C1F50` returns the 0x10-byte channel rows initialized by
+`sdfSndGetMidiChannelTable` returns the 0x10-byte channel rows initialized by
 `sdfSndVoiceMapInit` at `sdfSndMap + 0x10`, not an eight-byte volume view.
 The IPU output-mode byte describes RGBA32, RGBA16 or dithered RGBA16;
 `sdfIpuDecode` turns those selectors into BDEC's OFM/DTE bits using the
