@@ -52,7 +52,7 @@ extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
 extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
 typedef struct polyMovieObject_t polyMovieObject_t;
 extern s32 evtStopMover(polyMovieObject_t *mover, s32 sw, s32 baseframe, s32 nowframe);
-extern char evtViewerPathLinkMsg[];
+extern const char evtViewerPathLinkMsg[];
 extern s8 evtFrameListFieldTable[];
 extern s32 PopMenu(void);
 extern s32 strcmp(const char *a, const char *b);
@@ -629,7 +629,7 @@ void *SearchBasicFromNameIndex_evtEventViewer(s32 index)
     return dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, viewerinfo->nametable[index]);
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", evtViewerPathLinkMsg);
+const char evtViewerPathLinkMsg[40] = "\xa5\xa8\xa5\xd5\xa5\xa7\xa5\xaf\xa5\xc8\xa4\xd1\xa4\xb9\xa5\xea\xa5\xf3\xa5\xaf!! -> (%d, %d)\n";
 
 void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 baseframe)
 {
@@ -1654,7 +1654,7 @@ u32 evtEventViewerProcess5_0(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B620);
+const char D_0053B620[32] = "FREE CAMERA\0\0\0\0\0GAME CAMERA\0\0\0\0\0";
 
 s32 EnterMain(void)
 {
@@ -1789,6 +1789,22 @@ s32 EnterObjList(void)
     PushMenu(5, 0x90, 0x48);
     return 0;
 }
+
+const char evtFrameFadeBlackOut[16] = "BLACK OUT";
+
+const char evtFrameFadeBlackIn[16] = "BLACK IN";
+
+const char evtFrameFadeWhiteOut[16] = "WHITE OUT";
+
+const char evtFrameFadeWhiteIn[16] = "WHITE IN";
+
+const char evtViewerUnitVshadowOn[16] = "VSHADOW ON";
+
+const char evtViewerUnitMshadowOn[16] = "MSHADOW ON";
+
+const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
+
+const char evtViewerUnitDispOff[16] = "DISP OFF";
 
 #ifdef NON_MATCHING
 extern char *evtViewerDeleteConfirmNames[], *evtViewerTransModeNames[], *evtViewerUnitControlNames[];
@@ -2071,21 +2087,6 @@ s32 EnterFrameList(s32 action)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B700);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B710);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B720);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B730);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B740);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B750);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B760);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B770);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 #endif
@@ -2577,61 +2578,60 @@ s32 evtKillEventViewer(void)
     return dds3KillProcessName("EventViewer", 1);
 }
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", viewerinfo);
+evtViewerInfo_t *viewerinfo = 0;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtFileMajor);
+u16 evtFileMajor = 0x01F4;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_file_minor);
+u16 evt_file_minor = 0x0001;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", winoff_x);
+s16 winoff_x = 0;
 
-SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evt_camera);
+evtViewerObject_s *evt_camera = 0;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerFreeCameraName);
+char *evtViewerFreeCameraName = (char *)D_0053B620;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerGameCameraName);
+char *evtViewerGameCameraName = (char *)&D_0053B620[0x10];
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerCameraNameFormat);
+char evtViewerCameraNameFormat[3] = "%s";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", capwait);
+s32 capwait = 0;
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F840);
+char evtViewerStrNo[3] = "NO";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F848);
+char evtViewerStrYes[4] = "YES";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F850);
+char evtViewerStrOn[3] = "ON";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F858);
+char evtViewerStrOff[4] = "OFF";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F860);
+char evtViewerStrSub[4] = "SUB";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F868);
+char evtViewerStrAdd[4] = "ADD";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F870);
+char evtViewerStrNormal[7] = "NORMAL";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F878);
+char evtFrameFadeNameAllStop[8] = "ALLSTOP";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F880);
+char evtFrameFadeNameVolUp[6] = "VOLUP";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F888);
+char evtFrameFadeNameVolDown[8] = "VOLDOWN";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F890);
+char evtFrameFadeNameTrans[6] = "TRANS";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F898);
+char evtFrameFadeNameFadeOut[8] = "FADEOUT";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8A0);
+char evtFrameFadeNameFadeIn[7] = "FADEIN";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8A8);
+char evtFrameFadeNamePlay[5] = "PLAY";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8B0);
+char evtViewerUnitControlNameDispOn[8] = "DISP ON";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameSlight);
+char evtViewerProcNameSlight[7] = "slight";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameSfog);
+char evtViewerProcNameSfog[5] = "sfog";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameFilter);
+char evtViewerProcNameFilter[7] = "filter";
 
-INCLUDE_SDATA(const s32, "event/evtEventViewer", evtViewerProcNameMfilter);
+char evtViewerProcNameMfilter[8] = "mfilter";
 

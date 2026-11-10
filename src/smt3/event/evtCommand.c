@@ -184,7 +184,7 @@ s32 fldGbSetGimic(s32 fld, s32 area, s32 hojiID, s32 toplast);
 extern void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic);
 
 
-extern char evtMsgObjPathPara0[], evtMsgObjPathPara1[], evtMsgObjPathMoveNoObj[];
+extern const char evtMsgObjPathPara0[], evtMsgObjPathPara1[], evtMsgObjPathMoveNoObj[];
 
 void evtEnableMoonCalc(void);
 
@@ -200,15 +200,15 @@ dds3ProcessID_t *evtLoadEventPack(s32 eventno);
 
 s32 evtGetEventPackStat(u32 eventno);
 
-extern char evtMsgBeOk[];
+extern const char evtMsgBeOk[];
 
 void sdfPrintf(const char *str, ...);
 
-extern char evtMsgLoadBeStart[];
+extern const char evtMsgLoadBeStart[];
 
-extern char evtMsgReadBeStart[];
+extern const char evtMsgReadBeStart[];
 
-extern char evtMsgPmvRunNoProc[];
+extern const char evtMsgPmvRunNoProc[];
 
 void evtPathRate(dds3Basic_t *basic, f32 rate);
 
@@ -216,7 +216,7 @@ void evtPathDir(dds3Basic_t *basic, u32 dir);
 
 dds3ProcessID_t *evtStartPictureProcess(s32 priority, struct sdfTexHandle_t *texpath);
 
-extern char evtMsgTexBeNoProc[];
+extern const char evtMsgTexBeNoProc[];
 
 typedef u8 sdfTextureClampMode_t;
 
@@ -284,12 +284,12 @@ extern void fldSetNextField(s32 command, s32 para);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern char evtMsgNameNotFound[];
+extern const char evtMsgNameNotFound[];
 
 
-extern char evtMsgEffmg1LoadHint[];
+extern const char evtMsgEffmg1LoadHint[];
 
-extern char evtMsgEffmg2LoadHint[];
+extern const char evtMsgEffmg2LoadHint[];
 
 extern void dds3ObjectBaseOnFlag(void *basic, s32 flag);
 
@@ -305,9 +305,9 @@ extern void evtUnitLightOff(evtUnit_t *h, s32 frame);
 
 extern u8 evtUnitLightAnimeStat(evtUnit_t *h);
 
-extern char evtMsgModelMotionDeprecated[];
+extern const char evtMsgModelMotionDeprecated[];
 
-extern char evtMsgModelMoveMotDeprecated[];
+extern const char evtMsgModelMoveMotDeprecated[];
 
 extern void func_001E3C30(void *unit, s32 p1, s32 p2, s32 p3, s32 p4, s32 p5);
 
@@ -393,17 +393,17 @@ extern void sdfTexFreeDelayed(void *aHandle);
 extern void evtSetUnitMove2(evtUnit_t *h, s32 movetype, s32 posID, s32 motion,
                             s32 para1, s32 para2, void *func, void *data);
 
-extern char evtMsgPmvLoadArgs[];
+extern const char evtMsgPmvLoadArgs[];
 
-extern char evtMsgPmvLoadNoProc[];
+extern const char evtMsgPmvLoadNoProc[];
 
-extern char evtMsgPmvLoadStart[];
+extern const char evtMsgPmvLoadStart[];
 
-extern char evtMsgPmvLoadEnd[];
+extern const char evtMsgPmvLoadEnd[];
 
-extern char evtMsgPmvRun2Begin[];
+extern const char evtMsgPmvRun2Begin[];
 
-extern char evtMsgPmvRun2End[];
+extern const char evtMsgPmvRun2End[];
 
 
 extern void evtPictureDrawOn(void *id);
@@ -412,13 +412,13 @@ extern void evtPictureDrawOff(void *id);
 
 extern void evtKillPictureProcess(void *id);
 
-extern char evtMsgLightPathMoveError[];
+extern const char evtMsgLightPathMoveError[];
 
-extern char evtMsgLightPathMoveErrorDbg[];
+extern const char evtMsgLightPathMoveErrorDbg[];
 
-extern char evtMsgSetSkyAlphaLow[];
+extern const char evtMsgSetSkyAlphaLow[];
 
-extern char evtMsgSetSkyAlphaHigh[];
+extern const char evtMsgSetSkyAlphaHigh[];
 
 extern s32 *dds3GetActiveUnitSceneBasic(void *pSceneBasic);
 
@@ -428,7 +428,7 @@ extern void fldSkySetAlpha(s32 alp);
 
 extern void fldSkySetFilter(s32 idx, s32 mode, s32 hokan);
 
-extern char evtMsgBeOk[];
+extern const char evtMsgBeOk[];
 
 extern dds3Basic_t *dds3SceneBasicSearchName(void *scene, const char *name);
 
@@ -436,11 +436,11 @@ extern dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 type, const char *file);
 
 extern void *evtStartPictureProcess2(s32 priority, const char *texdata);
 
-extern char evtMsgTexLoadNoProc[];
+extern const char evtMsgTexLoadNoProc[];
 
-extern char evtMsgIdNotFound[];
+extern const char evtMsgIdNotFound[];
 
-extern char evtMsgIdNotFoundWarn[];
+extern const char evtMsgIdNotFoundWarn[];
 
 typedef struct
 {
@@ -454,17 +454,17 @@ extern dds3Basic_t *dds3AddD3PEffectObjectBasic(const char *file, evtVec_t *pos,
 
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic(const char *file, evtVec_t *pos, evtVec_t *rot);
 
-extern char evtMsgEffectLoadHint[];
+extern const char evtMsgEffectLoadHint[];
 
 extern void evtKillEventPack(s32 eventno);
 
-extern char evtMsgObjPathPara0[];
+extern const char evtMsgObjPathPara0[];
 
-extern char evtMsgObjPathPara1[];
+extern const char evtMsgObjPathPara1[];
 
-extern char evtMsgObjPathWaitNoObj[];
+extern const char evtMsgObjPathWaitNoObj[];
 
-extern char evtMsgDelBeStart[];
+extern const char evtMsgDelBeStart[];
 
 void *evtSearchBasic(s32 type, s32 serial)
 {
@@ -1197,19 +1197,19 @@ u32 evtCommand_EFFBED_LOAD(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgModelMotionDeprecated);
+const char evtMsgModelMotionDeprecated[64] = "\xa2\xa8\xc3\xed\xb0\xd5\x3a\x4d\x4f\x44\x45\x4c\x5f\x4d\x4f\x54\x49\x4f\x4e\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xba\xa3\xb8\xe5\xbb\xc8\xcd\xd1\xb6\xd8\xbb\xdf\xa4\xcb\xa4\xca\xa4\xea\xa4\xde\xa4\xb9\xa1\xa3\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgModelMoveMotDeprecated);
+const char evtMsgModelMoveMotDeprecated[64] = "\xa2\xa8\xc3\xed\xb0\xd5\x3a\x4d\x4f\x44\x45\x4c\x5f\x4d\x4f\x56\x45\x5f\x4d\x4f\x54\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xba\xa3\xb8\xe5\xbb\xc8\xcd\xd1\xb6\xd8\xbb\xdf\xa4\xcb\xa4\xca\xa4\xea\xa4\xde\xa4\xb9\xa1\xa3\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgLightDirZero);
+const char evtMsgLightDirZero[40] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgEffectBeNotFound);
+const char evtMsgEffectBeNotFound[32] = "EFFECT_BE not fount RID = %d\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgEffectBeFailed);
+const char evtMsgEffectBeFailed[24] = "\x45\x46\x46\x45\x43\x54\x5f\x42\x45\x28\x29\xc5\xd0\xcf\xbf\xbc\xba\xc7\xd4\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgEffectLoadHint);
+const char evtMsgEffectLoadHint[48] = "\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\x45\x46\x46\x45\x43\x54\x5f\x4c\x4f\x41\x44\x28\x29\xa4\xc7\xc2\xd0\xbe\xdd\xa5\xd5\xa5\xa1\xa5\xa4\xa5\xeb\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgNameNotFound);
+const char evtMsgNameNotFound[24] = "\x25\x73\xa4\xac\xb8\xab\xa4\xc4\xa4\xab\xa4\xea\xa4\xde\xa4\xbb\xa4\xf3\x21\x21\x0a";
 
 u32 evtCommand_EFFBED_BE(void) {
     sdfVector4_t position;
@@ -1321,7 +1321,7 @@ u32 evtCommand_EFFMG1_LOAD(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgEffmg1LoadHint);
+const char evtMsgEffmg1LoadHint[48] = "\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\x45\x46\x46\x4d\x47\x31\x5f\x4c\x4f\x41\x44\x28\x29\xa4\xc7\xc2\xd0\xbe\xdd\xa5\xd5\xa5\xa1\xa5\xa4\xa5\xeb\x0a";
 
 u32 evtCommand_EFFMG1_BE(void) {
     s32 taskId;
@@ -1364,7 +1364,7 @@ u32 evtCommand_EFFMG2_LOAD(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgEffmg2LoadHint);
+const char evtMsgEffmg2LoadHint[48] = "\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\x45\x46\x46\x4d\x47\x32\x5f\x4c\x4f\x41\x44\x28\x29\xa4\xc7\xc2\xd0\xbe\xdd\xa5\xd5\xa5\xa1\xa5\xa4\xa5\xeb\x0a";
 
 u32 evtCommand_EFFMG2_BE(void) {
     s32 taskId;
@@ -1770,9 +1770,9 @@ u32 evtCommand_CALL_PUZZLEBOY(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgIdNotFound);
+const char evtMsgIdNotFound[32] = "ID : id not found!! <%s>\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgIdNotFoundWarn);
+const char evtMsgIdNotFoundWarn[32] = "WARNING: ID not found! <%s>\n";
 
 s32 evtCommand_CALL_NEXT(void)
 {
@@ -2620,41 +2620,41 @@ s32 evtCommand_LIGHT_PATH_WAIT(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgObjPathPara0);
+const char evtMsgObjPathPara0[16] = "PARA0:%08x\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgObjPathPara1);
+const char evtMsgObjPathPara1[16] = "PARA1:%08x\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgObjPathMoveNoObj);
+const char evtMsgObjPathMoveNoObj[32] = "e OBJ_PATH_MOVE : obj==NULL\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgObjPathWaitNoObj);
+const char evtMsgObjPathWaitNoObj[32] = "e OBJ_PATH_WAIT : obj==NULL\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgLoadBeStart);
+const char evtMsgLoadBeStart[16] = "load BE (%d)..\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgBeOk);
+const char evtMsgBeOk[16] = "BE ok! (%d)\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgReadBeStart);
+const char evtMsgReadBeStart[16] = "read BE (%d)..\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgDelBeStart);
+const char evtMsgDelBeStart[16] = "del BE (%d)..\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvLoadArgs);
+const char evtMsgPmvLoadArgs[24] = "PMV_LOAD(%d,%d)\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvLoadNoProc);
+const char evtMsgPmvLoadNoProc[72] = "\xa2\xa8\xb7\xd9\xb9\xf0\x3a\x50\x4d\x56\x5f\x4c\x4f\x41\x44\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xa5\xd7\xa5\xed\xa5\xbb\xa5\xb9\xb7\xbf\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa4\xc7\xa4\xce\xa4\xdf\xcd\xad\xb8\xfa\xa4\xc7\xa4\xb9\xa1\xa3\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvLoadStart);
+const char evtMsgPmvLoadStart[24] = "load PMV (%03d_%03d)..\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvLoadEnd);
+const char evtMsgPmvLoadEnd[16] = "PMV_LOAD() end\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvRun2Begin);
+const char evtMsgPmvRun2Begin[16] = "PMV_RUN2()\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvRun2End);
+const char evtMsgPmvRun2End[16] = "PMV_RUN2() end\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgPmvRunNoProc);
+const char evtMsgPmvRunNoProc[72] = "\xa2\xa8\xb7\xd9\xb9\xf0\x3a\x50\x4d\x56\x5f\x52\x55\x4e\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xa5\xd7\xa5\xed\xa5\xbb\xa5\xb9\xb7\xbf\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa4\xc7\xa4\xce\xa4\xdf\xcd\xad\xb8\xfa\xa4\xc7\xa4\xb9\xa1\xa3\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgLightPathMoveError);
+const char evtMsgLightPathMoveError[24] = "LIGHT_PATH_MOVE error!\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgLightPathMoveErrorDbg);
+const char evtMsgLightPathMoveErrorDbg[32] = "error: LIGHT_PATH_MOVE.\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgTexBeNoProc);
+const char evtMsgTexBeNoProc[72] = "\xa2\xa8\xb7\xd9\xb9\xf0\x3a\x54\x45\x58\x5f\x42\x45\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xa5\xd7\xa5\xed\xa5\xbb\xa5\xb9\xb7\xbf\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa4\xc7\xa4\xce\xa4\xdf\xcd\xad\xb8\xfa\xa4\xc7\xa4\xb9\xa1\xa3\x0a";
 
 u32 evtCommand_TEX_BE(void) {
     scrProcessWork_s *work;
@@ -3068,11 +3068,11 @@ void evtDrawDeadMoonSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32
 }
 
 /* Acquire the background texture, then release the temporary file allocation. */
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgTexLoadNoProc);
+const char evtMsgTexLoadNoProc[72] = "\xa2\xa8\xb7\xd9\xb9\xf0\x3a\x54\x45\x58\x5f\x4c\x4f\x41\x44\x28\x29\xa4\xb3\xa4\xce\xa5\xb3\xa5\xde\xa5\xf3\xa5\xc9\xa4\xcf\xa5\xd7\xa5\xed\xa5\xbb\xa5\xb9\xb7\xbf\xa5\xb9\xa5\xaf\xa5\xea\xa5\xd7\xa5\xc8\xa4\xc7\xa4\xce\xa4\xdf\xcd\xad\xb8\xfa\xa4\xc7\xa4\xb9\xa1\xa3\x0a";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgSetSkyAlphaLow);
+const char evtMsgSetSkyAlphaLow[40] = "warning : SET_SKY_A alpha < -255\n";
 
-INCLUDE_RODATA(const s32, "event/evtCommand", evtMsgSetSkyAlphaHigh);
+const char evtMsgSetSkyAlphaHigh[48] = "warning : SET_SKY_A alpha > 255\n";
 
 void nbLoadDeadMoonTex(void) {
     u32 resource;
@@ -3090,7 +3090,7 @@ void nbFreeDeadMoonTex(void)
     DeadMoonTmx = NULL;
 }
 
-INCLUDE_SDATA(const s32, "event/evtCommand", evtKutiUnit);
+addr_t evtKutiUnit = 0;
 
-INCLUDE_SDATA(const s32, "event/evtCommand", DeadMoonTmx);
+sdfTexHandle_t *DeadMoonTmx = NULL;
 

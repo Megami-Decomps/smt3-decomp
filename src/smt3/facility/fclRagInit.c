@@ -44,7 +44,7 @@ extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, con
 
 extern s8 gProcessStat_1;
 
-extern char ragEventProcName[];
+extern const char ragEventProcName[];
 
 
 
@@ -60,9 +60,9 @@ extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 extern char ragCalcProcName[];
 
-extern char ragDrawProcName[];
+extern const char ragDrawProcName[];
 
-extern char ragUpdateProcName[];
+extern const char ragUpdateProcName[];
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -397,8 +397,8 @@ typedef struct
 } ragLoadTextureWork_t;
 
 extern char *ragTmxPathTable[];
-extern char ragBackgroundPath[];
-extern char ragMsgTexLoad[];
+extern const char ragBackgroundPath[];
+extern const char ragMsgTexLoad[];
 extern s32 fclLoadTexture(char *filename);
 extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1,
                            s32 texture);
@@ -421,7 +421,7 @@ void fclRagLoadTextures(u8 *data)
 }
 
 
-extern char ragMsgTexFree[];
+extern const char ragMsgTexFree[];
 
 void fclRagTexFree(u8 *pData)
 {
@@ -474,9 +474,9 @@ extern void fclInitCursorWindow(void *work, void *data, u8 count);
 extern void fclSetCursorList(void *work, s32 mode);
 extern char ragNewlineText[];
 extern char ragHexByteFormat[];
-extern char ragLabelItem[];
-extern char ragLabelSeirei[];
-extern char ragLabelMitama[];
+extern const char ragLabelItem[];
+extern const char ragLabelSeirei[];
+extern const char ragLabelMitama[];
 
 #ifdef NON_MATCHING
 extern void *memset(void *a, s32 b, size_t c);
@@ -534,7 +534,7 @@ extern void cmpResetDrawEnv(void);
 extern void fclRagLoadTextures(u8 *work);
 extern void fclRagTexLoad(u8 *work);
 extern void p2sdPlayBGM(s32 id);
-extern char ragMessagePath[];
+extern const char ragMessagePath[];
 
 fclRagWork_t *fclAllocRagWork(s8 type, s32 seq)
 {
@@ -718,39 +718,38 @@ void ragUpdateScene(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragEventProcName);
+const char ragEventProcName[10] = "e803_main";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragBackgroundPath);
+const char ragBackgroundPath[27] = "/facility/tmx/rag/r_bg.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMsgTexLoad);
+const char ragMsgTexLoad[17] = "RAG : Tex load.\n";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMsgTexFree);
+const char ragMsgTexFree[17] = "RAG : Tex free.\n";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelItem);
+const char ragLabelItem[10] = "ITEM   : ";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelSeirei);
+const char ragLabelSeirei[10] = "SEIREI : ";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragLabelMitama);
+const char ragLabelMitama[10] = "MITAMA : ";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragMessagePath);
+const char ragMessagePath[29] = "/facility/scr/rag/message.bf";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragDrawProcName);
+const char ragDrawProcName[9] = "rag_draw";
 
-INCLUDE_RODATA(const s32, "facility/fclRagInit", ragUpdateProcName);
+const char ragUpdateProcName[11] = "rag_update";
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", GBWK_0);
+u8 *GBWK_0 = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", gProcessStat_1);
+s8 gProcessStat_1 = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", ragMenuTextLeave);
+char ragMenuTextLeave[6] = "Leave";
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", ragMenuTextTalk);
+char ragMenuTextTalk[5] = "Talk";
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", ragNewlineText);
+char ragNewlineText[2] = "\n";
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", ragHexByteFormat);
+char ragHexByteFormat[6] = "%02x ";
 
-INCLUDE_SDATA(const s32, "facility/fclRagInit", ragCalcProcName);
+char ragCalcProcName[4] = "rag";
 

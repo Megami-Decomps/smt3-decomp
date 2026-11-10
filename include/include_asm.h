@@ -73,6 +73,10 @@
  * of one unit, where splat has no object to name (tools/include_sdata.py). */
 #define SDATA_PAD(N) __asm__(".pushsection .sdata\n\t.space " #N "\n.popsection\n")
 
+/* Return to .sdata after an INCLUDE_SDATA, which ends in .text, when C-defined
+ * small data follows: cc1 still believes it is in .sdata. */
+#define SDATA_RESUME() __asm__(".section .sdata\n")
+
 /* Raise this unit's .text alignment to 2^N, for a unit whose original object
  * was aligned more strictly than its own code needs. The retail link pads up
  * to it, so dropping the request moves everything after the unit. */
@@ -86,6 +90,7 @@ __asm__(".include \"macro.inc\"\n");
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)
 #define INCLUDE_SDATA(TYPE, FOLDER, NAME)
 #define SDATA_PAD(N)
+#define SDATA_RESUME()
 #define TEXT_ALIGN(N)
 
 #endif

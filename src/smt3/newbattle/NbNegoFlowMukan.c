@@ -221,7 +221,7 @@ extern s32 datGetPlayerLevel(void);
 
 #include "sdk_libc.h"
 
-extern char nbLevelPrintFmt[];
+extern const char nbLevelPrintFmt[];
 
 
 
@@ -811,5 +811,5 @@ s32 nbNegoFlowMukan(nbNegoProcessData_t *n)
     return D_004EF960[(u16)n->nownegoid](n);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowMukan", nbLevelPrintFmt);
+const char nbLevelPrintFmt[20] = "plv = %d, elv = %d\n";
 

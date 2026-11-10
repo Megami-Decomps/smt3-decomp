@@ -919,7 +919,7 @@ void nbInitAiScript(nbActionProcessData_t *a, s32 no)
     dds3LinkProcess(a->data->MainProcessID, proc);
     a->data->aiproc = proc;
 }
-INCLUDE_SDATA(const s32, "newbattle/nbAiScript", btl_ai_rot_cnt);
+s32 btl_ai_rot_cnt = 0;
 
 SDATA_PAD(4);
 

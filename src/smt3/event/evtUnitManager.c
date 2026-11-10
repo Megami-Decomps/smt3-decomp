@@ -939,7 +939,7 @@ evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit) {
 
 void *sdfChipAllocDirect(u32 aSize);
 
-extern sdfVector4_t D_0053A850;
+extern const sdfVector4_t D_0053A850;
 
 evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model) {
     evtUnit_t *work;
@@ -1091,7 +1091,7 @@ extern void FromRotation(f32 aAngle);
 
 void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
-extern sdfVector4_t evtUnitUpAxis;
+extern const sdfVector4_t evtUnitUpAxis;
 
 /* vu0 routine: turn the unit toward dir, at most a tenth of a radian a frame. */
 s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
@@ -1330,9 +1330,9 @@ extern void mdlSmoothSingleMotion(mdlObj_t *model, s32 group, s32 motion, f32 be
 extern s32 mdlChkMotionEndEx(mdlObj_t *model, s32 group);
 #include "sdk_libc.h"
 
-INCLUDE_RODATA(const s32, "event/evtUnitManager", D_0053A850);
+const sdfVector4_t D_0053A850 = { 0.0f, 1.0f, 0.5f, 0.0f };
 
-INCLUDE_RODATA(const s32, "event/evtUnitManager", evtUnitUpAxis);
+const sdfVector4_t evtUnitUpAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
     s32 moving = 0;

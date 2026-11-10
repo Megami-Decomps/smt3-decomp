@@ -151,7 +151,7 @@ void nbInitAtoProcess(nbMainProcessData_t *data)
 
 extern sdfMemHandle_t *nbResultFileHandle1, *nbResultFileHandle2, *nbResultFileHandle3;
 extern void *nbResultTmxData1, *nbResultTmxData2, *nbResultTmxData3;
-extern char nbResultTmxPath1[], nbResultTmxPath2[], nbResultTmxPath3[];
+extern const char nbResultTmxPath1[], nbResultTmxPath2[], nbResultTmxPath3[];
 
 void dds3LoadBootFile(void)
 {
@@ -160,9 +160,9 @@ void dds3LoadBootFile(void)
     nbResultFileHandle3 = sdfDevLoadFileEx(nbResultTmxPath3, (u32 *)&nbResultTmxData3, NULL);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath1);
+const char nbResultTmxPath1[32] = "/battle/tmx/result_01.tmx";
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath2);
+const char nbResultTmxPath2[32] = "/battle/tmx/result_02.tmx";
 
-INCLUDE_RODATA(const s32, "newbattle/nbAtoProcess", nbResultTmxPath3);
+const char nbResultTmxPath3[32] = "/battle/tmx/result_03.tmx";
 

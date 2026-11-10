@@ -262,9 +262,9 @@ void fldFreeAddressProcess(void)
     }
 }
 
-INCLUDE_SDATA(const s32, "field/fldPanel", addressprocess_id);
+dds3ProcessID_t *addressprocess_id = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
+dds3ProcessID_t *inputpanel_id = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPanel", fldAddressProcessName);
+char fldAddressProcessName[8] = "address";
 

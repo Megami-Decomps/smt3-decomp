@@ -373,21 +373,21 @@ effMajorEntry_t EffMajorTable[5] = {
     { dds3EffectPartCreate, dds3EffectPartDraw, dds3EffectPartDelete, (void (*)(s32 instance))dds3EffectPCFReset, (s32 (*)(s32 instance))dds3EffectPCFGetState, dds3EffectPartSetPosition, dds3EffectPartSetRotateMatrix, dds3EffectPartSetColor, (void (*)(s32 instance, s32 loop))dds3EffectPCFSetLoop, (s32 (*)(s32 instance))dds3EffectPCFGetLoop, dds3EffectPartCopy, dds3EffectPartSetScale },
 };
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke12);
+const char billPathSmoke12[18] = "/bill/smoke12.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke10);
+const char billPathSmoke10[18] = "/bill/smoke10.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke08);
+const char billPathSmoke08[18] = "/bill/smoke08.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke07);
+const char billPathSmoke07[18] = "/bill/smoke07.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathMblur8_3);
+const char billPathMblur8_3[19] = "/bill/mblur8_3.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathMblur8);
+const char billPathMblur8[17] = "/bill/mblur8.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathSmoke16);
+const char billPathSmoke16[18] = "/bill/smoke16.tmx";
 
-INCLUDE_RODATA(const s32, "effect/effManager", billPathBil00);
+const char billPathBil00[16] = "/bill/bil00.tmx";
 
-INCLUDE_SDATA(const s32, "effect/effManager", dds3EffectProcessName);
+char dds3EffectProcessName[7] = "effect";
 

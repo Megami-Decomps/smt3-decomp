@@ -383,5 +383,5 @@ void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
     itfMiscDrawAlphaPrim(tag, 0, 0);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", fclRibbonBaseColor);
+const itfColor_t fclRibbonBaseColor = { { 0x80, 0x80, 0x80, 0x80 } };
 

@@ -421,9 +421,9 @@ extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32
 
 extern void nbPnl_rsetAlpha(s32 mode);
 
-extern char nbPanelProcName[];
+extern const char nbPanelProcName[];
 
-extern char nbPanelDrawProcName[];
+extern const char nbPanelDrawProcName[];
 
 extern s32 nbPanelLayoutTable2[4][6];
 
@@ -486,13 +486,13 @@ extern addr_t hnbPnlFile3;
 
 extern addr_t hnbPnlFile4;
 
-extern char nbPnlTmxPath1[];
+extern const char nbPnlTmxPath1[];
 
-extern char nbPnlTmxPath2[];
+extern const char nbPnlTmxPath2[];
 
-extern char nbPnlTmxPath3[];
+extern const char nbPnlTmxPath3[];
 
-extern char nbPnlTmxPath4[];
+extern const char nbPnlTmxPath4[];
 
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
@@ -631,13 +631,13 @@ void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, 
     ot->regFunc(ot, list);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath1);
+const char nbPnlTmxPath1[32] = "/battle/tmx/Battle_01.tmx";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath2);
+const char nbPnlTmxPath2[32] = "/battle/tmx/Battle_02.tmx";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath3);
+const char nbPnlTmxPath3[32] = "/battle/tmx/Battle_03.tmx";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPnlTmxPath4);
+const char nbPnlTmxPath4[32] = "/battle/tmx/Battle_04.tmx";
 
 void nbPnl_rsetAlpha(s32 mode)
 {
@@ -1060,6 +1060,8 @@ extern frFontHandle_t *gnbPnlWork;
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * battle unknown realm savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+const s32 D_00545300[8] = {1, 1, 13, 1, 25, 1, 36, 1};
+
 #ifdef NON_MATCHING
 
 void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessData_t *p)
@@ -1250,8 +1252,6 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 }
 
 #else
-
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545300);
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
@@ -3911,9 +3911,9 @@ extern nbPanelProcess_nbPanelXYZ_t nbPanelPTPartList[];
 extern void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 centerX, s32 centerY,
                                     s32 width, s32 height, u32 color, u32 edgeColor);
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPanelProcName);
+const char nbPanelProcName[16] = "nb_panel";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbPanelDrawProcName);
+const char nbPanelDrawProcName[24] = "nb_panel_draw";
 
 void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
 {
@@ -4107,199 +4107,213 @@ void nbPanelFlashDraw(nbPanelFlashData_t *pFlash, u32 abgrBase)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_005454F0);
+const char D_005454E8[8] __attribute__((section(".rodata"))) = {0};
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545508);
+const char D_005454F0[24] = "\x81\xf3\x82\x99\x81\xc8\x81\xf8\x82\x84\x81\xd7\x81\xca\x81\xd9";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545518);
+const char D_00545508[16] = "\x81\xE1\x81\xD4\x81\xCA\x81\xD7\x84\xA0\x84\xA1";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545528);
+const char D_00545518[16] = "\x80\xAD\x80\xB0\x84\xA0\x84\xA1";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545538);
+const char D_00545528[16] = "\x80\xA8\x80\xB0\x84\xA0\x84\xA1";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545548);
+const char D_00545538[16] = "\x81\xBE\x81\xF4\x81\xFA\x84\xA0\x84\xA1";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545558);
+const char D_00545548[16] = "\x81\xB3\x81\xB5\x81\xD7\x81\xF1";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545568);
+const char D_00545558[16] = "\x81\xDE\x81\xC5\x87\xAC\x85\xC7";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545578);
+const char D_00545568[16] = "\x81\xDE\x81\xC5\x87\xAE\x85\xCC";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545588);
+const char D_00545578[16] = "\x81\xDE\x81\xC5\x84\xE6\x84\xE7";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545598);
+const char D_00545588[16] = "\x81\xB3\x81\xD0\x81\xD4\x81\xC0";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_005455A8);
+const char D_00545598[16] = "\x81\xE1\x81\xD4\x81\xCA\x81\xD7";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_005455B8);
+const char D_005455A8[16] = "\x81\xD1\x81\xF2\x82\x99\x81\xC9";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugUnitLabelTable);
+const char nbBadStatusParalyze[16] = "PARALYZE";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugIdFmt);
+extern char nbDebugCountDmg[], nbDebugCountAi0[], nbDebugCountAi1[], nbDebugCountAi2[],
+    nbDebugCountBatk[], nbDebugCountMatk[], nbDebugCountEsc[], nbDebugCountDef[], nbDebugCountHit[],
+    nbDebugCountHyooff[], nbDebugCountKaeoff[], nbDebugCountJyuoff[], nbDebugCountHamoff[],
+    nbDebugCountMref[], nbDebugCountBref[], nbDebugCountAtkx2[], nbDebugCountTarget[],
+    nbDebugCountKCnt[], nbDebugCountPCnt[], nbDebugCountAisyo[], nbDebugAisyoButu[],
+    nbDebugAisyoKaen[], nbDebugAisyoHyou[], nbDebugAisyoDeng[], nbDebugAisyoShog[],
+    nbDebugAisyoBann[], nbDebugAisyoHama[], nbDebugAisyoJyus[], nbDebugAisyoMary[],
+    nbDebugAisyoSnke[], nbDebugAisyoSsin[], nbDebugAisyoJiba[], nbDebugAisyoNego[],
+    nbDebugAisyoRec[], nbDebugAisyoHojo[], nbDebugAisyoSpec[];
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugLevelFmt);
+typedef struct {
+    const char *count[20];
+    const char *aisyo[16];
+} nbDebugUnitLabels_t;
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugHpFmt);
+const nbDebugUnitLabels_t nbDebugUnitLabelTable = {
+    {nbDebugCountDmg, nbDebugCountAi0, nbDebugCountAi1, nbDebugCountAi2, nbDebugCountBatk, nbDebugCountMatk, nbDebugCountEsc, nbDebugCountDef, nbDebugCountHit, nbDebugCountHyooff, nbDebugCountKaeoff, nbDebugCountJyuoff, nbDebugCountHamoff, nbDebugCountMref, nbDebugCountBref, nbDebugCountAtkx2, nbDebugCountTarget, nbDebugCountKCnt, nbDebugCountPCnt, nbDebugCountAisyo},
+    {nbDebugAisyoButu, nbDebugAisyoKaen, nbDebugAisyoHyou, nbDebugAisyoDeng, nbDebugAisyoShog, nbDebugAisyoBann, nbDebugAisyoHama, nbDebugAisyoJyus, nbDebugAisyoMary, nbDebugAisyoSnke, nbDebugAisyoSsin, nbDebugAisyoJiba, nbDebugAisyoNego, nbDebugAisyoRec, nbDebugAisyoHojo, nbDebugAisyoSpec},
+};
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugMpFmt);
+const char nbDebugIdFmt[16] = "ID  : 0x%03X";
 
-INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", nbDebugMotionNames);
+const char nbDebugLevelFmt[16] = "LV  : %d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", gnbPnlOtOfs);
+const char nbDebugHpFmt[16] = "HP  : %d/%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPnlDrawFlag);
+const char nbDebugMpFmt[16] = "MP  : %d/%d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPnlCnt);
+extern char nbDebugMotionNameNormal[], nbDebugMotionNamePause[], nbDebugMotionNameOut[], nbDebugMotionNameStop[];
 
-SDATA_PAD(4);
+const char *const nbDebugMotionNames[6] = {nbDebugMotionNameNormal, nbDebugMotionNamePause, nbDebugMotionNameOut, nbDebugMotionNameStop, 0, 0};
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551178);
+s32 gnbPnlOtOfs = 0x47;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelBaseABGR);
+s32 nbPnlDrawFlag = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelBaseRGBA);
+f32 nbPnlCnt = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelNumFormat);
+nbPanelPoint_t D_00551178 = {0x4D, 0x25};
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGPress);
+u32 nbPanelBaseABGR = 0x80808080;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGNumber);
+u32 nbPanelBaseRGBA = 0x80808080;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGTurn);
+char nbPanelNumFormat[4] = "%3d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGTurnOld);
+s32 nbPanelPGPress = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGFrame);
+s32 nbPanelPGNumber = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGBirthWait);
+s32 nbPanelPGTurn = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGStart);
+s32 nbPanelPGTurnOld = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGShow);
+s32 nbPanelPGFrame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGEncount);
+s32 nbPanelPGBirthWait = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPGBaseColor);
+u8 nbPanelPGStart = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTOmit);
+s8 nbPanelPGShow = 1;
 
-SDATA_PAD(3);
+s8 nbPanelPGEncount = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_1_Process);
+u32 nbPanelPGBaseColor = 0x80808080;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_1_Frame);
+s8 nbPanelPTOmit = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_2_Process);
+s32 nbPanelPT_1_Process = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_2_Frame);
+s32 nbPanelPT_1_Frame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_2_Rate);
+s32 nbPanelPT_2_Process = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_3_Process);
+s32 nbPanelPT_2_Frame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_3_Frame);
+f32 nbPanelPT_2_Rate = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPT_3_Rate);
+s32 nbPanelPT_3_Process = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Frame);
+s32 nbPanelPT_3_Frame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_0_Process);
+f32 nbPanelPT_3_Rate = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPressTurnTint);
+s32 nbPanelPTP_0_Frame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Frame);
+s32 nbPanelPTP_0_Process = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Process);
+u32 nbPanelPressTurnTint = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTP_1_Rate);
+s32 nbPanelPTP_1_Frame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTAProcess);
+s32 nbPanelPTP_1_Process = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTAFrame);
+f32 nbPanelPTP_1_Rate = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTARate_S);
+s32 nbPanelPTAProcess = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTARate_E);
+s32 nbPanelPTAFrame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelPTAOnly);
+f32 nbPanelPTARate_S = 0.0f;
 
-SDATA_PAD(3);
+f32 nbPanelPTARate_E = 0.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005511FC);
+s8 nbPanelPTAOnly = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockRun);
+s32 D_005511FC = 0xE6;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockPad);
+s8 nbPanelStockRun = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockABGR);
+s8 nbPanelStockPad = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockFadeFlag);
+u32 nbPanelStockABGR = 0x80808080;
 
-SDATA_PAD(3);
+s8 nbPanelStockFadeFlag = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockFrame);
+s32 nbPanelStockFrame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelStockShiftX);
+s32 nbPanelStockShiftX = 0x12C;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", StockIDListCount);
+s32 StockIDListCount = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", StockIDListCursor);
+s32 StockIDListCursor = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", StockIDListTop);
+s32 StockIDListTop = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeProcess);
+s32 nbPanelAnalyzeProcess = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeFrame);
+s32 nbPanelAnalyzeFrame = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeRate);
+f32 nbPanelAnalyzeRate = 1.0f;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", pNbPanelAnalyzeUnitWork);
+datUnitWork_t *pNbPanelAnalyzeUnitWork = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", nbPanelLevelFormat);
+char nbPanelLevelFormat[4] = "%2d";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", PanelAutoABGR);
+u32 PanelAutoABGR = 0x40808080;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", PanelAutoBaseColor);
+u32 PanelAutoBaseColor = 0x80808080;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", PanelAutoShow);
+s8 PanelAutoShow = 1;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", PanelPartyShow);
+s8 PanelPartyShow = 1;
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551240);
+char D_00551240[8] = "\x84\x92\x84\xe1";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551248);
+char D_00551248[8] = "\x83\xe1\x8d\x9a";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551250);
+char D_00551250[8] = "\x8b\xdd\x83\xe1";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551258);
+char D_00551258[8] = "\x84\xcf\x88\xdb\x80\x96";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551260);
+char D_00551260[8] = "\x84\xcf\x88\xdb\x80\x95";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551268);
+char D_00551268[8] = "\x84\xcf\x88\xdb\x80\x94";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551270);
+char D_00551270[8] = "\x84\xcf\x88\xdb\x80\x93";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551278);
+char D_00551278[8] = "\x84\xcf\x88\xdb\x80\x92";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551280);
+char D_00551280[8] = "\x84\xcf\x88\xdb\x80\x91";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551288);
+char D_00551288[8] = "\x87\xd1\x85\xc3\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551290);
+char D_00551290[8] = "\x8c\x8b\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_00551298);
+char D_00551298[8] = "\x81\xd5\x81\xf2\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512A0);
+char D_005512A0[8] = "\x83\xdb\x86\xd1\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512A8);
+char D_005512A8[8] = "\x87\xaa\x85\x8b\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512B0);
+char D_005512B0[8] = "\x83\xea\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512B8);
+char D_005512B8[8] = "\x85\x9a\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512C0);
+char D_005512C0[8] = "\x86\xd1\x8f\xf6";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512C8);
+char D_005512C8[8] = "\x83\xc7\x84\xce";
 
-INCLUDE_SDATA(const s32, "newbattle/nbPanelProcess", D_005512D0);
+char D_005512D0[8] = "\x84\xe6\x84\xe7";
 

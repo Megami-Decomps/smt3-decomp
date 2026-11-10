@@ -2237,7 +2237,7 @@ void nbCameraState_SkillCut1_Calc(void)
     nbCameraShot_GroundCollision(&pNbCamera);
 }
 
-extern char nbCameraSkillCut2NoTargetMsg[];
+extern const char nbCameraSkillCut2NoTargetMsg[];
 extern s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern s32 nbCameraDANTE_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
@@ -2249,7 +2249,7 @@ extern void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *pNbCamera, nbCameraSki
 extern void nbCameraShot_InvokeTargetNearReverse_Set(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern u32 effBTLModelGetGroupNumber(u32 group);
 
-INCLUDE_RODATA(const s32, "newbattle/nbCameraSkill", nbCameraSkillCut2NoTargetMsg);
+const char nbCameraSkillCut2NoTargetMsg[48] = "nbCameraSkillCut2:Not Target !!!!!!\n";
 
 void nbCameraState_SkillCut2_Init(void)
 {

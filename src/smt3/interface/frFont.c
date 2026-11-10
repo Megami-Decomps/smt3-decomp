@@ -2397,35 +2397,32 @@ void frDumpFontTexture(s32 x, s32 y, s32 depth)
 INCLUDE_ASM(const s32, "interface/frFont", frDumpFontTexture);
 #endif
 
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535968);
+const char D_00535968[16] = "HayasakaChiaki";
 
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535978);
+const char D_00535978[16] = "IsamuNitta";
 
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535988);
+const char D_00535988[16] = "YukoTakao";
 
-INCLUDE_SDATA(const s32, "interface/frFont", gMessageRequestResult);
+u32 gMessageRequestResult = 0xFFFFFFFF;
 
-INCLUDE_SDATA(const s32, "interface/frFont", gMessageSpaceX);
+s8 gMessageSpaceX = 3;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "interface/frFont", gMessageStepY);
+u32 gMessageStepY = 0x14;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frDefaultFontHandle);
+s32 frDefaultFontHandle = 0x14;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frSpaceAdvanceOffset);
+u32 frSpaceAdvanceOffset = 0;
 
-INCLUDE_SDATA(const s32, "interface/frFont", gModeFlag);
+u32 D_0054F418 = 0;
 
-SDATA_PAD(3);
+u8 gModeFlag = 0x16;
 
-INCLUDE_SDATA(const s32, "interface/frFont", gFontDrawOT);
+u32 gFontDrawOT = 0x48;
 
-INCLUDE_SDATA(const s32, "interface/frFont", frSetFontString_style);
+u8 frSetFontString_style = 0;
 
-SDATA_PAD(3);
-
-INCLUDE_SDATA(const s32, "interface/frFont", frDrawFontWork);
+u32 frDrawFontWork = 0;
 
 SDATA_PAD(4);
 

@@ -177,15 +177,15 @@ extern dds3Basic_t *fldRunTama3Basic;
 
 extern s32 fldRunTamaNext;
 
-extern sdfVector4Unaligned_t fldRunTamaSetAxis;
+extern const sdfVector4Unaligned_t fldRunTamaSetAxis;
 
-extern sdfVector4_t fldRunTamaAxis;
+extern const sdfVector4_t fldRunTamaAxis;
 
-extern char fldTama1UnitName[], fldTama2UnitName[], fldTama3UnitName[];
+extern const char fldTama1UnitName[], fldTama2UnitName[], fldTama3UnitName[];
 
-extern char fldDsparkPcfPath[], fldDsmoke2Path[], fldDspark02Path[], fldGun02aPath[];
+extern const char fldDsparkPcfPath[], fldDsmoke2Path[], fldDspark02Path[], fldGun02aPath[];
 
-extern char fldGun01a0Path[], fldMuzzleB010Path[], fldDsmoke1Path[], fldDflash1Path[];
+extern const char fldGun01a0Path[], fldMuzzleB010Path[], fldDsmoke1Path[], fldDflash1Path[];
 
 extern fldTest_FLDRUN_EFF_t fldDspark01File;
 
@@ -213,13 +213,13 @@ typedef struct {
     s16 v[10];
 } fldTamaSeVol_t;
 
-extern fldTamaSeFrame_t fldRunTamaSeFrames1;
+extern const fldTamaSeFrame_t fldRunTamaSeFrames1;
 
-extern fldTamaSeFrame_t fldRunTamaSeFrames2;
+extern const fldTamaSeFrame_t fldRunTamaSeFrames2;
 
-extern fldTamaSeFrame_t fldRunTamaSeFrames3;
+extern const fldTamaSeFrame_t fldRunTamaSeFrames3;
 
-extern fldTamaSeVol_t fldTamaSeVol;
+extern const fldTamaSeVol_t fldTamaSeVol;
 
 extern s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z);
 
@@ -308,7 +308,7 @@ typedef struct
     s32 old_status;
 } fldTest_FLDRUN_DANTE_t;
 
-extern char fldTestDrawName[];
+extern const char fldTestDrawName[];
 
 extern fldTest_FLDRUN_DANTE_t fldRun_Dante;
 
@@ -501,6 +501,8 @@ s32 fldElvCheckEnd(void)
 /* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
  * field underground facility, field unknown realm savestates, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
+const char fldTestDrawName[16] = "fldTestDraw";
+
 #ifdef NON_MATCHING
 extern volatile s8 dds3PadButtonState[];
 
@@ -574,7 +576,6 @@ void fldElvDrawFloorNum(void)
     fldElvGetFloorDigits(380, 26, display);
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldTest", fldTestDrawName);
 
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
 #endif
@@ -1606,39 +1607,39 @@ void fldRunTamaSe(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaSe);
 #endif
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaAxis);
+const sdfVector4_t fldRunTamaAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldTama1UnitName);
+const char fldTama1UnitName[16] = "TAMA1_UNIT";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldTama2UnitName);
+const char fldTama2UnitName[16] = "TAMA2_UNIT";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldTama3UnitName);
+const char fldTama3UnitName[16] = "TAMA3_UNIT";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldDsparkPcfPath);
+const char fldDsparkPcfPath[24] = "/fld/f/bin/DSPARK01.PCF";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldDsmoke2Path);
+const char fldDsmoke2Path[24] = "/fld/f/bin/DSMOKE2.D3P";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldDspark02Path);
+const char fldDspark02Path[24] = "/fld/f/bin/DSPARK02.D3P";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldGun02aPath);
+const char fldGun02aPath[24] = "/fld/f/bin/GUN02A.D3P";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldGun01a0Path);
+const char fldGun01a0Path[24] = "/fld/f/bin/GUN01A0.D3P";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldMuzzleB010Path);
+const char fldMuzzleB010Path[32] = "/fld/f/bin/MUZZLE_B010.PCF";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldDsmoke1Path);
+const char fldDsmoke1Path[24] = "/fld/f/bin/DSMOKE1.D3P";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldDflash1Path);
+const char fldDflash1Path[24] = "/fld/f/bin/DFLASH1.PCF";
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSetAxis);
+const sdfVector4Unaligned_t fldRunTamaSetAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames1);
+const fldTamaSeFrame_t fldRunTamaSeFrames1 = {{16.0f, 20.0f, 30.0f, 35.0f, 42.0f, 47.0f, 52.0f, 56.0f, 59.0f, 62.0f}};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames2);
+const fldTamaSeFrame_t fldRunTamaSeFrames2 = {{17.0f, 19.0f, 30.0f, 33.0f, 40.0f, 43.0f, 47.0f, 51.0f, 56.0f, 65.0f}};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunTamaSeFrames3);
+const fldTamaSeFrame_t fldRunTamaSeFrames3 = {{14.0f, 16.0f, 27.0f, 31.0f, 36.0f, 42.0f, 47.0f, 52.0f, 54.0f, 58.0f}};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldTamaSeVol);
+const fldTamaSeVol_t fldTamaSeVol = {{127, 127, 95, 95, 63, 63, 31, 31, 15, 15}};
 
 void fldMakeFroFileName(void) {
     char directory[0x20];
@@ -2738,13 +2739,13 @@ void fldRunDanteCollision(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteCollision);
 #endif
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun1Frames);
+const f32 fldRunDanteGun1Frames[4] = {2.0f, 10.0f, 19.0f, 28.0f};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun1Marks);
+const s32 fldRunDanteGun1Marks[4] = {20, 21, 20, 21};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun2Frames);
+const f32 fldRunDanteGun2Frames[6] = {31.0f, 37.0f, 44.0f, 51.0f, 59.0f, 65.0f};
 
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteGun2Marks);
+const s32 fldRunDanteGun2Marks[8] = { 0x14, 0x15, 0x14, 0x15, 0x14, 0x15, 0, 0 };
 
 void fldRunDanteAi(void)
 {
@@ -3264,6 +3265,8 @@ s32 fldRunEncountChk(void)
     return 0;
 }
 
+const sdfVector4_t fldRunDanteAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
+
 #ifdef NON_MATCHING
 extern fldDanteDoor_t fldDanteDoor0, fldDanteDoor1, fldDanteDoor2;
 extern fldDanteDoor_t fldDanteDoor4, fldDanteDoor5, fldDanteDoor6;
@@ -3413,71 +3416,72 @@ void fldRunDanteStanceSet(s32 stance)
     }
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldTest", fldRunDanteAxis);
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
 #endif
-INCLUDE_SDATA(const s32, "field/fldTest", gFldElvFloorNow);
+s32 gFldElvFloorNow = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorFrom);
+s32 fldElvFloorFrom = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorNum);
+s32 fldElvFloorNum = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorTo);
+s32 fldElvFloorTo = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorDisp);
+s32 fldElvFloorDisp = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvFloorTarget);
+s32 fldElvFloorTarget = -999;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldElvState);
+s32 fldElvState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldShadowWork);
+s32 fldShadowWork = 0;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldSdwBoxAlpha);
+s32 fldSdwBoxAlpha = 16;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldSdwLightTracking);
+s32 fldSdwLightTracking = 0;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRun_MAP_OX);
+s16 fldRun_MAP_OX = 0x0F6E;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRun_MAP_OZ);
+s16 fldRun_MAP_OZ = 0x0C1C;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRun_MAP_BX);
+s16 fldRun_MAP_BX = 0x0258;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRun_MAP_BZ);
+s16 fldRun_MAP_BZ = 0x0258;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunMapData);
+sdfMemHandle_t *fldRunMapData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunMapHeader);
+fldRunMapHeader_t *fldRunMapHeader = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunMapCellData);
+fldMapCell_t *fldRunMapCellData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", pFroMapHead);
+void *pFroMapHead = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunMapScale);
+void *fldRunMapScale = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama1Basic);
+dds3Basic_t *fldRunTama1Basic = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama2Basic);
+dds3Basic_t *fldRunTama2Basic = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunTama3Basic);
+dds3Basic_t *fldRunTama3Basic = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunTamaNext);
+s32 fldRunTamaNext = 0;
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldDataNgMsg);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsg1KO);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsgRe1KO);
+SDATA_RESUME();
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldRunDanteSe_asise);
+s32 fldRunDanteSe_asise = 0;
 
 SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldTest", fldMsg2A);
+SDATA_RESUME();
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldUnitControlHandle);
+dds3Basic_t *fldUnitControlHandle = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldPlayerUnit);
+u32 fldPlayerUnit = 0;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldDanteUnit);
+dds3Basic_t *fldDanteUnit = NULL;
 

@@ -25,7 +25,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LINE = re.compile(r'^(?:INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\)|SDATA_PAD\(\d+\));\n\n?', re.M)
+LINE = re.compile(r'^(?:INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\)|SDATA_PAD\(\d+\));\n(?:SDATA_RESUME\(\);\n)?\n?', re.M)
 PAD_NOTE = "/* Automatically generated and unreferenced pad */\n"
 VALUE = re.compile(r"\.(?:byte|short|word) (0x[0-9A-Fa-f]+)")
 DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
@@ -145,15 +145,28 @@ def place(version):
                 ):
                     anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
+        defined = compiled & {m.group(1) for m in DATA_DEF.finditer(text)}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
         following, placed = len(text), []
+        # cc1 keeps emitting into .sdata after a C variable, so a variable that follows
+        # an asm chunk (which ends in .text) needs SDATA_RESUME, and aligns itself,
+        # so a pad before it is dropped.
+        next_var = False
         for addr, pos, sym in reversed(order):
             pos = following if pos is None else pos
             following = pos
-            if sym not in compiled:
-                placed.append((pos, sym))
-        for pos, sym in sorted(placed, key=lambda p: -p[0]):
+            if sym in compiled:
+                next_var = sym in defined
+                continue
+            if sym.startswith("SDATA_PAD(") and next_var:
+                continue
+            placed.append((pos, sym, next_var and not sym.startswith("SDATA_PAD(")))
+            if not sym.startswith("SDATA_PAD("):
+                next_var = False
+        for pos, sym, resume in sorted(placed, key=lambda p: -p[0]):
             line = f"{sym};" if sym.startswith("SDATA_PAD(") else f'INCLUDE_SDATA(const s32, "{unit}", {sym});'
+            if resume:
+                line += "\nSDATA_RESUME();"
             text = text[:pos] + ("\n" if pos == len(text) else "") + line + "\n\n" + text[pos:]
             added += 1
         # One blank line before each included item, however often this reruns.

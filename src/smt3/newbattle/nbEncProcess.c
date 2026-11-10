@@ -861,7 +861,7 @@ INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbSetBadCurseTimer);
 
 extern u32 nbGetBadStat(s32 formindex);
 extern void nbSetBadCurseTimer(s32 step, s32 weight);
-extern char nbBadCurseDebugFormat[];
+extern const char nbBadCurseDebugFormat[];
 
 void nbInitBadCurseState(nbActionProcessData_t *a)
 {
@@ -933,6 +933,8 @@ void nbInitBadCurseState(nbActionProcessData_t *a)
 extern void nbInitBadCurseState(nbActionProcessData_t *a);
 
 /* NON_MATCHING: 13 of 93 words differ; see docs/matching/newbattle/nbEncProcess.md. */
+const char nbBadCurseDebugFormat[31] = "BAD\xB9\xD4\xC6\xB0\xB3\xCE\xCE\xA8  type:%d  ritu:%d\n";
+
 #ifdef NON_MATCHING
 s32 nbApplyBadCurse(nbActionProcessData_t *a)
 {
@@ -996,17 +998,16 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", nbBadCurseDebugFormat);
 
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbApplyBadCurse);
 #endif
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readbasetime);
+s32 readbasetime = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readtime);
+s32 readtime = 0;
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbEncProcessName);
+char nbEncProcessName[7] = "nb_enc";
 
-INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", nbBadCurseTimer);
+s32 nbBadCurseTimer = 0;
 
 SDATA_PAD(4);
 
