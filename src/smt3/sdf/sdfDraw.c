@@ -1137,27 +1137,27 @@ void sdfDrawSync(void) {
         sdfWaitVblank(0);
     }
 }
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameFlag);
+volatile u8 sdfDrawFrameFlag = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawSyncFlag);
+volatile u8 sdfDrawSyncFlag = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCounter);
+u16 sdfDrawFrameCounter = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawPublishFlag);
+volatile u8 sdfDrawPublishFlag = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameId);
+u8 sdfGrDrawFrameId = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrBufferSlot);
+u8 sdfGrBufferSlot = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelayCount);
+volatile s8 sdfReqDrawDelayCount = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelaySleepCount);
+u16 sdfReqDrawDelaySleepCount = 0;
 
 SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawReqQueueIndex);
+s32 sdfDrawReqQueueIndex = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameTagHead);
+u32 sdfGrDrawFrameTagHead = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCount);
+u32 sdfDrawFrameCount = 0;
 
