@@ -28,14 +28,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 
-
-
-
-
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-
-
-
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -241,7 +234,7 @@ extern u16 test2_dvllist[];
 
 extern s32 test_phearts;
 
-extern char nbTestHeartsMessage[];
+extern const char nbTestHeartsMessage[];
 
 extern void datAddHearts(s32 id);
 
@@ -276,8 +269,6 @@ extern s32 pack;
 extern const char nbTestProcessName[];
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
-
-
 
 extern void evtBitOn(s32 no);
 extern void evtBitOff(s32 no);
@@ -381,7 +372,6 @@ void SetBossDummy(void)
         }
     }
 }
-
 
 typedef union {
     s32 value;
@@ -507,7 +497,6 @@ void *TestProcess5(void)
     *(s32 *)((u8 *)DDS3_GBWK + 0x11AB8) |= 0xC;
     return TestProcess1;
 }
-
 
 void *TestProcess4(void)
 {
@@ -656,7 +645,7 @@ void nbInitBattleTest(void)
     dds3StartProcess(nbTestProcessName, 0x2B0C, 1, 1, TestProcess1, TestShutdown, NULL);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbTest", nbTestHeartsMessage);
+const char nbTestHeartsMessage[19] = "set devilhearts!!\n";
 
 const char nbTestProcessName[12] = "battle test";
 
