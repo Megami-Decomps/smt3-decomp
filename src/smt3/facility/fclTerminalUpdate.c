@@ -609,5 +609,5 @@ void fclDrawListSprite(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 blen
     cmpDrawBoxF(x, y, color, w, h, arg6, ot);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclTerminalUpdate", fclGemsNeededText);
+const char fclGemsNeededText[16] = "Gems Needed";
 

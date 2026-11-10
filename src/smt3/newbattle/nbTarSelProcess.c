@@ -4,8 +4,6 @@
 #include "nb.h"
 #include "sdfFrame.h"
 
-
-
 /* Target selection is started with an nbActionProcessData_t from the normal
  * action path; the debug path passes NULL. Only its leading state word is
  * read here. */
@@ -38,7 +36,7 @@ typedef struct nbTarSelProcessData_t {
     f32 scale_b;
 } nbTarSelProcessData_t;
 
-extern char nbTarSelProcessName[];
+extern const char nbTarSelProcessName[];
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern void sdfChipFreeDirect(void *ptr);
@@ -73,7 +71,7 @@ void nbSetTarSelJyokyoTime(s32 time)
     GetTarSelProcessData()->statusTime = SDF_FRAMES(time);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbTarSelProcess", nbTarSelProcessName);
+const char nbTarSelProcessName[16] = "nb_tarsel";
 
 void AnimeTargetCursor(nbTarSelProcessData_t *process)
 {
@@ -323,7 +321,6 @@ void SetCursor(nbTarSelProcessData_t *process)
         break;
     }
 }
-
 
 extern s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea);
 extern void SetCursor(nbTarSelProcessData_t *process);

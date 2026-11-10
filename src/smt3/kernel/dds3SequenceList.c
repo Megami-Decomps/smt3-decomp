@@ -78,7 +78,6 @@ extern s32 evtNextEventNo;
 extern void *sdfChipAllocDirect(u32 aSize);
 extern s32 itfMesMngInitialize(void *sub);
 
-
 extern scrProcessWork_s *scrHandleFirst;
 extern scrProcessWork_s *scrHandleLast;
 extern s32 scrHandleCount;
@@ -305,7 +304,7 @@ void CallEvent(u32 flg, s32 *data)
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", dds3CallEventReturnMsg);
+const char dds3CallEventReturnMsg[16] = "\245\244\245\331\245\363\245\310\311\374\265\242!!\n";
 
 s32 ExitEvent(void)
 {
@@ -1073,13 +1072,13 @@ scrProcessWork_s *fldFlowParse(scrHeader_t *header, s32 procno)
                                   procno);
 }
 
-INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", abcd);
+u32 abcd = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", scrHandleCount);
+s32 scrHandleCount = 0;
 
-INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", scrHandleFirst);
+scrProcessWork_s *scrHandleFirst = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", scrHandleLast);
+scrProcessWork_s *scrHandleLast = NULL;
 
-INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", D_0054E9A0);
+u32 D_0054E9A0[2] = { 0x220, 0 };
 

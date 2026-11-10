@@ -60,7 +60,6 @@ extern s32 fldBgmLoadStep;
 
 extern s32 fldBgmSmgAddr;
 
-
 void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
 void fldBgmLoad(void);
@@ -223,7 +222,7 @@ void fldPlaySe3D(void) {
     fldSe3DCalls++;
 }
 
-INCLUDE_RODATA(const s32, "field/fldSe", fldSe3DDefaultPos);
+const fldSoundPosition_t fldSe3DDefaultPos = { { 0.0f, -100.0f, 0.0f, 1.0f } };
 
 s32 fldGetBgmTrack(s32 code) {
     s32 track;
@@ -714,7 +713,6 @@ void fldBgmBitChk(void)
     }
 }
 
-
 void fldMotionSePlay(s32 seid, s32 subid) {
     s32 cmd = 0x9010000;
 
@@ -809,319 +807,320 @@ void fld_145DC0(s32 soundId, f32 x, f32 y, f32 z, f32 limit)
     p2sdPlaySe3DEx(gFldBgmTop[fldGlobalBase.area].smgId + soundId, (s32)(x / 100.0f), y, z, limit);
 }
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldBgmBit);
+u32 gFldBgmBit = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSeLastBgm);
+u32 fldSeLastBgm = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSeSmgId);
+s32 fldSeSmgId = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSndTransSrc);
+s32 gFldSndTransSrc = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSe3DNum);
+s32 gFldSe3DNum = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSe3DCalls);
+u32 fldSe3DCalls = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSe3DTick);
+u32 fldSe3DTick = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSeBgmId);
+s32 fldSeBgmId = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", MidiNo);
+s32 MidiNo = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldBgmReloadStep);
+s32 fldBgmReloadStep = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldBgmSmgAddr);
+s32 fldBgmSmgAddr = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldBgmLoadStep);
+s32 fldBgmLoadStep = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapField);
+s32 fldAutoMapField = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSeqStep);
+s32 fldAutoMapSeqStep = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapStartFloor);
+s32 fldAutoMapStartFloor = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSeqState);
+s32 fldAutoMapSeqState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", AutoMapSeq);
+u32 AutoMapSeq = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapHeader);
+fldAmAreaData_t *fldAutoMapHeader = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapData);
+s32 fldAutoMapData = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBuf);
+sdfMemHandle_t *fldAutoMapBuf = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapPulsePhase);
+f32 fldAutoMapPulsePhase = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBBox);
+s32 fldAutoMapBBox = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorCur);
+s32 fldAutoMapFloorCur = 1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorOld);
+s32 fldAutoMapFloorOld = 1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapFloorOfsY);
+f32 fldAutoMapFloorOfsY = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawX);
+f32 fldAutoMapDrawX = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawY);
+s32 fldAutoMapDrawY = 128;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapDrawState);
+s32 fldAutoMapDrawState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapSlideCount);
+s32 fldAutoMapSlideCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBlinkPhase);
+f32 fldAutoMapBlinkPhase = 1.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE98);
+f32 D_0054EE98 = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBobPhase);
+f32 fldAutoMapBobPhase = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAutoMapBgScroll);
+f32 fldAutoMapBgScroll = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontAlpha);
+f32 fldAreaFontAlpha = 1.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldAreaFontWork);
+s32 fldAreaFontWork = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamTarget);
+s32 fldNpcCamTarget = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamSlot);
+s32 fldNpcCamSlot = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcModelTable);
+s32 fldNpcModelTable = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldUiTexture);
+sdfTexHandle_t *fldUiTexture = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldEATexture);
+sdfTexHandle_t *fldEATexture = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldVLTexture);
+sdfTexHandle_t *fldVLTexture = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldVLBlurHandle);
+sdfTexHandle_t *fldVLBlurHandle = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSnowBlurHandle);
+sdfTexHandle_t *fldSnowBlurHandle = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcLoadIdx);
+struct effNode_t *fldNpcLoadIdx = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldDmgBlurEffect);
+void *fldDmgBlurEffect = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldDmgBlurHandle);
+u32 fldDmgBlurHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcBlurHandle);
+u32 fldNpcBlurHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTDmgEffect);
+void *fldTDmgEffect = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcFreeCount);
+dds3Basic_t *fldNpcFreeCount = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcModelFreeIdx);
+s32 fldNpcModelFreeIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcDrawCount);
+s32 fldNpcDrawCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcModelCount);
+sdfMemHandle_t *fldNpcModelCount = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldGenNpcData);
+u8 *fldGenNpcData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldGenNpcSize);
+u32 fldGenNpcSize = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara1File);
+sdfMemHandle_t *fldTakara1File = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara1Data);
+u8 *fldTakara1Data = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara1Size);
+s32 fldTakara1Size = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3File);
+sdfMemHandle_t *fldTakara3File = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3Data);
+u8 *fldTakara3Data = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3Size);
+s32 fldTakara3Size = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2File);
+sdfMemHandle_t *fldTakara2File = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Data);
+u8 *fldTakara2Data = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Size);
+s32 fldTakara2Size = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara1Mem);
+sdfMemHandle_t *fldTakara1Mem = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara3Mem);
+sdfMemHandle_t *fldTakara3Mem = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakara2Mem);
+sdfMemHandle_t *fldTakara2Mem = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxEffectHandle);
+void *fldItemBoxEffectHandle = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxEffectData);
+void *fldItemBoxEffectData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF30);
+s32 D_0054EF30 = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxCount);
+void *fldItemBoxCount = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", hEffPart);
+sdfTexHandle_t *hEffPart = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxTexHandle);
+void *fldItemBoxTexHandle = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxTexData);
+void *fldItemBoxTexData = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakaraSlotCount);
+struct effNode_t *fldTakaraSlotCount = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTakaraCount);
+s32 fldTakaraCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldHudSlide);
+f32 fldHudSlide = 1.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldEADrawState);
+f32 fldEADrawState = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldEAPrevAlpha);
+s32 fldEAPrevAlpha = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldEAAlphaRising);
+s32 fldEAAlphaRising = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldEADrawWork);
+s32 fldEADrawWork = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldVLPulsePhase);
+f32 fldVLPulsePhase = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldWaveDistance);
+f32 fldWaveDistance = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldWaveFrames);
+s32 fldWaveFrames = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosX);
+f32 fldNpcCamPosX = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosY);
+f32 fldNpcCamPosY = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamPosZ);
+f32 fldNpcCamPosZ = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamAngle);
+f32 fldNpcCamAngle = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldCamNpcTarget);
+f32 fldCamNpcTarget = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldNpcCamTargetY);
+f32 fldNpcCamTargetY = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldCamNpcTarget2);
+f32 fldCamNpcTarget2 = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleState);
+s32 fldTitleState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitlePhase);
+s32 fldTitlePhase = 99;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleFld);
+s32 fldTitleFld = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleWaitFrames);
+s32 fldTitleWaitFrames = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleFldTex);
+sdfTexHandle_t *fldTitleFldTex = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun1Tex);
+sdfTexHandle_t *fldTitleDun1Tex = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun2Tex);
+sdfTexHandle_t *fldTitleDun2Tex = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleDun3Tex);
+sdfTexHandle_t *fldTitleDun3Tex = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniState);
+s32 fldTitleMiniState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSnowActive);
+s32 fldSnowActive = 99;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniFld);
+s32 fldTitleMiniFld = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniTex);
+sdfTexHandle_t *fldTitleMiniTex = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldTitleMiniWork);
+sdfTexHandle_t *fldTitleMiniWork = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSeedBuff);
+void *gFldSeedBuff = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldSnowSeedBuf);
+sdfMemHandle_t *fldSnowSeedBuf = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowMode);
+s32 gFldSnowMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowX);
+f32 gFldSnowX = -640.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowZ);
+f32 gFldSnowZ = -640.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowY);
+f32 gFldSnowY = -6900.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowYD);
+f32 gFldSnowYD = 10000.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowSpd);
+f32 gFldSnowSpd = 4.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowLife);
+s32 gFldSnowLife = 1500;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gFldSnowW);
+f32 gFldSnowW = 5.0f;
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "field/fldSe", slDDS3To31Flg);
+s32 slDDS3To31Flg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slProcShutDownFlg);
+s32 slProcShutDownFlg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slProcPtr);
+sdfTexHandle_t *slProcPtr = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", _saveUI);
+sdfTexHandle_t *_saveUI = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slExitWaitCnt);
+s32 slExitWaitCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", baseIconFileHandle);
+addr_t baseIconFileHandle = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslCheckCardWait);
+s32 gslCheckCardWait = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslDrawFlagFile);
+u32 gslDrawFlagFile = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslDrawFlagBg);
+u32 gslDrawFlagBg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslAnimCnt);
+s32 gslAnimCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlSelCnt);
+s32 gSlSelCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlNowCardCheck);
+u32 gSlNowCardCheck = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlExitMode);
+u32 gSlExitMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlFileErroeFlg);
+s32 gSlFileErroeFlg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlSaveMode);
+s32 gSlSaveMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlEndingMode);
+u32 gSlEndingMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slChooseSaveIndex);
+s32 slChooseSaveIndex = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slQueryYesNoCursor);
+s32 slQueryYesNoCursor = -1;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slQueryYesNoMsg);
+u32 slQueryYesNoMsg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slQueryYesNoKeyFlag);
+s32 slQueryYesNoKeyFlag = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slFileSelError);
+s32 slFileSelError = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslFlushCnt);
+s32 gslFlushCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslMode);
+s32 gslMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslInfoLoadFlg);
+s32 gslInfoLoadFlg = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslExitType);
+u32 gslExitType = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslInfoCode);
+s32 gslInfoCode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslErrorCode);
+u32 gslErrorCode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gslErrorKeyFlag);
+u32 gslErrorKeyFlag = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", version_convert_ver);
+s32 version_convert_ver = 5;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slNextPageDraw_fc);
+f32 slNextPageDraw_fc = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlMcAccessCnt);
+s32 gSlMcAccessCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slMcAccessDraw_fc);
+f32 slMcAccessDraw_fc = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", gSlWindowCnt);
+s32 gSlWindowCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slIconSysSaveBuff);
+extern u8 slIconSysBuf[];
+u32 slIconSysSaveBuff = (u32)slIconSysBuf;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slIconSysSaveSize);
+u32 slIconSysSaveSize = 0x3c4;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slFileSelPulsePhase);
+f32 slFileSelPulsePhase = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldSe", slFileSelWork);
+f32 slFileSelWork = 0.0f;
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "field/fldSe", slNum2dFmt);
+char slNum2dFmt[8] = "%2d";
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F088);
+char slNum3dFmt[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F090);
+char slNum02dFmt[8] = "%02d";
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F098);
+char D_0054F098[8] = "NORMAL";
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054F0A0);
+char D_0054F0A0[8] = "HARD";
 
-INCLUDE_SDATA(const s32, "field/fldSe", fldHojiNameKey);
+char fldHojiNameKey[8] = "hoji";
 

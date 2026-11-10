@@ -63,7 +63,6 @@ typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRou
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
-
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
@@ -125,7 +124,7 @@ extern pbProcHandle_t *pbGetMoveChar(void);
  * Same real symbol and prototype; a reconstruction aid, not original spelling. */
 extern pbProcHandle_t *pbGetMoveCharOpaque(void) FAKEMATCH_ASM_NAME("pbGetMoveChar");
 
-extern char pbEncycName[];
+extern const char pbEncycName[];
 
 extern sdfMemHandle_t *a_key;
 
@@ -143,8 +142,8 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern void sdfTexFreeDelayed(void *aHandle);
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
-extern char pbDrawBgProcName[], pbMapPathFormat[], pbLoadMapDataProcName[];
-
+extern const char pbDrawBgProcName[], pbMapPathFormat[];
+extern char pbLoadMapDataProcName[];
 
 typedef struct { dds3ProcessID_t *id; } pbMapEditorState_t;
 extern s32 pbEditorState;
@@ -218,9 +217,6 @@ s32 pbEditInitProc(dds3ProcessID_t *id)
     }
     return 0;
 }
-
-
-
 
 void pbEditMainExitProc(void) {
     p2sdStopAllSe();
@@ -310,7 +306,7 @@ void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(id->workdata);
 }
 
-extern char pbEncycName[];
+extern const char pbEncycName[];
 extern void pbLoadTextures(s32 mode, s32 stage);
 extern s32 pbEditInitProc(dds3ProcessID_t *id);
 extern pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent);
@@ -323,7 +319,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 priority, s32 v2, s32 v3,
                                          dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
-INCLUDE_RODATA(const s32, "pb/pbMain", pbEncycName);
+const char pbEncycName[16] = "PUZZLE BOY";
 
 dds3ProcessID_t *pbStartMapEditor(s32 mode, s32 stage) {
     s32 state;
@@ -449,7 +445,6 @@ s8 func_001D4BE8(void) {
     return ret;
 }
 
-
 void func_001D4C08(pbProcHandle_t *panel) {
     if (pbMapIsValid() == 0) {
         dds3FadeOut(0, 0, 0, 1);
@@ -463,7 +458,6 @@ void func_001D4C08(pbProcHandle_t *panel) {
     }
 }
 
-
 void pbMakeMapPathHdd(pbProcHandle_t *parent) {
     if (pbMapPathIdx == 1) {
         dds3FadeOut(0, 0, 0, 1);
@@ -476,7 +470,7 @@ void pbMakeMapPathHdd(pbProcHandle_t *parent) {
     }
 }
 
-INCLUDE_RODATA(const s32, "pb/pbMain", pbDrawBgProcName);
+const char pbDrawBgProcName[16] = "pb-draw-bg";
 
-INCLUDE_RODATA(const s32, "pb/pbMain", pbMapPathFormat);
+const char pbMapPathFormat[32] = "pfs0:/pb/mapdata/pbMap%02d.map";
 

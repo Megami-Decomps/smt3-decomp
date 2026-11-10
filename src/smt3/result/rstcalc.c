@@ -23,14 +23,7 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 
-
-
-
 extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
-
-
-
-
 
 extern rstData_t *EventStart;
 
@@ -40,10 +33,6 @@ extern s8 D_00339E06[];
 
 extern s8 D_00339E0C[];
 
-
-
-
-
 extern s16 datGetDevilParam(u8 devilId);
 
 extern s32 cmpStatSetTimer(s32 kind, s8 index);
@@ -51,10 +40,6 @@ extern s32 cmpStatSetTimer(s32 kind, s8 index);
 extern void rstSetDestroySkillMaxHpMp(void);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
-
-
-
-
 
 extern rstData_t *rstDrawWork;
 
@@ -132,7 +117,7 @@ extern u32 datGetMaxHp(datUnitWork_t *work);
 extern u32 datGetMaxMp(datUnitWork_t *work);
 #include "sdk_libc.h"
 
-extern char rstDestroySkillFormat[];
+extern const char rstDestroySkillFormat[];
 
 void rstSetDestroySkillMaxHpMp(void)
 {
@@ -277,7 +262,6 @@ void rstInitWorkStock(s8 IkenieChk)
 }
 
 extern s32 datGetDevilSlotState(u8 devilId);
-
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * seq32, covering only the paths those calls took.
@@ -692,7 +676,6 @@ s32 rstCalcSkillPowerUp(void)
 extern s32 rstCalcEvoLevelDiff(datUnitWork_t *, datUnitWork_t *, datUnitWork_t *, s32);
 extern s32 cmbChkEvoNeedFlag(u16 devilId);
 
-
 s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
 {
     s32 diff;
@@ -976,7 +959,7 @@ extern char *text1[];
 extern s32 fclStartSelMessage(s32 id);
 extern void rstAddAsignParam(void);
 
-INCLUDE_RODATA(const s32, "result/rstcalc", rstDestroySkillFormat);
+const char rstDestroySkillFormat[48] = "New skill : %03x MAXHP+%d MAXMP+%d\n";
 
 s32 rstCalc(dds3ProcessID_t *id)
 {
@@ -1144,7 +1127,6 @@ next_devil:
     }
     return 0;
 }
-
 
 extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
 
@@ -1390,7 +1372,6 @@ s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
     }
 }
 
-
 extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
@@ -1524,7 +1505,6 @@ u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit)
 
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
 
-
 void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
 {
     datLevelUpRecord_t *row;
@@ -1543,9 +1523,7 @@ void cmbInitStockUnit(u16 id, datUnitWork_t *unit)
     }
 }
 
-
 extern void cmbClearUnitSkills(datUnitWork_t *unit);
-
 
 void cmb_222828(u16 devilId, u8 level, datUnitWork_t *unit)
 {
@@ -1642,9 +1620,6 @@ s32 func_002229E8(u16 value)
     } while (i < 1);
     return 0;
 }
-
-
-
 
 /* NON_MATCHING: the native lookup retains a table offset and a separate
  * address for the first matching entry. */
@@ -1792,7 +1767,6 @@ s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count)
     }
     return ready;
 }
-
 
 typedef struct
 {
@@ -1950,7 +1924,6 @@ s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
     }
     return -1;
 }
-
 
 extern s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count);
 
@@ -2192,7 +2165,6 @@ s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
     return count;
 }
 
-
 /* A localized empty operand constraint retains the native old-level copy
  * separately from the value incremented and stored. Both have real consumers
  * before the next callback; this aid is not original-source evidence. */
@@ -2217,7 +2189,6 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
     }
     return count;
 }
-
 
 extern void rstDrawNumber(s32 x, s32 y, s32 number);
 extern s32 fclChkMessage(void);

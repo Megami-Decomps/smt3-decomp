@@ -19,10 +19,6 @@ extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
-
-
-
-
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 
 extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
@@ -378,7 +374,7 @@ linkLight:
     }
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", dds3UnitAdditionalRotation);
+const f32 dds3UnitAdditionalRotation[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-INCLUDE_RODATA(const s32, "basic/dds3UnitObjectBasic", dds3UnitWobbleAxis);
+const f32 dds3UnitWobbleAxis[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 

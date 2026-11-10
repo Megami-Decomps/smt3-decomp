@@ -26,14 +26,7 @@ typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
 
-
-
-
-
 /* A loaded pac file; only the chain down to the decoded buffer is named. */
-
-
-
 
 /* 0xE0 bytes; only the field this unit reads is named. */
 typedef struct
@@ -246,15 +239,13 @@ extern void nbPanelAllHide(void);
 
 extern u32 f;
 
-
-
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
 extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern char nbE906EndMessage[];
+extern const char nbE906EndMessage[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -305,7 +296,6 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 nbKoukaPacket_t *nbAddFadeOutKoukaPacket(s32 startframe, s32 uniqueid, s32 length, s32 coltype);
 
 nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *bed, s32 cutno, nbFormation_t *form);
-
 
 extern s32 (*nbE905Table[])(nbEventProcessData_t *e);
 
@@ -482,13 +472,13 @@ s32 nbE906_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE905", nbE906EndMessage);
+const char nbE906EndMessage[16] = "\245\242\241\274\245\352\245\336\245\363\273\340\313\264\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE905", nbE905CameraBasic);
+dds3Basic_t *nbE905CameraBasic = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE905", nbE905StageBasic0);
+dds3Basic_t *nbE905StageBasic0 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE905", nbE905StageBasic1);
+dds3Basic_t *nbE905StageBasic1 = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE905", nbE905StageBasic2);
+dds3Basic_t *nbE905StageBasic2 = NULL;
 

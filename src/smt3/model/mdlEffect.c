@@ -11,7 +11,6 @@
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern u32 dds3GetKernelCount(void);
 
-
 typedef struct mdlBillboard_t mdlBillboard_t;
 
 typedef struct mdlEffect_t mdlEffect_t;
@@ -1413,79 +1412,78 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "model/mdlEffect", mdlDebugLabelAmbient);
+const char mdlDebugLabelAmbient[16] = "AMBIENT:";
 
-INCLUDE_RODATA(const s32, "model/mdlEffect", softenBiasTitle);
+const char softenBiasTitle[16] = "<FACE-DIV>";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibLabelP2A);
+char mdlPibLabelP2A[8] = "P2A";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibLabelD3P);
+char mdlPibLabelD3P[8] = "D3P";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelA);
+char mdlColorLabelA[8] = "A:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelB);
+char mdlColorLabelB[8] = "B:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelG);
+char mdlColorLabelG[8] = "G:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorLabelR);
+char mdlColorLabelR[8] = "R:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlColorByteFormat);
+char mdlColorByteFormat[8] = "%02X";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlPibCursorMark);
+char mdlPibCursorMark[8] = ">";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight2);
+char mdlDebugLabelLight2[8] = "LIGHT2:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight1);
+char mdlDebugLabelLight1[8] = "LIGHT1:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelLight0);
+char mdlDebugLabelLight0[8] = "LIGHT0:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLightCursor);
+char mdlDebugLightCursor[8] = ">";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLightFormat);
+char mdlDebugLightFormat[8] = "%6.2f";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelFog);
+char mdlDebugLabelFog[8] = "FOG:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelFar);
+char mdlDebugLabelFar[8] = "FAR";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelMin);
+char mdlDebugLabelMin[8] = "MIN";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelNear);
+char mdlDebugLabelNear[8] = "NEAR";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugIntFormat);
+char mdlDebugIntFormat[8] = "%6d";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugLabelMax);
+char mdlDebugLabelMax[8] = "MAX";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", mdlDebugScaleCursor);
+char mdlDebugScaleCursor[8] = ">";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelDivide);
+char softenBiasLabelDivide[8] = "DIVIDE:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelBias);
+char softenBiasLabelBias[8] = "BIAS:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelSoften);
+char softenBiasLabelSoften[8] = "SOFTEN:";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasCursor);
+char softenBiasCursor[8] = ">";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasValueFormat);
+char softenBiasValueFormat[8] = "%5.2f";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasAdjustFormat);
+char softenBiasAdjustFormat[8] = "%+5.2f";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelOn);
+char softenBiasLabelOn[8] = "ON";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", softenBiasLabelOff);
+char softenBiasLabelOff[8] = "OFF";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorRowBase);
+s32 dds3BitEditorRowBase = 0;
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable);
+s32 dds3BitEditorTable = 0;
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorTable2);
+s32 dds3BitEditorTable2 = 0;
 
-SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorGlyphTemplate);
+char dds3BitEditorGlyphTemplate[8] = " ";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorColumnFormat);
+char dds3BitEditorColumnFormat[8] = "%X";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", dds3BitEditorRowFormat);
+char dds3BitEditorRowFormat[8] = "%04X";
 
-INCLUDE_SDATA(const s32, "model/mdlEffect", evtNextEventNo);
+s32 evtNextEventNo = 0;
 

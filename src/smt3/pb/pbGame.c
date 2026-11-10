@@ -117,7 +117,6 @@ typedef struct { s16 x, y; } pbGoalPos_t;
 
 typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
 
-
 typedef struct
 {
     s16 clearBit;
@@ -200,7 +199,8 @@ extern void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id);
 
 extern char pbDrawMapCursorProcName[];
 
-extern char pbBlockDbProcName[], pbDrawMapbaseProcName[], pbViewCameraProcName[];
+extern const char pbViewCameraProcName[];
+extern char pbBlockDbProcName[], pbDrawMapbaseProcName[];
 
 extern s32 pb_proc_block_DB_Process(dds3ProcessID_t *id);
 
@@ -212,7 +212,7 @@ extern s32 moveChar(dds3ProcessID_t *id);
 
 extern void deleteMoveChar(dds3ProcessID_t *id);
 
-extern char pbMoveCharProcName[], pbMoveBlockProcName[], pbGameProcName[], pbMoveCameraProcName[];
+extern const char pbMoveCharProcName[], pbMoveBlockProcName[], pbGameProcName[], pbMoveCameraProcName[];
 
 extern s32 roundBlock(dds3ProcessID_t *id);
 
@@ -262,7 +262,7 @@ extern s32 roundAutoCamera(dds3ProcessID_t *id);
 
 extern u8 pbGetKeyMode(void);
 
-extern char pbGameDebugOwnerName[];
+extern const char pbGameDebugOwnerName[];
 
 extern void deleteGame(dds3ProcessID_t *id);
 
@@ -298,7 +298,8 @@ extern u32 pbAddRecord_blk(pbProcHandle_t *p, pbGroupData_t *grp);
 
 extern void deleteViewModeCamera(dds3ProcessID_t *id);
 
-extern char pbDrawBgProcName[], pbLoadMapDataProcName[], pbClearProcName[];
+extern const char pbClearProcName[];
+extern char pbDrawBgProcName[], pbLoadMapDataProcName[];
 
 extern void updateMotion(void);
 
@@ -322,7 +323,7 @@ extern pbProcHandle_t *moveB;
 
 extern pbProcHandle_t *roundCamera;
 
-extern char pbRootProcName[];
+extern const char pbRootProcName[];
 
 extern u32 pbPushRecord(pbProcHandle_t *p);
 
@@ -346,7 +347,6 @@ extern f32 pbGameCameraParam[3][4];
 /* Three target-offset rows. */
 extern f32 pbCameraVec[3][4];
 
-
 extern void pbSetGameCamera1(void);
 
 extern void pbSetGameCamera2(void);
@@ -358,8 +358,6 @@ extern void *pbFindGroupEntry(pbGroupDB_t *db, u32 group);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
-
-
 
 s32 getCharacterNum(void) {
     s32 count = 0;
@@ -968,9 +966,9 @@ s32 game(dds3ProcessID_t *id)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "pb/pbGame", pbRootProcName);
+const char pbRootProcName[16] = "puzzleBoy-root";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbGameDebugOwnerName);
+const char pbGameDebugOwnerName[24] = "DebugOwner";
 
 INCLUDE_ASM(const s32, "pb/pbGame", game);
 #endif
@@ -1142,7 +1140,6 @@ void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     }
 }
 
-
 /* NON_MATCHING: 30 of 31 words, 124 bytes against retail's 140; retail holds the delta row in three pointer copies and materialises the -1 return late. */
 #ifdef NON_MATCHING
 s32 moveBlock(dds3ProcessID_t *id) {
@@ -1164,7 +1161,6 @@ s32 moveBlock(dds3ProcessID_t *id) {
 #else
 INCLUDE_ASM(const s32, "pb/pbGame", moveBlock);
 #endif
-
 
 /* NON_MATCHING: 46 of 77 words, 308 bytes against retail's 324; the entry array is hoisted out of the loop retail reloads it in. */
 #ifdef NON_MATCHING
@@ -1263,7 +1259,6 @@ s32 roundBlock(dds3ProcessID_t *id) {
     return 0;
 }
 
-
 void deleteRoundBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
@@ -1351,7 +1346,6 @@ s32 viewModeCamera(dds3ProcessID_t *id)
     SDF_VU0_COPYVECTOR(&aViewTarget, &work->target[0]);
     return 0;
 }
-
 
 void deleteViewModeCamera(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
@@ -1736,7 +1730,6 @@ void pbInitGameCamera(void) {
     }
 }
 
-
 s8 pbCheckPreviousRecord(void) {
     s8 ret = pbCheckPopRecord(record);
     return ret;
@@ -1812,17 +1805,17 @@ extern void evtBitOn(s32 no);
 
 extern pbProcHandle_t *pbGetMoveChar(void);
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbGameProcName);
+const char pbGameProcName[16] = "pb-proc-game";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveCharProcName);
+const char pbMoveCharProcName[24] = "pb-proc-move char";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveBlockProcName);
+const char pbMoveBlockProcName[24] = "pb-proc-move block";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbMoveCameraProcName);
+const char pbMoveCameraProcName[24] = "pb-proc-move camera";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbViewCameraProcName);
+const char pbViewCameraProcName[32] = "pb-proc-move view camera";
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbClearProcName);
+const char pbClearProcName[16] = "pb-proc-clear";
 
 void pbGotoNewStage(void)
 {
@@ -1975,7 +1968,6 @@ void pbAddGroupEntry(pbBlockDB_t *db)
     }
 }
 
-
 void pbFreeGroupEntry(pbGroupData_t *entry) {
     sdfMemFreeDirect(entry->blockMem);
     sdfChipFreeDelayedDirect(entry);
@@ -2106,7 +2098,6 @@ s32 pb_proc_block_DB_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-
 void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbBlockDB_t *db = panel->data.blockDB;
@@ -2116,7 +2107,7 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-extern s32 pbMapCursorOffsetTable[4][4];
+extern const s32 pbMapCursorOffsetTable[4][4];
 extern s32 pbMapCursorBaseTable[4][4], pbMapCursorUvTable[4][4], pbMapCursorColorTable[4][4];
 extern f32 pbMapCursorWork;
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
@@ -2183,5 +2174,5 @@ void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(panel);
 }
 
-INCLUDE_RODATA(const s32, "pb/pbGame", pbMapCursorOffsetTable);
+const s32 pbMapCursorOffsetTable[4][4] = { { 0, -1, 0, -1 }, { -1, 0, -1, 0 }, { 0, 1, 0, 1 }, { 1, 0, 1, 0 } };
 

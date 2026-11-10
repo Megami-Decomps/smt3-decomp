@@ -47,7 +47,6 @@ typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRou
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
-
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
@@ -103,11 +102,11 @@ pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
     return panel;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuFreeSelectText);
+const char pbDebugMenuFreeSelectText[16] = "FREE SELECT";
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuStageSelectText);
+const char pbDebugMenuStageSelectText[16] = "STAGE SELECT";
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuMoveCameraDegreeText);
+const char pbDebugMenuMoveCameraDegreeText[24] = "MOVE CAMERA DEGREE";
 
-INCLUDE_RODATA(const s32, "pb/pbErrorDraw", pbDebugMenuMoveCameraRadiusText);
+const char pbDebugMenuMoveCameraRadiusText[24] = "MOVE CAMERA RADIUS";
 

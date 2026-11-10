@@ -730,7 +730,6 @@ void sceTtyHandler(s32 event, s32 byteCount, void *argument)
     TTY_CALLBACK_WORD(state, sendBusy) = 0;
 }
 
-
 #undef TTY_CALLBACK_WORD
 /* The transport header is eight bytes; TTY adds a four-byte reserved word.
  * Both native backing buffers span 320 bytes. */
@@ -801,8 +800,6 @@ s32 sceTtyWrite(const char *buffer, s32 length)
     }
 }
 
-
-
 s32 sceTtyRead(char *buffer, s32 length)
 {
     s32 count;
@@ -848,7 +845,6 @@ s32 sceTtyInit(void)
     ttyState.queue = gcc2_compiled__10(0x100);
     return 1;
 }
-
 
 s32 kputchar(s32 character)
 {
@@ -1070,7 +1066,6 @@ void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), void *arg
     entry->argument = argument;
 }
 
-
 void sceSifRemoveCmdHandler(s32 command)
 {
     u32 address = (u32)command << 3;
@@ -1085,7 +1080,6 @@ void sceSifRemoveCmdHandler(s32 command)
     entry = (sifCommandHandler_t *)address;
     entry->handler = NULL;
 }
-
 
 /* DMA bus addresses and transfer controls occupy four 32-bit words. */
 typedef struct sifDmaTransfer_t {
@@ -1288,7 +1282,6 @@ rpcPacket *_sceRpcGetPacket_0(rpcQueue *queue)
     EIntr();
     return NULL;
 }
-
 
 void _sceRpcFreePacket_0(rpcPacket *packet)
 {
@@ -1527,7 +1520,6 @@ s32 sceSifCheckStatRpc(rpcClientPrefix *client)
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
 #endif
 
-
 void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
 {
     sifRpcDataQueue_t *current;
@@ -1728,7 +1720,6 @@ void gcc2_compiled__13(void)
         fsIoctlSema = CreateSema(&param);
     }
 }
-
 
 typedef struct {
     u32 word0;
@@ -2022,7 +2013,6 @@ s32 sceFsInit(void)
     return 0;
 }
 
-
 extern u8 fsDetectedVersion[0x18];
 extern u8 kernelBuiltinVersion[4] __attribute__((section(".data")));
 extern const void *fsFallbackVersion __attribute__((section(".data")));
@@ -2050,7 +2040,6 @@ s32 sceFsReset(void)
     memset(fsDetectedVersion, 0, 4);
     return 0;
 }
-
 
 typedef struct fsCloseRequest_t {
     s32 sema;
@@ -2577,7 +2566,6 @@ s32 sceMkdir(const char *path, s32 mode)
     return result;
 }
 
-
 s32 sceRmdir(const char *path)
 {
     return _sceCallCode(path, 8);
@@ -2867,7 +2855,6 @@ s32 sceGetstat(const char *path, void *stat)
     return result;
 }
 
-
 s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
 {
     rpcSemaParam param;
@@ -2916,7 +2903,6 @@ s32 sceChstat(const char *path, const fsStat_t *stat, u32 mask)
     DeleteSema(sema);
     return result;
 }
-
 
 s32 sceRename(const char *oldPath, const char *newPath)
 {
@@ -3082,7 +3068,6 @@ s32 sceMount(const char *device, const char *blockDevice, s32 mode, const void *
     DeleteSema(sema);
     return result;
 }
-
 
 s32 sceUmount(const char *path)
 {
@@ -3300,7 +3285,6 @@ s32 sceSifAllocIopHeap(s32 size)
     }
     return 0;
 }
-
 
 void *sceSifAllocSysMemory(s32 mode, s32 size, void *address)
 {
@@ -3699,9 +3683,9 @@ s32 sceSifLoadElfPart(const char *path, const char *section, u32 *result)
     return _sceSifLoadElfPart(path, section, result, 1);
 }
 
-INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BCA8);
+const char D_0054BCA8[8] = "....";
 
-INCLUDE_RODATA(const s32, "sdk/libkernl", D_0054BCB0);
+const char D_0054BCB0[8] = "....";
 
 s32 sceSifLoadElf(const char *path, u32 *result)
 {
@@ -4131,7 +4115,6 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
-
 extern kernelEntryPair_t alarmEntryPairs[8];
 extern kernelEntryPair_t tlbEntryPairs[8];
 extern void *execArgumentBlock;
@@ -4166,7 +4149,6 @@ void InitAlarm(void)
         gcc2_compiled__17(alarmEntryPairs[i].index, entry);
     }
 }
-
 
 extern s32 Deci2Call(s32 command, void *packet);
 extern u8 deci2PacketStorage[];
@@ -4380,7 +4362,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", ExpandScratchPad);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB);
 
-INCLUDE_RODATA(const s32, "sdk/libkernl", execDefaultPath);
+const char execDefaultPath[8] = "";
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB32MB);
 

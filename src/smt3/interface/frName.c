@@ -92,7 +92,6 @@ void frSetNameData(s8 target, s8 type, s8 glyphCount, u8 *imageData)
     printf("NAME[%d] : Translate. \n", (s32)target);
 }
 
-
 void frTransNameImage(s8 target, s8 type)
 {
     if (frNameRefCount[target] == 0) {
@@ -174,7 +173,6 @@ frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption
     return chain;
 }
 
-
 frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
 {
     s8 glyph = (s8)frNameGlobalWork->nameCounts[target][0];
@@ -187,7 +185,6 @@ frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption
     }
     return chain;
 }
-
 
 extern frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 extern frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
@@ -231,29 +228,28 @@ frFontHandle_t *frGetCNameFRQ(s8 target, s8 style, frFontHandle_t *chain, s32 fi
     return font;
 }
 
-INCLUDE_SDATA(const s32, "interface/frName", frWrapEmptyString);
+char frWrapEmptyString[4] = "";
 
-INCLUDE_SDATA(const s32, "interface/frName", frHelpLastIndex);
+s32 frHelpLastIndex = -1;
 
-INCLUDE_SDATA(const s32, "interface/frName", frHelpPosX);
+s32 frHelpPosX = 0;
 
-INCLUDE_SDATA(const s32, "interface/frName", frHelpPosY);
+s32 frHelpPosY = 0;
 
-INCLUDE_SDATA(const s32, "interface/frName", D_0054F458);
+s32 D_0054F458 = 0;
 
-INCLUDE_SDATA(const s32, "interface/frName", frTestFontHandle);
+frFontHandle_t *frTestFontHandle = NULL;
 
-INCLUDE_SDATA(const s32, "interface/frName", frTestFontX);
+s32 frTestFontX = 0;
 
-INCLUDE_SDATA(const s32, "interface/frName", frTestFontY);
+s32 frTestFontY = 0;
 
-INCLUDE_SDATA(const s32, "interface/frName", frTestFontAlpha);
+s8 frTestFontAlpha = -128;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "interface/frName", frTestFontTexture);
+void *frTestFontTexture = NULL;
 
-INCLUDE_SDATA(const s32, "interface/frName", itfGaugeQuadVertexIndex);
+u8 itfGaugeQuadVertexIndex[8] = { 0, 1, 4, 3, 1, 2, 5, 4 };
 
-INCLUDE_SDATA(const s32, "interface/frName", itfGaugeQuadColorIndex);
+u8 itfGaugeQuadColorIndex[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 

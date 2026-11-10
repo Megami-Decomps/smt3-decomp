@@ -35,7 +35,6 @@ typedef struct dds3SplineWalk_t {
 
 /* 128-byte party records; this unit only reads the formation index. */
 
-
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
@@ -381,75 +380,73 @@ void effSetChanStep(dds3SplineWalk_t *pWalk, f32 step)
 {
     pWalk->step = step;
 }
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitActive);
+u8 nbCameraStartReadWaitActive = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartReadWaitFrames);
+u32 nbCameraStartReadWaitFrames = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartAnimWaitActive);
+u8 nbCameraStartAnimWaitActive = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartAnimWaitFrames);
+u32 nbCameraStartAnimWaitFrames = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraStartBAFrame);
+s32 nbCameraStartBAFrame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraEditDist);
+f32 nbCameraEditDist = 100.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraEditUp);
+f32 nbCameraEditUp = 0.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraCRSetPlayerFormRequestFlag);
+s8 nbCameraCRSetPlayerFormRequestFlag = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraState_CommandRoot_OrderIndex);
+s32 nbCameraState_CommandRoot_OrderIndex = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraPressRunFlag);
+s8 nbCameraPressRunFlag = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraPressThrough);
+u32 nbCameraPressThrough = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBossCutFlag);
+s32 nbCameraBossCutFlag = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBossVecTable);
+f32 nbCameraBossVecTable[1] = { -0.0f };
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSARI_MASEHA_Frame);
+s32 nbCameraBoss_BSARI_MASEHA_Frame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSARI_MASEHA_Type);
+s32 nbCameraBoss_BSARI_MASEHA_Type = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSARI_SIMANO_Type);
+s32 nbCameraBoss_BSARI_SIMANO_Type = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSARI_SIMANO_Rate);
+f32 nbCameraBoss_BSARI_SIMANO_Rate = 0.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Kagu_MJINKO_Type);
+u32 nbCameraBoss_Kagu_MJINKO_Type = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Pish_MUHENK_Type);
+u8 nbCameraBoss_Pish_MUHENK_Type = 0;
 
-SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Pish_MUHENK_Frame);
+s32 nbCameraBoss_Pish_MUHENK_Frame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSBERU_E915_Frame);
+u32 nbCameraBoss_BSBERU_E915_Frame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSBERU_E915_Rate);
+f32 nbCameraBoss_BSBERU_E915_Rate = 0.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_Beru_HAENO1_DirY);
+f32 nbCameraBoss_Beru_HAENO1_DirY[1] = { -0.0f };
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraBoss_BSLUSI_Type);
+s32 nbCameraBoss_BSLUSI_Type = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3D4);
+f32 D_0054F3D0 = -0.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerMode);
+f32 D_0054F3D4 = -0.0f;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerCurrent);
+char *nbCameraHelperViewerMode = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerStateHandle);
+void *nbCameraHelperViewerCurrent = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerTargetHandle);
+sdfMemHandle_t *nbCameraHelperViewerStateHandle = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerShowFrame);
+sdfMemHandle_t *nbCameraHelperViewerTargetHandle = NULL;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", nbCameraHelperViewerShowLines);
+u8 nbCameraHelperViewerShowFrame = 0;
 
-INCLUDE_SDATA(const s32, "effect/effSpline", D_0054F3F0);
+u8 nbCameraHelperViewerShowLines = 0;
+
+char D_0054F3F0[8] = "PATH";
 

@@ -17,7 +17,6 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
-
 extern void dds3MenuStepValue(char *text, f32 value);
 
 extern u8 dds3PadButtonState[];
@@ -425,19 +424,19 @@ void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius)
         rsetAlpha(0);
     }
 }
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelB);
+char dds3DebugLabelB[8] = "B:";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelG);
+char dds3DebugLabelG[8] = "G:";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugLabelR);
+char dds3DebugLabelR[8] = "R:";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugFmtInt3);
+char dds3DebugFmtInt3[8] = "%3d";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", dds3DebugFmtFloat3);
+char dds3DebugFmtFloat3[8] = "%5.3f";
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", fldCamDirLock);
+f32 fldCamDirLock = 0.0f;
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", fldCamPitch);
+f32 fldCamPitch = 0.0f;
 
-INCLUDE_SDATA(const s32, "kernel/dds3DebugStuff", fldCamLength);
+f32 fldCamLength = 0.0f;
 

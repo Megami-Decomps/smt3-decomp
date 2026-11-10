@@ -24,7 +24,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
 extern void nbDrawTargetCursor(nbMainProcessData_t *data, s32 x, s32 y);
 
-
 extern s32 evtGetAgeOfMoon16(void);
 
 extern void evtSetAgeOfMoon(s32 age);
@@ -105,7 +104,6 @@ typedef struct nbActionProcessData_t {
 
 /* 128-byte party records. */
 
-
 /* 60-byte rows; this unit reads only the base hp and mp pairs. */
 typedef struct nbDevilInfo_t {
     u32 flag;
@@ -165,7 +163,6 @@ extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
 extern nbEncountForm_t nbEncountFormTable[];
-
 
 s32 nbCheckDeadScript(nbFormation_t *form);
 
@@ -727,7 +724,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 #ifdef NON_MATCHING
 extern datSkill_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
-extern char D_00544170[];
+extern const char D_00544170[];
 
 #include "sdk_libc.h"
 
@@ -1102,5 +1099,5 @@ s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
     return no;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544170);
+const char D_00544170[32] = "\245\271\245\255\245\353\275\361\244\255\264\271\244\250!!\n";
 
