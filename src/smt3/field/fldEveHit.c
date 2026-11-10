@@ -1197,6 +1197,8 @@ s32 fldEveHit_ChkOn(const char *evehitname) {
     return 1;
 }
 
+const sdfVector4Unaligned_t fldEveHitDefaultDirection = { 0.0f, 0.0f, 1.0f, 1.0f };
+
 #ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s32 fldEncountTestFlag(u32 flag);
@@ -1404,7 +1406,6 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
     }
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldEveHit", fldEveHitDefaultDirection);
 
 INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkEveHit);
 #endif
@@ -1683,33 +1684,33 @@ const char *fldCheckNpcTalk2(const char *eventName) {
     }
     return 0;
 }
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldEveRngPrevIdx);
+s32 fldEveRngPrevIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldEveRngHitIdx);
+s32 fldEveRngHitIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldEveRngCount);
+s32 fldEveRngCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldEveRngIdx);
+s32 gFldEveRngIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldEveRngIdx_N);
+s32 gFldEveRngIdx_N = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldEveRngIdx_T);
+s32 gFldEveRngIdx_T = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gEveNum);
+u32 gEveNum = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldEveHitState);
+s32 fldEveHitState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldKyouseiTalk);
+s32 gFldKyouseiTalk = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldEveHitCount);
+s32 fldEveHitCount = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldInfIdx);
+s32 gFldInfIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldInf_HitIdx);
+s32 gFldInf_HitIdx = -1;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", gFldInf_WpExit);
+s32 gFldInf_WpExit = 0;
 
-INCLUDE_SDATA(const s32, "field/fldEveHit", fldDoorExitFlag);
+u8 fldDoorExitFlag = 0;
 
 SDATA_PAD(3);
 
