@@ -345,7 +345,7 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 extern char nbE907EndMessage[];
 
-extern char nbE911EndMsg[];
+extern const char nbE911EndMsg[];
 
 extern char nbMakaProcessName[];
 
@@ -369,9 +369,9 @@ extern char D_005467E0[];
 
 extern char D_00546860[];
 
-extern char nbE912EndText[];
+extern const char nbE912EndText[];
 
-extern char nbE913EndText[];
+extern const char nbE913EndText[];
 
 extern const char D_005468C8[];
 

@@ -255,9 +255,9 @@ extern void nbDelAllKoukaPacketType(s32 type);
 
 extern void MoveSub(nbEventProcessData_t *ed);
 
-extern char nbE912EndText[];
+extern const char nbE912EndText[];
 
-extern char nbE913EndText[];
+extern const char nbE913EndText[];
 
 extern void *evtGetResorceData(s32 eventno, s32 rid);
 
@@ -566,13 +566,13 @@ s32 nbE913_End(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbE912", nbE912EndText);
+const char nbE912EndText[24] = "\245\242\245\353\245\323\245\252\245\363\245\265\245\336\245\352\245\253\241\274\245\340\n";
 
-INCLUDE_RODATA(const s32, "newbattle/nbE912", nbE913EndText);
+const char nbE913EndText[24] = "\245\325\245\251\245\353\245\315\245\246\245\271\273\340\313\264\n";
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912Unit);
+dds3Basic_t *nbE912Unit = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912UnitA);
+dds3Basic_t *nbE912UnitA = NULL;
 
-INCLUDE_SDATA(const s32, "newbattle/nbE912", nbE912UnitB);
+dds3Basic_t *nbE912UnitB = NULL;
 
