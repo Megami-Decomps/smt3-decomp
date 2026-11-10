@@ -363,7 +363,7 @@ char *func_0010E270(dds3Basic_t *basic)
     }
     return basic->name;
 }
-INCLUDE_SDATA(const s32, "basic/dds3Basic", dds3ObjectIdCounter);
+u32 dds3ObjectIdCounter = 0;
 
-INCLUDE_SDATA(const s32, "basic/dds3Basic", dds3TheWorld);
+dds3Basic_t *dds3TheWorld = NULL;
 
