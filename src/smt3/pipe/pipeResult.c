@@ -230,13 +230,13 @@ s32 pipeGetRandomMessage(void)
 }
 u8 ResultIndex = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessNumFmt);
+char pipeMessNumFmt[3] = "%d";
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessData);
+void *pipeMessData = NULL;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessDataAddr);
+u32 pipeMessDataAddr = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeMessCount);
+s8 pipeMessCount = 0;
 
-INCLUDE_SDATA(const s32, "pipe/pipeResult", pipeExpectedMaka);
+s32 pipeExpectedMaka = 0;
 
