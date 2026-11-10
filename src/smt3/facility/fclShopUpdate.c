@@ -527,7 +527,7 @@ extern s32 fclSetWorkValue(s8 index, s32 value);
 extern s32 fclScriptStart(s32 script, s32 entry, void *process);
 extern s32 evtBitCheck(s32 eventNo);
 extern u16 shpGetItemFromItemBox(s32 slot);
-extern char shpTotalPayFormat[]; /* "Total pay : %d\n" */
+extern const char shpTotalPayFormat[]; /* "Total pay : %d\n" */
 
 void shpServiceTicket(void)
 {
@@ -752,7 +752,7 @@ extern void shpUpdateSeqSellNums(void);
 extern s32 shpUpdateSeqConfirm(s8 mode);
 extern void shpUpdateSeqPay(void);
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", shpTotalPayFormat);
+const char shpTotalPayFormat[16] = "Total pay : %d\n";
 
 s32 shop_update_Process(dds3ProcessID_t *id)
 {
@@ -833,13 +833,13 @@ s32 shop_update_Process(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTmxPath02);
+const char ragTmxPath02[32] = "/facility/tmx/rag/rag_02.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTmxPath01);
+const char ragTmxPath01[32] = "/facility/tmx/rag/rag_01.tmx";
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeMitamaText);
+const char ragTradeMitamaText[24] = "Trade for Mitama";
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeElementalsText);
+const char ragTradeElementalsText[24] = "Trade for Elementals";
 
-INCLUDE_RODATA(const s32, "facility/fclShopUpdate", ragTradeItemsText);
+const char ragTradeItemsText[16] = "Trade for Items";
 
