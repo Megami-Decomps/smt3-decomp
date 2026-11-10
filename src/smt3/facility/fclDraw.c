@@ -8,8 +8,6 @@
 #include "event.h"
 #include "font.h"
 
-
-
 extern datDevilTableEntry_t datDevilTable[];
 
 #include "sdk_libc.h"
@@ -26,15 +24,6 @@ extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 extern void sortSkillList(cmbUnit_t *unit);
-
-
-
-
-
-
-
-
-
 
 extern void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
                               u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);
@@ -194,7 +183,6 @@ void fcl_212910(s32 x, s32 y, s32 *color, u8 page, u16 spriteId, s32 *texList,
     fclDrawSpriteCore(x + sprite.X, y + sprite.Y, sprite.unk_04, sprite.unk_06,
                       color, &sprite, sprite.Flag, 0, 1, 7);
 }
-
 
 void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
 {
@@ -491,8 +479,6 @@ void sortSkillList(cmbUnit_t *unit)
     applySkillSortArray(unit, order);
 }
 
-
-
 void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
 {
     s32 i = 0;
@@ -511,7 +497,7 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
     }
     qsort(list, count, sizeof(*list), cmbSetEvoResult);
 }
-INCLUDE_SDATA(const s32, "facility/fclDraw", fclFmtItemCount);
+char fclFmtItemCount[8] = "%2d";
 
-INCLUDE_SDATA(const s32, "facility/fclDraw", fclFmtMaka);
+char fclFmtMaka[8] = "%7d";
 
