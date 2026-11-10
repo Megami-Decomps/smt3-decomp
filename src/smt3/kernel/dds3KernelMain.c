@@ -267,8 +267,7 @@ u32 dds3RunCount = 0;
 
 s8 dds3SoftResetFlag = 0;
 
-SDATA_HOLE(1);
-
+SDATA_PAD(1);
 
 u8 dds3SoftResetDisableFlag = 0;
 
@@ -292,6 +291,7 @@ s16 dds3LastDrawFrameCount = 0;
 
 u16 dds3VblanksPerFrame = 2;
 
+SDATA_PAD(2);
 
 s32 dds3KernelDebugSign = 1;
 
@@ -303,4 +303,5 @@ char dds3DrawFirstProcessName[8] = "draw1st";
 
 u8 dds3DrawProcessFlag = 0;
 
+SDATA_PAD(7);
 

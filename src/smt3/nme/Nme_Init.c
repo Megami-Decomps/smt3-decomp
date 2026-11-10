@@ -540,6 +540,7 @@ nmeWork_t *nmeProcessId = NULL;
 
 s8 gProcessStat = 0;
 
+SDATA_PAD(3);
 
 char nmeDefaultNameChiaki[8] = "Chiaki";
 

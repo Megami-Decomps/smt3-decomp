@@ -703,6 +703,8 @@ s32 D_0054F5CC = 0;
 
 u8 pbMenuItemCount[2] = {0x08, 0x04};
 
+SDATA_PAD(2);
+
 s32 D_0054F5D4 = 0;
 
 u32 pbMoveCharList = 1;
@@ -725,11 +727,15 @@ u8 pbGameKeyState = 0;
 
 f32 pbMapCursorWork = 0.0;
 
+SDATA_PAD(4);
+
 char pbMCardInitFormat[8] = "%d\n";
 
 char pbMCardNewline[8] = "\n";
 
 void *g_pdebug_0 = NULL;
+
+SDATA_PAD(4);
 
 char pbDebugMenuCursorMark[8] = ">";
 

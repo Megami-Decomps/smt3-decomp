@@ -1478,6 +1478,7 @@ s32 dds3BitEditorTable = 0;
 
 s32 dds3BitEditorTable2 = 0;
 
+SDATA_PAD(4);
 
 char dds3BitEditorGlyphTemplate[8] = " ";
 

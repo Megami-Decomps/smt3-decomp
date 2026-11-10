@@ -619,6 +619,8 @@ s32 gSelMsgNo = -1;
 
 s8 gSelMsgPos = 1;
 
+SDATA_PAD(3);
+
 char fclStrFee[4] = "Fee";
 
 u32 D_0054FC68[2] = {0x00000000, 0x00000000};

@@ -414,6 +414,8 @@ void evtPicturePriProcessInit(void)
 }
 void *evtPicturePriList = 0;
 
+SDATA_PAD(4);
+
 char evtPictureProcName[8] = "Picture";
 
 char evtPicturePriProcName[7] = "picpri";

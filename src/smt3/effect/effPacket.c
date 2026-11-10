@@ -364,6 +364,8 @@ void dds3CrossfadeEnd(void) {
 }
 s8 dds3CrossfadeRunFlag = 0;
 
+SDATA_PAD(3);
+
 u32 dds3CrossfadeFrame = 0;
 
 u32 dds3CrossfadeFrameMax = 0;

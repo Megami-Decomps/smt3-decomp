@@ -2229,11 +2229,13 @@ u32 dds3DrawFlag = 0;
 
 u8 dds3ScreenBlurFlag = 0;
 
+SDATA_PAD(1);
 
 s16 dds3ScreenBlurAlpha = 0x60;
 
 s16 dds3ScreenBlurScale = 0x10;
 
+SDATA_PAD(2);
 
 s32 dds3ScreenBlurOfsX[2] = { 0, 0 };
 
@@ -2251,6 +2253,7 @@ u32 distblurovercnt = 0;
 
 u32 ripblurovercnt = 0;
 
+SDATA_PAD(4);
 
 dds3QuakeGain_t dds3QuakeGainTable[1] = { { { 0.59999996423721313477f, 0.59999996423721313477f } } };
 

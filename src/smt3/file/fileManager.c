@@ -1270,6 +1270,7 @@ const char D_00548758[16] = "Hayasaka";
 
 u32 fileCallbackStatus = 0;
 
+SDATA_PAD(4);
 
 char fileManagerProcName[8] = "fileMan";
 

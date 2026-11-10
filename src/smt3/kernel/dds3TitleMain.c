@@ -643,6 +643,8 @@ mselGlobalWork_t *gGlobal = NULL;
 
 s32 fldWmapEnabled = 0;
 
+SDATA_PAD(4);
+
 char mselLevelLabel[3] = "Lv";
 
 char mselLevelFormat[4] = "%2d";

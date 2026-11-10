@@ -786,6 +786,7 @@ s8 slNewGameBit2323 = 0;
 
 s8 slNewGameBit162 = 0;
 
+SDATA_PAD(1);
 
 u16 dds3NewGameSavedHalf0C = 0;
 
@@ -795,6 +796,7 @@ sdfMemHandle_t *D_0054EA1C = NULL;
 
 dds3GlobalWork_t *DDS3_GBWK = NULL;
 
+SDATA_PAD(4);
 
 dds3FontReqFunc_t dds3FontReqTable = { dds3FontReqDestroy, dds3FontReqDrawFont };
 

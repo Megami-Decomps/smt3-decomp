@@ -187,5 +187,7 @@ s32 encDrawState = 0;
 
 s32 gencOn = 0;
 
+SDATA_PAD(4);
+
 char fldEncDrawName[8] = "encProc";
 

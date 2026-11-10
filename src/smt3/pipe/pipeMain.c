@@ -136,6 +136,7 @@ s32 mapPrev = 0;
 
 s8 debugMode = 0;
 
+SDATA_PAD(3);
 
 s32 SectionIndex = 0;
 

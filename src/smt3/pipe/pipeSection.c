@@ -254,6 +254,7 @@ const char pipeObjectLoadMsg[40] = "ObjectData Loading [%s]....OK\n";
 
 u32 pipeLoadState = 0;
 
+SDATA_PAD(4);
 
 s32 pipeLoadSection(s32 index)
 {
@@ -1689,6 +1690,7 @@ s32 pipeIndex = 0;
 
 u8 attackCount = 0;
 
+SDATA_PAD(3);
 
 s32 myMaka = 0;
 
@@ -1706,6 +1708,7 @@ s8 CameraAction = 0;
 
 s8 camMode = 0;
 
+SDATA_PAD(1);
 
 u16 myStatus = 0;
 

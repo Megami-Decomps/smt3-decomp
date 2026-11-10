@@ -392,6 +392,8 @@ rstData_t *GBWK_1 = NULL;
 
 s8 gProcessStat_4 = 0;
 
+SDATA_PAD(3);
+
 char rstProcName[8] = "result2";
 
 u32 D_0054FCF8[2] = {0xCA81F784, 0x00000000};

@@ -1797,6 +1797,8 @@ fileRequest_t *fldFileBuf1 = NULL;
 
 fileRequest_t *pFldNextFileDataF2 = NULL;
 
+SDATA_PAD(4);
+
 char fldFmtResPath[8] = "%s%s";
 
 sdfMemHandle_t *fldFieldPackData = NULL;
@@ -1825,7 +1827,11 @@ u32 fldBtlNextField = 0;
 
 u32 fldBtlNextArea = 0;
 
+SDATA_PAD(4);
+
 u8 D_0054EC00[1] = { 0x00 };
+
+SDATA_PAD(7);
 
 char fldFmtTbPath[8] = "%s.TB";
 

@@ -20,6 +20,8 @@ u8 dds3PadStickState[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 u8 dds3PadStickStatusState[4] = {0, 0, 0, 0};
 
+SDATA_PAD(4);
+
 s32 D_0054E918[2] = {1, 0};
 
 u32 D_0054E920[2] = {0, 0};

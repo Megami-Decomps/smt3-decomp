@@ -4528,5 +4528,7 @@ const char nbActionProcessName[16] = "nb_action";
 
 s32 StkSelId = 0;
 
+SDATA_PAD(4);
+
 char nbDebugNewline[8] = "\n";
 

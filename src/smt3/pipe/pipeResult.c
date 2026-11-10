@@ -230,6 +230,8 @@ s32 pipeGetRandomMessage(void)
 }
 u8 ResultIndex = 0;
 
+SDATA_PAD(7);
+
 char pipeMessNumFmt[3] = "%d";
 
 void *pipeMessData = NULL;
@@ -237,6 +239,8 @@ void *pipeMessData = NULL;
 u32 pipeMessDataAddr = 0;
 
 s8 pipeMessCount = 0;
+
+SDATA_PAD(3);
 
 s32 pipeExpectedMaka = 0;
 

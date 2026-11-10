@@ -32,7 +32,7 @@ DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M
 DATA_DEF = re.compile(
     r"^(?!extern\b|typedef\b)(?:static\s+)?(?:const\s+)?"
     r"[A-Za-z_][\w \t\*]*?(?:\(\s*\*\s*)?\b(\w+)\s*"
-    r"(?:\)\s*\([^;{}\n]*\))?\s*(?:\[[^\]]*\])*\s*"
+    r"(?:\[[^\]]*\])*\s*(?:\)\s*\([^;{}\n]*\))?\s*(?:\[[^\]]*\])*\s*"
     r'(?:__attribute__\s*\(\([^;\n]*\)\)\s*)*(?:=|;)',
     re.M,
 )
@@ -71,6 +71,7 @@ def alignment_pad(addr, end, body):
 
 
 def place(version):
+    ext_text = {c: c.read_text() for c in (ROOT / "src" / version).rglob("*.c")}
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / version / "symbol_addrs.txt").read_text())}
     added = 0
     for c in sorted((ROOT / "src" / version).rglob("*.c")):
@@ -142,14 +143,15 @@ def place(version):
                     and sym not in still_asm
                     and sym not in written_symbols
                     and not re.search(rf"\b{sym}\b", code)
+                    and not any(re.search(rf"\b{sym}\b", s) for p, s in ext_text.items() if p != c)
                 ):
                     anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
         defined = compiled & {m.group(1) for m in DATA_DEF.finditer(text)}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
-        # A C-defined object after a pad aligns itself, and the pad's section switch would send it to .text.
-        order = [e for i, e in enumerate(order) if not (
-            e[2].startswith("SDATA_PAD(") and i + 1 < len(order) and order[i + 1][2] in compiled)]
+        # A pad that C defines as a variable of its own (a D_ name) is not emitted twice.
+        anchored = {a for a, _, _ in anchors}
+        order = [e for e in order if not (e[2].startswith("SDATA_PAD(") and e[0] in anchored)]
         following, placed = len(text), []
         # cc1 keeps emitting into .sdata after a C variable, so a variable that follows
         # an asm chunk (which ends in .text) needs SDATA_RESUME, and aligns itself,
@@ -160,8 +162,6 @@ def place(version):
             following = pos
             if sym in compiled:
                 next_var = sym in defined
-                continue
-            if sym.startswith("SDATA_PAD(") and next_var:
                 continue
             placed.append((pos, sym, next_var and not sym.startswith("SDATA_PAD(")))
             if not sym.startswith("SDATA_PAD("):

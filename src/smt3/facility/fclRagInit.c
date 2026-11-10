@@ -742,6 +742,7 @@ u8 *GBWK_0 = 0;
 
 s8 gProcessStat_1 = 0;
 
+SDATA_PAD(3);
 
 char ragMenuTextLeave[6] = "Leave";
 

@@ -283,6 +283,8 @@ rcvWork_t *shutdownfunc = NULL;
 
 s8 gProcessStat_2 = 0;
 
+SDATA_PAD(3);
+
 char rcvCmdLeave[8] = "Leave";
 
 char rcvCmdTalk[8] = "Talk";

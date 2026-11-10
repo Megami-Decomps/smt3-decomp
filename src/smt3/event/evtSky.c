@@ -124,7 +124,7 @@ dds3ProcessID_t *evtInitSky(void)
 }
 u16 skyanime = 0;
 
-SDATA_HOLE(2);
+SDATA_PAD(2);
 
 s32 fldbokasi = 0;
 
@@ -166,7 +166,7 @@ char D_0054F990[8] = "START";
 
 s32 evtMenuDisp_cnt = 0;
 
-SDATA_HOLE(4);
+SDATA_PAD(4);
 
 char evtScrollUpMark[8] = "^";
 

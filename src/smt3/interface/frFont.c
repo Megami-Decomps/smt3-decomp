@@ -2407,6 +2407,7 @@ u32 gMessageRequestResult = 0xFFFFFFFF;
 
 s8 gMessageSpaceX = 3;
 
+SDATA_PAD(3);
 
 u32 gMessageStepY = 0x14;
 
@@ -2418,9 +2419,13 @@ u32 D_0054F418 = 0;
 
 u8 gModeFlag = 0x16;
 
+SDATA_PAD(3);
+
 u32 gFontDrawOT = 0x48;
 
 u8 frSetFontString_style = 0;
+
+SDATA_PAD(3);
 
 u32 frDrawFontWork = 0;
 

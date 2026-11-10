@@ -382,6 +382,7 @@ void effSetChanStep(dds3SplineWalk_t *pWalk, f32 step)
 }
 u8 nbCameraStartReadWaitActive = 0;
 
+SDATA_PAD(3);
 
 u32 nbCameraStartReadWaitFrames = 0;
 
@@ -397,11 +398,13 @@ f32 nbCameraEditUp = 0.0f;
 
 s8 nbCameraCRSetPlayerFormRequestFlag = 0;
 
+SDATA_PAD(3);
 
 s32 nbCameraState_CommandRoot_OrderIndex = 0;
 
 s8 nbCameraPressRunFlag = 0;
 
+SDATA_PAD(3);
 
 u32 nbCameraPressThrough = 0;
 
@@ -421,6 +424,7 @@ u32 nbCameraBoss_Kagu_MJINKO_Type = 0;
 
 u8 nbCameraBoss_Pish_MUHENK_Type = 0;
 
+SDATA_PAD(3);
 
 s32 nbCameraBoss_Pish_MUHENK_Frame = 0;
 

@@ -661,6 +661,8 @@ const char D_0053C840[16] = "Fusion basics";
 
 s32 evtMotionSeWork = 0x3E8;
 
+SDATA_PAD(4);
+
 char evtLoadStartMessage[8] = "LOAD..\n";
 
 char evtLoadDoneMessage[8] = "OK!!\n";

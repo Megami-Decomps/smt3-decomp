@@ -5844,6 +5844,7 @@ INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuQuit);
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuView);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
+SDATA_RESUME();
 
 cmpSkillList_t *cmpSkillCursor = NULL;
 
@@ -5852,6 +5853,7 @@ SDATA_PAD(4);
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineNum2dFmt);
 
 INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineStrFmt);
+SDATA_RESUME();
 
 s8 cmbActionMode = 0;
 

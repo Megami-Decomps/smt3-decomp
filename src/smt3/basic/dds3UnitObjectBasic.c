@@ -374,7 +374,7 @@ linkLight:
     }
 }
 
-const f32 dds3UnitAdditionalRotation[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
+const f32 dds3UnitAdditionalRotation[4] __attribute__((aligned(16))) = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 const f32 dds3UnitWobbleAxis[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 

@@ -1071,6 +1071,8 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
 }
 s8 effBTLSkillRun = 0;
 
+SDATA_PAD(3);
+
 s32 effBTLFieldColorProcess = 0;
 
 s32 effBTLSkyFilterAlphaTarget = 0x80;

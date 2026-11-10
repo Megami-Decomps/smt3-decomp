@@ -246,6 +246,7 @@ s32 frTestFontY = 0;
 
 s8 frTestFontAlpha = -128;
 
+SDATA_PAD(3);
 
 void *frTestFontTexture = NULL;
 

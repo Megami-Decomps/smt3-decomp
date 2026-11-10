@@ -522,3 +522,5 @@ s32 pipeCheckLevel(s32 level, s32 type)
 }
 dds3Basic_t *pipe_Camera = 0;
 
+SDATA_PAD(4);
+

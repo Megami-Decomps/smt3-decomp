@@ -350,7 +350,8 @@ void effBTLPointLightRun(void)
 }
 u32 effBTLPointLightProcess = 0;
 
-INCLUDE_SDATA_C(const s32, "effect/effBattleLight", D_0054F0E4);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", D_0054F0E4);
+SDATA_RESUME();
 
 s8 effBTLFieldColorOn = 0;
 
@@ -358,15 +359,16 @@ s8 D_0054F0F1 = 0;
 
 INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLJyocyuEffFilePath);
 
-INCLUDE_SDATA_C(const s32, "effect/effBattleLight", effBTLSelectedName);
+INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLSelectedName);
+SDATA_RESUME();
 
-SDATA_HOLE(4);
+SDATA_PAD(4);
 
 char effBedDirName[8] = "/sobed/";
 
 s32 effBTLCutCount = 0;
 
-SDATA_HOLE(4);
+SDATA_PAD(4);
 
 char effBTLCutAllFmt[8] = " ALL:%d";
 

@@ -386,6 +386,8 @@ const char cmpCampTmxPath[24] = "/camp/tmx/camp_01.tmx";
 
 s32 movieViewerPhase = 0;
 
+SDATA_PAD(4);
+
 char movieViewerFmtWord[8] = "%08X";
 
 char movieViewerFmtByte[8] = "%02X";

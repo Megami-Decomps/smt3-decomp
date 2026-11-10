@@ -4173,6 +4173,8 @@ s32 nbPnlDrawFlag = 0;
 
 f32 nbPnlCnt = 0.0f;
 
+SDATA_PAD(4);
+
 nbPanelPoint_t D_00551178 = {0x4D, 0x25};
 
 u32 nbPanelBaseABGR = 0x80808080;
@@ -4202,6 +4204,8 @@ s8 nbPanelPGEncount = 0;
 u32 nbPanelPGBaseColor = 0x80808080;
 
 s8 nbPanelPTOmit = 0;
+
+SDATA_PAD(3);
 
 s32 nbPanelPT_1_Process = 0;
 
@@ -4241,6 +4245,8 @@ f32 nbPanelPTARate_E = 0.0f;
 
 s8 nbPanelPTAOnly = 0;
 
+SDATA_PAD(3);
+
 s32 D_005511FC = 0xE6;
 
 s8 nbPanelStockRun = 0;
@@ -4250,6 +4256,8 @@ s8 nbPanelStockPad = 0;
 u32 nbPanelStockABGR = 0x80808080;
 
 s8 nbPanelStockFadeFlag = 0;
+
+SDATA_PAD(3);
 
 s32 nbPanelStockFrame = 0;
 

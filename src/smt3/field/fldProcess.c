@@ -1230,6 +1230,7 @@ fldSequenceController_t fldAutoMapSeqFlags = { 0, 0 };
 
 u32 fldEncountFlags = 0;
 
+SDATA_PAD(4);
 
 u32 fldEncountTimer[2] = { 0, 0 };
 

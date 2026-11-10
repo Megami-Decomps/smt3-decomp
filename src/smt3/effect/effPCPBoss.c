@@ -5031,6 +5031,7 @@ s32 effPCPBossONGYTexRefCount = 0;
 
 s32 effPCPBossONGY_RFrame = 0;
 
+SDATA_PAD(4);
 
 s32 effPadVibeFrames[2] = { 0, 0 };
 

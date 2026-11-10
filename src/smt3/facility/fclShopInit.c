@@ -461,6 +461,8 @@ cmbWork_t *shpWork = NULL;
 
 s8 shpProcessStat = 0;
 
+SDATA_PAD(3);
+
 char shpCmdLeave[8] = "Leave";
 
 char shpCmdTalk[8] = "Talk";

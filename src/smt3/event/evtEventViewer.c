@@ -2586,6 +2586,7 @@ u16 evt_file_minor = 0x0001;
 
 s16 winoff_x = 0;
 
+SDATA_PAD(2);
 
 evtViewerObject_s *evt_camera = 0;
 

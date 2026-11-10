@@ -1931,6 +1931,7 @@ u32 D_0054F318 = 0;
 
 s8 mfilterDone = 0;
 
+SDATA_PAD(3);
 
 u32 D_0054F320[2] = { 0, 0 };
 
@@ -1944,6 +1945,7 @@ addr_t hEffEveCPSmokeBill01Tex = 0;
 
 addr_t hEffEveCPSmokeBill02Tex = 0;
 
+SDATA_PAD(4);
 
 char nbCameraStateNameEvent[8] = "EVENT";
 

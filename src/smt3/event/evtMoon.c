@@ -932,13 +932,15 @@ f32 evtMoonPhase = 0;
 
 f32 evtMoonState = 0;
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", evtMoonProcessName);
+INCLUDE_SDATA(const s32, "event/evtMoon", evtMoonProcessName);
+SDATA_RESUME();
 
 char *evtDebugDefaultCameraName = D_0053B228;
 
 u32 evtDebugCameraPage = 1;
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", evtDebugCameraNameFmt);
+INCLUDE_SDATA(const s32, "event/evtMoon", evtDebugCameraNameFmt);
+SDATA_RESUME();
 
 s32 evtDebugState = 500;
 
@@ -948,36 +950,35 @@ s32 evtSceneDispTimer = 0;
 
 s32 evtSceneDispState = 0;
 
+SDATA_PAD(4);
 
-SDATA_HOLE(4);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7A8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7A8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7B0);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7B0);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7B8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7B8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7C0);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7C0);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7C8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7C8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7D0);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7D0);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7D8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7D8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7E0);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7E0);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7E8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7E8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7F0);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7F0);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7F8);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F7F8);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F800);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F800);
+INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F808);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", D_0054F808);
+INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispCountFmt);
 
-INCLUDE_SDATA_C(const s32, "event/evtMoon", evtSceneDispCountFmt);
-
-INCLUDE_SDATA_C(const s32, "event/evtMoon", evtSceneDispSerialFmt);
+INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispSerialFmt);
 
