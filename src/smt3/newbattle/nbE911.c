@@ -362,16 +362,21 @@ extern nbE911Light_t *nbE911Light1;
 
 extern s32 nbCheckLoad(nbFormation_t *form);
 extern void nbFormDispOn(s32 formindex);
-extern void nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                  s32 a, s32 b);
-extern void nbMakeUnitFadeInPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
-                                   s32 a, s32 b, s32 c, s32 d);
-extern void nbAddHitEffKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
-                                   s32 a);
+struct nbKoukaPacket_t;
+extern struct nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                                   u32 a, s32 frame);
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
+                                 u32 col, s32 delay, s32 aframe, s32 colframe);
+extern struct nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
+                                                    s32 type);
 extern void dds3SetQuake(s32 power, s32 time);
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 94 of 114 words match at the exact 456-byte size. */
+
+/* The work and primitive pointer bindings keep the two native pointer loads
+ * in one register. Each work pointer dies when its primitive pointer is
+ * initialized, and neither lifetime crosses a call. Removing either binding
+ * changes the color-update allocation and scheduling. This is a localized
+ * target-compiler aid, not evidence of historical source spelling. */
 s32 Effect2(nbEventProcessData_t *e)
 {
     nbFormation_t *forms = e->data->form;
@@ -412,9 +417,14 @@ s32 Effect2(nbEventProcessData_t *e)
         s32 alpha = ((0x48 - t) << 7) / div;
 
         if (nbE911Light0 != NULL) {
-            nbE911Prim_t *prim = nbE911Light0->work->prim;
-
-            prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
+            u32 alphaBits = (u32)alpha << 24;
+            FAKEMATCH_ASM_REG(nbE911Work_t *, work, "$5") = nbE911Light0->work;
+            FAKEMATCH_ASM_REG(nbE911Prim_t *, prim, "$5") = work->prim;
+            u32 rgbMask = 0xFFFFFF;
+            u32 color;
+            color = prim->color & rgbMask;
+            color |= alphaBits;
+            prim->color = color;
             t = e->seqtime;
         }
     }
@@ -423,16 +433,19 @@ s32 Effect2(nbEventProcessData_t *e)
         s32 alpha = ((0x50 - t) << 7) / div;
 
         if (nbE911Light1 != NULL) {
-            nbE911Prim_t *prim = nbE911Light1->work->prim;
-
-            prim->color = (alpha << 24) | (prim->color & 0xFFFFFF);
+            u32 alphaBits = (u32)alpha << 24;
+            FAKEMATCH_ASM_REG(nbE911Work_t *, work, "$5") = nbE911Light1->work;
+            FAKEMATCH_ASM_REG(nbE911Prim_t *, prim, "$5") = work->prim;
+            u32 rgbMask = 0xFFFFFF;
+            u32 color;
+            color = prim->color & rgbMask;
+            color |= alphaBits;
+            prim->color = color;
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
-#endif
+
 
 
 s32 nbE911_End(nbEventProcessData_t *e)
