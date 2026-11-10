@@ -19,10 +19,10 @@ s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
 
 
 
-extern char pipeFmtInt[];
-extern char pipeFmtSize[]; /* "size %d\n" */
-extern char pipeFmtTableMax[]; /* "tMAX %d\n" */
-extern char pipeFmtLinkNodeNum[]; /* "linkNodeNum %d\n" */
+extern const char pipeFmtInt[];
+extern const char pipeFmtSize[]; /* "size %d\n" */
+extern const char pipeFmtTableMax[]; /* "tMAX %d\n" */
+extern const char pipeFmtLinkNodeNum[]; /* "linkNodeNum %d\n" */
 
 typedef struct fileRequest fileRequest_t;
 extern fileRequest_t *pipePosFileRequest;
@@ -142,13 +142,13 @@ void func_002A2F48(void) {
 
 void func_002A2F50(void) {
 }
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtSize);
+const char pipeFmtSize[16] = "size %d\n";
 
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtTableMax);
+const char pipeFmtTableMax[16] = "tMAX %d\n";
 
-INCLUDE_RODATA(const s32, "pipe/pipePosTable", pipeFmtLinkNodeNum);
+const char pipeFmtLinkNodeNum[16] = "linkNodeNum %d\n";
 
-INCLUDE_SDATA(const s32, "pipe/pipePosTable", pipePosFileRequest);
+fileRequest_t *pipePosFileRequest = NULL;
 
-INCLUDE_SDATA(const s32, "pipe/pipePosTable", pipeFmtInt);
+const char pipeFmtInt[8] = "%d\n";
 
