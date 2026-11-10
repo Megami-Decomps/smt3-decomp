@@ -79,9 +79,9 @@ extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, f32 *scl);
 
 extern f32 fldWmapPlayerState;
 
-extern sdfVector4Unaligned_t fldWm3Scale;
+extern const sdfVector4Unaligned_t fldWm3Scale;
 
-extern sdfVector4Unaligned_t fldWm4Scale;
+extern const sdfVector4Unaligned_t fldWm4Scale;
 
 extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
@@ -1292,9 +1292,9 @@ s32 fldPlayerCalc_Nml(void)
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWarpRunAxis);
+const sdfVector4_t fldWarpRunAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlAxis);
+const sdfVector4_t fldNmlAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
 #endif
@@ -1381,7 +1381,7 @@ extern s32 fldHitChkMatter;
 extern s32 fldWmapMatterLast, fldWmapBlendStep;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, fldWmapPosFrom, fldWmapPosTo;
-extern sdfVector4Unaligned_t fldWm2Scale, fldWm2WorkInit;
+extern const sdfVector4Unaligned_t fldWm2Scale, fldWm2WorkInit;
 extern sdfMatrix4_t sdfViewMatrix;
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
@@ -2160,9 +2160,9 @@ s32 fldPlayerCalc_Nml_syukan(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml_syukan);
 #endif
 
-extern char fldNoroiDamageOnMsg[];
+extern const char fldNoroiDamageOnMsg[];
 
-extern char fldNoroiDamageOffMsg[];
+extern const char fldNoroiDamageOffMsg[];
 
 extern s32 fldEncountTestFlag(u32 mask);
 
@@ -2561,47 +2561,47 @@ void fldPlayerPosRot(void)
 #else
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerPosRot);
 #endif
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm3Scale);
+const sdfVector4Unaligned_t fldWm3Scale = {1.0f, 1.0f, 1.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm4Scale);
+const sdfVector4Unaligned_t fldWm4Scale = {1.0f, 1.0f, 1.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2Scale);
+const sdfVector4Unaligned_t fldWm2Scale = {1.0f, 1.0f, 1.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldWm2WorkInit);
+const sdfVector4Unaligned_t fldWm2WorkInit = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldNmlSyukanAxis);
+const sdfVector4Unaligned_t fldNmlSyukanAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldNoroiDamageOnMsg);
+const char fldNoroiDamageOnMsg[24] = "noroi damage on\n";
 
-INCLUDE_RODATA(const s32, "field/fldPlayer", fldNoroiDamageOffMsg);
+const char fldNoroiDamageOffMsg[32] = "noroi damage off\n";
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerWarpState);
+f32 fldPlayerWarpState = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerFastMode);
+s32 fldPlayerFastMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", gfldPlayerHasiCnt);
+s32 gfldPlayerHasiCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", gfldPlayerDamegeCnt);
+s32 gfldPlayerDamegeCnt = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerStepDist);
+s32 fldPlayerStepDist = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerMoveState);
+s32 fldPlayerMoveState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerSyukanState);
+s32 fldPlayerSyukanState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldPlayerMoveStateSaved);
+u32 fldPlayerMoveStateSaved = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmapMatterLast);
+s32 fldWmapMatterLast = -1;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmapBlendStep);
+s32 fldWmapBlendStep = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmWarpMode);
+s32 fldWmWarpMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmapPlayerState);
+f32 fldWmapPlayerState = 1.0f;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldWmFastMove);
+f32 fldWmFastMove = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldSyukanState);
+s32 fldSyukanState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldPlayer", fldSkyEnable);
+s32 fldSkyEnable = 0;
 
