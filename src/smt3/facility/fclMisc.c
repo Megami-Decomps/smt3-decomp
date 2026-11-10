@@ -609,33 +609,31 @@ void fclLoadFileAsync(const char *name, void *buf)
 {
     sdfFileCmdReadFile(name, 0, -1, fclLoadFileDone, buf);
 }
-INCLUDE_SDATA(const s32, "facility/fclMisc", gMsgID);
+s32 gMsgID = -1;
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", gMsgFlag);
+s8 gMsgFlag = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", gMsgInvFlag);
+s8 gMsgInvFlag = 0;
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", gSelMsgNo);
+s32 gSelMsgNo = -1;
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", gSelMsgPos);
+s8 gSelMsgPos = 1;
 
-SDATA_PAD(3);
+char fclStrFee[4] = "Fee";
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrFee);
+u32 D_0054FC68[2] = {0x00000000, 0x00000000};
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC68);
+char fclStrOwn[4] = "Own";
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrOwn);
+u32 D_0054FC78[2] = {0x0000C285, 0x00000000};
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC78);
+u32 D_0054FC80[2] = {0x0000BF8D, 0x00000000};
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", D_0054FC80);
+char fclStrTotal[6] = "Total";
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrTotal);
+char fclStrMoney[6] = "Money";
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrMoney);
+char fclStrNo[3] = "No";
 
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrNo);
-
-INCLUDE_SDATA(const s32, "facility/fclMisc", fclStrYes);
+char fclStrYes[4] = "Yes";
 
