@@ -51,7 +51,6 @@ extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 
-
 s32 pipeResultSection(void)
 {
     s32 finished = 0;
@@ -183,7 +182,6 @@ void pipeMessInit(void) {
         pipeMessMax = 7;
     }
 }
-
 
 void pipeFreeMessage(void)
 {
