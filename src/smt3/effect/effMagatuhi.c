@@ -452,9 +452,9 @@ extern f32 effMagaSavedViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern f32 effMagaSavedViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern s32 D_002F56C0[2][2][16];
+extern s32 dds3PadButtonHoldCounters[2][2][16];
 
-extern s32 D_002F57C0[2][2];
+extern s32 dds3PadStickHoldCounters[2][2];
 
 extern u8 dds3PadButtonPrev[2][2][16];
 
@@ -2981,13 +2981,13 @@ s32 func_001AA5A0(void) {
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             for (k = 0; k < 16; k++) {
-                D_002F56C0[j][i][k] = 0;
+                dds3PadButtonHoldCounters[j][i][k] = 0;
                 dds3PadButtonPrev[j][i][k] = 0;
                 dds3PadButtonState[j][i][k] = 0;
             }
         }
         for (k = 0; k < 2; k++) {
-            D_002F57C0[i][k] = 0;
+            dds3PadStickHoldCounters[i][k] = 0;
             dds3PadStickPrev[i][k][0] = -0x80;
             dds3PadStickPrev[i][k][1] = -0x80;
             dds3PadStickStatusPrev[i][k] = 0;

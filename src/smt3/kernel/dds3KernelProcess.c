@@ -210,7 +210,7 @@ extern sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *);
 extern void sdfGrFlushOtChain(u32 *);
 extern void sdfGrReqDraw(sdfDrawTag_t *, sdfPreDrawChain_t *);
 
-/* DDS1 kwlnRenderFrame donor, with SMT3's eleven model groups and draw bank. */
+/* DDS1 dds3DrawProcess donor, with SMT3's eleven model groups and draw bank. */
 s32 dds3DrawProcess(dds3ProcessID_t *task) {
     s32 bufferIndex = dds3GetFrameID();
     sdfModelOt_t *groupHeads;

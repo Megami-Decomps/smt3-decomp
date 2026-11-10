@@ -31,8 +31,8 @@ extern void sdfPadSetAct(s32 pad, s32 value0, s32 value1);
 
 extern u8 dds3PadButtonState[64];
 extern u8 dds3PadButtonPrev[64];
-extern u32 D_002F56C0[64];
-extern u32 D_002F57C0[4];
+extern u32 dds3PadButtonHoldCounters[64];
+extern u32 dds3PadStickHoldCounters[4];
 extern u8 dds3PadStickPrev[8];
 extern s8 dds3PadStickStatusPrev[4];
 extern u8 dds3PadStickState[8];
@@ -56,13 +56,13 @@ void dds3PadInitialize(void) {
     for (pad = 0; pad < 2; pad++) {
         for (half = 0; half < 2; half++) {
             for (key = 0; key < 16; key++) {
-                D_002F56C0[pad * 16 + half * 32 + key] = 0;
+                dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] = 0;
                 dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
                 dds3PadButtonState[pad * 16 + half * 32 + key] = 0;
             }
         }
         for (key = 0; key < 2; key++) {
-            D_002F57C0[pad * 2 + key] = 0;
+            dds3PadStickHoldCounters[pad * 2 + key] = 0;
             dds3PadStickPrev[pad * 4 + key * 2] = 0;
             dds3PadStickPrev[pad * 4 + key * 2 + 1] = 0;
             dds3PadStickStatusPrev[pad * 2 + key] = 0;
@@ -176,15 +176,15 @@ void dds3RunProcessList(void)
             for (key = 0; key < 16; key++) {
                 if (button[half][key] != 0) {
                     dds3PadButtonPrev[pad * 16 + half * 32 + key] = 1;
-                    D_002F56C0[pad * 16 + half * 32 + key]++;
-                    if (D_002F56C0[pad * 16 + half * 32 + key] == 1) {
+                    dds3PadButtonHoldCounters[pad * 16 + half * 32 + key]++;
+                    if (dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] == 1) {
                         dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0x83;
                     }
                 } else {
                     dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
-                    D_002F56C0[pad * 16 + half * 32 + key] = 0;
+                    dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] = 0;
                 }
-                count = D_002F56C0[pad * 16 + half * 32 + key];
+                count = dds3PadButtonHoldCounters[pad * 16 + half * 32 + key];
                 if (count >= SDF_FRAMES(8) && (SDF_FRAME_TICK(count) & 1) == 0 && SDF_FRAME_DUE(count)) {
                     dds3PadButtonPrev[pad * 16 + half * 32 + key] |= 2;
                 }
@@ -199,15 +199,15 @@ void dds3RunProcessList(void)
             SDF_VU0_GETLENGTH(sticklen);
             if (sticklen >= 64.0f) {
                 dds3PadStickStatusPrev[pad * 2 + key] = 1;
-                D_002F57C0[pad * 2 + key]++;
-                if (D_002F57C0[pad * 2 + key] == 1) {
+                dds3PadStickHoldCounters[pad * 2 + key]++;
+                if (dds3PadStickHoldCounters[pad * 2 + key] == 1) {
                     dds3PadStickStatusPrev[pad * 2 + key] = 0x83;
                 }
             } else {
                 dds3PadStickStatusPrev[pad * 2 + key] = 0;
-                D_002F57C0[pad * 2 + key] = 0;
+                dds3PadStickHoldCounters[pad * 2 + key] = 0;
             }
-            stickcount = D_002F57C0[pad * 2 + key];
+            stickcount = dds3PadStickHoldCounters[pad * 2 + key];
             if (stickcount >= SDF_FRAMES(8) && (SDF_FRAME_TICK(stickcount) & 1) == 0 &&
                 SDF_FRAME_DUE(stickcount)) {
                 dds3PadStickStatusPrev[pad * 2 + key] |= 2;
@@ -268,7 +268,7 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     }
 }
 
-void dds3_104170(void) {
+void dds3PadVibrationReset(void) {
     dds3PadVibrationState[0] = 0;
     dds3PadVibrationTable[0] = 0;
     dds3PadVibrationState[1] = 0;
