@@ -56,7 +56,8 @@ extern s8 fldDoorExitMode[];
 
 extern char pointResName[];
 
-extern char fldProcSequenceName[], fldProcDrawName[];
+extern const char fldProcSequenceName[];
+extern char fldProcDrawName[];
 
 extern void fclClearTerminalState(void);
 
@@ -93,11 +94,11 @@ extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
 
 extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
 
-extern char fldWaveUnitName[];
+extern const char fldWaveUnitName[];
 
-extern char fldPlayerAPath[];
+extern const char fldPlayerAPath[];
 
-extern char fldPlayerBPath[], fldPlayerCPath[], fldWpcPath[], fldHolePath[], fldWavePath[], fldWave02Path[];
+extern const char fldPlayerBPath[], fldPlayerCPath[], fldWpcPath[], fldHolePath[], fldWavePath[], fldWave02Path[];
 
 extern s32 gfldPlayerSize;
 
@@ -780,6 +781,21 @@ void fldReleaseUnitPad(void)
     fldGlobalBase.word5C = SDF_FRAMES(4);
 }
 
+const char fldProcSequenceName[16] __attribute__((aligned(16))) = "fldProcSequence";
+const fldPackedVector_t fldDefaultRotation = {{0x3F80000000000000ULL, 0x3F80000000000000ULL}};
+const char fldPlayerAPath[32] = "/model/field/player_a.PB";
+const char fldPlayerBPath[32] __attribute__((aligned(16))) = "/model/field/player_b.PB";
+const char fldPlayerCPath[32] __attribute__((aligned(16))) = "/model/field/player_c.PB";
+const char fldWpcPath[24] __attribute__((aligned(16))) = "/fld/f/bin/wpc.PB";
+const char fldHolePath[24] = "/model/field/hole.PB";
+const char fldWavePath[24] = "/fld/f/bin/wave.PB";
+const char fldWave02Path[24] = "/fld/f/bin/wave02.PB";
+const fldPackedVector_t fldUnitAxis = {{0x3F80000000000000ULL, 0x3F80000000000000ULL}};
+const fldPackedVector_t fldUnitScale = {{0x3F8000003F800000ULL, 0x3F8000003F800000ULL}};
+const fldPackedVector_t fldMirrorUnitScale = {{0xBF8000003F800000ULL, 0x3F8000003F800000ULL}};
+const fldPackedVector_t fldDantePosition = {{0xC120000000000000ULL, 0x3F80000000000000ULL}};
+const fldPackedVector_t fldDanteScale = {{0x3F8666663F866666ULL, 0x3F8000003F866666ULL}};
+
 #ifdef NON_MATCHING
 extern const fldPackedVector_t fldUnitAxis, fldUnitScale, fldMirrorUnitScale, fldDantePosition, fldDanteScale;
 extern s32 l_UseCollision;
@@ -987,33 +1003,19 @@ void fldSetUnit(fldResourcePoint_t *point)
     dds3AddPointBasic(dds3AllocObjectId(), (fldResourcePointUnaligned_t *)&fldPlayerPosRotWork, fldPlayerPosName);
 }
 #else
-INCLUDE_RODATA(const s32, "field/fldMain", fldProcSequenceName);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldDefaultRotation);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerAPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerBPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldPlayerCPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldWpcPath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldHolePath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldWavePath);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldWave02Path);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldUnitAxis);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldUnitScale);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldMirrorUnitScale);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldDantePosition);
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldDanteScale);
 
 INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
 #endif
@@ -1131,11 +1133,11 @@ s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldWaveUnitName);
+const char fldWaveUnitName[16] = "WAVE_UNIT";
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldCameraLookAt);
+const sdfVector4_t fldCameraLookAt = {0.0f, 1.0f, 0.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "field/fldMain", fldCameraInitTm);
+const sdfVector4_t fldCameraInitTm = {0.0f, 0.0f, 10.0f, 1.0f};
 
 s32 fldChkVortex(void)
 {
@@ -1466,41 +1468,41 @@ s32 fldOtInit(void)
                        &sdfGrOtTable[41]);
     }
 }
-INCLUDE_SDATA(const s32, "field/fldMain", l_UseCollision);
+s32 l_UseCollision = 1;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gFldNowDZone);
+s32 gFldNowDZone = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", fldPlayerAnimData);
+sdfMemHandle_t *fldPlayerAnimData = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", mhfldPlayerFile);
+void *mhfldPlayerFile = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldPlayerPtr);
+void *gfldPlayerPtr = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldPlayerSize);
+s32 gfldPlayerSize = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldPlayerSizeBk);
+s32 gfldPlayerSizeBk = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", mhfldAnaFile);
+void *mhfldAnaFile = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldAnaPtr);
+void *gfldAnaPtr = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldAnaSize);
+s32 gfldAnaSize = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", fldAnaBasic);
+dds3Basic_t *fldAnaBasic = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", mhfldWaveFile);
+void *mhfldWaveFile = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldWavePtr);
+void *gfldWavePtr = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gfldWaveSize);
+s32 gfldWaveSize = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", pointResName);
+char pointResName[8] = "";
 
-INCLUDE_SDATA(const s32, "field/fldMain", fldPlayerPosName);
+char fldPlayerPosName[8] = "ppos01";
 
-INCLUDE_SDATA(const s32, "field/fldMain", fldCameraUnitName);
+char fldCameraUnitName[8] = "P_Cam";
 
-INCLUDE_SDATA(const s32, "field/fldMain", gFldAnahoriAkumaIdx);
+s32 gFldAnahoriAkumaIdx = 0;
 
-INCLUDE_SDATA(const s32, "field/fldMain", gFldAnahoriAkumaIdxMax);
+s32 gFldAnahoriAkumaIdxMax = 0;
 
