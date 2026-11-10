@@ -90,15 +90,15 @@ s32 sdfGrOpenPacketBuff(void) {
 void sdfGrClosePacketBuff(saddr_t aBuffPtr) {
     sdfGrPacketBuffPtr = (aBuffPtr + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffHandle);
+struct sdfMemHandle_t *sdfGrPacketBuffHandle = NULL;
 
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffSize);
+s32 sdfGrPacketBuffSize = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffBase);
+s32 sdfGrPacketBuffBase[2] = {0, 0};
 
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffPtr);
+s32 sdfGrPacketBuffPtr = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffLimit);
+s32 sdfGrPacketBuffLimit = 0;
 
-INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", D_00551880);
+u32 D_00551880 = 0;
 
