@@ -66,7 +66,7 @@ void *memset(void *a, s32 b, size_t c);
 void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
-effArrHdr_t *dds3_1AC0A8(u32 count) {
+effArrHdr_t *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * 0x60;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + 0xC);
     effBezierCurve_t *slot = (effBezierCurve_t *)sdfMemLock(allocation);
@@ -87,12 +87,12 @@ effArrHdr_t *dds3_1AC0A8(u32 count) {
     return table;
 }
 
-void dds3_1AC138(effArrHdr_t *header) {
+void effReleaseSlotArrayAllocation(effArrHdr_t *header) {
     sdfMemFreeDirect(header->allocation);
 }
 
 /* Point-index sentinel 7 stops evaluation; otherwise sample before clamping t and advancing three controls. */
-s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
+s32 effStepActiveBezierSlot(effArrHdr_t *table, s32 index, f32 *out) {
     effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
     sdfVector4_t weights;
@@ -156,7 +156,7 @@ s32 effPCPBezierEval(effBezierCurve_t *slot, f32 *out) {
 }
 
 /* Evaluate without changing progress; write homogeneous W = 1. */
-void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
+void effEvaluateSlotBezierPosition(effBezierCurve_t *slot, f32 *out) {
     effBezierPoint_t *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -174,14 +174,14 @@ void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
 }
 
 /* Reset progress and its default step, retaining the control points. */
-void func_001AC4C8(effArrHdr_t *table, s32 index) {
+void effInitSlotTail(effArrHdr_t *table, s32 index) {
     effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
 
     slot->parameterStep = 0.05f;
     slot->pointIndex = slot->t = 0;
 }
 
-effBezierCurve_t *func_001AC4F0(effArrHdr_t *table, s32 index) {
+effBezierCurve_t *effGetSlotAt(effArrHdr_t *table, s32 index) {
     return &((effBezierCurve_t *)table->slots)[index];
 }
 

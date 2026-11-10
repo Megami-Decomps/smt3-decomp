@@ -237,7 +237,7 @@ s32 nbCameraLerpVec(dds3Bezier4PPart_t *slot, f32 *out) {
     return 1;
 }
 
-void func_001AC068(effBezier4P_t *table, s32 slotIndex) {
+void effMathResetBezierSlot(effBezier4P_t *table, s32 slotIndex) {
     dds3Bezier4PPart_t *slot = &((dds3Bezier4PPart_t *)table->pPart)[slotIndex];
 
     slot->step = 0.05f;

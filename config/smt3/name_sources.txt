@@ -80,3 +80,15 @@
 0x001B12B0	effReleaseInterpolationChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B12B0
 0x001B1238	effCreateChannel	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B1238
 0x001B09C0	effSplRun	inferred	DDS1/2 name for the same effSpline function; former name dds3_1B09C0
+0x001AC4F0	effGetSlotAt	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4F0
+0x001AC4C8	effInitSlotTail	inferred	DDS1/2 name for the same effDebug function; former name func_001AC4C8
+0x001AC3D8	effEvaluateSlotBezierPosition	inferred	DDS1/2 name for the same effDebug function; former name func_001AC3D8
+0x001AC150	effStepActiveBezierSlot	inferred	DDS1/2 name for the same effDebug function; former name func_001AC150
+0x001AC068	effMathResetBezierSlot	inferred	DDS1/2 name for the same effMath function; former name func_001AC068
+0x00168A50	polyBandLayoutRing	inferred	DDS1/2 name for the same polyManager function; former name func_00168A50
+0x00162270	effInitParticleRecord	inferred	DDS1/2 name for the same parManager function; former name func_00162270
+0x00162248	effFreeSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_00162248
+0x001621C8	effCloneSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621C8
+0x001621A0	effScaleSingleParticleTemplate	inferred	DDS1/2 name for the same parManager function; former name func_001621A0
+0x001AC138	effReleaseSlotArrayAllocation	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC138
+0x001AC0A8	effCreateSlotArray	inferred	DDS1/2 name for the same effDebug function; former name dds3_1AC0A8
