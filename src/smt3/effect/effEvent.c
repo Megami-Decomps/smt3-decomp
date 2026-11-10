@@ -985,7 +985,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
     SDF_VU0_LOADVECTOR(&out);
 }
 
-INCLUDE_RODATA(const s32, "effect/effEvent", effUnitY);
+const sdfVector4_t effUnitY = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam) {
     u32 particleCount = pParam->number;
@@ -1821,131 +1821,139 @@ void effEveAPP4Randomize(effEmit_t *hEffect) {
     } while (recordIndex < recordCount);
 }
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameDebugShotAll);
+const char nbCameraStateNameDebugShotAll[16] = "DEBUG[ALL SHOT]";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScriptFix);
+const char nbCameraStateNameScriptFix[16] = "SCRIPT-FIX";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScriptBougai);
+const char nbCameraStateNameScriptBougai[16] = "SCRIPT-BOUGAI";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameScript1Shot);
+const char nbCameraStateNameScript1Shot[16] = "SCRIPT-1SHOT";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemyBad);
+const char nbCameraStateNameEnemyBad[16] = "ENEMY_BAD";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEveTarget);
+const char nbCameraStateNameEveTarget[16] = "EVE-TARGET";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameEnemySide);
+const char nbCameraStateNameEnemySide[16] = "ENEMYSIDE";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNamePlayerSide);
+const char nbCameraStateNamePlayerSide[16] = "PLAYERSIDE";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameGameOver);
+const char nbCameraStateNameGameOver[16] = "GAMEOVER";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoEnd);
+const char nbCameraStateNameNegoEnd[16] = "NEGO-END";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoHojo);
+const char nbCameraStateNameNegoHojo[16] = "NEGO-HOJO";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoTarget);
+const char nbCameraStateNameNegoTarget[16] = "NEGO-TARGET";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoTaizi);
+const char nbCameraStateNameNegoTaizi[16] = "NEGO-TAIZI";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameNegoBougai);
+const char nbCameraStateNameNegoBougai[16] = "NEGO-BOUGAI";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNamePressTurn);
+const char nbCameraStateNamePressTurn[16] = "PRESS_TURN";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillEnd);
+const char nbCameraStateNameSkillEnd[16] = "SKILL_END";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut3);
+const char nbCameraStateNameSkillCut3[16] = "SKILL_CUT3";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut2);
+const char nbCameraStateNameSkillCut2[16] = "SKILL_CUT2";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillCut1);
+const char nbCameraStateNameSkillCut1[16] = "SKILL_CUT1";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillStart);
+const char nbCameraStateNameSkillStart[16] = "SKILL_START";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameSkillAttack);
+const char nbCameraStateNameSkillAttack[16] = "SKILL_ATTACK";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandTargetSelect);
+const char nbCameraStateNameCommandTargetSelect[24] = "COMMAND_TARGET_SELECT";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandBad);
+const char nbCameraStateNameCommandBad[16] = "COMMAND_BAD";
 
-INCLUDE_RODATA(const s32, "effect/effEvent", nbCameraStateNameCommandRoot);
+const char nbCameraStateNameCommandRoot[16] = "COMMAND_ROOT";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
+s8 Eve_BlurShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);
+s8 Eve_PartialMultiBlurShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_DistortionBlurShow);
+s8 Eve_DistortionBlurShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_FilterShow);
+s8 Eve_FilterShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiFilterShow);
+s8 Eve_PartialMultiFilterShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", Eve_RippleBlurShow);
+s8 Eve_RippleBlurShow = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F280);
+char D_0054F280[8] = "A";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F288);
+char D_0054F288[8] = "B";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F290);
+char D_0054F290[8] = "G";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F298);
+char D_0054F298[8] = "R";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2A0);
+char D_0054F2A0[8] = "BLEND ";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelScale);
+char effLabelScale[8] = "SCALE ";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelRotate);
+char effLabelRotate[8] = "ROTATE";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2B8);
+void *D_0054F2B8[2] = { &evtUnityCalcArea, NULL };
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelBlur);
+char effLabelBlur[5] = "BLUR";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F2C8);
+s8 D_0054F2C5 = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelArea);
+u32 D_0054F2C8[2] = { 0, 0 };
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelBlend);
+char effLabelArea[5] = "AREA";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelDistor);
+s8 mblurDone = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelSpeed);
+char effLabelBlend[8] = "BLEND";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelIntval);
+char effLabelDistor[8] = "DISTOR";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelWidth);
+char effLabelSpeed[8] = "SPEED";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelNumber);
+char effLabelIntval[8] = "INTVAL";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F308);
+char effLabelWidth[8] = "WIDTH";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelFilter);
+char effLabelNumber[7] = "NUMBER";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F318);
+s8 dblurDone = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", mfilterDone);
+void *D_0054F308[2] = { &dblurParam2, NULL };
 
-SDATA_PAD(3);
+char effLabelFilter[7] = "FILTER";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F320);
+s8 evtViewerDirty = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", effLabelDistS);
+u32 D_0054F318 = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", EffEveCPSmokeCount);
+s8 mfilterDone = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", hEffEveCPSmokeBill01Tex);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", hEffEveCPSmokeBill02Tex);
+u32 D_0054F320[2] = { 0, 0 };
 
-SDATA_PAD(4);
+char effLabelDistS[7] = "DIST_S";
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameEvent);
+s8 rblurDone = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameEnd);
+s32 EffEveCPSmokeCount = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameResult);
+addr_t hEffEveCPSmokeBill01Tex = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameSummon);
+addr_t hEffEveCPSmokeBill02Tex = 0;
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameStart);
 
-INCLUDE_SDATA(const s32, "effect/effEvent", nbCameraStateNameWait);
+char nbCameraStateNameEvent[8] = "EVENT";
+
+char nbCameraStateNameEnd[8] = "END";
+
+char nbCameraStateNameResult[8] = "RESULT";
+
+char nbCameraStateNameSummon[8] = "SUMMON";
+
+char nbCameraStateNameStart[8] = "START";
+
+char nbCameraStateNameWait[8] = "WAIT";
 
