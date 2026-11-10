@@ -8,8 +8,8 @@ typedef struct dds3AreaBasicWorkData_t
     dds3BasicArrayHandle_t *items[2];
 } dds3AreaBasicWorkData_t;
 
-extern char dds3AreaBasicMsgNoList[]; /* "エリアリストが見つかりません...\n" */
-extern char dds3AreaBasicMsgNoArea[]; /* "not exist a area  エリアが見つかりません...\n" */
+extern const char dds3AreaBasicMsgNoList[]; /* "エリアリストが見つかりません...\n" */
+extern const char dds3AreaBasicMsgNoArea[]; /* "not exist a area  エリアが見つかりません...\n" */
 
 #include "sdk_libc.h"
 
@@ -191,7 +191,7 @@ dds3Basic_t *dds3AreaBasicGetFastArea(void)
     return area;
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", dds3AreaBasicMsgNoList);
+const char dds3AreaBasicMsgNoList[40] = "\245\250\245\352\245\242\245\352\245\271\245\310\244\254\270\253\244\304\244\253\244\352\244\336\244\273\244\363...\n";
 
-INCLUDE_RODATA(const s32, "basic/dds3AreaBasic", dds3AreaBasicMsgNoArea);
+const char dds3AreaBasicMsgNoArea[56] = "not exist a area  \245\250\245\352\245\242\244\254\270\253\244\304\244\253\244\352\244\336\244\273\244\363...\n";
 
