@@ -629,43 +629,41 @@ void cmbEnableMenuEntry6(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6A0);
+const char D_0053C6A0[32] = "/facility/tmx/combine/g_bg.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6C0);
+const char D_0053C6C0[40] = "/facility/tmx/combine/comb_06.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6E8);
+const char D_0053C6E8[40] = "/facility/tmx/combine/comb_05.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C710);
+const char D_0053C710[40] = "/facility/tmx/combine/comb_04.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C738);
+const char D_0053C738[40] = "/facility/tmx/combine/comb_03.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C760);
+const char D_0053C760[40] = "/facility/tmx/combine/comb_02.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C788);
+const char D_0053C788[40] = "/facility/tmx/combine/comb_01.tmx";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C7B0);
+const char D_0053C7B0[24] = "Demonic Compendium";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C7C8);
+const char D_0053C7C8[16] = "Register";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C7D8);
+const char D_0053C7D8[16] = "Magatama";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C7E8);
+const char D_0053C7E8[24] = "Carry over skills";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C800);
+const char D_0053C800[24] = "Fusion accidents";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C818);
+const char D_0053C818[16] = "Sacrifices";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C828);
+const char D_0053C828[24] = "Elements & Mitama";
 
-INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C840);
+const char D_0053C840[16] = "Fusion basics";
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
+s32 evtMotionSeWork = 0x3E8;
 
-SDATA_PAD(4);
+char evtLoadStartMessage[8] = "LOAD..\n";
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", evtLoadStartMessage);
+char evtLoadDoneMessage[8] = "OK!!\n";
 
-INCLUDE_SDATA(const s32, "event/evtEventPack", evtLoadDoneMessage);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", CMB_GBWK);
+evtCmbWork_t *CMB_GBWK = 0;
 
