@@ -2365,7 +2365,7 @@ no_action:
 extern f32 slFileSelPulsePhase, slFileSelPulseStep, slFileSelWork;
 extern char slNewFileLabel[], slCorruptedFileLabel[], slNewCycleLabel[];
 extern char slNoFileLabel[], slCycleLabel[];
-extern char slNum2dFmt[], D_0054F088[], D_0054F090[], D_0054F098[], D_0054F0A0[];
+extern char slNum2dFmt[], slNum3dFmt[], slNum02dFmt[], D_0054F098[], D_0054F0A0[];
 extern char D_00311450[][0x20], D_00311850[][0x20];
 extern void cmpSetSkillListRows(s32 rows);
 extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *text);
@@ -2521,9 +2521,9 @@ s32 slFileSelDraw(s32 id)
                 if (time > 0x066FEBF8) {
                     time = 0x066FEBF8;
                 }
-                sprintf(number, D_0054F088, time / 108000);
+                sprintf(number, slNum3dFmt, time / 108000);
                 slKanjiDrawN(0x180, (y + 5) / 2, color, number);
-                sprintf(number, D_0054F090, (time % 108000) / 1800);
+                sprintf(number, slNum02dFmt, (time % 108000) / 1800);
                 slKanjiDrawN(0x1A4, (y + 5) / 2, color, number);
             }
             if (slDDS3To31Flg == 0) {

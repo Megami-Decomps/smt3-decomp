@@ -305,57 +305,57 @@ void dds3UpdateVibrationSlots(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052DFC8);
+const char dds3StartMenuModeSelect[16] = "MODE SELECT";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052DFD8);
+const char dds3StartMenuEndSaveTest[16] = "ENDSAVE TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052DFE8);
+const char dds3StartMenuStaffTest[16] = "STAFF TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052DFF8);
+const char dds3StartMenuMovieViewer[16] = "MOVIE VIEWER";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E008);
+const char dds3StartMenuPuzzleBoyGame[16] = "PUZZLE BOY GAME";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E018);
+const char dds3StartMenuMagatuhiEditor[16] = "MAGATUHI EDITOR";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E028);
+const char dds3StartMenuSpriteViewer[16] = "SPRITE VIEWER";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E038);
+const char dds3StartMenuParticleEditor[16] = "PARTICLE EDITOR";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E048);
+const char dds3StartMenuFontTest[16] = "FONT TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E058);
+const char dds3StartMenuSoundTest[16] = "SOUND TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E068);
+const char dds3StartMenuModelViewer[16] = "MODEL VIEWER";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E078);
+const char dds3StartMenuNameEntryTest[16] = "NAME ENTRY TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E088);
+const char dds3StartMenuResult2Test[16] = "RESULT2 TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E098);
+const char dds3StartMenuTerminalTest[16] = "TERMINAL TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0A8);
+const char dds3StartMenuRecoverTest[16] = "RECOVER TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0B8);
+const char dds3StartMenuRagTest[16] = "RAG TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0C8);
+const char dds3StartMenuShopTest[16] = "SHOP TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0D8);
+const char dds3StartMenuCombineTest[16] = "COMBINE TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0E8);
+const char dds3StartMenuCampTest[16] = "CAMP TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E0F8);
+const char dds3StartMenuMessageScriptTest[24] = "MESSAGE SCRIPT TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E110);
+const char dds3StartMenuEventViewer[16] = "EVENT VIEWER";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E120);
+const char dds3StartMenuEventTest[16] = "EVENT TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E130);
+const char dds3StartMenuKernelTest[16] = "KERNEL TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E140);
+const char dds3StartMenuModelCollisionEditor[24] = "MODEL COLLISION EDITOR";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E158);
+const char dds3StartMenuBattleFieldTest[24] = "BATTLE FIELD TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E170);
+const char dds3StartMenuNewBattleTest[16] = "NEW BATTLE TEST";
 
-INCLUDE_RODATA(const s32, "kernel/dds3PadManager", D_0052E180);
+const char dds3StartMenuGameStart[16] = "GAME START";
 
