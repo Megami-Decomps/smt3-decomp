@@ -11051,11 +11051,6 @@ void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor)
     }
 }
 
-/* NON_MATCHING: 7 of 37 words differ, exact size. */
-/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
- * seq17, seq26, seq28, seq29, seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 {
     u8 *work = cur;
@@ -11064,14 +11059,11 @@ void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
     *(s32 *)(work + 0x18) = a;
     *(s32 *)(work + 0x1C) = b;
     *(s32 *)(work + 8) = a;
-    *(s32 *)work = mode;
     *(s32 *)(work + 0xC) = b;
     *(s32 *)(work + 0x10) = c;
     *(s32 *)(work + 0x14) = d;
+    *(s32 *)work = mode;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
-#endif
 
 void cmpInitCursorRange(void *cursor, u8 index, u8 rows, saddr_t flag)
 {
