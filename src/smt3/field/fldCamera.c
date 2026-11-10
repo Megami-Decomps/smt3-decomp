@@ -26,8 +26,6 @@ f32 sdfCos(f32 aRadius);
 
 fldFollowCameraControl_t *fldGetFollowCameraControl(void);
 
-
-
 extern f32 fldCamPhokanSelX[];
 
 extern s32 fldCamPhokanState;
@@ -72,7 +70,6 @@ extern s32 fldCamMiwatasi;
 extern s32 fldElvCameraScene;
 
 extern void fldCamSetChaseCore(f32 height);
-
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 
@@ -209,7 +206,6 @@ extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 
 extern f32 EulerAngleAxisY(void);
 
-
 extern f32 fldCamDist;
 
 extern f32 fldCamHeight;
@@ -219,7 +215,6 @@ extern f32 fldCamParamTable2;
 extern f32 fldCamHeightTarget;
 
 extern f32 fldCamPitchTarget;
-
 
 extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 
@@ -593,7 +588,6 @@ void calcCamNormal(void) {
     fldCamSetLeng();
 }
 
-
 extern f32 fldCamDefaultPitch;
 
 /* Native direction-locked sibling of calcCamNormal; see
@@ -649,7 +643,6 @@ void calcCamDirLock(void) {
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
     fldCamSetLeng();
 }
-
 
 extern s32 fldNpcCamTarget;
 
@@ -1280,7 +1273,6 @@ void calcCamSyukan(void) {
     fldCamLength = 0.0f;
 }
 
-
 void fldSetElvCameraScene(u32 mode) {
     fldElvCameraScene = mode;
     dds3CameraObjectBasicGetTgtCam(dds3GetActiveCameraSceneBasic(dds3GetActiveScene()), fldElvCameraTarget,
@@ -1505,7 +1497,6 @@ void *fldCamMain(void) {
     return NULL;
 }
 
-
 extern void *dds3SearchProcessName(const char *namestr);
 
 extern void dds3SetScreenFovy(f32 fovy);
@@ -1578,15 +1569,17 @@ s32 fldElvCameraScene = 0;
 
 f32 fldCamElvState = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldHitChkMatter);
+s32 D_0054ECC4 = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldHitChkSlope);
+s32 fldHitChkMatter = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPhokanState);
+s32 fldHitChkSlope = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPHokanMode);
+s32 fldCamPhokanState = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamSvsState);
+s32 fldCamPHokanMode = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPitchTarget);
+s32 fldCamSvsState = 0;
+
+f32 fldCamPitchTarget = 0.0f;
 
