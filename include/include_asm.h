@@ -50,27 +50,28 @@
 #endif
 
 #define INCLUDE_ASM(TYPE, FOLDER, NAME)                        \
-    __asm__(".section .text\n"                                 \
+    __asm__(".pushsection .text\n"                             \
             "\t.set noat\n"                                    \
             "\t.set noreorder\n"                               \
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
             "\t.set reorder\n"                                 \
-            "\t.set at\n")
+            "\t.set at\n"                                      \
+            ".popsection\n")
 
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)                     \
-    __asm__(".section .rodata\n"                               \
+    __asm__(".pushsection .rodata\n"                           \
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
-            ".section .text\n")
+            ".popsection\n")
 
 /* Small data not yet defined in C (tools/include_sdata.py places these). */
 #define INCLUDE_SDATA(TYPE, FOLDER, NAME)                      \
-    __asm__(".section .sdata\n"                                \
+    __asm__(".pushsection .sdata\n"                            \
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
-            ".section .text\n")
+            ".popsection\n")
 
 /* N zero bytes of alignment padding ee-gcc put between two small-data objects
  * of one unit, where splat has no object to name (tools/include_sdata.py). */
-#define SDATA_PAD(N) __asm__(".section .sdata\n\t.space " #N "\n.section .text\n")
+#define SDATA_PAD(N) __asm__(".pushsection .sdata\n\t.space " #N "\n.popsection\n")
 
 /* Raise this unit's .text alignment to 2^N, for a unit whose original object
  * was aligned more strictly than its own code needs. The retail link pads up

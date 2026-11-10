@@ -921,9 +921,9 @@ void camp_update_Shutdown(void)
 
 extern char cmpCalcProcName[];
 
-extern char campDrawProcName[];
+extern const char campDrawProcName[];
 
-extern char campUpdateProcName[];
+extern const char campUpdateProcName[];
 
 extern void cmpinit();
 
@@ -954,9 +954,9 @@ void cmpProcessStart(void)
 
 extern char cmpCalcProcName[];
 
-extern char campDrawProcName[];
+extern const char campDrawProcName[];
 
-extern char campUpdateProcName[];
+extern const char campUpdateProcName[];
 
 void campKillProcesses(void)
 {
@@ -1848,10 +1848,8 @@ extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
 extern void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor,
                              datUnitWork_t *unit, s8 mode, s32 alpha);
 
-INCLUDE_RODATA(const s32, "code_0022C578", campDrawProcName);
-
-INCLUDE_RODATA(const s32, "code_0022C578", campUpdateProcName);
-
+const char campDrawProcName[16] = "camp_draw";
+const char campUpdateProcName[16] = "camp_update";
 void cmpCalcSkill(void)
 {
     u32 index = (u8)cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
@@ -2448,6 +2446,23 @@ void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot)
     fclDrawPanelSprite2(0x44, ot);
 }
 
+const char cmpTextWhatWillYouDiscard[24] __attribute__((aligned(16))) = "What will you discard?";
+const char cmpTextWhoWillYouPartWith[24] = "Who will you part with?";
+const char cmpTextWhoWillYouReturn[24] = "Who will you return?";
+const char cmpTextWhoWillYouSummon[24] = "Who will you summon?";
+const char cmpTextFromWhomWillYouExtract[32] = "From whom will you extract?";
+const char cmpTextWhichWillYouUnequip[24] = "Which will you unequip?";
+const char cmpTextWhichWillYouIngest[24] = "Which will you ingest?";
+const char cmpTextSPITEMS[16] = "SP ITEMS";
+const char cmpTextUseWhatItem[16] = "Use what item?";
+const char cmpTextWhoWillUseIt[24] = "Who will use it?";
+const char cmpTextWhoWillUseASkill[24] = "Who will use a skill?";
+const char cmpTextWhatWillYouUse[24] = "What will you use?";
+const char cmpTextMAINMENU[16] = "MAIN MENU";
+const char cmpTextNoDemonsToExtractFrom[32] = "No demons to extract from";
+const char cmpTextSummoned[16] = "Summoned";
+const s32 nmeQuadPanelCoords[12] = {0, 8320, 0, 0, 0, 1600, 8192, 0, 8192, 3584, 3584, 1696};
+
 #ifdef NON_MATCHING
 extern const s32 nmeGradFaces[26][10];
 extern const u32 nmeGradBaseColors[];
@@ -2522,45 +2537,11 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
 }
 
 #else
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F590);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F5A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F5C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F5D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F5F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F610);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F628);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F640);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F650);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F660);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F678);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F690);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053F6D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", nmeQuadPanelCoords);
-
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
 #endif
 
-INCLUDE_RODATA(const s32, "code_0022C578", nmeGradBaseColors);
-
-INCLUDE_RODATA(const s32, "code_0022C578", nmeGradWeights);
-
+const u32 nmeGradBaseColors[10] = {0x10, 0x10, 0x10, 0x10, 0x0, 0x10, 0x0, 0x0, 0x10, 0x0};
+const f32 nmeGradWeights[6] = {2.0f, 3.0f, 1.5f, 1.5f, 2.0f, 0.0f};
 void nmeDrawBlendQuad(s32 alpha, s32 ot)
 {
     u32 coords[2][3] = {{0x2000, 0xC80, 0x2000}, {0xE00, 0xE00, 0x9C0}};
@@ -4036,7 +4017,7 @@ s32 cmpLoadDHTextures(cmpDhWork_t *work)
     return printf("Read hearts tex.\n");
 }
 
-extern char campDhFreeTexMsg[];
+extern const char campDhFreeTexMsg[];
 
 void campDhFreeTexture(campInfoWork_t *work)
 {
@@ -4059,7 +4040,7 @@ extern void campDhFreeTexture(campInfoWork_t *work);
 
 extern void sdfMemFreePtrDirect(void *aPtr);
 
-extern char campDhFreeDataMsg[];
+extern const char campDhFreeDataMsg[];
 
 void campDhFreeResources(campInfoWork_t *work)
 {
@@ -4241,10 +4222,8 @@ extern s32 camp_draw_dh_Process();
 
 extern s32 camp_update_dh_Process();
 
-INCLUDE_RODATA(const s32, "code_0022C578", campDhFreeTexMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", campDhFreeDataMsg);
-
+const char campDhFreeTexMsg[24] = "Free hearts tex.\n";
+const char campDhFreeDataMsg[24] = "Free hearts tex data.\n";
 void *cmpStartProcessDH(cmpSeqInfo_t *parent)
 {
     void *proc;
@@ -5002,12 +4981,9 @@ void campDhDrawHearts(void)
 
 extern void campDhDrawIcon(void);
 
-INCLUDE_RODATA(const s32, "code_0022C578", campDhQuadGaugeCoords);
-
-INCLUDE_RODATA(const s32, "code_0022C578", campDhQuadGaugeColors);
-
-INCLUDE_RODATA(const s32, "code_0022C578", campDhGaugePalette);
-
+const u32 campDhQuadGaugeCoords[6] = {0x2000, 0x0, 0x2000, 0xE00, 0xE00, 0x6A0};
+const u32 campDhQuadGaugeColors[4] = {0xD0D0D80, 0x0, 0x0, 0x0};
+const u32 campDhGaugePalette[6] = {0x905BFF80, 0x75CBBD80, 0x76768680, 0x0, 0x0, 0x0};
 s32 camp_draw_dh_Process(s32 id)
 {
     campInfoWork_t *work = dds3GetProcessData(id);
@@ -7046,7 +7022,7 @@ u16 cmpGetSkillCost(u16 skill, u16 *work)
     return cost;
 }
 
-extern u8 D_0053FEB8[];
+extern const u8 D_0053FEB8[];
 extern char cmpFmtSkillCost[];
 
 #ifdef NON_MATCHING
@@ -7834,8 +7810,7 @@ extern s32 camp_calc_status_Process(s32 id);
 extern s32 camp_draw_status_Process(s32 id);
 extern s32 camp_update_status_Process(s32 id);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FEB8);
-
+const u8 D_0053FEB8[8] __attribute__((section(".rodata"))) = {0};
 void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *pParent)
 {
     void *proc = NULL;
@@ -9810,8 +9785,7 @@ extern void cmpDrawPanelEffBox(void *entry, s32 arg);
 extern void cmpDrawPanelEffRing(cmpPanelEffState_t *entry, s32 arg);
 extern void cmpDrawPanelEffQuad(cmpPanelEffState_t *entry, s32 arg);
 
-INCLUDE_RODATA(const s32, "code_0022C578", cmpPanelEffCoords);
-
+const s32 cmpPanelEffCoords[12] = {8192, 3200, 8192, 3584, 3584, 2496, 0, 4992, 0, 0, 0, 1088};
 void cmpFindPanelEffSlot(s32 arg)
 {
     s32 i;
@@ -10055,10 +10029,10 @@ void cmpModelInitCore2(void)
     func_0023FCC0();
 }
 
-extern u8 cmpDefaultLightColor[];
-extern u8 cmpDefaultLightDir[];
-extern u8 cmpDefaultAmbientColor[];
-extern u8 cmpDefaultFogColor[];
+extern const f32 cmpDefaultLightColor[];
+extern const u32 cmpDefaultLightDir[];
+extern const u32 cmpDefaultAmbientColor[];
+extern const u32 cmpDefaultFogColor[];
 extern f32 D_00345F60[];
 extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
 extern void dds3SetLightColor(s32 frame, s32 number, f32 *color);
@@ -10112,7 +10086,7 @@ extern void mdlFree(mdlObj_t *aHandle);
 
 extern void cmpFreeBadEffect(void);
 
-extern char cmpModelFreeMsg[];
+extern const char cmpModelFreeMsg[];
 
 void cmpModelFreeResource(void)
 {
@@ -10168,7 +10142,7 @@ extern void *hCAMPBadEffect;
 
 extern u8 D_00349300[];
 
-extern char cmpBadEffReadyMsg[];
+extern const char cmpBadEffReadyMsg[];
 
 extern void *effCAMPBadCreate(u8 *work, s32 kind);
 
@@ -10207,7 +10181,7 @@ extern void *hCAMPBadEffect;
 
 extern void effCAMPBadDelete(void *hCAMPBadEffect);
 
-extern char cmpBadEffFreeMsg[];
+extern const char cmpBadEffFreeMsg[];
 
 void cmpFreeBadEffect(void)
 {
@@ -10219,7 +10193,7 @@ void cmpFreeBadEffect(void)
     }
 }
 
-extern char cmpModelPrepareMsg[];
+extern const char cmpModelPrepareMsg[];
 
 void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
@@ -10263,7 +10237,7 @@ s32 cmpModelSetup(u16 id, s32 blocking)
     return 1;
 }
 
-extern char cmpModelReadyMsg[];
+extern const char cmpModelReadyMsg[];
 
 extern mdlObj_t *mdlLoad(u32 group, u32 id);
 
@@ -10507,7 +10481,7 @@ s8 cmpGetParamGaugeColor(s8 index)
     return cmpParamGaugeColors[index];
 }
 
-extern char cmpDebugIdFmt[];
+extern const char cmpDebugIdFmt[];
 
 extern s32 datExecSkill(s32 skill, datUnitWork_t *user, datUnitWork_t *target);
 
@@ -10612,42 +10586,20 @@ s32 cmpGetSkillTargetArea(u16 skillId)
 
 extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
 
-INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultLightColor);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultLightDir);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultAmbientColor);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpDefaultFogColor);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpModelFreeMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpBadEffReadyMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpBadEffFreeMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpModelPrepareMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpModelReadyMsg);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", cmpDebugIdFmt);
-
+const f32 cmpDefaultLightColor[4] = {1.0f, 1.0f, 1.0f, 0.0f};
+const u32 cmpDefaultLightDir[4] = {0x3F75C28F, 0x3EB851EB, 0x3EE147AE, 0x3F800000};
+const u32 cmpDefaultAmbientColor[4] = {0x3EF5C28F, 0x3EE66666, 0x3F0A3D70, 0x0};
+const u32 cmpDefaultFogColor[4] = {0x3DCCCCCC, 0x3DCCCCCC, 0x3DCCCCCC, 0x3F800000};
+const char cmpModelFreeMsg[24] = "Model %d:0x%03x free!!\n";
+const char cmpBadEffReadyMsg[20] = "Bad effect ready!!\n";
+const u32 D_00540054 __attribute__((section(".rodata"))) = 0;
+const char cmpBadEffFreeMsg[24] = "Bad effect free!!\n";
+const char cmpModelPrepareMsg[32] = "Model %d:0x%03x prepare...\n";
+const char cmpModelReadyMsg[32] = "Model %d:0x%03x ready!!\n";
+const char cmpTextVitality[16] = "Vitality";
+const char cmpTextIntelligence[16] = "Intelligence";
+const char cmpTextStrength[16] = "Strength";
+const char cmpDebugIdFmt[16] = "id:%x %x\n";
 s32 cmpUseItemKou(u16 item, datUnitWork_t *unit)
 {
     s32 index = -1;
@@ -11889,2311 +11841,1155 @@ s32 campStatusIsActive(void)
     return campStatusActive != 0;
 }
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540128);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540138);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540148);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540158);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540168);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540178);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540188);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540198);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401CC);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005401F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540208);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540218);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540228);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540238);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540248);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540258);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540268);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540278);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540288);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540298);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005402F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540308);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540318);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540328);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540338);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540348);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540358);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540368);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540378);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540388);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540398);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005403F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540408);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540418);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540428);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540438);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540448);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540458);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540468);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540478);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540488);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540498);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005404F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540508);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540518);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540528);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540538);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540548);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540558);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540568);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540578);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540588);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540598);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005405A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005405B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005405C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005405D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005405F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540610);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540628);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540640);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540650);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540668);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540690);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005406A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005406D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005406F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540708);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540718);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540738);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540758);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540770);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540798);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005407A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005407C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005407D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005407E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005407F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540828);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540850);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540888);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005408B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005408E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540908);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540930);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540958);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540978);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540998);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005409B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005409E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540A10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540A38);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540A50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540A60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540A88);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540AA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540AC8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540AE8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540B08);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540B20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540B38);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540B60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540B78);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540BA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540BC8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540BE8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C08);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C38);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540C98);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540CB8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540CD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540CF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540D18);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540D30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540D58);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540D70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540D98);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540DC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540DE8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540E10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540E28);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540E58);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540E78);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540E98);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540EC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540EE8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540F08);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540F30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540F50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540F70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540F88);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540FA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540FC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540FD8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540FE8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541008);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541038);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541060);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541088);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005410A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005410B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005410D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005410E8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541110);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541130);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541148);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541170);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541188);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005411A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005411C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005411D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005411F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541218);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541230);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541248);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541268);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541280);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005412A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005412C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005412D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005412F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541318);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541330);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541358);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541380);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005413A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005413C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005413E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541408);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541430);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541448);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541460);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541478);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541498);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005414B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005414D8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005414F8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541518);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541540);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541558);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541568);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541580);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005415A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005415B8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005415D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005415F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541608);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541620);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541638);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541648);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541660);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541678);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541698);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005416B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005416D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005416F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541710);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541738);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541760);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541780);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005417A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005417C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005417E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541808);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541828);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541850);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541878);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005418A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005418C8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005418E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541908);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541928);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541950);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541970);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541990);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005419A8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005419D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005419F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541A08);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541A30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541A58);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541A78);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541A98);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541AB8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541AE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541B08);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541B30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541B58);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541B78);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541B90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541BB8);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541BE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541BF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541C90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541CF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541D90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541DF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541E90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541EA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541EB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541EC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541ED0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541EE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541EF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541F90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00541FF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542000);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542010);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542030);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542040);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542050);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542060);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542070);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542080);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542090);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005420F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542100);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542110);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542120);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542130);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542140);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542150);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542160);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542170);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542180);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542190);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005421F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542200);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542210);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542220);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542230);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542240);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542250);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542260);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542270);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542280);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542290);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005422F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542300);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542310);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542320);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542330);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542340);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542350);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542360);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542370);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542380);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542390);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005423F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542400);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542410);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542420);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542430);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542440);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542450);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542460);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542470);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542480);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542490);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005424F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542500);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542510);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542520);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542530);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542540);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542550);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542560);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542570);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542580);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542590);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005425F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542600);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542610);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542620);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542630);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542640);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542650);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542660);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542670);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542680);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542690);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005426F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542700);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542710);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542720);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542730);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542740);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542750);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542760);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542770);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542780);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542790);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005427F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542800);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542810);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542820);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542830);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542840);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542850);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542860);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542870);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542880);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542890);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005428F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542900);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542910);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542920);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542930);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542940);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542950);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542960);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542970);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542980);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542990);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429A0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429D0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429E0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005429F0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542A90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542AF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542B90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542BF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542C90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542CF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542D90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542DF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542E90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542EA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542EB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542EC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542ED0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542EE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542EF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F00);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F10);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F20);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F30);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F40);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F50);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F60);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F70);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F80);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542F90);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FA0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FB0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FC0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FD0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FE0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00542FF0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543000);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543018);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543028);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543040);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543050);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543060);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543070);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543080);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00543098);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005430A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", campWork);
-
-INCLUDE_SDATA(const s32, "code_0022C578", campExitState);
-
+const char D_00540128[16] = "BeelzebubM";
+const char D_00540138[16] = "Seven-Eye";
+const char D_00540148[16] = "Station Hand";
+const char D_00540158[16] = "Masakado";
+const char D_00540168[16] = "Flauros Hallel";
+const char D_00540178[16] = "Ose Hallel";
+const char D_00540188[16] = "Baal Avatar";
+const char D_00540198[16] = "Kagutsuchi";
+const char cmpTextProtegonist[16] = "Protegonist";
+const char D_005401B8[16] = "Black Frost";
+const char cmpTextSakahagi[16] = "Sakahagi";
+const char D_005401D8[16] = "Futomimi";
+const char D_005401E8[16] = "Trumpeter";
+const char D_005401F8[16] = "The Harlot";
+const char D_00540208[16] = "Daisoujou";
+const char D_00540218[16] = "Hell Biker";
+const char D_00540228[16] = "Black Rider";
+const char D_00540238[16] = "Red Rider";
+const char D_00540248[16] = "White Rider";
+const char D_00540258[16] = "Pale Rider";
+const char D_00540268[16] = "Beelzebub";
+const char D_00540278[16] = "Metatron";
+const char D_00540288[16] = "Chatterskull";
+const char D_00540298[16] = "Lachesis";
+const char D_005402A8[16] = "Ongyo-Ki";
+const char D_005402B8[16] = "Yatagarasu";
+const char D_005402C8[16] = "Gui Xian";
+const char D_005402D8[16] = "Cu Chulainn";
+const char D_005402E8[16] = "Arahabaki";
+const char D_005402F8[16] = "Valkyrie";
+const char D_00540308[16] = "Will o' Wisp";
+const char D_00540318[16] = "Black Ooze";
+const char D_00540328[16] = "Choronzon";
+const char D_00540338[16] = "Rakshasa";
+const char D_00540348[16] = "Hresvelgr";
+const char D_00540358[16] = "Succubus";
+const char D_00540368[16] = "Queen Mab";
+const char D_00540378[16] = "Baphomet";
+const char D_00540388[16] = "Girimehkala";
+const char D_00540398[16] = "Datsue-Ba";
+const char D_005403A8[16] = "Shikigami";
+const char D_005403B8[16] = "Momunofu";
+const char D_005403C8[16] = "Shiki-Ouji";
+const char D_005403D8[16] = "Sarutahiko";
+const char D_005403E8[16] = "Gogmagog";
+const char D_005403F8[16] = "Nekomata";
+const char D_00540408[16] = "Badb Catha";
+const char D_00540418[16] = "Cerberus";
+const char D_00540428[16] = "Raja Naga";
+const char D_00540438[16] = "Quetzalcoatl";
+const char D_00540448[16] = "Yurlungur";
+const char D_00540458[16] = "Decarabia";
+const char D_00540468[16] = "Archangel";
+const char D_00540478[16] = "Principality";
+const char D_00540488[16] = "Dominion";
+const char D_00540498[16] = "Jack Frost";
+const char D_005404A8[16] = "High Pixie";
+const char D_005404B8[16] = "Pyro Jack";
+const char D_005404C8[16] = "Ara Mitama";
+const char D_005404D8[16] = "Nigi Mitama";
+const char D_005404E8[16] = "Kusi Mitama";
+const char D_005404F8[16] = "Saki Mitama";
+const char D_00540508[16] = "Feng Huang";
+const char D_00540518[16] = "Minakata";
+const char D_00540528[16] = "Okuninushi";
+const char D_00540538[16] = "Mikazuchi";
+const char D_00540548[16] = "Bishamon";
+const char D_00540558[16] = "Kikuri-Hime";
+const char D_00540568[16] = "Kushinada";
+const char D_00540578[16] = "Dionysus";
+const char D_00540588[16] = "Beiji-Weng";
+const char D_00540598[16] = "Sarasvati";
+const char D_005405A8[16] = "Scathach";
+const char D_005405B8[16] = "Amaterasu";
+const char D_005405C8[16] = "Null:curse";
+const char D_005405D8[32] = "Resist:phys Weak:fire/ice";
+const char D_005405F8[24] = "Null:ice Weak:fire";
+const char D_00540610[24] = "Null:force Weak:fire";
+const char D_00540628[24] = "Null:fire Weak:force";
+const char D_00540640[16] = "Null:mind";
+const char D_00540650[24] = "Null:expel Weak:death";
+const char D_00540668[40] = "Repel:expel/death Drain:curse/mind";
+const char D_00540690[24] = "Null:fire Drain:mind";
+const char D_005406A8[40] = "Repel:elec Null:expel Weak:curse";
+const char D_005406D0[32] = "Repel:magic Null:expel/death";
+const char D_005406F0[24] = "Null:magic/expel/death";
+const char D_00540708[16] = "Null:magic";
+const char D_00540718[32] = "Repel:expel/death Resist:all";
+const char D_00540738[32] = "Null:all except almighty";
+const char D_00540758[24] = "Normal resistance";
+const char D_00540770[40] = "Resist:phys Weak:force/expel/death";
+const char D_00540798[16] = "Null:nerve";
+const char D_005407A8[24] = "Repel:elec Weak:force";
+const char D_005407C0[24] = "Resist:phys Weak:magic";
+const char D_005407D8[16] = "Resist:ailments";
+const char D_005407E8[16] = "Resist:all";
+const char D_005407F8[48] = "Repel:fire/death Drn:ice Null:expel Res:phys";
+const char D_00540828[40] = "Null:expel/death/ailments Resist:phys";
+const char D_00540850[56] = "Repel:phys Drn:elec Null:expel/death/curse/nerve/mind";
+const char D_00540888[48] = "Repel:expel/death Drain:curse/mind Null:nerve";
+const char D_005408B8[48] = "Drain:force Null:fire/expel/death/ailments";
+const char D_005408E8[32] = "Null:force/expel/death/ailments";
+const char D_00540908[40] = "Drain:ice Null:expel/death/ailments";
+const char D_00540930[40] = "Null:elec/force/expel/death/ailments";
+const char D_00540958[32] = "Null:fire/expel/death/ailments";
+const char D_00540978[32] = "Null:ice/expel/death/ailments";
+const char D_00540998[32] = "Repel:expel/death Null:ailments";
+const char D_005409B8[48] = "Null:expel/death/ailments Resist:phys/magic";
+const char D_005409E8[40] = "Drn:fire Null:death Weak:expel/curse";
+const char D_00540A10[40] = "Null:death/curse/nerve Weak:expel";
+const char D_00540A38[24] = "Null:expel/death/mind";
+const char D_00540A50[16] = "Null:ailments";
+const char D_00540A60[40] = "Null:phys/death/curse/mind Weak:expel";
+const char D_00540A88[24] = "Null:force/death";
+const char D_00540AA0[40] = "Null:death Resist:magic Weak:expel";
+const char D_00540AC8[32] = "Null:death/curse/mind Weak:fire";
+const char D_00540AE8[32] = "Repel:expel/death Weak:elec";
+const char D_00540B08[24] = "Null:expel/death";
+const char D_00540B20[24] = "Null:phys/ice/expel";
+const char D_00540B38[40] = "Repel:death Null:nerve/mind Weak:expel";
+const char D_00540B60[24] = "Repel:force/expel";
+const char D_00540B78[40] = "Repel:expel Null:curse/nerve Weak:death";
+const char D_00540BA0[40] = "Repel:expel Drain:elec Weak:death";
+const char D_00540BC8[32] = "Repel:expel Drain:ice Weak:elec";
+const char D_00540BE8[32] = "Drain:ice Null:expel Weak:fire";
+const char D_00540C08[24] = "Repel:force Null:expel";
+const char D_00540C20[24] = "Null:expel Resist:phys";
+const char D_00540C38[24] = "Drain:force Null:expel";
+const char D_00540C50[48] = "Repel:ice Null:phys/expel/death Weak:all other";
+const char D_00540C80[24] = "Drain:fire Null:expel";
+const char D_00540C98[32] = "Null:ice/force/expel Weak:elec";
+const char D_00540CB8[24] = "Repel:expel Null:fire";
+const char D_00540CD0[32] = "Repel:expel Null:fire/force";
+const char D_00540CF0[40] = "Repel:expel Null:fire/elec/force";
+const char D_00540D18[24] = "Repel:expel Null:magic";
+const char D_00540D30[40] = "Null:death Res:phys Weak:magic/expel";
+const char D_00540D58[24] = "Null:death Weak:expel";
+const char D_00540D70[40] = "Null:death Res:phys Weak:fire/expel";
+const char D_00540D98[40] = "Null:death Res:phys Weak:ice/expel";
+const char D_00540DC0[40] = "Null:death Res:phys Weak:elec/expel";
+const char D_00540DE8[40] = "Null:death Res:phys Weak:force/expel";
+const char D_00540E10[24] = "Null:death Weak:magic";
+const char D_00540E28[48] = "Drn:fire Null:death Res:phys Weak:force/expel";
+const char D_00540E58[32] = "Null:death Weak:ice/expel";
+const char D_00540E78[32] = "Repel:death Weak:elec/expel";
+const char D_00540E98[40] = "Null:death Resist:ailments Weak:fire";
+const char D_00540EC0[40] = "Null:death Resist:ailments Weak:elec";
+const char D_00540EE8[32] = "Null:ice/death Weak:fire";
+const char D_00540F08[40] = "Drain:elec Null:death Weak:force";
+const char D_00540F30[32] = "Null:fire/death Weak:elec";
+const char D_00540F50[32] = "Repel:ice Null:death Weak:fire";
+const char D_00540F70[24] = "Null:elec Weak:ice";
+const char D_00540F88[24] = "Null:ice Weak:elec";
+const char D_00540FA0[32] = "Null:curse/mind Weak:force";
+const char D_00540FC0[24] = "Null:mind Weak:expel";
+const char D_00540FD8[16] = "Resist:magic";
+const char D_00540FE8[32] = "Resist:phys/magic/ailments";
+const char D_00541008[48] = "Drain:fire Null:death/nerve/mind Weak:ice";
+const char D_00541038[40] = "Repel:death Null:expel Resist:magic";
+const char D_00541060[40] = "Null:expel/death/ailments Weak:elec";
+const char D_00541088[24] = "Repel:death Weak:expel";
+const char D_005410A0[24] = "Null:death Weak:ice";
+const char D_005410B8[24] = "Null:death Weak:curse";
+const char D_005410D0[24] = "Repel:phys Null:death";
+const char D_005410E8[40] = "Drain:phys Null:death Weak:curse";
+const char D_00541110[32] = "Null:nerve/mind Weak:elec";
+const char D_00541130[24] = "Null:nerve Weak:ice";
+const char D_00541148[40] = "Null:curse/nerve Res:mind Weak:fire";
+const char D_00541170[24] = "Repel:phys Weak:elec";
+const char D_00541188[24] = "Repel:elec Weak:fire";
+const char D_005411A0[32] = "Resist:phys Weak:ailments";
+const char D_005411C0[24] = "Null:nerve Weak:force";
+const char D_005411D8[24] = "Resist:phys Weak:nerve";
+const char D_005411F0[40] = "Repel:expel/death Null:phys Weak:fire";
+const char D_00541218[24] = "Resist:fire Weak:ice";
+const char D_00541230[24] = "Resist:force Weak:fire";
+const char D_00541248[32] = "Null:expel/death Weak:nerve";
+const char D_00541268[24] = "Null:force Weak:elec";
+const char D_00541280[32] = "Null:phys/ice/death Weak:fire";
+const char D_005412A0[32] = "Null:fire/death Weak:force";
+const char D_005412C0[24] = "Resist:phys Weak:elec";
+const char D_005412D8[32] = "Repel:force Null:ailments";
+const char D_005412F8[32] = "Repel:fire Resist:phys Weak:ice";
+const char D_00541318[24] = "Drain:force Weak:elec";
+const char D_00541330[40] = "Drain:elec Null:ice/death Weak:fire";
+const char D_00541358[40] = "Drain:elec Resist:phys Weak:fire";
+const char D_00541380[32] = "Null:ice Resist:phys Weak:elec";
+const char D_005413A0[32] = "Null:magic Weak:ailments";
+const char D_005413C0[32] = "Drain:ice Null:death Weak:elec";
+const char D_005413E0[40] = "Null:death Resist:phys Weak:elec";
+const char D_00541408[40] = "Drn:fire Null:death Res:phys Weak:ice";
+const char D_00541430[24] = "Null:death Weak:nerve";
+const char D_00541448[24] = "Null:death Resist:magic";
+const char D_00541460[24] = "Repel:death Weak:nerve";
+const char D_00541478[32] = "Repel:expel Weak:ice/death";
+const char D_00541498[32] = "Repel:expel Weak:death/mind";
+const char D_005414B8[32] = "Repel:expel Weak:death/nerve";
+const char D_005414D8[32] = "Repel:expel Weak:force/death";
+const char D_005414F8[32] = "Repel:expel Weak:death/curse";
+const char D_00541518[40] = "Repel:expel Drn:fire Weak:ice/death";
+const char D_00541540[24] = "Drain:ice Weak:fire";
+const char D_00541558[16] = "Resist:elec";
+const char D_00541568[24] = "Resist:ice Weak:force";
+const char D_00541580[32] = "Repel:force Weak:curse/nerve";
+const char D_005415A0[24] = "Drain:ice Weak:mind";
+const char D_005415B8[24] = "Resist:phys Weak:curse";
+const char D_005415D0[32] = "Repel:expel/death Resist:magic";
+const char D_005415F0[24] = "Null:force Weak:curse";
+const char D_00541608[24] = "Drain:elec Weak:fire";
+const char D_00541620[24] = "Resist:ice Weak:fire";
+const char D_00541638[16] = "Drain:fire";
+const char D_00541648[24] = "Repel:force Weak:curse";
+const char D_00541660[24] = "Drain:force Weak:nerve";
+const char D_00541678[32] = "Resist:phys Weak:curse/nerve";
+const char D_00541698[24] = "Drain:fire Weak:ice";
+const char D_005416B0[32] = "Null:expel/death/ailments";
+const char D_005416D0[32] = "Null:expel/death Weak:force";
+const char D_005416F0[32] = "Null:expel/death Resist:magic";
+const char D_00541710[40] = "Repel:ice Null:expel/death Weak:fire";
+const char D_00541738[40] = "Drain:fire Null:expel/death Weak:ice";
+const char D_00541760[32] = "Null:expel/curse/mind Weak:elec";
+const char D_00541780[32] = "Null:ice/expel Weak:ailments";
+const char D_005417A0[32] = "Drain:elec Null:expel Weak:fire";
+const char D_005417C0[32] = "Drain:elec Null:expel Weak:ice";
+const char D_005417E0[40] = "Drain:force Null:expel Weak:elec";
+const char D_00541808[32] = "Null:ice/expel Weak:fire";
+const char D_00541828[40] = "Drn:fire Null:expel Weak:nerve/mind";
+const char D_00541850[40] = "Repel:elec Null:expel Weak:fire/nerve";
+const char D_00541878[40] = "Null:expel/curse/nerve Weak:force";
+const char D_005418A0[40] = "Repel:force Null:expel Weak:elec";
+const char D_005418C8[24] = "Repel:expel Null:death";
+const char D_005418E0[40] = "Repel:elec Null:expel Weak:force";
+const char D_00541908[32] = "Repel:ice Null:expel Weak:fire";
+const char D_00541928[40] = "Drn:elec Null:expel Weak:curse/nerve";
+const char D_00541950[32] = "Repel:fire Null:expel Weak:ice";
+const char D_00541970[32] = "Null:expel/nerve/mind Weak:fire";
+const char D_00541990[24] = "Repel:expel Weak:death";
+const char D_005419A8[40] = "Repel:death Null:fire/expel Weak:ice";
+const char D_005419D0[32] = "Null:fire/expel/death Weak:ice";
+const char D_005419F0[24] = "Null:phys/expel/death";
+const char D_00541A08[40] = "Null:expel/death Res:phys Weak:fire";
+const char D_00541A30[40] = "Null:expel/death Resist:all other";
+const char D_00541A58[32] = "Null:force/expel Weak:elec";
+const char D_00541A78[32] = "Drain:fire Repel:expel Weak:ice";
+const char D_00541A98[32] = "Null:expel/ailments Weak:fire";
+const char D_00541AB8[40] = "Null:force/expel/curse Weak:elec";
+const char D_00541AE0[40] = "Repel:expel Null:ailments Weak:force";
+const char D_00541B08[40] = "Repel:expel Resist:phys Weak:death";
+const char D_00541B30[40] = "Repel:expel/death Weak:nerve/mind";
+const char D_00541B58[32] = "Null:ice/expel Weak:force";
+const char D_00541B78[24] = "Null:fire/expel/death";
+const char D_00541B90[40] = "Repel:phys Null:expel/death Weak:ice";
+const char D_00541BB8[40] = "Repel:expel Null:death Res:all other";
+const char D_00541BE0[16] = "Null:expel";
+const char cmpTextStarKey[16] = "Star Key";
+const char cmpTextAfterlifeBell[16] = "Afterlife Bell";
+const char cmpTextBlackVisor[16] = "Black Visor";
+const char cmpTextDeathstone[16] = "Deathstone";
+const char cmpTextMoonKey[16] = "Moon Key";
+const char cmpTextKnowledge[16] = "Knowledge";
+const char cmpTextSovereignty[16] = "Sovereignty";
+const char cmpTextFoundation[16] = "Foundation";
+const char cmpTextEternity[16] = "Eternity";
+const char cmpTextGodliness[16] = "Godliness";
+const char cmpTextCompassion[16] = "Compassion";
+const char cmpTextNetherstone[16] = "Netherstone";
+const char cmpTextEarthstone[16] = "Earthstone";
+const char cmpTextHeavenstone[16] = "Heavenstone";
+const char cmpTextParkKey[16] = "Park Key";
+const char cmpTextLordSSword[16] = "Lord's Sword";
+const char cmpTextKimonStone[16] = "Kimon Stone";
+const char cmpTextHimorogi[16] = "Himorogi";
+const char cmpTextUmugiStone[16] = "Umugi Stone";
+const char cmpText1000YenBill[16] = "1000 Yen Bill";
+const char cmpTextRedKila[16] = "Red Kila";
+const char cmpTextGreenKila[16] = "Green Kila";
+const char cmpTextYellowKila[16] = "Yellow Kila";
+const char cmpTextWhiteKila[16] = "White Kila";
+const char cmpTextAnnexPass[16] = "Annex Pass";
+const char cmpTextAquamarine[16] = "Aquamarine";
+const char cmpTextTurquoise[16] = "Turquoise";
+const char cmpTextAmethyst[16] = "Amethyst";
+const char cmpTextSapphire[16] = "Sapphire";
+const char cmpTextMasakados[16] = "Masakados";
+const char cmpTextKamurogi[16] = "Kamurogi";
+const char cmpTextMurakumo[16] = "Murakumo";
+const char cmpTextAnathema[16] = "Anathema";
+const char cmpTextNarukami[16] = "Narukami";
+const char cmpTextShiranui[16] = "Shiranui";
+const char cmpTextIyomante[16] = "Iyomante";
+const char cmpTextWadatsumi[16] = "Wadatsumi";
+const char cmpTextMarogareh[16] = "Marogareh";
+const char cmpTextLuckyTicket[16] = "Lucky Ticket";
+const char cmpTextDiviningWater[16] = "Divining Water";
+const char cmpTextSmokeBall[16] = "Smoke Ball";
+const char cmpTextLightBall[16] = "Light Ball";
+const char cmpTextFloatBall[16] = "Float Ball";
+const char cmpTextAttractPipe[16] = "Attract Pipe";
+const char cmpTextRepulseBell[16] = "Repulse Bell";
+const char cmpTextSpyglass[16] = "Spyglass";
+const char cmpTextSoulReturn[16] = "Soul-Return";
+const char cmpTextBlessedFan[16] = "Blessed Fan";
+const char cmpTextLuIncense[16] = "Lu Incense";
+const char cmpTextAgIncense[16] = "Ag Incense";
+const char cmpTextViIncense[16] = "Vi Incense";
+const char cmpTextMaIncense[16] = "Ma Incense";
+const char cmpTextStIncense[16] = "St Incense";
+const char cmpTextTetrajaRock[16] = "Tetraja Rock";
+const char cmpTextDekajaRock[16] = "Dekaja Rock";
+const char cmpTextAttackMirror[16] = "Attack Mirror";
+const char cmpTextMagicMirror[16] = "Magic Mirror";
+const char cmpTextPotOfDeath[16] = "Pot of Death";
+const char cmpTextMakajamRock[16] = "Makajam Rock";
+const char cmpTextWagtailPlume[16] = "Wagtail Plume";
+const char cmpTextPoisonArrow[16] = "Poison Arrow";
+const char cmpTextMegidolaRock[16] = "Megidola Rock";
+const char cmpTextMegidoRock[16] = "Megido Rock";
+const char cmpTextMamudoRock[16] = "Mamudo Rock";
+const char cmpTextMahamaRock[16] = "Mahama Rock";
+const char cmpTextMazanRock[16] = "Mazan Rock";
+const char cmpTextMazioRock[16] = "Mazio Rock";
+const char cmpTextMabufuRock[16] = "Mabufu Rock";
+const char cmpTextMaragiRock[16] = "Maragi Rock";
+const char cmpTextDisStone[16] = "Dis-Stone";
+const char cmpTextDisMute[16] = "Dis-Mute";
+const char cmpTextDisCharm[16] = "Dis-Charm";
+const char cmpTextDisStun[16] = "Dis-Stun";
+const char cmpTextDisPoison[16] = "Dis-Poison";
+const char cmpTextSacredWater[16] = "Sacred Water";
+const char cmpTextBalmOfRising[16] = "Balm of Rising";
+const char cmpTextRevivalBead[16] = "Revival Bead";
+const char cmpTextChakraElixir[16] = "Chakra Elixir";
+const char cmpTextBeadOfLife[16] = "Bead of Life";
+const char cmpTextSomaDroplet[16] = "Soma Droplet";
+const char cmpTextGreatChakra[16] = "Great Chakra";
+const char cmpTextChakraPot[16] = "Chakra Pot";
+const char cmpTextChakraDrop[16] = "Chakra Drop";
+const char cmpTextBeadChain[16] = "Bead Chain";
+const char cmpTextLifeStone[16] = "Life Stone";
+const char cmpTextMedicine[16] = "Medicine";
+const char cmpTextMuscleDrink[16] = "Muscle Drink";
+const char D_00542160[16] = "Reserve\314\314\314\314\314\314\314\314";
+const char cmpTextCallEvil[16] = "Call Evil";
+const char cmpTextCallSouls[16] = "Call Souls";
+const char cmpTextCallSoldier[16] = "Call Soldier";
+const char cmpTextCallAngel[16] = "Call Angel";
+const char cmpTextJiveTalk[16] = "Jive Talk";
+const char cmpTextWineParty[16] = "Wine Party";
+const char cmpTextMaidenPlea[16] = "Maiden Plea";
+const char cmpTextIntimidate[16] = "Intimidate";
+const char cmpTextPersuade[16] = "Persuade";
+const char cmpTextGonnection[16] = "Gonnection";
+const char cmpTextArbitration[16] = "Arbitration";
+const char cmpTextStoneHunt[16] = "Stone Hunt";
+const char D_00542230[16] = "Threaten";
+const char D_00542240[16] = "Death Pact";
+const char D_00542250[16] = "Mischief";
+const char D_00542260[16] = "Soul Recruit";
+const char D_00542270[16] = "Dark Pledge";
+const char D_00542280[16] = "Brainwash";
+const char D_00542290[16] = "Son's Oath";
+const char D_005422A0[16] = "Never Yield";
+const char D_005422B0[16] = "Charisma";
+const char D_005422C0[16] = "Watchful";
+const char D_005422D0[16] = "Lucky Find";
+const char D_005422E0[16] = "Thief's Lore";
+const char D_005422F0[16] = "Mana Refill";
+const char D_00542300[16] = "Life Refill";
+const char D_00542310[16] = "Victory Cry";
+const char D_00542320[16] = "Mana Aid";
+const char D_00542330[16] = "Life Aid";
+const char D_00542340[16] = "Force Repel";
+const char D_00542350[16] = "Elec Repel";
+const char D_00542360[16] = "Ice Repel";
+const char D_00542370[16] = "Fire Repel";
+const char D_00542380[16] = "Phys Repel";
+const char D_00542390[16] = "Force Drain";
+const char D_005423A0[16] = "Elec Drain";
+const char D_005423B0[16] = "Ice Drain";
+const char D_005423C0[16] = "Fire Drain";
+const char D_005423D0[16] = "Phys Drain";
+const char D_005423E0[16] = "Void Mind";
+const char D_005423F0[16] = "Void Nerve";
+const char D_00542400[16] = "Void Curse";
+const char D_00542410[16] = "Void Death";
+const char D_00542420[16] = "Void Expel";
+const char D_00542430[16] = "Void Force";
+const char D_00542440[16] = "Void Elec";
+const char D_00542450[16] = "Void Ice";
+const char D_00542460[16] = "Void Fire";
+const char D_00542470[16] = "Void Phys";
+const char D_00542480[16] = "Anti-Mind";
+const char D_00542490[16] = "Anti-Nerve";
+const char D_005424A0[16] = "Anti-Curse";
+const char D_005424B0[16] = "Anti-Death";
+const char D_005424C0[16] = "Anti-Expel";
+const char D_005424D0[16] = "Anti-Force";
+const char D_005424E0[16] = "Anti-Elec";
+const char D_005424F0[16] = "Anti-Ice";
+const char D_00542500[16] = "Anti-Fire";
+const char D_00542510[16] = "Anti-Phys";
+const char D_00542520[16] = "Force Boost";
+const char D_00542530[16] = "Elec Boost";
+const char D_00542540[16] = "Ice Boost";
+const char D_00542550[16] = "Fire Boost";
+const char D_00542560[16] = "Attack All";
+const char D_00542570[16] = "Drain Attack";
+const char D_00542580[16] = "Dark Might";
+const char D_00542590[16] = "Bright Might";
+const char D_005425A0[16] = "Mind's Eye";
+const char D_005425B0[16] = "Fast Retreat";
+const char D_005425C0[16] = "Mana Surge";
+const char D_005425D0[16] = "Mana Gain";
+const char D_005425E0[16] = "Mana Bonus";
+const char D_005425F0[16] = "Life Surge";
+const char D_00542600[16] = "Life Gain";
+const char D_00542610[16] = "Life Bonus";
+const char D_00542620[16] = "God's Bow";
+const char D_00542630[16] = "Beast Roar";
+const char D_00542640[16] = "Death Lust";
+const char D_00542650[16] = "Hell Throttle";
+const char D_00542660[16] = "Hell Burner";
+const char D_00542670[16] = "Hell Exhaust";
+const char D_00542680[16] = "Hell Spin";
+const char D_00542690[16] = "Terrorblade";
+const char D_005426A0[16] = "Meditation";
+const char D_005426B0[16] = "Red Capote";
+const char D_005426C0[16] = "Andalucia";
+const char D_005426D0[16] = "Holy Star";
+const char D_005426E0[16] = "High King";
+const char D_005426F0[16] = "Root of Evil";
+const char D_00542700[16] = "Evil Gleam";
+const char D_00542710[16] = "Showtime";
+const char D_00542720[16] = "Whirlwind";
+const char D_00542730[16] = "Roundtrip";
+const char D_00542740[16] = "Bullet-Time";
+const char D_00542750[16] = "Rebellion";
+const char D_00542760[16] = "Soul Divide";
+const char D_00542770[16] = "Death Flies";
+const char D_00542780[16] = "(Summon)";
+const char D_00542790[16] = "Phase Shift";
+const char D_005427A0[16] = "Apocalypse";
+const char D_005427B0[16] = "Domination";
+const char D_005427C0[16] = "Wild Dance";
+const char D_005427D0[16] = "Lost Macca!";
+const char D_005427E0[16] = "Icy Death";
+const char D_005427F0[16] = "Hell's Call";
+const char D_00542800[16] = "God's Curse";
+const char D_00542810[16] = "Vast Light";
+const char D_00542820[16] = "Conjuration";
+const char D_00542830[16] = "Fire of Sinai";
+const char D_00542840[16] = "Replicate";
+const char D_00542850[16] = "Foul Union";
+const char D_00542860[16] = "Divine Will";
+const char cmpTextLaughter[16] = "Laughter";
+const char cmpTextDarkHowl[16] = "Dark Howl";
+const char cmpTextGathering[16] = "Gathering";
+const char cmpTextBeckonCall[16] = "Beckon Call";
+const char cmpTextInfiniteLight[16] = "Infinite Light";
+const char cmpTextDragonEye[16] = "Dragon Eye";
+const char cmpTextBeastEye[16] = "Beast Eye";
+const char cmpTextIntoxicate[16] = "Intoxicate";
+const char cmpTextPanicVoice[16] = "Panic Voice";
+const char cmpTextSexyGaze[16] = "Sexy Gaze";
+const char cmpTextSonicWave[16] = "Sonic Wave";
+const char cmpTextEternalRest[16] = "Eternal Rest";
+const char cmpTextBindingCry[16] = "Binding Cry";
+const char cmpTextStunGaze[16] = "Stun Gaze";
+const char cmpTextSolNiger[16] = "Sol Niger";
+const char cmpTextDismalTune[16] = "Dismal Tune";
+const char cmpTextDebilitate[16] = "Debilitate";
+const char cmpTextFogBreath[16] = "Fog Breath";
+const char cmpTextToxicCloud[16] = "Toxic Cloud";
+const char cmpTextBaelSBane[16] = "Bael's Bane";
+const char cmpTextEvilGaze[16] = "Evil Gaze";
+const char cmpTextMuteGaze[16] = "Mute Gaze";
+const char cmpTextStoneGaze[16] = "Stone Gaze";
+const char cmpTextHellGaze[16] = "Hell Gaze";
+const char cmpTextRadiance[16] = "Radiance";
+const char cmpTextStarlight[16] = "Starlight";
+const char cmpTextVioletFlash[16] = "Violet Flash";
+const char cmpTextLifeDrain[16] = "Life Drain";
+const char cmpTextManaDrain[16] = "Mana Drain";
+const char cmpTextDeathtouch[16] = "Deathtouch";
+const char cmpTextHolyWrath[16] = "Holy Wrath";
+const char cmpTextThunderclap[16] = "Thunderclap";
+const char cmpTextWetWind[16] = "Wet Wind";
+const char cmpTextWindCutter[16] = "Wind Cutter";
+const char cmpTextWingBuffet[16] = "Wing Buffet";
+const char cmpTextBoltStorm[16] = "Bolt Storm";
+const char cmpTextGlacialBlast[16] = "Glacial Blast";
+const char cmpTextIceBreath[16] = "Ice Breath";
+const char cmpTextRagnarok[16] = "Ragnarok";
+const char cmpTextProminence[16] = "Prominence";
+const char cmpTextHellfire[16] = "Hellfire";
+const char cmpTextFireBreath[16] = "Fire Breath";
+const char cmpTextTentacle[16] = "Tentacle";
+const char cmpTextExtraHit[16] = "Extra Hit";
+const char cmpTextRetaliate[16] = "Retaliate";
+const char cmpTextGaeaRage[16] = "Gaea Rage";
+const char cmpTextMagmaAxis[16] = "Magma Axis";
+const char cmpTextSpiralViper[16] = "Spiral Viper";
+const char cmpTextEvilMelody[16] = "Evil Melody";
+const char cmpTextHolyMelody[16] = "Holy Melody";
+const char D_00542B90[16] = "Earthquake";
+const char D_00542BA0[16] = "Foul Havoc";
+const char D_00542BB0[16] = "Last Resort";
+const char D_00542BC0[16] = "Freikugel";
+const char D_00542BD0[16] = "Oni-Kagura";
+const char D_00542BE0[16] = "Javelin Rain";
+const char D_00542BF0[16] = "Divine Shot";
+const char D_00542C00[16] = "Xeros-Beat";
+const char D_00542C10[16] = "Deadly Fury";
+const char D_00542C20[16] = "Godly Light";
+const char D_00542C30[16] = "Iron Claw";
+const char D_00542C40[16] = "Stun Claw";
+const char D_00542C50[16] = "Venom Claw";
+const char D_00542C60[16] = "Feral Claw";
+const char D_00542C70[16] = "Hell Fang";
+const char D_00542C80[16] = "Stun Bite";
+const char D_00542C90[16] = "Stone Bite";
+const char D_00542CA0[16] = "Charm Bite";
+const char D_00542CB0[16] = "Venom Bite";
+const char D_00542CC0[16] = "Feral Bite";
+const char D_00542CD0[16] = "Kamikaze";
+const char D_00542CE0[16] = "Sacrifice";
+const char D_00542CF0[16] = "Arid Needle";
+const char D_00542D00[16] = "Toxic Sting";
+const char D_00542D10[16] = "Stun Needle";
+const char D_00542D20[16] = "Needle Rush";
+const char D_00542D30[16] = "Chaos Blade";
+const char D_00542D40[16] = "Guillotine";
+const char D_00542D50[16] = "Deathbound";
+const char D_00542D60[16] = "Mighty Gust";
+const char D_00542D70[16] = "Stasis Blade";
+const char D_00542D80[16] = "Dark Sword";
+const char D_00542D90[16] = "Hassohappa";
+const char D_00542DA0[16] = "Brutal Slash";
+const char D_00542DB0[16] = "Heat Wave";
+const char D_00542DC0[16] = "Hades Blast";
+const char D_00542DD0[16] = "Hell Thrust";
+const char D_00542DE0[16] = "Pestilence";
+const char D_00542DF0[16] = "Lightoma";
+const char D_00542E00[16] = "Riberama";
+const char D_00542E10[16] = "Tetrakarn";
+const char D_00542E20[16] = "Makarakarn";
+const char D_00542E30[16] = "Makakaja";
+const char D_00542E40[16] = "Rakukaja";
+const char D_00542E50[16] = "Sukukaja";
+const char D_00542E60[16] = "Tarukaja";
+const char D_00542E70[16] = "Tentarafoo";
+const char D_00542E80[16] = "Marin Karin";
+const char D_00542E90[16] = "Shibaboo";
+const char D_00542EA0[16] = "Makajamon";
+const char D_00542EB0[16] = "Recarmdra";
+const char D_00542EC0[16] = "Samrecarm";
+const char D_00542ED0[16] = "Paraladi";
+const char D_00542EE0[16] = "Posumudi";
+const char D_00542EF0[16] = "Me Patra";
+const char D_00542F00[16] = "Makatora";
+const char D_00542F10[16] = "Mediarahan";
+const char D_00542F20[16] = "Mediarama";
+const char D_00542F30[16] = "Diarahan";
+const char D_00542F40[16] = "Mamudoon";
+const char D_00542F50[16] = "Mahamaon";
+const char D_00542F60[16] = "Megidolaon";
+const char D_00542F70[16] = "Megidola";
+const char D_00542F80[16] = "Mazandyne";
+const char D_00542F90[16] = "Maziodyne";
+const char D_00542FA0[16] = "Mazionga";
+const char D_00542FB0[16] = "Mabufudyne";
+const char D_00542FC0[16] = "Mabufula";
+const char D_00542FD0[16] = "Bufudyne";
+const char D_00542FE0[16] = "Maragidyne";
+const char D_00542FF0[16] = "Maragion";
+const char D_00543000[24] = "\314\314\314\314\314\314\314\314\314\314\314\314\314\314\314\314\314\314";
+const char D_00543018[16] = "Retreated";
+const char D_00543028[24] = "Retreating.... Success!";
+const char D_00543040[16] = "Retreating....";
+const char D_00543050[16] = "Retreating...";
+const char D_00543060[16] = "Retreating..";
+const char D_00543070[16] = "Retreating.";
+const char D_00543080[24] = "New enemy appeared!";
+const char D_00543098[16] = "Fell in panic!";
+const char D_005430A8[24] = "Reserved";
+campWork_t *campWork = NULL;
+s8 campExitState = 0;
 SDATA_PAD(3);
 
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FDF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpCalcProcName);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtNameCount);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FE68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtMaka);
-
-INCLUDE_SDATA(const s32, "code_0022C578", campStatusPanel);
-
-INCLUDE_SDATA(const s32, "code_0022C578", campInfoWork);
-
+char cmpTextLoad[8] = "Load";
+char cmpTextConfig[8] = "Config";
+char cmpTextStatus[8] = "Status";
+char cmpTextParty[8] = "Party";
+char cmpTextSkill[8] = "Skill";
+char cmpTextItem[8] = "Item";
+char cmpTextGems[8] = "Gems";
+char cmpTextDiscard[8] = "Discard";
+char cmpTextUse[8] = "Use";
+char cmpTextSummon[8] = "Summon";
+char cmpTextUnequip[8] = "Unequip";
+char cmpTextEquip[8] = "Equip";
+char cmpCalcProcName[8] = "camp";
+char cmpFmtNameCount[8] = "%s%d";
+char cmpTextGEMS[8] = "GEMS";
+char cmpTextITEM[8] = "ITEM";
+char D_0054FE58[8] = "PARTY";
+char D_0054FE60[8] = "STATUS";
+char D_0054FE68[8] = "Expend";
+char cmpFmtMaka[4] = "%7d";
+campStatusPanel_t *campStatusPanel = NULL;
+campInfoWork_t *campInfoWork = NULL;
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "code_0022C578", campDhFmtAmount);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatTimer);
-
-INCLUDE_SDATA(const s32, "code_0022C578", rstHeartsMasterPhase);
-
+char campDhFmtAmount[8] = "%2d";
+s32 cmpStatTimer = 0;
+u16 rstHeartsMasterPhase = 0;
 SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "code_0022C578", cmbBirthPanel);
-
+datUnitWork_t *cmbBirthPanel = NULL;
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtDec2);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtValMax);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtExpNext);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtItemQty);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtSkillCost);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEBC);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusPhase);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusWindowHidden);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelLoadState);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpInfoWindow);
-
+char cmpFmtDec2[8] = "%2d";
+char cmpFmtValMax[8] = "%3d";
+char cmpFmtExpNext[8] = "%6d";
+const char cmpFmtItemQty[8] = "%2d";
+char cmpFmtSkillCost[4] = "%3d";
+s32 D_0054FEBC = 0;
+campStatusPanel_t *cmpStatusPhase = NULL;
+s8 cmpStatusWindowHidden = 0;
+s8 cmpStatusModelLoadState = 0;
+cmpInfoWindow_t *cmpInfoWindow = NULL;
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtHpMp);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpFmtLevel);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpPanelEffList);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelResult);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpEncycWork);
-
-INCLUDE_SDATA(const s32, "code_0022C578", hCAMPBadEffect);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelReady);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpModelInitFlag);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusGroup);
-
-INCLUDE_SDATA(const s32, "code_0022C578", cmpStatusModelId);
-
+char cmpFmtHpMp[8] = "%3d";
+char cmpFmtLevel[4] = "%2d";
+cmpPanelEff_t *cmpPanelEffList = NULL;
+s32 cmpStatusModelResult = 0;
+mdlObj_t *cmpEncycWork = NULL;
+void *hCAMPBadEffect = NULL;
+s8 cmpStatusModelReady = 0;
+s8 cmpModelInitFlag = 0;
+u16 cmpStatusGroup = 0;
+u16 cmpStatusModelId = 0;
 SDATA_PAD(2);
 
-INCLUDE_SDATA(const s32, "code_0022C578", cmpModelHandle);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FEF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", campStatusActive);
-
+s32 cmpModelHandle = 0;
+char cmpTextLuck[8] = "Luck";
+char cmpTextAgility[8] = "Agility";
+char cmpTextMagic[8] = "Magic";
+s32 campStatusActive = 0;
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "code_0022C578", cmbRaceTable);
-
-INCLUDE_SDATA(const s32, "code_0022C578", nbEncountMaxBase);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FF98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFA8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFB0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFB8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFC0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFC8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFD0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0054FFF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550000);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550004);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550008);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550010);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550018);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0055001C);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550020);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550028);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550030);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550038);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0055003C);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550040);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550048);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550050);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550054);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550058);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550060);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550064);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550068);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550070);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550078);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550080);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550088);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550090);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550098);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005500F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550100);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550108);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550110);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550118);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550120);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550128);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550130);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550134);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550138);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550140);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550148);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550150);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550158);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550160);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550168);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550170);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550178);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550180);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550188);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550190);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550198);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005501F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550200);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550208);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550210);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550218);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550220);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550228);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550230);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550238);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550240);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550248);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550250);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550258);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550260);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550268);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550270);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550278);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550280);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550288);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550290);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550298);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005502F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550300);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550308);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550310);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550318);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550320);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550328);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550330);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550338);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_0055033C);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550340);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550348);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550350);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550358);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550360);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550368);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550370);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550378);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550380);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550388);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550390);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550398);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005503F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550400);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550408);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550410);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550418);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550420);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550428);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550430);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550438);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550440);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550448);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550450);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550458);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550460);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550468);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550470);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550478);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550480);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550488);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550490);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550498);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005504F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550500);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550508);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550510);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550518);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550520);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550528);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550530);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550538);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550540);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550548);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550550);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550558);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550560);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550568);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550570);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550578);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550580);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550588);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550590);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550598);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005505F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550600);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550608);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550610);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550618);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550620);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550628);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550630);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550638);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550640);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550648);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550650);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550658);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550660);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550668);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550670);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550678);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550680);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550688);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550690);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550698);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005506F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550700);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550708);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550710);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550718);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550720);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550728);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550730);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550738);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550740);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550748);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550750);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550758);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550760);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550768);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550770);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550778);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550780);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550788);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550790);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550798);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005507F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550800);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550808);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550810);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550818);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550820);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550828);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550830);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550838);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550840);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550848);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550850);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550858);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550860);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550868);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550870);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550878);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550880);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550888);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550890);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550898);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005508F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550900);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550908);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550910);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550918);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550920);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550928);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550930);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550938);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550940);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550948);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550950);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550958);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550960);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550968);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550970);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550978);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550980);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550988);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550990);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550998);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509A0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509A8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509B0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509B8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509C0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509C8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509D0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509D8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509E0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509E8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509F0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_005509F8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550A98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AA8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AB0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AB8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AC0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AC8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AD0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550AF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550B98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BA8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BB0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BB8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BC0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BC8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BD0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550BF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550C98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CA8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CB0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CB8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CC0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CC8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CD0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550CF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550D98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DA8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DB0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DB8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DC0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DC8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DD0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DD8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DE0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DE8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DF0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550DF8);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E00);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E08);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E10);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E18);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E20);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E28);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E30);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E38);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E40);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E48);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E50);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E58);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E60);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E68);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E70);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E78);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E80);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E88);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E90);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550E98);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550EA0);
-
-INCLUDE_SDATA(const s32, "code_0022C578", D_00550EA8);
-
+s32 cmbRaceTable = 0x180;
+s32 nbEncountMaxBase = 0x172;
+char D_0054FF20[8] = "Lucifer";
+char D_0054FF28[8] = "Shade";
+char D_0054FF30[8] = "Mara";
+char D_0054FF38[8] = "Reserve";
+char D_0054FF40[8] = "Tharmus";
+char D_0054FF48[8] = "Luvah";
+char D_0054FF50[8] = "Urizen";
+char D_0054FF58[8] = "Urthona";
+char D_0054FF60[8] = "Noah";
+char D_0054FF68[8] = "Ahriman";
+char D_0054FF70[8] = "Specter";
+char D_0054FF78[8] = "0xFE";
+char D_0054FF80[8] = "0xFD";
+char D_0054FF88[8] = "0xFC";
+char D_0054FF90[8] = "0xFB";
+char D_0054FF98[8] = "0xFA";
+char D_0054FFA0[8] = "0xF9";
+char D_0054FFA8[8] = "0xF8";
+char D_0054FFB0[8] = "0xF7";
+char D_0054FFB8[8] = "0xF6";
+char D_0054FFC0[8] = "0xF5";
+char D_0054FFC8[8] = "0xF4";
+char D_0054FFD0[8] = "0xF3";
+char D_0054FFD8[8] = "0xF2";
+char D_0054FFE0[8] = "0xF1";
+char D_0054FFE8[8] = "0xF0";
+char D_0054FFF0[8] = "0xEF";
+char D_0054FFF8[8] = "0xEE";
+char D_00550000[8] = "0xED";
+char D_00550008[8] = "0xEC";
+char D_00550010[8] = "0xEB";
+char D_00550018[8] = "0xEA";
+char D_00550020[8] = "0xE9";
+char D_00550028[8] = "0xE8";
+char D_00550030[8] = "0xE7";
+char D_00550038[8] = "0xE6";
+char D_00550040[8] = "0xE5";
+char D_00550048[8] = "0xE4";
+char D_00550050[8] = "0xE3";
+char D_00550058[8] = "0xE2";
+char D_00550060[8] = "0xE1";
+char D_00550068[8] = "0xE0";
+char D_00550070[8] = "0xDF";
+char D_00550078[8] = "0xDE";
+char D_00550080[8] = "0xDD";
+char D_00550088[8] = "0xDC";
+char D_00550090[8] = "0xDB";
+char D_00550098[8] = "0xDA";
+char D_005500A0[8] = "0xD9";
+char D_005500A8[8] = "0xD8";
+char D_005500B0[8] = "0xD7";
+char D_005500B8[8] = "0xD6";
+char D_005500C0[8] = "0xD5";
+char D_005500C8[8] = "0xD4";
+char D_005500D0[8] = "0xD3";
+char D_005500D8[8] = "0xD2";
+char D_005500E0[8] = "0xD1";
+char D_005500E8[8] = "0xD0";
+char D_005500F0[8] = "Matador";
+char D_005500F8[8] = "Dante";
+char D_00550100[8] = "0xBF";
+char D_00550108[8] = "0xBE";
+char D_00550110[8] = "0xBD";
+char D_00550118[8] = "0xBC";
+char D_00550120[8] = "0xBB";
+char D_00550128[8] = "0xBA";
+char D_00550130[8] = "0xB9";
+char D_00550138[8] = "0xB8";
+char D_00550140[8] = "0xB7";
+char D_00550148[8] = "0xB6";
+char D_00550150[8] = "0xB5";
+char D_00550158[8] = "0xB4";
+char D_00550160[8] = "0xB3";
+char D_00550168[8] = "Phantom";
+char D_00550170[8] = "Loa";
+char D_00550178[8] = "Atropos";
+char D_00550180[8] = "Clotho";
+char D_00550188[8] = "Fuu-Ki";
+char D_00550190[8] = "Sui-Ki";
+char D_00550198[8] = "Kin-Ki";
+char D_005501A0[8] = "Kaiwan";
+char D_005501A8[8] = "Pisaca";
+char D_005501B0[8] = "Samael";
+char D_005501B8[8] = "Manikin";
+char D_005501C0[8] = "Albion";
+char D_005501C8[8] = "Gurr";
+char D_005501D0[8] = "Garuda";
+char D_005501D8[8] = "Makami";
+char D_005501E0[8] = "Barong";
+char D_005501E8[8] = "Long";
+char D_005501F0[8] = "Hanuman";
+char D_005501F8[8] = "Kurama";
+char D_00550200[8] = "Ganesha";
+char D_00550208[8] = "Uriel";
+char D_00550210[8] = "Raphael";
+char D_00550218[8] = "Gabriel";
+char D_00550220[8] = "Michael";
+char D_00550228[8] = "Mou-Ryo";
+char D_00550230[8] = "Slime";
+char D_00550238[8] = "Blob";
+char D_00550240[8] = "Shadow";
+char D_00550248[8] = "Preta";
+char D_00550250[8] = "Yaka";
+char D_00550258[8] = "Legion";
+char D_00550260[8] = "Zhen";
+char D_00550268[8] = "Bicorn";
+char D_00550270[8] = "Nue";
+char D_00550278[8] = "Raiju";
+char D_00550280[8] = "Mothman";
+char D_00550288[8] = "Lilim";
+char D_00550290[8] = "Fomor";
+char D_00550298[8] = "Incubus";
+char D_005502A0[8] = "Nyx";
+char D_005502A8[8] = "Lilith";
+char D_005502B0[8] = "Loki";
+char D_005502B8[8] = "Abaddon";
+char D_005502C0[8] = "Surt";
+char D_005502C8[8] = "Aciel";
+char D_005502D0[8] = "Mot";
+char D_005502D8[8] = "Pazuzu";
+char D_005502E0[8] = "Tao Tie";
+char D_005502E8[8] = "Mada";
+char D_005502F0[8] = "Taraka";
+char D_005502F8[8] = "Shikome";
+char D_00550300[8] = "Yaksini";
+char D_00550308[8] = "Dakini";
+char D_00550310[8] = "Rangda";
+char D_00550318[8] = "Ikusa";
+char D_00550320[8] = "Oni";
+char D_00550328[8] = "Kodama";
+char D_00550330[8] = "Hua Po";
+char D_00550338[8] = "Sudama";
+char D_00550340[8] = "Titan";
+char D_00550348[8] = "Inugami";
+char D_00550350[8] = "Sparna";
+char D_00550358[8] = "Orthrus";
+char D_00550360[8] = "Nozuchi";
+char D_00550368[8] = "Naga";
+char D_00550370[8] = "Mizuchi";
+char D_00550378[8] = "Forneus";
+char D_00550380[8] = "Eligor";
+char D_00550388[8] = "Berith";
+char D_00550390[8] = "Ose";
+char D_00550398[8] = "Flauros";
+char D_005503A0[8] = "Angel";
+char D_005503A8[8] = "Power";
+char D_005503B0[8] = "Virtue";
+char D_005503B8[8] = "Throne";
+char D_005503C0[8] = "Pixie";
+char D_005503C8[8] = "Kelpie";
+char D_005503D0[8] = "Setanta";
+char D_005503D8[8] = "Troll";
+char D_005503E0[8] = "Oberon";
+char D_005503E8[8] = "Titania";
+char D_005503F0[8] = "Koppa";
+char D_005503F8[8] = "Apsaras";
+char D_00550400[8] = "Isora";
+char D_00550408[8] = "Dis";
+char D_00550410[8] = "Karasu";
+char D_00550418[8] = "Jinn";
+char D_00550420[8] = "Onkot";
+char D_00550428[8] = "Purski";
+char D_00550430[8] = "Efreet";
+char D_00550438[8] = "Erthys";
+char D_00550440[8] = "Aeros";
+char D_00550448[8] = "Aquans";
+char D_00550450[8] = "Flaemis";
+char D_00550458[8] = "Unicorn";
+char D_00550460[8] = "Cai-Zhi";
+char D_00550468[8] = "Shiisaa";
+char D_00550470[8] = "Senri";
+char D_00550478[8] = "Baihu";
+char D_00550480[8] = "Chimera";
+char D_00550488[8] = "Zouchou";
+char D_00550490[8] = "Koumoku";
+char D_00550498[8] = "Jikoku";
+char D_005504A0[8] = "Thor";
+char D_005504A8[8] = "Parvati";
+char D_005504B0[8] = "Skadi";
+char D_005504B8[8] = "Kali";
+char D_005504C0[8] = "Wu Kong";
+char D_005504C8[8] = "Shiva";
+char D_005504D0[8] = "Uzume";
+char D_005504D8[8] = "Sati";
+char D_005504E0[8] = "Laksmi";
+char D_005504E8[8] = "Horus";
+char D_005504F0[8] = "Atavaka";
+char D_005504F8[8] = "Odin";
+char D_00550500[8] = "Mithra";
+char D_00550508[8] = "Vishnu";
+char D_00550510[8] = "00";
+char D_00550518[8] = "Devil";
+char D_00550520[8] = "Fiend";
+char D_00550528[8] = "Emperor";
+char D_00550530[8] = "Light";
+char D_00550538[8] = "Hallel";
+char D_00550540[8] = "Zoa";
+char D_00550548[8] = "Corpus";
+char D_00550550[8] = "Entity";
+char D_00550558[8] = "Reaper";
+char D_00550560[8] = "Raptor";
+char D_00550568[8] = "Avian";
+char D_00550570[8] = "Avatar";
+char D_00550578[8] = "Dragon";
+char D_00550580[8] = "Genma";
+char D_00550588[8] = "Wargod";
+char D_00550590[8] = "Seraph";
+char D_00550598[8] = "Foul";
+char D_005505A0[8] = "Haunt";
+char D_005505A8[8] = "Wilder";
+char D_005505B0[8] = "Night";
+char D_005505B8[8] = "Tyrant";
+char D_005505C0[8] = "Vile";
+char D_005505C8[8] = "Femme";
+char D_005505D0[8] = "Brute";
+char D_005505D8[8] = "Jirae";
+char D_005505E0[8] = "Beast";
+char D_005505E8[8] = "Snake";
+char D_005505F0[8] = "Fallen";
+char D_005505F8[8] = "Divine";
+char D_00550600[8] = "Fairy";
+char D_00550608[8] = "Yoma";
+char D_00550610[8] = "Mitama";
+char D_00550618[8] = "Element";
+char D_00550620[8] = "Holy";
+char D_00550628[8] = "Kishin";
+char D_00550630[8] = "Lady";
+char D_00550638[8] = "Fury";
+char D_00550640[8] = "Megami";
+char D_00550648[8] = "Deity";
+char D_00550650[8] = "Race";
+char D_00550658[8] = "King";
+char D_00550660[8] = "Lord";
+char D_00550668[8] = "Phenom";
+char D_00550670[8] = "Spirit";
+char D_00550678[8] = "Slayer";
+char D_00550680[8] = "Master";
+char D_00550688[8] = "Saint";
+char D_00550690[8] = "Battler";
+char D_00550698[8] = "Expert";
+char D_005506A0[8] = "Zealot";
+char D_005506A8[8] = "Soldier";
+char D_005506B0[8] = "Adept";
+char D_005506B8[8] = "Votary";
+char D_005506C0[8] = "Dignity";
+char D_005506C8[8] = "Beauty";
+char D_005506D0[8] = "Insight";
+char D_005506D8[8] = "Wisdom";
+char D_005506E0[8] = "Majesty";
+char D_005506E8[8] = "Spoon";
+char D_005506F0[8] = "Letter";
+char D_005506F8[8] = "ID Card";
+char D_00550700[8] = "Coral";
+char D_00550708[8] = "Onyx";
+char D_00550710[8] = "Garnet";
+char D_00550718[8] = "Agate";
+char D_00550720[8] = "Opal";
+char D_00550728[8] = "Jade";
+char D_00550730[8] = "Ruby";
+char D_00550738[8] = "Emerald";
+char D_00550740[8] = "Pearl";
+char D_00550748[8] = "Diamond";
+char D_00550750[8] = "Kailash";
+char D_00550758[8] = "Gaea";
+char D_00550760[8] = "Sophia";
+char D_00550768[8] = "Gundari";
+char D_00550770[8] = "Vimana";
+char D_00550778[8] = "Adama";
+char D_00550780[8] = "Satan";
+char D_00550788[8] = "Gehenna";
+char D_00550790[8] = "Muspell";
+char D_00550798[8] = "Djed";
+char D_005507A0[8] = "Geis";
+char D_005507A8[8] = "Nirvana";
+char D_005507B0[8] = "Miasma";
+char D_005507B8[8] = "Kamudo";
+char D_005507C0[8] = "Hifumi";
+char D_005507C8[8] = "Ankh";
+char D_005507D0[8] = "Soma";
+char D_005507D8[8] = "Bead";
+char D_005507E0[8] = "0x1FF";
+char D_005507E8[8] = "0x1FE";
+char D_005507F0[8] = "0x1FD";
+char D_005507F8[8] = "0x1FC";
+char D_00550800[8] = "0x1FB";
+char D_00550808[8] = "0x1FA";
+char D_00550810[8] = "0x1F9";
+char D_00550818[8] = "0x1F8";
+char D_00550820[8] = "0x1F7";
+char D_00550828[8] = "0x1F6";
+char D_00550830[8] = "0x1F5";
+char D_00550838[8] = "0x1F4";
+char D_00550840[8] = "0x1EF";
+char D_00550848[8] = "0x1EE";
+char D_00550850[8] = "0x1ED";
+char D_00550858[8] = "0x1EC";
+char D_00550860[8] = "0x1EB";
+char D_00550868[8] = "0x1EA";
+char D_00550870[8] = "0x1E9";
+char D_00550878[8] = "0x1E8";
+char D_00550880[8] = "0x1E7";
+char D_00550888[8] = "0x1E6";
+char D_00550890[8] = "0x1E5";
+char D_00550898[8] = "0x1E4";
+char D_005508A0[8] = "0x1E3";
+char D_005508A8[8] = "0x1E2";
+char D_005508B0[8] = "0x1E1";
+char D_005508B8[8] = "0x1E0";
+char D_005508C0[8] = "0x1DF";
+char D_005508C8[8] = "0x1DE";
+char D_005508D0[8] = "0x1DD";
+char D_005508D8[8] = "0x1DC";
+char D_005508E0[8] = "0x1DB";
+char D_005508E8[8] = "0x1DA";
+char D_005508F0[8] = "0x1D9";
+char D_005508F8[8] = "0x1D8";
+char D_00550900[8] = "0x1D7";
+char D_00550908[8] = "0x1D6";
+char D_00550910[8] = "0x1D5";
+char D_00550918[8] = "0x1D4";
+char D_00550920[8] = "0x1D3";
+char D_00550928[8] = "0x1D2";
+char D_00550930[8] = "0x1D1";
+char D_00550938[8] = "0x1D0";
+char D_00550940[8] = "0x1CF";
+char D_00550948[8] = "0x1CE";
+char D_00550950[8] = "0x1CD";
+char D_00550958[8] = "0x1CC";
+char D_00550960[8] = "0x1CB";
+char D_00550968[8] = "0x1CA";
+char D_00550970[8] = "0x1C9";
+char D_00550978[8] = "0x1C8";
+char D_00550980[8] = "0x1C7";
+char D_00550988[8] = "0x1C6";
+char D_00550990[8] = "0x1C5";
+char D_00550998[8] = "0x1C4";
+char D_005509A0[8] = "0x1C3";
+char D_005509A8[8] = "0x1C2";
+char D_005509B0[8] = "0x1C1";
+char D_005509B8[8] = "0x1C0";
+char D_005509C0[8] = "0x1BF";
+char D_005509C8[8] = "0x1BE";
+char D_005509D0[8] = "0x1BD";
+char D_005509D8[8] = "0x1BC";
+char D_005509E0[8] = "0x1BB";
+char D_005509E8[8] = "0x1BA";
+char D_005509F0[8] = "0x1B9";
+char D_005509F8[8] = "0x1B8";
+char D_00550A00[8] = "0x1B7";
+char D_00550A08[8] = "0x1B6";
+char D_00550A10[8] = "0x1B5";
+char D_00550A18[8] = "0x1B4";
+char D_00550A20[8] = "0x1B3";
+char D_00550A28[8] = "0x1B2";
+char D_00550A30[8] = "0x1B1";
+char D_00550A38[8] = "0x1B0";
+char D_00550A40[8] = "0x1AF";
+char D_00550A48[8] = "0x1AE";
+char D_00550A50[8] = "0x1AD";
+char D_00550A58[8] = "0x1AC";
+char D_00550A60[8] = "0x1AB";
+char D_00550A68[8] = "0x1AA";
+char D_00550A70[8] = "0x1A9";
+char D_00550A78[8] = "0x1A8";
+char D_00550A80[8] = "0x1A7";
+char D_00550A88[8] = "0x1A6";
+char D_00550A90[8] = "Flatter";
+char D_00550A98[8] = "Nag";
+char D_00550AA0[8] = "Detain";
+char D_00550AA8[8] = "Haggle";
+char D_00550AB0[8] = "Loan";
+char D_00550AB8[8] = "Trade";
+char D_00550AC0[8] = "Begging";
+char D_00550AC8[8] = "Pester";
+char D_00550AD0[8] = "Beseech";
+char D_00550AD8[8] = "Wooing";
+char D_00550AE0[8] = "Seduce";
+char D_00550AE8[8] = "Kidnap";
+char D_00550AF0[8] = "Scout";
+char D_00550AF8[8] = "Talk";
+char D_00550B00[8] = "0x17F";
+char D_00550B08[8] = "0x17E";
+char D_00550B10[8] = "0x17D";
+char D_00550B18[8] = "0x17C";
+char D_00550B20[8] = "0x17B";
+char D_00550B28[8] = "0x17A";
+char D_00550B30[8] = "0x179";
+char D_00550B38[8] = "0x178";
+char D_00550B40[8] = "0x177";
+char D_00550B48[8] = "0x176";
+char D_00550B50[8] = "0x175";
+char D_00550B58[8] = "0x174";
+char D_00550B60[8] = "0x173";
+char D_00550B68[8] = "0x172";
+char D_00550B70[8] = "0x171";
+char D_00550B78[8] = "0x170";
+char D_00550B80[8] = "0x16F";
+char D_00550B88[8] = "0x16E";
+char D_00550B90[8] = "0x16D";
+char D_00550B98[8] = "0x16C";
+char D_00550BA0[8] = "0x16B";
+char D_00550BA8[8] = "0x16A";
+char D_00550BB0[8] = "0x167";
+char D_00550BB8[8] = "0x166";
+char D_00550BC0[8] = "Pierce";
+char D_00550BC8[8] = "Endure";
+char D_00550BD0[8] = "Might";
+char D_00550BD8[8] = "Preach";
+char D_00550BE0[8] = "Startle";
+char D_00550BE8[8] = "Stinger";
+char D_00550BF0[8] = "Provoke";
+char D_00550BF8[8] = "E & I";
+char D_00550C00[8] = "Mirage";
+char D_00550C08[8] = "Aurora";
+char D_00550C10[8] = "Retreat";
+char D_00550C18[8] = "Focus";
+char D_00550C20[8] = "Summon";
+char D_00550C28[8] = "Prayer";
+char D_00550C30[8] = "Allure";
+char D_00550C38[8] = "Lullaby";
+char D_00550C40[8] = "Taunt";
+char D_00550C48[8] = "War Cry";
+char D_00550C50[8] = "Tornado";
+char D_00550C58[8] = "Shock";
+char D_00550C60[8] = "Avenge";
+char D_00550C68[8] = "Counter";
+char D_00550C70[8] = "0x0A2";
+char D_00550C78[8] = "0x09D";
+char D_00550C80[8] = "0x09C";
+char D_00550C88[8] = "Attack";
+char D_00550C90[8] = "Blight";
+char D_00550C98[8] = "Tempest";
+char D_00550CA0[8] = "Berserk";
+char D_00550CA8[8] = "Lunge";
+char D_00550CB0[8] = "0x05F";
+char D_00550CB8[8] = "0x05E";
+char D_00550CC0[8] = "0x05D";
+char D_00550CC8[8] = "0x05C";
+char D_00550CD0[8] = "0x05B";
+char D_00550CD8[8] = "0x05A";
+char D_00550CE0[8] = "0x059";
+char D_00550CE8[8] = "0x058";
+char D_00550CF0[8] = "0x057";
+char D_00550CF8[8] = "0x056";
+char D_00550D00[8] = "0x055";
+char D_00550D08[8] = "0x054";
+char D_00550D10[8] = "0x053";
+char D_00550D18[8] = "0x052";
+char D_00550D20[8] = "0x051";
+char D_00550D28[8] = "0x050";
+char D_00550D30[8] = "0x04E";
+char D_00550D38[8] = "Dekunda";
+char D_00550D40[8] = "Liftoma";
+char D_00550D48[8] = "Estoma";
+char D_00550D50[8] = "Trafuri";
+char D_00550D58[8] = "Analyze";
+char D_00550D60[8] = "Tetraja";
+char D_00550D68[8] = "Pulinpa";
+char D_00550D70[8] = "Dormina";
+char D_00550D78[8] = "Dekaja";
+char D_00550D80[8] = "Makajam";
+char D_00550D88[8] = "Rakunda";
+char D_00550D90[8] = "Sukunda";
+char D_00550D98[8] = "Tarunda";
+char D_00550DA0[8] = "Recarm";
+char D_00550DA8[8] = "Petradi";
+char D_00550DB0[8] = "Mutudi";
+char D_00550DB8[8] = "Patra";
+char D_00550DC0[8] = "Media";
+char D_00550DC8[8] = "Diarama";
+char D_00550DD0[8] = "Dia";
+char D_00550DD8[8] = "Mamudo";
+char D_00550DE0[8] = "Mudoon";
+char D_00550DE8[8] = "Mudo";
+char D_00550DF0[8] = "Mahama";
+char D_00550DF8[8] = "Hamaon";
+char D_00550E00[8] = "Hama";
+char D_00550E08[8] = "Megido";
+char D_00550E10[8] = "Mazanma";
+char D_00550E18[8] = "Mazan";
+char D_00550E20[8] = "Zandyne";
+char D_00550E28[8] = "Zanma";
+char D_00550E30[8] = "Zan";
+char D_00550E38[8] = "Mazio";
+char D_00550E40[8] = "Ziodyne";
+char D_00550E48[8] = "Zionga";
+char D_00550E50[8] = "Zio";
+char D_00550E58[8] = "Mabufu";
+char D_00550E60[8] = "Bufula";
+char D_00550E68[8] = "Bufu";
+char D_00550E70[8] = "Maragi";
+char D_00550E78[8] = "Agidyne";
+char D_00550E80[8] = "Agilao";
+char D_00550E88[8] = "Agi";
+char D_00550E90[8] = "Failed";
+char D_00550E98[8] = "Dismiss";
+char D_00550EA0[8] = "Pass";
+char D_00550EA8[8] = "Dummy";
