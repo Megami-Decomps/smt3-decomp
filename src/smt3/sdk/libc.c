@@ -1116,6 +1116,16 @@ s32 vfprintf(FILE *fp, const char *fmt, va_list ap)
 }
 
 /* NON_MATCHING: formatter control flow, frame and allocation remain different. */
+const u8 _ctype_[264] = { 0, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x28, 0x28, 0x28, 0x28, 0x28, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x88, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x41, 0x41, 0x41, 0x41, 0x41, 0x41, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0x10, 0x10, 0x10, 0x10, 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+const char D_0054B658[8] __attribute__((section(".rodata"))) = "C";
+
+const char putsNewline[16] = "\n";
+
+const char printfSpaces[16] = "                ";
+
+const char printfZeros[16] = "0000000000000000";
+
 #ifdef NON_MATCHING
 /* Formatted-output core. Arguments occupy the EE ABI's eight-byte slots. */
 
@@ -1586,15 +1596,10 @@ error_exit:
 }
 
 #else
-INCLUDE_RODATA(const s32, "sdk/libc", _ctype_);
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B658);
 
-INCLUDE_RODATA(const s32, "sdk/libc", putsNewline);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfSpaces);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfZeros);
 
 INCLUDE_ASM(const s32, "sdk/libc", _vfprintf_r);
 #endif
@@ -1837,12 +1842,32 @@ _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n);
 _Bigint *_lshift(_reent *r, _Bigint *b, s32 shift);
 _Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b);
 s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor);
-extern char dtoaInfinityText[], dtoaNanText[];
+extern const char dtoaInfinityText[], dtoaNanText[];
 extern const f64 dtoaLog10Slope __attribute__((section(".rodata")));
 extern const f64 dtoaLog10Offset __attribute__((section(".rodata")));
 extern const f64 dtoaLog10Of2 __attribute__((section(".rodata")));
 extern const f64 dtoaPow10Big[];
 extern const f64 dtoaPow10Limit __attribute__((section(".rodata")));
+
+const char printfNanText[8] __attribute__((section(".rodata"))) = "NaN";
+
+const char printfHexLower[24] = "0123456789abcdef";
+
+const char printfNullText[8] __attribute__((section(".rodata"))) = "(null)";
+
+const char printfHexUpper[24] = "0123456789ABCDEF";
+
+const char printfBadBaseMsg[32] = "bug in vfprintf: bad base";
+
+const char printfZeroDigit[8] __attribute__((section(".rodata"))) = "0";
+
+const char printfDecimalPoint[16] = ".";
+
+INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B710);
+
+const char dtoaInfinityText[16] = "Infinity";
+
+const char dtoaNanText[8] __attribute__((section(".rodata"))) = "NaN";
 
 #ifdef NON_MATCHING
 char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
@@ -2378,25 +2403,15 @@ oneDigit:
     goto bigintDone;
 }
 #else
-INCLUDE_RODATA(const s32, "sdk/libc", printfNanText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfHexLower);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfNullText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfHexUpper);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfBadBaseMsg);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfZeroDigit);
 
-INCLUDE_RODATA(const s32, "sdk/libc", printfDecimalPoint);
 
-INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B710);
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaInfinityText);
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaNanText);
 
 INCLUDE_ASM(const s32, "sdk/libc", _dtoa_r);
 #endif
@@ -2822,8 +2837,8 @@ s32 _fwalk(_reent *r, s32 (*func)(void *)) {
     return ret;
 }
 
-extern char localeEmptyStr[];
-extern char localeCName[];
+extern const char localeEmptyStr[];
+extern const char localeCName[];
 extern s32 strcmp(const char *left, const char *right);
 
 char *_setlocale_r(_reent *r, s32 category, const char *locale)
@@ -3096,7 +3111,7 @@ _Bigint *_i2b(_reent *r, s32 i) {
 INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
 /* Native indexed constants span the separately labeled word at 0x0054B928. */
-extern const s32 pow5MultTable[4];
+extern const s32 pow5MultTable[];
 _Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
 
 _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
@@ -3108,7 +3123,7 @@ _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n)
 
     remainder = n & 3;
     if (remainder != 0) {
-        b = _multadd(r, b, pow5MultTable[remainder], 0);
+        b = _multadd(r, b, pow5MultTable[remainder - 1], 0);
     }
     n >>= 2;
     if (n == 0) {
@@ -3550,39 +3565,41 @@ long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
     return result;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Slope);
+f64 dtoaLog10Slope __attribute__((section(".rodata"))) = 0.289529654602168;
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Offset);
+f64 dtoaLog10Offset __attribute__((section(".rodata"))) = 0.17609125905579998;
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaLog10Of2);
+const f64 dtoaLog10Of2 __attribute__((section(".rodata"))) = 0.301029995663981;
 
 INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B8C0);
 
 INCLUDE_RODATA(const s32, "sdk/libc", localeconvData);
 
-INCLUDE_RODATA(const s32, "sdk/libc", localeEmptyStr);
+const char localeEmptyStr[8] __attribute__((section(".rodata"))) = "";
 
-INCLUDE_RODATA(const s32, "sdk/libc", localeDecimalPoint);
+const char localeDecimalPoint[8] __attribute__((section(".rodata"))) = ".";
 
-INCLUDE_RODATA(const s32, "sdk/libc", localeCName);
+const char localeCName[4] __attribute__((section(".rodata"))) = "C";
 
-INCLUDE_RODATA(const s32, "sdk/libc", pow5MultTable);
+const s32 pow5MultTable[2] __attribute__((section(".rodata"))) = { 5, 25 };
 
 INCLUDE_RODATA(const s32, "sdk/libc", D_0054B928);
 
-INCLUDE_RODATA(const s32, "sdk/libc", pow10Table);
+const f64 pow10Table[25] = { 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0, 10000000000.0, 100000000000.0, 1000000000000.0, 10000000000000.0, 100000000000000.0, 1000000000000000.0, 1e+16, 1e+17, 1e+18, 1e+19, 1e+20, 1e+21, 1e+22, 1e+23, 1e+24 };
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaPow10Big);
+const f64 dtoaPow10Big[4] = { 1e+16, 9.999999999999999e+31, 9.999999999999999e+63, 9.999999999999999e+127 };
 
-INCLUDE_RODATA(const s32, "sdk/libc", dtoaPow10Limit);
+const f64 dtoaPow10Limit __attribute__((section(".rodata"))) = 9.9999999999999986343e+255;
 
-INCLUDE_RODATA(const s32, "sdk/libc", kernlInternalErrorMsg);
+const f64 dtoaPow10Tiny[5] = { 1e-16, 9.9999999999999992e-33, 1e-64, 9.9999999999999993e-129, 1e-256 };
 
-INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgPacketTooLarge);
+const char kernlInternalErrorMsg[40] = "## internel error in libkernl.a!\n";
 
-INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgReceiveError);
+const char ttyMsgPacketTooLarge[40] = "TTY: packet size larger than expect\n";
 
-INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgSendError);
+const char ttyMsgReceiveError[24] = "TTY: receive error";
 
-INCLUDE_RODATA(const s32, "sdk/libc", ttyMsgWlenError);
+const char ttyMsgSendError[24] = "TTY: send err %d\n";
+
+const char ttyMsgWlenError[24] = "TTY: err ti->wlen=%08x\n";
 
