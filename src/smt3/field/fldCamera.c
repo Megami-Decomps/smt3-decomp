@@ -1349,13 +1349,13 @@ extern void fldCamUpdateChase(void);
 extern void fldEventUpdateEx_Unity_2(void);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *pBasic, f32 fovy);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
-extern char fldCamElvStartLabel[];
+extern const char fldCamElvStartLabel[];
 extern s32 D_0054EC94;
 extern f32 D_0054EC98;
 extern f32 D_0054EC9C;
 
 /* Six-mode camera dispatcher; native returns NULL on every path. */
-INCLUDE_RODATA(const s32, "field/fldCamera", fldCamElvStartLabel);
+const char fldCamElvStartLabel[15] = "elvstart_label";
 
 void *fldCamMain(void) {
     fldFollowCameraControl_t *control;
@@ -1510,7 +1510,7 @@ extern void *dds3SearchProcessName(const char *namestr);
 
 extern void dds3SetScreenFovy(f32 fovy);
 
-extern char fldCamElvStartLabel[];
+extern const char fldCamElvStartLabel[];
 
 void fldCamSyukanSuriawase(void) {
     fldAreaWork_t *state;
@@ -1548,37 +1548,35 @@ s32 fldCamNpcCamChk(char *pName) {
     }
     return 0;
 }
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamDefaultPitch);
+f32 fldCamDefaultPitch = 180.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamDist);
+f32 fldCamDist = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamMiwatasi);
+s32 fldCamMiwatasi = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", D_0054EC94);
+s32 D_0054EC94 = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", D_0054EC98);
+f32 D_0054EC98 = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", D_0054EC9C);
+f32 D_0054EC9C = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamHeightTarget);
+f32 fldCamHeightTarget = 550.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamHeight);
+f32 fldCamHeight = 550.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamParamTable2);
+f32 fldCamParamTable2 = 650.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamResetOn);
+s32 fldCamResetOn = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamFastFlag);
+s32 fldCamFastFlag = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamOrbitAngle);
+f32 fldCamOrbitAngle = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamPadHeight);
+f32 fldCamPadHeight = 0.0f;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldElvCameraScene);
+s32 fldElvCameraScene = 0;
 
-INCLUDE_SDATA(const s32, "field/fldCamera", fldCamElvState);
-
-SDATA_PAD(4);
+f32 fldCamElvState = 0.0f;
 
 INCLUDE_SDATA(const s32, "field/fldCamera", fldHitChkMatter);
 
