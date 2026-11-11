@@ -633,5 +633,10 @@ s32 movieStreamSema = -1;
 
 SDATA_PAD(4);
 
+#ifdef NON_MATCHING
+/* Retail's terminator is the zero padding after the four bytes; a host layout has none. */
+char sdfMovieIpsExt[5] = ".ips";
+#else
 char sdfMovieIpsExt[4] = ".ips";
+#endif
 
