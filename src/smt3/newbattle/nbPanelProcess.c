@@ -990,7 +990,13 @@ void nbPanelPolygonFlashDraw(s32 x, s32 y, s32 offsetX, s32 offsetY,
 
     tag = dds3FontReqAllocDrawTag();
     firstColor = effMagaCylinderCalcColor(color0, nbPanelBaseABGR);
+#ifdef NATIVE_FPU
+    /* The fading panel reaches halfHeight == 0. EE division saturates;
+     * plain host division would produce infinity and poison t * ratio. */
+    ratio = ffdivf((f32)halfWidth, rootHeight);
+#else
     ratio = (f32)halfWidth / rootHeight;
+#endif
     secondColor = effMagaCylinderCalcColor(color1, nbPanelBaseABGR);
     step = -((rootHeight + rootHeight) / 40.0f);
     t = rootHeight + step;

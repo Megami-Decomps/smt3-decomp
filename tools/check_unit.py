@@ -838,6 +838,34 @@ def text_residual_summary(size, comparison_size, diffs, native_size=None):
     return summary
 
 
+def verified_zero_gap(data, relocs, starts, owned, table_off, native_addr,
+                      size, expected, native_gap):
+    """Prove a table gap through independently verified interior C objects.
+
+    owned tuples are (SKIP offset, native address, extent), admitted only after
+    full/SKIP object address, extent, bytes and absence of relocations checks.
+    Keep a concrete next compiled item and the raw native next-item boundary.
+    """
+    begin = table_off + size
+    if not begin <= expected < len(data) or expected not in starts:
+        return False
+    if len(native_gap) != expected - begin or any(native_gap) or any(data[begin:expected]):
+        return False
+    if any(begin <= off < expected for off in relocs):
+        return False
+    intervals = sorted((off, addr, extent) for off, addr, extent in owned
+                       if off < expected and off + extent > begin)
+    previous = begin
+    for off, addr, extent in intervals:
+        if extent <= 0 or off < previous or off + extent > expected:
+            return False
+        if addr - native_addr != off - table_off:
+            return False
+        previous = off + extent
+    verified_starts = {off for off, _, _ in intervals}
+    return all(off in verified_starts for off in starts if table_off < off < expected)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("unit", type=Path)
@@ -932,6 +960,8 @@ def main():
         context_words = {}  # full-unit words that differ from retail
         data_context = []
         owned_rodata = []
+        owned_rodata_native = []
+        full_rodata_relocations = None
         owned_data_checked = False
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
@@ -1104,6 +1134,8 @@ def main():
                         data_context.append(f"{name}: source-owned .rodata bytes differ from retail")
                     else:
                         owned_rodata.append((skip_off, skip_off + size))
+                        owned_rodata_native.append((skip_off, addr, size))
+            full_rodata_relocations = relocations(full)[".rodata"]
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
@@ -1361,10 +1393,21 @@ def main():
         retail's next item, with only zero padding between: the compiled
         section reproduces the gap itself."""
         nxt = next((a for a, _ in retail_labels if a > retail_addr), None)
-        obj_next = next((s for s in starts if s > table_off), None)
-        if nxt is None or obj_next is None or obj_next >= len(rodata):
+        if nxt is None:
             return False
-        return obj_next - table_off == nxt - retail_addr and not any(rodata[table_off + size:obj_next])
+        expected = table_off + nxt - retail_addr
+        native_off = va_to_off(segs, retail_addr + size)
+        if native_off is None or not rodata_range or full_rodata_relocations is None:
+            return False
+        full_begin = native_off - rodata_range[0]
+        full_end = full_begin + expected - table_off - size
+        if any(full_begin <= off < full_end for off in full_rodata_relocations):
+            return False
+        return verified_zero_gap(rodata, rodata_relocs, starts,
+                                 owned_rodata_native, table_off, retail_addr,
+                                 size, expected,
+                                 retail[native_off:native_off + expected - table_off - size])
+
 
 
     # Rodata the C emits: jump tables (every entry must land on the retail case

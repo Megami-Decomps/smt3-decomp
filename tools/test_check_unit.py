@@ -1377,5 +1377,122 @@ class OwnedRodataBoundaryTests(unittest.TestCase):
                 self.assertEqual(code, 1, report)
 
 
+class InteriorOwnedContextTests(unittest.TestCase):
+    def check_interior(self, *, object_offset=24, wrong_object=False,
+                             nonzero_gap=False, wrong_entry=False, omit_symbol=False, full_offset=24, full_size=8, skip_size=8, full_missing=False, relocated=False, full_relocated=False, native_nonzero=False):
+        # Six entries end at24; verified zero object spans24..32.
+        # Raw retail labels omit the interior object but include nextData at32.
+        compiled = struct.pack('<4I', 0x3C020000, 0x24420000, 0x03E00008, 0)
+        native = struct.pack('<4I', 0x3C020010, 0x24420100, 0x03E00008, 0)
+        table = [0, 4, 8, 12, 0, 4]
+        data = bytearray(40)
+        struct.pack_into('<6I', data, 0, *table)
+        payload = bytes(8)
+        data[object_offset:object_offset+8] = payload
+        if wrong_object:
+            data[object_offset] ^= 1
+        if nonzero_gap:
+            data[28] = 1
+        if wrong_entry:
+            struct.pack_into('<I', data, 0, 4)
+        retail = bytearray(0x1200)
+        retail[0x1000:0x1010] = native
+        struct.pack_into('<6I', retail, 0x1100, *(0x100000+x for x in table))
+        retail[0x1118:0x1120] = payload
+        data[32:40] = retail[0x1120:0x1128] = b'NEXTDATA'
+        if native_nonzero:
+            retail[0x111c] = 1
+        relocs = {'.text': {0: ('R_MIPS_HI16', '.rodata'), 4: ('R_MIPS_LO16', '.rodata')},
+                  '.rodata': {x: ('R_MIPS_32', '.text') for x in range(0,24,4)},
+                  '.sdata': {}, '.data': {}}
+        if relocated:
+            relocs['.rodata'][24] = ('R_MIPS_32', 'unknown')
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root/'src/smt3/main/unit.c'; unit.parent.mkdir(parents=True)
+            unit.write_text('void target(void) {}\nconst char title[8] = {0};\nconst char nextData[8] = "NEXTDATA";\n')
+            cfg = root/'config/smt3'; cfg.mkdir(parents=True)
+            (cfg/'symbol_addrs.txt').write_text('target = 0x100000; // type:func\ntitle = 0x100118;\nnextData = 0x100120;\n')
+            (cfg/'SLUS_209.11.yaml').write_text('      - [0x1100, .rodata, main/unit]\n      - [0x1128, .rodata, main/next]\n')
+            original = root/RETAIL_PATH; original.parent.mkdir(parents=True); original.write_bytes(retail)
+            assembly = root/'asm/smt3/data/main/unit.rodata.s'; assembly.parent.mkdir(parents=True)
+            assembly.write_text('dlabel jtbl_00100100\ndlabel nextData\n')
+            def run(*args):
+                if '-S' in args:
+                    return '0 10 T target\n'
+                if '-t' in args and not omit_symbol:
+                    full = str(args[-1]).endswith('full.o')
+                    off, extent = (full_offset, full_size) if full else (object_offset, skip_size)
+                    head = '' if full and full_missing else f'{off:08x} g O .rodata {extent:08x} title\n'
+                    return head + '00000020 g O .rodata 00000008 nextData\n'
+                return ''
+            stack.enter_context(patch.object(check_unit, 'ROOT', root))
+            stack.enter_context(patch.dict(check_unit.RETAIL, {VERSION: RETAIL_PATH}, clear=True))
+            stack.enter_context(patch.dict(check_unit.VERSIONS, {VERSION: {'serial': SERIAL, 'gp': hex(GP)}}, clear=True))
+            stack.enter_context(patch.object(check_unit.sys, 'argv', ['check_unit.py', str(unit)]))
+            stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[]))
+            stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
+            stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
+            stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
+            def object_relocs(obj):
+                if full_relocated and str(obj).endswith('full.o'):
+                    return {**relocs, '.rodata': {**relocs['.rodata'], 24: ('R_MIPS_32', 'unknown')}}
+                return relocs
+            stack.enter_context(patch.object(check_unit, 'relocations', side_effect=object_relocs))
+            stack.enter_context(patch.object(check_unit, 'owns_rodata', return_value=True))
+            stack.enter_context(patch.object(check_unit, 'run', side_effect=run))
+            stack.enter_context(patch.object(check_unit.subprocess, 'run', return_value=SimpleNamespace(returncode=0, stderr='')))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_real_context_interior(self):
+        code, report = self.check_interior()
+        self.assertEqual(code, 0, report)
+
+    def test_bad_context_interiors(self):
+        for args in ({'full_offset':28}, {'full_size':4}, {'skip_size':4},
+                     {'full_missing':True}, {'object_offset':28},
+                     {'wrong_object':True}, {'nonzero_gap':True},
+                     {'wrong_entry':True}, {'omit_symbol':True}, {'relocated':True},
+                     {'full_relocated':True}, {'native_nonzero':True}):
+            with self.subTest(args=args):
+                code, report = self.check_interior(**args)
+                self.assertEqual(code, 1, report)
+
+
+class InteriorOwnedGapTests(unittest.TestCase):
+    def proof(self, **changes):
+        args = dict(data=bytes(40), relocs={}, starts=[0,24,32,40],
+                    owned=[(24,0x1018,8)], table_off=0, native_addr=0x1000,
+                    size=24, expected=32, native_gap=bytes(8))
+        args.update(changes)
+        return check_unit.verified_zero_gap(**args)
+
+    def test_verified_interior_zero_object(self):
+        self.assertTrue(self.proof())
+
+    def test_invalid_interiors_fail_closed(self):
+        for change in (
+            dict(owned=[]), dict(owned=[(24,0x1020,8)]),
+            dict(owned=[(24,0x1018,16)]), dict(owned=[(20,0x1014,12)]),
+            dict(owned=[(24,0x1018,8),(28,0x101c,4)]),
+            dict(owned=[(16,0x1010,8)]), dict(owned=[(24,0x1018,0)]),
+            dict(starts=[0,24,28,32,40]), dict(starts=[0,24,40]),
+            dict(relocs={24: ('R_MIPS_32','symbol')}),
+            dict(data=bytes(27)+b'X'+bytes(12)),
+            dict(native_gap=bytes(7)+b'X'), dict(native_gap=bytes(7)),
+            dict(expected=40),
+        ):
+            with self.subTest(change=change):
+                self.assertFalse(self.proof(**change))
+
+    def test_empty_gap_and_ordinary_padding_still_work(self):
+        self.assertTrue(self.proof(starts=[0,32,40],owned=[]))
+        self.assertTrue(self.proof(starts=[0,24,40],owned=[],expected=24,native_gap=b''))
+
+
 if __name__ == "__main__":
     unittest.main()
