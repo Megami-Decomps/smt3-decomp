@@ -11582,10 +11582,6 @@ s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
     return result;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq26, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmpBuildStockNameList(cmpLocalStock_t *stock)
 {
     s8 outputIndex = 0;
@@ -11597,14 +11593,11 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
     if ((stock->count & 1) != 0) {
         for (i = 0; i < DDS3_GBWK->stockCount; i++) {
             s8 stockId = DDS3_GBWK->stock[i];
-            datUnitWork_t *unit = &DDS3_GBWK->party[stockId].unit;
-
-            if ((unit->flag & 2) != 0 &&
-                cmpCursorSlotIsSelectable(unit, stock->count, 0) != 0) {
-                s8 selectedIndex = outputIndex;
-                stock->StockIdx[selectedIndex] = stockId;
+            if ((DDS3_GBWK->party[stockId].unit.flag & 2) != 0 &&
+                cmpCursorSlotIsSelectable(&DDS3_GBWK->party[stockId].unit, stock->count, 0) != 0) {
+                stock->StockIdx[outputIndex] = stockId;
+                stock->ListIdx[outputIndex] = i;
                 outputIndex++;
-                stock->ListIdx[selectedIndex] = i;
                 stock->PartyCnt++;
             }
         }
@@ -11612,15 +11605,13 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
 
     if ((stock->count & 2) != 0) {
         for (i = 4; i < 16; i++) {
-            datUnitWork_t *unit = &DDS3_GBWK->party[i].unit;
-
-            if ((unit->flag & 4) != 0) {
+            if ((DDS3_GBWK->party[i].unit.flag & 4) != 0) {
                 continue;
             }
-            if ((unit->flag & 1) == 0) {
+            if ((DDS3_GBWK->party[i].unit.flag & 1) == 0) {
                 continue;
             }
-            if (cmpCursorSlotIsSelectable(unit, stock->count, 1) == 0) {
+            if (cmpCursorSlotIsSelectable(&DDS3_GBWK->party[i].unit, stock->count, 1) == 0) {
                 continue;
             }
             {
@@ -11639,9 +11630,7 @@ void cmpBuildStockNameList(cmpLocalStock_t *stock)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpBuildStockNameList);
-#endif
+
 
 s8 cmpGetStockCount(void)
 {
