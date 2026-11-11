@@ -2784,56 +2784,114 @@ u32 slGetExitType(void) {
     return gslExitType;
 }
 
-#ifdef NON_MATCHING
-static inline void slQueryYesNoReadKeys(void)
-{
-    if (slQueryYesNoKeyFlag == 0 && slChkWindowOpenDone() != 0) {
-        if (slGetPadTrig(dds3PadButtonState[0x27] < 0)) {
-            if (slQueryYesNoCursor != 1) {
-                p2sdPlaySE(0, 0x7F, 0x3F);
-            }
-            slQueryYesNoCursor = 1;
-        } else if (slGetPadTrig(dds3PadButtonState[0x26] < 0)) {
-            if (slQueryYesNoCursor != 0) {
-                p2sdPlaySE(0, 0x7F, 0x3F);
-            }
-            slQueryYesNoCursor = 0;
-        } else if (slGetPadTrig(dds3PadButtonState[0x21] < 0)) {
-            if (slQueryYesNoCursor == 0 && (slQueryYesNoMsg == 1 || slQueryYesNoMsg == 3)) {
-                p2sdPlaySE(0x11, 0x7F, 0x3F);
-            } else {
-                p2sdPlaySE(8, 0x7F, 0x3F);
-            }
-            slQueryYesNoKeyFlag = slQueryYesNoCursor == 0 ? 1 : 2;
-        } else if (slGetPadTrig(dds3PadButtonState[0x23] < 0)) {
-            p2sdPlaySE(10, 0x7F, 0x3F);
-            slQueryYesNoKeyFlag = 2;
-        }
-    }
-}
 
-saddr_t slQueryYesNoProc(void)
-{
+saddr_t slQueryYesNoProc(void){
     s32 cardStatus;
-    if (slQueryYesNoMsg == 4 || slQueryYesNoMsg == 8) {
-        if (dds3PadButtonState[0x27] < 0) {
-            if (slQueryYesNoCursor != 1) {
+    s32 valid;
+    if ((u32)(slQueryYesNoMsg - 5) < 2){
+        if (slQueryYesNoKeyFlag == 0 && slChkWindowOpenDone() != 0){
+            if (slGetPadTrig(dds3PadButtonState[0x27] < 0)){
+                if (slQueryYesNoCursor != 1){
+                    p2sdPlaySE(0, 0x7F, 0x3F);
+                }
+                slQueryYesNoCursor = 1;
+            }
+            else if (slGetPadTrig(dds3PadButtonState[0x26] < 0)){
+                if (slQueryYesNoCursor != 0){
+                    p2sdPlaySE(0, 0x7F, 0x3F);
+                }
+                slQueryYesNoCursor = 0;
+            }
+            else if (slGetPadTrig(dds3PadButtonState[0x21] < 0)){
+                if (slQueryYesNoCursor == 0 && (slQueryYesNoMsg == 1 || slQueryYesNoMsg == 3)){
+                    p2sdPlaySE(0x11, 0x7F, 0x3F);
+                }
+                else{
+                    p2sdPlaySE(8, 0x7F, 0x3F);
+                }
+                if (slQueryYesNoCursor == 0){
+                    slQueryYesNoKeyFlag = 1;
+                }
+                else{
+                    slQueryYesNoKeyFlag = 2;
+                }
+            }
+            else if (slGetPadTrig(dds3PadButtonState[0x23] < 0)){
+                p2sdPlaySE(10, 0x7F, 0x3F);
+                slQueryYesNoKeyFlag = 2;
+            }
+        }
+        if (sdfMcFuncGetInfo1() != 0){
+            cardStatus = sdfMcGetFileInfoReady(mccb);
+            switch (cardStatus){
+                case 1:
+                switch (slQueryYesNoKeyFlag){
+                    case 0:
+                    if (slQueryYesNoMsg == 5){
+                        slQueryYesNoMsg = 0;
+                        slQueryYesNoCursor = -1;
+                        return slBootRetry();
+                    }
+                    sdfMcRegetInfo(mccb);
+                    break;
+                    case 1:
+                    slQueryYesNoMsg = 0;
+                    slQueryYesNoCursor = -1;
+                    return slQueryYesFunc();
+                    case 2:
+                    slQueryYesNoMsg = 0;
+                    slQueryYesNoCursor = -1;
+                    return slQueryNoFunc();
+                }
+                break;
+                case 2:
+                slQueryYesNoMsg = 0;
+                slQueryYesNoCursor = -1;
+                return slQueryYesFunc();
+                default:
+                {
+                    u32 *message = &slQueryYesNoMsg;
+                    *message = 5;
+                    switch (slQueryYesNoKeyFlag){
+                        case 0:
+                        sdfMcRegetInfo(mccb);
+                        break;
+                        case 1:
+                        slQueryYesNoMsg = 0;
+                        slQueryYesNoCursor = -1;
+                        return slQueryYesFunc();
+                        case 2:
+                        slQueryYesNoMsg = 0;
+                        slQueryYesNoCursor = -1;
+                        return slQueryNoFunc();
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    if (slQueryYesNoMsg == 4 || slQueryYesNoMsg == 8){
+        if (dds3PadButtonState[0x27] < 0){
+            if (slQueryYesNoCursor != 1){
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             slQueryYesNoCursor = 1;
-        } else if (dds3PadButtonState[0x26] < 0) {
-            if (slQueryYesNoCursor != 0) {
+        }
+        else if (dds3PadButtonState[0x26] < 0){
+            if (slQueryYesNoCursor != 0){
                 p2sdPlaySE(0, 0x7F, 0x3F);
             }
             slQueryYesNoCursor = 0;
-        } else if (dds3PadButtonState[0x21] < 0) {
+        }
+        else if (dds3PadButtonState[0x21] < 0){
             if (slQueryYesNoCursor == 0 &&
-                (slQueryYesNoMsg == 1 || slQueryYesNoMsg == 3 || slQueryYesNoMsg == 9)) {
+            (slQueryYesNoMsg == 1 || slQueryYesNoMsg == 3 || slQueryYesNoMsg == 9)){
                 p2sdPlaySE(0x11, 0x7F, 0x3F);
-            } else {
+            }
+            else{
                 p2sdPlaySE(8, 0x7F, 0x3F);
             }
-            if (slQueryYesNoCursor == 0) {
+            if (slQueryYesNoCursor == 0){
                 slQueryYesNoMsg = 0;
                 slQueryYesNoCursor = -1;
                 return slQueryYesFunc();
@@ -2841,7 +2899,8 @@ saddr_t slQueryYesNoProc(void)
             slQueryYesNoMsg = 0;
             slQueryYesNoCursor = -1;
             return slQueryNoFunc();
-        } else if (dds3PadButtonState[0x23] < 0) {
+        }
+        else if (dds3PadButtonState[0x23] < 0){
             p2sdPlaySE(10, 0x7F, 0x3F);
             slQueryYesNoCursor = -1;
             slQueryYesNoMsg = 0;
@@ -2849,74 +2908,84 @@ saddr_t slQueryYesNoProc(void)
         }
         return 0;
     }
-    if ((u32)(slQueryYesNoMsg - 5) < 2) {
-        slQueryYesNoReadKeys();
-        if (sdfMcFuncGetInfo1() == 0) {
-            return 0;
+    if (slQueryYesNoKeyFlag == 0 && slChkWindowOpenDone() != 0){
+        if (slGetPadTrig(dds3PadButtonState[0x27] < 0)){
+            if (slQueryYesNoCursor != 1){
+                p2sdPlaySE(0, 0x7F, 0x3F);
+            }
+            slQueryYesNoCursor = 1;
         }
-        cardStatus = sdfMcGetFileInfoReady(mccb);
-        if (cardStatus == 2) {
-            slQueryYesNoMsg = 0;
-            slQueryYesNoCursor = -1;
-            return slQueryYesFunc();
+        else if (slGetPadTrig(dds3PadButtonState[0x26] < 0)){
+            if (slQueryYesNoCursor != 0){
+                p2sdPlaySE(0, 0x7F, 0x3F);
+            }
+            slQueryYesNoCursor = 0;
         }
-        if (cardStatus != 1) {
-            slQueryYesNoMsg = 5;
+        else if (slGetPadTrig(dds3PadButtonState[0x21] < 0)){
+            if (slQueryYesNoCursor == 0 && (slQueryYesNoMsg == 1 || slQueryYesNoMsg == 3)){
+                p2sdPlaySE(0x11, 0x7F, 0x3F);
+            }
+            else{
+                p2sdPlaySE(8, 0x7F, 0x3F);
+            }
+            if (slQueryYesNoCursor == 0){
+                slQueryYesNoKeyFlag = 1;
+            }
+            else{
+                slQueryYesNoKeyFlag = 2;
+            }
         }
-        if (slQueryYesNoKeyFlag == 0) {
-            if (cardStatus == 1 && slQueryYesNoMsg == 5) {
+        else if (slGetPadTrig(dds3PadButtonState[0x23] < 0)){
+            p2sdPlaySE(10, 0x7F, 0x3F);
+            slQueryYesNoKeyFlag = 2;
+        }
+    }
+    if (sdfMcFuncGetInfo1() != 0){
+        s32 ready = sdfMcGetFileInfoReady(mccb);
+        valid = ready < 3;
+        if (valid){
+            valid = ready > 0;
+        }
+        if (valid){
+            /* Keep the real key storage dependency inside the valid-status
+             * branch. ee-gcc otherwise speculates its GP-relative load into
+             * the invalid-status branch delay slot. This empty constraint
+             * preserves the stored value and emits no access or general
+             * memory barrier; the following switch is its real consumer.
+             * Target-specific reconstruction aid, not original spelling. */
+            FAKEMATCH_ASM_LIVE_MEM(slQueryYesNoKeyFlag);
+            switch (slQueryYesNoKeyFlag){
+                case 0:
+                sdfMcRegetInfo(mccb);
+                break;
+                case 1:
                 slQueryYesNoMsg = 0;
                 slQueryYesNoCursor = -1;
-                return slBootRetry();
+                return slQueryYesFunc();
+                case 2:
+                slQueryYesNoMsg = 0;
+                slQueryYesNoCursor = -1;
+                return slQueryNoFunc();
             }
-            sdfMcRegetInfo(mccb);
-        } else if (slQueryYesNoKeyFlag == 1) {
-            slQueryYesNoMsg = 0;
-            slQueryYesNoCursor = -1;
-            return slQueryYesFunc();
-        } else if (slQueryYesNoKeyFlag == 2) {
-            slQueryYesNoMsg = 0;
-            slQueryYesNoCursor = -1;
-            return slQueryNoFunc();
         }
-        return 0;
-    }
-    slQueryYesNoReadKeys();
-    if (sdfMcFuncGetInfo1() == 0) {
-        return 0;
-    }
-    cardStatus = sdfMcGetFileInfoReady(mccb);
-    if (cardStatus <= 0 || cardStatus >= 3) {
-        slQueryYesNoCursor = -1;
-        slQueryYesNoMsg = 0;
-        sdfMcSetCardStat(mccb);
-        sdfMcClearSlotFlags(mccb, 0);
-        sdfMcClearSlotFlags(mccb, 1);
-        sdfMcClearSlotFlags(mccb, 2);
-        sdfMcClearSlotFlags(mccb, 3);
-        sdfMcClearSlotFlags(mccb, 4);
-        slSetInfo(0);
-        gslErrorCode = 1;
-        gslErrorKeyFlag = 0;
-        sdfMcRegetInfo(mccb);
-        return EE_ADDR_S(slErrorWaitMc);
-    }
-    if (slQueryYesNoKeyFlag == 0) {
-        sdfMcRegetInfo(mccb);
-    } else if (slQueryYesNoKeyFlag == 1) {
-        slQueryYesNoMsg = 0;
-        slQueryYesNoCursor = -1;
-        return slQueryYesFunc();
-    } else if (slQueryYesNoKeyFlag == 2) {
-        slQueryYesNoMsg = 0;
-        slQueryYesNoCursor = -1;
-        return slQueryNoFunc();
+        else{
+            slQueryYesNoCursor = -1;
+            slQueryYesNoMsg = 0;
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
+            slSetInfo(0);
+            gslErrorCode = 1;
+            gslErrorKeyFlag = 0;
+            sdfMcRegetInfo(mccb);
+            return EE_ADDR_S(slErrorWaitMc);
+        }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slQueryYesNoProc);
-#endif
 
 saddr_t slQueryYesNo(s32 (*yesFunc)(void), s32 (*noFunc)(void), s32 yesNoDefault) {
     slQueryYesFunc = yesFunc;
