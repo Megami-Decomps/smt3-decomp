@@ -631,12 +631,15 @@ s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
 }
 s32 movieStreamSema = -1;
 
+/* Retail's terminator is the zero padding after the four bytes; a host layout has none. */
+#ifdef NON_MATCHING
+#define SDF_MOVIE_IPS_EXT_SIZE 5
+#else
+#define SDF_MOVIE_IPS_EXT_SIZE 4
+#endif
+
 SDATA_PAD(4);
 
-#ifdef NON_MATCHING
-/* Retail's terminator is the zero padding after the four bytes; a host layout has none. */
-char sdfMovieIpsExt[5] = ".ips";
-#else
-char sdfMovieIpsExt[4] = ".ips";
-#endif
+char sdfMovieIpsExt[SDF_MOVIE_IPS_EXT_SIZE] = ".ips";
+#undef SDF_MOVIE_IPS_EXT_SIZE
 

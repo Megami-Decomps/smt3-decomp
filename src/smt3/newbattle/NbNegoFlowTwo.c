@@ -1732,40 +1732,48 @@ s32 Flow6_55(nbNegoProcessData_t *n)
     return 0;
 }
 
-#ifdef NON_MATCHING
 s32 Flow6_56(nbNegoProcessData_t *n)
 {
     datUnitWork_t *work;
-    nbNegoSkillCondition_t *condition;
     s32 skill;
     s32 ptype;
     s32 etype;
     s32 i;
+    s32 index;
 
     nbAddNegoIdKouho(n, 0x60039);
     skill = n->hojoskillid;
-    if ((skill < 0x19C || skill >= 0x1A2) &&
-        (skill < 0x1A3 || skill >= 0x1A5)) {
-        n->hojoaisyo = 0;
-    } else {
+    if (skill >= 0x19C) {
+        if (skill >= 0x1A2) {
+            /* Separate forward exits retain both signed comparisons in the
+             * qualified 02.jump output; a compound range folds to subtraction
+             * and an unsigned test. This compiler-shape aid is not a claim
+             * about the original source spelling. */
+            if (skill >= 0x1A5) {
+                goto invalidSkill;
+            }
+            if (skill < 0x1A3) {
+                goto invalidSkill;
+            }
+        }
         work = nbGetUnitWorkPointer(n->data, &n->data->party[n->hojopartyindex]);
-        condition = nbNegoSkillTable[n->hojoskillid - 0x180].condition;
-        for (i = 0; i < 4; i++, condition++) {
-            ptype = condition->ptype;
-            etype = condition->etype;
+        index = n->hojoskillid - 0x180;
+        for (i = 0; i < 4; i++) {
+            ptype = nbNegoSkillTable[index].condition[i].ptype;
+            etype = nbNegoSkillTable[index].condition[i].etype;
             if ((ptype != 0 || etype != 0) &&
                 nbFlowCheckUnit2(work, n->ework, ptype, etype, 1)) {
                 n->hojoaisyo = 1;
-                n->hojoaisyomes = condition->message;
+                n->hojoaisyomes = nbNegoSkillTable[index].condition[i].message;
                 break;
             }
         }
+    } else {
+invalidSkill:
+        n->hojoaisyo = 0;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_56);
-#endif
 
 s32 Flow6_57(nbNegoProcessData_t *n)
 {

@@ -1375,8 +1375,11 @@ def main():
     # `{"..", ..}` table) start an item too: the REL addend is the target offset.
     pointed = {struct.unpack_from("<I", rodata, o)[0] for o, (_, s) in rodata_relocs.items()
                if s == ".rodata" and o + 4 <= len(rodata)}
+    # Fully verified source-owned objects also delimit tables, including objects
+    # referenced only from another unit. Their native offset, size and bytes
+    # were checked above in both SKIP_ASM and full-unit contexts.
     starts = sorted({t[0] for t in tables} | set(bounds) | {p for p in pointed if p < len(rodata)}
-                    | {len(rodata)})
+                    | {start for start, _ in owned_rodata} | {len(rodata)})
     # Two retail copies that the C compiles to one object item: gcc merged
     # identical constants (e.g. two equal string initializers) that the
     # original kept apart, so the unit's rodata comes out short.

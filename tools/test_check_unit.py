@@ -1305,5 +1305,77 @@ class DefaultGuardScan(unittest.TestCase):
         self.assertNotIn("hidden", result)
 
 
+class OwnedRodataBoundaryTests(unittest.TestCase):
+    def check_owned_neighbor(self, *, object_offset=48, wrong_object=False,
+                             nonzero_gap=False, wrong_entry=False, omit_symbol=False):
+        # Nine jump entries end at36. A verified16-byte C object at48
+        # supplies the alignment gap, even when only another TU references it.
+        compiled = struct.pack('<4I', 0x3C020000, 0x24420000, 0x03E00008, 0)
+        native = struct.pack('<4I', 0x3C020010, 0x24420100, 0x03E00008, 0)
+        table = [0, 4, 8, 12, 0, 4, 8, 12, 0]
+        data = bytearray(64)
+        struct.pack_into('<9I', data, 0, *table)
+        payload = b'OWNED CONSTANT\0\0'
+        data[object_offset:object_offset+16] = payload
+        if wrong_object:
+            data[object_offset] ^= 1
+        if nonzero_gap:
+            data[40] = 1
+        if wrong_entry:
+            struct.pack_into('<I', data, 0, 4)
+        retail = bytearray(0x1200)
+        retail[0x1000:0x1010] = native
+        struct.pack_into('<9I', retail, 0x1100, *(0x100000+x for x in table))
+        retail[0x1130:0x1140] = payload
+        relocs = {'.text': {0: ('R_MIPS_HI16', '.rodata'), 4: ('R_MIPS_LO16', '.rodata')},
+                  '.rodata': {x: ('R_MIPS_32', '.text') for x in range(0,36,4)},
+                  '.sdata': {}, '.data': {}}
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp)
+            unit = root/'src/smt3/main/unit.c'; unit.parent.mkdir(parents=True)
+            unit.write_text('void target(void) {}\nconst char title[16] = "OWNED CONSTANT";\n')
+            cfg = root/'config/smt3'; cfg.mkdir(parents=True)
+            (cfg/'symbol_addrs.txt').write_text('target = 0x100000; // type:func\ntitle = 0x100130;\n')
+            (cfg/'SLUS_209.11.yaml').write_text('      - [0x1100, .rodata, main/unit]\n      - [0x1140, .rodata, main/next]\n')
+            original = root/RETAIL_PATH; original.parent.mkdir(parents=True); original.write_bytes(retail)
+            assembly = root/'asm/smt3/data/main/unit.rodata.s'; assembly.parent.mkdir(parents=True)
+            assembly.write_text('dlabel jtbl_00100100\ndlabel title\n')
+            def run(*args):
+                if '-S' in args:
+                    return '0 10 T target\n'
+                if '-t' in args and not omit_symbol:
+                    return f'{object_offset:08x} g O .rodata 00000010 title\n'
+                return ''
+            stack.enter_context(patch.object(check_unit, 'ROOT', root))
+            stack.enter_context(patch.dict(check_unit.RETAIL, {VERSION: RETAIL_PATH}, clear=True))
+            stack.enter_context(patch.dict(check_unit.VERSIONS, {VERSION: {'serial': SERIAL, 'gp': hex(GP)}}, clear=True))
+            stack.enter_context(patch.object(check_unit.sys, 'argv', ['check_unit.py', str(unit)]))
+            stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0, 0)))
+            stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[]))
+            stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
+            stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
+            stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
+            stack.enter_context(patch.object(check_unit, 'relocations', return_value=relocs))
+            stack.enter_context(patch.object(check_unit, 'owns_rodata', return_value=True))
+            stack.enter_context(patch.object(check_unit, 'run', side_effect=run))
+            stack.enter_context(patch.object(check_unit.subprocess, 'run', return_value=SimpleNamespace(returncode=0, stderr='')))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped:
+                check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_verified_owned_neighbor_supplies_alignment_gap(self):
+        code, report = self.check_owned_neighbor()
+        self.assertEqual(code, 0, report)
+        self.assertIn('1 match, 0 differ', report)
+
+    def test_invalid_owned_neighbors_do_not_hide_padding_or_data_errors(self):
+        for args in ({'object_offset':40}, {'wrong_object':True}, {'nonzero_gap':True},
+                     {'wrong_entry':True}, {'omit_symbol':True}):
+            with self.subTest(args=args):
+                code, report = self.check_owned_neighbor(**args)
+                self.assertEqual(code, 1, report)
+
+
 if __name__ == "__main__":
     unittest.main()
