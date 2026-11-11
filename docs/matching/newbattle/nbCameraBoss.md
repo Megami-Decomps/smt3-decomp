@@ -115,21 +115,42 @@ the default entries, which all resolve to the one default block.
 
 ## nbCameraBoss_BSMIZ_Command_Set (newbattle/nbCameraBoss, 0x218)
 
+134 of 134 words match at the native 536-byte extent in the exact candidate.
+Localized constraints act on the initialized camera pointer, the selected
+initialized length and the assigned `pos.y` cell. The camera pointer uses
+the native callee-saved allocation; length is assigned after the provider
+calls and dies after its three XYZ products. The memory operand names only
+the real four-byte `pos.y` clamp input. These reproduce native allocation
+and reloading, not original source spelling or an internal compiler-pass cause.
+
+The VU stores declare their full-vector memory outputs before C reads or
+updates those vectors. The exact typed load operands name the actual,
+fully written 16-byte `center`, `base` and `camera->target` vector objects,
+not an unrelated cast type or a larger owner object.
+
+Native `pos.w` remains unwritten. The raw full-vector load consumes it,
+subtraction produces W and XYZ-only normalization leaves W unchanged;
+the final direction store propagates it. This preserves native hardware
+behavior, not an initialized C float value or a claim that W is ignored.
+No W initializer or typed full-`pos` input is introduced.
+
+### Historical ordinary-C controls
+
 68 of 131 words differ; 524 bytes emitted against retail's 536.
 
 The body came off the matched sibling `nbCameraBoss_BSSAMA_Command_Set`, which
 has the same shape plus an `effBTLModelGetID` test. Everything up to the
 `length` choice matches except two callee-saved names: retail holds
 `pNbCamera` in `$18` and the model id in `$17`, the draft the other way round.
-That swap is a live-length tie-break and follows the one real difference.
+This was the historical allocation mismatch.
 
 Retail reloads `pos.y` from the frame for the `> -1.5f` clamp after storing all
 three components, then uses `bc1tl` with the clamp store in the delay slot. The
 draft keeps `pos.y` in a register, so the whole scale-and-add block schedules
 `pos.y` first and the clamp folds into it, and retail's `b` to the join plus its
 `nop` are three words the draft never emits. The HD reconstruction of this
-function also reads `pos.y` back through a separate accessor, so the reload is
-in the original, but nothing in C reproduces it here: the matched
+function also reads `pos.y` back through a separate accessor. None of the
+historical ordinary-C forms below reproduced that reload: the matched
 `BSSAMA_Command_Set` has the identical clamp over a literal distance and keeps
 the value in a register, as the draft does.
 

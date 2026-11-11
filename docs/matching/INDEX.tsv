@@ -257,12 +257,12 @@ nbCameraBoss_Sp_DOUTYO_TPFix_Set	newbattle/nbCameraBoss	0x64		docs/matching/newb
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	36
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	44
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	89
-nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	68 of 131 words differ	docs/matching/newbattle/nbCameraBoss.md	116
-nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	146
-nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	168
-nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	189
-nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	219
-nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	270
+nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	134 of 134 words match	docs/matching/newbattle/nbCameraBoss.md	116
+nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	167
+nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	189
+nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	179 of 230 words differ	docs/matching/newbattle/nbCameraBoss.md	210
+nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	240
+nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	291
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraProcess_nbCameraProcess	newbattle/nbCameraProcess	792 bytes	198 of 198 words match	docs/matching/newbattle/nbCameraProcess.md	52

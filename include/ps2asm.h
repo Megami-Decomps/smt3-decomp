@@ -73,6 +73,17 @@ typedef struct {
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (src))
 #define SDF_VU0_LOADVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, %0\n\t.set reorder" : : "m" (lvalue))
+/* Pointer-address loads with an exact read-only input of the pointed-to type.
+ * src must be a side-effect-free expression pointing to the actual, fully
+ * initialized 16-byte object at a 16-byte-aligned address. No alias cast or
+ * larger enclosing object may stand in for that input. These loads do not
+ * modify memory; the memory operand names only the object hardware reads. */
+#define SDF_VU0_LOADVECTOR_OBJECT(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (src), "m" (*(src)))
+#define SDF_VU0_LOADVECTOR_B_OBJECT(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
+    : : "r" (src), "m" (*(src)))
 #define SDF_VU0_LOADVECTOR_B_F32(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%1)\n\t.set reorder" \
     : : "m" (*(const volatile ps2asm_float_vector4_t *)(src)), "r" (src))

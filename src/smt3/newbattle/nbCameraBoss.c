@@ -913,16 +913,24 @@ s32 nbCameraBoss_Sp_PSYSTL_Run(nbCamera_t *pNbCamera)
     return 1;
 }
 
-/* NON_MATCHING: 68 of 131 words differ; 524 emitted against retail 536. Retail
- * reloads pos.y from the frame for the clamp, which reorders the whole block. */
-#ifdef NON_MATCHING
+/* Target-specific compiler reconstruction: the initialized camera pointer,
+ * selected initialized length, and initialized pos.y have real consumers in
+ * the native pointer, XYZ products, and clamp lifetimes. The local constraints
+ * reproduce native allocation/reloading, not original source spelling.
+ * VU stores declare their memory outputs; exact typed loads name the actual,
+ * fully written 16-byte center, base, and camera target vector objects.
+ * Native pos.w remains unwritten, yet the raw full-vector load and subsequent
+ * direction store consume and propagate it. Preserve that hardware behavior:
+ * do not initialize W or describe all of pos as an initialized typed input. */
 s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera)
 {
+    /* The initialized camera pointer lives in native callee-saved s2. */
+    FAKEMATCH_ASM_REG(nbCamera_t *, camera, "$18") = pNbCamera;
     nbMainProcessData_t *pData;
     nbFormation_t *pBase;
     nbFormation_t *pForm;
     s32 id;
-    f32 length;
+    FAKEMATCH_ASM_REG(f32, length, "$f1");
     sdfVector4_t pos;
     sdfVector4_t base;
     sdfVector4_t center;
@@ -939,43 +947,49 @@ s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera)
     pForm = &pData->form[pData->party[pData->order[pData->orderindex]].formindex];
     id = effBTLModelGetID(pForm);
     effBTLModelGetSphereCenter(pBase);
-    SDF_VU0_STOREVECTOR_NOMEM(&base);
+    SDF_VU0_STOREVECTOR(&base);
     if (id == 50 || id == 74) {
         base.y = base.y + pBase->h * pBase->scl * 0.18f;
     }
-    SDF_VU0_COPYVECTOR(pNbCamera, &base);
+    SDF_VU0_COPYVECTOR(camera, &base);
     effBTLModelGetSphereCenter(pForm);
-    SDF_VU0_STOREVECTOR_NOMEM(&center);
+    {
+        sdfVector4_t *out = &center;
+        SDF_VU0_STOREVECTOR_RWADDR_MEMORY(out);
+    }
     center.y = -effBTLModelGetHeight(pForm);
-    SDF_VU0_LOADVECTOR(&center);
-    SDF_VU0_LOADVECTOR_B(&base);
+    SDF_VU0_LOADVECTOR_OBJECT(&center);
+    SDF_VU0_LOADVECTOR_B_OBJECT(&base);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&dir);
+    /* The immediate branch initializes native f1. The .lit4 branch remains
+     * ordinary; both lengths feed the same three real product consumers. */
     if (id == 50 || id == 74) {
         length = 560.0f;
+        FAKEMATCH_ASM_LIVE_F32(length);
     } else {
         length = 550.0f;
     }
     pos.x = center.x + dir.x * length;
     pos.y = center.y + dir.y * length;
     pos.z = center.z + dir.z * length;
+    /* Native reloads this initialized cell for the real clamp. This narrow
+     * target constraint does not initialize W or order unrelated memory. */
+    FAKEMATCH_ASM_LIVE_MEM(pos.y);
     if (pos.y > -1.5f) {
         pos.y = -1.5f;
     }
-    SDF_VU0_LOADVECTOR(pNbCamera);
-    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_LOADVECTOR_OBJECT(&camera->target);
+    SDF_VU0_LOADVECTOR_B_BARRIER(&pos);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_GETLENGTH(pNbCamera->distance);
+    SDF_VU0_GETLENGTH(camera->distance);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
-    pNbCamera->fovy = 0.69813163f;
-    effBTLModelLook(pForm, &pNbCamera->target);
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    camera->fovy = 0.69813163f;
+    effBTLModelLook(pForm, &camera->target);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSMIZ_Command_Set);
-#endif
 
 s32 nbCameraBoss_BSONGY_Command_Set(nbCamera_t *pNbCamera)
 {
