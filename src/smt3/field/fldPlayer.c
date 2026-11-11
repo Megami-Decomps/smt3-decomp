@@ -455,7 +455,7 @@ void fldPlayerCalc_Hit(void) {
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
-extern sdfVector4_t fldWarpRunAxis;
+extern const sdfVector4_t fldWarpRunAxis;
 extern sdfMatrix4_t sdfViewMatrix;
 extern f32 EulerAngleAxisY(void);
 extern void InversMatrix(void);
@@ -682,8 +682,11 @@ s32 fldPlayerCalcHasigo(void) {
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
 #endif
 
+const sdfVector4_t fldWarpRunAxis = {0.0f, 1.0f, 0.0f, 1.0f};
+
+const sdfVector4_t fldNmlAxis = {0.0f, 1.0f, 0.0f, 1.0f};
+
 #ifdef NON_MATCHING
-extern const volatile sdfVector4_t fldNmlAxis;
 extern const char fldDamageOnMsg[], fldDamageOffMsg[];
 #define D_0054E90A ((u8 *)dds3PadStickState + 2)
 extern u8 dds3PadStickState[2][2][2];
@@ -730,7 +733,7 @@ s32 fldPlayerCalc_Nml(void)
     fldUnitControl_t *control = fldGetUnitControl();
     dds3Basic_t *second = control->handle2;
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
-    sdfVector4_t axis __attribute__((aligned(16))) = fldNmlAxis;
+    sdfVector4_t axis __attribute__((aligned(16))) = *(volatile sdfVector4_t *)&fldNmlAxis;
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
@@ -1292,10 +1295,6 @@ s32 fldPlayerCalc_Nml(void)
     return 0;
 }
 #else
-const sdfVector4_t fldWarpRunAxis = {0.0f, 1.0f, 0.0f, 1.0f};
-
-const sdfVector4_t fldNmlAxis = {0.0f, 1.0f, 0.0f, 1.0f};
-
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
 #endif
 
