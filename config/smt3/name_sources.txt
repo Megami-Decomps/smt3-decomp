@@ -230,3 +230,4 @@
 0x002FA788	lightBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A170, DDS2 0x00385188; former name D_002FA788
 0x002FA7A0	dds3PathBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A188, DDS2 0x003851A0; former name D_002FA7A0
 0x002FA7B8	dds3ModelBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A1A0, DDS2 0x003851B8; former name D_002FA7B8
+0x002DC970	QueryIntrContext	inferred	DDS1/2 QueryIntrContext twin (0x0030B4F0/0x00366770), same body; former name func_002DC970

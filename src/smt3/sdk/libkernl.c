@@ -464,7 +464,7 @@ void iInvalidDCache(void *start, void *end)
              EE_ADDR_PTR(EE_ADDR(end) & ~63U));
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", func_002DC970);
+INCLUDE_ASM(const s32, "sdk/libkernl", QueryIntrContext);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", DisableIntc);
 

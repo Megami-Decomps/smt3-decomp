@@ -10528,6 +10528,7 @@ iSyncDCache = 0x002DC818; // type:func size:0x14
 _sceIDC = 0x002DC830; // type:func size:0xA4
 InvalidDCache = 0x002DC8D8; // type:func size:0x7C
 iInvalidDCache = 0x002DC958; // type:func size:0x14
+QueryIntrContext = 0x002DC970; // type:func size:0x10
 DisableIntc = 0x002DC980; // type:func size:0x68
 EnableIntc = 0x002DC9E8; // type:func size:0x68
 DisableDmac = 0x002DCA50; // type:func size:0x68
