@@ -1145,8 +1145,6 @@ INCLUDE_ASM(const s32, "newbattle/nbAi", nbPickAiAction);
 
 extern void nbSetNormalSkill0(datUnitWork_t *work);
 
-/* NON_MATCHING: 4 of 114 words differ (first at +0x168). */
-#ifdef NON_MATCHING
 void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
 {
     s32 id;
@@ -1178,7 +1176,9 @@ void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
     if (entry->skill & 0x8000) {
         a->work->nowcommand = 1;
         switch (entry->skill & 0xF000) {
-
+        case 0xF000:
+            a->work->nowindex = 222;
+            break;
         case 0x9000:
             a->work->nowindex = 226;
             break;
@@ -1190,9 +1190,6 @@ void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
             break;
         case 0xC000:
             a->work->nowindex = 230;
-            break;
-        case 0xF000:
-            a->work->nowindex = 222;
             break;
         case 0xD000:
             a->work->nowindex = 252;
@@ -1208,9 +1205,6 @@ void SetKoudou(nbActionProcessData_t *a, s32 tbl, s32 kou)
         a->work->nowindex = entry->skill;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", SetKoudou);
-#endif
 
 extern s32 Sel_AI(nbActionProcessData_t *a, s32 n, s32 group);
 extern u32 nbGetVirtualAisyo(s32 skill, s32 source, s32 target);

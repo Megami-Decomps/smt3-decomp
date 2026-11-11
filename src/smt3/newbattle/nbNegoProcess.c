@@ -832,51 +832,56 @@ s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type)
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern u8 nbQuestionWeightTable[][4];
 
 s32 nbGetQuestionType(datUnitWork_t *work)
 {
     s32 weights[3] = {33, 33, 34};
     datDevilNegoFormat_t *text = &master_text[work->id];
-    dds3GlobalWork_t *volatile *globalRef = &DDS3_GBWK;
-    volatile u8 *privateSel = &text->privatesel;
     dds3GlobalWork_t *global;
+    dds3GlobalWork_t *current;
     s32 sum;
+    s32 accepted;
     s32 roll;
     s32 i;
     s32 first, second, third, temp;
 
-    i = *privateSel;
-    global = *globalRef;
-    if (i == 1) {
+    if (text->privatesel == 1) {
         s32 row = text->privateselindex;
 
-        roll = dds3GetRandIntA(NULL, 100);
         sum = 0;
+        roll = dds3GetRandIntA(NULL, 100);
         for (i = 0; i < 4; i++) {
+            if (roll < sum + nbQuestionWeightTable[row][i]) return i;
             sum += nbQuestionWeightTable[row][i];
-            if (roll < sum) return i;
         }
         return 0;
     }
+    global = DDS3_GBWK;
     sum = 0;
     for (i = 1; i < 4; i++) sum += global->negoques[i];
-    if (global->negoques[0] < sum * 2) {
-        if (dds3GetRandIntA(NULL, 2) != 0) return 0;
+    if (global->negoques[0] >= sum * 2) {
+        accepted = (s32)dds3GetRandIntA(NULL, 100) < 80;
     } else {
-        if ((s32)dds3GetRandIntA(NULL, 100) >= 80) return 0;
+        accepted = dds3GetRandIntA(NULL, 2) == 0;
     }
-    global = DDS3_GBWK;
+    if (!accepted) return 0;
+    current = DDS3_GBWK;
     first = 1; second = 2; third = 3;
-    if (global->negoques[first] < global->negoques[second]) {
+    if (current->negoques[first] < current->negoques[second]) {
         first = 2; second = 1;
     }
-    if (global->negoques[first] < global->negoques[3]) {
+    if (current->negoques[first] < current->negoques[3]) {
         temp = first; first = second; second = temp;
     }
-    if (global->negoques[second] < global->negoques[3]) {
-        third = second; second = 3;
+    temp = second;
+    if (current->negoques[temp] < current->negoques[3]) {
+        second = 3;
+        /* Target-specific scheduling aid: keep the live second-index update
+         * before copying its previous value to third, as in retail. The empty
+         * constraint emits no instructions; it is not original-source evidence. */
+        FAKEMATCH_ASM_READ(second);
+        third = temp;
     }
     if (first == second && second == third) {
         weights[0] = 33; weights[1] = 33; weights[2] = 34;
@@ -888,13 +893,11 @@ s32 nbGetQuestionType(datUnitWork_t *work)
         weights[0] = 0; weights[1] = 30; weights[2] = 70;
     }
     roll = dds3GetRandIntA(NULL, 100);
-    if (roll < weights[0]) return 1;
-    if (roll < weights[0] + weights[1]) return 2;
-    return 3;
+    if (roll < weights[0]) i = 1;
+    else if (roll < weights[0] + weights[1]) i = 2;
+    else i = 3;
+    return i;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbGetQuestionType);
-#endif
 
 s32 nbGetNegoYaruItemA(datUnitWork_t *w)
 {
@@ -1375,7 +1378,6 @@ typedef struct itfMesResource_t itfMesResource_t;
 extern s32 itfMesMngInitialize(itfMesResource_t *message);
 extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
 
-const u8 D_00544E38[16] = {0x21, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 const char nbInfoSelectFmt[40] = "select info usemestype = %d mesno =%d\n";
 
