@@ -224,3 +224,9 @@
 0x0059AD40	ctorFrameObject	inferred	static object __do_global_ctors passes to __register_frame_info; former name D_0059AD40
 0x0059AD58	mainCtorsDone	inferred	__main's static flag: run __do_global_ctors once; former name D_0059AD58
 0x0059AD60	frameObjectList	inferred	head of the object list __register_frame_info links into; former name D_0059AD60
+0x002FA610	worldBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x00329A08, DDS2 0x00384A20; former name D_002FA610
+0x002FA628	sceneBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x00329A20, DDS2 0x00384A38; former name D_002FA628
+0x002FA710	dds3CameraObjectBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A0F8, DDS2 0x00385110; former name D_002FA710
+0x002FA788	lightBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A170, DDS2 0x00385188; former name D_002FA788
+0x002FA7A0	dds3PathBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A188, DDS2 0x003851A0; former name D_002FA7A0
+0x002FA7B8	dds3ModelBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A1A0, DDS2 0x003851B8; former name D_002FA7B8
