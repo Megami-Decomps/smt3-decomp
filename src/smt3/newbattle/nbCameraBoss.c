@@ -1038,7 +1038,11 @@ s32 nbCameraBoss_Ongy_BUNSIN_Set(nbCamera_t *pNbCamera)
     return 1;
 }
 
-#ifdef NON_MATCHING
+/* VU0 sphere center is written through its bare address. The memory-aware
+ * read/write-address store keeps that scratch address local to the transfer;
+ * the camera operand below prevents caching the direction address across the rotation
+ * call. These localized compiler constraints reproduce native rematerialized
+ * addresses, not original source spelling. */
 s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera)
 {
     sdfVector4_t pos;
@@ -1048,7 +1052,10 @@ s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera)
     pos.y = -200.0f;
     pos.z = -1306.5f;
     effBTLModelGroupGetSphere(0x200);
-    SDF_VU0_STOREVECTOR(&center);
+    {
+        sdfVector4_t *out = &center;
+        SDF_VU0_STOREVECTOR_RWADDR_MEMORY(out);
+    }
     center.y *= 0.5f;
     SDF_VU0_LOADVECTOR(&center);
     SDF_VU0_STOREVECTOR(&pNbCamera->target);
@@ -1059,14 +1066,13 @@ s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera)
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
     pNbCamera->fovy = 0.6981316209f;
     SetRotateMatrixY(pNbCamera->frame * -0.0021816615f);
+    FAKEMATCH_ASM_LIVE(pNbCamera);
     SDF_VU0_LOADVECTOR(&pNbCamera->direction);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Ongy_BUNSIN_Run);
-#endif
+
 
 s32 nbCameraBoss_BSARUS_Command_Set(nbCamera_t *pNbCamera)
 {

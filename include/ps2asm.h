@@ -379,6 +379,12 @@ typedef struct {
 #define SDF_VU0_LOADVECTOR_RWADDR(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
     : "+r" (src))
+/* VU0 writes the destination memory. The conservative read/write address
+ * operand keeps a real scratch address local to this transfer when native
+ * code rematerializes it; this is a localized compiler reconstruction aid. */
+#define SDF_VU0_STOREVECTOR_RWADDR_MEMORY(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
+    : "+r" (dst) : : "memory")
 #define SDF_VU0_STOREVECTOR_RWADDR(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : "+r" (dst))
