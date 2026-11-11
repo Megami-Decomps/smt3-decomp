@@ -231,3 +231,8 @@
 0x002FA7A0	dds3PathBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A188, DDS2 0x003851A0; former name D_002FA7A0
 0x002FA7B8	dds3ModelBasicTable	inferred	Basic descriptor (constructor, destructor, main and draw procedures) in dds3BasicFuncTablePtr, named after its procedures as the HD names name its siblings; DDS1 0x0032A1A0, DDS2 0x003851B8; former name D_002FA7B8
 0x002DC970	QueryIntrContext	inferred	DDS1/2 QueryIntrContext twin (0x0030B4F0/0x00366770), same body; former name func_002DC970
+0x002D6500	__sprint	inferred	newlib vfprintf.c static that flushes the __suio through __sfvwrite; former name gcc2_compiled__0
+0x002D8148	quorem	inferred	newlib dtoa.c static: quotient digit from __mcmp and big subtraction; former name gcc2_compiled__1
+0x002D96F8	std	inferred	newlib findfp.c static that fills a FILE (flags, file, cookie, read/write/seek/close); former name gcc2_compiled__2
+0x002D3990	malloc_extend_top	inferred	newlib mallocr.c static that grows the top chunk through _sbrk_r; DDS1/2 name; former name gcc2_compiled_
+0x0052BB38	impure_data	inferred	newlib impure.c static _reent that _impure_ptr points at; DDS1 0x0039BCE0, DDS2 0x0040EE60; former name D_0052BB38

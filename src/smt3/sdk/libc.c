@@ -210,6 +210,7 @@ struct _reent {
 };
 
 extern _reent *_impure_ptr __attribute__((section(".data")));
+extern _reent impure_data;
 
 extern s32 _puts_r(_reent *r, const char *s);
 
@@ -249,7 +250,7 @@ extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
-extern void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data);
+extern void std(FILE *fp, s32 flags, s32 file, _reent *data);
 
 extern _glue *__sfmoreglue(_reent *r, s32 n);
 
@@ -445,7 +446,7 @@ typedef struct mallocArenaPrefix_t {
     u32 opaque00;
     u32 bitmap;
     mallocChunkPrefix_t *top;
-    u32 opaque0C;
+    mallocChunkPrefix_t *topBackward; /* bin 0's backward link; its forward link is top */
     mallocBinLinks_t bins[127];
 } mallocArenaPrefix_t;
 
@@ -474,7 +475,7 @@ extern u64 __malloc_max_total_mem __attribute__((section(".data")));
 /* NON_MATCHING: 584/600 bytes; second-request width conversions and
  * later register/scheduling choices remain unresolved. */
 #ifdef NON_MATCHING
-void gcc2_compiled_(_reent *r, u32 needed)
+void malloc_extend_top(_reent *r, u32 needed)
 {
     mallocChunkPrefix_t *oldTop = __malloc_av_.top;
     u32 oldSize = oldTop->size & ~3U;
@@ -539,7 +540,7 @@ void gcc2_compiled_(_reent *r, u32 needed)
     }
 }
 #else
-INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled_);
+INCLUDE_ASM(const s32, "sdk/libc", malloc_extend_top);
 #endif
 
 INCLUDE_ASM(const s32, "sdk/libc", _malloc_r);
@@ -1063,7 +1064,7 @@ long strtol(const char *s, char **end, s32 base) {
     return _strtol_r(_impure_ptr, s, end, base);
 }
 
-s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
+s32 __sprint(FILE *fp, __suio *uio) {
     s32 err;
 
     if (uio->uio_resid == 0) {
@@ -1131,7 +1132,7 @@ const char printfZeros[16] = "0000000000000000";
 
 extern s32 __swsetup(FILE *fp);
 extern s32 __sbprintf(FILE *fp, const char *format, va_list ap);
-extern s32 gcc2_compiled__0(FILE *fp, __suio *uio);
+extern s32 __sprint(FILE *fp, __suio *uio);
 extern s32 _mbtowc_r(_reent *r, s32 *out, const char *s, u32 limit, s32 *state);
 extern void *memchr(const void *s, s32 c, u32 n);
 extern void *localeconv(void);
@@ -1205,7 +1206,7 @@ s32 _vfprintf_r(_reent *r, FILE *fp, const char *format, va_list ap)
         uio.uio_iovcnt++; \
         uio.uio_resid += (length_); \
         if (uio.uio_iovcnt == 8) { \
-            if (gcc2_compiled__0(fp, &uio) != 0) goto error_exit; \
+            if (__sprint(fp, &uio) != 0) goto error_exit; \
             else current = iov; \
         } \
     }
@@ -1581,14 +1582,14 @@ emit_field:
         if (width > fieldBytes) cumulative += width;
         else cumulative += fieldBytes;
         if (uio.uio_resid != 0) {
-            if (gcc2_compiled__0(fp, &uio) != 0) goto error_exit;
+            if (__sprint(fp, &uio) != 0) goto error_exit;
         }
         uio.uio_iovcnt = 0;
         current = iov;
     }
 
 flush_output:
-    if (uio.uio_resid != 0 && gcc2_compiled__0(fp, &uio) != 0) goto error_exit;
+    if (uio.uio_resid != 0 && __sprint(fp, &uio) != 0) goto error_exit;
 error_exit:
 #undef PAD
 #undef PRINT
@@ -1745,7 +1746,7 @@ s32 __mcmp(_Bigint *a, _Bigint *b);
 
 /* NON_MATCHING: native 556-byte extent; 65 differing words in limb-loop allocation. */
 #ifdef NON_MATCHING
-s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor)
+s32 quorem(_Bigint *dividend, _Bigint *divisor)
 {
     s32 n = divisor->wds;
     u32 *divisorCursor;
@@ -1822,7 +1823,7 @@ s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor)
     return quotient;
 }
 #else
-INCLUDE_ASM(const s32, "sdk/libc", gcc2_compiled__1);
+INCLUDE_ASM(const s32, "sdk/libc", quorem);
 #endif
 
 /* Little-endian IEEE binary64 word view used by the numeric helpers. */
@@ -1841,7 +1842,7 @@ _Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
 _Bigint *_pow5mult(_reent *r, _Bigint *b, s32 n);
 _Bigint *_lshift(_reent *r, _Bigint *b, s32 shift);
 _Bigint *__mdiff(_reent *r, _Bigint *a, _Bigint *b);
-s32 gcc2_compiled__1(_Bigint *dividend, _Bigint *divisor);
+s32 quorem(_Bigint *dividend, _Bigint *divisor);
 extern const char dtoaInfinityText[], dtoaNanText[];
 extern const f64 dtoaLog10Slope __attribute__((section(".rodata")));
 extern const f64 dtoaLog10Offset __attribute__((section(".rodata")));
@@ -2290,7 +2291,7 @@ roundQuick:
         i = 1;
         j = value.word[0] & 1;
         for (;;) {
-            digit = gcc2_compiled__1(b, S) + '0';
+            digit = quorem(b, S) + '0';
             lowComparison = __mcmp(b, mlo);
             difference = __mdiff(r, S, mhi);
             highComparison = difference->sign != 0 ? 1 : __mcmp(b, difference);
@@ -2343,7 +2344,7 @@ roundQuick:
         }
     } else {
         for (i = 1;; i++) {
-            digit = gcc2_compiled__1(b, S) + '0';
+            digit = quorem(b, S) + '0';
             *out++ = digit;
             if (i >= limit) {
                 break;
@@ -2450,7 +2451,7 @@ s32 fflush(void *stream)
     return 0;
 }
 
-void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data) {
+void std(FILE *fp, s32 flags, s32 file, _reent *data) {
     fp->_p = NULL;
     fp->_r = 0;
     fp->_w = 0;
@@ -2541,9 +2542,9 @@ void _cleanup(void) {
 void __sinit(_reent *r) {
     r->__cleanup = _cleanup_r;
     r->__sdidinit = 1;
-    gcc2_compiled__2(&r->__sf[0], 4, 0, r);
-    gcc2_compiled__2(&r->__sf[1], 9, 1, r);
-    gcc2_compiled__2(&r->__sf[2], 0xA, 2, r);
+    std(&r->__sf[0], 4, 0, r);
+    std(&r->__sf[1], 9, 1, r);
+    std(&r->__sf[2], 0xA, 2, r);
     r->__sglue.next = NULL;
     r->__sglue.niobs = 3;
     r->__sglue.iobs = &r->__sf[0];
