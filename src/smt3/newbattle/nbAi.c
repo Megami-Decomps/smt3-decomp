@@ -1099,11 +1099,6 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
     return 0;
 }
 
-/* NON_MATCHING: 2 of 70 words differ (first at +0xB8). */
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
 {
     s32 list[8];
@@ -1129,8 +1124,8 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
     if (total == 0) {
         return -1;
     }
-    r = dds3GetRandIntA(NULL, total);
     acc = 0;
+    r = dds3GetRandIntA(NULL, total);
     for (i = 0; i < cnt; i++) {
         if (r < acc + row[list[i]].ritu) {
             return list[i];
@@ -1139,9 +1134,6 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
     }
     return -1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbPickAiAction);
-#endif
 
 extern void nbSetNormalSkill0(datUnitWork_t *work);
 
