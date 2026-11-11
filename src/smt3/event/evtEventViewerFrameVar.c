@@ -40,13 +40,6 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 s32 FrameVarProcess(dds3ProcessID_t *id);
 
-/* NON_MATCHING: 956 of retail's 980 bytes; the body matches instruction for
- * instruction but three loop-invariant constants stay immediates here instead
- * of taking three more saved registers. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq23, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 FrameVarProcess(dds3ProcessID_t *id)
 {
     void *tag;
@@ -57,10 +50,17 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     s32 i;
     s32 span;
     s32 x;
+    /* These live drawing bounds use callee-saved registers across the real
+     * drawing calls. Local bindings retain the native invariant allocation;
+     * they are a target-specific reconstruction aid, not original spelling. */
+    FAKEMATCH_ASM_REG(s32, origin, "s4");
+    FAKEMATCH_ASM_REG(s32, top, "s6");
+    FAKEMATCH_ASM_REG(s32, bottom, "s5");
 
     if (viewerinfo->framedisp == 0 && viewerinfo->menusw == 0) {
         return 0;
     }
+    origin = 0x74E0;
     tag = dds3FontReqAllocDrawTag();
     dds3ConsPanelTagLink(tag, 0x1E, 0x190, 0x26, 2);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x71E0, 0x8580, 0xFEFFFF, 0, evtFrameNumFmt,
@@ -68,19 +68,20 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     sdfPrimLinkRect(tag, 0x80009000, 0, 0x74E0, 0x85A0, 0x8B60, 0x85B8, 0xFEFFFF, NULL);
     if (viewerinfo->firstframe > 0) {
         sdfPrimLinkRect(tag, 0x80909090, 0, 0x74E0, 0x85A0,
-                        viewerinfo->firstframe * 360 / viewerinfo->totalframe * 16 + 0x74E0,
+                        viewerinfo->firstframe * 360 / viewerinfo->totalframe * 16 + origin,
                         0x85B8, 0xFEFFFF, NULL);
     }
     if (viewerinfo->lastframe < viewerinfo->totalframe - 1) {
         sdfPrimLinkRect(tag, 0x80909090, 0,
-                        viewerinfo->lastframe * 360 / viewerinfo->totalframe * 16 + 0x74E0,
+                        viewerinfo->lastframe * 360 / viewerinfo->totalframe * 16 + origin,
                         0x85A0, 0x8B60, 0x85B8, 0xFEFFFF, NULL);
     }
     cursorTag = NULL;
+    color = (viewerinfo->flags & 1) ? 0x80FFFF00 : 0x8000FFFF;
     span = viewerinfo->nowframe * 360 / viewerinfo->totalframe;
-    x = span * 16 + 0x74E0;
-    sdfPrimLinkRect(tag, (viewerinfo->flags & 1) ? 0x80FFFF00 : 0x8000FFFF, 0, x, 0x8588,
-                    ((span + 2) << 4) + 0x74E0, 0x85D8, 0xFEFFFF, NULL);
+    x = span * 16 + origin;
+    sdfPrimLinkRect(tag, color, 0, x, 0x8588,
+                    ((span + 2) << 4) + origin, 0x85D8, 0xFEFFFF, NULL);
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x, 0x85E0, 0xFEFFFF,
                                           (viewerinfo->flags & 1) ? 5 : 6, evtFrameNumFmt,
                                           viewerinfo->nowframe)));
@@ -89,31 +90,34 @@ s32 FrameVarProcess(dds3ProcessID_t *id)
     if (viewerinfo->framelist_target != NULL && viewerinfo->menusw == 1) {
         frame = viewerinfo->framelist_target->children;
         i = 0;
-        while (frame != NULL) {
-            if (i == viewerinfo->frameCursor + viewerinfo->frameFirst) {
-                cursorTag = dds3FontReqAllocDrawTag();
-                drawTag = cursorTag;
-                color = 0x800000FF;
-            } else {
-                drawTag = tag;
-                color = 0x8000FFFF;
-            }
-            span = frame->frame * 360 / viewerinfo->totalframe;
-            i++;
-            sdfPrimLinkRect(drawTag, color, 0, 0x74E0 + span * 16, 0x85A0,
-                            0x74E0 + ((span + 2) << 4), 0x85F8, 0xFEFFFF, NULL);
-            frame = frame->next;
+        if (frame != NULL) {
+            top = 0x85A0;
+            bottom = 0x85F8;
+            do {
+                if (i == viewerinfo->frameCursor + viewerinfo->frameFirst) {
+                    cursorTag = dds3FontReqAllocDrawTag();
+                    color = 0x800000FF;
+                    drawTag = cursorTag;
+                } else {
+                    drawTag = tag;
+                    color = 0x8000FFFF;
+                }
+                span = frame->frame * 360 / viewerinfo->totalframe;
+                i++;
+                sdfPrimLinkRect(drawTag, color, 0, origin + span * 16, top,
+                                origin + ((span + 2) << 4), bottom, 0xFEFFFF, NULL);
+                frame = frame->next;
+            } while (frame != NULL);
         }
     }
+
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, tag);
     if (cursorTag != NULL) {
         sdfDebugGrOt.regFunc(&sdfDebugGrOt, cursorTag);
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewerFrameVar", FrameVarProcess);
-#endif
+
 
 dds3ProcessID_t *evtInitFrameVar(void)
 {

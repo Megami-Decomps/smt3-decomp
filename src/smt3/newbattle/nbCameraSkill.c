@@ -1620,17 +1620,18 @@ void nbCameraState_Analyze_Set(nbCamera_t *pNbCamera)
     nbCamera_Analyze_Wait = 5;
 }
 
-#ifdef NON_MATCHING
 extern s32 effBTLModelGetID(nbFormation_t *pFormation);
 extern void effBTLModelInvokePartyHide(void);
 
 void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
 {
     nbFormation_t *target = effBTLSkillGetTargetFormation(0);
-    sdfVector4_t scale;
+    volatile sdfVector4_t scale;
     sdfVector4_t focus;
     s32 id = effBTLModelGetID(target);
-    f32 rate;
+    FAKEMATCH_ASM_REG(f32, rate, "$f0");
+    FAKEMATCH_ASM_REG(f32, clampRate, "$f3");
+    FAKEMATCH_ASM_REG(f32, compareRate, "$f4");
     f32 distance;
     f32 length;
     f32 base;
@@ -1643,16 +1644,23 @@ void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
         return;
     }
     rate = nbCamera_Analyze_Rate + nbCamera_Analyze_Rate_Add;
-    if (rate > 0.215f) {
+    /* Target-specific allocation aid: keep the actual sum result separate
+     * from its lower-bound test and upper-bound/publication copies. All
+     * three values are consumed here, before any call or VU operation. */
+    FAKEMATCH_ASM_LIVE_F32(rate);
+    clampRate = rate;
+    compareRate = clampRate;
+    if (compareRate > 0.215f) {
         nbCamera_Analyze_Rate_Add *= 1.1f;
     } else {
         nbCamera_Analyze_Rate_Add *= 0.725f;
     }
-    nbCamera_Analyze_Rate = rate < 0.0f ? 0.0f : rate;
+    nbCamera_Analyze_Rate = clampRate < 0.0f ? 0.0f : compareRate;
     distance = -pNbCamera->distance;
+    /* VU0 consumes this scratch vector through its bare address. */
+    scale.z = distance;
     scale.x = distance;
     scale.y = distance;
-    scale.z = distance;
     SDF_VU0_LOADVECTOR(&pNbCamera->direction);
     SDF_VU0_LOADVECTOR_B(&scale);
     SDF_VU0_MULVECTOR();
@@ -1661,13 +1669,22 @@ void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
     SDF_VU0_STOREVECTOR(&focus);
     effBTLModelGetMarkPosition2(target, 1);
     SDF_VU0_LOADVECTOR_B(&nbCameraAnalyzeVec);
-    VU0_LERP_VF10_VF11(nbCamera_Analyze_Rate);
+    {
+        u32 rateBits;
+        PS2_FLOAT_BITS(rateBits, nbCamera_Analyze_Rate);
+        SDF_VU0_INTERPOLATE(rateBits);
+    }
     SDF_VU0_STOREVECTOR(&pNbCamera->target);
     SDF_VU0_LOADVECTOR_B(&focus);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_GETLENGTH(length);
-    pNbCamera->distance = length;
+    {
+        /* The hardware length result has only this distance-store consumer;
+         * its fixed binding ends before the later sdfAtan call. */
+        FAKEMATCH_ASM_REG(f32, vectorLength, "$f1");
+        SDF_VU0_GETLENGTH(vectorLength);
+        pNbCamera->distance = vectorLength;
+    }
     if (0.001f < nbCamera_Analyze_Rate) {
         SDF_VU0_COPYVECTOR_C_TO_A();
         SDF_VU0_NORMALIZE();
@@ -1675,10 +1692,10 @@ void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
     }
     pNbCamera->fovy = 0.69813163f;
     length = sdfAtan(0.34906582f);
-    if (id == 0x82 || id == 0x11F) {
-        base = target->oneshotr * target->scl * 1.25f / length;
-    } else {
+    if (id != 0x82 && id != 0x11F) {
         base = target->oneshotr * target->scl / length;
+    } else {
+        base = target->oneshotr * target->scl * 1.25f / length;
     }
     want = base + (nbCamera_Analyze_Distance - base) * nbCamera_Analyze_Rate;
     pNbCamera->distance = want;
@@ -1687,9 +1704,7 @@ void nbCameraState_Analyze_Calc(nbCamera_t *pNbCamera)
     }
     nbCamera_Analyze_Frame++;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_Analyze_Calc);
-#endif
+
 
 void nbCameraShot_All_Set(nbCamera_t *pNbCamera)
 {
