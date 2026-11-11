@@ -215,15 +215,15 @@ extern const char slBaseIconName[];
 
 extern s32 slSaveWriteEnd_baseIcon(void);
 
-extern addr_t slBaseIconBuff;
+extern void *slBaseIconBuff;
 
 extern u32 slBaseIconBuffSize;
 
-saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr);
+saddr_t slSaveWriteFile(const char *filename, void **buff, u32 *size, void *endFunc, u32 *srcPtr);
 
 void sdfMcFuncDelete(u32 context, const char *path);
 
-extern u32 *slSaveWriteFile_buff;
+extern void **slSaveWriteFile_buff;
 
 extern u32 *slSaveWriteFile_size;
 
@@ -235,7 +235,7 @@ saddr_t slSaveProc_openFile(void);
 
 saddr_t slSaveProc_waitDataReady(void);
 
-extern void sdfMcFuncWrite(s32 request, u32 first, u32 second);
+extern void sdfMcFuncWrite(s32 descriptor, const void *buffer, s32 size);
 
 saddr_t slSaveProc_writeFile(void);
 
@@ -331,7 +331,7 @@ extern s32 version_convert_ver;
 
 extern u8 slIconSysBuf[];
 
-extern u32 slIconSysSaveBuff;
+extern void *slIconSysSaveBuff;
 
 extern u32 slIconSysSaveSize;
 
@@ -450,7 +450,7 @@ extern s32 evtBitCheck(s32 no);
 
 extern s32 gSlSaveMode;
 
-extern addr_t slSaveDataBuff;
+extern void *slSaveDataBuff;
 
 extern u32 slSaveDataSize;
 
@@ -2051,7 +2051,7 @@ s32 slSaveData_writeFile(void) {
     rec->mode = hdr->mode;
     memcpy(&slFileRecs[slot].name, &hdr->work, sizeof(slFileRecs[slot].name));
     slFileRecs[slot].nameLength = hdr->autoMapOpen;
-    slSaveDataBuff = EE_ADDR(DDS3_GBWK);
+    slSaveDataBuff = DDS3_GBWK;
     slSaveDataSize = 0x1A510;
     if (gSlSaveMode == 0 || gSlSaveMode == 2) {
         return slSaveWriteFile(path, &slSaveDataBuff, &slSaveDataSize, slSaveWriteEnd_saveData, 0);
@@ -2070,7 +2070,7 @@ saddr_t slSaveData_deleteIconSys(void) {
     return EE_ADDR_S(slSaveProc_Write_deleteIconSys);
 }
 
-saddr_t slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr) {
+saddr_t slSaveWriteFile(const char *filename, void **buff, u32 *size, void *endFunc, u32 *srcPtr) {
     slSaveWriteFile_buff = buff;
     slSaveWriteFile_size = size;
     slSaveWriteFile_endFunc = endFunc;
@@ -2612,7 +2612,7 @@ s32 slCalc(dds3ProcessID_t *id) {
     if (job != 0 && pacFileCheckEnd(EE_ADDR_AS(fileRequest_t *, job)) != 0) {
         baseIconFileHandle = 0;
         slBaseIconMemHandle = fileGetMemHandle((fileRequest_t *)EE_ADDR_PTR(job));
-        slBaseIconBuff = EE_ADDR(fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job)));
+        slBaseIconBuff = fileGetLoadPtr((fileRequest_t *)EE_ADDR_PTR(job));
         slBaseIconBuffSize = fileGetLoadSize((fileRequest_t *)EE_ADDR_PTR(job));
         fileHandleFree((fileRequest_t *)EE_ADDR_PTR(job));
     }

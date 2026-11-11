@@ -1102,7 +1102,7 @@ f32 slMcAccessDraw_fc = 0.0f;
 s32 gSlWindowCnt = 0;
 
 extern u8 slIconSysBuf[];
-u32 slIconSysSaveBuff = (u32)slIconSysBuf;
+void *slIconSysSaveBuff = slIconSysBuf;
 
 u32 slIconSysSaveSize = 0x3c4;
 

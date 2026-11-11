@@ -334,7 +334,7 @@ extern s32 slDDS3To31Flg;
 
 extern s32 version_convert_ver;
 
-extern u32 slIconSysSaveBuff;
+extern void *slIconSysSaveBuff;
 
 extern u32 slIconSysSaveSize;
 
