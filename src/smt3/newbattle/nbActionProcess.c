@@ -1633,18 +1633,20 @@ s32 CheckMukanNego(nbActionProcessData_t *a)
     return 1;
 }
 
-/* NON_MATCHING: 57 of 74 words differ (first at +0x4). */
-
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+/* Historical behaviour check against retail: 2 PCSX2 call vectors gave the same return and memory,
  * capture_006, capture_015, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 
 s32 CheckSenseiNego(nbActionProcessData_t *a)
 {
     u32 stat;
     datUnitWork_t *work;
     s32 rate;
+    s32 roll;
+    /* Keep the real 0/1 return in its ABI register. An ordinary local adds
+     * a return move and changes branch allocation in this compiler. This is
+     * a target-specific reconstruction aid; no call occurs while it is live. */
+    FAKEMATCH_ASM_REG(s32, result, "$2");
 
     if ((u16)a->data->StageMajor >= 0xF0 && (u16)a->data->StageMajor <= 0xF6) {
         return 0;
@@ -1675,23 +1677,21 @@ s32 CheckSenseiNego(nbActionProcessData_t *a)
     if (datCheckTalk((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54)) == 0) {
         return 0;
     }
-    if ((a->data->stat & 0x2000000) != 0) {
-        rate = 0x64;
-    } else {
+    if ((a->data->stat & 0x2000000) == 0) {
         rate = 21 / a->data->enemypcnt;
+    } else {
+        rate = 0x64;
     }
-    if ((s32)dds3GetRandIntA(NULL, 0x64) < rate) {
+    roll = dds3GetRandIntA(NULL, 0x64);
+    if (roll >= rate) {
+        result = 0;
+    } else {
         a->data->stat |= 0x100;
-        return 1;
+        result = 1;
     }
-    return 0;
+    return result;
 }
 
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", CheckSenseiNego);
-
-#endif
 
 /* Historical behaviour check against retail: 4 PCSX2 call vectors give the same return and memory,
  * capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.

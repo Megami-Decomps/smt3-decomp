@@ -756,8 +756,6 @@ void dds3DrawDistRipOverError(void)
     }
 }
 
-/* NON_MATCHING: 52 of 170 words differ (first at +0x38). */
-#ifdef NON_MATCHING
 void dds3DrawFade(void)
 {
     sdfDrawTag_t *list;
@@ -765,11 +763,17 @@ void dds3DrawFade(void)
     u32 frameId;
     s32 alpha;
     u64 color;
+    /* Reconstruction constraint: keep the widened blue lane in $4 through its
+     * 64-bit packing shift. The ordinary local leaves nine allocation words
+     * different. This is compiler allocation, not a GS register requirement.
+     * The value is consumed before any call; no lifetime is extended. */
+    FAKEMATCH_ASM_REG(u64, blue, "$4");
 
     frameId = dds3GetFrameID();
     alpha = 0x80 - fadergba[3];
     if (alpha < 0x80) {
-        color = 0x3F80000000000000 | ((u64)fadergba[1] << 8) | fadergba[0] | ((u64)fadergba[2] << 16) | (u64)(s32)((u32)alpha << 24);
+        blue = fadergba[2];
+        color = 0x3F80000000000000 | (u64)(s32)((u32)alpha << 24) | (blue << 16) | ((u64)fadergba[1] << 8) | fadergba[0];
         dds3FadePacket[frameId].dma.qwc = 0xA;
         dds3FadePacket[frameId].dma.pad = 0;
         dds3FadePacket[frameId].dma.id = 0x70;
@@ -802,9 +806,7 @@ void dds3DrawFade(void)
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, list);
     }
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3DrawFade);
-#endif
+
 
 void dds3SetScreenFovy(f32 fovy)
 {
