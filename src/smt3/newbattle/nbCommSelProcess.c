@@ -361,10 +361,8 @@ void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 col
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* The signed outer range test and the two dispatches keep the panel and
+ * separator-coordinate lifetimes separate, as in the native control flow. */
 void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 color)
 {
     s32 margin = 0;
@@ -372,34 +370,41 @@ void DispPanelSitaji(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 co
     s32 lineX;
 
     if (type == 3) {
-        margin = 43 - (s32)(s->ritu * 43.0f);
+        margin = 43 - (s32)(s->smritu * 43.0f);
     }
-    if ((u32)type < 6) {
-        y = oy - margin;
-        nbPnlSprite(ox, y + 0x13D, 0xE7, 0x2A, 1, 0x1C, 0xE7, 0x2A,
-                    color, s->data->pnltex[1]);
-        nbPnlSprite(ox, y + 0x167, 0xE7, margin + 0x48, 1, 0x45, 0xE7, 2,
-                    color, s->data->pnltex[1]);
-        nbPnlSprite(ox + 0x51, y + 0x153, 0x9A, 2, 1, 0x7A, 0x9A, 1,
-                    color, s->data->pnltex[1]);
-        nbPnlSprite(ox, oy + 0x1AF, 0xEB, 2, 1, 0x7D, 0xEB, 2,
-                    color, s->data->pnltex[1]);
-        nbPnlSprite(ox, y + 0x13D, 0x51, 0x18, 1, 1, 0x51, 0x19,
-                    color, s->data->pnltex[1]);
-        if (type != 3) {
-            lineX = ox + 0x17;
-            nbPnlSprite(lineX, y + 0x16C, 0xC5, 2, 1, 0x77, 0xC5, 2,
+    if (type < 6) {
+        switch (type) {
+        case 0: case 1: case 2: case 3: case 4: case 5: {
+            s32 y = oy - margin;
+            nbPnlSprite(ox, y + 0x13D, 0xE7, 0x2A, 1, 0x1C, 0xE7, 0x2A,
                         color, s->data->pnltex[1]);
-            nbPnlSprite(lineX, y + 0x181, 0xC5, 2, 1, 0x77, 0xC5, 2,
+            nbPnlSprite(ox, y + 0x167, 0xE7, margin + 0x48, 1, 0x45, 0xE7, 2,
                         color, s->data->pnltex[1]);
-            nbPnlSprite(lineX, y + 0x196, 0xC5, 2, 1, 0x77, 0xC5, 2,
+            nbPnlSprite(ox + 0x51, y + 0x153, 0x9A, 2, 1, 0x7A, 0x9A, 1,
                         color, s->data->pnltex[1]);
+            nbPnlSprite(ox, oy + 0x1AF, 0xEB, 2, 1, 0x7D, 0xEB, 2,
+                        color, s->data->pnltex[1]);
+            nbPnlSprite(ox, y + 0x13D, 0x51, 0x18, 1, 1, 0x51, 0x19,
+                        color, s->data->pnltex[1]);
+            break;
+        }
         }
     }
+    switch (type) {
+    case 0: case 1: case 2: case 4: case 5:
+        y = oy - margin;
+        lineX = ox + 0x17;
+        nbPnlSprite(lineX, y + 0x16C, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(lineX, y + 0x181, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                    color, s->data->pnltex[1]);
+        nbPnlSprite(lineX, y + 0x196, 0xC5, 2, 1, 0x77, 0xC5, 2,
+                    color, s->data->pnltex[1]);
+        break;
+    case 3:
+        break;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispPanelSitaji);
-#endif
 
 void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
 {
