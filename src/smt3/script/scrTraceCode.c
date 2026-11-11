@@ -340,8 +340,8 @@ extern s32 itfMesMngValidateNext();
 extern s32 trm_210A00();
 extern s32 trm_210AF8();
 extern s32 func_00210B38();
-extern s32 fcl_214428();
-extern s32 fcl_214458();
+extern s32 fclSetFlagScript();
+extern s32 fclGetWorkValueScript();
 extern s32 func_00210B68();
 extern s32 func_00210B90();
 extern s32 nme_298698();
@@ -781,8 +781,8 @@ const scrCommandTable_t scrCommandTable[544] = {
     {trm_210A00, 2},
     {trm_210AF8, 1},
     {func_00210B38, 0},
-    {fcl_214428, 1},
-    {fcl_214458, 1},
+    {fclSetFlagScript, 1},
+    {fclGetWorkValueScript, 1},
     {func_00210B68, 0},
     {func_00210B90, 0},
     {nme_298698, 2},

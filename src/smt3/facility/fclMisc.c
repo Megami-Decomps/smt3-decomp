@@ -111,7 +111,7 @@ typedef struct
     /* 0x18 */ u8 *unk_18;
 } fclSceneObj_t;
 
-s32 fcl_213998(char *name, fclSceneObj_t *dst)
+s32 fclCopySceneObjValue(char *name, fclSceneObj_t *dst)
 {
     fclSceneObj_t *obj = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 9, name);
 
@@ -215,7 +215,7 @@ typedef struct
     /* 0x02 */ u16 item[0xA0];
 } fclItemList_t;
 
-void func_00213BB8(fclItemList_t *list)
+void fclCreateItemList(fclItemList_t *list)
 {
     s32 item;
 
@@ -255,7 +255,7 @@ s32 cmpItemOrder(u8 *a, u8 *b)
     return 0;
 }
 
-s32 func_00213CD8(u8 *list, s32 count, u8 value)
+s32 fclCompactList(u8 *list, s32 count, u8 value)
 {
     s32 kept = 0;
     s32 i;
@@ -503,7 +503,7 @@ void fclSetMessageVar_20743088(s8 Index, saddr_t pStr)
     itfMesMngSetVarImmediate(gMsgID, Index, pStr);
 }
 
-s8 fcl_214270(void)
+s8 fclGetMessageInvalid(void)
 {
     return gMsgInvFlag;
 }
@@ -529,7 +529,7 @@ extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
 
 extern void itfMesMngSetOffsetY1(s32 msgid, s32 y1);
 
-void fcl_2142F0(s32 x, s32 y)
+void fclSetMessagePos(s32 x, s32 y)
 {
     itfMesMngSetMesPosition(gMsgID, x * 16, y * 8);
     itfMesMngSetOffsetY1(gMsgID, -((0x15F - y) * 8));
@@ -580,13 +580,13 @@ s8 fclGetWorkValue(s8 index)
     return fclWorkValue[index];
 }
 
-s32 fcl_214428(void)
+s32 fclSetFlagScript(void)
 {
     fclFlags[scrGetIntPara(0)] = 1;
     return 1;
 }
 
-s32 fcl_214458(void)
+s32 fclGetWorkValueScript(void)
 {
     s32 index = scrGetIntPara(0);
 
