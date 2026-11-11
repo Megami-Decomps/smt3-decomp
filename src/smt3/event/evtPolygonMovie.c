@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "effect.h"
@@ -122,7 +123,7 @@ f32 evtHokanFloat(s32 hokan, f32 ratio, f32 f1, f32 f2);
 extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
 extern u8 dds3ScreenBlurFlag;
-extern u32 dds3LightParam[];
+extern dds3LightState_t dds3LightParam;
 extern pmdSceneFogTable_t evtSceneFogParam;
 extern dds3Effect_Blur_t evtBlur2Param;
 extern dds3Effect_PartialMultiBlurParam_t evtMultBlurParam;
@@ -768,7 +769,7 @@ void SFogFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
     }
     evtHokanSceneFog(hokan, ratio, &key1->fog, &key2->fog, &evtSceneFogParam.fog);
     dds3SetFogPara(0, evtSceneFogParam.fog.vec[1], evtSceneFogParam.fog.vec[0], evtSceneFogParam.fog.vec[2], evtSceneFogParam.fog.vec[3]);
-    dds3LightParam[12] = evtSceneFogParam.fog.color;
+    dds3LightParam.fog.color = evtSceneFogParam.fog.color;
 }
 
 void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)

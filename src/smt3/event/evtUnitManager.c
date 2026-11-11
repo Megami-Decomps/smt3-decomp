@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "event.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -32,13 +33,7 @@ enum EvtTargetInfoFlags {
     EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR = 0x8
 };
 
-/* The fallback ambient vector follows the four source pointers at +0x10. */
-typedef struct {
-    f32 *sources[4];
-    f32 ambient[4];
-} evtLightParams_t;
-
-extern evtLightParams_t dds3LightParam;
+extern dds3LightState_t dds3LightParam;
 
 void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame);
 
@@ -435,7 +430,7 @@ void UnitAnime(evtUnit_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR_B(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR_B(dds3LightParam.sources[0] + 4);
+            SDF_VU0_LOADVECTOR_B(&dds3LightParam.parallel[0]->v);
         }
         dds3RotationArc();
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -460,7 +455,7 @@ void UnitAnime(evtUnit_t *unit) {
         if (ownVector) {
             SDF_VU0_LOADVECTOR(target->direction);
         } else {
-            SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->v);
         }
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
     }
@@ -523,7 +518,7 @@ void UnitAnime(evtUnit_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR(target);
         } else {
-            SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
         }
         SDF_VU0_SCALEVECTOR_BITS(factor);
         SDF_VU0_ADDVECTOR();
@@ -542,7 +537,7 @@ void UnitAnime(evtUnit_t *unit) {
         } else if (ownVector) {
             SDF_VU0_LOADVECTOR(target->secondColor);
         } else {
-            SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
         }
         SDF_VU0_SCALEVECTOR_BITS(factor);
         SDF_VU0_ADDVECTOR();
@@ -566,7 +561,7 @@ void UnitAnime(evtUnit_t *unit) {
             if (ownVector) {
                 SDF_VU0_LOADVECTOR(target);
             } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
             }
             MMI_RGBA_PACK_UNIT(firstPacked, 128.0f);
             defaultFirst[0] = firstPacked;
@@ -576,7 +571,7 @@ void UnitAnime(evtUnit_t *unit) {
             if (ownVector) {
                 SDF_VU0_LOADVECTOR(target->secondColor);
             } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
             }
             MMI_RGBA_PACK_UNIT(secondPacked, 128.0f);
             defaultSecond[0] = secondPacked;
@@ -689,7 +684,7 @@ void GetBaseLightRGB(evtUnit_t *h) {
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(info);
     } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
     }
 }
 
@@ -713,7 +708,7 @@ void GetBaseAmbientRGB(evtUnit_t *h) {
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(info->secondColor);
     } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
     }
 }
 
@@ -731,7 +726,7 @@ void GetBaseLightDir(evtUnit_t *h) {
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(h->vec10);
     } else {
-                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
+                SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->v);
     }
 }
 

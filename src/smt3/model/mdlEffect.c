@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "libsdf.h"
 #include "model.h"
 #include "kernel.h"
@@ -196,14 +197,6 @@ typedef struct
     u32 gradientColors[4];
 } mdlTrackCreateParams_t;
 
-typedef struct
-{
-    f32 (*lights[4])[4];
-    f32 ambient[4];
-    u8 unk20[0x10];
-    u32 fogColor;
-} mdlLightParams_t;
-
 typedef void (*mdlOtRegFunc_t)(sdfGrOt_t *, sdfDrawTag_t *);
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -216,7 +209,7 @@ extern f32 sdfViewMatrix[16];
 
 extern u8 aViewEye[];
 
-extern mdlLightParams_t dds3LightParam;
+extern dds3LightState_t dds3LightParam;
 
 extern mdlDebugLight_t mdlDebugLightWork;
 
@@ -1006,10 +999,10 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
         state->pad = (mdlDebugPad_t *)(dds3PadButtonState + 0x10);
     }
     if (state->lights == NULL) {
-        state->lights = dds3LightParam.lights;
+        state->lights = (f32 (**)[4])dds3LightParam.parallel;
     }
     if (state->ambient == NULL) {
-        state->ambient = dds3LightParam.ambient;
+        state->ambient = (f32 *)&dds3LightParam.ambient;
     }
     state->packetList = dds3FontReqAllocDrawTag();
     if (state->editing == 0) {
@@ -1262,7 +1255,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            dds3DebugColorEditEx(&dds3LightParam.fogColor, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&dds3LightParam.fog.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
@@ -1289,7 +1282,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
                                                           (mdlDebugScaleWork.editing == 1 && mdlDebugScaleWork.selection == i) ? 6 : 0,
                                                           mdlDebugEntryTable[i].format, value)));
     }
-    mdlDebugTextBox(0x8680, 0x7C60, dds3LightParam.fogColor, mdlDebugScaleWork.selection - 4);
+    mdlDebugTextBox(0x8680, 0x7C60, dds3LightParam.fog.color, mdlDebugScaleWork.selection - 4);
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((mdlOtRegFunc_t)ot->regFunc)(ot, mdlDebugScaleWork.packetList); }
     return 0;
 }

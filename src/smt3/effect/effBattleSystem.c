@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdf_resource.h"
 #include "sdk_libgcc.h"
 #include "newbattle.h"
@@ -3434,12 +3435,6 @@ void eff_174E88(void *unused)
 #else
 INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
 #endif
-
-typedef struct {
-    sdf3DLight_t *parallel[4];
-    sdfVector4_t ambient;
-    sdf3DFogParam_t fog;
-} dds3LightState_t;
 
 extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);

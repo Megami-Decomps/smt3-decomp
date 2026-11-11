@@ -1,15 +1,10 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "basic.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
-typedef struct
-{
-    sdfVector4_t *sources[4];
-    sdfVector4_t ambient;
-} dds3SceneLightParam_t;
-
-extern dds3SceneLightParam_t dds3LightParam;
+extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3LightObjectAmbient, dds3LightParam, 0x10);
 extern void evtLinkLightObjectBasic(void *h, dds3Basic_t *light, s32 frame);
 extern void evtUnlinkLightObjectBasic(void *h, s32 frame);
@@ -165,7 +160,7 @@ s32 lightmainprocedure(dds3Basic_t *basic)
             SDF_VU0_LOADVECTOR(&data->Light.color);
             SDF_VU0_LOADVECTOR_B(&data->Ambient);
         }
-        SDF_VU0_STOREVECTOR(dds3LightParam.sources[0]);
+        SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[0]->color);
         SDF_VU0_STOREVECTOR_B(&dds3LightObjectAmbient);
     }
     lights[0] = &data->Light;
@@ -214,7 +209,7 @@ void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame)
     } else {
         data->Flag |= 2;
         data->SwitchFrame = SDF_FRAMES(frame);
-        SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
+        SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->color);
         MMI_RGBA_PACK_UNIT(lightColor, 128.0f);
         work[0].word = lightColor;
         data->BaseLightRGB = lightColor;

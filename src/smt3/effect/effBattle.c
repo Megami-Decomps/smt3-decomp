@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "effBattle.h"
 #include "nb.h"
@@ -96,11 +97,6 @@ typedef struct effBTLFieldFilter_t {
 
 extern effBTLFieldFilter_t effBTLFieldColorFilter;
 
-typedef struct effBTLLightParams_t {
-    f32 *sources[4];
-    f32 ambient[4];
-} effBTLLightParams_t;
-
 typedef struct fldResourceLight_t {
     u32 resv;
     u32 Flag;
@@ -177,7 +173,7 @@ extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *r
 extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
 extern void dds3UnlinkSceneLight(dds3Basic_t *basic);
 
-extern effBTLLightParams_t dds3LightParam;
+extern dds3LightState_t dds3LightParam;
 
 typedef f32 effBTLVector4_t[4];
 
@@ -853,7 +849,7 @@ void effBTLFieldColorEnd(void) {
 }
 
 void effBTLFieldLightDirectionSet(const f32 *pDir) {
-    SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, pDir);
+    SDF_VU0_COPYVECTOR(&dds3LightParam.parallel[0]->v, pDir);
 }
 
 void effBTLFieldLightAxisSet(const f32 *pAxis);
@@ -943,7 +939,7 @@ void effBTLFieldColorRun(void) {
 
     switch (effBTLFieldColorProcess) {
     case 1:
-        source = dds3LightParam.sources[0];
+        source = (f32 *)dds3LightParam.parallel[0];
         SDF_VU0_COPYVECTOR(effBTLSavedLight1, source + 4);
         SDF_VU0_COPYVECTOR(effBTLSavedLight0, source);
         SDF_VU0_COPYVECTOR(effBTLSavedAmbient, effBTLSceneAmbient);
@@ -965,9 +961,9 @@ void effBTLFieldColorRun(void) {
         effBTLFieldLight.AnimeType = 0;
         dds3SetLightObjectResoruce(data->light[1], &effBTLFieldLight);
         dds3LinkSceneLight(data->light[1], 0xC);
-        dds3LightParam.sources[0][4] = -0.73f;
-        dds3LightParam.sources[0][5] = 1.55f;
-        dds3LightParam.sources[0][6] = 0.24f;
+        dds3LightParam.parallel[0]->v.x = -0.73f;
+        dds3LightParam.parallel[0]->v.y = 1.55f;
+        dds3LightParam.parallel[0]->v.z = 0.24f;
         effBTLSkyFilterON(0x40, 0xC);
         effBTLFieldFilterON(abgr, 0xC);
         effBTLFieldColorProcess = 3;
@@ -977,9 +973,9 @@ void effBTLFieldColorRun(void) {
             break;
         }
         SetRotateMatrixAxis(-effBTLFieldLightAnimRotate, effBTLFieldLightAnimAxis);
-        SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
+        SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[0]->v);
         SDF_VU0_APPLYMATRIX();
-        SDF_VU0_STOREVECTOR(dds3LightParam.sources[0] + 4);
+        SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[0]->v);
         effBTLFieldLightAnimFrame++;
         break;
     case 4:
@@ -992,7 +988,7 @@ void effBTLFieldColorRun(void) {
         effBTLFieldLight.AmbientB = effBTLSavedAmbient[2];
         dds3SetLightObjectResoruce(data->light[1], &effBTLFieldLight);
         dds3LinkSceneLight(data->light[1], 0xC);
-        SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, effBTLSavedLight1);
+        SDF_VU0_COPYVECTOR(&dds3LightParam.parallel[0]->v, effBTLSavedLight1);
         effBTLSkyFilterOFF(0xC);
         effBTLFieldFilterOFF(0xC);
         effBTLFieldColorProcess = 5;
