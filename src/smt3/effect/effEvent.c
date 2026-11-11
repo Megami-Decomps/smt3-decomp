@@ -1895,7 +1895,7 @@ char effLabelScale[8] = "SCALE ";
 
 char effLabelRotate[8] = "ROTATE";
 
-void *D_0054F2B8[2] = { &evtUnityCalcArea, NULL };
+void *effRectangleBlurSetupCreateArgs[2] = { &evtUnityCalcArea, NULL };
 
 char effLabelBlur[5] = "BLUR";
 
@@ -1921,7 +1921,7 @@ char effLabelNumber[7] = "NUMBER";
 
 s8 dblurDone = 0;
 
-void *D_0054F308[2] = { &dblurParam2, NULL };
+void *filterDebugCreateArgs[2] = { &dblurParam2, NULL };
 
 char effLabelFilter[7] = "FILTER";
 

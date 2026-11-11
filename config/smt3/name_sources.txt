@@ -236,3 +236,9 @@
 0x002D96F8	std	inferred	newlib findfp.c static that fills a FILE (flags, file, cookie, read/write/seek/close); former name gcc2_compiled__2
 0x002D3990	malloc_extend_top	inferred	newlib mallocr.c static that grows the top chunk through _sbrk_r; DDS1/2 name; former name gcc2_compiled_
 0x0052BB38	impure_data	inferred	newlib impure.c static _reent that _impure_ptr points at; DDS1 0x0039BCE0, DDS2 0x0040EE60; former name D_0052BB38
+0x0052D6B0	tlbKernelEntries	inferred	kernelTlbEntry_t[13], tlbTable.kernelEntries, loaded by InitTLB32MB; DDS1 0x0039D860; former name D_0052D6B0
+0x0052D780	tlbDefaultEntries	inferred	kernelTlbEntry_t[18], tlbTable.defaultEntries; DDS1 0x0039D930; former name D_0052D780
+0x0052D8A0	tlbExtendedEntries	inferred	kernelTlbEntry_t[8], tlbTable.extendedEntries; DDS1 0x0039DA50; former name D_0052D8A0
+0x0052D920	tlbTable	inferred	kernelTlbTable_t InitTLB32MB reads (counts and entry array pointers); DDS1 0x0039DAD0; former name D_0052D920
+0x0054F2B8	effRectangleBlurSetupCreateArgs	inferred	void *[2] {&evtUnityCalcArea, NULL}, effRectangleBlurSetupRecord.param; DDS1 0x003BB0B0; former name D_0054F2B8
+0x0054F308	filterDebugCreateArgs	inferred	void *[2] {&dblurParam2, NULL}, filterDebugMenu.param; DDS1 0x003BB118; former name D_0054F308
