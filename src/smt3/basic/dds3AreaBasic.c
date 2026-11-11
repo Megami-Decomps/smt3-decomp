@@ -1,8 +1,6 @@
 #include "common.h"
 #include "basic.h"
 
-typedef s32 (*dds3BasicProc_t)(dds3Basic_t *basic);
-
 typedef struct dds3AreaBasicWorkData_t
 {
     dds3BasicArrayHandle_t *items[2];

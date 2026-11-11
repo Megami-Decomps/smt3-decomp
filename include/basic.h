@@ -20,16 +20,17 @@ typedef s32 (*dds3BasicControlProc_t)(dds3PoseSet_t *pose, dds3Basic_t *basic);
 /* Bodies not recovered yet: reached only through pointers. */
 struct effSpline_t;
 
+typedef s32 (*dds3BasicProc_t)(dds3Basic_t *basic);
+
 /* One vtable per basic type, indexed by dds3BasicFuncTablePtr[type].
- * constructor takes (basic, color) and returns 1 on success; the rest take the
- * basic. reserve1 and reserve2 are from the HD metadata, so the 24-byte size
- * is the one thing here not pinned by the binary. */
+ * Each takes the basic; constructor returns 1 on success. reserve1 and reserve2
+ * are from the HD metadata, so the 24-byte size is not pinned by the binary. */
 struct dds3BasicFunction_t
 {
-    void *constructor;
-    void *destructor;
-    void *mainprocuder;
-    void *drawprocuder;
+    dds3BasicProc_t constructor;
+    void (*destructor)(dds3Basic_t *basic);
+    dds3BasicProc_t mainprocuder;
+    dds3BasicProc_t drawprocuder;
     void *reserve1;
     void *reserve2;
 };
