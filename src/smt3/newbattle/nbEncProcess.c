@@ -602,8 +602,6 @@ zero:
     return 0;
 }
 
-/* NON_MATCHING: native 396-byte size; 41 of 99 words differ. */
-#ifdef NON_MATCHING
 extern datDevilAIData_t datDevilAIDataTable[];
 extern s32 nbSkillIsInRange(s32 skill, s32 type);
 
@@ -612,6 +610,7 @@ s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
     s16 skills[64];
     datUnitWork_t *work;
     s32 aiId;
+    s32 result;
     s32 count = 0;
     s32 i;
     s32 j;
@@ -628,23 +627,21 @@ s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step)
     } else {
         aiId = a->work->id;
         for (i = 0; i < 3; i++) {
-            datDevilAITbl_t *entry = datDevilAIDataTable[aiId].table[i];
-            for (j = 0; j < 5; j++, entry++) {
-                skill = entry->skill;
+            for (j = 0; j < 5; j++) {
+                skill = datDevilAIDataTable[aiId].table[i][j].skill;
                 if (skill != 0 && (skill & 0x8000) == 0 && nbSkillIsInRange(skill, step) != 0) {
                     skills[count++] = skill;
                 }
             }
         }
     }
+    result = -1;
     if (count != 0) {
-        return skills[dds3GetRandIntA(0, count)];
+        result = skills[dds3GetRandIntA(0, count)];
     }
-    return -1;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbFindBadCurseTarget);
-#endif
+
 
 s32 nbBadCurseStep3(nbActionProcessData_t *a)
 {
