@@ -1550,7 +1550,6 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
     fldRunTamaNext = fldRunTamaNext % 3;
 }
 
-/* NON_MATCHING: 165 of 230 words differ (first at +0x34). */
 #ifdef NON_MATCHING
 void fldRunTamaSe(void)
 {
@@ -1575,8 +1574,10 @@ void fldRunTamaSe(void)
         if (frame1.f[i] - 0.5f < now && now < frame1.f[i] + 0.5f) {
             dds3GetPosPoseSet(fldRunTama1Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
-            p2sdPlaySE(0x6F0006,
-                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            {
+                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
+                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+            }
             break;
         }
     }
@@ -1586,8 +1587,10 @@ void fldRunTamaSe(void)
         if (frame2.f[i] - 0.5f < now && now < frame2.f[i] + 0.5f) {
             dds3GetPosPoseSet(fldRunTama2Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
-            p2sdPlaySE(0x6F0006,
-                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            {
+                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
+                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+            }
             break;
         }
     }
@@ -1597,8 +1600,10 @@ void fldRunTamaSe(void)
         if (frame3.f[i] - 0.5f < now && now < frame3.f[i] + 0.5f) {
             dds3GetPosPoseSet(fldRunTama3Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
-            p2sdPlaySE(0x6F0006,
-                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            {
+                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
+                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+            }
             break;
         }
     }

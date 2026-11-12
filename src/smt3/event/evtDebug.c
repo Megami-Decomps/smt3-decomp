@@ -263,7 +263,10 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
         line = 2;
         rowIndex = 0;
         sceneWork = scene->workdata;
-        for (row = rows.rows; row->type != 0; row++) {
+        /* Index the real row aggregate to preserve its native loop/frame shape.
+         * Redundant loads/stores still differ; this remains non-matching C. */
+        for (; rows.rows[rowIndex].type != 0; rowIndex++) {
+            row = &rows.rows[rowIndex];
             row->count = 0;
             row->rowCount = 0;
             attr = 0;
@@ -309,7 +312,6 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
                 row->rowCount--;
             }
             line++;
-            rowIndex++;
         }
     }
     panelTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
@@ -331,7 +333,7 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
             }
         } else {
             delta = evtSceneDispState + 4;
-            *(volatile s32 *)&evtSceneDispState =
+            evtSceneDispState =
                 delta <= rows.rows[evtSceneDispTimer].count ? delta : evtSceneDispState;
         }
     }
@@ -350,14 +352,14 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
     if (dds3PadBitTable[21] & 2) {
         if (evtSceneDispState > 0) {
             delta = evtSceneDispState + 1;
-            *(volatile s32 *)&evtSceneDispState =
+            evtSceneDispState =
                 delta <= rows.rows[evtSceneDispTimer].count ? delta : evtSceneDispState;
         }
     }
     if (dds3PadBitTable[20] & 2) {
         if (evtSceneDispState > 0) {
             delta = evtSceneDispState - 1;
-            *(volatile s32 *)&evtSceneDispState = delta > 0 ? delta : evtSceneDispState;
+            evtSceneDispState = delta > 0 ? delta : evtSceneDispState;
         }
     }
     if (dds3PadBitTable[17] < 0 && scene != NULL) {

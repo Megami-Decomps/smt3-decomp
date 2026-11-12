@@ -87,3 +87,33 @@ and output filename lengths. Changing those lengths can change this old
 compiler's output, so an absolute-path diagnostic is not production proof.
 Further work needs evidence beyond the closed cursor/countdown controls and
 the unrelated already-studied TamaFree scheduling family.
+
+### Tama sound quotient reconstruction
+
+The guarded `fldRunTamaSe` draft now gives each sound block an ordinary signed
+32-bit `volume` local for the product divided by 128, before passing
+`volume / 2` to the unchanged sound call. Native code performs those two signed
+round-toward-zero divisions separately. The previous single expression let
+this compiler combine them into division by 256. The real quotient local
+restores the native 968-byte size from 920 bytes without constraints,
+volatility, extra memory accesses or a changed numeric operation.
+
+The target-active reconstruction improves from 63 matching instruction words
+(out of 230 emitted) to 162 matching instruction words out of 242 native words. It is still nonmatching:
+aggregate-copy scheduling and ordering, six quotient-allocation/order words
+per sound block, and target-active rodata ownership remain unresolved. All
+38 existing matched text functions remain exact in the qualified quotient
+context. This is not an exact owner or matching-credit promotion.
+
+The actual frame-window scans, strict comparisons, pose handoff, distance
+call, signed volume-table loads and first-match breaks are unchanged. Actual
+body callback fixtures pass 300,000 cases each at O0, O2 and UBSan, using the
+provider's bounded distance range and all three frame tables. Plain/dumped
+raw compiler assembly and objects agree in both production and SKIP contexts;
+the guarded-only source edit leaves both baseline production outputs byte
+identical. Assembly fallback remains active.
+
+The qualified first RTL dump already contains shift-by-eight lowering for the
+single expression, versus shift-by-seven and then shift-by-one for the scoped
+quotient. Thus the key distinction precedes instruction scheduling; the
+remaining allocation/order differences are separate.
