@@ -8861,14 +8861,13 @@ s32 campDrawStockCell(s32 color, s8 index, s8 row)
 
 extern s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Historical retained-draft check: three PCSX2 call vectors covered only the
+ * paths taken (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
                          s8 cursorMode, s8 detailMode, datUnitWork_t *unit,
                          cmpCursorSlot_t *cursor, s32 alpha)
 {
+    s32 drawX;
     s32 firstColor;
     s32 secondColor = color;
     s32 thirdColor = 0x80808080;
@@ -8895,20 +8894,23 @@ void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
     firstColor = fclBlendColor(firstColor, 0, alpha);
     secondColor = fclBlendColor(secondColor, 0, alpha);
     thirdColor = fclBlendColor(thirdColor, 0, alpha);
-    x += offset;
-    campDrawStatusRow1(x, y, firstColor, unit);
-    if (detailMode != 1) {
+    drawX = (s32)((u32)x + (u32)offset);
+    campDrawStatusRow1(drawX, y, firstColor, unit);
+    {
+    /* Keep the native post-call mode reload in its comparison register.
+     * This local constraint carries no value across a call. */
+    FAKEMATCH_ASM_REG(s32, detail, "$3") = detailMode;
+    FAKEMATCH_ASM_LIVE(detail);
+    if (detail != 1) {
         colors[0] = thirdColor;
         colors[1] = thirdColor;
         colors[3] = thirdColor;
-        cmpDrawStatusBadge(x, y, colors, unit->badstatus, 0x100);
-        campDrawStatusRow2(x, y, secondColor, unit);
-        campDrawStatusRow3(x, y, thirdColor, unit);
+        cmpDrawStatusBadge(drawX, y, colors, unit->badstatus, 0x100);
+        campDrawStatusRow2(drawX, y, secondColor, unit);
+        campDrawStatusRow3(drawX, y, thirdColor, unit);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockStatus);
-#endif
+}
 
 extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
                                 s8 cursorMode, s8 detailMode,
