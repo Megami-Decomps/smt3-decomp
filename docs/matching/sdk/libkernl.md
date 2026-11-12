@@ -489,18 +489,46 @@ qualified allocator hook, so a pass-level explanation remains open.
 
 ## sceOpen
 
-640 emitted bytes against 644 native bytes; 111 of 160 emitted words match,
-49 differ and four native bytes remain uncovered. Most differences exchange
-the saved registers holding the path/request and semaphore/reply across phases.
-The native successful tail also copies the slot index into a return scratch
-before waiting on the slot semaphore; ordinary source retains the slot directly.
+Matched all 644 native instruction bytes (161/161 words) as ordinary C.
+The successful completion tail preserves the real slot return value across
+`WaitSema`, then acquires the returned descriptor from the completion result
+before publishing it to the reserved entry. No register binding, memory
+constraint, volatility or provider ABI change was added.
 
-The variadic interface saves six remaining argument registers in eight-byte
-slots. As in the matched kernel formatters, the configured 2.9 compiler's
-`__builtin_next_arg` points after that save area; subtracting six `sizeof(long)`
-slots reads the first optional mode word. Native reads it unconditionally,
-including for two-argument callers. The graph caller declaration agrees with
-this interface; its calls are unchanged.
+The reused `accepted` scalar has two disjoint real roles: first the uncached
+acceptance word through its rejection test, then the successful slot return
+value. Qualified final expansion RTL uses pseudo 95 for the first definition
+(UID 339) and predicate (349), then overwrites it from the slot (443) before
+the table-lock wait (457) and returns it (489). Allocation maps that pseudo
+to `$17`; there is no read of its former value after replacement. This is
+actual shared-pseudo/lifetime evidence, not a register-number coincidence.
+
+The descriptor snapshot is taken after the table-lock wait. The final C source
+publishes that snapshot before updating `entry->active`, changing the real
+entry-pointer last-use/death relationship. The emitted instructions retain
+the native active load, completion load, OR and active store, with descriptor
+publication in the `SignalSema` delay slot. Earlier qualified scheduling
+selected descriptor publication before the active store. Scheduler rank
+weights can explain that ordering when priorities tie; numeric priorities
+and the deciding tie were not observed, so source order or ordinal rank alone
+is not claimed as a complete causal proof.
+
+The variadic interface is a nonportable reconstruction of the pinned EE 2.9
+ABI, not an ISO `va_arg` safety claim. The compiler explicitly saves incoming
+`$6` in its argument-save area before the first call. The native and C paths
+unconditionally read that slot's low 32 bits, including unspecified incoming
+register residue for two-argument callers. This is not a guaranteed supplied
+argument, zero value, or a claim that every receiver ignores it. The configured
+`__builtin_next_arg` base minus six `sizeof(long)` slots identifies this actual
+save location; no optional argument or initialization was invented. The exact-release
+compiler allocates and populates this register-save object (`MEM:BLK`), and its
+public EABI header uses the backward-address capture idiom. This establishes
+the narrow raw low-32-bit register snapshot contract, not a nonexistent
+optional argument. An earlier qualification hold based only on physical
+initialization was resolved by this general compiler-object evidence. The
+[2.9-ee-991111-01 source release](https://github.com/GirianSeed/ee-gcc/releases/download/src-2.9-ee-991111-01/ee-gcc-2.0.zip)
+corroborates this in `function.c`, `config/mips/mips.{c,h}` and
+`ginclude/va-mips.h`; it is not a claim that the compiler binary was rebuilt.
 
 The 0x418-byte request contains masked flags, mode, a bounded 0x400-byte path
 and the reserved slot index. Only an exhausted path copy forces the last byte
@@ -509,11 +537,22 @@ rejected reply leave the reservation intact. A negative completion releases
 the slot under its semaphore; success stores the native descriptor, ORs the
 original flags into the active word and returns the slot index. The uncached
 acceptance word is captured before releasing the filesystem semaphore.
+The completion handler copies the result before signaling, while the caller's
+result remains live through the wait. This preserves the native valid-resource
+and IOP completion/rejection protocol, including no late write after a rejected
+request. It does not establish universal safety for unchecked semaphore
+creation/wait failures or a misbehaving asynchronous peer.
 
-A condition-first bounded copy restores native loop peeling and most setup
-scheduling compared with the initial combined assignment/increment condition.
-Reading the mode after the copy worsens allocation. No synthetic scratch move
-or dependency was added for the final slot-return difference.
+The earlier 640-byte retained draft and the subsequent 644-byte two-word
+frontier were nonmatching checkpoints. The final ordinary descriptor-acquisition
+phase resolves those remaining words without adding a fictitious effect.
+Fresh final owner checking is 165 match, 0 differ (canonical 164/0). Production,
+`SKIP_ASM`, and retained modes each pass complete plain/`-da` assembly and ELF
+parity. All peer code/data contracts are preserved; the four shifted low-address
+references in `GetSystemCallTableEntry` were checked against their actual
+register-specific high-address producers and unchanged function targets.
+The full retail image is byte-identical. Generated-source/stale controls,
+draft/IRX checks and regression gates are recorded with the qualification.
 
 ## _sceFs_Rcv_Intr
 

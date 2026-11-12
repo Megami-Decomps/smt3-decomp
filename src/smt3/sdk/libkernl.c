@@ -2306,9 +2306,7 @@ typedef union fsRequest_t {
 } fsRequest_t;
 extern fsRequest_t fsRequest;
 
-/* NON_MATCHING: 640/644 bytes; opposite saved-register assignments
- * and final slot-return scheduling remain unresolved. */
-#ifdef NON_MATCHING
+/* Publish the returned descriptor after waiting for the I/O table lock. */
 s32 sceOpen(const char *name, s32 flags, ...)
 {
     rpcSemaParam param;
@@ -2321,6 +2319,7 @@ s32 sceOpen(const char *name, s32 flags, ...)
     s32 slot;
     s32 sema;
     s32 accepted;
+    s32 descriptor;
 
     _sceFsWaitS(0);
     if (fsInitialized == 0) {
@@ -2376,16 +2375,15 @@ s32 sceOpen(const char *name, s32 flags, ...)
         SignalSema(fsIobSema);
         return result;
     }
+    accepted = slot;
     WaitSema(fsIobSema);
+    descriptor = result;
+    entry->word0 = descriptor;
     entry->active |= flags;
-    entry->word0 = result;
     SignalSema(fsIobSema);
-    return slot;
+    return accepted;
 }
 
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceOpen);
-#endif
 
 s32 sceClose(s32 descriptor)
 {
