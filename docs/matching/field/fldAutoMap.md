@@ -291,3 +291,17 @@ combinations), the two `nameD`/`nameU` arm orders, `&&` against nested `if`s
 for the 0.99/0.01 range, three spellings of `x + 0x1EC - w`, the counter read
 before, inside and after the switch, and the handle and width as one local
 with casts.
+
+### Ordinary sequence-start intermediate refinement
+
+The retained `fldAutoMapSeqStart` draft now has 165 of 195 words matching at the
+native 780-byte extent (previously 148). Splitting the same left-associated
+Z-coordinate addition around the real up-vector copy restores its earlier
+aggregate-copy position. No compiler constraint or artificial access is needed.
+The remaining differences are floating-point allocation and closing store
+scheduling; the assembly fallback stays in place and matching credit is unchanged.
+All 36 matched peers are unchanged. Plain versus dump-enabled compiler output
+agrees in both production and SKIP_ASM contexts; guarded production output is
+byte-identical to baseline. Independent review and one million changed-block finite-float fixtures per
+configuration pass at O0, O2 and with undefined-behavior sanitization. This tests
+the changed arithmetic/copy block, not an emulator of the whole function.

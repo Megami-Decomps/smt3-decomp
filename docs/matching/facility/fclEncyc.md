@@ -422,3 +422,45 @@ allocated sections and raw relocations agree, but non-file symbols do not:
 labels renumber and undefined D_003309E0/F0 become size sixteen instead of
 zero. No whole-object-contract identity or hooked compiler-decision claim
 is made. Full integration and retail gates remain required for promotion.
+
+
+### DrawReadMainHelp retained source advance (2026-11-12)
+
+The guarded ordinary-C draft now emits the native 1344 bytes, with 332 of
+336 words matching, versus 1328 bytes and 54 matching words before this pass.
+It remains `NON_MATCHING` with its production assembly fallback and earns no
+matching credit.
+
+Native rewrites the second rectangle's X coordinate at 0x0021DAFC before
+the third sprite call for help panel zero. The prior draft left that value
+in the escaping position array across the preceding callback. Restoring
+`pos[1].x = x + 0x1960` reproduces the actual store and its repeated scalar
+consumer. The providers currently read rather than mutate the positions;
+this is a native-access/source-contract correction, not a claimed game bug.
+
+Each panel now captures its actual signed alpha after allocation, tag
+initialization and position reads, before initializing the color array.
+Separate block-local alpha values express the disjoint real lifetimes. All
+other partial array writes, texture reloads, calls and ordering-table
+registration remain unchanged. No new constraint, qualifier, type, flag or
+fabricated consumer is used.
+
+The four remaining differences are a local scheduling swap in the second
+panel. Qualified stock compiler dumps show alpha load UID262, pointer reuse
+UID341, UV-component store UID285 and coordinate calculation UID491. The
+store has an anti-dependency on the alpha load; the pointer reuse also
+follows that load. Native instead places the store and coordinate calculation
+before the load and pointer reuse. This describes the measured compiler
+output, not an assertion about historical source spelling. Moving the UV
+initialization earlier changes allocation elsewhere; narrow alpha type and
+block controls are inert, and a live-alpha read regresses output. These
+controls are not retained.
+
+Complete owner checks preserve all 118 matched peers and owned data.
+Baseline versus retained production/SKIP raw assembly and objects agree;
+plain versus stock diagnostic output agrees in both contexts for the
+target-active investigative body. Independent actual-body tests use a separate
+sprite-call oracle and pass 200,000 cases each at O0, O2 and UBSan. Fixtures
+include callback mutation of work, positions, UV and colors; removing the
+position rewrite or moving alpha capture before allocation is rejected.
+These are adversarial model tests, not retail execution.

@@ -3810,14 +3810,16 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
     s32 y;
 
     if (work->help[1].alpha > 0) {
+        s32 alpha;
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
         x = FCL_ENCYC_DRAWN(work->help[1].x);
         y = FCL_ENCYC_DRAWN(work->help[1].y);
+        alpha = FCL_ENCYC_DRAWN(work->help[1].alpha);
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
-        color.components[3] = FCL_ENCYC_DRAWN(work->help[1].alpha);
+        color.components[3] = alpha;
         pos[0].x = x; pos[0].y = y;
         pos[1].x = x + 0xC90; pos[1].y = y + 0xF0;
         itfMiscDrawSpritePrim(pos, fclEncycHelpPanelUv, &color, 0xFFFFF0,
@@ -3828,14 +3830,16 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         D_002F67F8.regFunc(&D_002F67F8, tag);
     }
     if (work->help[0].alpha > 0) {
+        s32 alpha;
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
         x = FCL_ENCYC_DRAWN(work->help[0].x);
         y = FCL_ENCYC_DRAWN(work->help[0].y);
+        alpha = FCL_ENCYC_DRAWN(work->help[0].alpha);
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
-        color.components[3] = FCL_ENCYC_DRAWN(work->help[0].alpha);
+        color.components[3] = alpha;
         uv.components[0] = 0x930; uv.components[1] = 0x1E0;
         uv.components[2] = 0xFD0; uv.components[3] = 0x430;
         pos[0].x = x; pos[0].y = y;
@@ -3845,6 +3849,7 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
         uv.components[0] = 0xFC0;
         pos[0].x = x + 0x6A0;
+        pos[1].x = x + 0x1960;
         itfMiscDrawSpritePrim2(pos, &uv, &color, 0xFFFFF0, 0, tag);
         uv.components[0] = 0x6C0; uv.components[1] = 0x660;
         uv.components[2] = 0x880; uv.components[3] = 0x7F0;
