@@ -130,6 +130,7 @@ GetViewModeKey	facility/fclEncyc	0x1D4	117 of 117 words match	docs/matching/faci
 CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/facility/fclEncyc.md	245
 InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	272
 DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	372
+DrawReadMainHelp	facility/fclEncyc	0x540	336 of 336 words	docs/matching/facility/fclEncyc.md	469
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	75

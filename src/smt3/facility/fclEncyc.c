@@ -3798,7 +3798,6 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
 
 extern itfColor_t fclEncycMainHelpOverlayUv;
 
-#ifdef NON_MATCHING
 void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
 {
     fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
@@ -3831,11 +3830,14 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
     }
     if (work->help[0].alpha > 0) {
         s32 alpha;
+        s16 *alphaField;
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
         x = FCL_ENCYC_DRAWN(work->help[0].x);
         y = FCL_ENCYC_DRAWN(work->help[0].y);
-        alpha = FCL_ENCYC_DRAWN(work->help[0].alpha);
+        /* Keep the final alpha read through its actual signed-halfword field. */
+        alphaField = &work->help[0].alpha;
+        alpha = FCL_ENCYC_DRAWN(*alphaField);
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
@@ -3889,9 +3891,6 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         D_002F67F8.regFunc(&D_002F67F8, tag);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
-#endif
 
 void InitializeDebug_fclEncyc(void)
 {

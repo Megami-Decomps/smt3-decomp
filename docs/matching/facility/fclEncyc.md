@@ -426,10 +426,10 @@ is made. Full integration and retail gates remain required for promotion.
 
 ### DrawReadMainHelp retained source advance (2026-11-12)
 
-The guarded ordinary-C draft now emits the native 1344 bytes, with 332 of
-336 words matching, versus 1328 bytes and 54 matching words before this pass.
-It remains `NON_MATCHING` with its production assembly fallback and earns no
-matching credit.
+At this historical retained-source checkpoint, the guarded ordinary-C draft
+emitted the native 1344 bytes, with 332 of 336 words matching, versus 1328
+bytes and 54 matching words before that pass. It remained `NON_MATCHING`
+with its production assembly fallback and earned no matching credit then.
 
 Native rewrites the second rectangle's X coordinate at 0x0021DAFC before
 the third sprite call for help panel zero. The prior draft left that value
@@ -464,3 +464,60 @@ sprite-call oracle and pass 200,000 cases each at O0, O2 and UBSan. Fixtures
 include callback mutation of work, positions, UV and colors; removing the
 position rewrite or moving alpha capture before allocation is rejected.
 These are adversarial model tests, not retail execution.
+
+
+## DrawReadMainHelp (facility/fclEncyc, 0x540)
+
+Ordinary C matches all 336 of 336 words at the native 1,344-byte size.
+
+The final second-panel alpha read uses a local `s16 *` pointing to the existing
+`work->help[0].alpha` field. Retail reads that signed halfword at work+0x6C.
+The work allocation and union layout are unchanged; the overlapping view's idle
+timer is at +0x6E, not the alpha field. The pointer is initialized immediately
+before the original alpha observation, after the existing Y interpolation.
+`FCL_ENCYC_DRAWN(*alphaField)` passes the same field address and signed value to
+the interpolation hook. There is no cast, `restrict`, new constraint, extra read,
+ABI change, or access moved across a callback.
+
+The prior retained body was 1,344 bytes with four differing words. Qualified
+stock EE2.96 dumps show its last alpha load (UID 262, HI alias set 0) as an anti-dependency
+of the UV store (UID 285, SI alias set 2) before allocation. The exact compiler's
+`lang_get_alias_set` walks component/array expressions and returns alias set 0 when a
+component's base is a union. Its disjoint-alias test cannot reject a pair containing
+alias set 0, although other address and memory-dependence tests still apply.
+
+A broader pointer to the existing `help` array changed the alpha alias to11 and
+removed that recorded edge, but regressed to 1,348 bytes. The narrow field-pointer
+form reproduces all 336 target words in each of the six qualified mode/dump
+outputs. Its final production dumps show the final alpha load as UID 265,
+`mem:HI(work85+108)` with alias set 11, while the earlier alpha condition retains
+`mem/s:HI(work85+108)` with alias set 0. The UV store is UID 288, `mem/s:SI(frame+16)`
+with alias set 2; its pre-allocation dependency list no longer includes the final
+alpha load. Global allocation retains the original work base in hard register 17
+and the +108 displacement, unlike the broader array-pointer control's +12.
+
+This verifies a narrower expression changes the recorded dependence without
+changing the work-base address construction. It does not isolate alias IDs as
+the sole cause: the load's RTL `/s` memory flag also changes, and the compiler
+has additional address/dependence tests. No final scheduler tie-break is inferred
+from this metadata. Historical early-UV, alpha-lifetime and provider/return
+controls remain distinct; missing older private source is not evidence of novelty.
+
+Fresh complete-owner checks pass: canonical 118 match, 0 differ and final
+119 match, 0 differ, including owned data. Baseline and final each pass strict
+plain/stock-dump whole-assembly and entire-ELF parity in production, SKIP_ASM
+and retained-C modes. All 121/118/121 peer contracts and allocated data are
+preserved, resolving the four SKIP calls that change from named external
+references to the same locally defined target. No unknown address fields are
+masked as equality. The target is compiler-owned in the production object and
+all six final contexts match its literal native code.
+
+Fresh generated-source/stale-negative checks, all 150 draft contexts and their
+controls, seven IRX syntax checks, tooling regressions, and full 4,551,696-byte
+literal retail equality pass; the activated incremental build does no work.
+An initial canonical-owner/production check ran before normalized assembly
+includes were ready and failed. Those failures are retained; after generation
+and readers finished, only the missing baseline evidence was rerun successfully.
+The final target never includes its fallback, which is retained solely for the
+canonical comparison. Successful final production inputs were already complete
+and hash-bound before their readers started.

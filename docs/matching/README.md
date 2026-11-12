@@ -20,8 +20,8 @@ both native and emitted sizes when they differ.
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
 | 10 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
+| 10 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
-| 9 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 8 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
