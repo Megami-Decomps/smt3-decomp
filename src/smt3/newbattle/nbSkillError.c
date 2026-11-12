@@ -211,7 +211,7 @@ extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 le
 
 
 
-extern s32 nbFindStockSkillError(void);
+extern s32 __attribute__((pure)) nbFindStockSkillError(void);
 
 extern s32 evtBitCheck(s32 no);
 
@@ -377,8 +377,6 @@ s32 nbDispSkillErrorMessage(s32 err)
     }
 }
 
-/* NON_MATCHING: 1 of 18 words differ (first at +0x14). */
-#ifdef NON_MATCHING
 s32 nbCheckBattleSkillError1(s32 nskill)
 {
     if (nskill < 0x33) {
@@ -390,9 +388,6 @@ s32 nbCheckBattleSkillError1(s32 nskill)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError1);
-#endif
 
 extern s32 cmpAnyButtonGuideActive(datUnitWork_t **list, s32 count);
 extern s32 cmpButtonGuideShowDone(datUnitWork_t **list, s32 count);

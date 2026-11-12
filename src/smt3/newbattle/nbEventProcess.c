@@ -238,7 +238,7 @@ extern nbEventEntry_t nbEventEntryTable[];
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern s32 nbFindStockSkillError(void);
+extern s32 __attribute__((pure)) nbFindStockSkillError(void);
 
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *data, void *pos, void *rot);
 
@@ -528,7 +528,7 @@ void nbInitEventProcess(nbMainProcessData_t *data)
     data->eventproc = id;
 }
 
-s32 nbFindStockSkillError(void)
+s32 __attribute__((pure)) nbFindStockSkillError(void)
 {
     datUnitWork_t *w;
     fldAnahoriAkuma_t *a;

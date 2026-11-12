@@ -80,6 +80,7 @@ both native and emitted sizes when they differ.
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
+| 2 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbCameraProcess | [newbattle/nbCameraProcess.md](newbattle/nbCameraProcess.md) |
@@ -115,7 +116,6 @@ both native and emitted sizes when they differ.
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 1 | newbattle/nbSound | [newbattle/nbSound.md](newbattle/nbSound.md) |
-| 1 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
