@@ -219,7 +219,8 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 
 extern char nbBgmStopFormat[];
 
-typedef struct { s32 step; s32 weight; } nbBadCurseEntry_t;
+/* The native table is ten rows of two signed 32-bit values. */
+typedef s32 nbBadCurseEntry_t[2];
 
 extern nbBadCurseEntry_t nbBadCurseTable[];
 
@@ -827,7 +828,7 @@ s32 nbGetBadCurseStep(nbActionProcessData_t *a)
 
     total = 0;
     for (i = 0; i < nbBadCurseTimer; i++) {
-        total += nbBadCurseTable[i].weight;
+        total += nbBadCurseTable[i][1];
     }
     if (total == 0) {
         return -1;
@@ -835,27 +836,22 @@ s32 nbGetBadCurseStep(nbActionProcessData_t *a)
     r = dds3GetRandIntA(0, total);
     sum = 0;
     for (i = 0; i < nbBadCurseTimer; i++) {
-        if (nbBadCurseTable[i].weight != 0) {
-            sum += nbBadCurseTable[i].weight;
+        if (nbBadCurseTable[i][1] != 0) {
+            sum += nbBadCurseTable[i][1];
             if (r < sum) {
-                return nbBadCurseTable[i].step;
+                return nbBadCurseTable[i][0];
             }
         }
     }
     return 9;
 }
 
-/* NON_MATCHING: 2 of 11 words differ (first at +0x14). */
-#ifdef NON_MATCHING
 void nbSetBadCurseTimer(s32 step, s32 weight)
 {
-    nbBadCurseTable[nbBadCurseTimer].step = step;
-    nbBadCurseTable[nbBadCurseTimer].weight = weight;
+    nbBadCurseTable[nbBadCurseTimer][0] = step;
+    nbBadCurseTable[nbBadCurseTimer][1] = weight;
     nbBadCurseTimer++;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbSetBadCurseTimer);
-#endif
 
 extern u32 nbGetBadStat(s32 formindex);
 extern void nbSetBadCurseTimer(s32 step, s32 weight);
@@ -924,7 +920,7 @@ void nbInitBadCurseState(nbActionProcessData_t *a)
         }
     }
     for (i = 0; i < nbBadCurseTimer; i++) {
-        printf(nbBadCurseDebugFormat, nbBadCurseTable[i].step, nbBadCurseTable[i].weight);
+        printf(nbBadCurseDebugFormat, nbBadCurseTable[i][0], nbBadCurseTable[i][1]);
     }
 }
 
@@ -981,8 +977,8 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
         if (step >= 0 && result != 0) {
             for (i = 0; i < nbBadCurseTimer; i++) {
                 entry = &nbBadCurseTable[i];
-                if (entry->step == step) {
-                    entry->weight = 0;
+                if ((*entry)[0] == step) {
+                    (*entry)[1] = 0;
                     break;
                 }
             }

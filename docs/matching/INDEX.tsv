@@ -283,6 +283,7 @@ SelectMotData	newbattle/nbDebugProcess	0x434	269 of 269 words match	docs/matchin
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174	80 of 93 words match	docs/matching/newbattle/nbEncProcess.md	3
 nbFindBadCurseTarget	newbattle/nbEncProcess	0x18C		docs/matching/newbattle/nbEncProcess.md	31
+nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C		docs/matching/newbattle/nbEncProcess.md	65
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
 RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3

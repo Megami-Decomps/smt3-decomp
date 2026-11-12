@@ -61,3 +61,21 @@ The remaining 41 word differences include saved-register choices, the skill
 field displacement, the outer loop's two native address inductions and the
 return-tail shape. No register constraints, artificial arithmetic expansion
 or cursor outside the actual typed subobjects is justified by this residual.
+
+## nbSetBadCurseTimer (newbattle/nbEncProcess, 0x2C)
+
+The native 80-byte table is represented consistently as ten rows of two
+signed 32-bit values. A row is now an actual `s32[2]`, with step at `[0]`
+and weight at `[1]`; selector, logging and retained dispatcher accesses use
+the same representation. No cast, constraint, changed bound or new access
+is introduced. The count still exposes only fully initialized prefix rows.
+
+In the complete current owner, this ordinary representation changes the two
+remaining setter instructions and reproduces all eleven native words. The
+44-byte function excludes the following four-byte alignment nop. Complete
+owner checks report 24 match, 0 differ. All production and retained peers,
+including `nbFindBadCurseTarget` and the guarded `nbApplyBadCurse`, retain
+their instruction and ordered relocation contracts. Plain and stock-dump
+assembly and raw ELF output agree in all four checked macro contexts.
+This is a measured reconstruction, not evidence of the original source
+spelling or a claim about an unobserved compiler pass.

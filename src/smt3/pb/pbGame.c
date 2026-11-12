@@ -167,7 +167,7 @@ extern pbProcHandle_t *blockDB;
 
 extern u32 current_char;
 
-extern f32 pbDirVectorTable[];
+extern f32 pbDirVectorTable[][3];
 
 extern s32 pbPopRecord(pbProcHandle_t *p, pbProcHandle_t **c, pbProcHandle_t *blkDB);
 
@@ -1045,8 +1045,8 @@ s32 moveChar(dds3ProcessID_t *id) {
     u32 step;
     if (work->step < SDF_FRAMES(4)) {
         s32 dir = work->dir;
-        pbMoveMyCharcter(mychar[current_char], pbDirVectorTable[dir * 3] * SDF_FRAME_STEP(work->speed),
-                         pbDirVectorTable[dir * 3 + 2] * SDF_FRAME_STEP(work->speed));
+        pbMoveMyCharcter(mychar[current_char], pbDirVectorTable[dir][0] * SDF_FRAME_STEP(work->speed),
+                         pbDirVectorTable[dir][2] * SDF_FRAME_STEP(work->speed));
     }
     if (pbCharacterTable[pbMapWork->charIndex] != NULL) {
         pbCharacterTable[pbMapWork->charIndex]();
@@ -1118,27 +1118,22 @@ void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     }
 }
 
-/* NON_MATCHING: 30 of 31 words, 124 bytes against retail's 140; retail holds the delta row in three pointer copies and materialises the -1 return late. */
-#ifdef NON_MATCHING
 s32 moveBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
-    if (work->step >= SDF_FRAMES(4)) {
+    u32 step = work->step;
+    if (step < SDF_FRAMES(4)) {
+        s32 index = work->index;
+        pbGroupData_t *obj = work->block;
+        obj->x = obj->x + SDF_FRAME_STEP(pbDirVectorTable[index][0]);
+        obj->y = obj->y + SDF_FRAME_STEP(pbDirVectorTable[index][1]);
+        obj->z = obj->z + SDF_FRAME_STEP(pbDirVectorTable[index][2]);
+    } else {
         return -1;
     }
-    {
-        f32 *delta = &pbDirVectorTable[work->index * 3];
-        pbGroupData_t *obj = work->block;
-        obj->x = obj->x + SDF_FRAME_STEP(delta[0]);
-        obj->y = obj->y + SDF_FRAME_STEP(delta[1]);
-        obj->z = obj->z + SDF_FRAME_STEP(delta[2]);
-    }
-    work->step = work->step + 1;
+    work->step = step + 1;
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", moveBlock);
-#endif
 
 /* NON_MATCHING: 46 of 77 words, 308 bytes against retail's 324; the entry array is hoisted out of the loop retail reloads it in. */
 #ifdef NON_MATCHING

@@ -328,3 +328,19 @@ type warnings; this is not a strict-clean claim.
 Keep the canonical table declaration and fallback. Further investigation should
 explain the observed operand-order/copy boundary without regressing `moveChar`,
 rather than repeat generic pointer, snapshot or register sweeps.
+
+### Scalar-row reconstruction (2026-11-12)
+
+The displacement table now has actual `f32[3]` rows, consistently used by
+`moveBlock` and `moveChar`. Its five native rows retain twelve-byte stride
+and component offsets 0/4/8; the trailing four zero bytes remain padding.
+No vector-struct overlay, alignment promise, extra row or constraint is used.
+
+`moveBlock` captures the real unsigned step once, uses the native less-than
+movement guard, and updates the step at the shared successful tail. Out-of-range
+steps still return -1 without moving or incrementing. Direct accesses to the
+three components reproduce the complete native 140-byte function, while
+`moveChar` keeps its native 196 bytes. The complete owner reports 69 match,
+0 differ. These paired source/output observations explain the useful row
+representation; they do not establish original spelling or an unobserved
+compiler-pass mechanism.
