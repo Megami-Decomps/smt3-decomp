@@ -94,6 +94,57 @@ generated-source and stale controls, guarded EE and IRX checks, regressions,
 full retail checksum and literal byte comparison pass; the next build is a
 no-op. This adds one SDK function and 176 code bytes, with no game-code credit.
 
+## sceSifCallRpc (sdk/libkernl, 492 bytes)
+
+123 of 123 words match in ordinary C. The client allocates and populates a
+request, performs the selected cache writebacks, and sends it either
+asynchronously or through the native semaphore wait/delete path. Allocation,
+semaphore-creation and send failures retain their distinct return values and
+cleanup order. The two asynchronous response-mode stores and common success
+exit preserve the native control-flow shape without a compiler constraint.
+
+The request pool retains its 64-byte records. Its common 32-byte header has
+actual packet/client address fields, unsigned flags and sequence, followed by
+the overlapping command payload. Every header consumer uses the same native
+offsets and operations. Incoming routing addresses remain opaque values that
+are echoed, not newly dereferenced. The response pools and incoming bind
+prefix are unchanged. Capturing the client's server value before publishing
+the client address preserves the native acquisition order.
+
+The word-array draft emitted 484 bytes; a common raw header and typed payload
+emitted 480. Explicit response stores and cleanup/success joins restored the
+492-byte extent but left two adjacent stores reversed. Qualified stock SDK
+compiler dumps first show that reversal in the initial scheduling pass. A
+verbose observation preserves complete output and shows equal instruction
+priorities, with extra store dependencies involving routing fields represented
+as integer words; it does not prove a particular scheduler tie-break. Truthful
+pointer fields fix that pair, and the short server snapshot fixes the resulting
+load/store pair. No register binding, empty operand, volatile RAM, instruction
+replay or changed production compiler flag remains.
+
+Independent source/native review accepts the final representation under the
+pinned EE32 ABI and valid live RPC objects. The native semaphore descriptor
+initializes only its initial and maximum counts. This reconstruction preserves
+that inherited syscall-contract uncertainty without inventing initialization
+of the other fields or claiming wider kernel validity. Exact output does not
+establish the original Sony source spelling.
+
+Fresh owner checking reports 164 match, 0 differ. All 363 production,
+163 SKIP_ASM and 167 retained-C peer contracts and owned data are preserved.
+Changed local references resolve to their actual function and interior offset;
+the eleven remaining low-address fields are independently paired with their
+actual high-register definitions, including repeated-low cases. All six fresh
+target objects resolve to the literal 492 retail bytes.
+
+Strict production, SKIP_ASM and retained-C plain/dump pairs agree across
+complete assembly and object bytes after only the exact generated source
+filename is normalized. The current canonical baselines are reused only with
+verified source, header, configuration, generated-fallback and compiler/runtime
+closure. Fresh generated-source/stale controls, strict guarded EE and seven
+IRX checks, regressions, literal full retail comparison, checksums and a
+subsequent no-op build pass. This adds one SDK function and 492 code bytes,
+excluding four alignment bytes; game-code coverage is unchanged.
+
 ## sceSifAddCmdHandler (sdk/libkernl, 0x2C)
 
 11 of 11 words match, 44 bytes. The command's sign selects the existing
