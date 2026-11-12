@@ -609,9 +609,9 @@ void calcCamDirLock(void) {
     nearPoint.x = fldGlobalBase.x;
     nearPoint.y = fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight;
     nearPoint.z = fldGlobalBase.z;
-    nearPoint.x = fldCamEye[0] + (nearPoint.x - fldCamEye[0]) * SDF_FRAME_DECAY(0.5f);
-    nearPoint.y = fldCamEye[1] + (nearPoint.y - fldCamEye[1]) * SDF_FRAME_DECAY(0.5f);
-    nearPoint.z = fldCamEye[2] + (nearPoint.z - fldCamEye[2]) * SDF_FRAME_DECAY(0.5f);
+    nearPoint.x = fldCamEye[0] + (nearPoint.x - fldCamEye[0]) * SDF_FRAME_FRACTION(0.5f);
+    nearPoint.y = fldCamEye[1] + (nearPoint.y - fldCamEye[1]) * SDF_FRAME_FRACTION(0.5f);
+    nearPoint.z = fldCamEye[2] + (nearPoint.z - fldCamEye[2]) * SDF_FRAME_FRACTION(0.5f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &nearPoint);
     /* Retail keeps the reference XYZ setup at +0x10 although this mode has
      * no collision query. calcCamNormal uses this same setup as a live base. */
@@ -633,9 +633,9 @@ void calcCamDirLock(void) {
         fldCamDist = fldCamDirLock = 0.0f;
     }
     dds3SetPosPoseSet(control->handle, &farPoint);
-    farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.5f);
-    farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.5f);
-    farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.5f);
+    farPoint.x = fldCamTarget[0] + (farPoint.x - fldCamTarget[0]) * SDF_FRAME_FRACTION(0.5f);
+    farPoint.y = fldCamTarget[1] + (farPoint.y - fldCamTarget[1]) * SDF_FRAME_FRACTION(0.5f);
+    farPoint.z = fldCamTarget[2] + (farPoint.z - fldCamTarget[2]) * SDF_FRAME_FRACTION(0.5f);
     dds3SetPosPoseSet(control->handle, &farPoint);
     SDF_VU0_COPYVECTOR(fldCamEye, &nearPoint);
     SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
@@ -786,9 +786,9 @@ void fldEventUpdateEx_Unity_2(void)
     point.w = 1.0f;
     memset((void *)&base, 0, sizeof(base));
     base.w = 1.0f;
-    eye.x = fldCamEye[0] + (fldGlobalBase.x - fldCamEye[0]) * SDF_FRAME_DECAY(0.5f);
-    eye.y = fldCamEye[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - fldCamEye[1]) * SDF_FRAME_DECAY(0.125f);
-    eye.z = fldCamEye[2] + (fldGlobalBase.z - fldCamEye[2]) * SDF_FRAME_DECAY(0.5f);
+    eye.x = fldCamEye[0] + (fldGlobalBase.x - fldCamEye[0]) * SDF_FRAME_FRACTION(0.5f);
+    eye.y = fldCamEye[1] + (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex].eyeHeight - fldCamEye[1]) * SDF_FRAME_FRACTION(0.125f);
+    eye.z = fldCamEye[2] + (fldGlobalBase.z - fldCamEye[2]) * SDF_FRAME_FRACTION(0.5f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     dds3GetTMPoseSet(unit->handle);
     target.x = fldGlobalBase.campos.x;
@@ -905,9 +905,9 @@ void fldEventUpdateEx_Unity_2(void)
         target.y = y * inverse + by * blend;
     }
     dds3SetPosPoseSet(control->handle, &target);
-    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.125f);
-    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.125f);
-    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.125f);
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_FRACTION(0.125f);
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_FRACTION(0.125f);
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_FRACTION(0.125f);
     dds3SetPosPoseSet(control->handle, &target);
     SDF_VU0_COPYVECTOR(fldCamEye, &eye);
     SDF_VU0_COPYVECTOR(fldCamTarget, &target);
@@ -1123,16 +1123,16 @@ void fldCamUpdateChase(void) {
     eye.x = fldGlobalBase.x - sdfSin(fldCamOrbitAngle * 3.14f / 180.0f) * 256.0f;
     eye.y = fldGlobalBase.y - 200.0f + fldCamPadHeight;
     eye.z = fldGlobalBase.z - sdfCos(fldCamOrbitAngle * 3.14f / 180.0f) * 256.0f;
-    eye.x = fldCamEye[0] + (eye.x - fldCamEye[0]) * SDF_FRAME_DECAY(0.0625f);
-    eye.y = fldCamEye[1] + (eye.y - fldCamEye[1]) * SDF_FRAME_DECAY(0.0625f);
-    eye.z = fldCamEye[2] + (eye.z - fldCamEye[2]) * SDF_FRAME_DECAY(0.0625f);
+    eye.x = fldCamEye[0] + (eye.x - fldCamEye[0]) * SDF_FRAME_FRACTION(0.0625f);
+    eye.y = fldCamEye[1] + (eye.y - fldCamEye[1]) * SDF_FRAME_FRACTION(0.0625f);
+    eye.z = fldCamEye[2] + (eye.z - fldCamEye[2]) * SDF_FRAME_FRACTION(0.0625f);
     dds3CameraObjectBasicGetCameraTM(control->handle, &eye);
     target.x = fldGlobalBase.x;
     target.y = fldGlobalBase.y - 200.0f;
     target.z = fldGlobalBase.z;
-    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_DECAY(0.0625f);
-    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_DECAY(0.0625f);
-    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_DECAY(0.0625f);
+    target.x = fldCamTarget[0] + (target.x - fldCamTarget[0]) * SDF_FRAME_FRACTION(0.0625f);
+    target.y = fldCamTarget[1] + (target.y - fldCamTarget[1]) * SDF_FRAME_FRACTION(0.0625f);
+    target.z = fldCamTarget[2] + (target.z - fldCamTarget[2]) * SDF_FRAME_FRACTION(0.0625f);
     dds3SetPosPoseSet(control->handle, &target);
     node = control->handle;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
