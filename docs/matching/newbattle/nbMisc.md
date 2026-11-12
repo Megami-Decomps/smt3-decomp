@@ -145,3 +145,38 @@ passed 501,575 cases in both optimized and ASan+UBSan builds. Coverage includes
 zero, decimal boundaries, maximum `u32`, and signed alignment extremes. Portable
 signed-coordinate tests keep the initial subtraction and every x increment in
 range; no claim is made about defined ISO C behavior outside that range.
+
+### nbSetNormalSkill0 (retained nonmatching draft, native 360 bytes)
+
+The retained C now models the native selection as a switch with initialized
+selected-entry pointers and a success flag. Command zero selects normal skill
+zero and calls `nbHatudoCheckSkill(work, 0x130)` before setting its target type.
+Command one selects only indices 0xA4 through 0xA7. Other commands and indices
+perform no writes or print call. The success flag guards the real attribute,
+count and animation updates; it is not a dummy matching dependency.
+
+With the draft enabled in isolation, the emitted extent improves from 300 to
+360 bytes and 48 native words match out of 90. This is not an exact match and adds
+no matching credit. Residual differences include table-address reuse and
+allocation, range-test lowering, branch placement and store scheduling. The
+production assembly fallback remains unchanged.
+
+The ordinary draft preserves the provider call and subsequent work-flag read,
+uses the existing truthful table types, and adds no compiler constraints.
+Independent scalar-model fixtures cover all 65,536 indices for commands -1,
+0, 1 and 2, both relevant flag states, positive/zero/negative provider results,
+and byte-valued devil attributes/counts: 524,288 cases at O0, O2, and
+ASan+UBSan, comparing all normal/visual/attribute table bytes and call counts.
+These are host-model tests, not EE execution or arbitrary callback-side-effect
+coverage. Leak detection was disabled because the sandbox's ptrace environment
+prevents LeakSanitizer startup; address and undefined-behavior checks ran.
+All 33 previously matched owner functions remain exact. Plain and stock-dump
+compiler runs produce identical full raw assembly and objects in production
+and SKIP_ASM contexts for both enabled drafts. The guarded final edit is also
+raw assembly/object identical to the baseline in those two contexts.
+
+An independent native-control-flow review also checks all signed command
+values and post-callback mutation of command, index, ID and flags in 393,216
+cases each at O0, O2 and ASan/UBSan. These retain the preselected entry while
+observing the native post-call flag and ID reads. Actual provider source was
+separately checked; the fixtures use mocked callbacks, not game execution.

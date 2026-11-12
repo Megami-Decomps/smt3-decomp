@@ -327,3 +327,38 @@ strict three-mode complete plain/dump assembly and ELF parity. RNG and model
 show provider owners also pass independently. No header, layout, source owner
 or compiler flag changes are needed. Integrated retail and regression
 qualification is recorded with the landing.
+
+### nbCameraBoss_Command_Init (0x001C11F8, 460 bytes)
+
+All 115 target words match. The formation-type switch preserves the native
+9/10/13 dispatch graph; the ten-entry scan uses its native unsigned loop
+counter. A shared epilogue returns either zero or the selected camera
+provider's actual result. A localized binding keeps that result in the ABI
+result register `$2`, avoiding an extra result copy and preserving the common
+return path. Each assigned result is immediately returned; none is live
+across a later call. This is a target-specific reconstruction aid, not a
+claim about historical source spelling. Without the binding, the same C
+control flow emits 456 bytes and does not match.
+
+The initial null/order-index checks, active-bit tests, provider calls and
+return values are preserved. The formation base is reloaded after an
+unsuccessful ID-provider call, so a callback that changes that base still
+selects the same subsequent ten records. The first matching record wins.
+
+The complete owner passes 116 matches and zero differences with owned data
+checked. Eight full raw assembly/ELF parity comparisons pass across normal
+and diagnostic compilers in production and SKIP_ASM modes. An independently
+transcribed native-call model agrees with the extracted candidate on 250,000
+fixtures each at O0, O2, under UBSan and ASan/UBSan. Fixtures include null and
+invalid-index inputs, every dispatch ID, inactive records, callback-induced
+formation-base changes, arbitrary callback results and camera writes.
+Leak checking is disabled for the ASan run because the environment's
+LeakSanitizer cannot operate under its process tracing; the model allocates
+no heap memory. These host fixtures supplement, not replace, native exactness.
+
+Integrated retail-image equality and all repository gates remain required
+before publication.
+
+Independent review adds 300,000 native-control and effectful-callback cases
+at O0, O2 and ASan/UBSan, with three deliberately incorrect variants rejected.
+No private trace or fixture binary is included in this source change.

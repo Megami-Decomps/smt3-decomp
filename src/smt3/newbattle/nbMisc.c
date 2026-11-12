@@ -728,43 +728,57 @@ extern const char D_00544170[];
 
 #include "sdk_libc.h"
 
+/* NON_MATCHING: the native selection control flow restores the 360-byte
+ * extent, but table-address allocation and branch scheduling still differ.
+ * Retained draft only; production continues to use the assembly fallback. */
 void nbSetNormalSkill0(datUnitWork_t *work)
 {
-    datNormalSkill_t *skill;
-    datNormalSkillVisual_t *visual;
-    datSkill_t *skillattr;
+    datNormalSkill_t *skill = NULL;
+    datNormalSkillVisual_t *visual = NULL;
+    datSkill_t *skillattr = NULL;
     s32 attackattr;
     u32 attackcnt;
     s32 index;
+    s32 active = 0;
 
-    if (work->nowcommand == 0) {
-        index = 0;
-        skill = &datSkillTable.normal[index];
-        skillattr = &attr[index];
-        visual = &datSkillTable.visual[index];
-        skill->targettype = nbHatudoCheckSkill(work, 0x130) != 0;
-    } else if (work->nowcommand == 1 && work->nowindex >= 0xA4 && work->nowindex < 0xA8) {
+    switch (work->nowcommand) {
+    case 0:
+        skillattr = &attr[0];
+        skill = &datSkillTable.normal[0];
+        visual = &datSkillTable.visual[0];
+        if (nbHatudoCheckSkill(work, 0x130)) {
+            skill->targettype = 1;
+        } else {
+            skill->targettype = 0;
+        }
+        active = 1;
+        break;
+    case 1:
         index = work->nowindex;
-        skill = &datSkillTable.normal[index];
-        skillattr = &attr[index];
-        visual = &datSkillTable.visual[index];
-    } else {
-        return;
+        if (index < 0xA8 && index >= 0xA4) {
+            skillattr = &attr[index];
+            skill = &datSkillTable.normal[index];
+            visual = &datSkillTable.visual[index];
+            active = 1;
+        }
+        break;
     }
-    if (work->flag & 4) {
-        attackattr = 0;
-        attackcnt = 1;
-    } else {
-        attackattr = datDevilTable[work->id].attackattr;
-        attackcnt = datDevilTable[work->id].attackcnt;
+    if (active) {
+        if (work->flag & 4) {
+            attackattr = 0;
+            attackcnt = 1;
+        } else {
+            attackattr = datDevilTable[work->id].attackattr;
+            attackcnt = datDevilTable[work->id].attackcnt;
+        }
+        if (skill != NULL) {
+            skillattr->skillattr = attackattr;
+            skill->targetcntmax = attackcnt;
+            skill->targetcntmin = attackcnt;
+            visual->animetype = 0;
+        }
+        printf(D_00544170);
     }
-    if (skill != NULL) {
-        skillattr->skillattr = attackattr;
-        skill->targetcntmax = attackcnt;
-        skill->targetcntmin = attackcnt;
-        visual->animetype = 0;
-    }
-    printf(D_00544170);
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNormalSkill0);

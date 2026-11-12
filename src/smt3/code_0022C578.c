@@ -94,6 +94,8 @@ typedef struct
     /* 0x116C */ s32 unk_116C;
     /* 0x1170 */ s32 unk_1170;
     /* 0x1174 */ s32 unk_1174;
+    /* 0x1178 */ u8 reserved1178[0x100];
+    /* 0x1278 */ cmpHeartsIcon_t heartsIcons[25];
 } campInfoWork_t;
 
 extern fclEncyc_instance_tag *g_pinst;
@@ -4096,11 +4098,10 @@ extern void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 level
 
 void cmpInitHeartsIcon(campInfoWork_t *work)
 {
-    datUnitWork_t *unit = &DDS3_GBWK->unitwork[0];
-    cmpHeartsIcon_t *icon = (cmpHeartsIcon_t *)((u8 *)work + 0x1278);
     s32 i;
+    datUnitWork_t *unit = &DDS3_GBWK->unitwork[0];
 
-    for (i = 0; i < 25; i++, icon++) {
+    for (i = 0; i < 25; i++) {
         s8 id = cmpGetHeartsIconId((s8)i);
         s8 type;
         s32 color;
@@ -4118,6 +4119,7 @@ void cmpInitHeartsIcon(campInfoWork_t *work)
             rstCreateBeforeSkillList(id, unit, 0, &skills);
             moveType = 0;
             if (skills.SkillCnt != 0) {
+                u8 skillCount = (u8)skills.SkillCnt;
                 u16 level = unit->level;
                 u8 targetLevel = skills.TargetLevel[0];
 
@@ -4125,30 +4127,30 @@ void cmpInitHeartsIcon(campInfoWork_t *work)
                 if (level + 1 < targetLevel) {
                     moveType = level + 4 >= targetLevel;
                 }
-                if (skills.SkillCnt == 1 && id == 1 && evtBitCheck(0x8C1) == 0) {
+                if ((s8)skillCount == 1 && id == 1 && evtBitCheck(0x8C1) == 0) {
                     moveType = 0;
                 }
             }
         }
-        icon->IconType = type;
-        icon->Stat = 0;
-        icon->IconColor = color;
-        icon->MoveType = moveType;
-        icon->Axis = 0;
-        icon->AxisChg = -1;
-        icon->Wait1st = SDF_FRAMES(dds3GetRandA(NULL) & 0x1F);
+        work->heartsIcons[i].IconType = type;
+        work->heartsIcons[i].Stat = 0;
+        work->heartsIcons[i].IconColor = color;
+        work->heartsIcons[i].MoveType = moveType;
+        work->heartsIcons[i].Axis = 0;
+        work->heartsIcons[i].AxisChg = -1;
+        work->heartsIcons[i].Wait1st = SDF_FRAMES(dds3GetRandA(NULL) & 0x1F);
         {
             u32 wait = dds3GetRandA(NULL) & 0x1F;
 
-            icon->Angle = 0.0f;
-            icon->Wait = SDF_FRAMES(wait);
+            work->heartsIcons[i].Angle = 0.0f;
+            work->heartsIcons[i].Wait = SDF_FRAMES(wait);
         }
-        icon->DefCnt = 0;
-        icon->DefAng = 0.0f;
-        icon->Cnt = 0;
-        icon->Timer = 0;
-        icon->TimerSpd = 6;
-        icon->DistAng = 0.0f;
+        work->heartsIcons[i].DefCnt = 0;
+        work->heartsIcons[i].DefAng = 0.0f;
+        work->heartsIcons[i].Cnt = 0;
+        work->heartsIcons[i].Timer = 0;
+        work->heartsIcons[i].DistAng = 0.0f;
+        work->heartsIcons[i].TimerSpd = 6;
     }
 }
 #else

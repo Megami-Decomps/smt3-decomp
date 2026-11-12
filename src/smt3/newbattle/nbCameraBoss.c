@@ -3918,61 +3918,80 @@ s32 nbCameraBoss_CheckFix(void)
     return 1;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
+/* Behaviour checked against retail: 5 PCSX2 call vectors give the same return and memory,
  * battle_0_1, capture_006, capture_009, capture_010, capture_015, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern s32 nbCameraBoss_BSMIZ_Command_Set(nbCamera_t *pNbCamera);
 
 s32 nbCameraBoss_Command_Init(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     nbFormation_t *form;
+    /* Keep the actual return value in the ABI result register through the
+     * shared epilogue. This localized compiler constraint is a reconstruction
+     * aid, not historical spelling; the value is never live across a call. */
+    FAKEMATCH_ASM_REG(s32, result, "$2");
     s32 id;
-    s32 i;
+    u32 i;
 
-    if (data == NULL || data->orderindex == -1) {
-        return 0;
+    if (data == NULL) {
+        result = 0;
+        goto done;
     }
-    form = &data->form[4];
-    if (data->formationtype == 9) {
-        if (form->stat & 1) {
-            if (effBTLModelGetID(form) == 0x123) {
-                return nbCameraBoss_BSARI_Command_Set(pNbCamera);
-            }
-            form = &data->form[4];
+    if (data->orderindex == -1) {
+        result = 0;
+        goto done;
+    }
+    switch (data->formationtype) {
+    case 9:
+        form = &data->form[4];
+        if ((form->stat & 1) && effBTLModelGetID(form) == 0x123) {
+            result = nbCameraBoss_BSARI_Command_Set(pNbCamera);
+            goto done;
         }
-    } else if (data->formationtype == 10) {
+        break;
+    case 10:
+        form = &data->form[4];
         if (form->stat & 1) {
             id = effBTLModelGetID(form);
             if (id == 0x108 || id == 0x125) {
-                return nbCameraBoss_BSKAGU_Command_Set(pNbCamera);
+                result = nbCameraBoss_BSKAGU_Command_Set(pNbCamera);
+                goto done;
             }
-            form = &data->form[4];
         }
-    } else if (data->formationtype == 13 && (form->stat & 1)) {
-        return nbCameraBoss_BSLUSI_Command_Set(pNbCamera);
+        break;
+    case 13:
+        if (data->form[4].stat & 1) {
+            result = nbCameraBoss_BSLUSI_Command_Set(pNbCamera);
+            goto done;
+        }
+        break;
     }
+    form = &data->form[4];
     for (i = 0; i < 10; i++, form++) {
         if (form->stat & 1) {
             switch (effBTLModelGetID(form)) {
             case 0x109:
             case 0x129:
-                return nbCameraBoss_BSMIZ_Command_Set(pNbCamera);
+                result = nbCameraBoss_BSMIZ_Command_Set(pNbCamera);
+                goto done;
             case 0x10D:
-                return nbCameraBoss_BSONGY_Command_Set(pNbCamera);
+                result = nbCameraBoss_BSONGY_Command_Set(pNbCamera);
+                goto done;
             case 0x114:
-                return nbCameraBoss_BSARUS_Command_Set(pNbCamera);
+                result = nbCameraBoss_BSARUS_Command_Set(pNbCamera);
+                goto done;
             case 0x11F:
-                return nbCameraBoss_BSSAMA_Command_Set(pNbCamera);
+                result = nbCameraBoss_BSSAMA_Command_Set(pNbCamera);
+                goto done;
             }
         }
     }
-    return 0;
+    result = 0;
+done:
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Command_Init);
-#endif
+
 
 s32 nbCameraBoss_BSARI1_Cut23_EX01_Set(nbCamera_t *pNbCamera)
 {
