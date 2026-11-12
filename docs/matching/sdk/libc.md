@@ -418,3 +418,55 @@ adjacent ctype bytes remain identical to retail. Full retail checksum,
 generated-source, 569 regression-test, guarded-source and report gates pass,
 with a unique compiler-owned production span. SDK coverage gains one function
 and 216 bytes; game coverage is unchanged.
+
+
+## _calloc_r
+
+The ordinary C reconstruction matches all 180 instruction bytes (45 words)
+under the configured ee-gcc 2.96, with four following alignment bytes.
+Unsigned 32-bit multiplication retains the native modular request size.
+A failed allocation returns null before reading its header. A successful
+allocation clears the chunk size with its low two flag bits removed, less
+one four-byte word. Small chunks use the native unrolled word stores; larger
+chunks call the existing memset provider. No overflow check or allocator bug
+repair is introduced.
+
+This is allocator-internal storage: while PREV_INUSE is set, the allocated
+chunk may borrow the successor's previousSize word. Clearing stops before
+the successor's size word. It is not a claim that a caller's requested-size
+C object generally extends into another object. Native word widths, null
+handling, arithmetic and store ordering were independently reviewed. The
+final three stores execute at cursor offsets 0, 8 and 4, even though their
+ordinary C expressions are sequential.
+
+The small-arm cursor scope and genuine do/while(0) follow the historical
+MALLOC_ZERO structure in [newlib 1.9.0 mallocr.c](https://github.com/mirror/newlib-cygwin/blob/newlib-1_9_0/newlib/libc/stdlib/mallocr.c)
+(blob c2b2fb91f2b33f2ee32eac6c341d966cac234f47). This corroborates the source
+shape, not the SDK's exact newlib release or original source spelling.
+The archive map's 296/callocr.o attribution is name-only evidence, not a
+proven native translation-unit boundary. No boundary, compiler flag, ABI,
+constraint, declaration or malloc draft changes accompany this promotion.
+
+Discovery consumed four compiler/assembler pairs: baseline, two ordinary
+nonmatching controls, and the exact historical-macro control. Fresh complete
+owner and independent --source checks each pass 81 functions with no
+code or owned-data difference. Production, SKIP_ASM, retained and retained
+plus FIX_BUGS plain/dump routes have literally identical complete assembly
+and raw objects within each context. All 100/80/84/84 peer contracts,
+allocated data and ordered relocations are preserved. Production retains
+all 33,376 text bytes and 196 padding bytes unchanged, including the existing
+600-byte malloc_extend_top. C-only modes add only the target and its alignment.
+The production peer comparison reuses the verified discovery baseline object;
+the other baseline contexts were freshly compiled.
+
+All 101 linked owner function spans, complete owner text and 1,424 rodata
+bytes match retail. The complete 4,551,696-byte image is byte-identical to
+its reference. Fresh generated-source and stale-line controls, all 31 normal
+regression files (532 methods), 125 optimized checker methods, strict retained
+contexts and seven IRX checks pass. Two setup failures remain recorded: a
+premature owner check before Ninja's compatibility prerequisites (two compiler/
+assembler attempts), and a baseline production attempt whose now-promoted
+assembly fallback was omitted (one pair). Neither is a passing gate.
+Nine inherited unrelated owner failures were not rerun; this is not a global
+owner-suite pass. Prospective credit is one SDK/runtime function and 180 bytes,
+with no game-code gain, after publication and exact-commit CI.

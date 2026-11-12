@@ -3559,7 +3559,47 @@ long _write_r(_reent *r, s32 fd, const char *buf, s32 n) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", _calloc_r);
+void *_calloc_r(_reent *r, u32 n, u32 size)
+{
+    mallocChunkPrefix_t *chunk;
+    u32 chunkSize;
+    u32 request = n * size;
+    void *result;
+
+    result = _malloc_r(r, request);
+    if (result == NULL) {
+        return NULL;
+    } else {
+        chunk = (mallocChunkPrefix_t *)((u8 *)result - 8);
+        chunkSize = chunk->size & ~3U;
+        /* Historical MALLOC_ZERO scopes the cursor to its small-clear arm.
+         * The one-pass block preserves that macro's control structure. */
+        do {
+            u32 clearSize = chunkSize - sizeof(u32);
+            if (clearSize <= 9 * sizeof(clearSize)) {
+                u32 *clear = result;
+                if (clearSize >= 5 * sizeof(clearSize)) {
+                    *clear++ = 0;
+                    *clear++ = 0;
+                    if (clearSize >= 7 * sizeof(clearSize)) {
+                        *clear++ = 0;
+                        *clear++ = 0;
+                        if (clearSize >= 9 * sizeof(clearSize)) {
+                            *clear++ = 0;
+                            *clear++ = 0;
+                        }
+                    }
+                }
+                *clear++ = 0;
+                *clear++ = 0;
+                *clear = 0;
+            } else {
+                memset(result, 0, clearSize);
+            }
+        } while (0);
+        return result;
+    }
+}
 
 s32 _close_r(_reent *r, s32 fd) {
     s32 result;
