@@ -49,6 +49,51 @@ Production provenance verifies the unique compiler-owned 180-byte span at
 generated-source, regression, guarded-source and report gates pass. Exactly
 one SDK function and 180 bytes are added; game-code coverage is unchanged.
 
+## _request_bind (sdk/libkernl, 176 bytes)
+
+44 of 44 words match in ordinary C. The command handler allocates a forward
+response, snapshots the incoming packet and client routing words, and searches
+the registered servers by service ID. A missing server produces three zero
+payload words; a found server supplies its address, buffer and callback buffer.
+The handler sends the existing 64-byte response with no additional data.
+
+The request is the command dispatcher's copied stack scratch, not an overlay
+on an outgoing pool object. Its two routing words remain opaque 32-bit values.
+They are captured after response allocation and before publication; the service
+ID is read at the native search phase. The generic void two-pointer callback
+ABI, loads, stores and provider calls are unchanged.
+
+The general request pool and the two response pools retain their distinct
+native 32-record allocations. Each response is still 64 bytes: a nine-word
+common header, a three-word bind payload and four untouched tail words.
+Only the bind payload is a union of wire words and actual pointer fields.
+All consumers use these real subobjects; no full-array cast, fabricated
+overlap, new initialization or stronger alignment is introduced.
+
+This distinction matters to the emitted code. A whole-packet union restores
+the bind payload's native store/read ordering but perturbs existing header
+writers. Separating the common header from the overlapping payload preserves
+those peers in ordinary C. Populating the two routing fields in wire-offset
+source order also emits their native load/store sequence. These paired
+observations establish useful source properties, not the original spelling
+or an unobserved internal optimizer decision. No register binding, operand
+constraint, volatile RAM or instruction replay remains.
+
+Independent semantic and native review accepts the final representation for
+the pinned EE compiler and ABI. Fresh owner checking reports 163 match,
+0 differ. All 363 production, 162 SKIP_ASM and 166 retained-C peer contracts
+and owned data are preserved, with changed local code references resolved to
+their actual function and interior offset. Production retains all 664 rodata
+bytes. The three distinct pools each retain their native 0x800-byte BSS extent.
+
+Strict production, SKIP_ASM and retained-C plain/dump pairs agree across the
+complete assembly and object after only the exact randomized source filename
+is normalized. Corresponding canonical baselines are reused only after binding
+their source, headers, configuration and compiler/runtime identities. Fresh
+generated-source and stale controls, guarded EE and IRX checks, regressions,
+full retail checksum and literal byte comparison pass; the next build is a
+no-op. This adds one SDK function and 176 code bytes, with no game-code credit.
+
 ## sceSifAddCmdHandler (sdk/libkernl, 0x2C)
 
 11 of 11 words match, 44 bytes. The command's sign selects the existing
