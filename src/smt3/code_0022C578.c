@@ -4091,7 +4091,6 @@ s32 cmpSetHeartsSequenceRemove(void)
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern u32 dds3GetRandA(void *state);
 extern void rstCreateBeforeSkillList(s8 heartsId, datUnitWork_t *stock, s8 levelOffset,
                                      rstSkillInfo_t *info);
@@ -4113,19 +4112,25 @@ void cmpInitHeartsIcon(campInfoWork_t *work)
             moveType = 0;
         } else {
             rstSkillInfo_t skills;
+            s8 hasSkills;
+            u8 skillCount;
 
             type = cmpGetHeartsIconType((s8)i);
             color = cmpGetHeartsIconColor((s8)i);
             rstCreateBeforeSkillList(id, unit, 0, &skills);
+            hasSkills = skills.SkillCnt;
+            skillCount = (u8)skills.SkillCnt;
             moveType = 0;
-            if (skills.SkillCnt != 0) {
-                u8 skillCount = (u8)skills.SkillCnt;
+            if (hasSkills != 0) {
                 u16 level = unit->level;
                 u8 targetLevel = skills.TargetLevel[0];
 
                 moveType = 2;
                 if (level + 1 < targetLevel) {
-                    moveType = level + 4 >= targetLevel;
+                    moveType = 0;
+                    if (level + 4 >= targetLevel) {
+                        moveType = 1;
+                    }
                 }
                 if ((s8)skillCount == 1 && id == 1 && evtBitCheck(0x8C1) == 0) {
                     moveType = 0;
@@ -4153,9 +4158,6 @@ void cmpInitHeartsIcon(campInfoWork_t *work)
         work->heartsIcons[i].TimerSpd = 6;
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitHeartsIcon);
-#endif
 
 void cmpInitDHWindow(u8 *base)
 {
