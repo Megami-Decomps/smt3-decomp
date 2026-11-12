@@ -493,9 +493,8 @@ typedef struct mallocFenceposts_t {
 extern u64 __malloc_max_sbrked_mem __attribute__((section(".data")));
 extern u64 __malloc_max_total_mem __attribute__((section(".data")));
 
-/* NON_MATCHING: 584/600 bytes; second-request width conversions and
- * later register/scheduling choices remain unresolved. */
-#ifdef NON_MATCHING
+/* Localized constraints preserve real value lifetimes in the native allocator.
+ * These target-specific reconstruction aids do not establish original spelling. */
 void malloc_extend_top(_reent *r, u32 needed)
 {
     mallocChunkPrefix_t *oldTop = __malloc_av_.top;
@@ -505,7 +504,7 @@ void malloc_extend_top(_reent *r, u32 needed)
     s32 correction;
     u32 misalignment;
     u8 *newTop;
-    u8 *secondBreak;
+    FAKEMATCH_ASM_REG(u8 *, secondBreak, "$4");
     mallocFenceposts_t *fenceposts;
 
     if (__malloc_sbrk_base != (void *)-1) {
@@ -518,7 +517,13 @@ void malloc_extend_top(_reent *r, u32 needed)
     }
     __malloc_current_mallinfo.arena += increment;
     if (newTop == oldEnd) {
-        __malloc_av_.top->size = (increment + oldSize) | 1;
+        /* The native live growth size is held in $4 until its header store. */
+        FAKEMATCH_ASM_REG(u32, contiguousSize, "$4") = increment + oldSize;
+        FAKEMATCH_ASM_REG(u32, contiguousHeader, "$2");
+        FAKEMATCH_ASM_LIVE(contiguousSize);
+        contiguousHeader = contiguousSize | 1;
+        FAKEMATCH_ASM_LIVE(contiguousHeader);
+        __malloc_av_.top->size = contiguousHeader;
     } else {
         if (__malloc_sbrk_base == (void *)-1) {
             __malloc_sbrk_base = newTop;
@@ -532,19 +537,34 @@ void malloc_extend_top(_reent *r, u32 needed)
         } else {
             correction = 0;
         }
-        correction += (s32)(0x1000UL - ((EE_ADDR(newTop) + increment) & 0xFFF));
+        {
+            u64 pageComplement = 0x1000UL - ((EE_ADDR(newTop) + increment) & 0xFFF);
+            correction += (s32)pageComplement;
+        }
         secondBreak = _sbrk_r(r, correction);
+        FAKEMATCH_ASM_LIVE(secondBreak);
         if (secondBreak == (void *)-1) return;
-        __malloc_current_mallinfo.arena += correction;
-        __malloc_av_.top = (mallocChunkPrefix_t *)newTop;
-        __malloc_av_.top->size = (EE_ADDR(secondBreak) - EE_ADDR(newTop) + correction) | 1;
+        {
+            __malloc_current_mallinfo.arena += correction;
+            __malloc_av_.top = (mallocChunkPrefix_t *)newTop;
+            {
+                /* Form the real header at its store phase. The break pointer
+                 * dies here; neither live range crosses a provider call. */
+                FAKEMATCH_ASM_REG(u32, newTopSize, "$4") =
+                    (EE_ADDR(secondBreak) - EE_ADDR(newTop) + correction) | 1;
+                FAKEMATCH_ASM_LIVE(newTopSize);
+                __malloc_av_.top->size = newTopSize;
+            }
+        }
         if (oldTop != (void *)&__malloc_av_) {
             if (oldSize < 16) {
-                __malloc_av_.top->size = 1;
+                FAKEMATCH_ASM_REG(mallocChunkPrefix_t *, smallTop, "$3") = __malloc_av_.top;
+                FAKEMATCH_ASM_LIVE(smallTop);
+                smallTop->size = 1;
                 return;
             }
             oldSize = (oldSize - 12) & ~15U;
-            oldTop->size = oldSize | (oldTop->size & 1);
+            oldTop->size = (oldTop->size & 1) | oldSize;
             fenceposts = (mallocFenceposts_t *)((u8 *)oldTop + oldSize);
             fenceposts->firstSize = 5;
             fenceposts->secondSize = 5;
@@ -560,9 +580,6 @@ void malloc_extend_top(_reent *r, u32 needed)
         __malloc_max_total_mem = __malloc_current_mallinfo.arena;
     }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libc", malloc_extend_top);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libc", _malloc_r);
 

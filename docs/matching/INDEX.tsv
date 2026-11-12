@@ -436,14 +436,14 @@ corePktXfmLightClipUVPB	sdfVu1	0xD4		docs/matching/sdf/sdfVu1.md	144
 corePktRelightBackFaces	sdfVu1	0x8C		docs/matching/sdf/sdfVu1.md	149
 corePktApplyFaceDivColor	sdfVu1	0x98		docs/matching/sdf/sdfVu1.md	156
 _free_r			86 of 189 words match	docs/matching/sdk/libc.md	2
-gcc2_compiled_				docs/matching/sdk/libc.md	43
-gcc2_compiled__1			74 of 139 words match	docs/matching/sdk/libc.md	80
-vfprintf			8 of 29 words matching	docs/matching/sdk/libc.md	119
-_d2b				docs/matching/sdk/libc.md	134
-func_002D6678				docs/matching/sdk/libc.md	159
-_dtoa_r				docs/matching/sdk/libc.md	267
-_b2d	sdk/libc	0x198	102 of 102 words match	docs/matching/sdk/libc.md	308
-strcasecmp				docs/matching/sdk/libc.md	356
+malloc_extend_top			150 of 150 words match	docs/matching/sdk/libc.md	43
+gcc2_compiled__1			74 of 139 words match	docs/matching/sdk/libc.md	86
+vfprintf			8 of 29 words matching	docs/matching/sdk/libc.md	125
+_d2b				docs/matching/sdk/libc.md	140
+func_002D6678				docs/matching/sdk/libc.md	165
+_dtoa_r				docs/matching/sdk/libc.md	273
+_b2d	sdk/libc	0x198	102 of 102 words match	docs/matching/sdk/libc.md	314
+strcasecmp				docs/matching/sdk/libc.md	362
 What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51

@@ -838,6 +838,146 @@ def text_residual_summary(size, comparison_size, diffs, native_size=None):
     return summary
 
 
+def relocation_free_interval(relocs, begin, end, section_size):
+    """Prove a bounded half-open interval has no relocated bytes.
+
+    Validate every complete field, even for an empty interval. An unknown
+    footprint cannot prove absence of overlap; exact adjacency is harmless.
+    """
+    if any(type(value) is not int for value in (begin, end, section_size)) \
+            or not 0 <= begin <= end <= section_size:
+        return False
+    widths = {"R_MIPS_32": 4, "R_MIPS_64": 8}
+    for offset, relocation in relocs.items():
+        if type(offset) is not int or not isinstance(relocation, tuple) \
+                or len(relocation) != 2 or any(not isinstance(value, str) or not value
+                                             for value in relocation):
+            return False
+        width = widths.get(relocation[0])
+        if width is None or not 0 <= offset <= offset + width <= section_size \
+                or begin < end and offset < end and offset + width > begin:
+            return False
+    return True
+
+
+def isolated_rodata_object(symbol_text, offset, size, name, section_size):
+    """Require one named STT_OBJECT, with no competing label or object."""
+    definitions = []
+    for line in symbol_text.splitlines():
+        parts = line.split()
+        if ".rodata" not in parts:
+            continue
+        if len(parts) < 5 or parts[-3] != ".rodata":
+            return False
+        try:
+            off, extent = int(parts[0], 16), int(parts[-2], 16)
+        except ValueError:
+            return False
+        flags, symbol = parts[1:-3], parts[-1]
+        if not 0 <= off <= off + extent <= section_size:
+            return False
+        if (off, extent, symbol, flags) == (0, 0, ".rodata", ["l", "d"]):
+            continue
+        definitions.append((off, extent, symbol, flags))
+    own = [row for row in definitions if row[2] == name]
+    if len(own) != 1 or own[0][:3] != (offset, size, name) \
+            or own[0][3] not in (["l", "O"], ["g", "O"]):
+        return False
+    return not any(row is not own[0] and (
+        offset <= row[0] < offset + size
+        or row[1] > 0 and row[0] < offset + size and row[0] + row[1] > offset)
+        for row in definitions)
+
+
+def native_object_offset(segs, addr, size, retail_size):
+    """Map the entire object through exactly one bounded PT_LOAD segment.
+
+    Endpoint agreement alone can hide a hole. Refuse split mappings and any
+    second segment touching the object's virtual span, even if offsets agree.
+    """
+    if any(type(value) is not int for value in (addr, size, retail_size)) \
+            or addr < 0 or size <= 0 or retail_size < 0:
+        return None
+    covering = []
+    for segment in segs:
+        if not isinstance(segment, (tuple, list)) or len(segment) != 3 \
+                or any(type(value) is not int or value < 0 for value in segment):
+            return None
+        vaddr, file_off, extent = segment
+        if file_off + extent > retail_size:
+            return None
+        if extent and vaddr < addr + size and vaddr + extent > addr:
+            covering.append(segment)
+    if len(covering) != 1:
+        return None
+    vaddr, file_off, extent = covering[0]
+    if not vaddr <= addr < addr + size <= vaddr + extent:
+        return None
+    return file_off + addr - vaddr
+
+
+def shared_named_rodata_object(offset, native_addr, owned_range, symbol_text,
+                               skip_data, skip_symbols, skip_relocs,
+                               full_data, full_symbols, full_relocs, retail, segs):
+    """Witness one same named object despite a retained ASM reference.
+
+    The YAML owns its native span. A configured native size, or the complete
+    interval to the next configured symbol, must equal both object extents.
+    All bytes, including zeros at the tail, are checked without masking.
+    This proof only supplements the SHARED diagnostic, never a data/gap gate.
+    """
+    if owned_range is None:
+        return False
+    declarations = []
+    for line in symbol_text.splitlines():
+        row = ROW.match(line)
+        if row is None:
+            continue
+        extents = re.findall(r"\bsize:([^\s/]+)", line)
+        try:
+            extent = int(extents[0], 0) if extents else None
+        except ValueError:
+            return False
+        if len(extents) > 1 or extent is not None and extent < 0:
+            return False
+        declarations.append((row[1], int(row[2], 16), extent))
+    candidates = [(off, size, name) for off, size, name in section_symbols(skip_symbols, ".rodata")
+                  if off == offset and any(n == name and addr == native_addr
+                                           for n, addr, _ in declarations)]
+    if len(candidates) != 1:
+        return False
+    _, size, name = candidates[0]
+    if AUTO.match(name):
+        return False  # This supplement is for named objects, not auto-address labels.
+    native = [(addr, extent) for n, addr, extent in declarations if n == name]
+    if len(native) != 1 or native[0][0] != native_addr or size <= 0:
+        return False
+    extent = native[0][1]
+    if extent is None:
+        next_addr = min((addr for _, addr, _ in declarations if addr > native_addr), default=None)
+        if next_addr != native_addr + size:
+            return False
+    elif extent != size:
+        return False
+    if any(n != name and (native_addr <= addr < native_addr + size
+                          or extent is not None and extent > 0
+                          and addr < native_addr + size and addr + extent > native_addr)
+           for n, addr, extent in declarations):
+        return False
+    start, end = owned_range
+    native_off = native_object_offset(segs, native_addr, size, len(retail))
+    if native_off is None or not 0 <= start <= native_off < native_off + size <= end <= len(retail):
+        return False
+    full_off = native_off - start
+    if not isolated_rodata_object(skip_symbols, offset, size, name, len(skip_data)) \
+            or not isolated_rodata_object(full_symbols, full_off, size, name, len(full_data)) \
+            or not relocation_free_interval(skip_relocs, offset, offset + size, len(skip_data)) \
+            or not relocation_free_interval(full_relocs, full_off, full_off + size, len(full_data)):
+        return False
+    expected = retail[native_off:native_off + size]
+    return skip_data[offset:offset + size] == expected == full_data[full_off:full_off + size]
+
+
 def verified_zero_gap(data, relocs, starts, owned, table_off, native_addr,
                       size, expected, native_gap):
     """Prove a table gap through independently verified interior C objects.
@@ -847,11 +987,11 @@ def verified_zero_gap(data, relocs, starts, owned, table_off, native_addr,
     Keep a concrete next compiled item and the raw native next-item boundary.
     """
     begin = table_off + size
-    if not begin <= expected < len(data) or expected not in starts:
+    if not 0 <= table_off <= begin <= expected < len(data) or expected not in starts:
         return False
     if len(native_gap) != expected - begin or any(native_gap) or any(data[begin:expected]):
         return False
-    if any(begin <= off < expected for off in relocs):
+    if not relocation_free_interval(relocs, begin, expected, len(data)):
         return False
     intervals = sorted((off, addr, extent) for off, addr, extent in owned
                        if off < expected and off + extent > begin)
@@ -962,6 +1102,8 @@ def main():
         owned_rodata = []
         owned_rodata_native = []
         full_rodata_relocations = None
+        full_rodata_size = 0
+        shared_rodata = set()
         owned_data_checked = False
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
@@ -1101,6 +1243,7 @@ def main():
                                 f"{name}: full-unit .sdata bytes/relocations differ from retail"
                                 + (f" ({'; '.join(problems)})" if problems else ""))
             if rodata_symbols and rodata_range:
+                native_symbol_text = (ROOT / "config" / version / "symbol_addrs.txt").read_text()
                 full_rodata = {
                     name: (off, size) for off, size, name in section_symbols(
                         run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".rodata")
@@ -1135,8 +1278,15 @@ def main():
                     else:
                         owned_rodata.append((skip_off, skip_off + size))
                         owned_rodata_native.append((skip_off, addr, size))
+                        if shared_named_rodata_object(
+                                skip_off, addr, rodata_range, native_symbol_text,
+                                rodata, object_symbols, rodata_relocs,
+                                fdata[fro_off:fro_off + fro_size], full_objdump,
+                                full_ro_relocs, retail, segs):
+                            shared_rodata.add((skip_off, addr))
             full_rodata_relocations = relocations(full)[".rodata"]
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+            full_rodata_size = len(fdata[fro_off:fro_off + fro_size])
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
             if fro_size and ro_start:
@@ -1401,7 +1551,8 @@ def main():
             return False
         full_begin = native_off - rodata_range[0]
         full_end = full_begin + expected - table_off - size
-        if any(full_begin <= off < full_end for off in full_rodata_relocations):
+        if full_end > rodata_range[1] - rodata_range[0] or not relocation_free_interval(
+                full_rodata_relocations, full_begin, full_end, full_rodata_size):
             return False
         return verified_zero_gap(rodata, rodata_relocs, starts,
                                  owned_rodata_native, table_off, retail_addr,
@@ -1471,8 +1622,8 @@ def main():
                 bad += 1
                 print(f"PAD rodata of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
                       "after it that no C emits: keep the extern D_ symbol")
-            elif users := asm_users(retail_addr):
-                # The object keeps one copy; an asm function still pulls in its own.
+            elif (users := asm_users(retail_addr)) and (table_off, retail_addr) not in shared_rodata:
+                # Only an isolated, native-sized full/SKIP object proves one provider.
                 bad += 1
                 print(f"SHARED rodata of {name} (retail 0x{retail_addr:08X}) is also used by asm "
                       f"{', '.join(users)}: keep the extern D_ symbol until they are C")

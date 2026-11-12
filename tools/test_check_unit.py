@@ -1379,7 +1379,7 @@ class OwnedRodataBoundaryTests(unittest.TestCase):
 
 class InteriorOwnedContextTests(unittest.TestCase):
     def check_interior(self, *, object_offset=24, wrong_object=False,
-                             nonzero_gap=False, wrong_entry=False, omit_symbol=False, full_offset=24, full_size=8, skip_size=8, full_missing=False, relocated=False, full_relocated=False, native_nonzero=False):
+                             nonzero_gap=False, wrong_entry=False, omit_symbol=False, full_offset=24, full_size=8, skip_size=8, full_missing=False, relocated=False, full_relocated=False, native_nonzero=False, full_relocation=None, full_data_size=None):
         # Six entries end at24; verified zero object spans24..32.
         # Raw retail labels omit the interior object but include nextData at32.
         compiled = struct.pack('<4I', 0x3C020000, 0x24420000, 0x03E00008, 0)
@@ -1435,7 +1435,15 @@ class InteriorOwnedContextTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
             stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
+            if full_data_size is not None:
+                def object_sections(obj):
+                    blob = data[:full_data_size] if str(obj).endswith('full.o') else data
+                    return blob, {'.rodata': (0, len(blob))}
+                stack.enter_context(patch.object(check_unit, 'sections', side_effect=object_sections))
             def object_relocs(obj):
+                if full_relocation and str(obj).endswith('full.o'):
+                    offset, kind = full_relocation
+                    return {**relocs, '.rodata': {**relocs['.rodata'], offset: (kind, 'unknown')}}
                 if full_relocated and str(obj).endswith('full.o'):
                     return {**relocs, '.rodata': {**relocs['.rodata'], 24: ('R_MIPS_32', 'unknown')}}
                 return relocs
@@ -1492,6 +1500,295 @@ class InteriorOwnedGapTests(unittest.TestCase):
     def test_empty_gap_and_ordinary_padding_still_work(self):
         self.assertTrue(self.proof(starts=[0,32,40],owned=[]))
         self.assertTrue(self.proof(starts=[0,24,40],owned=[],expected=24,native_gap=b''))
+
+
+class RelocationFreeIntervalTests(unittest.TestCase):
+    def test_fixed_fields_match_interval_oracle(self):
+        for kind, width in (('R_MIPS_32', 4), ('R_MIPS_64', 8)):
+            for offset in range(-1, 18):
+                for begin in range(17):
+                    for end in range(begin, 17):
+                        with self.subTest(kind=kind, offset=offset, begin=begin, end=end):
+                            valid = 0 <= offset and offset + width <= 16
+                            overlap = begin < end and offset < end and begin < offset + width
+                            self.assertEqual(check_unit.relocation_free_interval(
+                                {offset: (kind, 'symbol')}, begin, end, 16), valid and not overlap)
+
+    def test_unknown_and_malformed_fields_never_prove_a_gap(self):
+        for relocs in ({0: ('R_MIPS_UNKNOWN', 'symbol')}, {0: ('R_MIPS_NONE', 'symbol')},
+                       {-1: ('R_MIPS_32', 'symbol')}, {13: ('R_MIPS_32', 'symbol')},
+                       {9: ('R_MIPS_64', 'symbol')}, {False: ('R_MIPS_32', 'symbol')},
+                       {0: ('R_MIPS_32', '')}, {0: ['R_MIPS_32', 'symbol']},
+                       {0: ('R_MIPS_32',)}, {0: (None, 'symbol')}):
+            for begin, end in ((0, 0), (8, 12), (16, 16)):
+                with self.subTest(relocs=relocs, begin=begin, end=end):
+                    self.assertFalse(check_unit.relocation_free_interval(relocs, begin, end, 16))
+
+    def test_interval_bounds_and_exact_adjacency(self):
+        for args in ((-1, 0, 16), (0, 17, 16), (5, 4, 16), (0, 0, -1),
+                     (False, 0, 16), (0, 0.0, 16), (0, 0, True)):
+            with self.subTest(args=args):
+                self.assertFalse(check_unit.relocation_free_interval({}, *args))
+        for begin, end in ((0, 8), (12, 16), (10, 10)):
+            self.assertTrue(check_unit.relocation_free_interval({8: ('R_MIPS_32', 'x')}, begin, end, 16))
+
+
+class SharedNamedRodataProofTests(unittest.TestCase):
+    @staticmethod
+    def row(offset, size, name='named', flags='g O'):
+        return f'{offset:08x} {flags} .rodata {size:08x} {name}\n'
+
+    def fixture(self, size=16, skip_off=8, full_off=24, origin=0x1000):
+        payload = bytes((index % 251 + 1 for index in range(size - 4))) + bytes(4)
+        skip = bytes(skip_off) + payload + bytes(8)
+        full = bytes(full_off) + payload + bytes(8)
+        retail = bytes(0x80) + full
+        addr = origin + full_off
+        return dict(offset=skip_off, native_addr=addr, owned_range=(0x80, len(retail)),
+                    symbol_text=f'named = 0x{addr:X}; // size:0x{size:X}\nnext = 0x{addr+size:X};\n',
+                    skip_data=skip, skip_symbols=self.row(skip_off, size), skip_relocs={},
+                    full_data=full, full_symbols=self.row(full_off, size), full_relocs={},
+                    retail=retail, segs=[(origin, 0x80, len(full))])
+
+    def proof(self, **changes):
+        args = self.fixture()
+        args.update(changes)
+        return check_unit.shared_named_rodata_object(**args)
+
+    def test_explicit_size_or_complete_native_interval(self):
+        self.assertTrue(self.proof())
+        self.assertTrue(self.proof(symbol_text='named = 0x1018;\nnext = 0x1028;\n'))
+        self.assertTrue(self.proof(skip_symbols=self.row(8,16,flags='l O')))
+        self.assertTrue(self.proof(symbol_text='named = 0x1018; // size:0x10\n'))
+
+    def test_intended_native_shapes_without_claiming_a_real_build(self):
+        for size, skip_off, full_off, origin in ((200,0x208,0x3E0,0x54B550),
+                                               (16,0x28,0x38,0x531EE0)):
+            with self.subTest(size=size):
+                args = self.fixture(size,skip_off,full_off,origin)
+                self.assertTrue(check_unit.shared_named_rodata_object(**args))
+        args = self.fixture(24,0x38,0x48,0x531EE0)
+        args['symbol_text'] = 'named = 0x531F28;\nnext = 0x5320F8;\n'
+        self.assertFalse(check_unit.shared_named_rodata_object(**args))
+
+    def test_native_address_size_owner_and_alias_controls(self):
+        for changes in (
+            dict(symbol_text='next = 0x1028;\n'),
+            dict(symbol_text='named = 0x1019; // size:0x10\n'),
+            dict(symbol_text='named = 0x1018;\n'),
+            dict(symbol_text='named = 0x1018;\nnext = 0x1030;\n'),
+            dict(symbol_text='named = 0x1018; // size:8\nnext = 0x1028;\n'),
+            dict(symbol_text='named = 0x1018; // size:24\nnext = 0x1028;\n'),
+            dict(symbol_text='named = 0x1018; // size:0x10 size:0x10\n'),
+            dict(symbol_text='named = 0x1018; // size:invalid\n'),
+            dict(symbol_text='named = 0x1018; // size:-1\n'),
+            dict(symbol_text='named = 0x1018; // size:0x10\nnamed = 0x1018;\n'),
+            dict(symbol_text='named = 0x1018; // size:0x10\nalias = 0x1018;\n'),
+            dict(symbol_text='named = 0x1018; // size:0x10\nalias = 0x101C;\n'),
+            dict(symbol_text='named = 0x1018; // size:0x10\nprior = 0x1010; // size:16\n'),
+            dict(owned_range=None), dict(owned_range=(0x90,0xB0)),
+            dict(owned_range=(0x80,0xA0)), dict(owned_range=(-1,0xB0)),
+            dict(owned_range=(0x80,0x1000)), dict(native_addr=0x1019), dict(segs=[]),
+        ):
+            with self.subTest(changes=changes):
+                self.assertFalse(self.proof(**changes))
+
+    def test_full_skip_uniqueness_and_types(self):
+        for side, offset in (('skip',8),('full',24)):
+            for raw in ('', self.row(offset,8), self.row(offset,24),
+                        self.row(offset+1,16), self.row(offset,16,flags='g'),
+                        self.row(offset,16,flags='w O'), self.row(offset,0),
+                        self.row(offset,16)+self.row(offset,16),
+                        self.row(offset,16)+self.row(offset,0,'alias','l'),
+                        self.row(offset,16)+self.row(offset+4,4,'interior'),
+                        self.row(offset,16)+self.row(offset-4,8,'prior'),
+                        self.row(offset,16)+self.row(1,0,'named'),
+                        self.row(offset,16)+'malformed .rodata row\n'):
+                with self.subTest(side=side,raw=raw):
+                    self.assertFalse(self.proof(**{side+'_symbols':raw}))
+            self.assertTrue(self.proof(**{side+'_symbols':self.row(offset,16)+self.row(offset+16,0,'adjacent','l')}))
+
+    def test_all_bytes_and_tail_bytes_are_required(self):
+        args = self.fixture()
+        for field, start in (('skip_data',8),('full_data',24),('retail',0x98)):
+            for delta in range(16):
+                data = bytearray(args[field]); data[start+delta] ^= 1
+                with self.subTest(field=field,delta=delta):
+                    self.assertFalse(self.proof(**{field:bytes(data)}))
+            self.assertFalse(self.proof(**{field:args[field][:start+15]}))
+
+    def test_complete_native_mapping_rejects_holes_and_overlaps(self):
+        valid = self.fixture()['segs'][0]
+        for segs in (
+            [(0x1000,0x80,0x20),(0x1024,0xA4,0xC)],  # mapped endpoints, interior hole
+            [(0x1000,0x80,0x20),(0x1020,0xA0,0x10)],  # contiguous but split proof
+            [valid,valid],
+            [valid,(0x101C,0x9C,4)],  # same-offset overlapping segment
+            [valid,(0x101C,0xAC,4)],  # conflicting overlapping mapping
+            [(0x1019,0x99,0x17)], [(0x1000,0x80,0x27)],
+            [(0x1000,0x80,0x100)], [(0x1000,-1,0x30)],
+            [valid,(0x2000,0,False)], [valid,(0x2000,0)],
+        ):
+            with self.subTest(segs=segs):
+                self.assertFalse(self.proof(segs=segs))
+        self.assertTrue(self.proof(segs=[valid,(0x1028,0xA8,8)]))
+        self.assertTrue(self.proof(segs=[valid,(0x1010,0x90,8)]))
+        self.assertTrue(self.proof(segs=[(0x1018,0x98,16)]))
+
+    def test_auto_address_names_do_not_grant_named_object_proof(self):
+        for name in ('D_00001018','D_00001018.1','jtbl_00001018','func_00001018'):
+            args=self.fixture()
+            for key in ('symbol_text','skip_symbols','full_symbols'):
+                args[key]=args[key].replace('named',name)
+            with self.subTest(name=name):
+                self.assertFalse(check_unit.shared_named_rodata_object(**args))
+
+    def test_relocation_partial_overlap_unknown_footprints_and_adjacency(self):
+        for side, start in (('skip',8),('full',24)):
+            for offset,kind in ((start,'R_MIPS_32'),(start-4,'R_MIPS_64'),
+                                (start+15,'R_MIPS_32'),(0,'R_MIPS_UNKNOWN'),
+                                (-1,'R_MIPS_32')):
+                with self.subTest(side=side,offset=offset,kind=kind):
+                    self.assertFalse(self.proof(**{side+'_relocs':{offset:(kind,'x')}}))
+            for offset in (start-4,start+16):
+                self.assertTrue(self.proof(**{side+'_relocs':{offset:('R_MIPS_32','x')}}))
+
+
+class SharedNamedRodataContextTests(unittest.TestCase):
+    def check_shared(self, **changes):
+        payload = b'NAMED OBJECT' + bytes(4)
+        f = dict(skip=bytes(8)+payload, full=bytes(24)+payload,
+                 skip_raw='00000008 g O .rodata 00000010 named\n',
+                 full_raw='00000018 g O .rodata 00000010 named\n',
+                 symbol_text='target = 0x100000; // type:func\nnamed = 0x100118;\nnext = 0x100128;\n',
+                 yaml='      - [0x1100, .rodata, main/unit]\n      - [0x1128, .rodata, main/next]\n',
+                 skip_relocs={}, full_relocs={}, failed_full=False)
+        f.update(changes)
+        compiled = struct.pack('<4I',0x3C020000,0x24420008,0x03E00008,0)
+        full_code = struct.pack('<4I',0x3C020000,0x24420018,0x03E00008,0)
+        retail = bytearray(0x1200)
+        struct.pack_into('<4I',retail,0x1000,0x3C020010,0x24420118,0x03E00008,0)
+        retail[0x1118:0x1128] = payload
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root=Path(tmp); unit=root/'src/smt3/main/unit.c'; unit.parent.mkdir(parents=True)
+            unit.write_text('void target(void) {}\nconst char named[16] = "NAMED OBJECT";\nINCLUDE_ASM(const s32, "main/unit", consumer);\n')
+            cfg=root/'config/smt3'; cfg.mkdir(parents=True)
+            (cfg/'symbol_addrs.txt').write_text(f['symbol_text'])
+            (cfg/'SLUS_209.11.yaml').write_text(f['yaml'])
+            original=root/RETAIL_PATH; original.parent.mkdir(parents=True); original.write_bytes(retail)
+            assembly=root/'asm/smt3/data/main/unit.rodata.s'; assembly.parent.mkdir(parents=True)
+            assembly.write_text('dlabel named\ndlabel next\n')
+            consumer=root/'asm/smt3/nonmatchings/main/unit/consumer.s'; consumer.parent.mkdir(parents=True)
+            consumer.write_text('lui $2,%hi(named)\naddiu $2,$2,%lo(named)\n')
+            def run(*args):
+                if '-S' in args: return '0 10 T target\n'
+                if '-t' in args: return f['full_raw' if str(args[-1]).endswith('full.o') else 'skip_raw']
+                return ''
+            def relocations(obj):
+                return {'.text':{0:('R_MIPS_HI16','.rodata'),4:('R_MIPS_LO16','.rodata')},
+                        '.rodata':f['full_relocs' if obj.name=='full.o' else 'skip_relocs'],'.data':{},'.sdata':{}}
+            def sections(obj):
+                data=f['full' if obj.name=='full.o' else 'skip']
+                return data,{'.rodata':(0,len(data))}
+            stack.enter_context(patch.object(check_unit,'ROOT',root))
+            stack.enter_context(patch.dict(check_unit.RETAIL,{VERSION:RETAIL_PATH},clear=True))
+            stack.enter_context(patch.dict(check_unit.VERSIONS,{VERSION:{'serial':SERIAL,'gp':hex(GP)}},clear=True))
+            stack.enter_context(patch.object(check_unit.sys,'argv',['check_unit.py',str(unit)]))
+            stack.enter_context(patch('eeas_compat.lit4_range',return_value=(0,0)))
+            stack.enter_context(patch.object(check_unit,'load_segments',return_value=[(0x100000,0x1000,0x200)]))
+            stack.enter_context(patch.object(check_unit,'text_section',side_effect=lambda obj:full_code if obj.name=='full.o' else compiled))
+            stack.enter_context(patch.object(check_unit,'sections',side_effect=sections))
+            stack.enter_context(patch.object(check_unit,'relocations',side_effect=relocations))
+            stack.enter_context(patch.object(check_unit,'owns_rodata',return_value=True))
+            stack.enter_context(patch.object(check_unit,'run',side_effect=run))
+            calls=[SimpleNamespace(returncode=0,stderr=''),SimpleNamespace(returncode=int(f['failed_full']),stderr='fixture failure')]
+            stack.enter_context(patch.object(check_unit.subprocess,'run',side_effect=calls))
+            output=stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped: check_unit.main()
+            return stopped.exception.code,output.getvalue()
+
+    def test_complete_same_named_object_satisfies_shared_only(self):
+        code,report=self.check_shared()
+        self.assertEqual(code,0,report)
+        self.assertIn('1 match, 0 differ',report)
+        self.assertNotIn('SHARED',report)
+
+    def test_missing_proof_keeps_shared_or_existing_gate_failure(self):
+        for changes in (
+            dict(skip_raw=''),dict(full_raw=''),dict(failed_full=True),
+            dict(skip_raw='00000008 g O .rodata 00000008 named\n'),
+            dict(full_raw='00000018 g O .rodata 00000008 named\n'),
+            dict(full_raw='00000018 g O .rodata 00000010 named\n00000018 l .rodata 00000000 alias\n'),
+            dict(skip=bytes(8)+b'NAMED OBJECT'+bytes(3)+b'X'),
+            dict(full=bytes(24)+b'NAMED OBJECT'+bytes(3)+b'X'),
+            dict(symbol_text='target = 0x100000; // type:func\nnamed = 0x100118;\nnext = 0x100138;\n'),
+            dict(symbol_text='target = 0x100000; // type:func\nnamed = 0x100118; // size:8\nnext = 0x100128;\n'),
+            dict(yaml=''),dict(yaml='      - [0x1110, .rodata, main/unit]\n      - [0x1128, .rodata, main/next]\n'),
+            dict(skip_relocs={4:('R_MIPS_64','unknown')}),
+            dict(full_relocs={20:('R_MIPS_64','unknown')}),
+            dict(skip_relocs={0:('R_MIPS_UNKNOWN','unknown')}),
+            dict(full_relocs={0:('R_MIPS_UNKNOWN','unknown')}),
+        ):
+            with self.subTest(changes=changes):
+                code,report=self.check_shared(**changes)
+                self.assertEqual(code,1,report)
+
+
+class InteriorRelocationFootprintTests(unittest.TestCase):
+    def test_full_partial_field_rejects_the_prior_false_positive(self):
+        helper=InteriorOwnedContextTests()
+        for field in ((20,'R_MIPS_64'),(23,'R_MIPS_32'),(0,'R_MIPS_UNKNOWN')):
+            with self.subTest(field=field):
+                code,report=helper.check_interior(full_relocation=field)
+                self.assertEqual(code,1,report)
+                self.assertIn('PAD jump table',report)
+
+    def test_full_adjacency_preserves_the_existing_positive(self):
+        code,report=InteriorOwnedContextTests().check_interior(full_relocation=(20,'R_MIPS_32'))
+        self.assertEqual(code,0,report)
+
+    def test_skip_partial_field_and_unknown_width_cannot_prove_a_zero_gap(self):
+        helper=InteriorOwnedGapTests()
+        for offset,kind in ((20,'R_MIPS_64'),(23,'R_MIPS_32'),(0,'R_MIPS_UNKNOWN')):
+            with self.subTest(offset=offset,kind=kind):
+                self.assertFalse(helper.proof(relocs={offset:(kind,'x')}))
+        self.assertTrue(helper.proof(relocs={20:('R_MIPS_32','x'),32:('R_MIPS_64','x')}))
+
+    def test_full_gap_must_fit_the_emitted_section(self):
+        code,report=InteriorOwnedContextTests().check_interior(full_data_size=28)
+        self.assertEqual(code,1,report)
+        self.assertIn('PAD jump table',report)
+
+    def test_invalid_skip_bounds_and_empty_interval_fields(self):
+        helper=InteriorOwnedGapTests()
+        for changes in (dict(table_off=-1),dict(size=-1),dict(size=-4,expected=-4,native_gap=b''),
+                        dict(expected=41),dict(expected=23),dict(size=41)):
+            with self.subTest(changes=changes):
+                self.assertFalse(helper.proof(**changes))
+        self.assertTrue(helper.proof(starts=[0,24,40],owned=[],expected=24,native_gap=b'',
+                                     relocs={20:('R_MIPS_64','x')}))
+        self.assertFalse(helper.proof(starts=[0,24,40],owned=[],expected=24,native_gap=b'',
+                                      relocs={38:('R_MIPS_32','x')}))
+
+
+class NativeObjectMappingTests(unittest.TestCase):
+    def test_single_segment_matches_bounded_interval_oracle(self):
+        for addr in range(7):
+            for size in range(1,7):
+                for start in range(7):
+                    for extent in range(7):
+                        for file_off in (0,4):
+                            fits = file_off + extent <= 8 and start <= addr and addr + size <= start + extent
+                            want = file_off + addr - start if fits else None
+                            with self.subTest(addr=addr,size=size,start=start,extent=extent,file_off=file_off):
+                                self.assertEqual(check_unit.native_object_offset(
+                                    [(start,file_off,extent)],addr,size,8),want)
+
+    def test_invalid_object_bounds_withhold_mapping(self):
+        for args in ((-1,1,8),(0,0,8),(0,-1,8),(0,1,-1),(False,1,8),(0,True,8),(0,1,8.0)):
+            with self.subTest(args=args):
+                self.assertIsNone(check_unit.native_object_offset([(0,0,8)],*args))
 
 
 if __name__ == "__main__":

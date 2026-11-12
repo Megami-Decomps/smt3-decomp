@@ -40,42 +40,48 @@ chunk pseudo 86 (27/153, priority 7058) to GPR9. Native keeps the chunk in GPR9
 but uses size GPR8 and successor GPR5. A new ordinary lifetime/control premise
 is needed; types and output semantics do not justify pinning that pair.
 
-## gcc2_compiled_
+## malloc_extend_top
 
-Heap extension emits 584 of 600 native bytes, with 76 of 146 emitted words
-matching and 70 differing. Sixteen bytes remain uncovered; first difference
-is an exit displacement at +0xA8. The prologue and initial request sequence
-match. The second request simplifies to a 32-bit subtract instead of native
-64-bit subtraction followed by sign narrowing; later temporaries and the
-small-old-top exit also differ. Assembly remains active, with no exact credit.
+Heap extension matches all 600 native instruction bytes: 150 of 150 words
+match. This contributes 600 SDK EE bytes and zero game-code bytes. The
+production build selects C; the four remaining libc drafts keep their guards.
 
 The request adds the 64-bit top pad to the zero-extended 32-bit need and 16,
 then narrows to a signed break increment. A known break base enables page
 rounding. A failed first request, or a backward break with a real old top,
-returns immediately. Contiguous growth extends the fresh top header.
-Noncontiguous growth first charges the request, then charges the gap from
-the old top end when the base was already known; it does not replace that
-accounting with an assumed break-minus-base identity.
+returns immediately. Contiguous growth keeps the unflagged size sum distinct
+from the header value with its previous-in-use bit set.
 
-The new header aligns its user pointer to 16 bytes. The second request adds
-the front adjustment and a page complement, including a full page for zero
-remainder. Failure leaves earlier arena/base updates intact but skips new
-top, fencepost and maximum-memory updates. Success uses the entire second
-increment in both the arena charge and the new-top size.
+Noncontiguous growth charges the first request, then the gap from the old
+top end when the base was already known. The second request includes the
+front alignment adjustment and a page complement, including a full page
+for zero remainder. Its complement stays 64-bit until the signed narrowing.
+Failure preserves earlier arena/base updates but skips new-top, fencepost
+and maximum-memory updates. Success charges the entire second increment.
 
-A real old top smaller than 16 poisons the NEW top size to one and returns.
-Otherwise its usable size is `(oldSize - 12) & ~15`, its previous-in-use bit
-is preserved, and two fencepost size words at offsets +4/+8 receive five.
-Only a usable old remainder of at least 16 is freed. The typed twelve-byte
-fencepost view leaves its first word untouched and avoids treating the
-second size word as a free-list pointer. Maximum counters compare the
-sign-extended 32-bit arena word as unsigned 64-bit and store that same value.
+The localized constraints name real initialized values with actual consumers:
+the contiguous unflagged sum uses `$4` and its flagged store header uses `$2`.
+The second break result and the later new-top size have disjoint `$4` live
+ranges; neither crosses a provider call. The new header computation and its
+existing operand constraint stay after arena accounting and top publication,
+at the header store's consumer phase. The small-old-top path uses `$3` for
+the actual new-top pointer whose size is poisoned to one, then returns.
+No dummy use, artificial live range or extra instruction template is needed.
 
-The initial overlapping-header spelling emits 588 bytes; the truthful
-fencepost record emits 584. Explicit signed/unsigned long page constants
-and physical field order do not retain the missing conversions. The actual
-`_sbrk_r` prototype is supplied before this earlier helper; it is compiler-inert.
-No extra pointer copy or dummy width operation was added.
+For an old top of at least 16 bytes, `(oldSize - 12) & ~15` forms its usable
+remainder, preserving the previous-in-use bit. The typed twelve-byte fencepost
+view leaves its first word untouched and writes five at offsets +4/+8.
+Only a usable remainder of at least 16 is freed. Maximum counters compare
+the sign-extended 32-bit arena word as unsigned 64-bit and store that value.
+The provider ABI, real heap accesses and existing valid-EE-heap/accounting
+assumptions are unchanged; matching does not establish original source spelling.
+
+The earlier overlapping-header draft emitted 588 bytes; the truthful fencepost
+view emitted 584. Restoring the actual arithmetic widths, value lifetimes and
+header-store phase reaches 600 without changing peers. Complete qualification
+checks the owner and owned data, all 100 peer functions, the full retail image,
+and literal plain/stock-dump assembly and raw ELF equality separately in
+production, SKIP_ASM, retained-C and retained-C plus FIX_BUGS contexts.
 
 ## gcc2_compiled__1
 
