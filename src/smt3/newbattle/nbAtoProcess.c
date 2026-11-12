@@ -27,7 +27,7 @@ s32 nbAtoStoneProcess(dds3ProcessID_t *id)
     s32 runtime = dds3GetProcessRunTime(id);
     nbMainProcessData_t *data = nbGetMainProcessData();
 
-    switch (SDF_FRAME_DUE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
+    switch (SDF_FRAME_DUE_AGE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
     case 10:
         nbCameraSetState(0x14);
         return 0;
@@ -57,7 +57,7 @@ s32 nbAtoGameoverProcess(dds3ProcessID_t *id)
     nbMainProcessData_t *data = nbGetMainProcessData();
     nbFormation_t *form = data->form;
 
-    switch (SDF_FRAME_DUE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
+    switch (SDF_FRAME_DUE_AGE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
     case 1:
         nbSingleFormExceptedDispOff(form);
         evtSetUnitColorRGB(form->hunit, 0, 0x80808080);
@@ -79,7 +79,7 @@ s32 nbAtoGameover2Process(dds3ProcessID_t *id)
 {
     u32 runtime = dds3GetProcessRunTime(id);
 
-    switch (SDF_FRAME_DUE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
+    switch (SDF_FRAME_DUE_AGE(runtime) ? SDF_FRAME_TICK(runtime) : -1) {
     case 10:
         dds3FadeOut(0xFF, 0xFF, 0xFF, 30);
         return 0;

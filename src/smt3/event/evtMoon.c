@@ -105,7 +105,7 @@ void evtDeadMoonDraw(evtMoonProcessData_t *data)
         evtDrawDeadMoonSprite(ox + 38, oy + 16, 37, 29, 110, 1, 17, 14, 0x808080,
                               DeadMoonTmx, ox, oy, 0.0f, alpha, alpha, 100.0f, 100.0f);
         rsetAlpha(0);
-        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (SDF_FRAME_DUE()) {
             evtDeadMoonDraw_total_cnt = (evtDeadMoonDraw_total_cnt + 1) % 74;
             evtDeadMoonDraw_a_cnt = (evtDeadMoonDraw_a_cnt + 1) % 48;
         }

@@ -140,7 +140,7 @@ s32 stfMain2(dds3ProcessID_t *id)
     }
 
 scroll:
-    oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + SDF_FRAME_DUE(dds3GetKernelCount()));
+    oStaff_UI->scrollY = (s32)((u32)oStaff_UI->scrollY + SDF_FRAME_DUE());
     GetoStaffUI();
     if (oStaff_UI->scrollY ==
         (s32)((u32)((s32)((u32)stfStaffRollTable[0xB4].y + 0xE0u) / 0x1E)
@@ -258,7 +258,7 @@ void ObjDispOff(void)
         cover = 0x200;
     }
     if (cover >= 0x200) {
-        oStaff_UI->unk_0104 = (s32)((u32)oStaff_UI->unk_0104 + 2u * SDF_FRAME_DUE(dds3GetKernelCount()));
+        oStaff_UI->unk_0104 = (s32)((u32)oStaff_UI->unk_0104 + 2u * SDF_FRAME_DUE());
         if (oStaff_UI->unk_0104 > 0x80) {
             oStaff_UI->unk_0104 = 0x80;
         }
@@ -345,7 +345,7 @@ void ObjDispOff(void)
     rsetAlpha(0);
     if (oStaff_UI->unk_0100 >= 0x3BB) {
         if (oStaff_UI->unk_0114 < 0x80) {
-            oStaff_UI->unk_0114 = oStaff_UI->unk_0114 + 2 / step * SDF_FRAME_DUE(dds3GetKernelCount());
+            oStaff_UI->unk_0114 = oStaff_UI->unk_0114 + 2 / step * SDF_FRAME_DUE();
         } else {
             oStaff_UI->unk_0114 = 0x80;
         }
@@ -359,7 +359,7 @@ void ObjDispOff(void)
         aDrawBoxG(0, 0, 0x200, 0xE0, 0, 0, 0, alpha, 0, 0, 0, alpha,
                   0, 0, 0, alpha, 0, 0, 0, alpha);
     }
-    oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + SDF_FRAME_DUE(dds3GetKernelCount()));
+    oStaff_UI->unk_0100 = (s32)((u32)oStaff_UI->unk_0100 + SDF_FRAME_DUE());
 }
 
 extern s32 p2sdGetPcmState(void);

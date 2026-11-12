@@ -1279,7 +1279,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
     data->flag = 0;
     nbCheckPackLoad(data);
     /* A new phase first runs on a retail tick's first host tick. */
-    if (data->phasetime == 0 && !SDF_FRAME_DUE(dds3GetKernelCount())) {
+    if (data->phasetime == 0 && !SDF_FRAME_DUE()) {
         data->battletime = data->battletime + 1;
         return 0;
     }

@@ -1130,7 +1130,7 @@ void mdlTask(tagPipeObject *objPtr, tagpipeBasic *basicPtr, f32 x, f32 y, f32 z)
     mtxRotateZ(&matrix, z * radians);
     mtxStore(&matrix, &matrix);
     vecDistance(basicPtr->rot, (f32 (*)[4])matrix.m);
-    SDF_FRAME_INTERPOLATE_ROT(dds3GetKernelCount(), basicPtr->base, (sdfVector4_t *)basicPtr->rot);
+    SDF_FRAME_INTERPOLATE_ROT(basicPtr->base, (sdfVector4_t *)basicPtr->rot);
 }
 
 

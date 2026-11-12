@@ -475,7 +475,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     /* A cut made by a battle step starts counting on the next host tick, so the
      * quake, which draws from the shared random stream, waits for a retail tick. */
     if (list->shake != 0 && list->shakeFrame == SDF_FRAME_TICK(frame) &&
-        SDF_FRAME_DUE(dds3GetKernelCount())) {
+        SDF_FRAME_DUE()) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {

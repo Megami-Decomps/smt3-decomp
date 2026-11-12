@@ -489,7 +489,7 @@ s32 nb_295D98(dds3ProcessID_t *id)
     s32 serial;
 
     e = dds3GetProcessData(id);
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
+    if (!SDF_FRAME_DUE()) return 0;
     if (nbE912Table[e->seq](e) != 0) {
         nbE912Unit = NULL;
         if (nbE912UnitA != NULL) {

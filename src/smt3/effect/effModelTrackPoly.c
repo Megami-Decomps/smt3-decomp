@@ -303,13 +303,13 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
         frame = hMTPoly->params.hModel->first->frame;
         if (hMTPoly->params.frame_s <= frame) {
             if (frame <= hMTPoly->params.frame_e) {
-                if (SDF_FRAME_DUE(hMTPoly->updateCount) && SDF_FRAME_TICK(hMTPoly->updateCount) % hMTPoly->params.record == 0) {
+                if (SDF_FRAME_DUE_AGE(hMTPoly->updateCount) && SDF_FRAME_TICK(hMTPoly->updateCount) % hMTPoly->params.record == 0) {
                     Eff_ModelTrackPolyGetMarkPosition(hMTPoly);
                 }
                 dds3HermitianTrackPolyDraw(hMTPoly->trackPoly);
             } else {
                 poly = hMTPoly->trackPoly;
-                if ((poly->abgr & 0xFF000000) != 0 && SDF_FRAME_DUE(hMTPoly->updateCount)) {
+                if ((poly->abgr & 0xFF000000) != 0 && SDF_FRAME_DUE_AGE(hMTPoly->updateCount)) {
                     poly->abgr += 0xE0000000;
                 }
                 dds3HermitianTrackPolyDraw(poly);
@@ -1063,7 +1063,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     if (frame < (f32)hSwordTrack->param_dante.startFrame) {
         return;
     }
-    if (SDF_FRAME_DUE(hSwordTrack->frame)) effSwordTrackRecord(hSwordTrack);
+    if (SDF_FRAME_DUE_AGE(hSwordTrack->frame)) effSwordTrackRecord(hSwordTrack);
     hSwordTrack->otIndex = 0x2E;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);

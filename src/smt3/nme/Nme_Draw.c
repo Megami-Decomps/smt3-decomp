@@ -665,7 +665,7 @@ void nmeUpdateInput(void)
 void nmeAdvanceAnim(void)
 {
     nmeWork_t *work = nmeUpdateWork;
-    work->animation += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
+    work->animation += SDF_FRAME_STEP_INT(2);
     if (work->animation >= 0x900) {
         work->animation = 0;
     }

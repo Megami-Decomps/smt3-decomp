@@ -41,11 +41,17 @@
 #define SDF_FRAME_STEP_DOWN(x, d, min) ((x) - (d))
 #endif
 
-/* An advance per tick added to an integer, given a count of host ticks from
- * 0. A host splits d into whole steps that add up to exactly d over each
- * retail tick, where a rounded SDF_FRAME_STEP would stall or run fast. */
+/* An advance per tick added to an integer. A host splits d into whole steps
+ * that add up to exactly d over each retail tick, where a rounded
+ * SDF_FRAME_STEP would stall or run fast. */
 #ifndef SDF_FRAME_STEP_INT
-#define SDF_FRAME_STEP_INT(age, d) (d)
+#define SDF_FRAME_STEP_INT(d) (d)
+#endif
+
+/* SDF_FRAME_STEP_INT counted from an object's own age, a count of host ticks
+ * from 0, so the steps keep the object's phase. */
+#ifndef SDF_FRAME_STEP_INT_AGE
+#define SDF_FRAME_STEP_INT_AGE(age, d) (d)
 #endif
 
 /* Runs where a floor face's edge band reached a sphere, before the sphere is
@@ -80,11 +86,17 @@
 #define SDF_FRAME_TICK(age) (age)
 #endif
 
-/* True on the first host tick of each retail tick, given a count of host
- * ticks from 0. Gates a step that cannot be scaled, such as a record into a
- * history ring or an integer ramp, so it runs at the retail rate. */
+/* True on the first host tick of each retail tick. Gates a step that cannot
+ * be scaled, such as a record into a history ring or an integer ramp, so it
+ * runs at the retail rate. */
 #ifndef SDF_FRAME_DUE
-#define SDF_FRAME_DUE(age) 1
+#define SDF_FRAME_DUE() 1
+#endif
+
+/* SDF_FRAME_DUE counted from an object's own age, a count of host ticks from
+ * 0, so the step keeps the object's phase. */
+#ifndef SDF_FRAME_DUE_AGE
+#define SDF_FRAME_DUE_AGE(age) 1
 #endif
 
 /* The random state for a draw that code retail runs once per tick makes each
@@ -92,35 +104,55 @@
  * stream on one host tick of each retail tick and a stream of its own on the
  * rest, so the shared stream advances at the retail rate. */
 #ifndef SDF_FRAME_RAND
-#define SDF_FRAME_RAND(age) ((void *)0)
+#define SDF_FRAME_RAND() ((void *)0)
+#endif
+
+/* SDF_FRAME_RAND keyed by a count of host ticks an owner keeps from 0. */
+#ifndef SDF_FRAME_RAND_AGE
+#define SDF_FRAME_RAND_AGE(age) ((void *)0)
+#endif
+
+/* SDF_FRAME_RAND for a draw from the random state at state rather than the
+ * shared stream, such as the battle stream: a host answers state on one host
+ * tick of each retail tick and a stream of its own on the rest. */
+#ifndef SDF_FRAME_RAND_STATE
+#define SDF_FRAME_RAND_STATE(state) (state)
+#endif
+#ifndef SDF_FRAME_RAND_STATE_AGE
+#define SDF_FRAME_RAND_STATE_AGE(age, state) (state)
 #endif
 
 /* Runs one statement on the first host tick of each retail tick. */
 #ifndef SDF_FRAME_WHEN
-#define SDF_FRAME_WHEN(age, stmt) stmt
+#define SDF_FRAME_WHEN(stmt) stmt
+#endif
+
+/* SDF_FRAME_WHEN counted from an object's own age, a count of host ticks from
+ * 0. */
+#ifndef SDF_FRAME_WHEN_AGE
+#define SDF_FRAME_WHEN_AGE(age, stmt) stmt
 #endif
 
 /* The bits of a key mask, read only on the first host tick of each retail
  * tick, so a held key repeats at the retail rate. */
 #ifndef SDF_FRAME_MASK
-#define SDF_FRAME_MASK(age, bits) (bits)
+#define SDF_FRAME_MASK(bits) (bits)
 #endif
 
 /* A value drawn each host tick from state its owner updates once per retail
- * tick, given a count of host ticks from 0 and a key no other interpolated value
- * uses. A host draws it between its values at the ends of the last two retail
+ * tick, given a key no other interpolated value uses. A host draws it between its values at the ends of the last two retail
  * ticks by the share of this tick run, so it moves every host tick and lands
  * on the retail value at the tick's last host tick. The state is unchanged,
  * so retail draws the value itself. */
 #ifndef SDF_FRAME_INTERPOLATE
-#define SDF_FRAME_INTERPOLATE(age, key, value) (value)
+#define SDF_FRAME_INTERPOLATE(key, value) (value)
 #endif
 
 /* SDF_FRAME_INTERPOLATE of a value read before its owner updates it in the
  * same retail tick, so the value changes between that tick's host ticks. A
  * host samples it on the first host tick of each retail tick only. */
 #ifndef SDF_FRAME_INTERPOLATE_DUE
-#define SDF_FRAME_INTERPOLATE_DUE(age, key, value) (value)
+#define SDF_FRAME_INTERPOLATE_DUE(key, value) (value)
 #endif
 
 /* Forgets what SDF_FRAME_INTERPOLATE drew for key, where its owner starts the
@@ -136,43 +168,43 @@
 #define SDF_FRAME_INTERPOLATE_RESET_IF(cond, key)
 #endif
 
-/* Sets lvalue to SDF_FRAME_INTERPOLATE(age, key, value). Expands to nothing here. */
+/* Sets lvalue to SDF_FRAME_INTERPOLATE(key, value). Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_SET
-#define SDF_FRAME_INTERPOLATE_SET(age, key, lvalue, value)
+#define SDF_FRAME_INTERPOLATE_SET(key, lvalue, value)
 #endif
 
 /* Sets the n floats at dst to SDF_FRAME_INTERPOLATE of the n floats at src, the
  * i-th keyed by key and i. Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_VEC
-#define SDF_FRAME_INTERPOLATE_VEC(age, key, dst, src, n)
+#define SDF_FRAME_INTERPOLATE_VEC(key, dst, src, n)
 #endif
 
 /* Four floats drawn each host tick from the four at src, which their owner
  * updates once per retail tick: a host points at a copy whose first n lanes
  * are SDF_FRAME_INTERPOLATE of src's, keyed by src. Retail points at src. */
 #ifndef SDF_FRAME_INTERPOLATE_PTR
-#define SDF_FRAME_INTERPOLATE_PTR(age, src, n) (src)
+#define SDF_FRAME_INTERPOLATE_PTR(src, n) (src)
 #endif
 
 /* Sets basic's position to the vector at pos, which its owner sets once per
  * retail tick. A host sets SDF_FRAME_INTERPOLATE of it, keyed by pos, and sets
  * it again at each SDF_FRAME_INTERPOLATE_POSES on the rest of the retail tick. */
 #ifndef SDF_FRAME_INTERPOLATE_POSE
-#define SDF_FRAME_INTERPOLATE_POSE(age, basic, pos) dds3SetPosPoseSet((basic), (pos))
+#define SDF_FRAME_INTERPOLATE_POSE(basic, pos) dds3SetPosPoseSet((basic), (pos))
 #endif
 
 /* Sets basic's rotation to the quaternion at rot, which its owner sets once per
  * retail tick. A host interpolates it the short way round, keyed by rot, and
  * sets it again at each SDF_FRAME_INTERPOLATE_POSES as it does positions. */
 #ifndef SDF_FRAME_INTERPOLATE_ROT
-#define SDF_FRAME_INTERPOLATE_ROT(age, basic, rot) dds3SetRotPoseSet((basic), (rot))
+#define SDF_FRAME_INTERPOLATE_ROT(basic, rot) dds3SetRotPoseSet((basic), (rot))
 #endif
 
 /* Sets again each position SDF_FRAME_INTERPOLATE_POSE and each rotation
  * SDF_FRAME_INTERPOLATE_ROT set in this retail tick.
  * Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_POSES
-#define SDF_FRAME_INTERPOLATE_POSES(age)
+#define SDF_FRAME_INTERPOLATE_POSES()
 #endif
 
 /* Brackets the reads of positions recorded once per retail tick by parts
@@ -180,10 +212,11 @@
  * posOld the one before. A host running more ticks than retail may move the
  * followers between retail ticks, reading the mark itself from root's node
  * mark, and must put pos and posOld back at END so the next record still
- * spans one retail tick. Retail reads the recorded positions, so both expand
- * to nothing. */
-#ifndef SDF_FRAME_FOLLOW_BEGIN
-#define SDF_FRAME_FOLLOW_BEGIN(age, pos, posOld, root, mark)
+ * spans one retail tick. BEGIN takes the age of the part's owner, a count
+ * of host ticks from 0. Retail reads the recorded positions, so both expand to
+ * nothing. */
+#ifndef SDF_FRAME_FOLLOW_BEGIN_AGE
+#define SDF_FRAME_FOLLOW_BEGIN_AGE(age, pos, posOld, root, mark)
 #endif
 #ifndef SDF_FRAME_FOLLOW_END
 #define SDF_FRAME_FOLLOW_END(pos, posOld)

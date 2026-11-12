@@ -1033,13 +1033,13 @@ void fldAutoMapDrawOneArea(void)
     }
     state = fldAutoMapDrawState;
     if (state < 0) {
-        state += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        state += SDF_FRAME_STEP_INT(4);
         fldAutoMapDrawState = state;
-        fldAutoMapSlideCount += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        fldAutoMapSlideCount += SDF_FRAME_STEP_INT(4);
     }
     if (state > 0) {
-        fldAutoMapDrawState = state - SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
-        fldAutoMapSlideCount -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 4);
+        fldAutoMapDrawState = state - SDF_FRAME_STEP_INT(4);
+        fldAutoMapSlideCount -= SDF_FRAME_STEP_INT(4);
     }
     if (!(fldAutoMapFloorOfsY < 1000.0f) || !(fldAutoMapFloorOfsY > -1000.0f)) {
         if (fldAutoMapFloorOfsY > 0.0f) {

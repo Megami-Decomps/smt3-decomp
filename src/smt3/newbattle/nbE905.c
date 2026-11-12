@@ -342,7 +342,7 @@ s32 nbE905Process_1(dds3ProcessID_t *id)
     s32 serial;
 
     e = dds3GetProcessData(id);
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
+    if (!SDF_FRAME_DUE()) return 0;
     if (nbE905Table[e->seq](e) != 0) {
         nbE905CameraBasic = NULL;
         if (nbE905StageBasic0 != NULL) {

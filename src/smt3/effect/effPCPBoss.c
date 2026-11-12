@@ -1899,10 +1899,10 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
             sdfModelGetMarkPos(map, i);
             if (frame < work->cellCount) {
                 historyCount = historyCell->vertexCount;
-                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount));
-                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1));
-                SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2));
-                historyCell->vertexCount += 3 * SDF_FRAME_DUE(work->frame);
+                SDF_FRAME_WHEN_AGE(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount));
+                SDF_FRAME_WHEN_AGE(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 1));
+                SDF_FRAME_WHEN_AGE(work->frame, SDF_VU0_STOREVECTOR_NOMEM(positions + historyCount + 2));
+                historyCell->vertexCount += 3 * SDF_FRAME_DUE_AGE(work->frame);
                 taperStep = taperRange / frame;
                 blend = 1.0f;
                 SDF_VU0_LOADVECTOR_C(D_0031FF70);
@@ -2071,7 +2071,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                             colorWords[4] = colorWords[2];
                         }
                     }
-                    cell->frame += SDF_FRAME_DUE(work->frame);
+                    cell->frame += SDF_FRAME_DUE_AGE(work->frame);
                 }
                 dds3FlashPolyListDraw(group->hFlash);
             }
@@ -4156,7 +4156,7 @@ void effPCPDANTE_Damage_Run(effPCPDANTE_Damage_tag *work)
             scale = effBTLPartGetScalePtr(unit);
             place.payload[10] = scale;
 
-            if (work->delay[slot] != 0 && SDF_FRAME_DUE(dds3GetKernelCount())) {
+            if (work->delay[slot] != 0 && SDF_FRAME_DUE()) {
                 work->delay[slot] = work->delay[slot] - 1;
                 if (work->delay[slot] == 0) {
                     nbSetUnitMotion(unit, 1, 0, 1.0f);

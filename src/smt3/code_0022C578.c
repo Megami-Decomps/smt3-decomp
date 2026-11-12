@@ -2895,7 +2895,7 @@ void campDrawNumber(void)
             timer %= 0x100;
             fade = (0x100 - timer) / 2;
         }
-        fade = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &campWork->RootTimer, fade);
+        fade = SDF_FRAME_INTERPOLATE_DUE(&campWork->RootTimer, fade);
         colors[0] = 0x80808000 | fade;
         colors[1] = 0x80808000 | fade;
         colors[2] = 0x80808000 | fade;
@@ -2931,7 +2931,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if (campWork->RootTimer < 0x100) {
-            campWork->RootTimer += 0x2A * SDF_FRAME_DUE(dds3GetKernelCount());
+            campWork->RootTimer += 0x2A * SDF_FRAME_DUE();
         }
         if (campWork->RootTimer > 0x100) {
             campWork->RootTimer = 0x100;
@@ -2941,7 +2941,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if ((u32)(campWork->RootTimer - 0x100) < 0x100) {
-            campWork->RootTimer += 0x2A * SDF_FRAME_DUE(dds3GetKernelCount());
+            campWork->RootTimer += 0x2A * SDF_FRAME_DUE();
         }
         if (campWork->RootTimer > 0x200) {
             campWork->RootTimer = 0x200;
@@ -3370,7 +3370,7 @@ void cmpUpdateProcessStatus(void)
     u8 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
 
     if ((s8)campWork->statusPhase != 0 && (s8)campWork->statusPhase < 3) {
-        campWork->statusPhase += SDF_FRAME_DUE(dds3GetKernelCount());
+        campWork->statusPhase += SDF_FRAME_DUE();
     }
     switch (button) {
     case 1:
@@ -3586,7 +3586,7 @@ s32 func_00232198(void)
 {
     s32 i;
 
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
+    if (!SDF_FRAME_DUE()) return 0;
     for (i = 0; i < 0x10; i++) {
         if (campWork->stockDelay[i] > 0) {
             campWork->stockDelay[i]--;
@@ -4581,7 +4581,7 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
         f32 angle = entry->unk_18;
         fclDrawArrowCursorBox(x - inset, y - (inset >> 1), 0,
             (inset >> 3) + 35, (inset >> 3) + 36, entry->color, entry->unk_01,
-            1, SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &entry->unk_2C, entry->unk_2C), angle);
+            1, SDF_FRAME_INTERPOLATE_DUE(&entry->unk_2C, entry->unk_2C), angle);
     }
 }
 
@@ -5295,7 +5295,7 @@ void cmpStepHeartsAttachCursor(s32 step)
         {
             return;
         }
-        campDhTimerWork->unk_28 += SDF_FRAME_DUE(dds3GetKernelCount());
+        campDhTimerWork->unk_28 += SDF_FRAME_DUE();
     }
     phase = campDhTimerWork->unk_28 % period;
     if (phase == 0)
@@ -5411,7 +5411,7 @@ s32 campDhWaitMessageEnd(void)
 
 void campDhAdvanceAnim(void)
 {
-    campDhTimerWork->unk_1C += SDF_FRAME_DUE(dds3GetKernelCount());
+    campDhTimerWork->unk_1C += SDF_FRAME_DUE();
     if (campDhTimerWork->unk_1C >= 0x400) {
         campDhTimerWork->unk_1C = 0;
     }
@@ -5552,7 +5552,7 @@ void campDhScanEntries(void)
             entry->unk_10 -= 1;
             continue;
         }
-        if ((entry->unk_2C = entry->unk_2C + entry->unk_30 * SDF_FRAME_DUE(dds3GetKernelCount())) >= 0x201) {
+        if ((entry->unk_2C = entry->unk_2C + entry->unk_30 * SDF_FRAME_DUE()) >= 0x201) {
             entry->unk_2C = 0;
             SDF_FRAME_INTERPOLATE_RESET(&entry->unk_2C);
         }
@@ -5577,21 +5577,21 @@ void campDhFindVisibleIcon(void)
     }
     if (gauge->visible != 0) {
         if (gauge->alpha < 0x100) {
-            gauge->alpha = gauge->alpha + SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->step);
+            gauge->alpha = gauge->alpha + SDF_FRAME_STEP_INT(gauge->step);
         }
         if (gauge->alpha >= 0x101) {
             gauge->alpha = 0x100;
         }
     } else {
         if (gauge->alpha > 0) {
-            gauge->alpha = gauge->alpha - SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->step);
+            gauge->alpha = gauge->alpha - SDF_FRAME_STEP_INT(gauge->step);
         }
         if (gauge->alpha < 0) {
             gauge->alpha = 0;
         }
     }
     if (gauge->fade < 0x100) {
-        gauge->fade = gauge->fade + SDF_FRAME_STEP_INT(dds3GetKernelCount(), gauge->fadeStep);
+        gauge->fade = gauge->fade + SDF_FRAME_STEP_INT(gauge->fadeStep);
     }
     if (gauge->fade >= 0x101) {
         gauge->fade = 0x100;
@@ -5782,10 +5782,10 @@ void rstDrawNumber(s32 x, s32 y, s8 number)
                         D_00345D88, fclSpriteTable, 0x47);
     if (number > 0) {
         if (cmpStatTimer < 0x18) {
-            cmpStatTimer += SDF_FRAME_DUE(dds3GetKernelCount());
+            cmpStatTimer += SDF_FRAME_DUE();
         }
     } else if (cmpStatTimer > 0) {
-        cmpStatTimer -= SDF_FRAME_DUE(dds3GetKernelCount());
+        cmpStatTimer -= SDF_FRAME_DUE();
     }
     cmpGetGaugeBlinkAlpha(cmpStatTimer, 2, colors);
     fclDrawSpriteRes((x + 0x7E) << 4, (yBase + 0x92) << 3, 0, (s32 *)colors,
@@ -6645,7 +6645,7 @@ extern s32 cmpStatusAnimCount[];
 
 void cmpAdvanceStatusAnim(void)
 {
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return;
+    if (!SDF_FRAME_DUE()) return;
     if (cmpStatusAnimCount[0] < 0x30) {
         cmpStatusAnimCount[0]++;
     } else {
@@ -8838,7 +8838,7 @@ s32 campGetCursorColorAlt2(s32 color, cmpCursorSlot_t *slot)
 
 s32 campGetStockAlpha(s8 index, s8 row)
 {
-    return SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &campWork->stockAlpha[index + row * 4],
+    return SDF_FRAME_INTERPOLATE_DUE(&campWork->stockAlpha[index + row * 4],
                                      campWork->stockAlpha[index + row * 4]);
 }
 
@@ -10364,7 +10364,7 @@ void cmpSetStatusModelParam(void)
     SDF_VU0_SCALEVECTOR(600.0f);
     SDF_VU0_ADDVECTOR();
     /* The quake moves once per retail tick. */
-    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), dds3QuakeOffset, 3));
+    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3QuakeOffset, 3));
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     SDF_VU0_LOADVECTOR(aViewEye);
@@ -10993,7 +10993,7 @@ void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor)
                 value = (s32 *)(valueBase + byteOffset);
                 update = value;
                 if (*update < 0x100) {
-                    *update += SDF_FRAME_STEP_INT(dds3GetKernelCount(), entry->param);
+                    *update += SDF_FRAME_STEP_INT(entry->param);
                 } else {
                     entry->state = 0;
                 }
@@ -11328,7 +11328,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
 
 void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
 {
-    cursor->unk_34 += 6 * SDF_FRAME_DUE(dds3GetKernelCount());
+    cursor->unk_34 += 6 * SDF_FRAME_DUE();
     if (cursor->unk_34 > 0x200) {
         cursor->unk_34 -= 0x200;
     }

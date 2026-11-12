@@ -3118,7 +3118,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
     u32 point;
 
     if (hData->updateCount > SDF_FRAMES(50)) {
-        if (SDF_FRAME_DUE(hData->updateCount) && (hData->baseColor & 0xFF000000) >= 0x08000000) {
+        if (SDF_FRAME_DUE_AGE(hData->updateCount) && (hData->baseColor & 0xFF000000) >= 0x08000000) {
             hData->baseColor -= 0x08000000;
         }
     }
@@ -3131,7 +3131,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
     dds3EffectPartSetPosition(hData->secondaryHandle, hData->vectorWords);
     mdlLink(model, sdfModelOtTable);
     captureRow = hData->historyCount;
-    if (captureRow < 25 && SDF_FRAME_DUE(hData->updateCount - 1)) {
+    if (captureRow < 25 && SDF_FRAME_DUE_AGE(hData->updateCount - 1)) {
         for (point = 0; point < 7; point++) {
             if (captureRow % effPCPMudoSampleStep[point] == 0) {
                 sdfModelGetMarkPos(model->modelRoot, point + 1);
@@ -3162,7 +3162,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
                 dds3BillboardSetPosition(bill, hData->samplePositions[i][point]);
                 dds3BillboardDraw(bill);
                 dds3BillboardSetAnimKey(bill, hData->animationFrames[i][point]);
-                hData->animationFrames[i][point] += SDF_FRAME_DUE(hData->updateCount - 1);
+                hData->animationFrames[i][point] += SDF_FRAME_DUE_AGE(hData->updateCount - 1);
             }
         }
     }
@@ -5279,10 +5279,10 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
     dds3EffectPartSetColor(work->headHandle, color);
     mdlLink(model, sdfModelOtTable);
     /* pos and pos_old hold the last two retail ticks' marks, so the trail segment spans one tick. */
-    SDF_FRAME_WHEN(work->frame, SDF_VU0_COPYVECTOR(work->pos_old, work->pos));
-    SDF_FRAME_WHEN(work->frame, sdfModelGetMarkPos(model->modelRoot, 1));
-    SDF_FRAME_WHEN(work->frame, SDF_VU0_STOREVECTOR(work->pos));
-    SDF_FRAME_FOLLOW_BEGIN(work->frame, work->pos, work->pos_old, model->modelRoot, 1);
+    SDF_FRAME_WHEN_AGE(work->frame, SDF_VU0_COPYVECTOR(work->pos_old, work->pos));
+    SDF_FRAME_WHEN_AGE(work->frame, sdfModelGetMarkPos(model->modelRoot, 1));
+    SDF_FRAME_WHEN_AGE(work->frame, SDF_VU0_STOREVECTOR(work->pos));
+    SDF_FRAME_FOLLOW_BEGIN_AGE(work->frame, work->pos, work->pos_old, model->modelRoot, 1);
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
             if (i == 4) {
@@ -5324,7 +5324,7 @@ void effPCPAgiFireballDraw(effPCPAgiFireball_tag *work) {
             if (work->param.TrackCount[j] > 0) {
                 if (frame < count) {
                     base = (SDF_FRAME_TICK(work->frame) - 1) * work->param.TrackCount[j];
-                    if (SDF_FRAME_DUE(work->frame)) {
+                    if (SDF_FRAME_DUE_AGE(work->frame)) {
                         SDF_VU0_LOADVECTOR(work->pos);
                         SDF_VU0_LOADVECTOR_B(work->pos_old);
                         SDF_VU0_SUBVECTOR();

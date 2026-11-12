@@ -476,7 +476,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
             nbCameraStateTable[pNbCamera.state].init();
         }
     }
-    if (nbCameraStateTable[pNbCamera.state].calc != NULL && SDF_FRAME_DUE(dds3GetKernelCount())) {
+    if (nbCameraStateTable[pNbCamera.state].calc != NULL && SDF_FRAME_DUE()) {
         nbCameraStateTable[pNbCamera.state].calc();
     }
     if (effBTLDebug_CameraAllEditCheck() != 0) {
@@ -492,7 +492,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     work = camera->workdata;
     /* Steps with the state calc, so the whole shot changes once per retail
      * tick and the draw below interpolates it evenly. */
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+    if (SDF_FRAME_DUE()) {
         if (pNbCamera.anim.rotate_f > 0) {
             pNbCamera.anim.rotate_f--;
         } else {
@@ -530,14 +530,14 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &work->targetPos.x);
     SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.direction.x);
     SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.fovy);
-    SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &work->eyeVector.x, &eye.x, &eye.x, 3);
-    SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &work->targetPos.x, &work->targetPos.x, &work->targetPos.x, 3);
+    SDF_FRAME_INTERPOLATE_VEC(&work->eyeVector.x, &eye.x, &eye.x, 3);
+    SDF_FRAME_INTERPOLATE_VEC(&work->targetPos.x, &work->targetPos.x, &work->targetPos.x, 3);
     /* MakeCamera aims at the eye plus this vector. */
-    SDF_FRAME_INTERPOLATE_VEC(dds3GetKernelCount(), &pNbCamera.direction.x, &work->eyeVector.x, &work->eyeVector.x, 3);
+    SDF_FRAME_INTERPOLATE_VEC(&pNbCamera.direction.x, &work->eyeVector.x, &work->eyeVector.x, 3);
     dds3SetPosPoseSet(camera, &eye);
-    dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &pNbCamera.fovy, pNbCamera.fovy));
+    dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_INTERPOLATE(&pNbCamera.fovy, pNbCamera.fovy));
     work->flag |= 1;
-    pNbCamera.frame += SDF_FRAME_DUE(dds3GetKernelCount());
+    pNbCamera.frame += SDF_FRAME_DUE();
     return 0;
 }
 

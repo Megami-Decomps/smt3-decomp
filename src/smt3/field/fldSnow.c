@@ -388,7 +388,7 @@ void fldSnowTask(void)
         return;
     }
     if (gFldSnowMode == 0) {
-        for (i = 0; i < 2 * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+        for (i = 0; i < 2 * SDF_FRAME_DUE(); i++) {
             if ((dds3GetRandA(NULL) & 3) == 0) {
                 u32 random = dds3GetRandA(NULL) & 0xFF;
                 f32 x = gFldSnowX + (f32)random * gFldSnowW;
@@ -399,7 +399,7 @@ void fldSnowTask(void)
             }
         }
     } else {
-        for (i = 0; i < 12 * SDF_FRAME_DUE(dds3GetKernelCount()); i++) {
+        for (i = 0; i < 12 * SDF_FRAME_DUE(); i++) {
             if ((dds3GetRandA(NULL) & 3) == 0) {
                 u32 random = dds3GetRandA(NULL) & 0xFF;
                 f32 x = fldGlobalBase.x + gFldSnowX + (f32)random * gFldSnowW;
@@ -444,10 +444,10 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
-                seed->life -= SDF_FRAME_DUE(dds3GetKernelCount());
+                seed->life -= SDF_FRAME_DUE();
                 seed->y += SDF_FRAME_STEP(speed + (f32)seed->spdx * 0.125f);
                 if (seed->life < 0x40) {
-                    seed->alp -= 2 * SDF_FRAME_DUE(dds3GetKernelCount());
+                    seed->alp -= 2 * SDF_FRAME_DUE();
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;
@@ -476,10 +476,10 @@ void fldSnowTask(void)
         seed = gFldSeedBuff;
         for (i = 0; i < 700; i++, seed++) {
             if (seed->flg & 1) {
-                seed->life -= SDF_FRAME_DUE(dds3GetKernelCount());
+                seed->life -= SDF_FRAME_DUE();
                 seed->y += SDF_FRAME_STEP(speed - (f32)seed->spdx * 0.125f);
                 if (seed->life < 0x40) {
-                    seed->alp -= 2 * SDF_FRAME_DUE(dds3GetKernelCount());
+                    seed->alp -= 2 * SDF_FRAME_DUE();
                 }
                 if (seed->life <= 0) {
                     seed->flg = 0;

@@ -871,7 +871,7 @@ void fldSdwDraw(dds3Basic_t *basic)
         if (work->EL_serialID != -1) {
             if (fldSdwLightTracking == 0) {
                 if (fldSdwBoxAlpha >= 21) {
-                    fldSdwBoxAlpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
+                    fldSdwBoxAlpha -= SDF_FRAME_STEP_INT(2);
                 } else {
                     fldSdwLightTracking = 1;
                     fldSdwBoxAlpha = 8;
@@ -899,7 +899,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                     fldSdwDrawVec.x /= distance;
                 }
                 if (fldSdwBoxAlpha < 48) {
-                    fldSdwBoxAlpha += 2 * SDF_FRAME_DUE(dds3GetKernelCount());
+                    fldSdwBoxAlpha += 2 * SDF_FRAME_DUE();
                 }
             }
             length = 200.0f;
@@ -925,11 +925,11 @@ void fldSdwDraw(dds3Basic_t *basic)
             fldSdwDrawVec.x += extra;
             alpha = fldSdwBoxAlpha;
             if (alpha >= 21) {
-                alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
+                alpha -= SDF_FRAME_STEP_INT(2);
                 fldSdwBoxAlpha = alpha;
             }
             if (alpha < 20) {
-                fldSdwBoxAlpha = alpha + SDF_FRAME_STEP_INT(dds3GetKernelCount(), 2);
+                fldSdwBoxAlpha = alpha + SDF_FRAME_STEP_INT(2);
             }
             length = 200.0f;
         } else {
@@ -937,7 +937,7 @@ void fldSdwDraw(dds3Basic_t *basic)
                 fldSdwLightTracking = 0;
                 fldSdwBoxAlpha = 6;
             } else {
-                fldSdwBoxAlpha -= 4 * SDF_FRAME_DUE(dds3GetKernelCount());
+                fldSdwBoxAlpha -= 4 * SDF_FRAME_DUE();
             }
             length = 200.0f;
         }
@@ -2002,14 +2002,14 @@ void func_0011C790(void) {
 void func_0011C798(void)
 {
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
 }
 
 void func_0011C7B8(void)
 {
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
     if (fldRun_Dante.bgm_mode != 0) {
         fldRun_Dante.bgm_mode = 0;
@@ -2026,7 +2026,7 @@ void fldRunDanteDoin(void)
     void **basic;
 
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe == 0x4E && fldRun_Dante.pDoor != NULL) {
         basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.pDoor->name);
@@ -2059,10 +2059,10 @@ void fldRunDanteMove(void)
     u8 *routeEntry;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
 
     routeEntry = fldRun_Dante.RouteDataTop;
@@ -2168,10 +2168,10 @@ void fldRunDantePwak(void)
     u8 *routeEntry;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
 
     routeEntry = fldRun_Dante.RouteDataTop;
@@ -2269,7 +2269,7 @@ void fldRunDanteSoba(void)
     f32 dist;
 
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
     dist = fldRun_Dante.d_p_len;
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
@@ -2308,10 +2308,10 @@ void fldRunDantePatr(void)
     f32 angle;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
 
     FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
@@ -2406,10 +2406,10 @@ void fldRunDanteGun1(void)
     s32 i;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
     distance = fldRun_Dante.d_p_len;
@@ -2497,10 +2497,10 @@ void fldRunDanteGun2(void)
     s32 i;
 
     if (fldRun_Dante.cnt_ex < 300) {
-        fldRun_Dante.cnt_ex += SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
     }
     if (fldRun_Dante.nextframe > 0) {
-        fldRun_Dante.nextframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.nextframe -= SDF_FRAME_DUE();
     }
     fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
     distance = fldRun_Dante.d_p_len;
@@ -3104,7 +3104,7 @@ void fldRunDanteSetModel(void)
             alpha >>= 1;
         }
         fldRunDanteDrawShadow(alpha, fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z, 700.0f);
-        fldRun_Dante.gunlight_anime -= SDF_FRAME_DUE(dds3GetKernelCount());
+        fldRun_Dante.gunlight_anime -= SDF_FRAME_DUE();
         fldRunDanteGetDistAngle(&distance, &angle);
         if (distance < 1800.0f) {
             intensity = (s32)((1800.0f - distance) * 0.017777777f) + 16;

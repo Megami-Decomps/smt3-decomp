@@ -1236,7 +1236,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &point);
+            if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &point);
         }
         if (age >= life && respawn) {
             particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1421,7 +1421,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
                 fade = 1.0f;
             }
             effMagaCylinderSetPart(valueWork, particleIndex, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            if (SDF_FRAME_DUE(frame)) effMagaCylinderSetPartPos(valueWork, particleIndex, &out);
+            if (SDF_FRAME_DUE_AGE(frame)) effMagaCylinderSetPartPos(valueWork, particleIndex, &out);
         }
         if (frame >= life && respawn) {
             *delays = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1597,7 +1597,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
+            if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1798,7 +1798,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
+            if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -2023,7 +2023,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             }
             effMagaCylinderSetPart(valueWork, i,
                                    effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            if (SDF_FRAME_DUE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
+            if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
             particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);

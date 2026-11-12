@@ -918,11 +918,11 @@ s32 ProcSequence(dds3ProcessID_t *id)
         break;
     case 2:
     case 6:
-        if (fldGlobalBase.word94 > 0) fldGlobalBase.word94 -= SDF_FRAME_DUE(dds3GetKernelCount());
+        if (fldGlobalBase.word94 > 0) fldGlobalBase.word94 -= SDF_FRAME_DUE();
         break;
     case 3:
     case 7:
-        if (fldGlobalBase.word94 < 15) fldGlobalBase.word94 += SDF_FRAME_DUE(dds3GetKernelCount());
+        if (fldGlobalBase.word94 < 15) fldGlobalBase.word94 += SDF_FRAME_DUE();
         break;
     }
     if (fldProcCampChk() != 1) {

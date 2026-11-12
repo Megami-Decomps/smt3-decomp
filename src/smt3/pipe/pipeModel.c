@@ -126,7 +126,7 @@ void mymdlPosSet(tagpipeBasic *pWork, f32 x, f32 y, f32 z)
     pWork->pos[0] = x;
     pWork->pos[1] = y;
     pWork->pos[2] = z;
-    SDF_FRAME_INTERPOLATE_POSE(dds3GetKernelCount(), pWork->base, pWork->pos);
+    SDF_FRAME_INTERPOLATE_POSE(pWork->base, pWork->pos);
     pWork = NULL;
 }
 

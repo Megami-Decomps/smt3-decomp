@@ -1057,7 +1057,7 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
 
     work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
     FrameRun(work);
-    work->nowFrame += SDF_FRAME_DUE(dds3GetKernelCount());
+    work->nowFrame += SDF_FRAME_DUE();
     ret = 0;
     if (work->nowFrame >= work->cutInfo->LastFrame) {
         printf("end polygon movie! frame:%d\n", work->nowFrame);

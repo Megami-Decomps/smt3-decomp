@@ -185,7 +185,7 @@ void dds3RunProcessList(void)
                     dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] = 0;
                 }
                 count = dds3PadButtonHoldCounters[pad * 16 + half * 32 + key];
-                if (count >= SDF_FRAMES(8) && (SDF_FRAME_TICK(count) & 1) == 0 && SDF_FRAME_DUE(count)) {
+                if (count >= SDF_FRAMES(8) && (SDF_FRAME_TICK(count) & 1) == 0 && SDF_FRAME_DUE_AGE(count)) {
                     dds3PadButtonPrev[pad * 16 + half * 32 + key] |= 2;
                 }
             }
@@ -209,7 +209,7 @@ void dds3RunProcessList(void)
             }
             stickcount = dds3PadStickHoldCounters[pad * 2 + key];
             if (stickcount >= SDF_FRAMES(8) && (SDF_FRAME_TICK(stickcount) & 1) == 0 &&
-                SDF_FRAME_DUE(stickcount)) {
+                SDF_FRAME_DUE_AGE(stickcount)) {
                 dds3PadStickStatusPrev[pad * 2 + key] |= 2;
             }
         }

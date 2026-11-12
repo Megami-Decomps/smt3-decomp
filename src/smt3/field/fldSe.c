@@ -187,7 +187,7 @@ void fldPlaySe3D(void) {
             nearby = 1;
         }
     }
-    if (nearby != 0 && (SDF_FRAME_TICK(tick) & 1) && SDF_FRAME_DUE(tick)) {
+    if (nearby != 0 && (SDF_FRAME_TICK(tick) & 1) && SDF_FRAME_DUE_AGE(tick)) {
         p2sdSetStandPos(listenerX, listenerY, listenerZ,
             fldCamEye[0], fldCamEye[1], fldCamEye[2]);
     }

@@ -988,7 +988,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         FAKEMATCH_ASM_LIVE_VOLATILE(movement);
         phase = form->range;
         power = form->shakePower;
-        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (SDF_FRAME_DUE()) {
             step = (1.0f - phase) * power;
             form->shakePower = power + 0.02f;
             if (step < 0.01f) {
@@ -1000,7 +1000,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
             }
         }
         SDF_VU0_LOADVECTOR(&form->startpos);
-        blend = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &form->range, form->range);
+        blend = SDF_FRAME_INTERPOLATE(&form->range, form->range);
         interpolationBlend = blend;
         inversePhase = 1.0f - blend;
         PS2_FLOAT_BITS(phaseBits, inversePhase);
@@ -1019,7 +1019,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         if (form->basic != NULL) {
             dds3SetPosPoseSet(form->basic, &form->pos);
             anime = form->anime;
-            blend = SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &form->range, form->range);
+            blend = SDF_FRAME_INTERPOLATE(&form->range, form->range);
         }
         if (blend >= 1.0f) {
             if ((anime & 0x40) != 0) {
@@ -1107,8 +1107,8 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
         FAKEMATCH_ASM_REG(f32, endpoint, "$f2") = 1.0f;
         FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
         x = form->damageRange * phase;
-        rangeStep = (endpoint - phase) * power * SDF_FRAME_DUE(dds3GetKernelCount());
-        form->shakePower = power + 0.02f * SDF_FRAME_DUE(dds3GetKernelCount());
+        rangeStep = (endpoint - phase) * power * SDF_FRAME_DUE();
+        form->shakePower = power + 0.02f * SDF_FRAME_DUE();
         form->range = phase + rangeStep;
         if (form->range >= 0.99f) {
             form->shakePower = -form->addmovet * 0.6f;
@@ -1117,8 +1117,8 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
         FAKEMATCH_ASM_REG(f32, negativePower, "$f4") = -power;
         FAKEMATCH_ASM_REG(f32, rangeStep, "$f5");
         x = form->damageRange * form->range;
-        rangeStep = form->range * negativePower * SDF_FRAME_DUE(dds3GetKernelCount());
-        form->shakePower = power - 0.01f * SDF_FRAME_DUE(dds3GetKernelCount());
+        rangeStep = form->range * negativePower * SDF_FRAME_DUE();
+        form->shakePower = power - 0.01f * SDF_FRAME_DUE();
         form->range -= rangeStep;
         if (form->range <= 0.01f) {
             form->type = 0;
@@ -1127,7 +1127,7 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
             return;
         }
     }
-    SDF_FRAME_INTERPOLATE_SET(dds3GetKernelCount(), &form->damageRange, x, form->damageRange * form->range);
+    SDF_FRAME_INTERPOLATE_SET(&form->damageRange, x, form->damageRange * form->range);
     SDF_VU0_COPYVECTOR(&pos, &form->pos);
     pos.x += x;
     dds3SetPosPoseSet(basic, &pos);
@@ -1196,7 +1196,7 @@ void RunDamage(nbMainProcessData_t *data, nbFormation_t *form)
     }
 
     /* The shake draws from the shared random stream, so it moves once per retail tick. */
-    if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+    if (SDF_FRAME_DUE()) {
         offset = dds3GetRandFloatA(0) * form->damageRange;
         if ((form->time & 1) != 0) {
             offset = -offset;
@@ -1410,7 +1410,7 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                     if (form->hunit->motionSetup.motionId != 0) {
                         nbSetUnitMotion(form, 0, 3, 1.0f);
                     } else if (form->autotime != 0) {
-                        form->autotime -= SDF_FRAME_DUE(dds3GetKernelCount());
+                        form->autotime -= SDF_FRAME_DUE();
                     } else {
                         nbSetUnitMotion(form, 0, 3, 1.0f);
                     }
@@ -1447,7 +1447,7 @@ void *nbUnitProcess2(dds3ProcessID_t *id)
                     form->basic->poseset->flag = (form->basic->poseset->flag | 1) & ~2;
                 }
             }
-            form->time += SDF_FRAME_DUE(dds3GetKernelCount());
+            form->time += SDF_FRAME_DUE();
         }
     }
     return NULL;

@@ -462,11 +462,11 @@ void nbMakaStep(nbMakaProcessData_t *w)
         return;
     case 2:
         if (w->offtime > 0) {
-            w->offtime -= SDF_FRAME_DUE(dds3GetKernelCount());
+            w->offtime -= SDF_FRAME_DUE();
             return;
         }
         if (w->alpha > 0) {
-            w->alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 0x14);
+            w->alpha -= SDF_FRAME_STEP_INT(0x14);
             if (w->alpha < 0) {
                 w->alpha = 0;
             }

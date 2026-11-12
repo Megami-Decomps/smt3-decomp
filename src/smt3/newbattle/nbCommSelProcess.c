@@ -276,7 +276,7 @@ void DispPanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 c)
     s32 blink;
 
     if (type == 3) {
-        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
+        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(&s->smritu, s->smritu) * 43.0f);
     }
     listCount = GetCommListCnt(s, type);
     blink = SDF_FRAME_TICK(s->data->battletime) % 0x19 < 0xE;
@@ -308,7 +308,7 @@ void DispPanelLabel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, u32 col
 
     nbGetUnitWorkPointer(s->data, s->my);
     if (type == 3) {
-        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
+        margin = 0x2B - (s32)(SDF_FRAME_INTERPOLATE_DUE(&s->smritu, s->smritu) * 43.0f);
     }
     count = 0;
     rank = 0;
@@ -703,7 +703,7 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
     DispPanelSitaji(s, type, originalX, originalY, color);
     DispPanelCursor(s, type, originalX, originalY, color);
     count = GetCommListCnt(s, type);
-    motion = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f;
+    motion = SDF_FRAME_INTERPOLATE_DUE(&s->smritu, s->smritu) * 43.0f;
 
     if ((u32)type < 6) {
         switch (type) {
@@ -774,7 +774,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         }
     } else {
         if (s->helpa > 0) {
-            s->helpa -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 21);
+            s->helpa -= SDF_FRAME_STEP_INT(21);
             if (s->helpa < 0) {
                 s->helpa = 0;
             }
@@ -784,7 +784,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 128) {
             s->animeflag &= ~1;
         } else {
-            s->alpha += SDF_FRAME_STEP_INT(dds3GetKernelCount(), 20);
+            s->alpha += SDF_FRAME_STEP_INT(20);
             if (s->alpha > 128) {
                 s->alpha = 128;
             }
@@ -794,7 +794,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
         if (s->alpha == 0) {
             s->animeflag &= ~2;
         } else {
-            s->alpha -= SDF_FRAME_STEP_INT(dds3GetKernelCount(), 12);
+            s->alpha -= SDF_FRAME_STEP_INT(12);
             if (s->alpha < 0) {
                 s->alpha = 0;
             }
@@ -809,7 +809,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             if (d == 0) {
                 d = -1;
             }
-            SDF_FRAME_WHEN(dds3GetKernelCount(), s->ox -= d);
+            SDF_FRAME_WHEN(s->ox -= d);
         }
     }
     if (s->animeflag & 4) {
@@ -825,7 +825,7 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             if (d < endpoint) {
                 d = endpoint;
             }
-            SDF_FRAME_WHEN(dds3GetKernelCount(), s->smritu -= d);
+            SDF_FRAME_WHEN(s->smritu -= d);
             if (s->smritu < 0.0f) {
                 s->smritu = 0.0f;
             }
@@ -1043,7 +1043,7 @@ void DispCommandList2(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
     s32 id;
     s32 color = 0;
     s32 oz = s->oz;
-    s32 slide = (s32)(SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->smritu, s->smritu) * 43.0f);
+    s32 slide = (s32)(SDF_FRAME_INTERPOLATE_DUE(&s->smritu, s->smritu) * 43.0f);
 
     /* Keep the normalized X in its live coordinate; allocation evidence:
      * docs/levers/cross-block-locals.md. */
@@ -1432,7 +1432,7 @@ void *nbCommSelProcess1(dds3ProcessID_t *id)
     if ((actstat & 0x80) != 0 && animation == 0) {
         return NULL;
     }
-    ox = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &s->ox, s->ox);
+    ox = SDF_FRAME_INTERPOLATE_DUE(&s->ox, s->ox);
     oy = s->oy;
     alpha = s->alpha;
     s->animeflag = animeFlags & ~0x20;

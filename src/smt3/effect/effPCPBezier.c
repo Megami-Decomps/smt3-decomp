@@ -584,7 +584,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *group)
             slot->pos[2] = point[2];
             slot->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayRange);
             dds3BezierTrackPolyReset(slot->hBztp);
-        } else if (slot->frame++ >= 0 && SDF_FRAME_DUE(slot->frame - 1)) {
+        } else if (slot->frame++ >= 0 && SDF_FRAME_DUE_AGE(slot->frame - 1)) {
             if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
                 if (slot->alpha > fadeStep) {
                     slot->alpha -= fadeStep;

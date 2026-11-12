@@ -1247,7 +1247,7 @@ void *nbNegoProcess1(dds3ProcessID_t *id)
         return NULL;
     }
     if (n->waitframe > 0) {
-        n->waitframe -= SDF_FRAME_DUE(dds3GetKernelCount());
+        n->waitframe -= SDF_FRAME_DUE();
         return NULL;
     }
     if (n->data->stat & 0x400000) {

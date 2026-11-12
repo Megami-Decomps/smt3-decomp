@@ -193,7 +193,7 @@ extern u32 dds3GetKernelCount(void);
 s32 dds3GlobalWorkMainProc(dds3ProcessID_t *id)
 {
     DDS3_GBWK->unk38++;
-    DDS3_GBWK->playtime += SDF_FRAME_DUE(dds3GetKernelCount());
+    DDS3_GBWK->playtime += SDF_FRAME_DUE();
     return 0;
 }
 

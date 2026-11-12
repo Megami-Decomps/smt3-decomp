@@ -129,7 +129,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *id)
     SDF_VU0_SCALEVECTOR(600.0f);
     SDF_VU0_ADDVECTOR();
     /* The quake moves once per retail tick. */
-    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3GetKernelCount(), dds3QuakeOffset, 3));
+    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3QuakeOffset, 3));
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(target);
     SDF_VU0_LOADVECTOR(&aViewEye);

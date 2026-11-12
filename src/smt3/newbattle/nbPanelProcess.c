@@ -1090,7 +1090,7 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    x -= SDF_FRAME_INTERPOLATE(dds3GetKernelCount(), &nbPnlWork[i].OfsX, nbPnlWork[i].OfsX);
+    x -= SDF_FRAME_INTERPOLATE(&nbPnlWork[i].OfsX, nbPnlWork[i].OfsX);
     if (act) {
         v = sdfSin(nbPnlCnt) * 48.0f;
         v += 0xB0;
@@ -1617,10 +1617,10 @@ void nbPanelPressGauge(nbMainProcessData_t *data)
     baseColor = nbPanelPGBaseColor;
     if (nbPanelPGShow == 0) {
         if ((baseColor & 0xFF000000) == 0) return;
-        baseColor += 0xF0000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+        baseColor += 0xF0000000 * SDF_FRAME_DUE();
         nbPanelPGBaseColor = baseColor;
     } else if ((baseColor & 0xFF000000) != 0x80000000) {
-        baseColor += 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+        baseColor += 0x10000000 * SDF_FRAME_DUE();
         nbPanelPGBaseColor = baseColor;
     }
     nbPanelBaseColorSet(baseColor);
@@ -2868,7 +2868,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     } else {
         ret = -1;
     }
-    cx = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &nbPanelStockShiftX, nbPanelStockShiftX) + 0xE6;
+    cx = SDF_FRAME_INTERPOLATE_DUE(&nbPanelStockShiftX, nbPanelStockShiftX) + 0xE6;
     if (nbPanelStockFrame > 0) {
         s32 frame;
         u32 col;
@@ -2881,12 +2881,12 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
         }
         col = ((u32)(rate * 128.0f) << 24) | 0x808080;
         nbPanelBaseColorSet(col);
-        if (SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (SDF_FRAME_DUE()) {
             nbPanelStockShiftX = nbPanelStockShiftX >> 1;
         }
         if (nbPanelStockFadeFlag != 0) {
             if ((nbPanelStockABGR & 0xFF000000) != 0) {
-                nbPanelStockABGR = nbPanelStockABGR + 0xE0000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+                nbPanelStockABGR = nbPanelStockABGR + 0xE0000000 * SDF_FRAME_DUE();
             }
             effMagaCylinderCalcColor(col, nbPanelStockABGR);
             nbPanelBaseColorSet(nbPanelStockABGR);
@@ -3519,7 +3519,7 @@ void nbPanelAuto(nbMainProcessData_t *p)
     if (p->phase < 3) {
         PanelAutoABGR = 0x40808080;
     } else if (PanelAutoABGR != 0x80808080) {
-        PanelAutoABGR += 0x04000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+        PanelAutoABGR += 0x04000000 * SDF_FRAME_DUE();
     }
 
     baseColor = PanelAutoBaseColor;
@@ -3527,10 +3527,10 @@ void nbPanelAuto(nbMainProcessData_t *p)
         if ((baseColor & 0xFF000000) == 0) {
             return;
         }
-        baseColor -= 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+        baseColor -= 0x10000000 * SDF_FRAME_DUE();
         PanelAutoBaseColor = baseColor;
     } else if ((baseColor & 0xFF000000) != 0x80000000) {
-        baseColor += 0x10000000 * SDF_FRAME_DUE(dds3GetKernelCount());
+        baseColor += 0x10000000 * SDF_FRAME_DUE();
         PanelAutoBaseColor = baseColor;
     }
     nbPanelBaseColorSet(baseColor);
@@ -3703,8 +3703,8 @@ void nbPanelPartyDraw(void)
             x = 230;
             yy = y + 0x153;
         } else {
-            x = dds3GetRandIntA(SDF_FRAME_RAND(dds3GetKernelCount()), 6) + 227;
-            yy = yb + dds3GetRandIntA(SDF_FRAME_RAND(dds3GetKernelCount()), 6) - 3;
+            x = dds3GetRandIntA(SDF_FRAME_RAND(), 6) + 227;
+            yy = yb + dds3GetRandIntA(SDF_FRAME_RAND(), 6) - 3;
         }
         if (partyindex[i] != -1) {
 #ifdef FIX_BUGS
@@ -3718,7 +3718,7 @@ void nbPanelPartyDraw(void)
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                SDF_FRAME_WHEN(dds3GetKernelCount(), nbPnlWork[i].OfsX += ofs);
+                SDF_FRAME_WHEN(nbPnlWork[i].OfsX += ofs);
                 if (nbPnlWork[i].OfsX >= 17) {
                     nbPnlWork[i].OfsX = 16;
                 }
@@ -3728,7 +3728,7 @@ void nbPanelPartyDraw(void)
                 if (ofs < 1) {
                     ofs = 1;
                 }
-                SDF_FRAME_WHEN(dds3GetKernelCount(), nbPnlWork[i].OfsX -= ofs);
+                SDF_FRAME_WHEN(nbPnlWork[i].OfsX -= ofs);
                 if (nbPnlWork[i].OfsX < 0) {
                     nbPnlWork[i].OfsX = 0;
                 }

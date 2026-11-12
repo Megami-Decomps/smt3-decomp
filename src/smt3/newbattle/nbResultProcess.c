@@ -180,7 +180,7 @@ void nbResultInitLabels(void)
     nbPnl_rsetAlpha(0);
     for (i = 0; i < 64; i++) {
         if (nbResultCaptions[i].flag != 0) {
-            nbResultCaptions[i].life -= SDF_FRAME_DUE(dds3GetKernelCount());
+            nbResultCaptions[i].life -= SDF_FRAME_DUE();
             if (nbResultCaptions[i].life <= 0) {
                 nbResultCaptions[i].flag = 0;
             } else {
@@ -264,7 +264,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     if (nbResultScoreTable[scoreIndex].stopcnt > 0) {
-        nbResultScoreTable[scoreIndex].stopcnt -= SDF_FRAME_DUE(dds3GetKernelCount());
+        nbResultScoreTable[scoreIndex].stopcnt -= SDF_FRAME_DUE();
     }
     if (frame > 0) {
         if (frame < 8) {
@@ -273,15 +273,15 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
             alpha = 0x80;
         }
         drawX = nbResultScoreTable[scoreIndex].ofsx * 0x46 / 100;
-        SDF_FRAME_WHEN(dds3GetKernelCount(), nbResultScoreTable[scoreIndex].ofsx = drawX);
-        drawX = SDF_FRAME_INTERPOLATE_DUE(dds3GetKernelCount(), &nbResultScoreTable[scoreIndex].ofsx, drawX);
+        SDF_FRAME_WHEN(nbResultScoreTable[scoreIndex].ofsx = drawX);
+        drawX = SDF_FRAME_INTERPOLATE_DUE(&nbResultScoreTable[scoreIndex].ofsx, drawX);
         spriteColor = ((u32)alpha << 24) | baseColor;
         nbPnlSprite(x + drawX, y, 0x25, 0x22, 0xBF, 1, 0x25, 0x22, spriteColor, nbResultTex1);
         nbPnlSprite(x + drawX + 0x25, y, 0x11F, 0x22, 0xE3, 1, 1, 0x22, spriteColor, nbResultTex1);
         nbPnlSprite(x + drawX + 0x144, y, 0x78, 0x22, 0x6A, 0x2E, 0x78, 0x22, spriteColor, nbResultTex1);
     }
     if (frame >= 13) {
-        if (nbResultTobiwarpLabel > 0 && nbResultScoreTable[scoreIndex].stopcnt == 0 && SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if (nbResultTobiwarpLabel > 0 && nbResultScoreTable[scoreIndex].stopcnt == 0 && SDF_FRAME_DUE()) {
             expCnt = nbResultScoreTable[scoreIndex].exp_cnt +
                      nbResultScoreTable[scoreIndex].resultadd;
             nbResultScoreTable[scoreIndex].exp_cnt = expCnt;
@@ -293,7 +293,7 @@ void nbResultDrawPC1(s32 scoreIndex, s32 x, s32 y, s32 frame,
             }
         }
         if (nbResultScoreTable[scoreIndex].lvupanmflg != 0) {
-            count = nbResultScoreTable[scoreIndex].lvupanmcnt + SDF_FRAME_DUE(dds3GetKernelCount());
+            count = nbResultScoreTable[scoreIndex].lvupanmcnt + SDF_FRAME_DUE();
             nbResultScoreTable[scoreIndex].lvupanmcnt = count;
             if (count >= 16) {
                 nbResultScoreTable[scoreIndex].lvupanmflg = 0;
@@ -466,7 +466,7 @@ s32 nbResultFindBestScore(nbMainProcessData_t *data)
         }
     }
     if (pending == 0 && nbResultBestScore < 60) {
-        nbResultBestScore += SDF_FRAME_DUE(dds3GetKernelCount());
+        nbResultBestScore += SDF_FRAME_DUE();
     }
     return nbResultBestScore;
 }
@@ -519,7 +519,7 @@ void nbFindTobiwarpLabel(nbMainProcessData_t *data)
     s32 py;
 
     D_00551100 = D_00551100 + SDF_FRAME_STEP(0.099999995f);
-    nbResultTimer += SDF_FRAME_DUE(dds3GetKernelCount());
+    nbResultTimer += SDF_FRAME_DUE();
     nbPnl_setOt(0x47);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);

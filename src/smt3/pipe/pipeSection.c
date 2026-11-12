@@ -125,7 +125,7 @@ s32 pipe_Section(void)
 {
     s32 ret = pipeMainSection();
 
-    SDF_FRAME_INTERPOLATE_POSES(dds3GetKernelCount());
+    SDF_FRAME_INTERPOLATE_POSES();
     pipeDrawSection();
     pipeSoundSection();
     CalcCamera();
@@ -308,7 +308,7 @@ extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
 
 s32 pipeMainSection(void)
 {
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
+    if (!SDF_FRAME_DUE()) return 0;
     pipeOffset();
     switch (pipeIndex) {
     case 0:

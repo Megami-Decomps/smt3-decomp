@@ -3127,7 +3127,7 @@ s32 CheckAction_READY(nbActionProcessData_t *a)
     sdfMemHandle_t *handle;
 
     /* Each setup step costs one retail tick. */
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) {
+    if (!SDF_FRAME_DUE()) {
         return 0;
     }
     switch (a->seqcnt) {
@@ -4196,7 +4196,7 @@ s32 CheckAction_CHECK1(nbActionProcessData_t *a)
     }
     if (a->packettime >= 16) {
         /* Tested before it counts down, so it counts on a retail tick's last host tick. */
-        a->packettime -= SDF_FRAME_DUE(dds3GetKernelCount() + 1);
+        a->packettime -= SDF_FRAME_DUE_AGE(dds3GetKernelCount() + 1);
         return 0;
     }
     nbUpdateOrder();
@@ -4412,7 +4412,7 @@ void *nbActionProcess1(dds3ProcessID_t *id)
     if (ok != 0) {
         if ((a->stat & 2) != 0) {
             /* Each sequence step costs one retail tick, not one host tick. */
-            if (!SDF_FRAME_DUE(dds3GetKernelCount())) {
+            if (!SDF_FRAME_DUE()) {
                 return 0;
             }
             if (a->seq == 0x16) {
@@ -4422,7 +4422,7 @@ void *nbActionProcess1(dds3ProcessID_t *id)
             a->stat &= ~2;
             return 0;
         }
-        if ((u16)a->seqtime == 0 && !SDF_FRAME_DUE(dds3GetKernelCount())) {
+        if ((u16)a->seqtime == 0 && !SDF_FRAME_DUE()) {
             return 0;
         }
         if (ActionFuncTable[a->seq].check(a) != 0) {

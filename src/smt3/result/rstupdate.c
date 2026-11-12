@@ -543,7 +543,7 @@ void rstUpdateSeqEvoAct(void)
     case 0:
         startPos->unk_78 = 0;
         if (startPos->unk_22E4 != 0) {
-            startPos->unk_22E4 -= 4 * SDF_FRAME_DUE(dds3GetKernelCount());
+            startPos->unk_22E4 -= 4 * SDF_FRAME_DUE();
         } else {
             startPos->evoPhase++;
         }

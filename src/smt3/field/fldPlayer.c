@@ -368,15 +368,15 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
             if (volume < 0) volume = 0;
         } else {
             volume = 127;
-            volume -= (dds3GetRandA(0) >> 2) & 0x3F;
+            volume -= (dds3GetRandA(SDF_FRAME_RAND()) >> 2) & 0x3F;
             if (volume > 127) volume = 127;
             if (volume < 0) volume = 0;
         }
         if (hisMotion != 0 && hisMotion != 8 && hisMotion != 9 && upMotion == 8) {
             fldSeVol(left + 3, volume);
         } else {
-            left += (dds3GetRandA(0) >> 4) % 3;
-            right += (dds3GetRandA(0) >> 4) % 3;
+            left += (dds3GetRandA(SDF_FRAME_RAND()) >> 4) % 3;
+            right += (dds3GetRandA(SDF_FRAME_RAND()) >> 4) % 3;
             if (upMotion == 1 || upMotion == 17 || upMotion == 2 || upMotion == 19 || upMotion == 3 || upMotion == 20) {
                 if (before < 4.0f && now >= 4.0f) fldSeVol(left, volume);
                 if (before < 13.0f && now >= 13.0f) fldSeVol(right, volume);
@@ -394,14 +394,14 @@ void fldPlayerMotionSe(s32 hisMotion, s32 upMotion)
                 if (before < 21.0f && now >= 21.0f) fldSeVol(right, volume);
             } else if (upMotion == 14) {
                 volume = 127;
-                volume -= dds3GetRandA(0) % 31;
+                volume -= dds3GetRandA(SDF_FRAME_RAND()) % 31;
                 if (volume > 127) volume = 127;
                 if (volume < 0) volume = 0;
                 if (before < 1.0f && now >= 1.0f) fldSeVol(0x24, volume);
                 if (before < 18.0f && now >= 18.0f) fldSeVol(0x37, volume);
             } else if (upMotion == 15) {
                 volume = 127;
-                volume -= dds3GetRandA(0) % 31;
+                volume -= dds3GetRandA(SDF_FRAME_RAND()) % 31;
                 if (volume > 127) volume = 127;
                 if (volume < 0) volume = 0;
                 if (before < 1.0f && now >= 1.0f) fldSeVol(0x24, volume);

@@ -482,7 +482,7 @@ s32 nbE903Process_1(dds3ProcessID_t *id)
     s32 serial;
     dds3Basic_t *scene;
 
-    if (!SDF_FRAME_DUE(dds3GetKernelCount())) return 0;
+    if (!SDF_FRAME_DUE()) return 0;
     if (nbE903Table[event->seq](event) != 0) {
         nbE903CurBasic = NULL;
         if (nbE903Basic0 != NULL) {
