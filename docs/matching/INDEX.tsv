@@ -470,24 +470,24 @@ sceIpuInit	sdk/libipu	0x238		docs/matching/sdk/libipu.md	84
 _request_end_0	sdk/libkernl	180 bytes	45 of 45 words match	docs/matching/sdk/libkernl.md	3
 sceSifAddCmdHandler	sdk/libkernl	0x2C	11 of 11 words match	docs/matching/sdk/libkernl.md	52
 sceSifRemoveCmdHandler	sdk/libkernl	0x28	10 of 10 words match	docs/matching/sdk/libkernl.md	80
-sceSifCheckStatRpc				docs/matching/sdk/libkernl.md	104
-sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	123
-sceSifRegisterRpc				docs/matching/sdk/libkernl.md	144
-sceSifInitIopHeap			34 of 34 words match	docs/matching/sdk/libkernl.md	175
-sceSifSetIopAddr	sdk/libkernl	220 bytes	55 of 55 words match	docs/matching/sdk/libkernl.md	228
-sceClose				docs/matching/sdk/libkernl.md	265
-sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	287
-supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	313
-sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	351
-sceOpen				docs/matching/sdk/libkernl.md	382
-_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	410
-sceDclose				docs/matching/sdk/libkernl.md	439
-kputchar				docs/matching/sdk/libkernl.md	462
-sceTtyInit				docs/matching/sdk/libkernl.md	489
-sceTtyWrite				docs/matching/sdk/libkernl.md	535
-iPutTLBEntry				docs/matching/sdk/libkernl.md	585
-iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	628
-LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	679
+sceSifCheckStatRpc	sdk/libkernl	60 bytes	15 of 15 words match	docs/matching/sdk/libkernl.md	104
+sceSifSetRpcQueue				docs/matching/sdk/libkernl.md	135
+sceSifRegisterRpc				docs/matching/sdk/libkernl.md	156
+sceSifInitIopHeap			34 of 34 words match	docs/matching/sdk/libkernl.md	187
+sceSifSetIopAddr	sdk/libkernl	220 bytes	55 of 55 words match	docs/matching/sdk/libkernl.md	240
+sceClose				docs/matching/sdk/libkernl.md	277
+sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	299
+supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	325
+sceSifInitRpc			95 of 103 words matching	docs/matching/sdk/libkernl.md	363
+sceOpen				docs/matching/sdk/libkernl.md	394
+_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	422
+sceDclose				docs/matching/sdk/libkernl.md	451
+kputchar				docs/matching/sdk/libkernl.md	474
+sceTtyInit				docs/matching/sdk/libkernl.md	501
+sceTtyWrite				docs/matching/sdk/libkernl.md	547
+iPutTLBEntry				docs/matching/sdk/libkernl.md	597
+iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	640
+LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	691
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79

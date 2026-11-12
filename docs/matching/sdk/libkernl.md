@@ -101,24 +101,36 @@ checksum, affected-owner/data and regression qualification accompany the
 landing. Exactly two SDK functions and 84 SDK bytes are added; game-code
 coverage is unchanged.
 
-## sceSifCheckStatRpc
+## sceSifCheckStatRpc (sdk/libkernl, 60 bytes)
 
-44 of 60 native bytes, with 5 of 11 compared words matching and 16 bytes
-uncovered. The native routine separately branches on the active bit and
-returns literal zero or one. The ordinary C compiles the same condition to a
-direct masked-bit return, with fewer branches and a shared return.
+15 of 15 words match in ordinary C. A null packet, a sequence mismatch
+against packet offset 0x18, or a clear active bit at packet offset 0x10
+returns zero; otherwise the function returns one. The existing client prefix
+and actual 64-byte packet record are unchanged. Loads retain their native
+widths and short-circuit order, with no stores, calls or added volatility.
 
-The client is the shared packet-address/sequence prefix. A null packet,
-a sequence mismatch against packet offset 0x18, or a clear active bit at
-packet offset 0x10 returns zero; otherwise it returns one. Packet storage is
-the actual 64-byte protocol record already used by allocation and release.
-No field volatility or callback return changes are justified by this gap.
-The assembly fallback remains active.
+The forward success exit keeps the shared zero return before the initialized
+successful result. Qualified configured SDK 2.9 output retains those two
+blocks and puts the literal one in the success return's delay slot. This
+establishes the emitted control-flow shape, not a particular optimizer pass
+or original source spelling. No register binding or compiler constraint is
+needed. The earlier nested-return draft emits 44 bytes and returns the masked
+bit directly; a boolean-result local was inert. An intermediate forward-exit
+operand control reached 13 of 15 words matching, but removing that operand
+produced the exact ordinary form. A separate one-pass guard emits 64 bytes
+and does not match.
 
-The boolean-result local that matches `sceSifIsAliveIop` does not recover this
-routine's native branches: it still emits 44 bytes, with 5 of 11 compared
-words matching and 16 bytes uncovered. The preferred direct-return draft is
-unchanged; do not repeat that local-result control without a new premise.
+Independent semantic and native review approves the final source. The full
+owner reports 162 match, 0 differ, versus 161 match, 0 differ before promotion.
+All 363 production peers and 664 rodata bytes are unchanged. The 161 SKIP_ASM
+and 165 retained-C peer contracts and owned data are also preserved, resolving
+changed relocation addends to their actual function and interior offset.
+Six strict baseline/final plain-versus-dump pairs cover all three contexts;
+complete assembly and object bytes agree after only the exact randomized
+scratch filename is normalized. Full retail checksum, generated-source
+positive and stale negative controls, regression, guarded EE and IRX checks
+accompany the promotion. This adds one SDK function and 60 code bytes,
+excluding four alignment bytes; game-code coverage is unchanged.
 
 ## sceSifSetRpcQueue
 

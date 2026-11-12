@@ -1500,9 +1500,7 @@ typedef struct rpcClientPrefix {
     u32 sequence;
 } rpcClientPrefix;
 
-/* NON_MATCHING: 44 of 60 native bytes, 5 of 11 compared words match;
- * the final active-bit test becomes a direct boolean return. */
-#ifdef NON_MATCHING
+/* Keep the shared zero exit before the successful return. */
 s32 sceSifCheckStatRpc(rpcClientPrefix *client)
 {
     rpcPacket *packet = client->packet;
@@ -1510,15 +1508,18 @@ s32 sceSifCheckStatRpc(rpcClientPrefix *client)
     if (packet != NULL) {
         if (client->sequence == packet->w[6]) {
             if ((packet->w[4] & 1) != 0) {
-                return 1;
+                goto active;
             }
         }
     }
     return 0;
+active:
+    {
+        s32 result = 1;
+        return result;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifCheckStatRpc);
-#endif
+
 
 void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId)
 {
