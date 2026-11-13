@@ -195,6 +195,35 @@ def full_context_function_inventory_problems(objdump_text, native_names, aliases
     return problems
 
 
+def full_context_entry_placement_problems(objdump_text, native_names, syms, origin, aliases=None):
+    """Verify full-build entry addresses against the fixed YAML owner origin.
+
+    Identical text and a valid set of names do not establish entry placement:
+    moving a label alone changes calls from other owners. Include zero-sized
+    assembler labels as well as C function symbols; do not infer function size.
+    """
+    problems = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if len(parts) < 5 or parts[-3] != ".text":
+            continue
+        name = parts[-1]
+        if name not in native_names and name not in (aliases or {}):
+            continue
+        expected = syms.get(name, (aliases or {}).get(name))
+        if expected is None:
+            expected = address(name, syms)
+        try:
+            offset = int(parts[0], 16)
+        except ValueError:
+            offset = None
+        if origin is None or expected is None or offset is None:
+            problems.append(f"full unit entry {name} has no verified placement")
+        elif origin + offset != expected:
+            problems.append(f"full unit entry {name} is at 0x{origin + offset:X}, expected 0x{expected:X}")
+    return problems
+
+
 def full_context_text_problems(text, native, origin, relocs, syms, gp,
                                section_bases, lit4, object_gp, retail, segs):
     """Check the linked owner span, including bodies absent under SKIP_ASM.
@@ -1517,6 +1546,8 @@ def main():
                         full_section_bases[section] = origin
             if not args.func and text_range is not None:
                 start, end = text_range
+                data_context.extend(full_context_entry_placement_problems(
+                    full_objdump, native_entries, syms, off_to_va(segs, start), full_aliases))
                 data_context.extend(full_context_text_problems(
                     ftext, retail[start:end], off_to_va(segs, start), frel,
                     syms, gp, full_section_bases, full_lit4, full_gp0, retail, segs))

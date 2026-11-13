@@ -2449,5 +2449,55 @@ class FullTextSpanTests(unittest.TestCase):
     def test_literal_pool_required(self):
         self.assertTrue(self.check((0xC7800000, 0), relocs={0: ("R_MIPS_LITERAL", ".lit4")}))
 
+class FullContextEntryPlacementTests(unittest.TestCase):
+
+    def check(self, text, names=("entry",), syms=None, origin=0x1000, aliases=None):
+        return check_unit.full_context_entry_placement_problems(
+            text, names, {"entry": 0x1008} if syms is None else syms, origin, aliases)
+
+    def test_c_entry_correct(self):
+        self.assertFalse(self.check("00000008 g F .text 00000010 entry"))
+
+    def test_c_entry_moved(self):
+        self.assertTrue(self.check("0000000c g F .text 00000010 entry"))
+
+    def test_zero_size_asm_entry_moved(self):
+        self.assertTrue(self.check("0000000c g .text 00000000 entry"))
+
+    def test_zero_size_asm_entry_correct(self):
+        self.assertFalse(self.check("00000008 g .text 00000000 entry"))
+
+    def test_unknown_symbol_not_inferred(self):
+        self.assertFalse(self.check("00000008 g .text 00000000 other"))
+
+    def test_known_entry_missing_address(self):
+        self.assertTrue(self.check("00000008 g .text 00000000 entry", syms={}))
+
+    def test_missing_origin(self):
+        self.assertTrue(self.check("00000008 g .text 00000000 entry", origin=None))
+
+    def test_verified_alias(self):
+        self.assertFalse(self.check("00000008 l F .text 00000010 entry.3", aliases={"entry.3": 0x1008}))
+
+    def test_moved_verified_alias(self):
+        self.assertTrue(self.check("0000000c l F .text 00000010 entry.3", aliases={"entry.3": 0x1008}))
+
+    def test_data_not_text(self):
+        self.assertFalse(self.check("00000008 g .data 00000010 entry"))
+
+    def test_invalid_offset(self):
+        self.assertTrue(self.check("invalid g .text 00000010 entry"))
+
+
+    def test_auto_address(self):
+        self.assertFalse(self.check("00000008 g .text 00000000 func_00001008", names=("func_00001008",), syms={}))
+
+    def test_canonical_address_precedes_alias(self):
+        self.assertFalse(self.check("00000008 g F .text 00000010 entry", aliases={"entry": 0xDEAD}))
+
+
+    def test_verified_alias_precedes_auto_fallback(self):
+        self.assertFalse(self.check("00000008 l F .text 00000010 func_00003000.12",names=(), syms={},aliases={"func_00003000.12": 0x1008}))
+
 if __name__ == "__main__":
     unittest.main()
