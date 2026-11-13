@@ -162,6 +162,39 @@ def compiler_local_function_aliases(objdump_text, funcs, syms, function_names):
     return aliases
 
 
+def native_function_inventory(assembly, text_range, function_names, syms, segs):
+    """Native entries plus explicit recovered inner entries in this YAML span."""
+    names = set(re.findall(r"^\s*(?:glabel|alabel) (\S+)", assembly, re.M))
+    start, end = text_range
+    for name in function_names:
+        addr = syms.get(name)
+        off = va_to_off(segs, addr) if addr is not None else None
+        if off is not None and start <= off < end:
+            names.add(name)
+    return names
+
+
+def full_context_function_inventory_problems(objdump_text, native_names, aliases=None, skip_names=()):
+    """Reject emitted functions outside the retail owner's entry inventory.
+
+    Existing SKIP_ASM functions retain their normal code/address diagnostics.
+    The SKIP_ASM inventory cannot see definitions conditional on the actual
+    build. Only verified compiler-local aliases may supplement native names;
+    an address known elsewhere in the game does not confer ownership here.
+    Section markers and assembler labels are not STT_FUNC definitions.
+    """
+    allowed = set(native_names) | set(aliases or {}) | set(skip_names)
+    problems = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if len(parts) < 6 or parts[-3] != ".text" or "F" not in parts[1:-3]:
+            continue
+        name = parts[-1]
+        if name not in allowed:
+            problems.append(f"unexpected emitted function {name}: not in the retail unit's entry inventory")
+    return problems
+
+
 def run(*cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw).stdout
 
@@ -1391,6 +1424,17 @@ def main():
                 syms, function_names)
             full_function_names.update(re.sub(r"\.\d+$", "", name)
                                        for name in full_aliases)
+            native_assembly = ROOT / "asm" / version / f"{unit_name}.s"
+            if not args.func:
+                text_range = owned_rom_range(yaml_text, unit_name, "c")
+                native_entries = native_function_inventory(
+                    native_assembly.read_text(), text_range, function_names, syms, segs
+                ) if text_range is not None and native_assembly.exists() else set()
+                data_context.extend(full_context_function_inventory_problems(
+                    full_objdump, native_entries,
+                    {name: addr for name, addr in full_aliases.items()
+                     if re.sub(r"\.\d+$", "", name) in native_entries},
+                    {name for _, _, name in funcs}))
             # Both compilation contexts must independently establish identity.
             # Retain emitted names so --func selection stays strictly exact.
             syms.update({name: addr for name, addr in skip_aliases.items()

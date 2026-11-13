@@ -1712,7 +1712,12 @@ class NestedFunctionCheckerTests(unittest.TestCase):
                     self.assertIn("helper.0: no address", report)
                     self.assertIn("DIFF caller", report)
                     self.assertIn("CONTEXT RELOC caller", report)
-                    self.assertIn("0 match, 3 differ", report)
+                    # This synthetic owner has no native inventory. An extra
+                    # full-only function now also fails the ownership check.
+                    extra = context == "extra_full"
+                    self.assertIn(f"0 match, {4 if extra else 3} differ", report)
+                    if extra:
+                        self.assertIn("unexpected emitted function", report)
 
     def test_explicit_symbol_mapping_is_not_overridden_by_stem(self):
         status, report = self.run_checker(explicit_address=0x1008)
@@ -2331,6 +2336,54 @@ class FullContextStorageTests(unittest.TestCase):
         yaml='  - [0x100, .data, main/unit]\n  - [0x104, .data, next]\n'
         self.assertFalse(check_unit.full_context_storage_problems(yaml,'main/unit',{'.data':(0,4)},'','',{}))
         self.assertTrue(check_unit.full_context_storage_problems(yaml,'main/unit',{'.data':(0,8)},'','',{}))
+
+class FullContextFunctionInventoryTests(unittest.TestCase):
+    def row(self, name, size="00000010", flags="g     F", section=".text"):
+        return f"00000000 {flags} {section} {size} {name}\n"
+
+    def check(self, text, names=("entry",), aliases=None):
+        return check_unit.full_context_function_inventory_problems(text, names, aliases)
+
+    def test_known_entry(self):
+        self.assertEqual(self.check(self.row("entry")), [])
+
+    def test_extra_full_only_function(self):
+        self.assertIn("unexpected", self.check(self.row("unexpected"))[0])
+
+    def test_other_owner_name_not_allowed(self):
+        self.assertTrue(self.check(self.row("other_owner_function")))
+
+    def test_verified_numeric_alias(self):
+        self.assertFalse(self.check(self.row("entry.7", flags="l     F"), aliases={"entry.7": 0x1234}))
+
+    def test_unverified_numeric_suffix(self):
+        self.assertTrue(self.check(self.row("entry.7", flags="l     F")))
+
+    def test_zero_size_function_still_rejected(self):
+        self.assertTrue(self.check(self.row("unexpected", size="00000000")))
+
+    def test_section_and_assembly_labels_ignored(self):
+        self.assertFalse(self.check(self.row(".text", flags="l     d") +
+                                    self.row("assembly_label", flags="g      ")))
+
+    def test_nontext_function_ignored(self):
+        self.assertFalse(self.check(self.row("not_text", section=".debug")))
+
+
+class NativeFunctionInventoryTests(unittest.TestCase):
+    def test_inner_entries_and_half_open_owner_bounds(self):
+        syms = {"first": 0x1010, "inner": 0x1018, "next": 0x1020,
+                "previous": 0x100C, "data": 0x101C}
+        names = check_unit.native_function_inventory(
+            "glabel assembly_entry\n  alabel split_entry\ndlabel data_label\n",
+            (0x10, 0x20), set(syms) - {"data"}, syms, [(0x1000, 0, 0x100)])
+        self.assertEqual(names, {"assembly_entry", "split_entry", "first", "inner"})
+
+    def test_unmapped_or_undefined_function_not_inferred(self):
+        names = check_unit.native_function_inventory("", (0x10, 0x20),
+            {"unknown", "missing"}, {"unknown": 0x1000}, [])
+        self.assertEqual(names, set())
+
 
 if __name__ == "__main__":
     unittest.main()
