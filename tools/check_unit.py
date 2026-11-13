@@ -640,6 +640,28 @@ def initialized_data_problems(section_range, section_origin, retail_span,
     return problems
 
 
+def full_rodata_relocation_problems(data, relocs, funcs, syms, section_bases,
+                                    retail_span):
+    """Validate actual-build pointers, including switch labels, before masking.
+
+    Standalone tables cannot establish full-unit dispatch: conditional source
+    may retain identical instructions while changing only case-label entries.
+    The caller supplies the bounded YAML-owned origin and actual full offsets.
+    """
+    problems = []
+    for off, (kind, symbol) in sorted(relocs.items()):
+        if off < 0 or off + 4 > len(data) or off + 4 > len(retail_span):
+            problems.append(f"relocation outside owned .rodata at +0x{off:X}")
+            continue
+        linked, errors = relocate_sdata_item(
+            data[off:off + 4], off, {off: (kind, symbol)}, funcs, syms, section_bases)
+        if errors:
+            problems.extend(errors)
+        elif linked != retail_span[off:off + 4]:
+            problems.append(f"{kind} {symbol} at +0x{off:X} differs from retail")
+    return problems
+
+
 def trim_sdata_item(item, item_offset, relocs):
     """Drop alignment padding without truncating relocation-backed words."""
     reloc_words = {off - item_offset for off in relocs
@@ -1398,6 +1420,15 @@ def main():
             full_rodata_relocations = relocations(full)[".rodata"]
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
             full_rodata_size = len(fdata[fro_off:fro_off + fro_size])
+            if rodata_range is not None:
+                start, end = rodata_range
+                data_context.extend("full unit's .rodata " + problem for problem in
+                    full_rodata_relocation_problems(
+                        fdata[fro_off:fro_off + fro_size], full_rodata_relocations,
+                        [(off, size, name) for name, (off, size) in fsyms.items()],
+                        syms, full_section_bases, retail[start:end]))
+            elif full_rodata_relocations:
+                data_context.append("full unit's relocated .rodata has no unambiguous YAML-owned range")
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
                                  (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
             if fro_size and ro_start:

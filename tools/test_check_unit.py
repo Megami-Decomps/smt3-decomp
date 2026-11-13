@@ -105,6 +105,41 @@ class FullContextRelocationTests(unittest.TestCase):
             {0: ("R_MIPS_26", "provider")}, {"provider": 0x2000})), 1)
 
 
+class FullRodataRelocationTests(unittest.TestCase):
+    def check(self, value, want, symbol=".text", kind="R_MIPS_32", **kwargs):
+        return check_unit.full_rodata_relocation_problems(
+            struct.pack("<I", value), {0: (kind, symbol)},
+            [(0x20, 16, "target")], {"target": 0x2000, "data": 0x3000},
+            kwargs.get("bases", {}), struct.pack("<I", want))
+
+    def test_full_function_offset_and_interior(self):
+        self.assertFalse(self.check(0x24, 0x2004))
+        self.assertTrue(self.check(0x28, 0x2004))
+
+    def test_named_provider_and_addend(self):
+        self.assertFalse(self.check(4, 0x3004, "data"))
+        self.assertTrue(self.check(8, 0x3004, "data"))
+
+    def test_owned_section_pointer(self):
+        self.assertFalse(self.check(4, 0x3004, ".rodata", bases={".rodata": 0x3000}))
+        self.assertTrue(self.check(8, 0x3004, ".rodata", bases={".rodata": 0x3000}))
+
+    def test_unknown_targets_fail_closed(self):
+        for symbol in ("unknown", ".unknown", ".text"):
+            self.assertTrue(self.check(0, 0x2000, symbol))
+
+    def test_unsupported_relocation_fails_closed(self):
+        self.assertTrue(self.check(0, 0x3000, "data", "R_MIPS_16"))
+
+    def test_outside_emitted_and_owned_span_fail_closed(self):
+        for off, data, retail in ((-4, b"1234", b"1234"),
+                                  (4, b"1234", b"12345678"),
+                                  (4, b"12345678", b"1234")):
+            problems = check_unit.full_rodata_relocation_problems(
+                data, {off: ("R_MIPS_32", "data")}, [], {}, {}, retail)
+            self.assertIn("outside owned", problems[0])
+
+
 class GeneratedRodataInputTests(unittest.TestCase):
     def test_absent_optional_file(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -136,7 +171,7 @@ class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
                     source_text="void target(void) {}\n", candidate=None, assembly=None,
-                    native_inventory=None, full_nm=None, full_relocs=None):
+                    native_inventory=None, full_nm=None, full_relocs=None, full_rodata=None, full_rodata_owned=True):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -174,10 +209,19 @@ class FocusedFunctionTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
-            stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
+            stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj:
+                (full_rodata[0], {".rodata": (0, len(full_rodata[0]))})
+                if full_rodata is not None and obj.name == "full.o" else (b"", {})))
+            if full_rodata is not None:
+                stack.enter_context(patch.object(check_unit, "owned_rom_range", side_effect=
+                    lambda yaml, unit, section: (len(code), len(code) + 4)
+                    if section == ".rodata" and full_rodata_owned else None))
+                stack.enter_context(patch.object(check_unit, "generated_rodata_text", return_value=""))
             stack.enter_context(patch.object(check_unit, "relocations", side_effect=lambda obj: {
                 ".text": (full_relocs if obj.name == "full.o" and full_relocs is not None
-                          else text_relocs or {}), ".rodata": {}, ".sdata": {}}))
+                          else text_relocs or {}), ".rodata":
+                    full_rodata[1] if full_rodata is not None and obj.name == "full.o" else {},
+                    ".sdata": {}}))
 
             def object_output(*args):
                 if "-S" not in args:
@@ -285,6 +329,23 @@ class FocusedFunctionTests(unittest.TestCase):
                 self.assertEqual(status, 1)
                 self.assertIn("CONTEXT RELOC target", report)
                 self.assertIn("1 match, 1 differ", report)
+
+    def test_full_context_switch_relocation_is_not_hidden_by_masking(self):
+        code = struct.pack("<II", 0x03E00008, 0)
+        for addend, expected_status in ((0, 0), (4, 1)):
+            status, report = self.run_checker(None, code=code,
+                retail_code=code + struct.pack("<I", 0x1000),
+                full_rodata=(struct.pack("<I", addend), {0: ("R_MIPS_32", ".text")}))
+            self.assertEqual(status, expected_status, report)
+            if expected_status:
+                self.assertIn("DATA CONTEXT full unit's .rodata R_MIPS_32 .text", report)
+
+    def test_relocated_full_rodata_requires_owned_range(self):
+        status, report = self.run_checker(None,
+            full_rodata=(bytes(4), {0: ("R_MIPS_32", ".text")}),
+            full_rodata_owned=False)
+        self.assertEqual(status, 1, report)
+        self.assertIn("relocated .rodata has no unambiguous YAML-owned range", report)
 
     def test_full_context_call_can_use_equivalent_symbol_alias(self):
         status, report = self.run_checker(
@@ -632,6 +693,8 @@ class FocusedRodataTests(unittest.TestCase):
                                0x3C020000, 0x24420000 + neighbor_offset,
                                0x03E00008, 0)
         full_text = bytearray(compiled)
+        struct.pack_into("<I", full_text, 20, 0x24420020)
+        full_rodata = rodata[:16] + struct.pack("<4I", *([0x12345678] * 4)) + rodata[neighbor_offset:]
         if neighbor_as_built:
             struct.pack_into("<I", full_text, 28, 0x24020001)
         retail = bytearray(0x1040)
@@ -660,14 +723,14 @@ class FocusedRodataTests(unittest.TestCase):
             config.mkdir(parents=True)
             (config / "symbol_addrs.txt").write_text(
                 "target = 0x1000; // type:func\nneighbor = 0x1040; // type:func\n")
-            (config / "SLUS_209.11.yaml").write_text("")
+            (config / "SLUS_209.11.yaml").write_text("      - [0x1000, .rodata, main/unit]\n      - [0x1030, .rodata, main/next]\n")
             original = root / RETAIL_PATH
             original.parent.mkdir(parents=True)
             original.write_bytes(retail)
-            assembly = root / "asm/smt3/data/game/unit.rodata.s"
+            assembly = root / "asm/smt3/data/main/unit.rodata.s"
             assembly.parent.mkdir(parents=True)
             assembly.write_text("dlabel jtbl_00002000\ndlabel jtbl_00002010\n"
-                                "dlabel jtbl_00002020\n")
+                                "dlabel jtbl_00002020\ndlabel jtbl_00002030\n")
             argv = ["check_unit.py", str(unit)]
             if func:
                 argv.extend(["--func", func])
@@ -680,8 +743,8 @@ class FocusedRodataTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", side_effect=lambda obj: full_text if obj.name == "full.o" else compiled))
-            stack.enter_context(patch.object(check_unit, "sections", return_value=(rodata, {".rodata": (0, len(rodata))})))
-            stack.enter_context(patch.object(check_unit, "relocations", return_value=relocs))
+            stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj: (full_rodata, {".rodata": (0, len(full_rodata))}) if obj.name == "full.o" else (rodata, {".rodata": (0, len(rodata))})))
+            stack.enter_context(patch.object(check_unit, "relocations", side_effect=lambda obj: {**relocs, ".rodata": {off: ("R_MIPS_32", ".text") for off in list(range(0,16,4))+list(range(32,48,4))}} if obj.name == "full.o" else relocs))
             stack.enter_context(patch.object(check_unit, "owns_rodata", return_value=True))
             stack.enter_context(patch.object(check_unit, "run", side_effect=lambda *args: "0 10 T target\n10 10 T neighbor\n" if "-S" in args else ""))
             stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
@@ -1660,7 +1723,7 @@ class InteriorOwnedContextTests(unittest.TestCase):
             def object_relocs(obj):
                 if full_relocation and str(obj).endswith('full.o'):
                     offset, kind = full_relocation
-                    return {**relocs, '.rodata': {**relocs['.rodata'], offset: (kind, 'unknown')}}
+                    return {**relocs, '.rodata': {**relocs['.rodata'], offset: (kind, 'target')}}
                 if full_relocated and str(obj).endswith('full.o'):
                     return {**relocs, '.rodata': {**relocs['.rodata'], 24: ('R_MIPS_32', 'unknown')}}
                 return relocs

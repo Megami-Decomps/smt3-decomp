@@ -68,11 +68,6 @@ void fldAllTblLoad(void)
     sdfFileClose(fd);
 }
 
-/* NON_MATCHING: 23 of 73 words differ (first at +0xC). */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq41, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern void fldAutoMapClear(void);
 
 void fldGbFlagClear(void)
@@ -85,27 +80,29 @@ void fldGbFlagClear(void)
         DDS3_GBWK->takaraOpen[i] = 0;
     }
     for (i = 0; i < 8; i++) {
-        DDS3_GBWK->takaraOpenEx[i] = 0;
+        /* Preserve the native biased byte-offset phase on this live index.
+         * The whole-object byte view stays within takaraOpenEx[0..7]; this
+         * target-only constraint is not evidence of original source spelling. */
+        s32 offset = 0x11A70 + i;
+        FAKEMATCH_ASM_LIVE(offset);
+        ((u8 *)DDS3_GBWK)[offset + 0x10] = 0;
     }
-    for (k = 0; k < 0x28; k++) {
+    for (i = 0; i < 0x28; i++) {
         for (j = 0; j < 0x20; j++) {
-            DDS3_GBWK->gb[k].flags[j].modelFlag = 0;
-            DDS3_GBWK->gb[k].flags[j].animeFlag = 0;
-            DDS3_GBWK->gb[k].flags[j].atariFlag = 0;
-            DDS3_GBWK->gb[k].flags[j].modelFlag2 = 0;
-            DDS3_GBWK->gb[k].flags[j].animeFlag2 = 0;
-            for (i = 0; i < 0x10; i++) {
-                DDS3_GBWK->gb[k].flags[j].animeId2[i] = -1;
+            DDS3_GBWK->gb[i].flags[j].modelFlag = 0;
+            DDS3_GBWK->gb[i].flags[j].animeFlag = 0;
+            DDS3_GBWK->gb[i].flags[j].atariFlag = 0;
+            DDS3_GBWK->gb[i].flags[j].modelFlag2 = 0;
+            DDS3_GBWK->gb[i].flags[j].animeFlag2 = 0;
+            for (k = 0; k < 0x10; k++) {
+                DDS3_GBWK->gb[i].flags[j].animeId2[k] = -1;
             }
-            DDS3_GBWK->gb[k].flags[j].npcFlag = 0;
-            DDS3_GBWK->gb[k].flags[j].hojiFlag = 0;
+            DDS3_GBWK->gb[i].flags[j].npcFlag = 0;
+            DDS3_GBWK->gb[i].flags[j].hojiFlag = 0;
         }
     }
     fldAutoMapClear();
 }
-#else
-INCLUDE_ASM(const s32, "field/fldGlobal", fldGbFlagClear);
-#endif
 
 void fldGbInit_System(s32 mode)
 {
