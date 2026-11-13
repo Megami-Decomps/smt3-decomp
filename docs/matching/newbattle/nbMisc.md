@@ -180,3 +180,42 @@ values and post-callback mutation of command, index, ID and flags in 393,216
 cases each at O0, O2 and ASan/UBSan. These retain the preselected entry while
 observing the native post-call flag and ID reads. Actual provider source was
 separately checked; the fixtures use mocked callbacks, not game execution.
+
+### nbSetTargetSkill (retained nonmatching draft, native 560 bytes)
+
+The guarded reconstruction now retains the native command-block order and
+explicit target-rule bit construction. Its isolated enabled body improves
+from 480 bytes / 25 matching words to the native 560 bytes / 126 of 140
+matching words. It is not an exact match; the assembly fallback and matching
+credit are unchanged. Remaining differences concern flag-phase allocation and
+scheduling and the command-six branch's delay slot.
+
+Two localized empty operands preserve native operations on actual initialized
+values. A value of one supplies the area selector and rule bit zero, preventing
+constant folding of the rule construction to an AND mask. The selected value
+two in command six supplies the final rule output and retains the native branch
+instead of a conditional move. Neither crosses a call or introduces memory
+accesses, register bindings, dummy consumers or a historical-source claim.
+
+The signed command dispatch, provider calls, post-item-call table reads,
+signed player-count threshold, and nullable output stores in type/rule/area
+order remain unchanged. Independent source/native review covers callback
+mutation and aliasing. Extracted-body host tests pass 6,453,696 cases each at
+O2 and ASan/UBSan, including every signed-halfword command, all rule and area
+bytes, signed mode/count boundaries, callback mutations, and all 64 mappings
+of the three output pointers to null or shared output locations. These are
+host semantic checks, not native hardware execution or concurrency tests.
+
+The full guarded owner retains 33 exact functions and unchanged owned data;
+the independently enabled target is the only differing function. Strict
+NON_MATCHING compilation succeeds. Pinned plain and diagnostic compiler runs
+have byte-identical raw assembly and complete object output in production,
+SKIP_ASM and NON_MATCHING+SKIP_ASM contexts. An independent instruction-level
+bit oracle also passes 50,331,648 UBSan cases.
+
+A bounded ordinary forward-edge/shared-join alternative without the command-six
+operand regresses to 548 bytes. Qualified initial RTL retains the desired
+branch and common area assignment, but the early jump pass replaces them with
+conditional selection before scheduling. Production and SKIP_ASM plain/dump
+assembly and whole objects agree. Merely spelling a forward join does not
+resolve that residual; no such alternative was retained.

@@ -665,21 +665,11 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
     s32 rule = 0;
     s32 area = 0;
     s32 skill;
+    s32 firstBit;
     u8 targetarea;
     u8 targetrule;
 
     switch (work->nowcommand) {
-    case 0:
-        if (mode != 0) {
-            rule = 2;
-            area = 1;
-        } else {
-            area = 2;
-        }
-        if (nbHatudoCheckSkill(work, 0x130) != 0 && mode == 0) {
-            type = 1;
-        }
-        break;
     case 1:
     case 5:
         if (work->nowcommand == 1) {
@@ -693,19 +683,53 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
         case 2: type = 2; break;
         }
         targetarea = datSkillTable.normal[skill].targetarea;
-        if (targetarea & 1) {
-            area = mode != 0 ? 2 : 1;
+        /* This initialized bit supplies both the area selector and rule bit
+         * zero below. Keep that live operand opaque so ee-gcc retains retail's
+         * conditional construction of the first three rule bits instead of
+         * collapsing them to & 7.
+         * This localized constraint is not a historical-source claim. */
+        firstBit = 1;
+        FAKEMATCH_ASM_LIVE(firstBit);
+        if ((u8)(targetarea & 1)) {
+            area = mode != 0 ? 2 : firstBit;
         }
         area |= targetarea & 2;
         targetrule = datSkillTable.normal[skill].targetrule;
-        rule = targetrule & 0xF;
+        rule = 0;
+        if (targetrule & 1) rule = firstBit;
+        if (targetrule & 2) rule |= 2;
+        if (targetrule & 4) rule |= 4;
+        if (targetrule & 8) rule |= 8;
+        break;
+    case 0:
+        type = 0;
+        if (mode != 0) {
+            rule = 2;
+            area = 1;
+        } else {
+            rule = 0;
+            area = 2;
+        }
+        if (nbHatudoCheckSkill(work, 0x130) != 0 && mode == 0) {
+            type = 1;
+        }
         break;
     case 4:
+        type = 0;
+        rule = 0;
         area = 2;
         break;
     case 6:
         if ((a->data->stat & 8) == 0) {
-            rule = a->data->playerpcnt >= 4 ? 2 : 12;
+            type = 0;
+            if (a->data->playerpcnt >= 4) {
+                rule = 2;
+                /* The selected rule is consumed by the final output store.
+                 * Its local operand keeps the native branch rather than movn. */
+                FAKEMATCH_ASM_LIVE(rule);
+            } else {
+                rule = 12;
+            }
             area = 1;
         }
         break;
