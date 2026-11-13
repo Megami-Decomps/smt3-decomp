@@ -127,8 +127,9 @@ The stock base is ordinary RAM. Its inherited volatile casts had no demonstrated
 hardware or asynchronous-writer justification and are removed. The source
 still reloads it across row drawing calls, and keeps the preselected unit
 pointer while observing flags after `DispBadStatus`. No new constraint or
-compiler promise is used. Remaining differences concern string-base allocation,
-argument scheduling and the final unconditional stock-base read.
+compiler promise is used. Remaining differences concern string-base allocation and argument scheduling.
+The ordinary draft retains the unconditional stock-base reload, including the
+last iteration, in the loop branch delay slot.
 
 Extracted-body host tests compare a native byte-offset/event-order oracle in
 92,160 scenarios each under optimization and address/undefined-behavior
