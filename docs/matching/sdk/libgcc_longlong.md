@@ -98,3 +98,30 @@ gate, and all seven IRX checks. A fresh two-worker guard run passes all
 attempt 1, including build and Pages deployment. Raw logs verify the exact
 checkout and deployed commit; the run completed successfully on 2026-11-02
 at 02:19:51 UTC.
+
+### Guarded signed quotient reconstruction
+
+The guarded signed-quotient wrapper now reconstructs the native 1,684-byte
+operation using the existing normalized word-division helper with a null
+remainder output. Each negative operand is converted to its unsigned magnitude
+with staged high-word negation and low-word borrow. The numerator sets the sign
+flag and a negative denominator complements it; the resulting quotient is
+negated only when the signs differ. All word negations use unsigned arithmetic,
+including the native wrapped result for the minimum signed value divided by -1.
+
+This object uses its own existing 256-byte `libgccDivdiBitLengths` table at
+`0x0054BD78`; all bytes agree with retail and their bit-length meanings. The
+native zero-divisor path is preserved by the pinned compiler's conditional
+`break 7` before division. Host tests exclude that trap path, rather than claiming
+that division by zero is defined portable C.
+
+The draft emits 1,704 bytes with 112/421 native instruction words matching and
+remains assembly-backed. No matching credit is claimed. Existing signed
+remainder, unsigned quotient and unsigned remainder draft instruction bodies
+remain byte-identical. Complete-owner normal, SKIP_ASM and retained assembly and
+object output agree with diagnostic-dump builds after normalizing only the
+randomized source filename. Extracted optimized and ASan/UBSan fixtures pass
+849,612 cases against a signed 128-bit quotient oracle; an independent reviewer
+passes another 9,410,234 boundary and biased randomized cases and verifies the
+native table and sign/borrow paths. These checks do not claim EE timing or trap
+execution on the host.
