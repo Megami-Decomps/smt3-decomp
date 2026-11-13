@@ -28,17 +28,24 @@ without evidence for a different compiler decision.
 
 ## SetSingleTarget2 (newbattle/nbAi, 0x26C)
 
-143 of 155 words match at the native 620-byte instruction size. All twelve
-differences are the stack adjustment and saved-register offsets: the draft
-uses a 0x40-byte frame with saves starting at 0x10, while native uses 0x50
-with saves starting at 0x20. Every other instruction matches.
+155 of 155 words match at the native 620-byte instruction size in ordinary C.
+The used signed-byte candidate list has capacity 32. This produces the native
+0x50-byte frame and saves beginning at 0x20, instead of the former 16-element
+draft's 0x40-byte frame and twelve frame/save differences.
 
-The candidate buffer contains signed-byte formation indices. Native writes
-only indices 0 through 15; the extra frame space does not establish a larger
-source-level array capacity. The 16-element reconstruction remains guarded
-until actual storage evidence explains that difference. The RNG declaration
-now agrees with its provider: state pointer, unsigned limit and unsigned
-return. This correction leaves the emitted instructions unchanged.
+Capacity is supported by the explicit `NewSpecific(sbyte, 0x20u)` allocation in
+[reconstructed SMT3HD nbAi.c](https://github.com/smt-ret/smt3-reconstructed-sources/blob/cdcd3e5874d72e63afae6e771e3b2d8f85cf66b1/src/nbAi.c#L2219),
+not by frame size alone. That is reconstructed port evidence, not recovered
+PS2 source spelling; the original HD binary/helper and complete cross-build
+algorithm equivalence were not recovered. No padding-only object was added.
+
+The formation scan still writes at most the first 16 signed-byte indices;
+additional capacity is neither initialized nor accessed. The list never escapes.
+Selection is guarded by count > 0, and the actual unsigned RNG provider returns
+its random word modulo count, so selection reads the initialized prefix. All
+selector calls, callback boundaries, post-RNG formation observations and writes
+remain unchanged. No constraints, volatile accesses or instruction macros are
+needed. The earlier RNG ABI correction alone was code-inert.
 
 ## Sel_AI (newbattle/nbAi, 0x358)
 

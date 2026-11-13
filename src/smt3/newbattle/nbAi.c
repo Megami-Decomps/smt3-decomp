@@ -1496,13 +1496,15 @@ void Sel_RND(nbActionProcessData_t *a, s32 n)
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+/* Historical behaviour check against retail: 1 PCSX2 call vector give the same return and memory,
  * capture_006, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 {
-    s8 list[16];
+    /* Reconstructed HD nbAi.c at smt-ret/smt3-reconstructed-sources
+     * cdcd3e5874d72e63afae6e771e3b2d8f85cf66b1 uses NewSpecific(sbyte, 0x20u).
+     * Capacity evidence only, not recovered PS2 source spelling. */
+    s8 list[32];
     s32 result = 0;
     s32 count;
     s32 selected;
@@ -1550,9 +1552,6 @@ s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n)
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", SetSingleTarget2);
-#endif
 
 s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 {
