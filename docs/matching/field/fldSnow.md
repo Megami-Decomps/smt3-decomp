@@ -47,7 +47,7 @@ attempt 1 passed build and Pages deployment.
 ### Guarded snow update and rendering reconstruction
 
 `fldSnowTask` remains guarded with its assembly fallback. The reconstruction
-now emits the native 1280-byte extent with 240 of 320 instruction words matching,
+now emits the native 1280-byte extent with 256 of 320 instruction words matching,
 versus 1316 bytes and 117 matching words before this revision. This is not an
 exact match and earns no matching credit.
 
@@ -55,7 +55,9 @@ The two ordinary seed pointers no longer impose unsupported volatile accesses.
 Each draw-loop iteration still reloads the global seed-buffer base after any
 render callback; the per-iteration item pointer remains valid only within that
 iteration. The actual 12.0f corner radius supplies both signed corner coordinates,
-and that scalar is reassigned to the snow speed in the later update phase.
+initialized before the camera loads as in retail. A separate speed scalar
+serves the later particle-update phase. This ordinary separation improves the
+previous native-size draft from 240 to 256 matching instruction words.
 A distinct drift scalar supplies the actual 0.125f multiplier. The two temporary
 stack objects follow native direction-vector then sprite order. Coordinate
 addition retains its original floating-point grouping, and unsigned color
@@ -64,9 +66,10 @@ No new compiler constraints, type views, or flags are added.
 
 Full-owner verification retains all nine exact peers. Normal, SKIP_ASM, and
 NON_MATCHING/SKIP_ASM plain/dumped compiler outputs agree byte-for-byte. Host
-comparison covers 2048 complete-call scenarios with 700-element seed pools,
+comparison covers 8192 complete-call scenarios with 700-element seed pools,
 mode changes, null buffers, signed velocities/lifetimes/alpha, and callbacks
 mutating the spawn inputs, global seed-buffer base, mode and rendering threshold.
 Optimized and address/undefined-sanitized runs agree with the previous guarded
 body. Remaining differences include the random-coordinate float allocation,
-camera setup schedule, update speed/drift registers and packed-color schedule.
+camera setup schedule and packed-color schedule. The update speed/drift
+registers now agree with retail.

@@ -195,6 +195,57 @@ def full_context_function_inventory_problems(objdump_text, native_names, aliases
     return problems
 
 
+def full_context_text_problems(text, native, origin, relocs, syms, gp,
+                               section_bases, lit4, object_gp, retail, segs):
+    """Check the linked owner span, including bodies absent under SKIP_ASM.
+
+    Function-size metadata can include padding or encompass inner entries.
+    The YAML text span instead fixes every instruction's placement. Only
+    zero alignment suffixes may differ in length, never nonzero omitted code.
+    """
+    if origin is None or len(text) % 4 or len(native) % 4:
+        return ["full unit's text has no aligned native span"]
+    if len(text) > len(native):
+        return ["full unit's text exceeds its native owner span"]
+    if any(native[len(text):]):
+        return ["full unit omits nonzero bytes at the end of its native text span"]
+    if any(at < 0 or at % 4 or at + 4 > len(text) for at in relocs):
+        return ["full unit's text relocation is outside its aligned span"]
+    want = native[:len(text)]
+    # Section-relative references use the fixed owner origin, including inner
+    # labels with no independent symbol size. No arbitrary function inference.
+    local_syms = dict(syms, __check_unit_text_origin=origin)
+    hi_addends = paired_hi16_addends(text, relocs)
+    differences = full_context_relocation_diffs(
+        text, 0, len(text), want, relocs,
+        [(0, len(text), "__check_unit_text_origin")], local_syms, gp,
+        hi_addends, section_bases, object_gp)
+    differences.extend(full_context_literal_diffs(
+        text, 0, len(text), want, relocs, lit4, object_gp, retail, segs, gp))
+    for i in range(0, len(text), 4):
+        mine_word = struct.unpack_from("<I", text, i)[0]
+        want_word = struct.unpack_from("<I", want, i)[0]
+        relocation = relocs.get(i)
+        mask = 0xFFFFFFFF
+        if relocation:
+            kind, symbol = relocation
+            base = symbol.split("+", 1)[0]
+            supported = kind in ("R_MIPS_26", "R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_GPREL16")
+            known_section = (not base.startswith(".")
+                             or (base == ".text" and kind in ("R_MIPS_26", "R_MIPS_HI16", "R_MIPS_LO16"))
+                             or section_bases.get(base) is not None)
+            literal = kind in ("R_MIPS_LITERAL", "R_MIPS_GPREL16") and base == ".lit4"
+            if (kind == "R_MIPS_HI16" and i not in hi_addends) or (not literal and not (supported and known_section)):
+                differences.append((i, mine_word, want_word, f"unresolved {kind} {symbol}"))
+            mask = 0xFC000000 if kind == "R_MIPS_26" else 0xFFFF0000
+        if mine_word & mask != want_word & mask:
+            differences.append((i, mine_word, want_word, "instruction"))
+    if differences:
+        first = differences[0]
+        return [f"full unit's text differs from retail at +0x{first[0]:X} ({first[3]})"]
+    return []
+
+
 def run(*cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw).stdout
 
@@ -1464,6 +1515,11 @@ def main():
                     origin = off_to_va(segs, owned_range[0])
                     if origin is not None:
                         full_section_bases[section] = origin
+            if not args.func and text_range is not None:
+                start, end = text_range
+                data_context.extend(full_context_text_problems(
+                    ftext, retail[start:end], off_to_va(segs, start), frel,
+                    syms, gp, full_section_bases, full_lit4, full_gp0, retail, segs))
             for off, size, name in funcs:
                 if name in fsyms:
                     foff, fsize = fsyms[name]

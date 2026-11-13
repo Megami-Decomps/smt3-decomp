@@ -2385,5 +2385,69 @@ class NativeFunctionInventoryTests(unittest.TestCase):
         self.assertEqual(names, set())
 
 
+class FullTextSpanTests(unittest.TestCase):
+    def check(self, words=(0x03E00008, 0), native=None, **kwargs):
+        text = struct.pack("<%dI" % len(words), *words)
+        native = text if native is None else struct.pack("<%dI" % len(native), *native)
+        return check_unit.full_context_text_problems(
+            text, native, kwargs.get("origin", 0x1000), kwargs.get("relocs", {}),
+            kwargs.get("syms", {}), GP, kwargs.get("bases", {}),
+            kwargs.get("lit4", b""), 0, kwargs.get("retail", native),
+            kwargs.get("segs", [(0x1000, 0, len(native))]))
+
+    def test_identical(self):
+        self.assertFalse(self.check())
+
+    def test_instruction_change(self):
+        self.assertTrue(self.check(native=(0x03E00008, 1)))
+
+    def test_missing_nonzero_tail(self):
+        self.assertTrue(self.check(native=(0x03E00008, 0, 1)))
+
+    def test_zero_alignment_tail(self):
+        self.assertFalse(self.check(native=(0x03E00008, 0, 0)))
+
+    def test_excess_code(self):
+        self.assertTrue(self.check(native=(0x03E00008,)))
+
+    def test_missing_origin(self):
+        self.assertTrue(self.check(origin=None))
+
+    def test_local_jump_uses_owner_origin(self):
+        self.assertFalse(self.check((0x08000001, 0), native=(0x08000401, 0),
+            relocs={0: ("R_MIPS_26", ".text")}))
+        self.assertTrue(self.check((0x08000001, 0), native=(0x08000400, 0),
+            relocs={0: ("R_MIPS_26", ".text")}))
+
+    def test_named_jump_and_wrong_provider(self):
+        self.assertFalse(self.check((0x0C000000, 0), native=(0x0C000800, 0),
+            relocs={0: ("R_MIPS_26", "provider")}, syms={"provider": 0x2000}))
+        self.assertTrue(self.check((0x0C000000, 0), native=(0x0C000800, 0),
+            relocs={0: ("R_MIPS_26", "provider")}, syms={"provider": 0x2004}))
+
+    def test_unknown_provider_rejected(self):
+        self.assertTrue(self.check((0x0C000000, 0), relocs={0: ("R_MIPS_26", "unknown")}))
+
+    def test_unknown_sections_and_relocation_kinds(self):
+        for kind, symbol in (("R_MIPS_LO16", ".unknown"), ("R_MIPS_32", ".text"),
+                             ("R_MIPS_GPREL16", ".text")):
+            self.assertTrue(self.check((0x24020000, 0), native=(0x24021234, 0),
+                relocs={0: (kind, symbol)}))
+
+    def test_malformed_relocation_offsets(self):
+        for offset in (-4, 1, 8):
+            self.assertTrue(self.check(relocs={offset: ("R_MIPS_26", "target")}))
+
+    def test_unmapped_section_base(self):
+        self.assertTrue(self.check((0x24020000, 0), native=(0x24021234, 0),
+            relocs={0: ("R_MIPS_LO16", ".data")}, bases={".data": None}))
+
+    def test_unpaired_section_high_relocation(self):
+        self.assertTrue(self.check((0x3C020000, 0), native=(0x3C021234, 0),
+            relocs={0: ("R_MIPS_HI16", ".data")}, bases={".data": 0x301000}))
+
+    def test_literal_pool_required(self):
+        self.assertTrue(self.check((0xC7800000, 0), relocs={0: ("R_MIPS_LITERAL", ".lit4")}))
+
 if __name__ == "__main__":
     unittest.main()

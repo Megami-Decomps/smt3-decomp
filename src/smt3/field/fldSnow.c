@@ -379,6 +379,7 @@ void fldSnowTask(void)
     s32 i;
     s32 mode;
     f32 speed;
+    f32 radius;
     f32 drift;
     f32 cameraX;
     f32 cameraZ;
@@ -416,6 +417,7 @@ void fldSnowTask(void)
     rsetOtOfs(0x2C);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(1);
+    radius = 12.0f;
     cameraZ = fldCamTarget.z;
     cameraX = fldCamTarget.x;
     eyeZ = fldCamEye.z;
@@ -432,15 +434,14 @@ void fldSnowTask(void)
     sprite.uv[2].v = 0x100;
     sprite.uv[3].u = 0;
     sprite.uv[3].v = 0x100;
-    speed = 12.0f;
-    sprite.vt[0].x = -speed;
-    sprite.vt[0].y = -speed;
-    sprite.vt[1].x = speed;
-    sprite.vt[1].y = -speed;
-    sprite.vt[2].x = speed;
-    sprite.vt[2].y = speed;
-    sprite.vt[3].x = -speed;
-    sprite.vt[3].y = speed;
+    sprite.vt[0].x = -radius;
+    sprite.vt[0].y = -radius;
+    sprite.vt[1].x = radius;
+    sprite.vt[1].y = -radius;
+    sprite.vt[2].x = radius;
+    sprite.vt[2].y = radius;
+    sprite.vt[3].x = -radius;
+    sprite.vt[3].y = radius;
     sprite.rot = 0.0f;
     mode = gFldSnowMode;
     if (mode == 0) {
