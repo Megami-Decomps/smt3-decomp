@@ -189,23 +189,36 @@ extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
 #ifdef NON_MATCHING
 void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
 {
-    s32 border = (panel->Flag & 0x10000) != 0 ? 0x18 : 6;
+    s32 border = 6;
+    /* These localized constraints keep the real depth and border-offset
+     * values in their native callee-saved registers. The width constraint
+     * preserves its consumed second-box subtraction phase. They are
+     * reconstruction aids; the remaining schedule is still nonmatching. */
+    FAKEMATCH_ASM_REG(s32, offset, "s6");
     s32 width = (u16)panel->W;
-    s32 z = panel->Z << 4;
+    FAKEMATCH_ASM_REG(s32, z, "s4") = panel->Z;
 
+    if (panel->Flag & 0x10000) border = 0x18;
     fclDrawPanelSprite2(0x44, ot);
+    width -= border;
+    z = (u32)z << 4;
     cmpDrawBoxF(panel->X, panel->Y, panel->Z, border, (u16)panel->H, 0x13141559, ot);
-    cmpDrawBoxF(panel->X + ((border + 0x13) << 4), panel->Y, panel->Z,
-                width - border - 0x13, (u16)panel->H, 0x13141559, ot);
-    fclDrawSpriteFilter(panel->X + (border << 4), panel->Y, z, 0, NULL,
+    width -= 0x13;
+    FAKEMATCH_ASM_LIVE(width);
+    cmpDrawBoxF((s32)((u32)panel->X + ((u32)(border + 0x13) << 4)), panel->Y, panel->Z,
+                width, (u16)panel->H, 0x13141559, ot);
+    offset = border << 4;
+    FAKEMATCH_ASM_LIVE(offset);
+    fclDrawSpriteFilter((s32)((u32)panel->X + (u32)offset), panel->Y, z, 0, NULL,
                         10, 3, D_00345D88, fclSpriteTable, ot);
-    fclDrawSpriteSizeFilter(panel->X + (border << 4), panel->Y + 0xC8, z, 0x13,
+    fclDrawSpriteSizeFilter((s32)((u32)panel->X + (u32)offset), (s32)((u32)panel->Y + 0xC8), z, 0x13,
                             (u16)panel->H - 0x32, 0, NULL, 10, 5,
                             D_00345D88, fclSpriteTable, ot);
-    fclDrawSpriteFilter(panel->X + (border << 4), panel->Y + (((u16)panel->H - 0x19) << 3),
+    fclDrawSpriteFilter((s32)((u32)panel->X + (u32)offset), (s32)((u32)panel->Y + (((u32)(u16)panel->H - 0x19) << 3)),
                         z, 0, NULL, 10, 4, D_00345D88, fclSpriteTable, ot);
     fclDrawPanelBorder(panel, z, border, ot);
 }
+
 #else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
 #endif

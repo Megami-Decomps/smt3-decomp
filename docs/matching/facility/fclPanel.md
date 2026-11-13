@@ -145,3 +145,20 @@ from the mutable height before its decrement remains 916 bytes but differs in
 cached-delta spellings was inert; chained color assignments worsened the
 result. Revisit the value ranges or compiler decision before repeating those
 source forms. The complete normal owner remains exact, including its data.
+
+### Type-one panel: captured depth and consumed width phases
+
+The guarded reconstruction matches 100 of 109 words at the native 436-byte
+size. It keeps the entry width across the initial sprite callback, subtracts
+the border before the first box, and subtracts 19 before passing that width
+to the second box. The entry depth is captured before the callback and shifted
+by four for subsequent sprites; the box callbacks still read fresh depth.
+
+Localized constraints on these real values preserve the second-box width
+phase and native callee-saved depth and border-offset registers. These are
+reconstruction aids, not evidence of original source spelling. Every value
+has an actual consumer, and both bound registers are callee-saved across the
+calls they span. Unsigned-word coordinate arithmetic preserves native wrap.
+The nine residual words concern scheduling around the second box and texture
+address materialization. The assembly fallback remains active; no exact
+matching credit is claimed.
