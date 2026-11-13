@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Pin the draft accounting, which has misread the tree in both directions."""
 import contextlib
+import errno
+import os
 import io
 import re
 import subprocess
@@ -69,6 +71,28 @@ class CompilerFailures(unittest.TestCase):
         result = subprocess.CompletedProcess([], status, stdout, stderr)
         with patch.object(cn.subprocess, "run", return_value=result):
             return cn.compile_unit(Path("src/smt3/unit.c"))
+
+    def test_ee_loader_uses_override_or_default(self):
+        for override in (None, "", "/tmp/loader path"):
+            with self.subTest(override=override), patch.dict(os.environ, {}, clear=True):
+                if override is not None:
+                    os.environ["SMT3_I386_LIBDIR"] = override
+                with patch.object(cn.subprocess, "run", return_value=
+                                  subprocess.CompletedProcess([], 0, "", "")) as run:
+                    self.assertEqual(cn.compile_unit(Path("unit.c")), "")
+                libdir = Path(override) if override else cn.ROOT / "tools/glibc32"
+                self.assertEqual(run.call_args.args[0][:3],
+                                 [str(libdir / "ld-linux.so.2"), "--library-path",
+                                  str(libdir)])
+
+    def test_ee_loader_launch_errors_fail_closed(self):
+        for code in (errno.ENOENT, errno.EACCES, errno.ENOEXEC):
+            error = OSError(code, os.strerror(code), "ld-linux.so.2")
+            with self.subTest(code=code), patch.object(cn.subprocess, "run",
+                                                      side_effect=error):
+                diagnostic = cn.compile_unit(Path("unit.c"))
+                self.assertIn("could not start compiler", diagnostic)
+                self.assertIn(str(error), diagnostic)
 
     def irx_result(self, status, stderr="", stdout=""):
         result = subprocess.CompletedProcess([], status, stdout, stderr)
