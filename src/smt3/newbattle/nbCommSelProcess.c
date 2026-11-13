@@ -680,11 +680,9 @@ extern void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
 
 extern void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha);
 
-/* NON_MATCHING: 203 of 207 words match with the command-row C draft visible. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+/* Historical behaviour check against retail: 3 PCSX2 call vectors give the same return and memory,
  * battle unknown realm savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 alpha)
 {
     s32 color = ((u32)alpha << 24) | 0x808080;
@@ -712,13 +710,17 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
         case 2:
         case 4:
         case 5:
-            rowStep = 0x15;
             ox += 0x1B;
-            oy += 0x159;
+            rowStep = oy + 0x159;
+            oy = rowStep;
+            rowStep = 0x15;
             break;
         case 3:
             rowStep = 0x2B;
             ox += 0x21;
+            /* Keep the real adjusted row X as a localized reconstruction constraint,
+             * not a claim about the original source spelling. */
+            FAKEMATCH_ASM_LIVE(ox);
             oy += motion + 0x12E;
             break;
         }
@@ -759,9 +761,6 @@ void DispCommandPanel(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 a
     DispPanelLabel(s, type, originalX, originalY, color);
 }
 
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandPanel);
-#endif
 
 void AnimeCommandList(nbCommSelProcessData_t *s)
 {

@@ -88,11 +88,9 @@ globals substituted for literal-pool constants. The nonvolatile control's
 negative result remains useful: maintaining the endpoint alone did not
 constrain the independent load's schedule.
 
-## DispCommandPanel (0x33C)
+## DispCommandPanel (newbattle/nbCommSelProcess, 0x33C)
 
-203 of 207 instruction words match at the native 828-byte size when the
-existing `DispComm1PanelComm` C draft is visible. The caller remains
-assembly-backed; the row callee is now matched as documented above.
+207 of 207 words match at the native 828-byte extent.
 
 The five inputs are process, command type, X, Y and opacity. Preserve the
 original coordinates for the background, cursor setup, help origin and final
@@ -104,33 +102,56 @@ other row renderers.
 Capture each entry before callbacks. Reload `drawcursor` after the selected
 row's cursor callback before deciding whether to draw help. Read the command
 count again for each row and `drawlisty` again for the loop bound; retain the
-visible-row count returned before layout selection. Rows 4 and 5 advance Y
+visible-row count returned before layout selection. Command types 4 and 5 advance Y
 without an entry-renderer call. The help callback uses seven arguments,
 including fresh depth and help opacity.
 
-With a separate normalized-coordinate local, the reconstruction has broad
-entry/register differences. Updating the incoming coordinate variables while
-retaining original-coordinate snapshots recovers the native allocation.
-Declare the help-coordinate locals before the original Y snapshot: its reload
-home is then the native frame offset 0x10 rather than 8. Moving the help
-coordinate calculations earlier instead extends their lifetimes and changes
-the allocation.
+Two complementary source changes close the former four-word residual:
 
-The remaining differences are two scheduling exchanges. Offsets +0x110 and
-+0x118 exchange the row-step store and normal-layout Y adjustment. Offsets
-+0x12C and +0x130 exchange the type-3 X and final Y adjustments. Computing the
-slide addition separately changes the float-result register and does not
-close the match; moving the normal row-step assignment leaves its pair
-unchanged.
+- In the normal-layout arm, `rowStep` temporarily holds the actual Y sum,
+  supplies `oy`, then becomes the real 21-pixel stride. The phases are
+  disjoint and have genuine consumers. This ordinary scalar reuse restores
+  the native Y adjustment before the branch and stride store in its delay
+  slot, without adding arithmetic, calls or memory observations.
+- In the type-3 arm, a nonvolatile empty `+r` operand on initialized,
+  adjusted `ox` preserves the native X-before-final-Y order. This is a
+  localized compiler reconstruction aid on the real row coordinate, not
+  evidence of original source spelling. It introduces no fixed register,
+  memory clobber, dummy consumer or artificial lifetime extension. Removing
+  only this operand leaves the two type-3 words different.
 
-A truthful command-row forward declaration alone leaves this caller at
-836 bytes with 132 matching instruction words and 75 differing words in the
-native overlap. Making the existing genuine command-row C body visible
-recovers the native size and leaves the four words above. The row callee's former
-three-word lower-bound residual is now resolved independently; this does not
-resolve the caller's scheduling differences. Reproduce the caller measurement with
-`tools/check_unit.py src/smt3/newbattle/nbCommSelProcess.c
---cflags=-DNON_MATCHING --func DispCommandPanel -v`.
+The previous normalized-coordinate and initializer controls remain closed.
+A separate normalized-coordinate local caused broad allocation differences;
+updating the incoming variables while retaining original-coordinate snapshots
+recovered the native allocation. Declaring help-coordinate locals before the
+original Y snapshot gives its native frame offset 0x10 rather than 8. Moving
+help calculations earlier extends their lifetimes and changes allocation.
+Separating the slide addition changes the float-result register; merely
+moving the normal stride assignment did not resolve its scheduling pair.
+
+Qualified unchanged-source compiler observations explain the old ordering,
+not original source intent. Before reload, the type-3 X/final-Y comparison
+has equal priorities and register weights 1/0, selecting Y first. After
+reload, normal-layout Y and the stride spill are co-ready: the reached tiers
+tie until per-pass linear instruction keys 65/63 select the spill first.
+That key is not C-source order, and candidate selection is not a proof of
+issue or delay-slot eligibility. The ordinary scalar-reuse result above is
+verified from emitted code; no unobserved lowering cause is asserted.
+
+The whole-function semantic review covers the initialized command-selection
+process and its valid resources, not arbitrary fabricated state. Producers
+bound command types, populated rows, scrolling and slide fractions; the
+retail debug-skill table also fits the existing 288-entry row. Original
+coordinates, callback-sensitive reloads, byte/halfword accesses and provider
+ABIs remain unchanged. The outer layout guard does not make an invalid type
+safe: earlier code already indexes the type-dependent state.
+
+Production and retained target code resolve to all 828 retail bytes. Complete
+owner/data checks, ordinary/dump output parity, finite attribution of the
+SKIP-context table insertion, draft/IRX checks, regression tests and literal
+retail equality qualify the promotion. Historical failed observer attempts
+and rejected controls remain separate from the successful observations and
+source qualification.
 
 ## SetCommCursor2 (newbattle/nbCommSelProcess, 0x21C)
 

@@ -275,9 +275,9 @@ bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	194 of
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
-DispCommandPanel (0x33C)				docs/matching/newbattle/nbCommSelProcess.md	91
-SetCommCursor2	newbattle/nbCommSelProcess	0x21C	135 of 135 words match	docs/matching/newbattle/nbCommSelProcess.md	135
-DispHelpPanel	newbattle/nbCommSelProcess	0x1E8	122 of 122 words match	docs/matching/newbattle/nbCommSelProcess.md	177
+DispCommandPanel	newbattle/nbCommSelProcess	0x33C	207 of 207 words match	docs/matching/newbattle/nbCommSelProcess.md	91
+SetCommCursor2	newbattle/nbCommSelProcess	0x21C	135 of 135 words match	docs/matching/newbattle/nbCommSelProcess.md	156
+DispHelpPanel	newbattle/nbCommSelProcess	0x1E8	122 of 122 words match	docs/matching/newbattle/nbCommSelProcess.md	198
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 SelectDevil	newbattle/nbDebugProcess	0x218	79 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
 SelectMotData	newbattle/nbDebugProcess	0x434	269 of 269 words match	docs/matching/newbattle/nbDebugProcess.md	74
