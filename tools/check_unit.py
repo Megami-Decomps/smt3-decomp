@@ -1585,8 +1585,10 @@ def main():
             # retail's, in retail order. Catches string literals and
             # INCLUDE_RODATA items that come out in a different order.
             fdata, fsecs = sections(full)
-            if (emitted.get(".data") or fsecs.get(".data", (0, 0))[1]) \
-                    and not args.func and data_range is not None:
+            # The YAML owner is the obligation, even when both compiles emit
+            # no data. Otherwise removing all initialized definitions silently
+            # skips the payload/inventory check while functions still match.
+            if not args.func and data_range is not None:
                 owned_data_checked = True
                 data_start, data_end = data_range
                 full_data_off, full_data_size = fsecs.get(".data", (0, 0))

@@ -2316,6 +2316,21 @@ class FullContextStorageTests(unittest.TestCase):
         self.assertNotEqual(status,0,report)
         self.assertIn('DATA CONTEXT',report)
 
+    def test_missing_owned_data_in_both_contexts_is_rejected(self):
+        status, report = self.fixture(section='.data', owned=True, payload=b'')
+        self.assertNotEqual(status, 0, report)
+        self.assertIn('.data has no STT_OBJECT definitions in both contexts', report)
+
+    def test_zero_filled_owned_data_still_needs_definitions(self):
+        status, report = self.fixture(section='.data', owned=True,
+                                      payload=b'', native=bytes(4))
+        self.assertNotEqual(status, 0, report)
+        self.assertIn('.data has no STT_OBJECT definitions in both contexts', report)
+
+    def test_missing_unowned_data_is_not_an_ownership_obligation(self):
+        status, report = self.fixture(section='.data', owned=False, payload=b'')
+        self.assertEqual(status, 0, report)
+
     def test_zero_sections_are_not_unowned_storage(self):
         status,report = self.fixture(payload=b'')
         self.assertEqual(status,0,report)
