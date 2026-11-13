@@ -920,6 +920,8 @@ s32 sceCdStStop(void)
 #ifdef NON_MATCHING
 s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
 {
+    /* Native sll/addu use the low 32 bits, including wraparound.
+     * Keep the accumulator signed for its existing return/diagnostic ABI. */
     s32 error;
     s32 completed;
     s32 read;
@@ -938,10 +940,10 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
     if (mode != 0) {
         do {
             reply = sceCdStream(0, sectors - completed,
-                               (u8 *)buffer + (completed << 11), 2, cdvdDefaultStreamMode);
+                               (u8 *)buffer + ((u32)completed << 11), 2, cdvdDefaultStreamMode);
             read = reply & 0xFFFF;
             currentError = reply >> 16;
-            completed += read;
+            completed = (s32)((u32)completed + (u32)read);
             if (currentError != 0) {
                 error = currentError;
                 if (cdvdDebugLevel > 0) {

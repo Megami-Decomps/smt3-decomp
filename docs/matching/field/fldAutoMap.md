@@ -367,3 +367,16 @@ scheduler dump already put map-position stores ahead of field-ID stores; swappin
 the source groups repairs two emitted store positions without new constraints.
 Full owner checks preserve all 36 exact peers and three-mode assembly/object
 parity passes. Nine scheduling words remain, starting at +0x234.
+
+A subsequent local destination-operand constraint reaches 187/195, still at
+780 bytes. A truthful `sdfVector4_t *eye` is initialized to `&fldAutoMapEye`
+and constrained with an empty `+r` operand immediately before its existing
+VU-copy consumer. No fixed register binding is needed and no value crosses a
+call. This target-specific reconstruction aid leaves the native vector accesses,
+including untouched W lanes, unchanged; it is not evidence of original source
+spelling. The final target-Y and camera-X store positions now agree, while eight
+address/zero/store scheduling words remain from +0x228 through +0x248. The
+assembly fallback and matching credit remain unchanged. All 36 exact peers are
+preserved, and production, SKIP_ASM and NON_MATCHING+SKIP_ASM each have identical
+assembly and objects with and without compiler dumps. Ordinary pointer naming
+alone stays at 186/195; fixed binding adds no benefit over the immediate operand.

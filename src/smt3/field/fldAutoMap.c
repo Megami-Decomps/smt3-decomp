@@ -1371,6 +1371,7 @@ void fldAutoMapSeqStart(void) {
     sdfVector4_t target;
     sdfVector4_t camera;
     sdfVector4_t up;
+    sdfVector4_t *eye;
     f32 px;
     f32 pz;
     fldAmLightParam_t *light;
@@ -1442,7 +1443,10 @@ void fldAutoMapSeqStart(void) {
     camera.x = (f32)fldAutoMapCamX;
     camera.y = -24000.0f;
     camera.z = (f32)fldAutoMapCamZ;
-    SDF_VU0_COPYVECTOR(&fldAutoMapEye, &camera);
+    /* Constrain the real destination only at its immediate VU-copy consumer. */
+    eye = &fldAutoMapEye;
+    FAKEMATCH_ASM_LIVE(eye);
+    SDF_VU0_COPYVECTOR(eye, &camera);
     SDF_VU0_COPYVECTOR(&fldAutoMapRect, &target);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     light = (fldAmLightParam_t *)&dds3LightParam2[0x20];

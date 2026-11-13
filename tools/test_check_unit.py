@@ -2633,5 +2633,45 @@ class FullContextDataPlacementTests(unittest.TestCase):
         self.assertEqual(self.check("00000004 g O .bss 00000010 table"), [])
 
 
+class SymbolSizePrecedenceTests(unittest.TestCase):
+    def read_sizes(self, rows):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            directory = root / "config" / VERSION
+            directory.mkdir(parents=True)
+            (directory / "symbol_addrs.txt").write_text(rows)
+            with patch.object(check_unit, "ROOT", root):
+                return check_unit.symbol_sizes(VERSION)
+
+    def test_first_definition_size_wins(self):
+        self.assertEqual(self.read_sizes(
+            "table = 0x1000; // size:0xC\n"
+            "table = 0x1000; // size:0x10\n"), {"table": 12})
+
+    def test_shadowed_address_cannot_supply_size(self):
+        self.assertEqual(self.read_sizes(
+            "table = 0x1000;\n"
+            "table = 0x2000; // size:0x20\n"), {})
+
+    def test_unsized_override_suppresses_generated_size(self):
+        self.assertEqual(self.read_sizes(
+            "table = 0x1000;\n"
+            "table = 0x1000; // size:0x20\n"), {})
+
+    def test_shadowed_malformed_size_is_ignored(self):
+        self.assertEqual(self.read_sizes(
+            "table = 0x1000; // size:0xC\n"
+            "table = 0x1000; // size:invalid\n"), {"table": 12})
+
+    def test_first_malformed_size_still_fails(self):
+        with self.assertRaises(ValueError):
+            self.read_sizes("table = 0x1000; // size:invalid\n")
+
+    def test_independent_alias_sizes_are_preserved(self):
+        self.assertEqual(self.read_sizes(
+            "table = 0x1000; // size:0xC\n"
+            "alias = 0x1000; // size:0x10\n"), {"table": 12, "alias": 16})
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -99,13 +99,20 @@ def symbols(version):
 
 
 def symbol_sizes(version):
-    """Read explicit native extents; an address interval may include alignment."""
+    """Read native extents from the same first definitions used by symbols()."""
     out = {}
+    seen = set()
     for line in (ROOT / "config" / version / "symbol_addrs.txt").read_text().splitlines():
         row = ROW.match(line)
+        if not row or row.group(1) in seen:
+            continue
+        name = row.group(1)
+        # An unsized hand-curated definition also shadows the generated row.
+        # Importing its size could join metadata from two different addresses.
+        seen.add(name)
         size = re.search(r"\bsize:([^\s/]+)", line)
-        if row and size:
-            out[row.group(1)] = int(size.group(1), 0)
+        if size:
+            out[name] = int(size.group(1), 0)
     return out
 
 
