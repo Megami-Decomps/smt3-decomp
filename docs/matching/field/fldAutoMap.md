@@ -305,3 +305,25 @@ agrees in both production and SKIP_ASM contexts; guarded production output is
 byte-identical to baseline. Independent review and one million changed-block finite-float fixtures per
 configuration pass at O0, O2 and with undefined-behavior sanitization. This tests
 the changed arithmetic/copy block, not an emulator of the whole function.
+
+### SeqStart live-zero allocation control (pass143)
+
+The guarded draft now matches 172/195 words at the native 780-byte extent,
+up from 165/195. This is **not an exact match** and retains its assembly fallback.
+The positive-zero scalar is locally bound to `$f1` and constrained immediately
+before its three real Y stores (field identifier, map position and target).
+Retail materializes positive zero in `$f1` before those stores. No memory access,
+float expression, callback, or additional consumer was introduced; the scalar
+is initialized after the final callback and consumed before the vector copies.
+
+Deletion controls at the same extent: binding without the live constraint stays
+165/195; live constraint without binding reaches 166/195. Binding all three live
+coordinates reaches 170/195 and is not retained. Ordinary scalar reuse of px/pz
+adds four bytes; splitting the X addition reaches 161/195. Moving zero's assignment
+and naming shared camera scalars do not improve the baseline. These controls do
+not justify changing access types or inventing dependencies.
+
+Residual differences now begin at +0x1F4: global-address registers, coordinate
+arithmetic allocation and store scheduling still differ, as do the later light
+constant registers. This is measured emitted-output progress, not proof of the
+historical source or a finished decompilation.

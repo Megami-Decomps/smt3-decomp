@@ -1808,6 +1808,7 @@ class OwnedRodataBoundaryTests(unittest.TestCase):
             stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0, 0)))
             stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[]))
             stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
+            stack.enter_context(patch.object(check_unit, 'off_to_va', side_effect=lambda segs, off: off+0xFF000))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
             stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
             stack.enter_context(patch.object(check_unit, 'relocations', return_value=relocs))
@@ -1888,6 +1889,7 @@ class InteriorOwnedContextTests(unittest.TestCase):
             stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0, 0)))
             stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[]))
             stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
+            stack.enter_context(patch.object(check_unit, 'off_to_va', side_effect=lambda segs, off: off+0xFF000))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
             stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
             if full_data_size is not None:
@@ -2513,6 +2515,57 @@ class FullContextEntryPlacementTests(unittest.TestCase):
 
     def test_verified_alias_precedes_auto_fallback(self):
         self.assertFalse(self.check("00000008 l F .text 00000010 func_00003000.12",names=(), syms={},aliases={"func_00003000.12": 0x1008}))
+
+class FullContextDataPlacementTests(unittest.TestCase):
+    def check(self, row, syms=None, bases=None):
+        return check_unit.full_context_data_placement_problems(
+            row, {"table": 0x1000} if syms is None else syms,
+            {".rodata": 0x1000} if bases is None else bases)
+
+    def test_full_only_object_shift_rejected(self):
+        self.assertTrue(self.check("00000004 g O .rodata 00000010 table"))
+
+    def test_full_only_zero_sized_asm_label_shift_rejected(self):
+        self.assertTrue(self.check("00000004 g .rodata 00000000 table"))
+
+    def test_correct_object_and_asm_labels_pass(self):
+        for kind in ("g O", "g", "l O"):
+            self.assertEqual(self.check(f"00000000 {kind} .rodata 00000010 table"), [])
+
+    def test_all_initialized_sections_checked(self):
+        for section in (".rodata", ".sdata", ".data"):
+            self.assertTrue(self.check(f"00000004 g O {section} 00000010 table",
+                                       bases={section: 0x1000}))
+
+    def test_missing_origin_and_bad_offset_fail_closed(self):
+        self.assertTrue(self.check("00000000 g O .rodata 00000010 table", bases={}))
+        self.assertTrue(self.check("invalid g O .rodata 00000010 table"))
+
+    def test_numeric_label_uses_address_resolver(self):
+        self.assertTrue(self.check("00000004 g .rodata 00000000 D_00001000", syms={}))
+
+    def test_configured_address_wins_numeric_name(self):
+        self.assertEqual(self.check("00000000 g .rodata 00000000 D_00002000",
+                                   syms={"D_00002000": 0x1000}), [])
+
+    def test_unknown_local_and_section_markers_ignored(self):
+        self.assertEqual(self.check("00000004 l O .rodata 00000010 unknown"), [])
+        self.assertEqual(self.check("00000000 l d .rodata 00000000 .rodata",
+                                   syms={".rodata": 0x9999}), [])
+
+    def test_known_aliases_and_end_labels_keep_independent_addresses(self):
+        rows = ("00000000 g .rodata 00000000 table\n"
+                "00000000 g .rodata 00000000 alias\n"
+                "00000010 g .rodata 00000000 end")
+        self.assertEqual(self.check(rows, syms={"table": 0x1000,
+                                             "alias": 0x1000, "end": 0x1010}), [])
+        self.assertTrue(self.check(rows, syms={"table": 0x1000,
+                                            "alias": 0x1004, "end": 0x1010}))
+
+    def test_unrelated_sections_ignored(self):
+        self.assertEqual(self.check("00000004 g F .text 00000010 table"), [])
+        self.assertEqual(self.check("00000004 g O .bss 00000010 table"), [])
+
 
 if __name__ == "__main__":
     unittest.main()

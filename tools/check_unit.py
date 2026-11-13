@@ -224,6 +224,37 @@ def full_context_entry_placement_problems(objdump_text, native_names, syms, orig
     return problems
 
 
+
+def full_context_data_placement_problems(objdump_text, syms, section_bases):
+    """Check known initialized-data labels, including full-only assembler labels.
+
+    Raw section equality cannot establish exported label placement. Resolve
+    native names independently of emitted offsets, and use fixed YAML origins.
+    Unknown compiler-local labels do not establish new retail symbols.
+    """
+    problems = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if len(parts) < 5 or parts[-3] not in (".rodata", ".sdata", ".data"):
+            continue
+        section, name = parts[-3], parts[-1]
+        if name == section:
+            continue
+        expected = address(name, syms)
+        if expected is None:
+            continue
+        origin = section_bases.get(section)
+        try:
+            offset = int(parts[0], 16)
+        except ValueError:
+            offset = None
+        if origin is None or offset is None:
+            problems.append(f"full unit data label {name} has no verified placement")
+        elif origin + offset != expected:
+            problems.append(f"full unit data label {name} is at 0x{origin + offset:X}, expected 0x{expected:X}")
+    return problems
+
+
 def full_context_text_problems(text, native, origin, relocs, syms, gp,
                                section_bases, lit4, object_gp, retail, segs):
     """Check the linked owner span, including bodies absent under SKIP_ASM.
@@ -1544,6 +1575,9 @@ def main():
                     origin = off_to_va(segs, owned_range[0])
                     if origin is not None:
                         full_section_bases[section] = origin
+            if not args.func:
+                data_context.extend(full_context_data_placement_problems(
+                    full_objdump, syms, full_section_bases))
             if not args.func and text_range is not None:
                 start, end = text_range
                 data_context.extend(full_context_entry_placement_problems(

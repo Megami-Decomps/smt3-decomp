@@ -1364,7 +1364,7 @@ void fldAutoMapDrawWindow(void) {
     rsetAlpha(0);
 }
 
-/* NON_MATCHING: 165 of 195 words, exact size; the closing vector block is
+/* NON_MATCHING: 172 of 195 words, exact size; the closing vector block is
  * scheduled differently and holds the two coordinates in other fp registers. */
 #ifdef NON_MATCHING
 void fldAutoMapSeqStart(void) {
@@ -1378,7 +1378,7 @@ void fldAutoMapSeqStart(void) {
     s32 i;
     f32 wx;
     f32 wz;
-    f32 zero;
+    FAKEMATCH_ASM_REG(f32, zero, "$f1");
 
     if (fldAutoMapSeqTestFlag(1) == 1) {
         return;
@@ -1422,6 +1422,8 @@ void fldAutoMapSeqStart(void) {
     up = fldAutoMapSeqUp;
     wz += 200.0f;
     wx = fldGlobalBase.x + px;
+    /* Keep the native positive-zero scalar live for the three real Y stores. */
+    FAKEMATCH_ASM_LIVE_F32(zero);
     fldAutoMapFieldId.x = wx;
     fldAutoMapFieldId.y = zero;
     fldAutoMapFieldId.z = wz;
