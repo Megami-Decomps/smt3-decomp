@@ -507,13 +507,8 @@ void DispComm1PanelSummon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy,
 }
 
 
-/* NON_MATCHING: 29 of 97 words differ (first at +0x8). */
-
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-
+/* The incoming Y becomes the upper edge; y1 holds the scaled coordinate
+ * before becoming the lower edge. All coordinate arithmetic wraps as words. */
 void DispCommCursor(s32 ox, s32 oy, s32 a)
 {
     sdfDrawTag_t *list;
@@ -521,33 +516,29 @@ void DispCommCursor(s32 ox, s32 oy, s32 a)
     s32 xb;
     s32 x1;
     s32 alpha = 0x46;
-    s32 y0, y1;
+    s32 y1;
     u32 c0, c1;
 
     if (a != 0x80) {
         alpha = a * 0.0078125f * 70.0f;
     }
-    xb = ox << 4;
-    x1 = xb + 0x7630;
-    ox = xb + 0x7000;
+    xb = (u32)ox * 16;
+    x1 = (u32)xb + 0x7630;
+    ox = (u32)xb + 0x7000;
     list = dds3FontReqAllocDrawTag();
-    y0 = (oy << 3) + 0x7900;
-    y1 = (oy << 3) + 0x7998;
-    c0 = (alpha << 24) | 0x8CBE1B;
-    c1 = (alpha << 24) | 0x9B4400;
-    sdfPrimLinkG4(list, 0x14C, ox, y0, c0, x1, y0, c1, ox, y1, c0, x1, y1, c1, -1, NULL);
+    y1 = (u32)oy * 8;
+    oy = (u32)y1 + 0x7900;
+    y1 = (u32)y1 + 0x7998;
+    c0 = ((u32)alpha << 24) | 0x8CBE1B;
+    c1 = ((u32)alpha << 24) | 0x9B4400;
+    sdfPrimLinkG4(list, 0x14C, ox, oy, c0, x1, oy, c1, ox, y1, c0, x1, y1, c1, -1, NULL);
     ox = x1;
-    sdfPrimLinkG4(list, 0x14C, ox, y0, c1, xb + 0x7C60, y0, 0xBF0013, ox, y1, c1, xb + 0x7C60, y1,
+    sdfPrimLinkG4(list, 0x14C, ox, oy, c1, (u32)xb + 0x7C60, oy, 0xBF0013, ox, y1, c1, (u32)xb + 0x7C60, y1,
                   0xBF0013, -1, NULL);
     ot = &sdfGrOtTable[71];
     ot->regFunc(ot, list);
 }
 
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommCursor);
-
-#endif
 
 #ifdef NON_MATCHING
 void DispSummonCursor(s32 ox, s32 oy, s32 a)

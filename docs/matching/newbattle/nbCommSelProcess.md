@@ -243,3 +243,18 @@ without changing target output. An independent
 extracted-actual-body callback oracle passes 200,000 cases at O2 and under
 ASan/UBSan; this is a host semantic test, not native execution. Full integrated
 retail and regression gates remain required for publication.
+
+### DispCommCursor Y-coordinate phases
+
+`DispCommCursor` now matches all 97 words at the native 388-byte extent.
+The incoming Y scalar becomes the upper edge after `y1` has captured its scaled
+value; `y1` then becomes the lower edge. This ordinary live-value reuse explains
+the native allocation without constraints, dummy values, or register bindings.
+Coordinate arithmetic and alpha packing use unsigned word operations to preserve
+native wrap. Alpha retains the two binary32 multiplies and signed conversion.
+Both quad calls, their argument ordering, tag allocation, and the final OT callback
+are unchanged. This establishes a matching reconstruction, not original spelling.
+The complete owner has 37 matches and no differences. Extracted-body tests compare
+one million full-domain coordinate/alpha call traces against a native-operation
+oracle at O2 and under ASan/UBSan. Three complete-owner modes preserve plain versus
+dump-enabled assembly and object output.
