@@ -75,7 +75,7 @@ class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
                     source_text="void target(void) {}\n", candidate=None, assembly=None,
-                    native_inventory=None):
+                    native_inventory=None, full_nm=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -120,6 +120,8 @@ class FocusedFunctionTests(unittest.TestCase):
             def object_output(*args):
                 if "-S" not in args:
                     return ""
+                if str(args[-1]).endswith("full.o") and full_nm is not None:
+                    return full_nm
                 names = full_emitted if str(args[-1]).endswith("full.o") and full_emitted is not None else emitted
                 return "".join(f"0 {len(code):x} T {name}\n" for name in names.split())
 
@@ -147,8 +149,54 @@ class FocusedFunctionTests(unittest.TestCase):
         candidate = ('#ifdef NON_MATCHING\nvoid target(void) {}\n#else\n'
                      'INCLUDE_ASM(s32, "smt3/main/unit", target);\n#endif\n')
         status, report = self.run_checker(
-            None, emitted="", candidate=candidate, native_inventory="glabel target\n")
+            None, emitted="", full_emitted="target", candidate=candidate, native_inventory="glabel target\n")
         self.assertEqual(status, 0, report)
+
+    def test_inactive_source_definition_cannot_supply_native_owner(self):
+        for candidate in (
+            "/*\nvoid target(void) {}\n*/\n",
+            "#if 0\nvoid target(void) {}\n#endif\n",
+            "#ifdef NON_MATCHING\nvoid target(void) {}\n#endif\n",
+        ):
+            with self.subTest(candidate=candidate):
+                status, report = self.run_checker(
+                    None, emitted="", candidate=candidate,
+                    native_inventory="glabel target\n")
+                self.assertEqual(status, 1, report)
+                self.assertIn("MISSING target: not emitted by the full-unit compile", report)
+
+    def test_full_owner_emission_checked_even_if_skip_context_has_function(self):
+        status, report = self.run_checker(
+            None, emitted="target", full_emitted="",
+            native_inventory="glabel target\n")
+        self.assertEqual(status, 1, report)
+        self.assertIn("MISSING target: not emitted by the full-unit compile", report)
+
+    def test_full_owner_definition_retained(self):
+        status, report = self.run_checker(
+            None, emitted="target", native_inventory="glabel target\n")
+        self.assertEqual(status, 0, report)
+
+    def test_zero_size_assembly_entry_is_present_in_full_owner(self):
+        status, report = self.run_checker(
+            None, emitted="", full_nm="00000000 T target\n",
+            candidate='INCLUDE_ASM(s32, "smt3/main/unit", target);\n',
+            native_inventory="glabel target\n")
+        self.assertEqual(status, 0, report)
+
+    def test_nontext_symbol_cannot_supply_function_owner(self):
+        for symbol in ("00000000 D target\n", "00000000 00000008 D target\n"):
+            with self.subTest(symbol=symbol):
+                status, report = self.run_checker(
+                    None, emitted="", full_nm=symbol,
+                    native_inventory="glabel target\n")
+                self.assertEqual(status, 1, report)
+                self.assertIn("not emitted by the full-unit compile", report)
+
+    def test_focused_check_requires_full_context_emission(self):
+        status, report = self.run_checker("target", full_emitted="")
+        self.assertEqual(status, 1, report)
+        self.assertIn("requested function not emitted by the full-unit compile", report)
 
     def test_missing_requested_name_fails_even_at_an_emitted_address(self):
         for requested in ("typo", "func_00001000", "alias"):
@@ -1266,6 +1314,11 @@ class NestedFunctionCheckerTests(unittest.TestCase):
         self.assertEqual(status, 0, report)
         self.assertIn("OK   helper.0 @ 0x00001000", report)
         self.assertIn("OK   caller @ 0x00001008", report)
+        self.assertIn("2 match, 0 differ", report)
+
+    def test_qualified_local_alias_supplies_full_native_inventory(self):
+        status, report = self.run_checker(native_inventory="glabel helper\nglabel caller\n")
+        self.assertEqual(status, 0, report)
         self.assertIn("2 match, 0 differ", report)
 
     def test_source_override_missing_owner_is_not_hidden_by_canonical_source(self):

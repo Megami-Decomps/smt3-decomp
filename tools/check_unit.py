@@ -1136,15 +1136,22 @@ def main():
         owned_data_checked = False
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
+        full_function_names = None
         full = Path(tmp) / "full.o"
         rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
                              str(source), "-o", str(full)],
                             capture_output=True, text=True, env=env)
         if rf.returncode == 0:
             ftext, frel = text_section(full), relocations(full)[".text"]
+            full_defined_symbols = run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(full))
             fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
-                l.split() for l in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only",
-                                       str(full)).splitlines()) if len(p) == 4 and p[2] in "Tt"}
+                l.split() for l in full_defined_symbols.splitlines()) if len(p) == 4 and p[2] in "Tt"}
+            # Even zero-size assembly entry labels must survive in the linked
+            # context. Source spelling alone cannot prove emitted ownership:
+            # comments, disabled conditionals and declarations can retain a name.
+            full_function_names = {p[-1] for p in (
+                l.split() for l in full_defined_symbols.splitlines())
+                if len(p) in (3, 4) and p[-2] in "Tt"}
 
             full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
             skip_aliases = compiler_local_function_aliases(
@@ -1153,6 +1160,8 @@ def main():
                 full_objdump,
                 [(off, size, name) for name, (off, size) in fsyms.items()],
                 syms, function_names)
+            full_function_names.update(re.sub(r"\.\d+$", "", name)
+                                       for name in full_aliases)
             # Both compilation contexts must independently establish identity.
             # Retain emitted names so --func selection stays strictly exact.
             syms.update({name: addr for name, addr in skip_aliases.items()
@@ -1337,6 +1346,9 @@ def main():
     if args.func and not any(name == args.func for _, _, name in funcs):
         bad += 1
         print(f"MISSING {args.func}: requested function not emitted by the SKIP_ASM compile")
+    elif args.func and full_function_names is not None and args.func not in full_function_names:
+        bad += 1
+        print(f"MISSING {args.func}: requested function not emitted by the full-unit compile")
     if "(unit)" in context:
         bad += 1
         print("NOASM the unit does not compile with its asm included (missing asm file? "
@@ -1821,6 +1833,9 @@ def main():
             if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$|\basm\s*\(\s*\"{name}\"\s*\)", source_raw_text, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
+            elif full_function_names is not None and name not in full_function_names:
+                bad += 1
+                print(f"MISSING {name}: not emitted by the full-unit compile")
     # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
     # (a stale local asm tree still defines the old label, so the local build hides it).
     renamed = {f"func_{int(a, 16):08X}": n for n, a in re.findall(
