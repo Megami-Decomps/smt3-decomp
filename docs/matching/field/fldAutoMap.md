@@ -327,3 +327,15 @@ Residual differences now begin at +0x1F4: global-address registers, coordinate
 arithmetic allocation and store scheduling still differ, as do the later light
 constant registers. This is measured emitted-output progress, not proof of the
 historical source or a finished decompilation.
+
+### SeqStart field-ID address materialization (pass144)
+
+The guarded draft advances from 172 to 175/195 words at the native 780 bytes by
+materializing the real `fldAutoMapFieldId` address in a local, truthfully typed
+pointer bound to `$3`. It supplies only the existing three field stores and
+is never live across a call. This is a localized register-allocation aid, not
+historical-source evidence. The same unbound pointer remains 172/195; an added
+empty live constraint gives 174 and is omitted. Moving the assignment earlier
+within the same closing block does not improve 175. All 36 matched peers remain
+unchanged, and plain/dump-enabled assembly and object output agree in all three
+compilation modes. The assembly fallback remains; this is not an exact match.

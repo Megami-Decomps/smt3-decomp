@@ -1515,7 +1515,8 @@ def main():
                              str(source), "-o", str(full)],
                             capture_output=True, text=True, env=env)
         if rf.returncode == 0:
-            ftext, frel = text_section(full), relocations(full)[".text"]
+            full_relocs = relocations(full)
+            ftext, frel = text_section(full), full_relocs[".text"]
             full_defined_symbols = run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(full))
             fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
                 l.split() for l in full_defined_symbols.splitlines()) if len(p) == 4 and p[2] in "Tt"}
@@ -1640,17 +1641,17 @@ def main():
                     all_relocs[".data"], funcs,
                     fdata[full_data_off:full_data_off + full_data_size],
                     section_symbols(full_objdump, ".data"),
-                    relocations(full)[".data"],
+                    full_relocs[".data"],
                     [(off, size, name) for name, (off, size) in fsyms.items()],
                     syms, section_bases)
                 data_context.extend(f".data {problem}" for problem in initialized_problems)
             if sdata_range:
                 full_sdata = {
                     name: (off, size) for off, size, name in section_symbols(
-                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".sdata")
+                        full_objdump, ".sdata")
                 }
                 fsd_off, fsd_size = fsecs.get(".sdata", (0, 0))
-                fsd_relocs = relocations(full)[".sdata"]
+                fsd_relocs = full_relocs[".sdata"]
                 full_funcs = [(off, size, name) for name, (off, size) in fsyms.items()]
                 start, end = sdata_range
                 sdata_origin = off_to_va(segs, start)
@@ -1707,10 +1708,10 @@ def main():
                 native_symbol_text = (ROOT / "config" / version / "symbol_addrs.txt").read_text()
                 full_rodata = {
                     name: (off, size) for off, size, name in section_symbols(
-                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".rodata")
+                        full_objdump, ".rodata")
                 }
                 fro_off, fro_size = fsecs.get(".rodata", (0, 0))
-                full_ro_relocs = relocations(full)[".rodata"]
+                full_ro_relocs = full_relocs[".rodata"]
                 start, end = rodata_range
                 for skip_off, size, name in rodata_symbols:
                     addr = address(name, syms)
@@ -1745,7 +1746,7 @@ def main():
                                 fdata[fro_off:fro_off + fro_size], full_objdump,
                                 full_ro_relocs, retail, segs):
                             shared_rodata.add((skip_off, addr))
-            full_rodata_relocations = relocations(full)[".rodata"]
+            full_rodata_relocations = full_relocs[".rodata"]
             fro_off, fro_size = fsecs.get(".rodata", (0, 0))
             full_rodata_size = len(fdata[fro_off:fro_off + fro_size])
             if rodata_range is not None:
@@ -1763,7 +1764,7 @@ def main():
                 mine = bytearray(fdata[fro_off:fro_off + fro_size])
                 roff = int(ro_start.group(1), 16)
                 want = bytearray(retail[roff:roff + fro_size])
-                for off in relocations(full)[".rodata"]:
+                for off in full_relocs[".rodata"]:
                     mine[off:off + 4] = want[off:off + 4] = b"\0\0\0\0"
                 if mine != want:
                     first = next(i for i in range(fro_size) if mine[i] != want[i])

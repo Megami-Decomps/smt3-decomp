@@ -1364,7 +1364,7 @@ void fldAutoMapDrawWindow(void) {
     rsetAlpha(0);
 }
 
-/* NON_MATCHING: 172 of 195 words, exact size; the closing vector block is
+/* NON_MATCHING: 175 of 195 words, exact size; the closing vector block is
  * scheduled differently and holds the two coordinates in other fp registers. */
 #ifdef NON_MATCHING
 void fldAutoMapSeqStart(void) {
@@ -1376,6 +1376,7 @@ void fldAutoMapSeqStart(void) {
     fldAmLightParam_t *light;
     fldAmAreaData_t *rec;
     s32 i;
+    FAKEMATCH_ASM_REG(sdfVector4_t *, fieldId, "$3");
     f32 wx;
     f32 wz;
     FAKEMATCH_ASM_REG(f32, zero, "$f1");
@@ -1424,9 +1425,11 @@ void fldAutoMapSeqStart(void) {
     wx = fldGlobalBase.x + px;
     /* Keep the native positive-zero scalar live for the three real Y stores. */
     FAKEMATCH_ASM_LIVE_F32(zero);
-    fldAutoMapFieldId.x = wx;
-    fldAutoMapFieldId.y = zero;
-    fldAutoMapFieldId.z = wz;
+    /* Local address binding preserves the native field-ID base register. */
+    fieldId = &fldAutoMapFieldId;
+    fieldId->x = wx;
+    fieldId->y = zero;
+    fieldId->z = wz;
     fldAutoMapPosX.x = wx;
     fldAutoMapPosX.y = zero;
     fldAutoMapPosX.z = wz;

@@ -198,8 +198,30 @@ syscall offsets. It proves the tested horizontal low-12-bit equivalence, not
 actual syscall outputs or the whole constructor. Width zero remains native's
 division-trap case.
 
-Unchanged vertical and mode-80 expressions still need an explicit overflow
-audit for arbitrary syscall outputs; no unsupported range assumption makes
-these candidates semantically qualified. No source, provider, flags or
-ownership changes are promoted. A new control needs evidence beyond this
-product/base/quotient family.
+The vertical and mode-80 overflow audit is resolved below. No provider, flags
+or ownership changes are promoted. A new matching control still needs evidence
+beyond this product/base/quotient family.
+
+### Defined masked coordinate addition
+
+The syscall outputs have no established signed-range bound. The retained draft
+now uses unsigned modulo-2^32 addition at each masked coordinate offset. This
+repairs undefined signed overflow rather than improving a matching score:
+mode 80 with `dy = 32767` and `offsetY = INT_MAX` previously overflowed before
+the mask; the horizontal offset has the same issue. Native vertical `addu` /
+`addiu` wraps, and reducing the horizontal wide sum modulo 2^32 before taking
+its low 12 bits is equivalent. Products and sums before the offsets fit signed
+32 bits for all signed-16 inputs and nonzero widths. Packing still ORs complete
+64-bit terms without masking away native spill bits, and width zero retains
+the native division-trap case rather than receiving an invented result.
+
+The actual repaired expressions pass 47,775,096 whole-DISPLAY comparisons
+against an independent native instruction-dataflow model under host UBSan.
+Coverage includes every signed-16 width, all three supported modes, both
+interlace/field classes, signed-16 edge tuples and signed-32 syscall-offset
+extremes; this is not exhaustive over all combinations. This is an arithmetic
+model, not PS2 hardware execution. Plain/dump assembly and object output agree
+in all three compilation modes. The active draft remains 892 bytes against
+884 native instruction bytes, with 80/221 native-position words equal (the
+unsafe draft had 83/221). All ten matched peers remain exact and the production
+guard retains the assembly fallback. No exact matching credit is claimed.

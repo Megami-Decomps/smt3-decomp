@@ -193,7 +193,11 @@ s32 checkModelVersion(void)
 
 INCLUDE_ASM(const s32, "sdk/libgraph", _GetGsDxDyOffset);
 
-/* NON_MATCHING: 892 bytes against retail's 888. The first 64 words match and
+/* The masked coordinate sums use unsigned modulo-2^32 addition. The native
+ * addu/addiu vertical path wraps; its low 12 bits agree with the native wide
+ * horizontal sum too. No bound is assumed on the signed syscall offsets.
+ * Keep whole-word OR packing: masking other fields would lose native spill bits.
+ * NON_MATCHING: 892 bytes against retail's 884 instruction bytes. The first 64 words match and
  * the divergence starts inside the NTSC display arithmetic, where one extra
  * instruction shifts the rest of the function. What matches: the parameter-block call, the mode range test, the model-version
  * path, the _GetGsDxDyOffset call with its four frame addresses, the shared
@@ -245,15 +249,15 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 d
             magh = (2560 + w - 1) / w;
             disp->display = ((u64)(magh - 1) << 23) |
                 ((u64)((param->fieldMode != 0 ? h * 2 : h) - 1) << 44) |
-                ((u64)((636 + dx * magh + offsetX) & 0xFFF)) |
-                ((u64)((dy + offsetY + 50) & 0xFFF) << 12) |
+                ((u64)((636 + dx * magh + (u32)offsetX) & 0xFFF)) |
+                ((u64)(((u32)dy + (u32)offsetY + 50) & 0xFFF) << 12) |
                 ((u64)((magh * w) - 1) << 32);
         } else {
             magh = (2560 + w - 1) / w;
             disp->display = ((u64)(magh - 1) << 23) |
                 ((u64)(h - 1) << 44) |
-                ((u64)((636 + dx * magh + offsetX) & 0xFFF)) |
-                ((u64)((dy + offsetY + 25) & 0xFFF) << 12) |
+                ((u64)((636 + dx * magh + (u32)offsetX) & 0xFFF)) |
+                ((u64)(((u32)dy + (u32)offsetY + 25) & 0xFFF) << 12) |
                 ((u64)((magh * w) - 1) << 32);
         }
     } else if ((s16)param->mode == 3) {
@@ -261,23 +265,23 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 d
             magh = (2560 + w - 1) / w;
             disp->display = ((u64)(magh - 1) << 23) |
                 ((u64)((param->fieldMode != 0 ? h * 2 : h) - 1) << 44) |
-                ((u64)((656 + dx * magh + offsetX) & 0xFFF)) |
-                ((u64)((dy + offsetY + 72) & 0xFFF) << 12) |
+                ((u64)((656 + dx * magh + (u32)offsetX) & 0xFFF)) |
+                ((u64)(((u32)dy + (u32)offsetY + 72) & 0xFFF) << 12) |
                 ((u64)((magh * w) - 1) << 32);
         } else {
             magh = (2560 + w - 1) / w;
             disp->display = ((u64)(magh - 1) << 23) |
                 ((u64)(h - 1) << 44) |
-                ((u64)((656 + dx * magh + offsetX) & 0xFFF)) |
-                ((u64)((dy + offsetY + 36) & 0xFFF) << 12) |
+                ((u64)((656 + dx * magh + (u32)offsetX) & 0xFFF)) |
+                ((u64)(((u32)dy + (u32)offsetY + 36) & 0xFFF) << 12) |
                 ((u64)((magh * w) - 1) << 32);
         }
     } else if ((s16)param->mode == 80) {
         disp->display = ((u64)(h - 1) << 44) |
             ((u64)((w * 2) - 1) << 32) |
             0x800000 |
-            ((u64)((dy + offsetY + 35) & 0xFFF) << 12) |
-            ((u64)((232 + dx * 2 + ((720 - w) / 2) * 2 + offsetX) & 0xFFF));
+            ((u64)(((u32)dy + (u32)offsetY + 35) & 0xFFF) << 12) |
+            ((u64)((232 + dx * 2 + ((720 - w) / 2) * 2 + (u32)offsetX) & 0xFFF));
     } else {
         scePrintf(sceGsDefDispEnvModeMsg, (s16)param->mode);
     }

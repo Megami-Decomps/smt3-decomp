@@ -2121,6 +2121,7 @@ class SharedNamedRodataContextTests(unittest.TestCase):
                  yaml='      - [0x1100, .rodata, main/unit]\n      - [0x1128, .rodata, main/next]\n',
                  skip_relocs={}, full_relocs={}, failed_full=False)
         f.update(changes)
+        self.inspections = []
         compiled = struct.pack('<4I',0x3C020000,0x24420008,0x03E00008,0)
         full_code = struct.pack('<4I',0x3C020000,0x24420018,0x03E00008,0)
         retail = bytearray(0x1200)
@@ -2138,10 +2139,13 @@ class SharedNamedRodataContextTests(unittest.TestCase):
             consumer=root/'asm/smt3/nonmatchings/main/unit/consumer.s'; consumer.parent.mkdir(parents=True)
             consumer.write_text('lui $2,%hi(named)\naddiu $2,$2,%lo(named)\n')
             def run(*args):
+                if "-t" in args:
+                    self.inspections.append(("symbols", Path(args[-1]).name))
                 if '-S' in args: return '0 10 T target\n'
                 if '-t' in args: return f['full_raw' if str(args[-1]).endswith('full.o') else 'skip_raw']
                 return ''
             def relocations(obj):
+                self.inspections.append(("relocations", obj.name))
                 return {'.text':{0:('R_MIPS_HI16','.rodata'),4:('R_MIPS_LO16','.rodata')},
                         '.rodata':f['full_relocs' if obj.name=='full.o' else 'skip_relocs'],'.data':{},'.sdata':{}}
             def sections(obj):
@@ -2190,6 +2194,24 @@ class SharedNamedRodataContextTests(unittest.TestCase):
             with self.subTest(changes=changes):
                 code,report=self.check_shared(**changes)
                 self.assertEqual(code,1,report)
+
+
+    def test_full_object_inspected_once_and_refreshed_for_each_compile(self):
+        for changes, expected in (
+                ({}, 0),
+                ({'full_relocs': {20: ('R_MIPS_64', 'unknown')}}, 1),
+                ({}, 0)):
+            with self.subTest(changes=changes):
+                code, report = self.check_shared(**changes)
+                self.assertEqual(code, expected, report)
+                self.assertEqual(self.inspections.count(('relocations', 'full.o')), 1)
+                self.assertEqual(self.inspections.count(('symbols', 'full.o')), 1)
+
+    def test_failed_full_compile_is_not_inspected(self):
+        code, report = self.check_shared(failed_full=True)
+        self.assertEqual(code, 1, report)
+        self.assertNotIn(('relocations', 'full.o'), self.inspections)
+        self.assertNotIn(('symbols', 'full.o'), self.inspections)
 
 
 class InteriorRelocationFootprintTests(unittest.TestCase):
