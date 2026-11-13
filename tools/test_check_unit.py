@@ -44,6 +44,33 @@ from check_unit import (
 )
 
 
+class GeneratedRodataInputTests(unittest.TestCase):
+    def test_absent_optional_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(check_unit.generated_rodata_text(Path(tmp) / "missing", None), "")
+
+    def test_missing_required_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "finish configure.py"):
+                check_unit.generated_rodata_text(Path(tmp) / "missing", (0x10, 0x20))
+
+    def test_empty_required_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "unit.rodata.s"
+            for text in ("", " \n\t"):
+                path.write_text(text)
+                with self.subTest(text=text), self.assertRaisesRegex(ValueError, "missing or empty"):
+                    check_unit.generated_rodata_text(path, (0x10, 0x20))
+
+    def test_existing_file_preserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "unit.rodata.s"
+            text = ".section .rodata\ndlabel D_00100010\n.word 0\n"
+            path.write_text(text)
+            for extent in (None, (0x10, 0x20)):
+                self.assertEqual(check_unit.generated_rodata_text(path, extent), text)
+
+
 class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",

@@ -721,6 +721,27 @@ def owns_rodata(version, unit, section="rodata"):
     return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
 
 
+def generated_rodata_text(path, owned_range):
+    """Require split metadata when YAML assigns this unit retail rodata.
+
+    An absent file is legitimate for a unit without its own rodata segment.
+    Read once, before compilation, so a concurrent split cannot silently turn
+    the item-boundary map into an empty map later in the check.
+    """
+    try:
+        text = path.read_text()
+    except FileNotFoundError:
+        if owned_range is None:
+            return ""
+        text = ""
+    if owned_range is not None and not text.strip():
+        raise ValueError(
+            f"generated rodata metadata missing or empty: {path}; "
+            "finish configure.py before checking units; do not run "
+            "force-split/generated-source checks concurrently")
+    return text
+
+
 def owned_rom_range(yaml_text, unit, section):
     """Bound one explicit per-unit initialized section by its next sibling."""
     items = list(YAML_ITEM.finditer(yaml_text))
@@ -1035,6 +1056,11 @@ def main():
     yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
     sdata_range = owned_rom_range(yaml_text, unit_name, ".sdata")
     rodata_range = owned_rom_range(yaml_text, unit_name, ".rodata")
+    ro_file = ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s"
+    try:
+        ro_text = generated_rodata_text(ro_file, rodata_range)
+    except ValueError as exc:
+        sys.exit(f"infrastructure error: {exc}")
     data_range = owned_rom_range(yaml_text, unit_name, ".data")
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -1493,8 +1519,6 @@ def main():
         return asm_literal_users(source_text, asm_dir, syms, addr)
     # The unit's whole .rodata as splat split it (symbols later moved into
     # function files are listed there too).
-    ro_file = ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s"
-    ro_text = ro_file.read_text() if ro_file.exists() else ""
     retail_labels = sorted((int(a, 16), k) for k, a in re.findall(r"^dlabel (D|jtbl)_([0-9A-F]{8})\b", ro_text, re.M))
     # Labels renamed in symbol_addrs (e.g. a named table) mark item starts too.
     retail_labels += sorted((syms[n], "D") for n in re.findall(r"^dlabel (\w+)\b", ro_text, re.M)
