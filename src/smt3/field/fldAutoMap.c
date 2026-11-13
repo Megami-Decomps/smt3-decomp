@@ -1364,7 +1364,7 @@ void fldAutoMapDrawWindow(void) {
     rsetAlpha(0);
 }
 
-/* NON_MATCHING: 184 of 195 words, exact size; the closing vector block is
+/* NON_MATCHING: 186 of 195 words, exact size; the closing vector block is
  * scheduled differently. */
 #ifdef NON_MATCHING
 void fldAutoMapSeqStart(void) {
@@ -1430,12 +1430,12 @@ void fldAutoMapSeqStart(void) {
     FAKEMATCH_ASM_LIVE_F32(zero);
     /* Local address binding preserves the native field-ID base register. */
     fieldId = &fldAutoMapFieldId;
-    fieldId->x = wx;
-    fieldId->y = zero;
-    fieldId->z = wz;
     fldAutoMapPosX.x = wx;
     fldAutoMapPosX.y = zero;
     fldAutoMapPosX.z = wz;
+    fieldId->x = wx;
+    fieldId->y = zero;
+    fieldId->z = wz;
     target.x = (f32)fldAutoMapCamX;
     target.y = zero;
     target.z = (f32)fldAutoMapCamZ;

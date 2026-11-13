@@ -359,3 +359,11 @@ regresses to 173, so none is added. Independent review confirms the native
 0x43480000 constant and add.s lifetime. All 36 matched peers remain unchanged;
 plain/dump assembly and object outputs agree in production, SKIP_ASM and
 NON_MATCHING+SKIP_ASM modes. Eleven vector-block scheduling differences remain.
+
+The following bounded pass reaches 186/195 through an ordinary reorder of the
+map-position and field-ID three-store blocks. The distinct vectors retain the
+same x/y/z accesses and values, with no intervening observer. The qualified
+scheduler dump already put map-position stores ahead of field-ID stores; swapping
+the source groups repairs two emitted store positions without new constraints.
+Full owner checks preserve all 36 exact peers and three-mode assembly/object
+parity passes. Nine scheduling words remain, starting at +0x234.
