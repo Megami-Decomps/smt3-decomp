@@ -1249,12 +1249,16 @@ extern s32 cmbGetBirthPhase(void);
 s32 cmbRunBirthDevilStep(void)
 {
     if (CMB_GBWK->unk_00004 == 1) {
-        if (CMB_GBWK->unk_00003 == 5) {
+        switch (CMB_GBWK->unk_00003) {
+        case 5:
             cmbSetupBirthPanel(0);
-        } else if (CMB_GBWK->unk_00003 == 6) {
+            break;
+        case 6:
             cmbSetupBirthPanel(1);
-        } else if (CMB_GBWK->unk_00003 == 8) {
+            break;
+        case 8:
             cmbSetupBirthPanel(2);
+            break;
         }
     }
     return cmbGetBirthPhase();

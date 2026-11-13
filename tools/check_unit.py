@@ -477,6 +477,40 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
     differences = []
     if hi_addends is None:
         hi_addends = paired_hi16_addends(text, relocs)
+    # A local function's address is a paired section-relative HI/LO addend.
+    # Resolve both halves through the actual full object, just as local calls.
+    local_fields, pending = {}, []
+    for at, (kind, symbol) in relocs.items():
+        if symbol.split("+", 1)[0] != ".text":
+            continue
+        if kind == "R_MIPS_HI16":
+            pending.append(at)
+        elif kind == "R_MIPS_LO16":
+            lows = []
+            for high in pending:
+                local = hi_addends.get(high)
+                targets = set()
+                for off, width, name in funcs:
+                    if local is not None and off <= local < off + width:
+                        origin = address(name, syms)
+                        targets.add(origin + local - off if origin is not None else None)
+                target = targets.pop() if len(targets) == 1 else None
+                local_fields[high] = (linked_hi_field(target, 0)
+                                      if target is not None else None)
+                lows.append(linked_lo_field(target, 0) if target is not None else None)
+            # LO16 may reuse an earlier LUI after its pending HI relocations
+            # were consumed. Only the low half is encoded: enumerate bounded
+            # function offsets congruent to it and require one native low half.
+            if not pending:
+                low = struct.unpack_from("<I", text, at)[0] & 0xFFFF
+                for off, width, name in funcs:
+                    local = low + ((off - low + 0xFFFF) // 0x10000) * 0x10000
+                    if off <= local < off + width:
+                        origin = address(name, syms)
+                        lows.append(linked_lo_field(origin + local - off, 0)
+                                    if origin is not None else None)
+            local_fields[at] = lows[0] if lows and len(set(lows)) == 1 else None
+            pending = []
     for at, (kind, symbol) in relocs.items():
         if not offset <= at < offset + size or at + 4 > len(text):
             continue
@@ -497,6 +531,8 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
             if origin is not None:
                 expected = ((origin + local - owner[0]) >> 2) & 0x3FFFFFF
             mask = 0x3FFFFFF
+        elif base == ".text" and kind in ("R_MIPS_HI16", "R_MIPS_LO16"):
+            expected = local_fields.get(at)
         elif target is not None:
             if kind == "R_MIPS_26":
                 expected = linked_jump_field(target, mine & 0x3FFFFFF)
@@ -509,7 +545,7 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
                 addend = sext16(mine) + (object_gp if base.startswith(".") else 0)
                 expected = linked_gprel_field(target, addend, gp)
         if expected is None and (not base.startswith(".") or
-                                 (base == ".text" and kind == "R_MIPS_26")):
+                                 (base == ".text" and kind in ("R_MIPS_26", "R_MIPS_HI16", "R_MIPS_LO16"))):
             differences.append((index, mine, want, f"unresolved {kind} {symbol}"))
             continue
         if expected is not None and (

@@ -332,3 +332,33 @@ host fixtures pass 3,584 scenarios in optimized and ASan/UBSan runs, covering
 acquisition, callback-mutated semaphores, sync failure, bind retries, RPC failure,
 mode extremes and reply capture before release. These fixtures establish the
 modeled control/data contract, not hardware, concurrency or EE ABI behavior.
+
+**Retained `sceCdInit` reconstruction.**
+
+The guarded draft reconstructs the complete 736-byte initialization transaction.
+It returns immediately when S-command synchronization is busy, initializes RPC,
+records the current thread, resets the native command-state words and increments
+its invocation counter with unsigned wraparound. The bind retry ignores the
+server field after a negative result, and waits again after a successful bind
+with a null server. Both empty countdowns retain the established SDK sibling
+source shape. The request uses four bytes of the 16-byte object at `D_00598EC0`;
+the client at `D_00598E68` has a native 40-byte extent, including its server field
+at offset 36. The three N-command state words occupy 12 bytes and the six
+S-command state words occupy 24 bytes; explicit field views stay inside those
+objects without changing providers or symbol definitions.
+
+The transaction receives 16 bytes and reads uncached reply words in native order:
+status, first version, second version. Status 255 bypasses version checks;
+status 254 enables debug output. Other statuses use signed division by 256,
+not unsigned shifts, to select the return code. Mode 5 exits and resets all three
+semaphore IDs; all other modes initialize semaphores and the power callback.
+RPC failure clears the active flag and skips both completion paths.
+
+The target emits 708 of 736 native bytes and remains assembly-backed, with no
+matching credit. All 31 compiled peers and owned data remain exact. Extracted
+host fixtures pass 19,440 cases in optimized and ASan/UBSan runs, covering signed
+mode/version extremes, special statuses, sync/RPC failure, negative and null-server
+bind retries, counter wraparound, state writes and teardown. These are modeled
+control/data checks, not hardware, EE ABI, concurrency or delay-timing evidence.
+A shared full-client/request-pointer control emitted 700 bytes and was rejected;
+the unresolved work is frame, allocation and scheduling, not a promoted match.

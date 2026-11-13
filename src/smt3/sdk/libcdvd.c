@@ -485,7 +485,89 @@ s32 _sceCd_scmd_prechk(s32 command)
     return 1;
 }
 
+/* NON_MATCHING: complete initialization transaction; allocation and scheduling remain. */
+#ifdef NON_MATCHING
+SYMBOL_AT(s32, cdvdInitPower, cdvdScmdState, 0);
+SYMBOL_AT(s32, cdvdInitUnk, cdvdScmdState, 4);
+SYMBOL_AT(s32, cdvdInitDisk, cdvdScmdState, 8);
+SYMBOL_AT(s32, cdvdInitScmd, cdvdScmdState, 12);
+SYMBOL_AT(s32, cdvdInitStatus, cdvdScmdState, 16);
+SYMBOL_AT(s32, cdvdInitCount, cdvdScmdState, 20);
+extern cdvdRpcClient_t D_00598E68;
+extern s32 D_00598EC0;
+SYMBOL_AT(s32, cdvdNcmdCommand, cdvdNcmdState, 4);
+s32 sceCdInit(s32 mode)
+{
+    s32 thread;
+    s32 bound;
+    s32 delay;
+    s32 result;
+    s32 status;
+    s32 firstVersion;
+    s32 secondVersion;
+    if (sceCdSyncS(1) != 0) return 0;
+    sceSifInitRpc(0);
+    thread = GetThreadId();
+    cdvdPowerOffActive = 1;
+    cdvdOwnerThreadId = thread;
+    cdvdInitPower = -1;
+    cdvdInitUnk = -1;
+    cdvdNcmdInit = -1;
+    cdvdInitScmd = -1;
+    cdvdInitDisk = -1;
+    cdvdNcmdCommand = 0;
+    cdvdInitCount = (u32)cdvdInitCount + 1;
+    cdvdInitStatus = -1;
+    for (;;) {
+        bound = sceSifBindRpc(&D_00598E68, 0x80000592, 0);
+        if (bound < 0) {
+            if (cdvdDebugLevel > 0)
+                scePrintf("Libcdvd bind err %d CD_Init %d\n", bound, cdvdInitCount);
+            for (delay = 0x100000; delay != -1; delay--) { }
+        } else if (D_00598E68.server != NULL) {
+            break;
+        } else {
+            for (delay = 0x100000; delay != -1; delay--) { }
+        }
+    }
+    D_00598EC0 = mode;
+    cdvdInitStatus = 0;
+    sceSifWriteBackDCache(&D_00598EC0, 4);
+    if (sceSifCallRpc(&D_00598E68, 0, 0, &D_00598EC0, 4,
+                      cdvdScmdReply, 16, NULL, NULL) < 0) {
+        cdvdPowerOffActive = 0;
+        return 0;
+    }
+    status = *UNCACHED(&cdvdScmdReply[3]);
+    firstVersion = *UNCACHED(&cdvdScmdReply[1]);
+    secondVersion = *UNCACHED(&cdvdScmdReply[2]);
+    result = 1;
+    if (status != 0xFF) {
+        if (status == 0xFE) cdvdDebugLevel = 1;
+        else if (firstVersion / 256 < 2 || secondVersion / 256 < 2) result = 2;
+    }
+    cdvdPowerOffActive = 0;
+    switch (mode) {
+    case 0:
+    case 1:
+        break;
+    case 5:
+        if (cdvdDebugLevel > 0) scePrintf("Libcdvd Exit\n");
+        cdvd_exit();
+        cdvdNcmdSema = -1;
+        cdvdScmdLockSema = -1;
+        cdvdScmdSema = -1;
+        return result;
+    default:
+        break;
+    }
+    cmd_sem_init();
+    PowerOffCB();
+    return result;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInit);
+#endif
 
 /* NON_MATCHING: native 504-byte shape, saved-register allocation differs. */
 #ifdef NON_MATCHING

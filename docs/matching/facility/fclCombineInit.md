@@ -659,3 +659,25 @@ signed domains, frame boundaries, floating representations and callback
 mutation. Leak detection is disabled in the sanitizer fixture; it uses no
 heap allocations. Strict production/SKIP declaration failures and the pointer
 warning are identical inherited debt; retained strict checks pass.
+
+
+**Birth-step dispatch reconstruction.** The guarded `cmbRunBirthDevilStep`
+draft now uses the actual cases 5, 6 and 8 rather than an equality chain.
+Only when signed byte +4 equals 1, it reads signed byte +3 and calls
+`cmbSetupBirthPanel` with 0, 1 or 2 respectively; every path then returns
+`cmbGetBirthPhase`. No callback, access width, return contract or order changes.
+The ordinary switch recovers the native selector tree and all three call blocks:
+140 emitted bytes and 33/35 words, versus the old 116-byte draft's 8 matching
+words in its 29-word prefix. It remains guarded and earns no matching credit.
+
+The residual is precisely the return-address restore occupying the case-5
+conditional branch delay slot at +0x3C rather than the following unconditional
+branch delay slot at +0x44. Normal and diagnostic complete-owner assembly and
+raw object output are identical. The real compiler's delay-slot dump clones
+the common epilogue restore into that conditional branch; this is not an
+argument allocation, selector lowering or extra runtime operation problem.
+Six real-case source orders, per-arm returns, explicit default break, early
+return, nested comparisons, one-pass control and a real selector read operand
+were bounded diagnostics: none matched. No constraints are retained. All
+199 other functions and owned data check exact; exhaustive 65,536 signed-byte
+state pairs preserve the original and native selection and argument behavior.

@@ -52,6 +52,60 @@ class FullContextRelocationTests(unittest.TestCase):
             struct.pack("<" + "I" * len(wants), *wants), relocs,
             funcs or [], syms or {}, GP)
 
+    def test_local_address_interior_and_native_carry(self):
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_LO16", ".text")}
+        words, wants = [0x3C020000, 0x24420024], [0x3C020021, 0x24428000]
+        self.assertFalse(self.check(words, wants, rels, {"provider": 0x207FFC}, [(32, 16, "provider")]))
+        self.assertTrue(self.check(words, wants, rels, {"provider": 0x208000}, [(32, 16, "provider")]))
+
+    def test_local_address_multiple_hi_one_lo(self):
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_HI16", ".text"),
+                8: ("R_MIPS_LO16", ".text")}
+        self.assertFalse(self.check([0x3C020000, 0x3C030000, 0x24420024],
+            [0x3C020020, 0x3C030020, 0x24421234], rels,
+            {"provider": 0x201230}, [(32, 16, "provider")]))
+
+    def test_local_address_relocation_order_not_instruction_order(self):
+        rels = {4: ("R_MIPS_HI16", ".text"), 0: ("R_MIPS_LO16", ".text")}
+        self.assertFalse(self.check([0x24428004, 0x3C020001], [0x24421234, 0x3C020020],
+            rels, {"provider": 0x201230}, [(0x8000, 16, "provider")]))
+
+    def test_local_address_missing_pair_owner_or_symbol_fails_closed(self):
+        words = [0x3C020000, 0x24420024]
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_LO16", ".text")}
+        for funcs, syms in [([], {}), ([(32, 4, "provider")], {"provider": 0x2000}),
+                            ([(32, 16, "provider")], {})]:
+            with self.subTest(funcs=funcs, syms=syms):
+                self.assertEqual(len(self.check(words, words, rels, syms, funcs)), 2)
+        for rel in [{0: rels[0]}]:
+            self.assertEqual(len(self.check(words, words, rel, {"provider": 0x2000},
+                                           [(32, 16, "provider")])), 1)
+
+    def test_local_address_overlapping_owners_must_agree(self):
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_LO16", ".text")}
+        for second, expected in ((0x2000, False), (0x3000, True)):
+            result = self.check([0x3C020000, 0x24420024], [0x3C020000, 0x24422004],
+                rels, {"one": 0x2000, "two": second}, [(32, 16, "one"), (32, 16, "two")])
+            self.assertEqual(bool(result), expected)
+
+    def test_local_address_shared_high_multiple_lows(self):
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_LO16", ".text"),
+                8: ("R_MIPS_LO16", ".text")}
+        self.assertFalse(self.check([0x3C020000, 0x24420024, 0x24420028],
+            [0x3C020020, 0x24421234, 0x24421238], rels,
+            {"provider": 0x201230}, [(32, 16, "provider")]))
+        rels = {0: ("R_MIPS_LO16", ".text")}
+        self.assertTrue(self.check([0x24420024], [0x24421234], rels,
+            {"one": 0x201230, "two": 0x301234}, [(32, 16, "one"), (0x10020, 16, "two")]))
+
+    def test_local_address_incompatible_shared_low_fails_closed(self):
+        rels = {0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_HI16", ".text"),
+                8: ("R_MIPS_LO16", ".text")}
+        result = self.check([0x3C020000, 0x3C030001, 0x24420024],
+            [0x3C020020, 0x3C030030, 0x24421234], rels,
+            {"one": 0x201230, "two": 0x301234}, [(32, 16, "one"), (0x10020, 16, "two")])
+        self.assertTrue(any("unresolved" in x[3] for x in result))
+
     def test_named_hi_lo_addend_and_carry(self):
         words = [0x3C020001, 0x24428000]
         relocs = {0: ("R_MIPS_HI16", "data"), 4: ("R_MIPS_LO16", "data")}
@@ -329,6 +383,18 @@ class FocusedFunctionTests(unittest.TestCase):
                 self.assertEqual(status, 1)
                 self.assertIn("CONTEXT RELOC target", report)
                 self.assertIn("1 match, 1 differ", report)
+
+    def test_full_context_local_pointer_is_not_hidden_by_masking(self):
+        for native_target, expected_status in ((0x1000, 0), (0x2000, 1)):
+            status, report = self.run_checker(None,
+                code=struct.pack("<II", 0x3C020000, 0x24420000),
+                retail_code=struct.pack("<II", 0x3C020000, 0x24420000 | native_target),
+                text_relocs={0: ("R_MIPS_HI16", "right"), 4: ("R_MIPS_LO16", "right")},
+                full_relocs={0: ("R_MIPS_HI16", ".text"), 4: ("R_MIPS_LO16", ".text")},
+                extra_symbols=f"right = 0x{native_target:X};\n")
+            self.assertEqual(status, expected_status, report)
+            if expected_status:
+                self.assertIn("CONTEXT RELOC target", report)
 
     def test_full_context_switch_relocation_is_not_hidden_by_masking(self):
         code = struct.pack("<II", 0x03E00008, 0)
