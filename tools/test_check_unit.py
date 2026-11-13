@@ -662,15 +662,62 @@ class TextResidualTests(unittest.TestCase):
 
 
 class LinkerSymbolTests(unittest.TestCase):
-    def symbols(self, rows):
+    def symbols(self, rows, auto=None, config=None):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / f"config/{VERSION}").mkdir(parents=True)
             (root / f"config/{VERSION}/symbol_addrs.txt").write_text(rows)
+            if auto is not None:
+                (root / f"config/{VERSION}/undefined_syms_auto.txt").write_text(auto)
+            if config is not None:
+                (root / f"config/{VERSION}/{SERIAL}.yaml").write_text(config)
             with patch.object(check_unit, "ROOT", root), \
                     patch.dict(check_unit.VERSIONS,
                                {VERSION: {"serial": SERIAL, "gp": hex(GP)}}, clear=True):
                 return symbols(VERSION)
+
+    CONFIG = "options:\n  undefined_syms_auto_path: config/smt3/undefined_syms_auto.txt\n"
+
+    def test_explicit_configured_numeric_absolute_resolves_scalar(self):
+        result = self.symbols("", "D_FFFFF = 0xFFFFF; // delay counter\n", self.CONFIG)
+        self.assertEqual(address("D_FFFFF", result), 0xFFFFF)
+        rels = {0: ("R_MIPS_HI16", "D_FFFFF"), 4: ("R_MIPS_LO16", "D_FFFFF")}
+        self.assertFalse(FullContextRelocationTests().check(
+            [0x3C020000, 0x24420000], [0x3C020010, 0x2442FFFF], rels, result))
+
+    def test_numeric_label_requires_configured_definition(self):
+        for config in (None, "", "options: {}", "options:\n  undefined_syms_auto_path: other.txt\n"):
+            self.assertIsNone(address("D_FFFFF", self.symbols("", "D_FFFFF = 0xFFFFF;", config)))
+        self.assertIsNone(address("D_FFFFF", self.symbols("", None, self.CONFIG)))
+
+    def test_absolute_loader_ignores_arbitrary_named_providers(self):
+        result = self.symbols("", "other = 0xFFFFF;\nfunc_FFFFF = 0xFFFFF;\n", self.CONFIG)
+        self.assertNotIn("other", result)
+        self.assertIsNone(address("func_FFFFF", result))
+
+    def test_absolute_loader_rejects_malformed_or_mislabeled_values(self):
+        for auto in ("D_FFFFF;", "D_FFFFF+=0xFFFFF;", "D_000FFFFF;", "D_FFFFF = 0xFFFFF", "D_FFFFF = bogus;", "D_FFFFF = 0x100000;",
+                     "D_FFFFF = 0xFFFFF; extra", "D_FFFFF = 0xFFFFFFFFF;"):
+            with self.subTest(auto=auto), self.assertRaises(ValueError):
+                self.symbols("", auto, self.CONFIG)
+
+    def test_absolute_loader_rejects_duplicates_and_canonical_conflicts(self):
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            self.symbols("", "D_FFFFF = 0xFFFFF;\nD_FFFFF = 0xFFFFF;", self.CONFIG)
+        with self.assertRaisesRegex(ValueError, "conflicts"):
+            self.symbols("D_FFFFF = 0xFFFFE;", "D_FFFFF = 0xFFFFF;", self.CONFIG)
+        self.assertEqual(self.symbols("D_FFFFF = 0xFFFFF;", "D_FFFFF = 0xFFFFF;",
+                                      self.CONFIG)["D_FFFFF"], 0xFFFFF)
+
+    def test_absolute_loader_rejects_ambiguous_or_malformed_config(self):
+        for config in (self.CONFIG + "  undefined_syms_auto_path: other.txt\n", "options: ["):
+            with self.assertRaises(ValueError):
+                self.symbols("", "D_FFFFF = 0xFFFFF;", config)
+
+    def test_absolute_loader_failure_has_clear_cli_diagnostic(self):
+        with patch.object(check_unit, "symbols", side_effect=ValueError("invalid absolute definition")):
+            status, report = FocusedFunctionTests().run_checker(None)
+        self.assertEqual(status, "infrastructure error: invalid absolute definition")
 
     def test_linker_gp_resolves_to_the_retail_address(self):
         self.assertEqual(address("_gp", self.symbols("target = 0x1000;\n")), GP)
