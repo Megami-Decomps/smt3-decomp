@@ -1083,21 +1083,31 @@ extern u8 *DDS3_GBWK;
 /* Localised name text, 0x40 bytes after the manager. */
 extern char itfMesMngVarText[];
 
-/* NON_MATCHING: 152 bytes against 172. Separate lead and tail variables give retail's three inductions; retail also re-copies the global pointer each iteration. */
+/* The real working base and two count-address phases remain separate on EE.
+ * Local constraints retain native per-iteration address formation and the
+ * initial-to-loop count copy; they do not imply original source spelling. */
 #ifdef NON_MATCHING
 void itfMesMngGetVarLocalize(s32 id)
 {
+    FAKEMATCH_ASM_REG(u8 *, work, "$9") = DDS3_GBWK;
     char *out = itfMesMngVarText;
-    s32 lead = id * 20 + 0x6600;
-    s32 tailA = id * 20 + 0x6601;
-    s32 tailB = id * 20 + 0x6601;
-    s32 count = id + 0x6650;
+    s32 lead;
+    s32 tailA;
+    s32 tailB;
+    FAKEMATCH_ASM_REG(s32, count, "$6") = id + 0x6650;
+    FAKEMATCH_ASM_REG(s32, loopCount, "$13");
     s32 k = 0;
 
-    if (((u8 *)DDS3_GBWK + 4)[count] != 0) {
+    FAKEMATCH_ASM_LIVE(count);
+    if ((work + 4)[count] != 0) {
+        loopCount = count;
+        lead = id * 20 + 0x6600;
+        tailA = id * 20 + 0x6601;
+        tailB = id * 20 + 0x6601;
         do {
-            u8 *gb = (u8 *)DDS3_GBWK + 4;
+            u8 *gb = work + 4;
             u8 code = gb[lead];
+            work = DDS3_GBWK;
 
             if (code & 0x80) {
                 *out = code;
@@ -1111,7 +1121,7 @@ void itfMesMngGetVarLocalize(s32 id)
             tailA += 2;
             tailB += 2;
             k++;
-        } while (k < ((u8 *)DDS3_GBWK + 4)[count]);
+        } while (k < (work + 4)[loopCount]);
     }
     *out = 0;
 }

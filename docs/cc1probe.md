@@ -170,3 +170,32 @@ artifacts, with 85 events and 24 exercised hooks, not all 45 hooks. Later
 [GroupCenter cases](matching/effect/effBattleMisc.md#later-qualified-scheduler-and-allocation-observations-2026-11-03)
 each qualified 5,565 inputs, 28 artifacts and 34 exercised hooks. These are
 case-specific observations, not blanket neutrality or matching claims.
+
+### A ready address can lose on priority, then dependent count
+
+A qualified retained-C `fldAutoMapSeqStart` observation distinguishes three
+causes inside its remaining scheduling window. The eye-address high half has
+priority 8 and outranks the field-ID low half at 7. The already-ready camera
+stack address has priority 6; it first loses to those higher-priority nodes,
+then loses to the two field-ID stores at equal priority through the
+comparator's dependent-count tier. Neither decision is a final source-order
+tie. By contrast, the positive-zero materialization and eye-address low half
+both have priority 7 and their comparison reaches the final instruction-order
+tier. Moving pointer declarations indiscriminately therefore targets the
+wrong mechanism for most of this window.
+
+The observation qualified the ordinary wrapper, direct plain, direct dump
+and observed compiler assembly and objects in the same retained-C context;
+6,471 events covered 855 frozen inputs. It is evidence about this nonmatching
+candidate, not a reconstruction of the original compiler's runtime decisions.
+Determining the particular successor edge that supplies each critical-path
+priority remains separate work. In this schedule, empty operands consume issue slots;
+adding fabricated consumers is not a legitimate way to raise a priority.
+
+On the configured ee-gcc 2.96 `-O2` owner with `NON_MATCHING` and `SKIP_ASM`,
+the baseline remains 187/195 words at the native 780-byte size. Immediate
+real camera-address operands did not improve it; pairing the eye and camera
+operands fell to 184/195. A real field-base operand fell to 171/195, and a
+position-base operand to 173/195. These are bounded negative controls, not
+matching gains or permissions to fabricate dependencies. The unchanged
+fallback remains required.
