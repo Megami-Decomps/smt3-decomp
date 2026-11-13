@@ -362,3 +362,34 @@ bind retries, counter wraparound, state writes and teardown. These are modeled
 control/data checks, not hardware, EE ABI, concurrency or delay-timing evidence.
 A shared full-client/request-pointer control emitted 700 bytes and was rejected;
 the unresolved work is frame, allocation and scheduling, not a promoted match.
+
+
+**Retained callback-worker reconstruction.**
+
+`_Cdvd_cbLoop` now has guarded C for its complete semaphore-driven worker loop.
+The pending reason -1 clears native command/thread state and the four-byte
+cleanup word before `ExitDeleteThread`. The C preserves the observed continuation
+if that call returns. Positive debug levels print the callback and saved reason;
+the callback is reloaded afterward, since printing may call external code.
+The saved reason is tested and separately reloaded as the callback argument.
+Each iteration clears N-command state before waiting again.
+
+Access-local volatile lvalues preserve the interrupt-shared pending/saved reason,
+N-command state and published callback-thread ID accesses. The unnamed cleanup
+word remains ordinary storage: no independent reader is established. Qualifying
+that word too produced an exact diagnostic, but was rejected because an exact
+store order does not independently establish a volatile contract. The retained
+candidate has the native 188-byte extent and 45/47 matching words; its cleanup
+word and callback-thread-ID stores occupy the opposite instruction positions.
+It remains assembly-backed and adds no matching credit. The earlier 184-byte
+consumer investigation predated the producer's explicit volatile saved-reason
+alias; that alias now preserves the final argument reload without changing the
+callback return type.
+
+All 31 matching peers and owned data remain exact. Normal, SKIP_ASM and retained
+whole-owner assembly/object outputs agree with diagnostic-dump builds after
+normalizing only their randomized temporary source filename. An extracted host
+fixture passes 1,350 scenarios under optimization and ASan/UBSan, including
+returning/nonreturning shutdown mocks, callback replacement during debug output,
+null callbacks, signed reason extremes and three worker iterations. These tests
+model control/data behavior, not EE hardware scheduling or concurrent execution.

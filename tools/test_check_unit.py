@@ -44,6 +44,55 @@ from check_unit import (
 )
 
 
+class FullContextLiteralTests(unittest.TestCase):
+    def check(self, *, mine=0xC780C000, want=0xC7800000,
+              value=0x3F800000, native=0x3F800000, kind="R_MIPS_LITERAL",
+              pool=None, retail=None, segs=None, offset=0, size=4, symbol=".lit4"):
+        return check_unit.full_context_literal_diffs(
+            struct.pack("<I", mine), offset, size, struct.pack("<I", want),
+            {0: (kind, symbol)}, struct.pack("<I", value) if pool is None else pool,
+            0x4000, struct.pack("<I", native) if retail is None else retail,
+            [(0x1000, 0, 4)] if segs is None else segs, 0x1000)
+
+    def test_same_bit_pattern_and_supported_relocations(self):
+        for kind in ("R_MIPS_LITERAL", "R_MIPS_GPREL16"):
+            for value in (0, 0x80000000, 0x7FC00001, 0x7F800000, 0x3F800000):
+                self.assertFalse(self.check(value=value, native=value, kind=kind))
+
+    def test_actual_pool_value_not_opcode_or_pool_offset(self):
+        self.assertEqual(len(self.check(value=0x3F800001)), 1)
+        self.assertEqual(len(self.check(value=0x80000000, native=0)), 1)
+        self.assertEqual(len(self.check(value=0x7FC00001, native=0x7FC00002)), 1)
+
+    def test_negative_object_offset_and_overrun_fail_closed(self):
+        for word in (0xC780BFFC, 0xC780C004):
+            self.assertEqual(len(self.check(mine=word)), 1)
+        self.assertEqual(len(self.check(pool=b"abc")), 1)
+
+    def test_retail_mapping_and_alignment_fail_closed(self):
+        self.assertEqual(len(self.check(want=0xC7800004)), 1)
+        self.assertEqual(len(self.check(want=0xC7800001)), 1)
+        self.assertEqual(len(self.check(mine=0xC780C001)), 1)
+        self.assertEqual(len(self.check(segs=[])), 1)
+        self.assertEqual(len(self.check(segs=[(0x1000, 0, 3)])), 1)
+        self.assertEqual(len(self.check(segs=[(0x1000, 0, 4)] * 2)), 1)
+
+    def test_opcode_and_unsupported_relocation_fail_closed(self):
+        self.assertEqual(len(self.check(mine=0xC781C000)), 1)
+        self.assertEqual(len(self.check(kind="R_MIPS_HI16")), 1)
+
+    def test_only_referenced_function_pool_values_are_selected(self):
+        self.assertFalse(self.check(offset=4))
+        self.assertFalse(self.check(size=0))
+        self.assertFalse(self.check(symbol=".rodata"))
+
+    def test_truncated_instruction_fails_closed(self):
+        problems = check_unit.full_context_literal_diffs(
+            b"abc", 0, 4, b"abcd", {0: ("R_MIPS_LITERAL", ".lit4")},
+            b"abcd", 0x4000, b"abcd", [(0x1000, 0, 4)], 0x1000)
+        self.assertEqual(len(problems), 1)
+
+
 class FullContextRelocationTests(unittest.TestCase):
     def check(self, words, wants, relocs, syms=None, funcs=None, offset=0, size=None):
         return check_unit.full_context_relocation_diffs(
@@ -297,6 +346,14 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_full_literal_requires_actual_pool_value(self):
+        status, report = self.run_checker(
+            "target", code=struct.pack("<I", 0xC7800000),
+            full_relocs={0: ("R_MIPS_LITERAL", ".lit4")})
+        self.assertEqual(status, 1, report)
+        self.assertIn("CONTEXT RELOC target", report)
+        self.assertIn("unmapped or unaligned .lit4 value", report)
 
     def test_empty_candidate_cannot_pass_whole_owner_audit(self):
         status, report = self.run_checker(

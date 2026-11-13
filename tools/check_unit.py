@@ -600,6 +600,41 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
     return differences
 
 
+def full_context_literal_diffs(text, offset, size, retail_code, relocs,
+                               literal_data, object_gp, retail, segs, gp):
+    """Compare actual-build binary32 pool values, not just their instruction fields.
+
+    SKIP_ASM and full context may have different constant pools. Their opcode
+    shapes and offsets alone cannot establish equal values after linking.
+    """
+    differences = []
+    for at, (kind, symbol) in relocs.items():
+        if symbol.split("+", 1)[0] != ".lit4" or not offset <= at < offset + size:
+            continue
+        index = at - offset
+        if at + 4 > len(text) or index + 4 > len(retail_code):
+            differences.append((index, 0, 0, "truncated .lit4 instruction"))
+            continue
+        mine = struct.unpack_from("<I", text, at)[0]
+        want = struct.unpack_from("<I", retail_code, index)[0]
+        if kind not in ("R_MIPS_GPREL16", "R_MIPS_LITERAL"):
+            differences.append((index, mine, want, f"unsupported {kind} .lit4"))
+            continue
+        ours_at = literal_pool_offset(mine, object_gp)
+        native_addr = retail_literal_address(want, gp)
+        native_at = native_object_offset(segs, native_addr, 4, len(retail))
+        if (ours_at < 0 or ours_at + 4 > len(literal_data)
+                or ours_at % 4 or native_addr % 4 or native_at is None):
+            differences.append((index, mine, want, "unmapped or unaligned .lit4 value"))
+            continue
+        ours = literal_data[ours_at:ours_at + 4]
+        theirs = retail[native_at:native_at + 4]
+        if not instruction_shape_matches(mine, want, kind) or ours != theirs:
+            differences.append((index, mine, want,
+                                f".lit4 value {ours.hex()} vs retail {theirs.hex()}"))
+    return differences
+
+
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
                         section_bases=None):
     """Apply resolvable R_MIPS_32 relocations to one emitted data item.
@@ -1339,6 +1374,8 @@ def main():
             fdata, fsecs = sections(full)
             full_ri_off, full_ri_size = fsecs.get(".reginfo", (0, 0))
             full_gp0 = struct.unpack_from("<i", fdata, full_ri_off + 20)[0] if full_ri_size >= 24 else 0
+            full_l4_off, full_l4_size = fsecs.get(".lit4", (0, 0))
+            full_lit4 = fdata[full_l4_off:full_l4_off + full_l4_size]
             full_hi_addends = paired_hi16_addends(ftext, frel)
             full_section_bases = {}
             for section, owned_range in ((".rodata", rodata_range),
@@ -1357,6 +1394,9 @@ def main():
                             ftext, foff, fsize, retail[roff:roff + fsize], frel,
                             [(o, n, key) for key, (o, n) in fsyms.items()],
                             syms, gp, full_hi_addends, full_section_bases, full_gp0)
+                        context_relocations[name].extend(full_context_literal_diffs(
+                            ftext, foff, fsize, retail[roff:roff + fsize], frel,
+                            full_lit4, full_gp0, retail, segs, gp))
                     if fsize != size or masked(ftext[foff:foff + fsize], foff, frel) != \
                             masked(text[off:off + size], off, relocs):
                         # The build links the full-unit code: if that matches retail

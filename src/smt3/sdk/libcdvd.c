@@ -164,7 +164,38 @@ void _sceCd_cd_callback(s32 *reason)
     (*(volatile s32 *)&cdvdCallbackReason) = 0;
 }
 
+/* Four-byte native cleanup word; no additional role is established. */
+extern s32 D_00598C4C;
+extern void ExitDeleteThread(void);
+
+#ifdef NON_MATCHING
+void _Cdvd_cbLoop(void)
+{
+    /* Preserve the interrupt-shared reason and thread-state accesses. The
+     * saved reason is tested, then reloaded for the callback argument. */
+    for (;;) {
+        WaitSema(cdvdScmdSema);
+        if ((*(volatile s32 *)&cdvdCallbackReason) == -1) {
+            (*(volatile s32 *)&cdvdNcmdState) = 0;
+            (*(volatile s32 *)&cdvdCallbackReason) = 0;
+            (*(volatile s32 *)&cdvdCallbackThreadId) = 0;
+            D_00598C4C = 0;
+            ExitDeleteThread();
+        }
+        if (cdvdDebugLevel > 0) {
+            scePrintf("sceCdCbfunc= %d sceCdCbfunc_num= %d\n", cdvdCallback,
+                      cdvdCallbackSavedReason);
+        }
+        if (cdvdCallback != NULL && cdvdCallbackSavedReason != 0) {
+            cdvdCallback(cdvdCallbackSavedReason);
+        }
+        (*(volatile s32 *)&cdvdNcmdState) = 0;
+    }
+}
+
+#else
 INCLUDE_ASM(const s32, "sdk/libcdvd", _Cdvd_cbLoop);
+#endif
 
 s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
 {
