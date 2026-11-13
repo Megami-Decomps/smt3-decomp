@@ -2241,5 +2241,96 @@ class NativeObjectMappingTests(unittest.TestCase):
                 self.assertIsNone(check_unit.native_object_offset([(0,0,8)],*args))
 
 
+
+class FullContextStorageTests(unittest.TestCase):
+    def fixture(self, section='.sdata', payload=b'\x2a\0\0\0', owned=False,
+                native=b'\x2a\0\0\0', nm_extra='', metadata=''):
+        code = struct.pack('<2I', 0x03e00008, 0)
+        retail = bytearray(0x1200)
+        retail[0x1000:0x1008] = code
+        retail[0x1100:0x1100+len(native)] = native
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
+            root = Path(tmp); unit = root/'src/smt3/main/unit.c'
+            unit.parent.mkdir(parents=True); unit.write_text('void target(void) {}\n')
+            cfg = root/'config/smt3'; cfg.mkdir(parents=True)
+            (cfg/'symbol_addrs.txt').write_text('target = 0x100000; // type:func size:8\nitem = 0x100100; // size:4\n')
+            yaml = (f'      - [0x1100, {section}, main/unit]\n'
+                    f'      - [0x1104, {section}, main/next]\n') if owned else ''
+            (cfg/'SLUS_209.11.yaml').write_text(yaml)
+            original = root/RETAIL_PATH; original.parent.mkdir(parents=True); original.write_bytes(retail)
+            def run(*args):
+                full = str(args[-1]).endswith('full.o')
+                if '-S' in args: return '0 8 T target\n' + (nm_extra if full else '')
+                if '-t' in args: return metadata if full else ''
+                return ''
+            def sections(obj):
+                return (payload, {section: (0, len(payload))}) if obj.name == 'full.o' else (b'', {})
+            stack.enter_context(patch.object(check_unit, 'ROOT', root))
+            stack.enter_context(patch.dict(check_unit.RETAIL, {VERSION:RETAIL_PATH}, clear=True))
+            stack.enter_context(patch.dict(check_unit.VERSIONS, {VERSION:{'serial':SERIAL,'gp':hex(GP)}}, clear=True))
+            stack.enter_context(patch.object(check_unit.sys, 'argv', ['check_unit.py', str(unit)]))
+            stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0,0)))
+            stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[(0x100000,0x1000,0x200)]))
+            stack.enter_context(patch.object(check_unit, 'text_section', return_value=code))
+            stack.enter_context(patch.object(check_unit, 'sections', side_effect=sections))
+            stack.enter_context(patch.object(check_unit, 'relocations', return_value={'.text':{},'.rodata':{},'.sdata':{},'.data':{}}))
+            stack.enter_context(patch.object(check_unit, 'run', side_effect=run))
+            stack.enter_context(patch.object(check_unit.subprocess, 'run', return_value=SimpleNamespace(returncode=0,stderr='')))
+            output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(SystemExit) as stopped: check_unit.main()
+            return stopped.exception.code, output.getvalue()
+
+    def test_full_only_unowned_writable_sections_rejected(self):
+        for section in ('.sdata','.data','.sbss','.bss'):
+            with self.subTest(section=section):
+                status, report = self.fixture(section=section)
+                self.assertNotEqual(status,0,report)
+                self.assertIn('DATA CONTEXT',report)
+
+    def test_full_only_common_rejected(self):
+        for kind in ('C','c'):
+            status,report = self.fixture(payload=b'',nm_extra=f'4 4 {kind} item\n')
+            self.assertNotEqual(status,0,report)
+            self.assertIn('COMMON item',report)
+
+    def test_full_only_owned_sdata_payload_checked_without_skip_symbols(self):
+        status,report = self.fixture(owned=True)
+        self.assertEqual(status,0,report)
+        status,report = self.fixture(owned=True,payload=b'\x2b\0\0\0')
+        self.assertNotEqual(status,0,report)
+        self.assertIn('.sdata bytes/relocations differ',report)
+
+    def test_full_only_owned_sdata_oversize_and_missing_nonzero_tail(self):
+        for payload in (b'\x2a\0\0\0'+bytes(4), b''):
+            status,report = self.fixture(owned=True,payload=payload)
+            self.assertNotEqual(status,0,report)
+            self.assertIn('DATA CONTEXT',report)
+
+    def test_full_only_data_inventory_is_checked(self):
+        status,report = self.fixture(section='.data',owned=True,metadata='0 g O .data 4 item\n')
+        self.assertNotEqual(status,0,report)
+        self.assertIn('DATA CONTEXT',report)
+
+    def test_zero_sections_are_not_unowned_storage(self):
+        status,report = self.fixture(payload=b'')
+        self.assertEqual(status,0,report)
+
+    def test_full_nobits_exact_inventory_and_overflow(self):
+        yaml = ('  - {type: .bss, name: main/unit, vram: 0x2000}\n'
+                '  - {type: .bss, name: next, vram: 0x2004}\n')
+        args = [yaml,'main/unit',{'.bss':(0,4)},'0 g O .bss 4 item\n','',{'item':0x2000}]
+        self.assertFalse(check_unit.full_context_storage_problems(*args))
+        args[2] = {'.bss':(0,0)}
+        self.assertTrue(check_unit.full_context_storage_problems(*args))
+        args[2] = {'.bss':(0,8)}
+        self.assertTrue(check_unit.full_context_storage_problems(*args))
+        args[2] = {'.bss':(0,4)}; args[3]=''
+        self.assertTrue(check_unit.full_context_storage_problems(*args))
+
+    def test_bounded_storage_helper_keeps_payload_checks_separate(self):
+        yaml='  - [0x100, .data, main/unit]\n  - [0x104, .data, next]\n'
+        self.assertFalse(check_unit.full_context_storage_problems(yaml,'main/unit',{'.data':(0,4)},'','',{}))
+        self.assertTrue(check_unit.full_context_storage_problems(yaml,'main/unit',{'.data':(0,8)},'','',{}))
+
 if __name__ == "__main__":
     unittest.main()

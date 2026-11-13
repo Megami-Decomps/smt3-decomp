@@ -3112,16 +3112,18 @@ extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode)
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 
 #ifdef NON_MATCHING
+/* Native selects the cursor pair at 0x64/0x66 or 0x68/0x6A.
+ * The independent sort-mode byte at 0x6C is not part of either pair. */
 void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction)
 {
     cmpCursorFullWork_t work;
     cmpCursorInfo_t *cursor = &work.cursor;
-    s32 slot = (s16)pinst->unk_58 == 1 ? 0 : 3;
+    s32 slot = (s16)pinst->unk_58 == 1 ? 0 : 2;
     u8 shift;
     s32 index;
 
     memset(&work, 0, sizeof(work));
-    shift = slot == 0 ? *(u8 *)&pinst->lw_cur[1] : pinst->unk_6C;
+    shift = *(u8 *)&pinst->lw_cur[slot + 1];
     cursor->unk_22 = pinst->lw_cur[slot];
     cursor->unk_25 = shift;
     cursor->unk_24 = shift;
@@ -3140,11 +3142,7 @@ void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction)
     }
     cmpFindNextCursorItem(cursor, direction != 0 ? 1 : -1, 1);
     pinst->lw_cur[slot] = cursor->unk_22;
-    if (slot == 0) {
-        pinst->lw_cur[1] = (u8)cursor->unk_24;
-    } else {
-        pinst->cursorShift = (u8)cursor->unk_24;
-    }
+    pinst->lw_cur[slot + 1] = (u8)cursor->unk_24;
     index = cursor->unk_22 + (u8)cursor->unk_24;
     if ((s16)pinst->unk_58 == 1) {
         ChangeDevilObjectRegistConfirm(pinst->entries.regist.validUnit[index], pinst);

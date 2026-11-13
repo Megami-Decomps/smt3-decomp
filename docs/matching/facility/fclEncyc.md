@@ -521,3 +521,18 @@ and readers finished, only the missing baseline evidence was rerun successfully.
 The final target never includes its fallback, which is retained solely for the
 canonical comparison. Successful final production inputs were already complete
 and hash-bound before their readers started.
+
+### Guarded CirculateDevilObject cursor-pair correction
+
+The retained C now selects the actual halfword pairs at 0x64/0x66 and
+0x68/0x6A. Native first selects 0 or 2, doubles it, adds the instance+4
+base, then uses offsets 0x60 and 0x62. The old draft's second pair instead
+used 0x6A/0x6C, overwriting the independent sort-selector byte before its
+later dispatch read. Both pairs are within the existing four-halfword
+`lw_cur` array; no layout or fabricated bound is introduced. The shift is
+read as a byte and published as a zero-extended halfword, as in retail.
+
+The corrected guarded body remains assembly-backed: 23/94 words at 376
+bytes versus retail 372 bytes. Baseline was 11/94 at 376 bytes. A paired
+pointer control regressed to 14/89 at 356 bytes and was rejected. All 119
+exact peers remain unchanged. No exact-match credit is claimed.

@@ -677,6 +677,39 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
     return bytes(linked), problems
 
 
+def full_context_storage_problems(yaml_text, unit, sections, symbol_text,
+                                  nm_text, syms, aliases=(), explicit_sizes=None):
+    """Require actual-build writable storage to have a bounded native owner.
+
+    SKIP_ASM can omit declarations included only in the linked context. Its
+    section inventory cannot authorize full-unit storage or COMMON symbols.
+    ROM-owned payloads are checked separately against their retail bytes.
+    """
+    problems = []
+    for section in (".data", ".sdata", ".bss", ".sbss"):
+        size = sections.get(section, (0, 0))[1]
+        native_nobits = (owned_nobits_range(yaml_text, unit, section)
+                         if section in (".bss", ".sbss") else None)
+        if not size and native_nobits is None:
+            continue
+        if section in (".bss", ".sbss"):
+            problems.extend(section + " " + problem for problem in
+                nobits_ownership_problems(
+                    yaml_text, unit, section, size,
+                    nobits_symbols(symbol_text, section), syms, aliases,
+                    explicit_sizes))
+        else:
+            owned = owned_rom_range(yaml_text, unit, section)
+            if owned is None:
+                problems.append(f"{section}: full-unit storage has no bounded YAML owner")
+            elif size > owned[1] - owned[0]:
+                problems.append(f"{section}: full-unit size 0x{size:X} exceeds owned span "
+                                f"0x{owned[1] - owned[0]:X}")
+    for name, size in common_symbols(nm_text):
+        problems.append(f"COMMON {name}: full unit emits 0x{size:X} bytes without an owned definition")
+    return problems
+
+
 def initialized_data_problems(section_range, section_origin, retail_span,
                                data, definitions, relocs, funcs,
                                full_data, full_definitions, full_relocs,
@@ -1372,6 +1405,9 @@ def main():
                 return words
 
             fdata, fsecs = sections(full)
+            data_context.extend(full_context_storage_problems(
+                yaml_text, unit_name, fsecs, full_objdump, full_defined_symbols,
+                syms, aliases, symbol_sizes(version)))
             full_ri_off, full_ri_size = fsecs.get(".reginfo", (0, 0))
             full_gp0 = struct.unpack_from("<i", fdata, full_ri_off + 20)[0] if full_ri_size >= 24 else 0
             full_l4_off, full_l4_size = fsecs.get(".lit4", (0, 0))
@@ -1418,7 +1454,8 @@ def main():
             # retail's, in retail order. Catches string literals and
             # INCLUDE_RODATA items that come out in a different order.
             fdata, fsecs = sections(full)
-            if emitted.get(".data") and not args.func and data_range is not None:
+            if (emitted.get(".data") or fsecs.get(".data", (0, 0))[1]) \
+                    and not args.func and data_range is not None:
                 owned_data_checked = True
                 data_start, data_end = data_range
                 full_data_off, full_data_size = fsecs.get(".data", (0, 0))
@@ -1440,7 +1477,7 @@ def main():
                     [(off, size, name) for name, (off, size) in fsyms.items()],
                     syms, section_bases)
                 data_context.extend(f".data {problem}" for problem in initialized_problems)
-            if sdata_symbols and sdata_range:
+            if sdata_range:
                 full_sdata = {
                     name: (off, size) for off, size, name in section_symbols(
                         run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".sdata")
@@ -1450,7 +1487,7 @@ def main():
                 full_funcs = [(off, size, name) for name, (off, size) in fsyms.items()]
                 start, end = sdata_range
                 sdata_origin = off_to_va(segs, start)
-                section_bases = {".sdata": sdata_origin} if sdata_origin is not None else {}
+                section_bases = dict(full_section_bases)
                 full_bytes, full_problems = relocate_sdata_item(
                     fdata[fsd_off:fsd_off + fsd_size], 0, fsd_relocs, full_funcs,
                     syms, section_bases)
