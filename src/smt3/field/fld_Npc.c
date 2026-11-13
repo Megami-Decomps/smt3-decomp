@@ -342,8 +342,6 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     sdfVector4_t scale __attribute__((aligned(16)));
     sdfVector4_t axis __attribute__((aligned(16)));
     fldNpcPaths_t paths;
-    fldNpcSlot_t *slot;
-    const fldNpcTable_t *defaults;
     s32 index;
     s32 kind, major, minor, motion, size, camera;
     f32 radius, range, height, displaySize;
@@ -357,53 +355,50 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     paths.groups.first = fldNpcLoadPathsFirst;
     paths.groups.second = fldNpcLoadPathsSecond;
     index = fldNpcModelTable;
-    slot = &fldModelSlotTable[index];
-    slot->x = x;
-    slot->y = y;
-    slot->z = z;
-    slot->rot.x = rotation[0];
-    slot->rot.y = rotation[1];
-    slot->type = npcId;
-    slot->cnti = 0;
-    slot->rot.z = rotation[2];
-    slot->cntAnmi = 0;
-    slot->unk44 = 0;
-    slot->rot.w = rotation[3];
-    slot->cntf = 0.0f;
-    slot->cntAnmf = 0.0f;
-    slot->room = room;
-    slot->effect = NULL;
-    slot->itemBoxIdx = 0;
-    slot->object = NULL;
-    strcpy(slot->name, name);
-    defaults = &fldNpcDefaults[npcId];
-    kind = defaults->type;
-    size = defaults->hitSize;
-    major = defaults->modelMajor;
-    minor = defaults->modelMinor;
-    motion = defaults->motion;
-    camera = defaults->camera;
+    fldModelSlotTable[index].x = x;
+    fldModelSlotTable[index].y = y;
+    fldModelSlotTable[index].z = z;
+    fldModelSlotTable[index].rot.x = rotation[0];
+    fldModelSlotTable[index].rot.y = rotation[1];
+    fldModelSlotTable[index].type = npcId;
+    fldModelSlotTable[index].cnti = 0;
+    fldModelSlotTable[index].rot.z = rotation[2];
+    fldModelSlotTable[index].cntAnmi = 0;
+    fldModelSlotTable[index].unk44 = 0;
+    fldModelSlotTable[index].rot.w = rotation[3];
+    fldModelSlotTable[index].cntf = 0.0f;
+    fldModelSlotTable[index].cntAnmf = 0.0f;
+    fldModelSlotTable[index].room = room;
+    fldModelSlotTable[index].effect = NULL;
+    fldModelSlotTable[index].itemBoxIdx = 0;
+    fldModelSlotTable[index].object = NULL;
+    strcpy(fldModelSlotTable[index].name, name);
+    kind = fldNpcDefaults[npcId].type;
+    size = fldNpcDefaults[npcId].hitSize;
+    major = fldNpcDefaults[npcId].modelMajor;
+    minor = fldNpcDefaults[npcId].modelMinor;
+    motion = fldNpcDefaults[npcId].motion;
+    camera = fldNpcDefaults[npcId].camera;
     for (i = 0; i < 448; i++) {
-        fldNpcOverride_t *override = &fldNpcOverrides[i];
-        if (override->field != fldGlobalBase.area || override->floor != fldGlobalBase.floor + 1 ||
-            strcmp(override->name, name) != 0) {
+        if (fldNpcOverrides[i].field != fldGlobalBase.area || fldNpcOverrides[i].floor != fldGlobalBase.floor + 1 ||
+            strcmp(fldNpcOverrides[i].name, name) != 0) {
             continue;
         }
-        if (override->eventBit != 0 && evtBitCheck(override->eventBit) == 0) {
+        if (fldNpcOverrides[i].eventBit != 0 && evtBitCheck(fldNpcOverrides[i].eventBit) == 0) {
             return;
         }
-        camera = override->camera;
-        major = override->modelMajor;
+        camera = fldNpcOverrides[i].camera;
+        major = fldNpcOverrides[i].modelMajor;
         kind = major != 0;
-        size = override->hitSize;
-        minor = override->modelMinor;
-        motion = override->motion;
+        size = fldNpcOverrides[i].hitSize;
+        minor = fldNpcOverrides[i].modelMinor;
+        motion = fldNpcOverrides[i].motion;
         break;
     }
-    slot->kind = kind;
-    slot->camera = camera;
-    slot->modelMajor = major;
-    slot->modelIndex = minor;
+    fldModelSlotTable[index].kind = kind;
+    fldModelSlotTable[index].camera = camera;
+    fldModelSlotTable[index].modelMajor = major;
+    fldModelSlotTable[index].modelIndex = minor;
     if (size == 1) {
         radius = 50.0f;
         range = 180.0f;
@@ -420,7 +415,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
         height = 100.0f;
         displaySize = 0.0f;
     }
-    slot->csize = displaySize;
+    fldModelSlotTable[index].csize = displaySize;
     if (kind == 0) {
         s16 resourceIndex = fldGlobalBase.area < 10 ? 11 : minor;
         if (fldBlurEffectTable[resourceIndex] == NULL) {
@@ -433,7 +428,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
             fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, (u32 *)&fldModelResPtr[resourceIndex],
                                                                 (u32 *)&fldModelResSize[resourceIndex]);
         }
-        slot->unk44 = 0;
+        fldModelSlotTable[index].unk44 = 0;
         if (fldGlobalBase.area == 1) {
             dds3Basic_t *object;
             if (fldNpcModelCount == NULL) {
@@ -452,13 +447,13 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
             dds3SetRotPoseSet(object, &rot);
         } else {
             if (fldGlobalBase.area < 10) {
-                slot->y += 90.0f;
+                fldModelSlotTable[index].y += 90.0f;
             }
             if (fldNpcLoadIdx == NULL) {
-                slot->effect = dds3EffectLoad(fldNpcPacData);
-                fldNpcLoadIdx = slot->effect;
+                fldModelSlotTable[index].effect = dds3EffectLoad(fldNpcPacData);
+                fldNpcLoadIdx = fldModelSlotTable[index].effect;
             } else {
-                slot->effect = dds3EffectCopy(fldNpcLoadIdx);
+                fldModelSlotTable[index].effect = dds3EffectCopy(fldNpcLoadIdx);
             }
         }
     } else if (kind == 1) {
@@ -474,7 +469,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
         SDF_VU0_STOREVECTOR(&rot);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), &position, &rot);
         dds3SetUnitObjectId(object, "NPC_MDL_UNIT");
-        slot->object = object;
+        fldModelSlotTable[index].object = object;
         dds3ObjectBaseMakeUnit(object, major, minor);
         dds3SetSclPoseSet(object, &scale);
         model = dds3ObjectBaseGetModelHandle(object);
