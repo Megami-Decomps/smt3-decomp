@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """Compile the NON_MATCHING drafts.
 
-    python3 tools/check_nonmatching.py [src/smt3/<unit>.c ...]
+    python3 tools/check_nonmatching.py [--jobs 1..8] [src/smt3/<unit>.c ...]
+
+Optional bounded parallelism runs independent units with isolated temporary
+assembly files. Default 1 preserves resource use; --jobs 4 is useful on machines
+with spare CPU/memory. Controls always finish before workers start; reports
+retain input order regardless of completion order. No matching build may
+regenerate shared inputs while these compiler processes are active.
 
 A draft kept behind `#ifdef NON_MATCHING` is never compiled by the normal
 build, so a struct rename or a changed signature elsewhere can break it
@@ -12,6 +18,8 @@ SMT3_I386_LIBDIR overrides the pinned loader directory, as in configure.py.
 A failure means the draft needs updating, not that the repo is broken: the
 real build does not use it. Exit status is non-zero so CI still says so.
 """
+import argparse
+from concurrent.futures import ThreadPoolExecutor
 import glob
 import os
 import re
@@ -190,34 +198,74 @@ def control() -> None:
                      "reported, so the symbol check cannot be trusted")
 
 
-if __name__ == "__main__":
-    todo = units(sys.argv[1:])
+def check_draft_unit(path, known):
+    """Return failures and report lines for one unit without shared output files."""
+    text = path.read_text()
+    names = draft_names(text)
+    rel = path.relative_to(ROOT) if path.is_absolute() else path
+    bad, lines = 0, []
+    for fix_bugs in (False, True):
+        if fix_bugs and "FIX_BUGS" not in text:
+            continue
+        label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
+        with tempfile.TemporaryDirectory(prefix="smt3-draft-") as tmp:
+            asm = Path(tmp) / "unit.s"
+            err = compile_unit(path, fix_bugs, str(asm))
+            missing = [] if err else undefined_data(asm.read_text(), known, text)
+        if missing:
+            bad += 1
+            lines.append(f"{rel}: undefined with {label}: {' '.join(missing)}")
+        elif err:
+            bad += 1
+            lines.append(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE with {label}")
+            lines.append("\n".join("    " + l for l in err.split("\n")[:12]))
+        else:
+            lines.append(f"{rel}: {len(names)} draft(s) compile with {label}")
+    return bad, lines
+
+
+def worker_count(value):
+    try:
+        count = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("jobs must be an integer from 1 to 8")
+    if not 1 <= count <= 8:
+        raise argparse.ArgumentTypeError("jobs must be an integer from 1 to 8")
+    return count
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--jobs", type=worker_count, default=1,
+                        help="maximum concurrent unit compiles (1..8, default 1)")
+    parser.add_argument("paths", nargs="*")
+    args = parser.parse_args(argv)
+    todo = units(args.paths)
     if not todo:
         print("no NON_MATCHING drafts")
-        sys.exit(0)
+        return 0
     control()
     known = symbol_extents()
     bad = 0
-    for path in todo:
-        text = path.read_text()
-        names = draft_names(text)
-        rel = path.relative_to(ROOT) if path.is_absolute() else path
-        for fix_bugs in (False, True):
-            if fix_bugs and "FIX_BUGS" not in text:
-                continue
-            label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
-            asm = tempfile.NamedTemporaryFile(suffix=".s", delete=False)
-            asm.close()
-            err = compile_unit(path, fix_bugs, asm.name)
-            missing = [] if err else undefined_data(Path(asm.name).read_text(), known, text)
-            Path(asm.name).unlink()
-            if missing:
-                bad += 1
-                print(f"{rel}: undefined with {label}: {' '.join(missing)}")
-            elif err:
-                bad += 1
-                print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE with {label}")
-                print("\n".join("    " + l for l in err.split("\n")[:12]))
-            else:
-                print(f"{rel}: {len(names)} draft(s) compile with {label}")
-    sys.exit(1 if bad else 0)
+    def check(path):
+        return check_draft_unit(path, known)
+    # map yields input order, so slow units cannot reorder diagnostics. Keep
+    # the default serial path identical in resource use and exception behavior.
+    if args.jobs == 1:
+        results = map(check, todo)
+        for failures, lines in results:
+            bad += failures
+            for line in lines:
+                print(line)
+    else:
+        with ThreadPoolExecutor(max_workers=args.jobs) as pool:
+            for failures, lines in pool.map(check, todo):
+                bad += failures
+                for line in lines:
+                    print(line)
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -335,7 +335,105 @@ s32 PowerOffCB(void)
     return 1;
 }
 
+/* The native transaction copies 36 bytes with unaligned load/store pairs. */
+typedef struct __attribute__((packed)) {
+    u32 lsn;
+    u32 size;
+    char name[16];
+    u8 tail[12];
+} cdvdSearchFileReply_t;
+typedef struct {
+    cdvdSearchFileReply_t file;
+    char name[256];
+    addr_t replyAddress;
+    s32 layer;
+} cdvdSearchRequest_t;
+extern cdvdSearchRequest_t D_00598CC0;
+extern s32 D_00598E00;
+extern cdvdRpcClient_t D_00598E40;
+extern s32 PollSema(s32 sema);
+extern void sceSifInitRpc(s32 mode);
+extern s32 sceSifBindRpc(void *client, u32 service, s32 mode);
+extern s32 cdvdNcmdLastCommand __attribute__((section(".data")));
+SYMBOL_AT(s32, cdvdSearchInitialized, cdvdScmdState, 4);
+
+#ifdef NON_MATCHING
+s32 sceCdLayerSearchFile(addr_t destination, const char *name, s32 layer)
+{
+    s32 status;
+    s32 delay;
+    s32 i;
+    cdvdSearchFileReply_t *file = EE_ADDR_AS(cdvdSearchFileReply_t *, destination);
+
+    cmd_sem_init();
+    status = PollSema(cdvdNcmdSema);
+    if (cdvdNcmdSema != status) {
+        return 0;
+    }
+    cdvdNcmdLastCommand = 1;
+    ReferThreadStatus(cdvdOwnerThreadId, cdvdThreadStatus);
+    if (sceCdSync(1) != 0) {
+        SignalSema(cdvdNcmdSema);
+        return 0;
+    }
+    sceSifInitRpc(0);
+    if (cdvdSearchInitialized < 0) {
+        for (;;) {
+            cdvdRpcClient_t *client = &D_00598E40;
+            if (sceSifBindRpc(client, 0x80000597, 0) < 0) {
+                if (cdvdDebugLevel > 0) {
+                    scePrintf("Libcdvd bind err CdSearchFile\n");
+                }
+                for (delay = 0x100000; delay != -1; --delay) {
+                }
+                continue;
+            }
+            if (client->server != NULL) {
+                break;
+            }
+            for (delay = 0x100000; delay != -1; --delay) {
+            }
+        }
+        cdvdSearchInitialized = 0;
+    }
+    for (i = 0; i < 256; ++i) {
+        D_00598CC0.name[i] = name[i];
+        if (D_00598CC0.name[i] == 0) {
+            break;
+        }
+    }
+    if (i == 256) {
+        D_00598CC0.name[255] = 0;
+    }
+    if (cdvdDebugLevel > 0) {
+        scePrintf("ee call cmd search %s\n", D_00598CC0.name);
+    }
+    D_00598CC0.layer = layer;
+    D_00598CC0.replyAddress = EE_ADDR(&D_00598CC0);
+    sceSifWriteBackDCache(&D_00598CC0, 300);
+    if (sceSifCallRpc(&D_00598E40, 0, 0, &D_00598CC0, 300,
+                     &D_00598E00, 4, 0, 0) < 0) {
+        SignalSema(cdvdNcmdSema);
+        return 0;
+    }
+    *file = *(cdvdSearchFileReply_t *)(EE_ADDR(&D_00598CC0) | 0x20000000);
+    if (cdvdDebugLevel > 0) {
+        scePrintf("search name %s\n", file->name);
+        if (cdvdDebugLevel > 0) {
+            scePrintf("search size %d\n", (s32)file->size);
+            if (cdvdDebugLevel > 0) {
+                scePrintf("search loc lbn %d\n", (s32)file->lsn);
+            }
+        }
+    }
+    status = UNCACHED(&D_00598E00)[0];
+    SignalSema(cdvdNcmdSema);
+    return status;
+}
+
+#else
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdLayerSearchFile);
+#endif
 
 s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
 {

@@ -17,6 +17,107 @@ import check_nonmatching as cn
 import check_irx_nonmatching as irx
 
 
+class ParallelDraftChecks(unittest.TestCase):
+    def test_worker_bound_is_explicit(self):
+        for value in ("1", "4", "8"):
+            self.assertEqual(cn.worker_count(value), int(value))
+        for value in ("0", "-1", "9", "many", "1.5"):
+            with self.assertRaises(cn.argparse.ArgumentTypeError):
+                cn.worker_count(value)
+
+    def test_controls_finish_before_any_work_and_reports_stay_ordered(self):
+        from threading import Event, Lock
+        release = Event()
+        controlled = []
+        completed = []
+        lock = Lock()
+        paths = [Path("slow.c"), Path("fast.c"), Path("last.c")]
+        def work(path, known):
+            self.assertEqual(controlled, [True])
+            self.assertEqual(known, [(8, 32)])
+            if path == paths[0]:
+                self.assertTrue(release.wait(5), "second worker did not start")
+            with lock:
+                completed.append(path)
+            if path != paths[0]:
+                release.set()
+            return (1 if path == paths[1] else 0), [path.name]
+        with patch.object(cn, "units", return_value=paths), \
+                patch.object(cn, "control", side_effect=lambda: controlled.append(True)), \
+                patch.object(cn, "symbol_extents", return_value=[(8, 32)]), \
+                patch.object(cn, "check_draft_unit", side_effect=work), \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(cn.main(["--jobs", "2"]), 1)
+        self.assertEqual(out.getvalue(), "slow.c\nfast.c\nlast.c\n")
+        self.assertNotEqual(completed[0], paths[0])
+
+    def test_serial_default_and_positionals_are_unchanged(self):
+        with patch.object(cn, "units", return_value=[Path("a.c")]) as units, \
+                patch.object(cn, "control") as control, \
+                patch.object(cn, "symbol_extents", return_value=[]), \
+                patch.object(cn, "check_draft_unit", return_value=(0, ["ok"])) as work, \
+                patch.object(cn, "ThreadPoolExecutor") as pool, \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(cn.main(["src/smt3/a.c"]), 0)
+            units.assert_called_once_with(["src/smt3/a.c"])
+            control.assert_called_once_with()
+            work.assert_called_once_with(Path("a.c"), [])
+            pool.assert_not_called()
+        self.assertEqual(out.getvalue(), "ok\n")
+
+    def test_failed_control_cannot_launch_workers(self):
+        with patch.object(cn, "units", return_value=[Path("a.c")]), \
+                patch.object(cn, "control", side_effect=SystemExit("bad control")), \
+                patch.object(cn, "ThreadPoolExecutor") as pool, \
+                patch.object(cn, "check_draft_unit") as work:
+            with self.assertRaises(SystemExit):
+                cn.main(["--jobs", "4"])
+            pool.assert_not_called()
+            work.assert_not_called()
+
+    def test_empty_selection_does_not_launch_controls(self):
+        with patch.object(cn, "units", return_value=[]), \
+                patch.object(cn, "control") as control, \
+                contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(cn.main(["--jobs", "4"]), 0)
+            control.assert_not_called()
+        self.assertEqual(out.getvalue(), "no NON_MATCHING drafts\n")
+
+    def test_each_mode_owns_and_cleans_its_temporary_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit = root / "unit.c"
+            unit.write_text("#ifdef NON_MATCHING\nint f(void){return 1;}\n#else\n"
+                            'INCLUDE_ASM(int, "u", f);\n#endif\n/* FIX_BUGS */\n')
+            outputs, modes = [], []
+            def compile(path, mode, asm):
+                outputs.append(Path(asm))
+                modes.append(mode)
+                Path(asm).write_text("lw $2,%lo(D_00000010)($3)\n")
+                return "unit.c:4: failure" if mode else ""
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                count, lines = cn.check_draft_unit(unit, [(8,32)])
+            self.assertEqual(count, 2)
+            self.assertEqual(modes, [False, True])
+            self.assertNotEqual(outputs[0].parent, outputs[1].parent)
+            self.assertTrue(all(not p.parent.exists() for p in outputs))
+            self.assertIn("undefined with NON_MATCHING: D_00000010", lines[0])
+            self.assertIn("DOES NOT COMPILE with NON_MATCHING + FIX_BUGS", lines[1])
+            self.assertEqual(lines[2], "    unit.c:4: failure")
+
+    def test_exception_cleans_temporary_assembly(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);unit=root/"unit.c";unit.write_text("int f(void){}")
+            outputs=[]
+            def compile(path, mode, asm):
+                outputs.append(Path(asm));Path(asm).write_text("partial")
+                raise RuntimeError("failed")
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                with self.assertRaises(RuntimeError):
+                    cn.check_draft_unit(unit, [])
+            self.assertFalse(outputs[0].parent.exists())
+
+
 class SwallowedLabels(unittest.TestCase):
     asm = "\tlw\t$2,%lo(D_00000010)($3)\n"
 

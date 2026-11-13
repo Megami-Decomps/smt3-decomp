@@ -256,6 +256,12 @@ python3 tools/check_irx_nonmatching.py
 python3 tools/check_generated_sources.py   # needs the retail ELF, runs configure twice
 ```
 
+On machines with spare CPU and memory, `tools/check_nonmatching.py --jobs 4`
+runs independent units concurrently. The optional worker limit is 1 through 8;
+the default remains serial. Controls finish before workers start, and diagnostic
+order and failures are unchanged. Do not regenerate shared inputs with
+`configure.py` while these compilers are running.
+
 `configure.py` rewrites the INCLUDE_RODATA and INCLUDE_SDATA lines in `src/`.
 A change that moves the rodata split must commit the regenerated lines in the
 same commit; `tools/check_generated_sources.py` fails CI otherwise.

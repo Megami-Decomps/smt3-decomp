@@ -393,3 +393,38 @@ fixture passes 1,350 scenarios under optimization and ASan/UBSan, including
 returning/nonreturning shutdown mocks, callback replacement during debug output,
 null callbacks, signed reason extremes and three worker iterations. These tests
 model control/data behavior, not EE hardware scheduling or concurrent execution.
+
+**Retained layered-file search.**
+
+The guarded `sceCdLayerSearchFile` reconstructs the native 788-byte semaphore/RPC
+transaction. The consumed request view contains a 36-byte file-result prefix,
+256-byte name, 32-bit reply address and signed layer, totaling 300 bytes. Its native
+storage spans the adjacent labels at `D_00598CC0` and `D_00598CE4`, ending before
+`D_00598E00`; no ownership or symbol boundary is changed. The 40-byte RPC client
+uses its server field at +36. The result view is packed because native copies
+36 bytes using unaligned doubleword and word pairs; unknown trailing fields remain
+bytes rather than invented scalar types.
+
+The filename copy stops after its first zero or 256 bytes, overwriting the last
+byte with zero when truncated. Poll acquisition compares against the reloaded
+semaphore global. Sync and RPC failure release it and return zero. Negative bind
+results ignore the server field; a nonnegative result with a null server retries.
+The copy, cache flush, 300-byte request and 4-byte reply preserve native order.
+Debug output rechecks its global level after each call. The uncached reply is
+captured before semaphore release, and only a successful RPC copies the file.
+
+The draft emits 796 bytes and 108/197 matching native words. It remains guarded and
+earns no exact-match credit; all 31 compiled peers and owned data remain exact.
+Applying the matched precheck's localized argument constraints to this distinct
+transaction worsened output to 816 bytes, so the retained source uses none.
+Extracted host fixtures pass 1,440 optimized and ASan/UBSan cases, covering empty,
+254/255/256/300-byte names, high-bit bytes, layer extremes, failure branches,
+negative/non-null and nonnegative/null bind retries, callback-mutated semaphore
+and debug state, result-copy extent and reply capture before release. Host fixture
+address adapters model the uncached alias and destination, not EE cache behavior,
+ABI or concurrency.
+
+Independent native/source review also extends the fixture to 216,720 ASan/UBSan
+scenarios, covering every name length from zero through 300 and debug-state
+changes at each diagnostic. That expanded fixture shortens empty countdowns
+only for test runtime; it does not claim timing equivalence.
