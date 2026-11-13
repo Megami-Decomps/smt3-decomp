@@ -1364,8 +1364,8 @@ void fldAutoMapDrawWindow(void) {
     rsetAlpha(0);
 }
 
-/* NON_MATCHING: 175 of 195 words, exact size; the closing vector block is
- * scheduled differently and holds the two coordinates in other fp registers. */
+/* NON_MATCHING: 184 of 195 words, exact size; the closing vector block is
+ * scheduled differently. */
 #ifdef NON_MATCHING
 void fldAutoMapSeqStart(void) {
     sdfVector4_t target;
@@ -1377,6 +1377,7 @@ void fldAutoMapSeqStart(void) {
     fldAmAreaData_t *rec;
     s32 i;
     FAKEMATCH_ASM_REG(sdfVector4_t *, fieldId, "$3");
+    FAKEMATCH_ASM_REG(f32, zOffset, "$f2");
     f32 wx;
     f32 wz;
     FAKEMATCH_ASM_REG(f32, zero, "$f1");
@@ -1421,7 +1422,9 @@ void fldAutoMapSeqStart(void) {
     zero = 0.0f;
     wz = fldGlobalBase.z + pz;
     up = fldAutoMapSeqUp;
-    wz += 200.0f;
+    /* Local binding of the real Z offset reproduces native allocation. */
+    zOffset = 200.0f;
+    wz += zOffset;
     wx = fldGlobalBase.x + px;
     /* Keep the native positive-zero scalar live for the three real Y stores. */
     FAKEMATCH_ASM_LIVE_F32(zero);
@@ -1444,8 +1447,8 @@ void fldAutoMapSeqStart(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
     light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
     light->near = 255.0f;
-    light->far = 255.0f;
     light->scale = 1000.0f;
+    light->far = 255.0f;
     light->bias = 20000.0f;
     light->mode = 0x108010;
     dds3ScreenParam2[4] = 2048.0f;

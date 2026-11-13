@@ -190,6 +190,7 @@ extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
 void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
 {
     s32 border = 6;
+    s32 x;
     /* These localized constraints keep the real depth and border-offset
      * values in their native callee-saved registers. The width constraint
      * preserves its consumed second-box subtraction phase. They are
@@ -207,9 +208,13 @@ void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
     FAKEMATCH_ASM_LIVE(width);
     cmpDrawBoxF((s32)((u32)panel->X + ((u32)(border + 0x13) << 4)), panel->Y, panel->Z,
                 width, (u16)panel->H, 0x13141559, ot);
+    /* Pair the freshly loaded X with the real border offset at their shared
+     * coordinate consumer. This localized scheduling aid emits no instruction
+     * and preserves the post-box reload; it is not original-source evidence. */
+    x = panel->X;
     offset = border << 4;
-    FAKEMATCH_ASM_LIVE(offset);
-    fclDrawSpriteFilter((s32)((u32)panel->X + (u32)offset), panel->Y, z, 0, NULL,
+    FAKEMATCH_ASM_LIVE_PAIR(offset, x);
+    fclDrawSpriteFilter((s32)((u32)x + (u32)offset), panel->Y, z, 0, NULL,
                         10, 3, D_00345D88, fclSpriteTable, ot);
     fclDrawSpriteSizeFilter((s32)((u32)panel->X + (u32)offset), (s32)((u32)panel->Y + 0xC8), z, 0x13,
                             (u16)panel->H - 0x32, 0, NULL, 10, 5,

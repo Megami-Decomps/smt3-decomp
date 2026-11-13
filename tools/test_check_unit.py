@@ -776,6 +776,50 @@ class LinkerSymbolTests(unittest.TestCase):
             status, report = FocusedFunctionTests().run_checker(None)
         self.assertEqual(status, "infrastructure error: invalid absolute definition")
 
+    def test_safe_loader_selection_and_extension_free_fallback(self):
+        real = check_unit.yaml
+        for accelerated in (False, True):
+            loader = object()
+            api = SimpleNamespace(SafeLoader=loader, YAMLError=real.YAMLError,
+                                  safe_load=real.safe_load)
+            if accelerated:
+                api.CSafeLoader = object()
+                loader = api.CSafeLoader
+            calls = []
+            def load(text, *, Loader):
+                calls.append(Loader)
+                return real.safe_load(text)
+            api.load = load
+            with patch.object(check_unit, "yaml", api):
+                result = self.symbols("", "D_FFFFF = 0xFFFFF;", self.CONFIG)
+            self.assertEqual(result["D_FFFFF"], 0xFFFFF)
+            self.assertEqual(calls, [loader])
+
+    def test_safe_loader_linker_contract_parity(self):
+        real = check_unit.yaml
+        configs = [
+            self.CONFIG, "", "null", "[]", "options: []", "options: {}",
+            "options: {undefined_syms_auto_path: config/smt3/undefined_syms_auto.txt}",
+            "defaults: &d {undefined_syms_auto_path: config/smt3/undefined_syms_auto.txt}\noptions: *d",
+            "defaults: &d {undefined_syms_auto_path: config/smt3/undefined_syms_auto.txt}\noptions: {<<: *d}",
+            self.CONFIG + "  undefined_syms_auto_path: other.txt\n",
+            "options: [", "options: *missing", "options: !!python/object:builtins.object {}",
+            "!!python/object/apply:builtins.print [must-not-run]",
+        ]
+        for config in configs:
+            results = []
+            for loader in (real.SafeLoader, getattr(real, "CSafeLoader", real.SafeLoader)):
+                api = SimpleNamespace(SafeLoader=loader, load=real.load, YAMLError=real.YAMLError)
+                with patch.object(check_unit, "yaml", api):
+                    try:
+                        results.append(self.symbols("", "D_FFFFF = 0xFFFFF;", config))
+                    except ValueError as exc:
+                        results.append(str(exc))
+            with self.subTest(config=config):
+                self.assertEqual(results[0], results[1])
+            if "!!python" in config:
+                self.assertEqual(results[0], SERIAL + ".yaml: malformed linker configuration")
+
     def test_linker_gp_resolves_to_the_retail_address(self):
         self.assertEqual(address("_gp", self.symbols("target = 0x1000;\n")), GP)
 

@@ -85,7 +85,10 @@ def symbols(version):
         if len(re.findall(r"^\s*undefined_syms_auto_path\s*:", config_text, re.M)) > 1:
             raise ValueError(f"{config.name}: ambiguous undefined_syms_auto_path")
         try:
-            document = yaml.safe_load(config_text) or {}
+            # Both loaders use SafeConstructor; libyaml only accelerates parsing.
+            # Keep the pure-Python path for installations without the extension.
+            document = yaml.load(
+                config_text, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader)) or {}
         except yaml.YAMLError as exc:
             raise ValueError(f"{config.name}: malformed linker configuration") from exc
         options = document.get("options", {}) if isinstance(document, dict) else {}

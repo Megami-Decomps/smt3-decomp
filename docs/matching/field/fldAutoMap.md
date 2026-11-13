@@ -339,3 +339,23 @@ empty live constraint gives 174 and is omitted. Moving the assignment earlier
 within the same closing block does not improve 175. All 36 matched peers remain
 unchanged, and plain/dump-enabled assembly and object output agree in all three
 compilation modes. The assembly fallback remains; this is not an exact match.
+
+### SeqStart light-store ordering (pass145)
+
+Writing the real light scale before its far field in the guarded draft advances
+175 to 180/195 matching words at the native 780-byte extent. These are distinct
+nonvolatile fields (+8 and +4), with no intervening callback or observer; retail
+also stores scale before far. The ordinary source reorder removes all five
+late-light register/store differences without adding a constraint or changing any
+value, access width or consumer. The remaining 15 words concern the closing
+coordinate/vector block. The assembly fallback remains and no exact credit is
+claimed. Independent semantic review and randomized whole-storage fixtures pass.
+
+A local `$f2` binding of the actual 200.0f Z offset then advances to 184/195.
+The initialized constant has its sole real consumer in the existing Z addition,
+with no intervening call; this is a localized reconstruction aid, not original
+source evidence. The unbound scalar stays 180; adding an empty live constraint
+regresses to 173, so none is added. Independent review confirms the native
+0x43480000 constant and add.s lifetime. All 36 matched peers remain unchanged;
+plain/dump assembly and object outputs agree in production, SKIP_ASM and
+NON_MATCHING+SKIP_ASM modes. Eleven vector-block scheduling differences remain.

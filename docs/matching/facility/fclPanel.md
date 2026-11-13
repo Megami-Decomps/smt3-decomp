@@ -148,7 +148,7 @@ source forms. The complete normal owner remains exact, including its data.
 
 ### Type-one panel: captured depth and consumed width phases
 
-The guarded reconstruction matches 100 of 109 words at the native 436-byte
+The guarded reconstruction matches 102 of 109 words at the native 436-byte
 size. It keeps the entry width across the initial sprite callback, subtracts
 the border before the first box, and subtracts 19 before passing that width
 to the second box. The entry depth is captured before the callback and shifted
@@ -159,6 +159,10 @@ phase and native callee-saved depth and border-offset registers. These are
 reconstruction aids, not evidence of original source spelling. Every value
 has an actual consumer, and both bound registers are callee-saved across the
 calls they span. Unsigned-word coordinate arithmetic preserves native wrap.
-The nine residual words concern scheduling around the second box and texture
+A paired operand holds the first post-box X load and the real border offset
+at their coordinate consumer. Both values are initialized and consumed; no
+call or memory effect is moved across the second box callback. This replaces
+the single offset operand and improves the remaining arithmetic ordering.
+The seven residual words concern scheduling around the second box and texture
 address materialization. The assembly fallback remains active; no exact
 matching credit is claimed.
