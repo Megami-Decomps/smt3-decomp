@@ -44,8 +44,10 @@ typedef long long s64;
 def check(module: str, shim: Path) -> int:
     cfg = irx_config.load(module)
     src = irx_config.path(cfg, "src")
+    # IRX drafts use pre-C23 non-prototype declarations. GCC 15 defaults to
+    # C23, where f() means f(void); keep the intended legacy GNU C dialect.
     out = subprocess.run(
-        ["gcc", "-m32", "-fsyntax-only", "-DNON_MATCHING",
+        ["gcc", "-std=gnu17", "-m32", "-fsyntax-only", "-DNON_MATCHING",
          "-include", str(shim / "irx.h"),
          "-I", str(ROOT / "include" / "irx"), str(src)],
         capture_output=True, text=True, cwd=ROOT)
