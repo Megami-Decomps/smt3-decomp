@@ -487,7 +487,81 @@ s32 _sceCd_scmd_prechk(s32 command)
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInit);
 
+/* NON_MATCHING: native 504-byte shape, saved-register allocation differs. */
+#ifdef NON_MATCHING
+extern cdvdRpcClient_t D_00598E90;
+extern s32 D_00598ED0;
+SYMBOL_AT(s32, cdvdDiskReadyInit, cdvdScmdState, 8);
+
+/* The failure-return branch and RPC mode retain native scheduling; the
+ * pending nonmatch is the allocation of the long-lived saved values. The
+ * two semaphore constraints keep actual freshly loaded call arguments out
+ * of the native empty call delay slots, as in the matched precheck siblings. */
+s32 sceCdDiskReady(s32 mode)
+{
+    s32 status;
+    s32 delay;
+    s32 ret;
+    if (cdvdDebugLevel > 0) {
+        scePrintf("DiskReady 0\n");
+    }
+    cmd_sem_init();
+    {
+        s32 sema = cdvdScmdLockSema;
+        FAKEMATCH_ASM_LIVE(sema);
+        status = PollSema(sema);
+    }
+    if (cdvdScmdLockSema != status) {
+        return 6;
+    }
+    status = sceCdSyncS(1);
+    {
+        FAKEMATCH_ASM_REG(s32, rpcMode, "$4") = 0;
+        if (status != 0) goto fail;
+        sceSifInitRpc(rpcMode);
+    }
+    if (cdvdDiskReadyInit < 0) {
+        for (;;) {
+            cdvdRpcClient_t *client = &D_00598E90;
+            if (sceSifBindRpc(client, 0x8000059A, 0) < 0) {
+                if (cdvdDebugLevel > 0) {
+                    scePrintf("Libcdvd bind err CdDiskReady\n");
+                }
+                for (delay = 0x100000; delay != -1; --delay) {
+                }
+                continue;
+            }
+            if (client->server != NULL) {
+                break;
+            }
+            for (delay = 0x100000; delay != -1; --delay) {
+            }
+        }
+        cdvdDiskReadyInit = 0;
+    }
+    D_00598ED0 = mode;
+    sceSifWriteBackDCache(&D_00598ED0, 4);
+    if (sceSifCallRpc(&D_00598E90, 0, 0, &D_00598ED0, 4, cdvdScmdReply, 4, 0, 0) < 0) {
+fail:
+        {
+            s32 sema = cdvdScmdLockSema;
+            FAKEMATCH_ASM_LIVE(sema);
+            SignalSema(sema);
+        }
+        if (mode == 8) return -1;
+        return 6;
+    }
+    if (cdvdDebugLevel > 0) {
+        scePrintf("DiskReady ended\n");
+    }
+    ret = UNCACHED(cdvdScmdReply)[0];
+    SignalSema(cdvdScmdLockSema);
+    return ret;
+}
+
+#else
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdDiskReady);
+#endif
 
 s32 sceCdMmode(s32 media)
 {

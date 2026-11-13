@@ -304,3 +304,31 @@ sibling, the current production reconciler only processes game units. The
 unique compiler-owned linked target is nevertheless all 368 retail bytes,
 and the complete native owner and full image are exact. This separates verified
 SDK source credit from raw report matched totals; reporting tools are unchanged.
+
+**Retained `sceCdDiskReady` reconstruction.**
+
+The guarded draft reconstructs the 504-byte command transaction without changing
+its assembly fallback. It acquires and rechecks the S-command semaphore, preserves
+the mode-dependent failure result (mode 8 returns -1, other modes return 6), binds
+service `0x8000059A` only while the initialization word is negative, and transfers
+the real four-byte request and uncached reply. Negative binds ignore the server
+field; successful binds with no server retry. Both native countdowns run from
+`0x100000` through zero. Semaphore globals are reloaded after callbacks, and the
+reply is saved before releasing the semaphore.
+
+`D_00598E90` has a native 0x30-byte extent; the existing 0x28-byte client prefix
+models only its accessed server field at +0x24. `D_00598ED0` has eight bytes, of
+which this transaction uses four. The initialization word is at +8 within the
+24-byte `cdvdScmdState` object, distinct from the S precheck's word at +12.
+The narrow semaphore operand constraints and post-sync zero-mode binding use
+the same native argument boundaries as the matched prechecks, not extra accesses
+or barriers. No fixed value spans a call that clobbers its assigned register.
+
+The draft emits the native 504-byte extent and 101/126 matching words. All 25
+remaining differences are saved-register permutations; it is not promoted and
+adds no matching credit. The 31 compiled peer functions and owned data remain
+exact. Plain and `-da` complete-owner assembly and raw objects agree. Extracted
+host fixtures pass 3,584 scenarios in optimized and ASan/UBSan runs, covering
+acquisition, callback-mutated semaphores, sync failure, bind retries, RPC failure,
+mode extremes and reply capture before release. These fixtures establish the
+modeled control/data contract, not hardware, concurrency or EE ABI behavior.

@@ -3767,22 +3767,19 @@ void cmpSetStockVisible(s8 visible)
     }
 }
 
-/* NON_MATCHING: 1 of 10 words match, 40 bytes against retail's 48; retail
- * zero-extends the returned byte with sll 24 / srl 24. */
-#ifdef NON_MATCHING
+/* Normalize the returned flag byte explicitly in unsigned arithmetic.
+ * The split conversion retains the native zero-extension around the store. */
 u8 cmpClearStatusFlags(void)
 {
     campStatusPanel_t *panel = campStatusPanel;
-
     if (panel != NULL) {
-        panel->flags &= 2;
-        return panel->flags;
+        u32 value = panel->flags & 2;
+        u32 high = value << 24;
+        panel->flags = value;
+        return high >> 24;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpClearStatusFlags);
-#endif
 
 extern cmpInfoWindow_t *campCalcStockWindow;
 
