@@ -939,3 +939,32 @@ source-credit change. The actual SDK report-category delta is 72 code bytes and 
 measured independently from fresh current-parent reports rather than inferred
 from source promotion. The complete game report remains unchanged at
 1,518,560 matched code bytes and 8,686 matched functions.
+
+## _request_call (sdk/libkernl, 140 bytes)
+
+The request handler uses the existing typed RPC packet, server and queue records.
+It appends the server through the empty/nonempty queue paths, publishes the tail,
+then copies the incoming request metadata and conditionally wakes the queue thread.
+The existing packet/server overlap and access order are retained; no noalias
+assumption or wider callback ABI is introduced.
+
+An input-only constraint consumes the actual initialized `queue->end` pointer
+immediately after its store. That tail is subsequently read by the next enqueue.
+The operand is a four-byte `MEM:SI` on queue+0x10, not a general memory barrier.
+Without it, the ordinary typed body sinks publication past two metadata pointer
+loads/stores. With it, all 140 instruction bytes resolve to retail. This is an
+observed output difference, not a claim about the original source spelling or an
+unobserved scheduler rule.
+
+The print RPC endpoint now uses the same canonical queue/server types as the
+registration API. Its aligned queue wrapper preserves the native stack layout;
+the callback accepts the existing three-word API signature and converts only its
+buffer argument locally. All five print functions, allocated data and relocations
+are unchanged. This compatibility repair earns no additional matching credit.
+
+Qualification covers complete libkernl and print owners, production/SKIP/retained
+ordinary-versus-dump compiler output, finite peer address attribution, guarded
+drafts, regression controls and literal full-retail equality. The handler's
+resolved SHA-256 is d47ecf298080c119dab99aecc868a9cdcc575c9d94f7f1f68da19fe650627d42.
+The shared-type repair and handler belong together; byte equality alone did not
+justify the former incompatible print overlay. Exact-commit CI follows publication.

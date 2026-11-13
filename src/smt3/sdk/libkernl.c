@@ -1563,7 +1563,40 @@ s32 sceSifBindRpc(rpcClient *client, u32 serverId, s32 mode)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", _request_call);
+/* Current typed request payload, with native queue publication before metadata. */
+extern s32 iWakeupThread(s32 threadId);
+void _request_call(void *incoming, void *unusedQueue)
+{
+    rpcPacket *packet = incoming;
+    sifRpcServerData_t *server = packet->payload.call.server;
+    sifRpcDataQueue_t *queue = server->queue;
+    void *packetAddress;
+    void *client;
+
+    if (queue->start == NULL) {
+        queue->start = server;
+    } else {
+        queue->end->next = server;
+    }
+    queue->end = server;
+    /* The newly published tail is live for the next queue insertion.  Keep
+     * this real initialized field at the native publication phase; this
+     * localized operand is not a barrier for unrelated memory accesses. */
+    FAKEMATCH_ASM_READ_MEM(queue->end);
+    packetAddress = packet->header.packetAddress;
+    client = packet->header.clientAddress;
+    server->packetAddress = packetAddress;
+    server->client = client;
+    server->rpcNumber = packet->payload.call.function;
+    server->size = packet->payload.call.sendBytes;
+    server->receiveBuffer = packet->payload.call.receive;
+    server->receiveSize = packet->payload.call.receiveBytes;
+    server->mode = packet->payload.call.responseMode;
+    server->requestId = packet->header.flags;
+    if (queue->threadId >= 0 && queue->active == 0) {
+        iWakeupThread(queue->threadId);
+    }
+}
 
 s32 sceSifCallRpc(void *clientAddress, s32 function, s32 mode, void *send,
                    s32 sendBytes, void *receive, s32 receiveBytes,

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "sif_rpc.h"
 
 s32 strlen(const char *aStr);
 
@@ -81,7 +82,8 @@ extern s32 vsprintf(char *destination, const char *format, void *args);
 extern s32 (*p2sdSmgBuf)(void);
 
 /* Copy a positive source/end span into the RPC reply buffer; otherwise return NULL. */
-void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet) {
+void *sdfPrintRpcFunc(s32 unused, void *request, s32 unusedSize) {
+    sifCommand_t *packet = request;
     s32 copyBytes = packet->end - packet->source;
     if (copyBytes > 0) {
         memcpy(packet, EE_ADDR_AS(void *, packet->source), copyBytes);
@@ -92,33 +94,13 @@ void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet) {
 
 void sdfPrintRpcThread();
 
-typedef struct sifPrintRpcServerData_t sifPrintRpcServerData_t;
-typedef struct sifRpcDataQueue_t {
-    s32 threadId;
-    s32 active;
-    sifPrintRpcServerData_t *serverList;
-    sifPrintRpcServerData_t *request;
-    s32 requestState;
-    struct sifRpcDataQueue_t *next;
-} __attribute__((aligned(16))) sifRpcDataQueue_t;
+typedef struct sifPrintQueueStorage_t {
+    sifRpcDataQueue_t queue;
+} __attribute__((aligned(16))) sifPrintQueueStorage_t;
 
-struct sifPrintRpcServerData_t {
-    s32 serviceId;
-    void *(*handler)(s32, sifCommand_t *);
-    void *buffer;
-    u32 opaque0C;
-    s32 bufferSize;
-    void *callback;
-    u8 opaque18[0x20];
-    sifPrintRpcServerData_t *next;
-    sifPrintRpcServerData_t *nextRequest;
-    sifRpcDataQueue_t *queue;
-};
+SIZE_CHECK(sifPrintQueueStorage_size_must_be_0x20, sifPrintQueueStorage_t, 0x20);
 
-SIZE_CHECK(sifRpcDataQueue_size_must_be_0x20, sifRpcDataQueue_t, 0x20);
-SIZE_CHECK(sifPrintRpcServerData_size_must_be_0x44, sifPrintRpcServerData_t, 0x44);
-
-extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
+extern void *sdfPrintRpcFunc(s32 unused, void *request, s32 unusedSize);
 extern s32 GetThreadId(void);
 extern void sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId);
 #include "sdk_libkernl.h"
@@ -128,12 +110,12 @@ extern u8 sdfPrintRpcBuff[];
 
 void sdfPrintRpcThread(void)
 {
-    sifRpcDataQueue_t queue;
-    sifPrintRpcServerData_t server;
+    sifPrintQueueStorage_t storage;
+    sifRpcServerData_t server __attribute__((aligned(16)));
 
-    sceSifSetRpcQueue(&queue, GetThreadId());
-    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x32647270, (sceSifRpcFunc)sdfPrintRpcFunc, sdfPrintRpcBuff, 0, NULL, (struct sifRpcDataQueue_t *)&queue);
-    sceSifRpcLoop(&queue);
+    sceSifSetRpcQueue(&storage.queue, GetThreadId());
+    sceSifRegisterRpc(&server, 0x32647270, sdfPrintRpcFunc, sdfPrintRpcBuff, 0, NULL, &storage.queue);
+    sceSifRpcLoop(&storage.queue);
 }
 
 

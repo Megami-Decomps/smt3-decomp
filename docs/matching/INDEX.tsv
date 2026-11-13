@@ -492,6 +492,7 @@ sceTtyWrite				docs/matching/sdk/libkernl.md	682
 iPutTLBEntry				docs/matching/sdk/libkernl.md	732
 iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	775
 LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	826
+_request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	943
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
 sceMcSync				docs/matching/sdk/libmc.md	79
