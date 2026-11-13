@@ -382,11 +382,15 @@ extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
                                  datUnitWork_t *unit, s32 flags, s32 ot);
 extern char *text2[];
 
+/* Retained draft: native copies two four-word offset arrays to the stack
+ * and reads each row there. Ordinary writable locals retain those loads.
+ * The final row coordinates are computed before the status dispatch, as in
+ * retail; 171/184 words match at the native 736-byte extent. */
 #ifdef NON_MATCHING
 void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
 {
-    const s32 xOffsets[4] = {0x24, 0x9E, 0xFD, 0x15A};
-    const s32 yOffsets[4] = {14, 13, 13, 10};
+    s32 xOffsets[4] = {0x24, 0x9E, 0xFD, 0x15A};
+    s32 yOffsets[4] = {14, 13, 13, 10};
     s32 textX = x + (xOffsets[0] << 4);
     s32 textY = y + (yOffsets[0] << 3);
     datUnitWork_t *unit;
@@ -409,6 +413,8 @@ void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
                          0x80808080, unit, 1, ot);
     cmpDrawStatusIconRow(x + (xOffsets[2] << 4), y + (yOffsets[2] << 3), z,
                          0x80808080, unit, 2, ot);
+    textX = x + (xOffsets[3] << 4);
+    textY = y + (yOffsets[3] << 3);
     switch (unit->badstatus) {
     case 0x40: statusIcon = 2; break;
     case 0x20: statusIcon = 3; break;
@@ -416,7 +422,7 @@ void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
     case 0x100: statusIcon = 5; break;
     default: return;
     }
-    fclDrawSpriteRes(x + (xOffsets[3] << 4), y + (yOffsets[3] << 3), z << 4,
+    fclDrawSpriteRes(textX, textY, z << 4,
                      NULL, 0, statusIcon, rcvDrawWork->texHandle, rcvSpriteTable, ot);
 }
 #else

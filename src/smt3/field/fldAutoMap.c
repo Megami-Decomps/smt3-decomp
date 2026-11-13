@@ -561,8 +561,9 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     sdfModelLinkOt(&sdfModelOtTable[9], emitter);
 }
 
-/* NON_MATCHING: 10 of 146 words, exact size; the two saved fp registers hold x
- * and y the other way round, which rotates all three arms. */
+/* NON_MATCHING: 584 emitted bytes versus 580 native bytes; 10 native-prefix
+ * words match. The saved fp registers hold x and y the other way round, and
+ * the native default arm rematerializes the row and reloads its geometry. */
 #ifdef NON_MATCHING
 void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
     sdfDrawTag_t *tag;
