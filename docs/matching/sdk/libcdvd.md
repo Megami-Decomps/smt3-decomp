@@ -428,3 +428,20 @@ Independent native/source review also extends the fixture to 216,720 ASan/UBSan
 scenarios, covering every name length from zero through 300 and debug-state
 changes at each diagnostic. That expanded fixture shortens empty countdowns
 only for test runtime; it does not claim timing equivalence.
+
+### Search reply debug-width recovery
+
+The retained `sceCdLayerSearchFile` draft now emits the native 788-byte extent
+(133/197 instruction words, versus 796 bytes and 108/197). It is still guarded,
+not an exact match. The retail reply copy uses unaligned doubleword pairs, while
+its numeric debug reads at reply offsets +4 and +0 use aligned `lw`. Field-derived pointers to the members' exact declared `u32` type spell
+these aligned reads only inside the numeric debug branches. No alternate
+aggregate or union alias is introduced. The packed copy and name-only paths keep
+accepting unaligned storage, including a name-print callback that disables later
+numeric diagnostics. No qualifier or register constraint is added.
+
+All 31 exact owner peers remain exact. Extracted-body optimized and sanitized
+scenario tests pass; normal, SKIP_ASM and retained whole-owner assembly/object
+output is identical with and without compiler dumps after normalizing only the
+randomized source filename. Remaining differences are allocation, destination
+spill/reload, and branch scheduling; no matching credit is claimed.

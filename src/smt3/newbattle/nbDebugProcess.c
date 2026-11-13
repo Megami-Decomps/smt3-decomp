@@ -366,12 +366,18 @@ extern char nbDebugEmptyStockLabel[];
 extern char *text2[];
 
 #ifdef NON_MATCHING
+/* NON_MATCHING: native row coordinates are formed before the selected-row
+ * drawing branch. Keep the next row Y separate from the two current pixel
+ * coordinates. Stock base is ordinary RAM, re-read across the drawing calls.
+ * The canonical unitwork view names the native record base at global + 0xA54.
+ * Allocation and scheduling still differ; production uses INCLUDE_ASM. */
 s32 nbDebugStockSelect(void)
 {
     sdfDrawTag_t *tag;
     frFontHandle_t *request;
-    fldAnahoriAkuma_t *unit;
-    s32 i, y, color, attr, base, result, index;
+    datUnitWork_t *unit;
+    s32 i = 0, y = 70;
+    s32 color, attr, base, result, index, rowY, fontY;
     u32 flags;
     u16 name;
 
@@ -381,10 +387,9 @@ s32 nbDebugStockSelect(void)
     D_002F67F8.regFunc(&D_002F67F8, tag);
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    base = *(volatile s32 *)&nbDebugStockBase;
-    y = 70;
-    for (i = 0; i < 12; i++) {
-        unit = &DDS3_GBWK->akuma[base + i];
+    base = nbDebugStockBase;
+    do {
+        unit = &DDS3_GBWK->unitwork[base + i];
         if (nbDebugStockCursor == i) {
             attr = 4;
             color = 0xFF0080;
@@ -392,23 +397,26 @@ s32 nbDebugStockSelect(void)
             attr = 0;
             color = -0x80;
         }
-        DispBadStatus(0xAA, y + 4, unit->badstatus, attr);
+        rowY = y + 4;
+        DispBadStatus(0xAA, rowY, unit->badstatus, attr);
+        rowY *= 8;
+        fontY = y * 8;
+        y += 20;
         flags = unit->flag;
         if (flags & 1) {
             name = 0xFF;
             if (!(flags & 4)) {
-                name = unit->devilId;
+                name = unit->id;
             }
-            request = frwGetSmallFontFRQ(0xFA * 16, y * 8, 0xFFFF80, color, text2[name], NULL);
+            request = frwGetSmallFontFRQ(0xFA * 16, fontY, 0xFFFF80, color, text2[name], NULL);
             frDrawFont((frFontHandle_t *)request);
             frDestroyFontRequestAfter((frFontHandle_t *)request);
         } else {
-            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7FA0, (y + 4) * 8 + 0x7900,
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7FA0, rowY + 0x7900,
                                                   0xFFFF80, attr, nbDebugEmptyStockLabel, 0, 0xFF)));
         }
-        y += 20;
-        base = *(volatile s32 *)&nbDebugStockBase;
-    }
+        base = nbDebugStockBase;
+    } while (++i < 12);
     D_002F67F8.regFunc(&D_002F67F8, tag);
     result = dds3SelectMenu(0, 1, 16, 1, 12, NULL, &nbDebugStockBase, NULL, &nbDebugStockCursor);
     if (result == -1) {

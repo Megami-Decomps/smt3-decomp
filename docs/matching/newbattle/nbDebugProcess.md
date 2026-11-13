@@ -107,3 +107,37 @@ promoted. Ordered relocations retain the original providers and ordering.
 Independent semantic review and an extracted-source host fixture cover
 526,890 cases, with seven behavior-changing negative controls rejected.
 The host fixture establishes logical behavior, not target allocation.
+
+### nbDebugStockSelect (retained draft, native 628 bytes)
+
+The retained ordinary reconstruction now emits 624 bytes and matches 60 of
+157 native words, versus 632 bytes and nine matching words in the inherited
+draft. It remains guarded with its assembly fallback; no matching credit is
+added.
+
+The native row loop keeps the current status/empty-label pixel Y and font Y
+separate from the next row Y. Expressing those real coordinate phases, with
+the consumed loop index and Y initialized before drawing, improves allocation.
+The canonical `unitwork` overlay addresses global + 0xA54 + 0xEC * index,
+identically to the former `akuma` field view; it directly names the flag,
+unsigned-halfword ID and status fields used by retail. No provider signature,
+layout, bound or call is changed.
+
+The stock base is ordinary RAM. Its inherited volatile casts had no demonstrated
+hardware or asynchronous-writer justification and are removed. The source
+still reloads it across row drawing calls, and keeps the preselected unit
+pointer while observing flags after `DispBadStatus`. No new constraint or
+compiler promise is used. Remaining differences concern string-base allocation,
+argument scheduling and the final unconditional stock-base read.
+
+Extracted-body host tests compare a native byte-offset/event-order oracle in
+92,160 scenarios each under optimization and address/undefined-behavior
+sanitizers. They cover both occupancy paths, all menu outcomes -2 through 2,
+valid base/cursor combinations, varying status/IDs, and callbacks that change
+the global-work backing, selected base/cursor and unit fields. Entire event
+streams and resulting state agree. These are not EE execution tests; valid
+stock and name indices remain caller preconditions.
+
+All 16 existing exact owner functions remain exact. The complete guarded owner
+passes, and full raw assembly/whole objects from plain versus diagnostic
+compiler runs agree in production, SKIP_ASM and retained-C contexts.

@@ -420,9 +420,12 @@ s32 sceCdLayerSearchFile(addr_t destination, const char *name, s32 layer)
     if (cdvdDebugLevel > 0) {
         scePrintf("search name %s\n", file->name);
         if (cdvdDebugLevel > 0) {
-            scePrintf("search size %d\n", (s32)file->size);
+            /* Only numeric diagnostics require native aligned word reads.
+             * Keep the copy/name paths packed; these addresses retain the
+             * fields' actual u32 type, with no alternate aggregate alias. */
+            scePrintf("search size %d\n", (s32)*(u32 *)&file->size);
             if (cdvdDebugLevel > 0) {
-                scePrintf("search loc lbn %d\n", (s32)file->lsn);
+                scePrintf("search loc lbn %d\n", (s32)*(u32 *)&file->lsn);
             }
         }
     }
