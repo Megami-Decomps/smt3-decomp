@@ -993,7 +993,7 @@ u8 cmpGetLoadState(void)
 
 /* NON_MATCHING: 9 of 35 words differ, exact size. */
 #ifdef NON_MATCHING
-extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
+extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 extern s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
 
 s32 cmpSetStockRemoveEff(u8 *work)
@@ -1013,9 +1013,9 @@ s32 cmpSetStockRemoveEff(u8 *work)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
 #endif
 
-extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
+extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 
-/* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
+/* NON_MATCHING: native-size branch/address phases; allocation still differs. */
 #ifdef NON_MATCHING
 /* Called above its definition, where ee-gcc assumed int. */
 s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
@@ -1027,13 +1027,17 @@ void cmpSetIniStockRecoverEff(u8 *work)
     s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
     s32 room = cmpStockHasRoom((cmpStockWork_t *)work, 0);
     s32 slot;
+    s32 offset;
     u8 *target;
 
     work += 0xAC;
     slot = cmpFindFreeStockSlot(index, room);
-    target = work + slot * 16 + 0x1078;
+    offset = slot * 16;
+    target = work + offset + 0x1078;
     if (room != 0) {
-        target = work + slot * 16 + 0x3C;
+        /* Keep the real selected-row offset as a distinct consumed phase. */
+        FAKEMATCH_ASM_LIVE(offset);
+        target = work + offset + 0x3C;
     }
     cmpSetCursorSlot(0, 4, 0x10, (cmpCursorSlot_t *)target);
 }
@@ -9122,8 +9126,11 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
 #endif
 
-s32 cmpFindFreeStockSlot(s8 index, s8 room)
+/* Callers forward word results; retail normalizes both bytes on entry. */
+s32 cmpFindFreeStockSlot(s32 indexArg, s32 roomArg)
 {
+    s8 index = indexArg;
+    s8 room = roomArg;
     s8 slot = 0;
 
     if (index < 0) {
