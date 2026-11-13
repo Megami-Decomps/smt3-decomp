@@ -74,7 +74,8 @@ class GeneratedRodataInputTests(unittest.TestCase):
 class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
-                    source_text="void target(void) {}\n", candidate=None, assembly=None):
+                    source_text="void target(void) {}\n", candidate=None, assembly=None,
+                    native_inventory=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -99,6 +100,10 @@ class FocusedFunctionTests(unittest.TestCase):
                 alternate = root / "candidate.c"
                 alternate.write_text(candidate)
                 argv.extend(["--source", str(alternate)])
+            if native_inventory is not None:
+                native = root / "asm/smt3/main/unit.s"
+                native.parent.mkdir(parents=True)
+                native.write_text(native_inventory)
             stack.enter_context(patch.object(check_unit, "ROOT", root))
             stack.enter_context(patch.dict(check_unit.RETAIL, {VERSION: RETAIL_PATH}, clear=True))
             stack.enter_context(patch.dict(
@@ -130,6 +135,20 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_empty_candidate_cannot_pass_whole_owner_audit(self):
+        status, report = self.run_checker(
+            None, emitted="", candidate="", native_inventory="glabel target\n")
+        self.assertEqual(status, 1, report)
+        self.assertIn("MISSING target: neither C nor INCLUDE_ASM", report)
+        self.assertIn("0 match, 1 differ", report)
+
+    def test_candidate_guarded_asm_fallback_retains_owner(self):
+        candidate = ('#ifdef NON_MATCHING\nvoid target(void) {}\n#else\n'
+                     'INCLUDE_ASM(s32, "smt3/main/unit", target);\n#endif\n')
+        status, report = self.run_checker(
+            None, emitted="", candidate=candidate, native_inventory="glabel target\n")
+        self.assertEqual(status, 0, report)
 
     def test_missing_requested_name_fails_even_at_an_emitted_address(self):
         for requested in ("typo", "func_00001000", "alias"):
@@ -1176,7 +1195,7 @@ class NestedFunctionCheckerTests(unittest.TestCase):
                     full_helper_word=None, retail_call=0x0C000400,
                     metadata_flags="l F", full_name="helper.0",
                     full_flags="l F", extra_full=(), extra_skip=(),
-                    explicit_address=None):
+                    explicit_address=None, candidate_source=None, native_inventory=None):
         """Run the complete checker with fake objects; never invoke cc.sh."""
         compiled = struct.pack("<IIII", helper_word, 0, 0x0C000000, 0)
         full_code = struct.pack("<IIII", helper_word if full_helper_word is None
@@ -1200,6 +1219,14 @@ class NestedFunctionCheckerTests(unittest.TestCase):
             original.parent.mkdir(parents=True)
             original.write_bytes(retail)
             argv = ["check_unit.py", str(unit)]
+            if candidate_source is not None:
+                candidate = root / "candidate.c"
+                candidate.write_text(candidate_source)
+                argv.extend(["--source", str(candidate)])
+            if native_inventory is not None:
+                assembly = root / "asm/smt3/main/unit.s"
+                assembly.parent.mkdir(parents=True)
+                assembly.write_text(native_inventory)
             if requested is not None:
                 argv.extend(["--func", requested])
             stack.enter_context(patch.object(check_unit, "ROOT", root))
@@ -1240,6 +1267,30 @@ class NestedFunctionCheckerTests(unittest.TestCase):
         self.assertIn("OK   helper.0 @ 0x00001000", report)
         self.assertIn("OK   caller @ 0x00001008", report)
         self.assertIn("2 match, 0 differ", report)
+
+    def test_source_override_missing_owner_is_not_hidden_by_canonical_source(self):
+        status, report = self.run_checker(
+            candidate_source="", native_inventory="glabel caller\n")
+        self.assertEqual(status, 1, report)
+        self.assertIn("MISSING caller: neither C nor INCLUDE_ASM", report)
+
+    def test_source_override_audits_candidate_order(self):
+        status, report = self.run_checker(candidate_source=(
+            "void caller(void)\n{\n}\nvoid helper(void)\n{\n}\n"))
+        self.assertEqual(status, 1, report)
+        self.assertIn("ORDER helper", report)
+
+    def test_source_override_audits_candidate_stale_names(self):
+        status, report = self.run_checker(candidate_source=(
+            "void caller(void) {}\n/* func_00001000 */\n"))
+        self.assertEqual(status, 1, report)
+        self.assertIn("STALE func_00001000", report)
+
+    def test_focused_candidate_need_not_retain_unselected_owner(self):
+        status, report = self.run_checker(
+            "caller", candidate_source="void caller(void) {}\n",
+            native_inventory="glabel helper\nglabel caller\n")
+        self.assertEqual(status, 0, report)
 
     def test_focused_selection_still_requires_exact_emitted_name(self):
         status, report = self.run_checker("helper.0")
