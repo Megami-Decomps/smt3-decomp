@@ -44,6 +44,67 @@ from check_unit import (
 )
 
 
+class FullContextRelocationTests(unittest.TestCase):
+    def check(self, words, wants, relocs, syms=None, funcs=None, offset=0, size=None):
+        return check_unit.full_context_relocation_diffs(
+            struct.pack("<" + "I" * len(words), *words), offset,
+            len(wants) * 4 if size is None else size,
+            struct.pack("<" + "I" * len(wants), *wants), relocs,
+            funcs or [], syms or {}, GP)
+
+    def test_named_hi_lo_addend_and_carry(self):
+        words = [0x3C020001, 0x24428000]
+        relocs = {0: ("R_MIPS_HI16", "data"), 4: ("R_MIPS_LO16", "data")}
+        wants = [0x3C020031, 0x24428000]
+        self.assertFalse(self.check(words, wants, relocs, {"data": 0x300000}))
+        self.assertEqual(len(self.check(words, wants, relocs, {"data": 0x310004})), 2)
+
+    def test_named_gprel_uses_actual_provider(self):
+        relocs = {0: ("R_MIPS_GPREL16", "data")}
+        self.assertFalse(self.check([0x8F820004], [0x8F820014], relocs, {"data": GP + 16}))
+        self.assertEqual(len(self.check([0x8F820004], [0x8F820014], relocs, {"data": GP + 20})), 1)
+
+    def test_local_call_resolves_full_object_offsets(self):
+        relocs = {0: ("R_MIPS_26", ".text")}
+        funcs = [(0x20, 16, "provider")]
+        self.assertFalse(self.check([0x0C000009], [0x0C000801], relocs, {"provider": 0x2000}, funcs))
+        self.assertEqual(len(self.check([0x0C000009], [0x0C000801], relocs, {"provider": 0x3000}, funcs)), 1)
+
+    def test_slice_does_not_check_neighbor_or_unresolved_data_section(self):
+        self.assertFalse(self.check([0x08000000, 0x3C020000], [0x3C020020],
+            {0: ("R_MIPS_26", "bad"), 4: ("R_MIPS_HI16", ".rodata")},
+            {"bad": 0x3000}, offset=4))
+
+    def test_unresolved_named_and_local_calls_fail_closed(self):
+        for symbol in ("missing_provider", ".text"):
+            result = self.check([0x08000000], [0x08000800],
+                                {0: ("R_MIPS_26", symbol)})
+            self.assertEqual(len(result), 1)
+            self.assertIn("unresolved", result[0][3])
+
+    def test_full_owned_small_data_uses_object_gp_bias(self):
+        words = struct.pack("<I", 0x8F82C004)
+        expected = struct.pack("<I", 0x8F820014)
+        args = (words, 0, 4, expected, {0: ("R_MIPS_GPREL16", ".sdata+0x4000")}, [], {}, GP)
+        self.assertFalse(check_unit.full_context_relocation_diffs(
+            *args, section_bases={".sdata": GP + 16}, object_gp=0x4000))
+        self.assertEqual(len(check_unit.full_context_relocation_diffs(
+            *args, section_bases={".sdata": GP + 20}, object_gp=0x4000)), 1)
+
+    def test_full_owned_rodata_resolves_actual_origin_and_offset(self):
+        words = struct.pack("<II", 0x3C020000, 0x24420028)
+        relocs = {0: ("R_MIPS_HI16", ".rodata"), 4: ("R_MIPS_LO16", ".rodata")}
+        args = (words, 0, 8, struct.pack("<II", 0x3C020053, 0x2442DF78), relocs, [], {}, GP)
+        self.assertFalse(check_unit.full_context_relocation_diffs(
+            *args, section_bases={".rodata": 0x52DF50}))
+        self.assertEqual(len(check_unit.full_context_relocation_diffs(
+            *args, section_bases={".rodata": 0x52DF54})), 1)
+
+    def test_wrong_instruction_shape_is_not_masked(self):
+        self.assertEqual(len(self.check([0x08000000], [0x0C000800],
+            {0: ("R_MIPS_26", "provider")}, {"provider": 0x2000})), 1)
+
+
 class GeneratedRodataInputTests(unittest.TestCase):
     def test_absent_optional_file(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -75,7 +136,7 @@ class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
                     source_text="void target(void) {}\n", candidate=None, assembly=None,
-                    native_inventory=None, full_nm=None):
+                    native_inventory=None, full_nm=None, full_relocs=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -114,8 +175,9 @@ class FocusedFunctionTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
             stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
-            stack.enter_context(patch.object(check_unit, "relocations", return_value={
-                ".text": text_relocs or {}, ".rodata": {}, ".sdata": {}}))
+            stack.enter_context(patch.object(check_unit, "relocations", side_effect=lambda obj: {
+                ".text": (full_relocs if obj.name == "full.o" and full_relocs is not None
+                          else text_relocs or {}), ".rodata": {}, ".sdata": {}}))
 
             def object_output(*args):
                 if "-S" not in args:
@@ -211,6 +273,29 @@ class FocusedFunctionTests(unittest.TestCase):
         self.assertEqual(status, 1)
         self.assertIn("MISSING target", report)
 
+    def test_wrong_full_context_call_is_not_hidden_by_matching_skip_call(self):
+        for requested in (None, "target"):
+            with self.subTest(requested=requested):
+                status, report = self.run_checker(
+                    requested, code=struct.pack("<II", 0x08000000, 0),
+                    retail_code=struct.pack("<II", 0x08000800, 0),
+                    text_relocs={0: ("R_MIPS_26", "right")},
+                    full_relocs={0: ("R_MIPS_26", "wrong")},
+                    extra_symbols="right = 0x2000;\nwrong = 0x3000;\n")
+                self.assertEqual(status, 1)
+                self.assertIn("CONTEXT RELOC target", report)
+                self.assertIn("1 match, 1 differ", report)
+
+    def test_full_context_call_can_use_equivalent_symbol_alias(self):
+        status, report = self.run_checker(
+            None, code=struct.pack("<II", 0x08000000, 0),
+            retail_code=struct.pack("<II", 0x08000800, 0),
+            text_relocs={0: ("R_MIPS_26", "right")},
+            full_relocs={0: ("R_MIPS_26", "equivalent")},
+            extra_symbols="right = 0x2000;\nequivalent = 0x2000;\n")
+        self.assertEqual(status, 0)
+        self.assertNotIn("CONTEXT RELOC", report)
+
     def test_asm_only_function_does_not_count_as_emitted_c(self):
         status, report = self.run_checker("target", emitted="", full_emitted="target")
         self.assertEqual(status, 1)
@@ -295,7 +380,7 @@ class FocusedFunctionTests(unittest.TestCase):
             extra_symbols="drawBank = 0x002F6A80;\n")
         self.assertEqual(status, 1)
         self.assertIn("DIFF target", report)
-        self.assertIn("0 match, 1 differ", report)
+        self.assertIn("0 match, 2 differ", report)
 
 
 class SourceReviewDiagnosticsTests(unittest.TestCase):
@@ -1393,7 +1478,8 @@ class NestedFunctionCheckerTests(unittest.TestCase):
                     self.assertEqual(status, 1, report)
                     self.assertIn("helper.0: no address", report)
                     self.assertIn("DIFF caller", report)
-                    self.assertIn("0 match, 2 differ", report)
+                    self.assertIn("CONTEXT RELOC caller", report)
+                    self.assertIn("0 match, 3 differ", report)
 
     def test_explicit_symbol_mapping_is_not_overridden_by_stem(self):
         status, report = self.run_checker(explicit_address=0x1008)

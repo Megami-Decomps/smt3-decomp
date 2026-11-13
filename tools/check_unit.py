@@ -465,6 +465,60 @@ def paired_hi16_addends(text, relocs):
     return addends
 
 
+
+def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
+                                   funcs, syms, gp, hi_addends=None, section_bases=None, object_gp=0):
+    """Check resolvable instruction targets in the actual build context.
+
+    Masked code equality does not establish relocation equality: conditional
+    source can emit identical opcodes referring to different providers. Bounded
+    owned data sections use their final retail origin, never the SKIP_ASM layout.
+    """
+    differences = []
+    if hi_addends is None:
+        hi_addends = paired_hi16_addends(text, relocs)
+    for at, (kind, symbol) in relocs.items():
+        if not offset <= at < offset + size or at + 4 > len(text):
+            continue
+        index = at - offset
+        if index + 4 > len(retail_code):
+            continue  # extent and code comparisons diagnose this separately
+        mine = struct.unpack_from("<I", text, at)[0]
+        want = struct.unpack_from("<I", retail_code, index)[0]
+        base = symbol.split("+", 1)[0]
+        target = (section_bases or {}).get(base, address(base, syms))
+        expected = None
+        mask = 0xFFFF
+        if kind == "R_MIPS_26" and base == ".text":
+            local = (mine & 0x3FFFFFF) << 2
+            owner = next(((off, name) for off, width, name in funcs
+                          if off <= local < off + width), None)
+            origin = address(owner[1], syms) if owner else None
+            if origin is not None:
+                expected = ((origin + local - owner[0]) >> 2) & 0x3FFFFFF
+            mask = 0x3FFFFFF
+        elif target is not None:
+            if kind == "R_MIPS_26":
+                expected = linked_jump_field(target, mine & 0x3FFFFFF)
+                mask = 0x3FFFFFF
+            elif kind == "R_MIPS_HI16" and at in hi_addends:
+                expected = linked_hi_field(target, hi_addends[at])
+            elif kind == "R_MIPS_LO16":
+                expected = linked_lo_field(target, sext16(mine))
+            elif kind == "R_MIPS_GPREL16":
+                addend = sext16(mine) + (object_gp if base.startswith(".") else 0)
+                expected = linked_gprel_field(target, addend, gp)
+        if expected is None and (not base.startswith(".") or
+                                 (base == ".text" and kind == "R_MIPS_26")):
+            differences.append((index, mine, want, f"unresolved {kind} {symbol}"))
+            continue
+        if expected is not None and (
+                not instruction_shape_matches(mine, want, kind)
+                or want & mask != expected):
+            differences.append((index, mine, want, f"{kind} {symbol}"))
+    return differences
+
+
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
                         section_bases=None):
     """Apply resolvable R_MIPS_32 relocations to one emitted data item.
@@ -1127,6 +1181,7 @@ def main():
         # as the build compiles it, relocated fields masked.
         context = {}
         context_words = {}  # full-unit words that differ from retail
+        context_relocations = {}
         data_context = []
         owned_rodata = []
         owned_rodata_native = []
@@ -1175,9 +1230,27 @@ def main():
                         words[i] &= 0xFC000000 if r[0] == "R_MIPS_26" else 0xFFFF0000
                 return words
 
+            fdata, fsecs = sections(full)
+            full_ri_off, full_ri_size = fsecs.get(".reginfo", (0, 0))
+            full_gp0 = struct.unpack_from("<i", fdata, full_ri_off + 20)[0] if full_ri_size >= 24 else 0
+            full_hi_addends = paired_hi16_addends(ftext, frel)
+            full_section_bases = {}
+            for section, owned_range in ((".rodata", rodata_range),
+                                         (".sdata", sdata_range), (".data", data_range)):
+                if owned_range is not None:
+                    origin = off_to_va(segs, owned_range[0])
+                    if origin is not None:
+                        full_section_bases[section] = origin
             for off, size, name in funcs:
                 if name in fsyms:
                     foff, fsize = fsyms[name]
+                    addr = address(name, syms)
+                    roff = va_to_off(segs, addr) if addr is not None else None
+                    if roff is not None:
+                        context_relocations[name] = full_context_relocation_diffs(
+                            ftext, foff, fsize, retail[roff:roff + fsize], frel,
+                            [(o, n, key) for key, (o, n) in fsyms.items()],
+                            syms, gp, full_hi_addends, full_section_bases, full_gp0)
                     if fsize != size or masked(ftext[foff:foff + fsize], foff, frel) != \
                             masked(text[off:off + size], off, relocs):
                         # The build links the full-unit code: if that matches retail
@@ -1365,6 +1438,12 @@ def main():
                       "(relocated fields masked)")
             for i, built, want in (words if args.verbose else words[:3]):
                 print(f"       +0x{i:03X} full {built:08X} retail {want:08X}")
+    for name, differences in context_relocations.items():
+        if differences and (not args.func or args.func == name):
+            bad += 1
+            print(f"CONTEXT RELOC {name}: full-unit instruction targets differ from retail")
+            for offset, mine, want, reason in (differences if args.verbose else differences[:3]):
+                print(f"       +0x{offset:03X} full {mine:08X} retail {want:08X} {reason}")
     if ro_diff and not args.func:
         bad += 1
         print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "

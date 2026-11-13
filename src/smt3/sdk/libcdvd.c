@@ -139,7 +139,30 @@ cdvdCallback_t sceCdCallback(cdvdCallback_t func)
     return old;
 }
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_cd_callback);
+extern s32 cdvdScmdSema __attribute__((section(".data")));
+/* The native 8-byte object holds pending reason at +0 and saved reason at +4.
+ * _Cdvd_cbLoop tests pending and passes saved to the registered callback. */
+SYMBOL_AT(volatile s32, cdvdCallbackSavedReason, cdvdCallbackReason, 4);
+
+void _sceCd_cd_callback(s32 *reason)
+{
+    /* Interrupt-published state is accessed at each native read/write.
+     * Qualify only these accesses; ordinary callers retain their own contract. */
+    (*(volatile s32 *)&cdvdCallbackReason) = *reason;
+    cdvdCallbackSavedReason = (*(volatile s32 *)&cdvdCallbackReason);
+    if ((*(volatile s32 *)&cdvdCallbackReason) == 11) {
+        (*(volatile s32 *)&cdvdCallbackReason) = 0;
+        (*(volatile s32 *)&cdvdNcmdState) = 0;
+        return;
+    }
+    iSignalSema((*(volatile s32 *)&cdvdNcmdSema));
+    if (cdvdCallbackThreadId != 0 && cdvdCallback != NULL) {
+        iSignalSema((*(volatile s32 *)&cdvdScmdSema));
+    } else {
+        (*(volatile s32 *)&cdvdNcmdState) = 0;
+    }
+    (*(volatile s32 *)&cdvdCallbackReason) = 0;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _Cdvd_cbLoop);
 

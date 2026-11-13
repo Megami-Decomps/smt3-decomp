@@ -57,15 +57,15 @@ The recovered setter and callback slot use that function-pointer type instead
 of an integer placeholder, preserving the setter's 92 bytes and all 22
 matching functions in the owner.
 
-The completion-producer draft emits 140 of 160 bytes. Native reloads status
-after storing it, twice before any call. A module-wide volatile declaration
-only reaches 148 bytes and makes the retained teardown draft grow from 148 to
-152 bytes, so it is not an established access contract. The thread consumer
-emits 184 of 188 bytes: its final callback uses the reason-test register for
-the argument, while native reloads the argument in the call delay slot and
-keeps the callback in another register. Naming a typed callback snapshot does
-not change that result. Changing its return type to steer those registers
-would contradict the interface. Both bodies remain assembly-backed.
+The completion producer `_sceCd_cd_callback` now reproduces its native 160 bytes.
+Local volatile lvalues preserve the interrupt-published pending word's two
+reloads and semaphore/state accesses without changing other callers' contracts.
+The saved signed reason is the second word of the native eight-byte object,
+consumed by `_Cdvd_cbLoop`; the scalar alias does not change its extent.
+All 31 owner functions and owned data match; ordinary and `-da` full-owner
+assembly and objects agree. Broad global qualification changed peers and was
+rejected. The consumer remains assembly-backed at 184 of 188 bytes: its final
+saved-reason reload is unresolved; changing the callback return type is invalid.
 
 ## sceCdStRead
 
