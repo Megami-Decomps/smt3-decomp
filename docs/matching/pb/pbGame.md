@@ -365,3 +365,23 @@ with inputs unchanged. No source change or new matching credit results. A new
 source attempt must preserve the native per-iteration reload without simply
 reintroducing this one-cycle loop-pointer producer; declaration-order retries
 cannot fix the load's observed readiness boundary by themselves.
+
+**`deleteMoveBlock` delayed-branch boundary (2026-11-14).** Moving the existing
+loop-pointer constraint to its genuine tail count consumer remains a rejected
+control: 50/81 words instead of 52/81, both at 324 bytes. It removes the immediate
+producer latency and restores the first-scheduled load-before-increment order,
+but does not preserve the native final loop form. Fresh complete-owner dumps
+locate that second failure specifically between machine reorganization and
+delayed-branch filling. Before delay filling, load 209 is below loop label 316
+and branch 313 targets that label. Afterwards the original load remains on the
+entry path, a new label 459 follows it, and branch 313 targets that new label
+with a copy of load 209 in its annulled taken-path delay slot. The emitted
+`bnel` therefore reloads only on continuation, unlike the native loop-head
+load and ordinary `bne` with offset increment in its delay slot.
+
+All three modes pass complete assembly/object plain/dump parity. This establishes
+the transformation boundary, not which internal rejection or profitability
+condition chose the successor load instead of the offset increment. The latter
+is the next useful diagnostic; the evidence does not justify another blind
+constraint-placement sweep. The guarded source is unchanged and receives no
+new matching credit.

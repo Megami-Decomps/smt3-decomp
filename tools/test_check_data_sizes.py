@@ -163,6 +163,64 @@ class JumpTargets(unittest.TestCase):
         self.assertEqual([a[1] for a in accesses], [0x320020, 0x340040])
 
 
+class LikelyDelaySlots(unittest.TestCase):
+    scan = AddressProvenance.scan
+
+    def branches(self):
+        return ([(op << 26) | (4 << 21) | 5 for op in (0x14, 0x15, 0x16, 0x17)]
+                + [(1 << 26) | (4 << 21) | (rt << 16) | 5 for rt in (2, 3, 18, 19)]
+                + [(op << 26) | (8 << 21) | (rt << 16) | 5
+                   for op in (0x10, 0x11, 0x12) for rt in (2, 3)])
+
+    def test_annulled_address_creation_cannot_seed_fallthrough(self):
+        for branch in self.branches():
+            with self.subTest(branch=hex(branch)):
+                accesses, _ = self.scan([branch,
+                    (0xF << 26) | (2 << 16) | 0x32,
+                    (0x23 << 26) | (2 << 21) | (3 << 16)])
+                self.assertEqual(accesses, [])
+
+    def test_annulled_overwrite_restores_pre_slot_address(self):
+        for branch in self.branches():
+            with self.subTest(branch=hex(branch)):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (2 << 16) | 0x32, branch,
+                    (0xF << 26) | (2 << 16) | 0x34,
+                    (0x23 << 26) | (2 << 21) | (3 << 16)])
+                self.assertEqual([a[1] for a in accesses], [0x320000])
+
+    def test_link_likely_invalidates_previous_return_address(self):
+        for rt in (18, 19):
+            with self.subTest(rt=rt):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (31 << 16) | 0x32,
+                    (1 << 26) | (4 << 21) | (rt << 16) | 5,
+                    (0x23 << 26) | (31 << 21) | (2 << 16),
+                    (0x23 << 26) | (31 << 21) | (3 << 16)])
+                self.assertEqual(accesses, [])
+
+    def test_target_join_still_clears_restored_state(self):
+        accesses, _ = self.scan([
+            (0xF << 26) | (2 << 16) | 0x32,
+            (0x14 << 26) | (4 << 21) | 1,
+            (0xF << 26) | (2 << 16) | 0x34,
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual(accesses, [])
+
+    def test_taken_slot_access_and_nonlikely_slot_writes_survive(self):
+        accesses, _ = self.scan([
+            (0xF << 26) | (2 << 16) | 0x32,
+            (0x14 << 26) | (4 << 21) | 5,
+            (0x23 << 26) | (2 << 21) | (2 << 16),
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual([a[1] for a in accesses], [0x320000, 0x320000])
+        accesses, _ = self.scan([
+            (4 << 26) | (4 << 21) | 5,
+            (0xF << 26) | (2 << 16) | 0x34,
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual([a[1] for a in accesses], [0x340000])
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

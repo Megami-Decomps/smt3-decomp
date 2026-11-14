@@ -474,3 +474,14 @@ final increment/load exchange. It does not establish actual PS2 timing, identify
 a valid C-level remedy, or improve the match. A further control needs evidence
 that it changes this eligibility without artificial dependencies; repeating
 priority-only or declaration-order controls is not justified by this result.
+
+**DANTE Init ordinary control-flow pass (2026-11-14).** The guarded draft now
+uses the native unsigned invocation-ID switch and explicit failed skill cases,
+separate bad-status/state exits, and the native per-arm addition of +/-300 to
+the Z position. This preserves the accepted ID/skill sets, getter and callback
+order, repeated target acquisition, VU operations and asymmetric radius formula.
+No constraint, type, provider or unit-boundary change is introduced. It improves
+from 41/155 words at 620 bytes to 96/161 at native 644 bytes, but remains guarded
+and nonmatching. The first residual divergence is the special-target branch:
+the compiler shares its final Look call with the other case, unlike retail.
+A target-ID switch was tested and rejected (48 words, 668 bytes).

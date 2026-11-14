@@ -6022,14 +6022,22 @@ s32 nbCameraDANTE_Init(void)
     u32 state;
     s32 id;
     f32 distance;
-    f32 offset;
 
     id = effBTLModelGetID(invoke);
-    if (id != 0xC0 && (id < 0x153 || id > 0x155)) {
+    switch ((u32)id) {
+    case 0xC0:
+    case 0x153:
+    case 0x154:
+    case 0x155:
+        break;
+    default:
         return 0;
     }
     state = effBTLSkillGetState();
-    if ((effBTLModelGetBadStatus(invoke) & 0x40) != 0 || (state & 0xC) != 0) {
+    if (effBTLModelGetBadStatus(invoke) & 0x40) {
+        return 0;
+    }
+    if (state & 0xC) {
         return 0;
     }
     switch (effBTLSkillGetID()) {
@@ -6062,16 +6070,21 @@ s32 nbCameraDANTE_Init(void)
         effBTLModelSetPosition(invoke, &invokePos);
         effBTLModelLook(invoke, &targetPos);
         return 1;
+    case 0x106:
+    case 0x108:
+    case 0x109:
+    case 0x10A:
+    case 0x10C:
+        return 0;
     case 0x10B:
         effBTLModelTargetPartyShow();
         effBTLModelInvokeGroupHide();
         effBTLGetGroupPos(invoke, &invokePos);
         if (invoke->stat & 0x100) {
-            offset = -300.0f;
+            invokePos.z += -300.0f;
         } else {
-            offset = 300.0f;
+            invokePos.z += 300.0f;
         }
-        invokePos.z += offset;
         effBTLModelSetPosition(invoke, &invokePos);
         return 1;
     case 0x10D:
