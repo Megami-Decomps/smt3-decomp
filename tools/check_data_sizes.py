@@ -103,10 +103,12 @@ def scan_text(b, secs, func_starts, gp):
                 regs[rt] = ((imm << 16) & 0xFFFFFFFF, "hi", pc)
                 regs.pop(0, None)
             elif op in (0x09, 0x0D, 0x19) and rs in regs:
-                v = regs[rs][0]
+                # Capture provenance before writing rt: address construction often
+                # uses the same register for both the high half and result.
+                v, kind, _ = regs[rs]
                 v = (v + sx16(imm)) & 0xFFFFFFFF if op != 0x0D else v | imm
                 regs[rt] = (v, "addr", pc)
-                consts.append((pc, v, regs[rs][1] == "hi"))
+                consts.append((pc, v, kind == "hi"))
             elif op in (0x09, 0x19) and rs == 28 and gp:
                 v = (gp + sx16(imm)) & 0xFFFFFFFF
                 regs[rt] = (v, "addr", pc)

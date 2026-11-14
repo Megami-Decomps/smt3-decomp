@@ -407,3 +407,21 @@ historical source spelling. Adding an artificial dependency merely to inflate
 the camera-address priority would not be justified. Further source work needs
 a real camera consumer or matched source-family evidence that changes the
 relevant block shape, rather than another pointer-declaration permutation.
+
+### Kagu E909 shared-tail capture qualification (2026-11-14)
+
+The guarded E909 draft now emits the native 724 bytes, with 172/181 words
+matching (nine scheduling differences remain), versus 136/180 at 720 bytes.
+A short signed frame capture in register 2 restores the native copy to the
+ordinary frame value consumed by both conversion and increment. Its lifetime
+starts after all switch-arm calls and ends before the VU scratch operations
+clobber register 2. This localized constraint is a reconstruction aid, not
+original-source evidence. Both switch arms and the signed floating-point
+conversion remain unchanged.
+
+Separately, spelling the increment as `(s32)((u32)frame + 1u)` defines the
+native low-32-bit wrap at `INT_MAX`; the wrap-only control emits identical
+output, as do capture-only and capture-plus-wrap. The first seven residual
+words are shared-tail scheduling around duration conversion, the clamp literal
+and the frame copy; the final two exchange the end-distance load and increment.
+The assembly fallback remains in production; no exact-match credit is claimed.

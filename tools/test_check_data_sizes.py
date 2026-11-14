@@ -51,6 +51,43 @@ class WordAddrs(unittest.TestCase):
             cds.load_word_addrs(d)
 
 
+class AddressProvenance(unittest.TestCase):
+    def scan(self, words):
+        import struct
+        data = struct.pack("<%dI" % len(words), *words)
+        return cds.scan_text(data, [dict(name=".text", off=0, size=len(data),
+                                       addr=0x100000)], {0x100000}, None)
+
+    def test_same_register_high_low_construction(self):
+        for opcode, low, expected in ((9, 0x1234, 0x321234),
+                                      (9, 0xFFFF, 0x31FFFF),
+                                      (0x19, 0x1234, 0x321234),
+                                      (0xD, 0xFFFF, 0x32FFFF)):
+            with self.subTest(opcode=opcode, low=low):
+                _, consts = self.scan([(0xF << 26) | (2 << 16) | 0x32,
+                    (opcode << 26) | (2 << 21) | (2 << 16) | low])
+                self.assertEqual(consts, [(0x100004, expected, True)])
+
+    def test_distinct_destination_has_same_provenance(self):
+        for destination in (2, 3):
+            _, consts = self.scan([(0xF << 26) | (2 << 16) | 0x32,
+                (9 << 26) | (2 << 21) | (destination << 16) | 0x1234])
+            self.assertEqual(consts, [(0x100004, 0x321234, True)])
+
+    def test_adjustment_of_completed_address_is_not_new_high_pair(self):
+        _, consts = self.scan([(0xF << 26) | (2 << 16) | 0x32,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x1234,
+            (9 << 26) | (2 << 21) | (2 << 16) | 4])
+        self.assertEqual(consts, [(0x100004, 0x321234, True),
+                                (0x100008, 0x321238, False)])
+
+    def test_move_preserves_high_provenance_before_self_update(self):
+        _, consts = self.scan([(0xF << 26) | (2 << 16) | 0x32,
+            (2 << 21) | (3 << 11) | 0x21,
+            (9 << 26) | (3 << 21) | (3 << 16) | 0x1234])
+        self.assertEqual(consts, [(0x100008, 0x321234, True)])
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

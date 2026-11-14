@@ -1964,9 +1964,8 @@ extern void nbCameraShot_All_Set3(nbCamera_t *pNbCamera, sdfVector4_t *pTarget);
 
 extern s32 nbCameraBoss_BSKAGU_Command_Set(nbCamera_t *pNbCamera);
 
-/* NON_MATCHING: 44 of 180 words differ; 720 emitted against retail 724. Retail
- * copies the frame counter into a second register before the int-to-float
- * conversion; the draft converts the loaded register directly. */
+/* NON_MATCHING: 172/181 words match at native 724 bytes.  The shared-tail
+ * capture preserves the native copy; nine scheduling differences remain. */
 #ifdef NON_MATCHING
 void nbCameraBoss_Kagu_E909_Run(void)
 {
@@ -2023,7 +2022,13 @@ void nbCameraBoss_Kagu_E909_Run(void)
         nbCameraKaguFrame = 0;
         break;
     }
-    frame = nbCameraKaguFrame;
+    /* Real frame capture ends before VU scratch overwrites $2.  This local
+     * compiler constraint reconstructs the native copy, not source spelling. */
+    {
+        FAKEMATCH_ASM_REG(s32, raw, "2") = nbCameraKaguFrame;
+        FAKEMATCH_ASM_LIVE(raw);
+        frame = raw;
+    }
     rate = (f32)frame / (f32)nbCameraKaguDuration;
     if (rate > 1.0f) {
         rate = 1.0f;
@@ -2038,7 +2043,7 @@ void nbCameraBoss_Kagu_E909_Run(void)
     SDF_VU0_STOREVECTOR(&pCamera->direction);
     pCamera->fovy = 0.69813163f;
     pCamera->distance = nbCameraKaguStartDistance + (nbCameraKaguEndDistance - nbCameraKaguStartDistance) * rate;
-    nbCameraKaguFrame = frame + 1;
+    nbCameraKaguFrame = (s32)((u32)frame + 1u);
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_E909_Run);

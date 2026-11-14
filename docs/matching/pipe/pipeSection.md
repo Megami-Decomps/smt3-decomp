@@ -242,3 +242,25 @@ guarded owner and leaves normal/SKIP_ASM complete assembly and objects
 unchanged. Both source forms pass all three modes' plain/dump assembly and
 object parity. A bounded 100,005-case integer model supplements the direct
 fallback-value review.
+
+### Reload-control allocation priority
+
+A qualified read-only compiler observation of the earlier 23/66 draft and
+its rejected live-`part` reload control resolves their allocation-order swap.
+In the ordinary draft, position pseudo 96 has ten references over 21 live
+instructions and priority 14285; comparison pseudo 115 has four references
+over six instructions and priority 13333. The comparator returns -952 and
+orders position first. In the reload control, their live lengths become 20
+and five, yielding priorities 15000 and 16000; the comparator returns 1000
+and orders the comparison first. Both decisions use the priority tier, not
+an equal-priority tie or range-copy preference.
+
+This explains the observed ordering reversal that accompanies the register
+swap, not the original source spelling or a complete repair. The reload
+control remains rejected; the retained negative-position-tail draft remains
+30/66. A next source experiment must address the real lifetime/interference
+change rather than assume a scheduling-only difference or add dummy uses.
+The two whole-owner observations preserve all six baseline artifacts each;
+fresh normal, SKIP_ASM and guarded plain/dump compilations also preserve
+complete assembly and object parity. No source change or matching credit is
+claimed by this diagnostic.
