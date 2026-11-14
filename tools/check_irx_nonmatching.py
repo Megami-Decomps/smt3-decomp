@@ -54,9 +54,13 @@ def check(module: str, shim: Path) -> int:
         label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
         # IRX drafts use pre-C23 non-prototype declarations. GCC 15 defaults to
         # C23, where f() means f(void); retain the legacy GNU C dialect.
+        # Match the EE draft gate: a typo or missing callee declaration must
+        # fail even on hosts that still treat implicit declarations as warnings.
+        # Other warnings and legacy explicit non-prototypes remain permitted.
         out = subprocess.run(
             ["gcc", "-std=gnu17", "-m32", "-fsyntax-only", "-DNON_MATCHING",
              *(["-DFIX_BUGS"] if fix_bugs else []),
+             "-Werror=implicit-function-declaration",
              "-include", str(shim / "irx.h"),
              "-I", str(ROOT / "include" / "irx"), str(src)],
             capture_output=True, text=True, cwd=ROOT)

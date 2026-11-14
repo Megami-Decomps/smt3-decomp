@@ -362,3 +362,25 @@ before publication.
 Independent review adds 300,000 native-control and effectful-callback cases
 at O0, O2 and ASan/UBSan, with three deliberately incorrect variants rejected.
 No private trace or fixture binary is included in this source change.
+
+### Foru E913 guarded interpolation reconstruction (2026-11-14)
+
+The retained `nbCameraBoss_Foru_E913_Run` draft now emits the native 196 bytes
+and matches 43/49 native words, versus 200 bytes and 6/49 for the earlier draft.
+It remains guarded and earns no exact-match credit. A single ordinary camera
+pointer supplies both vector destinations and the distance/fovy fields. A
+localized unsigned frame-capture binding and empty operand constraint preserve
+the native load/copy distinction; the copied frame has real signed conversion
+and final increment consumers. The capture variable is reused for the final
+unsigned increment only after interpolation, with a fresh constraint for its
+store. Its two disjoint live ranges do not cross the VU macros' address loads.
+This is a target-specific allocation aid, not original-source evidence.
+
+The signed low-word-to-float conversion, division by 190, upper clamp at one,
+two four-lane interpolation sequences, scalar camera stores and modulo-32 frame
+increment are unchanged. Existing VU macros and literal values are unchanged.
+All six residual words are in entry scheduling; the interpolation and completion
+sequence matches. The ordinary pointer-only version emits 192 bytes; unsigned
+capture without the binding also loses the native copy. Volatile constraints
+worsen the result. Do not infer a compiler scheduling cause from these scores
+without a separately qualified trace.

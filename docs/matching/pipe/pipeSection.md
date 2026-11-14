@@ -199,3 +199,25 @@ qualification, 450 tests, 817 layout assertions, inline/shell checks, seven
 IRX modules, retail SHA1/byte comparison/no-op and reconciled reports pass.
 Game coverage is 8594 functions / 1485744 bytes, including the separate peer
 StageLoad addition; this batch adds no exact matching credit.
+
+### Descriptor provenance and bounded reload control
+
+The provider `getPartsInfo` is a separate-owner 60-row lookup: it reads the
+signed ID argument and table IDs and returns the first matching row or null.
+Its exact owner has eight matches and no differences. It does not write the
+frame, link or position state and has no callbacks; an opaque same-symbol
+declaration cannot remove same-unit knowledge that this caller never had.
+The initialized/reached-row preconditions above still apply.
+
+A localized empty read/write operand on the actual `part` pointer immediately
+before its advancing frame use restores that native previous-frame load in a
+bounded control. The value is live only until the frame addition, before the
+next lookup replaces it. Nevertheless this control regresses from 23/66 to
+20/66 words at 264 bytes and is not retained. Recovering the reload alone is
+not sufficient: entry ordering, position allocation and tail selection still
+differ. This is measured source/output evidence, not a claim that the control
+reproduces every native access or proves a particular internal compiler pass.
+Both forms passed three-mode complete-owner plain/dump assembly and object
+parity; production and SKIP_ASM outputs were unchanged by the guarded control.
+Further work should target the remaining allocation/branch structure with
+native evidence, not posit provider writes or repeat blanket volatility.

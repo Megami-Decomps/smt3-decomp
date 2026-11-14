@@ -27,7 +27,8 @@ class IRXDialectTests(unittest.TestCase):
         self.assertEqual(errors, 0)
         self.assertEqual(len(commands), 2)
         for command in commands:
-            for flag in ('-std=gnu17', '-m32', '-fsyntax-only', '-DNON_MATCHING'):
+            for flag in ('-std=gnu17', '-m32', '-fsyntax-only', '-DNON_MATCHING',
+                         '-Werror=implicit-function-declaration'):
                 self.assertIn(flag, command)
         self.assertNotIn('-DFIX_BUGS', commands[0])
         self.assertIn('-DFIX_BUGS', commands[1])
@@ -84,6 +85,45 @@ class RealCompilerModes(unittest.TestCase):
         errors, _ = self.compile_source('#include "mode.h"\nint f(void) { return 1; }\n',
                                        '#ifdef FIX_BUGS\n#error broken header correction\n#endif\n')
         self.assertGreater(errors, 0)
+
+    def test_undeclared_callee_fails_in_either_mode(self):
+        for condition, good_mode in (("FIX_BUGS", "NON_MATCHING"),
+                                     ("!defined(FIX_BUGS)", "NON_MATCHING + FIX_BUGS")):
+            with self.subTest(condition=condition):
+                errors, output = self.compile_source(
+                    f"#if {condition}\n"
+                    "int f(void) { return missing_callee(7); }\n"
+                    "#else\nint f(void) { return 7; }\n#endif\n")
+                self.assertGreater(errors, 0)
+                self.assertIn(f"CONTROL ({good_mode}): ok", output)
+
+    def test_warning_default_compiler_does_not_accept_missing_callee(self):
+        # GCC 14 made this error-by-default. Its -fpermissive option restores
+        # the warning disposition used by older hosts; the explicit -Werror
+        # must still reject it. Exercise the real compiler, not canned stderr.
+        real_run = subprocess.run
+
+        def warning_default(command, **kwargs):
+            return real_run([command[0], '-fpermissive', *command[1:]], **kwargs)
+
+        with patch.object(checker.subprocess, 'run', side_effect=warning_default):
+            errors, output = self.compile_source(
+                'int f(void) { return missing_callee(7); }\n')
+        self.assertGreater(errors, 0)
+        self.assertNotIn(': ok', output)
+
+    def test_header_undeclared_callee_fails(self):
+        errors, _ = self.compile_source(
+            '#include "mode.h"\nint f(void) { return helper(); }\n',
+            'static int helper(void) { return missing_callee(); }\n')
+        self.assertGreater(errors, 0)
+
+    def test_declared_callees_keep_legacy_nonprototype_support(self):
+        for declaration in ('extern int callee();', 'extern int callee(int);'):
+            with self.subTest(declaration=declaration):
+                errors, _ = self.compile_source(
+                    declaration + '\nint f(void) { return callee(7); }\n')
+                self.assertEqual(errors, 0)
 
     def test_valid_branches_pass(self):
         errors, _ = self.compile_source('int f(void) {\n#ifdef FIX_BUGS\nreturn 2;\n#else\nreturn 1;\n#endif\n}\n')

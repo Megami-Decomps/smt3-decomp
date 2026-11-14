@@ -464,8 +464,17 @@ extern sdfVector4_t nbCameraForuE913DirectionEnd;
 
 void nbCameraBoss_Foru_E913_Run(void)
 {
-    u32 frame = Foru_E913_Frame;
-    f32 rate = (s32)frame / 190.0f;
+    nbCamera_t *camera = &pNbCamera;
+    /* Local capture/store constraint: raw is consumed by the frame copy,
+     * then reused only for the final modulo-32 increment. No value remains
+     * live in $3 across the VU address loads. This reconstructs allocation,
+     * not historical source spelling. */
+    FAKEMATCH_ASM_REG(u32, raw, "3") = Foru_E913_Frame;
+    u32 frame;
+    f32 rate;
+    FAKEMATCH_ASM_LIVE(raw);
+    frame = raw;
+    rate = (s32)frame / 190.0f;
 
     if (rate > 1.0f) {
         rate = 1.0f;
@@ -473,14 +482,16 @@ void nbCameraBoss_Foru_E913_Run(void)
     SDF_VU0_LOADVECTOR(&nbCameraForuE913TargetStart);
     SDF_VU0_LOADVECTOR_B(&nbCameraForuE913TargetEnd);
     VU0_LERP_VF10_VF11(rate);
-    SDF_VU0_STOREVECTOR(&pNbCamera.target);
+    SDF_VU0_STOREVECTOR(&camera->target);
     SDF_VU0_LOADVECTOR(&nbCameraForuE913DirectionStart);
     SDF_VU0_LOADVECTOR_B(&nbCameraForuE913DirectionEnd);
     VU0_LERP_VF10_VF11(rate);
-    SDF_VU0_STOREVECTOR(&pNbCamera.direction);
-    pNbCamera.distance = 1.0f;
-    pNbCamera.fovy = 0.6981316209f;
-    Foru_E913_Frame = frame + 1;
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    camera->distance = 1.0f;
+    camera->fovy = 0.6981316209f;
+    raw = frame + 1;
+    FAKEMATCH_ASM_LIVE(raw);
+    Foru_E913_Frame = raw;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Foru_E913_Run);
