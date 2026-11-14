@@ -448,3 +448,29 @@ The observer preserves all six output artifacts; direct replay agrees with the
 ordinary wrapper. Complete-owner assembly and objects are byte-equal in plain
 and dump builds for production, SKIP_ASM, and active-draft modes. This is compiler
 evidence, not a new match or evidence of historical source spelling.
+
+
+### Kagu E909 qualified issue-eligibility decision
+
+A fresh read-only observation of the retained 172/181-word candidate resolves
+that intervening decision. In the compiler's pre-reload scheduler, the
+start-distance load issues at cycle 6 on modeled unit 0. The end-distance load
+then receives hazard cost 1 on that same unit and is queued for the next cycle;
+the clamp literal is deferred the same way. The increment uses modeled unit 6,
+receives cost 0, and can issue at cycle 6 despite its lower priority. At cycle 7
+the end-distance load receives cost 0 and issues; the literal then receives cost
+1 again and waits until cycle 8.
+
+The positive-unit hazard calculation is inlined in the scheduling block, so
+observing only the out-of-line hazard function misses these decisions. The
+qualified observation checks the inline decision and queue insertion as well as
+the helper's entry and exit. All six observed output artifacts remain identical
+to the unobserved replay, which also agrees with the ordinary wrapper. Fresh
+complete-owner assembly and object comparisons pass plain/dump parity in
+production, SKIP_ASM, and active-draft modes.
+
+This establishes modeled resource eligibility, not a priority reversal, for the
+final increment/load exchange. It does not establish actual PS2 timing, identify
+a valid C-level remedy, or improve the match. A further control needs evidence
+that it changes this eligibility without artificial dependencies; repeating
+priority-only or declaration-order controls is not justified by this result.

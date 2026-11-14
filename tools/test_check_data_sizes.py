@@ -132,6 +132,37 @@ class ZeroRegister(unittest.TestCase):
                                     0x320020, False)])
 
 
+class JumpTargets(unittest.TestCase):
+    scan = AddressProvenance.scan
+
+    def test_forward_jump_target_drops_linear_path_constant(self):
+        accesses, _ = self.scan([
+            (2 << 26) | (0x100010 >> 2), 0,
+            (0xF << 26) | (2 << 16) | 0x32,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x20,
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual(accesses, [])
+
+    def test_backward_jump_target_drops_linear_path_constant(self):
+        accesses, _ = self.scan([
+            (0xF << 26) | (2 << 16) | 0x32,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x20,
+            (0x23 << 26) | (2 << 21) | (3 << 16),
+            (2 << 26) | (0x100008 >> 2), 0])
+        self.assertEqual(accesses, [])
+
+    def test_jump_delay_slot_and_target_local_construction_survive(self):
+        accesses, _ = self.scan([
+            (0xF << 26) | (2 << 16) | 0x32,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x20,
+            (2 << 26) | (0x100010 >> 2),
+            (0x23 << 26) | (2 << 21) | (3 << 16),
+            (0xF << 26) | (2 << 16) | 0x34,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x40,
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual([a[1] for a in accesses], [0x320020, 0x340040])
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

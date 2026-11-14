@@ -80,6 +80,9 @@ def scan_text(b, secs, func_starts, gp):
         clear = set(func_starts)
         for i, w in enumerate(words):
             op = w >> 26
+            if op == 2:  # direct jump: its destination is also a control-flow join
+                pc = base_pc + i * 4
+                clear.add(((pc + 4) & 0xF0000000) | ((w & 0x03FFFFFF) << 2))
             if op in (4, 5, 6, 7, 0x14, 0x15, 0x16, 0x17, 1) or (op in (0x10, 0x11, 0x12) and (w >> 21) & 31 == 8):
                 clear.add(base_pc + (i + 1) * 4 + (sx16(w & 0xFFFF) << 2))
         regs = {}

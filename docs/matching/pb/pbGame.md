@@ -344,3 +344,24 @@ three components reproduce the complete native 140-byte function, while
 0 differ. These paired source/output observations explain the useful row
 representation; they do not establish original spelling or an unobserved
 compiler-pass mechanism.
+
+**`deleteMoveBlock` loop scheduling follow-on (2026-11-14).** The retained
+nonmatching draft remains 52/81 words at the native 324-byte size. A qualified
+observation of its actual compiler distinguishes a dependency latency from a
+register-pressure tie. The real loop-pointer constraint (instruction 208) is
+selected at cycle 0, ahead of the counter increment (304), by priority 25 versus
+3. Its modeled result cost is one cycle despite having no emitted instruction
+or execution unit. The dependent `blk` load (211) has tick 1 and is not ready
+when the independent increment fills cycle 0. At cycle 1, that load is selected
+with priority 24. Both scheduling passes exhibit this sequence. The recorded
+RTL has the direct 208-to-211 dependency; the compiler's unrecognized-instruction
+cost path defaults to one before computing dependent ticks. This accounts for
+the increment-before-load ordering without attributing it to an allocation tie
+or treating the constraint as a general memory barrier.
+
+All six complete-owner assembly/object plain/dump pairs agree, direct compiler
+replay agrees with the wrapper, and all six observed/unobserved artifacts agree
+with inputs unchanged. No source change or new matching credit results. A new
+source attempt must preserve the native per-iteration reload without simply
+reintroducing this one-cycle loop-pointer producer; declaration-order retries
+cannot fix the load's observed readiness boundary by themselves.
