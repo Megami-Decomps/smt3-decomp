@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Compile every IRX module's C with NON_MATCHING: a syntax check, not a match.
+"""Compile IRX C with NON_MATCHING, with and without FIX_BUGS.
+
+A syntax check, not a match.
 
     python tools/check_irx_nonmatching.py [MODULE ...]
 
@@ -44,23 +46,32 @@ typedef long long s64;
 def check(module: str, shim: Path) -> int:
     cfg = irx_config.load(module)
     src = irx_config.path(cfg, "src")
-    # IRX drafts use pre-C23 non-prototype declarations. GCC 15 defaults to
-    # C23, where f() means f(void); keep the intended legacy GNU C dialect.
-    out = subprocess.run(
-        ["gcc", "-std=gnu17", "-m32", "-fsyntax-only", "-DNON_MATCHING",
-         "-include", str(shim / "irx.h"),
-         "-I", str(ROOT / "include" / "irx"), str(src)],
-        capture_output=True, text=True, cwd=ROOT)
-    bad = [l for l in out.stderr.splitlines() if ": error:" in l or "error:" in l]
-    if out.returncode and not bad:
-        bad = [f"compiler exited with status {out.returncode}"]
-        detail = (out.stderr or out.stdout).strip()
-        if detail:
-            bad.append(detail)
-    print(f"{module}: {'ok' if not bad else str(len(bad)) + ' error(s)'}")
-    for line in bad[:20]:
-        print("   " + line)
-    return len(bad)
+    # Check both modes unconditionally, including FIX_BUGS uses in headers.
+    # A corrected branch is otherwise as invisible to CI as an assembly-guarded
+    # draft. This does not alter the production compiler or matching build.
+    errors = 0
+    for fix_bugs in (False, True):
+        label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
+        # IRX drafts use pre-C23 non-prototype declarations. GCC 15 defaults to
+        # C23, where f() means f(void); retain the legacy GNU C dialect.
+        out = subprocess.run(
+            ["gcc", "-std=gnu17", "-m32", "-fsyntax-only", "-DNON_MATCHING",
+             *(["-DFIX_BUGS"] if fix_bugs else []),
+             "-include", str(shim / "irx.h"),
+             "-I", str(ROOT / "include" / "irx"), str(src)],
+            capture_output=True, text=True, cwd=ROOT)
+        bad = [l for l in out.stderr.splitlines() if "error:" in l]
+        if out.returncode and not bad:
+            bad = [f"compiler exited with status {out.returncode}"]
+            detail = (out.stderr or out.stdout).strip()
+            if detail:
+                bad.append(detail)
+        print(f"{module} ({label}): {'ok' if not bad else str(len(bad)) + ' error(s)'}")
+        for line in bad[:20]:
+            print("   " + line)
+        errors += len(bad)
+    return errors
+
 
 
 def main() -> None:

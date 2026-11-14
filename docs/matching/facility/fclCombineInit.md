@@ -707,3 +707,30 @@ on 200,000 random/boundary cases, including mutated box color buffers, in optimi
 and ASan/UBSan builds. Leak checking is disabled for that sanitizer run because
 LeakSanitizer cannot operate under the executor's tracing environment. The guarded
 production owner and full integration checks remain required for publication.
+
+### Stock-row post-reload priority frontier
+
+A fresh output-qualified trace of the retained guarded stock-row owner places
+its low-byte mask across the first box call in post-reload scheduling, not in
+initial expression lowering or allocation. The mask is already ready at cycle
+21. The real comparator chooses the final stack color store instead: its
+critical-path priority is 17 versus the mask's 12, and the comparator returns
+-5 at the priority tier. No register-weight, dependence-class, successor-count
+or final-order tie-breaker decides this comparison.
+
+That store discharges the call's remaining dependency. The scheduler selects
+the first box call within the same cycle while the mask remains in the ready
+list; the mask is not selected until cycle 26. There is no direct mask-to-call
+dependency requiring this order, and the trace does not show a separate sorted
+comparison of the mask against the newly released call. Consequently, changing
+only declaration order or a final tie breaker does not address this observed
+frontier. A future source change needs a real computation/use or control-flow
+reason to change the critical path; an artificial color dependency or general
+memory barrier is not justified.
+
+The pinned compiler observer captured 4,824 events with all six baseline and
+observed artifacts byte-identical and 853 frozen inputs verified before and
+after. Same-path direct replay also agrees with the ordinary wrapper, and
+fresh plain/stock-dump complete-owner assembly and objects agree. This is
+compiler-property evidence, not a new exact match or historical source claim;
+the guarded candidate remains 67/81 words at 324 bytes.
