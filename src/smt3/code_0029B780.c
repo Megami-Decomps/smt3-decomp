@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "newdata.h"
 #include "facility.h"
 #include "ps2asm.h"
 #include "basic.h"
@@ -60,7 +61,6 @@ extern s8 slLoadKillFlag;
 
 extern u8 *GBWK;
 
-extern u8 *DDS3_GBWK;
 
 extern s32 fclGetPanelAnimPhase(void *p);
 
@@ -119,13 +119,13 @@ s32 dds3ConfigChanged(void)
 void dds3ConfigSaveBackup(void)
 {
     printf(dds3ConfigSaveBackupMsg);
-    dds3ConfigValue[0] = dds3ConfigValue[1] = *(s32 *)(DDS3_GBWK + 0x11AB8);
+    dds3ConfigValue[0] = dds3ConfigValue[1] = DDS3_GBWK->configFlags;
 }
 
 void dds3ConfigRestoreBackup(void)
 {
     printf(dds3ConfigRestoreBackupMsg);
-    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigValue[1];
+    DDS3_GBWK->configFlags = dds3ConfigValue[1];
 }
 
 void dds3InitConfigItems(u8 *gbwk)
@@ -211,7 +211,7 @@ s32 dds3GetConfigFlag(u32 index, s32 *table)
 
 s32 dds3GetGlobalConfigFlag(s32 index)
 {
-    return dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
+    return dds3GetConfigFlag(index, &DDS3_GBWK->configFlags);
 }
 
 typedef struct frTextBank_t frTextBank_t;
@@ -526,11 +526,11 @@ void dds3DrawConfigPanel(s32 ot)
     }
     dds3DrawConfigSlider(0, -0x48, 0, ot);
     dds3DrawConfigText(0, 0x268, 0, 2, 0,
-                        dds3GetConfigFlag(0, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+                        dds3GetConfigFlag(0, &DDS3_GBWK->configFlags), ot);
     dds3DrawConfigText(0, 0x4B0, 0, 3, 1,
-                        dds3GetConfigFlag(1, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+                        dds3GetConfigFlag(1, &DDS3_GBWK->configFlags), ot);
     dds3DrawConfigText(0, 0x7A8, 0, 3, 2,
-                        dds3GetConfigFlag(2, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+                        dds3GetConfigFlag(2, &DDS3_GBWK->configFlags), ot);
     dds3DrawConfigText(0, 0xAB0, 0, 1, 3, -1, ot);
     color = dds3GetConfigFadeAlpha() | 0x80808000;
     colors[0] = color;

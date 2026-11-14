@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "newdata.h"
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
@@ -36,7 +37,6 @@ extern s8 dds3ConfigState;
 
 extern u8 *GBWK;
 
-extern u8 *DDS3_GBWK;
 
 extern s32 cmpUpdateTerminate(u8 *p);
 
@@ -67,7 +67,7 @@ void dds3DestroyConfig(void *PID)
     s32 seq = 1;
 
     if (GBWK != NULL) {
-        dds3ConfigValue[1] = *(s32 *)(DDS3_GBWK + 0x11AB8);
+        dds3ConfigValue[1] = DDS3_GBWK->configFlags;
         if (GBWK[0x18] == 1) {
             dds3AdminiCallSequence(2, &seq, 4, 0);
         }
@@ -157,11 +157,11 @@ s32 dds3UpdateConfig(void *PID)
         if (dds3PadButtonState[0x24] >= 0) {
             goto no_sound;
         }
-        if (dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8)) == 0) {
+        if (dds3GetConfigFlag(index, &DDS3_GBWK->configFlags) == 0) {
             if (index == 3) {
                 goto no_sound;
             }
-            dds3ToggleConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
+            dds3ToggleConfigFlag(index, &DDS3_GBWK->configFlags);
             break;
         }
         goto no_sound;
@@ -169,13 +169,13 @@ s32 dds3UpdateConfig(void *PID)
         if (dds3PadButtonState[0x25] >= 0) {
             goto no_sound;
         }
-        if (dds3GetConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8)) == 0) {
+        if (dds3GetConfigFlag(index, &DDS3_GBWK->configFlags) == 0) {
             goto no_sound;
         }
         if (index == 3) {
             goto no_sound;
         }
-        dds3ToggleConfigFlag(index, (s32 *)(DDS3_GBWK + 0x11AB8));
+        dds3ToggleConfigFlag(index, &DDS3_GBWK->configFlags);
         break;
     case 0x10:
         cmpMoveCursor((cmpCursorInfo_t *)(GBWK + 0x1C), -1);

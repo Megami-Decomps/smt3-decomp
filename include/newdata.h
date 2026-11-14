@@ -193,7 +193,9 @@ typedef struct
     s16 previewY;
     s32 moonAnahoriCount;
     u8 takaraOpenEx[0x20];         /* 0x11A80 */
-    u8 reserved11AA0[0x20];
+    u8 reserved11AA0[0x18];
+    s32 configFlags;               /* 0x11AB8: dds3GetConfigFlag */
+    u8 reserved11ABC[4];
     union { u16 heartsSkills[32][12]; u16 hearts_sk[32][12]; }; /* 0x11AC0 */
     u8 hearts_up_param[32][6];   /* 0x11DC0 */
     union {

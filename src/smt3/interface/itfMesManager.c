@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "newdata.h"
 #include "itfMesManager.h"
 #include "kernel.h"
 #include "sdfFrame.h"
@@ -1078,7 +1079,6 @@ u8 *itfMesMngGetVar(s32 id, s32 index) {
     return EE_ADDR_AS(u8 *, pinst[id].mes->variable.pptr[index]);
 }
 
-extern u8 *DDS3_GBWK;
 
 /* Localised name text, 0x40 bytes after the manager. */
 extern char itfMesMngVarText[];

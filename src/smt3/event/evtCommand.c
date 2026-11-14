@@ -1,4 +1,5 @@
 #include "common.h"
+#include "newdata.h"
 #include "sdf_resource.h"
 #include "event.h"
 #include "kernel.h"
@@ -331,7 +332,6 @@ extern void evtSetSkyAlpha(s32 frame, s32 a);
 
 extern s32 dds3ExistProcess(void *id);
 
-extern void *DDS3_GBWK;
 
 extern f32 sdfSin(f32 aRadius);
 
@@ -2991,7 +2991,7 @@ u32 evt_1E91E8(void)
 {
     u8 *gb;
 
-    gb = DDS3_GBWK;
+    gb = (u8 *)DDS3_GBWK;
     scrSetIntReturnValue((EE_ADDR_AS(u8 *, scrGetIntPara(0)) + EE_ADDR(gb))[0x1CEC]);
     return 1;
 }
