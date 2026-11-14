@@ -108,11 +108,13 @@ def scan_text(b, secs, func_starts, gp):
                 v, kind, _ = regs[rs]
                 v = (v + sx16(imm)) & 0xFFFFFFFF if op != 0x0D else v | imm
                 regs[rt] = (v, "addr", pc)
-                consts.append((pc, v, kind == "hi"))
+                if rt != 0:
+                    consts.append((pc, v, kind == "hi"))
             elif op in (0x09, 0x19) and rs == 28 and gp:
                 v = (gp + sx16(imm)) & 0xFFFFFFFF
                 regs[rt] = (v, "addr", pc)
-                consts.append((pc, v, True))
+                if rt != 0:
+                    consts.append((pc, v, True))
             elif op in LOAD_W or op in STORE_W:
                 width = LOAD_W.get(op) or STORE_W.get(op)
                 if rs in regs:
@@ -142,6 +144,9 @@ def scan_text(b, secs, func_starts, gp):
                     kill.append(rt)
             elif op == 0x1C:
                 kill += [rd, rt]
+            # GPR zero discards every write, including arithmetic and moves.
+            # Never let a discarded address seed later accesses or symbols.
+            regs.pop(0, None)
             for r in kill:
                 regs.pop(r, None)
             if pending_call and op not in (3,) and not (op == 0 and (w & 63) == 9):

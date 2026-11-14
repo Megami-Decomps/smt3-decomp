@@ -1135,7 +1135,7 @@ s32 moveBlock(dds3ProcessID_t *id) {
     return 0;
 }
 
-/* NON_MATCHING: 46 of 77 words, 308 bytes against retail's 324; the entry array is hoisted out of the loop retail reloads it in. */
+/* NON_MATCHING: native-sized loop; residual allocation and scheduling differ. */
 #ifdef NON_MATCHING
 void deleteMoveBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
@@ -1158,12 +1158,18 @@ void deleteMoveBlock(dds3ProcessID_t *id) {
         i = 0;
         if (block->num != 0) {
             pbMapArea_t *a = &pbMapWork->area;
+            pbGroupData_t *loopBlock = block;
             do {
-                s16 y = block->cellY + (block->blk + i)->y;
-                s16 x = block->cellX + (block->blk + i)->x;
+                s16 y, x;
+                /* Keep the real group pointer local to this loop consumer.
+                 * This empty target constraint restores the native per-pass
+                 * blk reload; block remains the final group-ID consumer. */
+                FAKEMATCH_ASM_LIVE(loopBlock);
+                y = loopBlock->cellY + (loopBlock->blk + i)->y;
+                x = loopBlock->cellX + (loopBlock->blk + i)->x;
                 a->map.blk[y][x] &= 0xF7FF;
                 i++;
-            } while (i < block->num);
+            } while (i < loopBlock->num);
         }
         pbDeleteGroupEntry(blockDB, block->grpID);
         moveB = NULL;

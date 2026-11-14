@@ -88,6 +88,50 @@ class AddressProvenance(unittest.TestCase):
         self.assertEqual(consts, [(0x100008, 0x321234, True)])
 
 
+class ZeroRegister(unittest.TestCase):
+    scan = AddressProvenance.scan
+    def test_discarded_address_does_not_seed_access_or_const(self):
+        for opcode in (9, 0x19, 0xD):
+            with self.subTest(opcode=opcode):
+                accesses, consts = self.scan([
+                    (0xF << 26) | (2 << 16) | 0x32,
+                    (opcode << 26) | (2 << 21) | 0x1234,
+                    (0x23 << 26) | (3 << 16),
+                    (9 << 26) | (4 << 16) | 8,
+                    (0x23 << 26) | (4 << 21) | (5 << 16)])
+                self.assertEqual((accesses, consts), ([], []))
+
+    def test_discarded_move_does_not_seed_access(self):
+        for funct in (0x21, 0x2D, 0x25):
+            with self.subTest(funct=funct):
+                accesses, consts = self.scan([
+                    (0xF << 26) | (2 << 16) | 0x32,
+                    (2 << 21) | funct,
+                    (0x23 << 26) | (3 << 16)])
+                self.assertEqual((accesses, consts), ([], []))
+
+    def test_discarded_gp_address_does_not_seed_const(self):
+        import struct
+        for opcode in (9, 0x19):
+            with self.subTest(opcode=opcode):
+                words = [(opcode << 26) | (28 << 21) | 4,
+                         (0x23 << 26) | (3 << 16)]
+                data = struct.pack('<2I', *words)
+                result = cds.scan_text(data, [dict(name='.text', off=0,
+                    size=len(data), addr=0x100000)], {0x100000}, 0x550000)
+                self.assertEqual(result, ([], []))
+
+    def test_real_register_source_survives_discarded_write(self):
+        accesses, consts = self.scan([
+            (0xF << 26) | (2 << 16) | 0x32,
+            (9 << 26) | (2 << 21) | 0x1234,
+            (9 << 26) | (2 << 21) | (2 << 16) | 0x20,
+            (0x23 << 26) | (2 << 21) | (3 << 16)])
+        self.assertEqual(consts, [(0x100008, 0x320020, True)])
+        self.assertEqual(accesses, [(0x10000C, 0x320020, 4, True,
+                                    0x320020, False)])
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

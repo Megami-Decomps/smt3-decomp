@@ -425,3 +425,26 @@ output, as do capture-only and capture-plus-wrap. The first seven residual
 words are shared-tail scheduling around duration conversion, the clamp literal
 and the frame copy; the final two exchange the end-distance load and increment.
 The assembly fallback remains in production; no exact-match credit is claimed.
+
+### Kagu E909 qualified ready-list comparisons
+
+A qualified observation of the retained 172/181-word candidate identifies the
+first two shared-tail choices as critical-path priority decisions: the real
+frame copy has priority 18 versus duration conversion's 17, and frame conversion
+has 17 versus the clamp literal's 7. Neither comparison reaches a tie-breaker.
+A bounded control retaining the signed duration conversion in a local float
+with an empty float operand constraint regresses to 171/181 words at 724 bytes;
+it is not retained.
+
+The final increment/load exchange is different. The end-distance load has
+priority 16 and wins its comparison against the increment's 3. Nevertheless,
+after the start-distance load issues at cycle 6, the increment issues in that
+cycle and the end-distance load waits until cycle 7. Thus the final order cannot
+be explained by the increment winning the observed priority comparison. The
+observation does not identify the intervening issue-eligibility decision; that
+is the next diagnostic, not another declaration-order permutation.
+
+The observer preserves all six output artifacts; direct replay agrees with the
+ordinary wrapper. Complete-owner assembly and objects are byte-equal in plain
+and dump builds for production, SKIP_ASM, and active-draft modes. This is compiler
+evidence, not a new match or evidence of historical source spelling.
