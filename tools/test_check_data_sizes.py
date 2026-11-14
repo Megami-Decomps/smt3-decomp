@@ -221,6 +221,40 @@ class LikelyDelaySlots(unittest.TestCase):
         self.assertEqual([a[1] for a in accesses], [0x340000])
 
 
+class CallLinkProvenance(unittest.TestCase):
+    scan = AddressProvenance.scan
+    def test_jal_invalidates_old_link_before_delay_slot_and_after_return(self):
+        for slot in (0, (0x23 << 26) | (31 << 21) | (3 << 16)):
+            with self.subTest(slot=slot):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (31 << 16) | 0x34,
+                    (3 << 26) | (0x120000 >> 2), slot,
+                    (0x23 << 26) | (31 << 21) | (3 << 16)])
+                self.assertEqual(accesses, [])
+
+    def test_jal_does_not_construct_address_from_old_link_in_slot(self):
+        accesses, consts = self.scan([
+            (0xF << 26) | (31 << 16) | 0x34,
+            (3 << 26) | (0x120000 >> 2),
+            (9 << 26) | (31 << 21) | (16 << 16) | 0x1234,
+            (0x23 << 26) | (16 << 21) | (3 << 16)])
+        self.assertEqual(accesses, [])
+        self.assertEqual(consts, [])
+
+    def test_noncall_preserves_link_and_jalr_kills_its_actual_link(self):
+        accesses, _ = self.scan([
+            (0xF << 26) | (31 << 16) | 0x34, 0,
+            (0x23 << 26) | (31 << 21) | (3 << 16)])
+        self.assertEqual([a[1] for a in accesses], [0x340000])
+        for link in (16, 31):
+            with self.subTest(link=link):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (link << 16) | 0x34,
+                    (25 << 21) | (link << 11) | 9,
+                    (0x23 << 26) | (link << 21) | (3 << 16)])
+                self.assertEqual(accesses, [])
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

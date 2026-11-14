@@ -153,6 +153,9 @@ def scan_text(b, secs, func_starts, gp):
                 if funct == 9:
                     pending_call = True
             elif op == 3:
+                # jal overwrites the link before its delay slot. Do not let an
+                # old constant in $ra seed delay-slot or return-path addresses.
+                regs.pop(31, None)
                 pending_call = True
             elif op in (0x08, 0x0A, 0x0B, 0x0C, 0x0E, 0x18, 0x09, 0x0D, 0x19):
                 kill.append(rt)
