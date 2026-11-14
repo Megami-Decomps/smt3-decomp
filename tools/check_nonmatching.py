@@ -145,12 +145,22 @@ SKIP_ASM_WORDS = re.compile(r"^\s*\.(?:file|section|align|ent|end|frame|mask|fma
 
 
 def symbol_extents() -> list[tuple[int, int]]:
-    """(address, size) for every sized symbol in symbol_addrs.txt."""
+    """Extents from effective first definitions, including unsized shadows.
+
+    Hand-curated rows precede generated rows. A shadowed generated address must
+    not become a fictitious symbol start that exempts an unresolved D_ operand.
+    Keep metadata from the same definition, as check_unit.symbol_sizes does.
+    """
     extents = []
+    seen = set()
     for line in (ROOT / "config/smt3/symbol_addrs.txt").read_text().splitlines():
-        m = re.match(r"\w+\s*=\s*0x([0-9A-Fa-f]+);.*\bsize:0x([0-9A-Fa-f]+)", line)
-        if m:
-            extents.append((int(m.group(1), 16), int(m.group(2), 16)))
+        row = re.match(r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;", line)
+        if not row or row.group(1) in seen:
+            continue
+        seen.add(row.group(1))
+        size = re.search(r"\bsize:([^\s/]+)", line)
+        if size:
+            extents.append((int(row.group(2), 16), int(size.group(1), 0)))
     if not extents:
         sys.exit("config/smt3/symbol_addrs.txt has no sized symbols, so extents cannot be read")
     return extents

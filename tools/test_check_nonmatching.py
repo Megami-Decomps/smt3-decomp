@@ -172,6 +172,55 @@ class ParallelDraftChecks(unittest.TestCase):
             self.assertFalse(outputs[0].parent.exists())
 
 
+class EffectiveSymbolExtents(unittest.TestCase):
+    def extents(self, source):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "config/smt3"
+            config.mkdir(parents=True)
+            (config / "symbol_addrs.txt").write_text(source)
+            with patch.object(cn, "ROOT", root):
+                return cn.symbol_extents()
+
+    def test_shadowed_start_cannot_hide_interior_reference(self):
+        known = self.extents("owner = 0x8; // size:0x20\n"
+                             "owner = 0x10; // size:0x4\n")
+        self.assertEqual(known, [(8, 32)])
+        self.assertEqual(cn.undefined_data(".word D_00000010\n", known),
+                         ["D_00000010"])
+
+    def test_unsized_first_definition_shadows_generated_extent(self):
+        known = self.extents("owner = 0x100;\nowner = 0x8; // size:0x20\n"
+                             "other = 0x200; // size:0x10\n")
+        self.assertEqual(known, [(0x200, 16)])
+        self.assertEqual(cn.undefined_data(".word D_00000010\n", known), [])
+
+    def test_same_address_first_size_wins(self):
+        self.assertEqual(self.extents("owner = 0x8; // size:0x8\n"
+                                      "owner = 0x8; // size:0x20\n"), [(8, 8)])
+
+    def test_distinct_alias_names_retain_their_extents(self):
+        self.assertEqual(self.extents("owner = 0x8; // size:0x20\n"
+                                      "part = 0x10; // size:0x4\n"),
+                         [(8, 32), (16, 4)])
+
+    def test_spacing_decimal_sizes_and_comments(self):
+        self.assertEqual(self.extents("// fake = 0x10; // size:0x4\n"
+                                      "  owner = 0x8 ; // size:32\n"), [(8, 32)])
+
+    def test_malformed_effective_size_fails_closed(self):
+        with self.assertRaises(ValueError):
+            self.extents("owner = 0x8; // size:not_a_size\n")
+
+    def test_shadowed_invalid_size_is_not_read(self):
+        self.assertEqual(self.extents("owner = 0x8; // size:0x20\n"
+                                      "owner = 0x10; // size:bad\n"), [(8, 32)])
+
+    def test_no_effective_sized_symbols_fails_closed(self):
+        with self.assertRaises(SystemExit):
+            self.extents("owner = 0x8;\nowner = 0x10; // size:0x20\n")
+
+
 class SwallowedLabels(unittest.TestCase):
     asm = "\tlw\t$2,%lo(D_00000010)($3)\n"
 

@@ -152,3 +152,29 @@ Controls: binding the output directly to `$7` regressed to 164 bytes; explicit
 initial count-address binding retained 39/43 and did not solve the scheduling
 frontier. Further work should explain the four entry differences rather than
 repeat those controls or change the correctly emitted loop.
+
+### Localization entry scheduler priorities (2026-11-14)
+
+The retained 39/43-word, 172-byte draft's four entry differences are not merely
+source-order or register-allocation ties. A qualified observation of the pinned
+2.96 compiler in the complete `NON_MATCHING` + `SKIP_ASM` owner records the first
+scheduler comparing the output-symbol HIGH (UID 13, priority 3) against the
+count-address addition (UID 34, priority 4). The addition wins at the priority
+tier, then the HIGH issues in the other slot at clock 2. At clock 3 the count-byte
+load (UID 40, priority 3) similarly outranks output-symbol LOW (UID 14, priority
+2). Neither deciding comparison reaches the dependent-count or final-order tier.
+
+The qualified dependency dump gives HIGH → LOW → real output-live operand,
+while count-address → byte load → zero-count branch carries the longer load
+path. The byte load has measured cost 2; the branch has priority 1. These facts
+explain why declaration shuffles and direct count-address allocation did not
+repair the two exchanges. They do not prove which source spelling produced the
+retail order, nor justify adding a fictitious dependency or binding a synthesized
+symbol high half. Local allocation's reversed temporary assignment remains a
+consequence to test after an independently justified scheduling change.
+
+Qualification: ordinary wrapper/direct command equality, direct plain/dump
+whole-owner assembly and object equality, observer/unobserved equality for six
+artifacts, and unchanged hashes for the 856-file input closure. The 866-event
+observation is scoped to this frozen source and retained compile context, not a
+blanket claim of observer neutrality. No matching credit or source change.
