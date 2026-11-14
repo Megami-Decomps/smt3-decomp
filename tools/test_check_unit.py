@@ -2456,7 +2456,7 @@ class NativeObjectMappingTests(unittest.TestCase):
 
 class FullContextStorageTests(unittest.TestCase):
     def fixture(self, section='.sdata', payload=b'\x2a\0\0\0', owned=False,
-                native=b'\x2a\0\0\0', nm_extra='', metadata='', relocation_records=None):
+                native=b'\x2a\0\0\0', nm_extra='', metadata='', relocation_records=None, focused=False):
         code = struct.pack('<2I', 0x03e00008, 0)
         retail = bytearray(0x1200)
         retail[0x1000:0x1008] = code
@@ -2482,7 +2482,8 @@ class FullContextStorageTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, 'ROOT', root))
             stack.enter_context(patch.dict(check_unit.RETAIL, {VERSION:RETAIL_PATH}, clear=True))
             stack.enter_context(patch.dict(check_unit.VERSIONS, {VERSION:{'serial':SERIAL,'gp':hex(GP)}}, clear=True))
-            stack.enter_context(patch.object(check_unit.sys, 'argv', ['check_unit.py', str(unit)]))
+            stack.enter_context(patch.object(check_unit.sys, 'argv',
+                ['check_unit.py', str(unit)] + (['--func', 'target'] if focused else [])))
             stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0,0)))
             stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[(0x100000,0x1000,0x200)]))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=code))
@@ -2508,6 +2509,20 @@ class FullContextStorageTests(unittest.TestCase):
                 self.assertIn(context, code)
                 self.assertIn('multiple relocations at .data+0x0', code)
                 self.assertNotIn('match,', report)
+
+    def test_literal_payload_relocations_fail_closed_in_both_contexts(self):
+        for section in (".lit4", ".lit8"):
+            records = (f"RELOCATION RECORDS FOR [{section}]:\n"
+                       "00000000 R_MIPS_32 foo\n")
+            for context in ('unit.o', 'full.o'):
+                for focused in (False, True):
+                    with self.subTest(section=section, context=context, focused=focused):
+                        code, report = self.fixture(relocation_records={context: records}, focused=focused)
+                        self.assertIsInstance(code, str)
+                        self.assertIn('infrastructure error:', code)
+                        self.assertIn(context, code)
+                        self.assertIn('relocated literal payloads are unsupported', code)
+                        self.assertNotIn('match,', report)
 
     def test_full_only_unowned_writable_sections_rejected(self):
         for section in ('.sdata','.data','.sbss','.bss'):
@@ -2847,6 +2862,26 @@ class RelocationInventoryTests(unittest.TestCase):
     def read(self, records):
         with patch.object(check_unit, "run", return_value=records):
             return check_unit.relocations(Path("fixture.o"))
+
+    def test_relocations_applied_to_literal_payload_fail_closed(self):
+        for section in (".lit4", ".lit8"):
+            for kind in ("R_MIPS_32", "R_MIPS_HI16", "R_MIPS_NONE"):
+                with self.subTest(section=section, kind=kind):
+                    records = (f"RELOCATION RECORDS FOR [{section}]:\n"
+                               f"00000004 {kind} foo\n")
+                    with self.assertRaisesRegex(ValueError, "relocated literal payloads"):
+                        self.read(records)
+
+    def test_code_references_to_literal_pool_remain_supported(self):
+        for kind in ("R_MIPS_LITERAL", "R_MIPS_GPREL16"):
+            records = ("RELOCATION RECORDS FOR [.text]:\n"
+                       f"00000000 {kind} .lit4\n")
+            self.assertEqual(self.read(records)[".text"], {0: (kind, ".lit4")})
+
+    def test_nonalloc_debug_relocations_are_not_literal_payload(self):
+        records = ("RELOCATION RECORDS FOR [.debug_info]:\n"
+                   "00000000 R_MIPS_32 .lit4\n")
+        self.assertFalse(any(self.read(records).values()))
 
     def test_composed_relocations_rejected_in_every_verified_section(self):
         for section in (".text", ".rodata", ".data", ".sdata"):

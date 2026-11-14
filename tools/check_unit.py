@@ -665,7 +665,9 @@ def relocations(obj):
 
     Multiple ELF relocations at one offset can compose in relocation order. This
     verifier supports only one relocation per word; never silently discard an
-    earlier relocation by replacing its dictionary entry.
+    earlier relocation by replacing its dictionary entry. Literal pool bytes are
+    compared directly, so relocations applied to those bytes are unsupported;
+    this is distinct from supported code relocations *referencing* .lit4.
     """
     out, section = {name: {} for name in (".text", ".rodata", ".data", ".sdata")}, None
     for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
@@ -673,6 +675,11 @@ def relocations(obj):
             section = line.split("[", 1)[1].rstrip("]:")
             continue
         parts = line.split()
+        if (section in (".lit4", ".lit8") and len(parts) >= 3
+                and re.fullmatch(r"[0-9a-f]{8}", parts[0])):
+            raise ValueError(
+                f"{obj}: relocation applied to {section}+0x{int(parts[0], 16):X}: "
+                f"{parts[1]} {parts[2]}; relocated literal payloads are unsupported")
         if section in out and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
             offset = int(parts[0], 16)
             if offset in out[section]:
