@@ -6,6 +6,9 @@
 
 #include "common.h"
 
+#define DDS3_SCREEN_OFFX 28672
+#define DDS3_SCREEN_OFFY 30976
+
 typedef struct dds3ProcessID_t dds3ProcessID_t;
 
 /* A process step returns the next step to run, 0 to stay on this one, or -1 to

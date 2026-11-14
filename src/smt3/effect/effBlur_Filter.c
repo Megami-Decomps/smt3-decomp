@@ -2,6 +2,7 @@
 #include "sdk_libgcc.h"
 #include "libsdf.h"
 #include "effect.h"
+#include "kernel.h"
 #include "sdfFrame.h"
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -98,14 +99,14 @@ void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPri
     pSpriteParm->g = 128;
     pSpriteParm->b = 128;
     pSpriteParm->a = pBlur->abgr >> 24;
-    x0 = (pBlur->xy[0][0] << 4) + 0x7000;
+    x0 = (pBlur->xy[0][0] << 4) + DDS3_SCREEN_OFFX;
     pSpriteParm->vtx[0].x = x0;
-    y0 = (pBlur->xy[0][1] << 3) + 0x7900;
+    y0 = (pBlur->xy[0][1] << 3) + DDS3_SCREEN_OFFY;
     pSpriteParm->vtx[0].y = y0;
     pSpriteParm->vtx[1].x = x0;
-    y1 = (pBlur->xy[1][1] << 3) + 0x7900;
+    y1 = (pBlur->xy[1][1] << 3) + DDS3_SCREEN_OFFY;
     pSpriteParm->vtx[1].y = y1;
-    x1 = (pBlur->xy[1][0] << 4) + 0x7000;
+    x1 = (pBlur->xy[1][0] << 4) + DDS3_SCREEN_OFFX;
     pSpriteParm->vtx[2].x = x1;
     pSpriteParm->vtx[2].y = y0;
     pSpriteParm->vtx[3].x = x1;
@@ -610,10 +611,10 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
 
     drawPacket = effPkt2DAllocF4(0);
     color = source->abgr | 0x3F80000000000000ULL;
-    x[0] = (source->xy[0][0] << 4) + 0x7000;
-    x[1] = (source->xy[1][0] << 4) + 0x7000;
-    y[0] = (source->xy[0][1] << 3) + 0x7900;
-    y[1] = (source->xy[1][1] << 3) + 0x7900;
+    x[0] = (source->xy[0][0] << 4) + DDS3_SCREEN_OFFX;
+    x[1] = (source->xy[1][0] << 4) + DDS3_SCREEN_OFFX;
+    y[0] = (source->xy[0][1] << 3) + DDS3_SCREEN_OFFY;
+    y[1] = (source->xy[1][1] << 3) + DDS3_SCREEN_OFFY;
     topLeft = (u16)x[0] | ((u32)(u16)y[0] << 16);
     bottomLeft = (u16)x[0] | ((u32)(u16)y[1] << 16);
     topRight = (u16)x[1] | ((u32)(u16)y[0] << 16);
@@ -675,14 +676,14 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
     prim->vtx[2].t = 0.0f;
     prim->vtx[3].s = 1.0f;
     prim->vtx[3].t = 1.0f;
-    x0 = (s32)(((u32)source->bounds.left << 4) + 0x7000U);
+    x0 = (s32)(((u32)source->bounds.left << 4) + DDS3_SCREEN_OFFX);
     prim->vtx[0].x = x0;
-    y0 = (s32)(((u32)source->bounds.top << 3) + 0x7900U);
+    y0 = (s32)(((u32)source->bounds.top << 3) + DDS3_SCREEN_OFFY);
     prim->vtx[0].y = y0;
     prim->vtx[1].x = x0;
-    y1 = (s32)(((u32)source->bounds.bottom << 3) + 0x7900U);
+    y1 = (s32)(((u32)source->bounds.bottom << 3) + DDS3_SCREEN_OFFY);
     prim->vtx[1].y = y1;
-    x1 = (s32)(((u32)source->bounds.right << 4) + 0x7000U);
+    x1 = (s32)(((u32)source->bounds.right << 4) + DDS3_SCREEN_OFFX);
     prim->vtx[2].x = x1;
     prim->vtx[2].y = y0;
     prim->vtx[3].x = x1;

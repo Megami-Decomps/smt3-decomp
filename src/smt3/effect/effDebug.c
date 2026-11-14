@@ -4,6 +4,7 @@
 #include "ps2asm.h"
 
 #include "effect.h"
+#include "kernel.h"
 
 /* Screen pixel pair in the debug overlay's own 1/16 pixel grid. */
 typedef struct
@@ -200,7 +201,7 @@ void effDebugPointDraw(sdfVector4_t *pPos)
     SDF_VU0_STOREVECTOR_MEMOPS(screen);
     point.x = (s32)screen.x - 0x700;
     point.y = ((s32)screen.y << 1) - 0xF20;
-    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,
+    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + DDS3_SCREEN_OFFX, point.y * 8 + DDS3_SCREEN_OFFY,
                                           0xFF0000, 0x20, 0x10, 0x60008080, 0x60008080));
     ot = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
@@ -221,7 +222,7 @@ void effDebugPointDraw2(sdfVector4_t *pPos, u32 color)
     SDF_VU0_STOREVECTOR_MEMOPS(screen);
     point.x = (s32)screen.x - 0x700;
     point.y = ((s32)screen.y << 1) - 0xF20;
-    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,
+    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + DDS3_SCREEN_OFFX, point.y * 8 + DDS3_SCREEN_OFFY,
                                           0xFF0000, 0x20, 0x10, color, color));
     ot = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
@@ -247,9 +248,9 @@ void effDebugLineDraw(sdfVector4_t *pPos0, sdfVector4_t *pPos1)
     point[0].y = ((s32)screen[0].y << 1) - 0xF20;
     point[1].x = (s32)screen[1].x - 0x700;
     point[1].y = ((s32)screen[1].y << 1) - 0xF20;
-    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + 0x7000, point[0].y * 8 + 0x7900,
+    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + DDS3_SCREEN_OFFX, point[0].y * 8 + DDS3_SCREEN_OFFY,
                                      0xFF0000, 0x60008080,
-                                     point[1].x * 16 + 0x7000, point[1].y * 8 + 0x7900,
+                                     point[1].x * 16 + DDS3_SCREEN_OFFX, point[1].y * 8 + DDS3_SCREEN_OFFY,
                                      0xFF0000, 0x60008080, 0));
     ot = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
@@ -275,9 +276,9 @@ void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode)
     point[0].y = ((s32)screen[0].y << 1) - 0xF20;
     point[1].x = (s32)screen[1].x - 0x700;
     point[1].y = ((s32)screen[1].y << 1) - 0xF20;
-    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + 0x7000, point[0].y * 8 + 0x7900,
+    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + DDS3_SCREEN_OFFX, point[0].y * 8 + DDS3_SCREEN_OFFY,
                                      0xFF0000, mode,
-                                     point[1].x * 16 + 0x7000, point[1].y * 8 + 0x7900,
+                                     point[1].x * 16 + DDS3_SCREEN_OFFX, point[1].y * 8 + DDS3_SCREEN_OFFY,
                                      0xFF0000, mode, 0));
     ot = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
@@ -289,7 +290,7 @@ void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format) {
     sdfGrOt_t *scene;
 
     sdfDrawTagInit(task);
-    sdfDrawTagLink(task, (sdfDevPrintf((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, commandIndex, format)));
+    sdfDrawTagLink(task, (sdfDevPrintf((x << 4) + DDS3_SCREEN_OFFX, (y << 3) + DDS3_SCREEN_OFFY, 0xFF0000, commandIndex, format)));
     scene = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, task);
 }
@@ -532,7 +533,7 @@ void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 
     sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, (dds3PrimFrameRect(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, width * 0x10, height * 8, fillColor, borderColor)));
+    sdfDrawTagLink(list, (dds3PrimFrameRect(x * 0x10 + DDS3_SCREEN_OFFX, y * 8 + DDS3_SCREEN_OFFY, 0xFF0000, width * 0x10, height * 8, fillColor, borderColor)));
     scene = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
 }
