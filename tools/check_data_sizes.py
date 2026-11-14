@@ -43,11 +43,19 @@ def load_elf(path):
 
 def load_syms(path):
     syms = {}
-    for line in Path(path).read_text().splitlines():
+    lines = {}
+    for line_number, line in enumerate(Path(path).read_text().splitlines(), 1):
         m = SYM.match(line.strip())
         if not m:
             continue
         name, addr, tail = m.group(1), int(m.group(2), 16), m.group(3) or ""
+        # This flat name-keyed inventory cannot represent duplicate or overlay
+        # definitions. Refuse instead of silently choosing the last extent.
+        if name in syms:
+            raise ValueError(f"{path}:{line_number}: duplicate symbol {name}; "
+                             f"first defined on line {lines[name]}. "
+                             "Duplicate-name inventories are unsupported.")
+        lines[name] = line_number
         size = re.search(r"size:(0x[0-9A-Fa-f]+|\d+)", tail)
         typ = re.search(r"type:(\w+)", tail)
         syms[name] = dict(name=name, addr=addr, size=int(size.group(1), 0) if size else None,
@@ -289,6 +297,7 @@ def main():
     a = ap.parse_args()
     try:
         cs = load_csizes(a.csizes) if a.csizes else None
+        syms = load_syms(a.symbols)
     except ValueError as e:
         ap.error(str(e))
 
@@ -312,7 +321,6 @@ def main():
         o = s["off"] + addr - s["addr"]
         return struct.unpack_from("<I", b, o)[0] if addr + 4 <= s["addr"] + s["size"] else None
 
-    syms = load_syms(a.symbols)
     funcs = {s["addr"] for s in syms.values() if s["type"] == "func" or (not sec_of(s["addr"]))}
     gp = None
     for s in secs:

@@ -11,6 +11,50 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_data_sizes as cds
 
 
+class SymbolInventory(unittest.TestCase):
+    def load(self, text):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "symbols.txt"
+            path.write_text(text)
+            return cds.load_syms(path)
+
+    def test_duplicate_name_is_rejected(self):
+        for first, second in (("size:4 type:u8", "size:64 type:u32"),
+                              ("", "size:64"), ("size:4", "size:4")):
+            with self.subTest(first=first, second=second), self.assertRaisesRegex(
+                    ValueError, r":2: duplicate symbol value; first defined on line 1"):
+                self.load(f"value = 0x00300000; // {first}\n"
+                          f"value = 0x00300000; // {second}\n")
+
+    def test_duplicate_at_other_address_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "duplicate symbol value"):
+            self.load("value = 0x00300000;\nvalue = 0x00400000;\n")
+
+    def test_duplicate_overlays_are_explicitly_unsupported(self):
+        with self.assertRaisesRegex(ValueError, "Duplicate-name inventories are unsupported"):
+            self.load("value = 0x00300000; // allow_duplicated:true\n"
+                      "value = 0x00400000; // allow_duplicated:true\n")
+
+    def test_distinct_names_are_unchanged(self):
+        symbols = self.load("first = 0x00300000; // size:4 type:u8\n"
+                            "next = 0x00300010; // size:16\n")
+        self.assertEqual(set(symbols), {"first", "next"})
+        self.assertEqual(symbols["first"]["size"], 4)
+        self.assertEqual(symbols["first"]["type"], "u8")
+
+    def test_cli_rejects_duplicate_before_other_inputs(self):
+        with mock.patch.object(sys, "argv", ["check_data_sizes"]), \
+             mock.patch.object(cds, "load_syms", side_effect=ValueError("duplicate symbol x")), \
+             mock.patch.object(cds, "load_elf") as elf, \
+             mock.patch.object(cds, "load_word_addrs") as words, \
+             mock.patch.object(sys, "stderr"):
+            with self.assertRaises(SystemExit) as failure:
+                cds.main()
+        self.assertEqual(failure.exception.code, 2)
+        elf.assert_not_called()
+        words.assert_not_called()
+
+
 class CSizeCache(unittest.TestCase):
     def cache(self, symbols, failed=None):
         data = {"symbols": symbols}
@@ -41,6 +85,7 @@ class CSizeCache(unittest.TestCase):
     def test_cli_rejects_before_scanning_inputs(self):
         path = self.cache({}, ["src/broken.c"])
         with mock.patch.object(sys, "argv", ["check_data_sizes", "--csizes", path]), \
+             mock.patch.object(cds, "load_syms", return_value={}), \
              mock.patch.object(cds, "load_elf") as elf, \
              mock.patch.object(cds, "load_word_addrs") as words, \
              mock.patch.object(sys, "stderr") as stderr:
