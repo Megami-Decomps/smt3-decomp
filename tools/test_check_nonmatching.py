@@ -338,6 +338,45 @@ class FixBugsControl(unittest.TestCase):
 
 
 class DraftNames(unittest.TestCase):
+    def test_spliced_guard_tokens(self):
+        for newline in ("\n", "\r\n"):
+            splice = chr(92) + newline
+            for guard in ("#if" + splice + "def NON_MATCHING",
+                          "#ifdef NON_" + splice + "MATCHING",
+                          "#ifdef " + splice + "NON_MATCHING"):
+                with self.subTest(guard=guard):
+                    text = guard + '\nvoid real(void) {}\n#else\nINCLUDE_ASM(int, "u", real);\n#endif\n'
+                    self.assertEqual(cn.draft_names(text), ["real"])
+
+    def test_spliced_fallback_tokens(self):
+        splice = chr(92) + "\n"
+        for fallback in ('INCLUDE_' + splice + 'ASM(int, "u", real);',
+                         'INCLUDE_ASM(int, "u", re' + splice + 'al);'):
+            with self.subTest(fallback=fallback):
+                self.assertEqual(cn.draft_names('#ifdef NON_MATCHING\n#else\n' + fallback + '\n#endif\n'), ["real"])
+
+    def test_continued_comment_cannot_create_a_draft(self):
+        text = '#if 1\n// continued ' + chr(92) + '\n#ifdef NON_MATCHING\n#else\nINCLUDE_ASM(int, "u", fake);\n#endif\n'
+        self.assertEqual(cn.draft_names(text), [])
+
+    def test_spliced_comment_delimiters_do_not_expose_fallback(self):
+        splice = chr(92) + "\n"
+        text = '#ifdef NON_MATCHING\n#else\n/' + splice + '* INCLUDE_ASM(int, "u", fake); *' + splice + '/\nINCLUDE_ASM(int, "u", real);\n#endif\n'
+        self.assertEqual(cn.draft_names(text), ["real"])
+
+    def test_spliced_endif_does_not_leak_guard(self):
+        text = '#ifdef NON_MATCHING\n#else\nINCLUDE_ASM(int, "u", real);\n#end' + chr(92) + '\nif\nINCLUDE_ASM(int, "u", unrelated);\n'
+        self.assertEqual(cn.draft_names(text), ["real"])
+
+    def test_spliced_draft_inventory_flows_to_progress(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            src = root / "src/smt3/family"
+            src.mkdir(parents=True)
+            (src / "unit.c").write_text('#ifdef NON_' + chr(92) + '\nMATCHING\n#else\nINCLUDE_ASM(int, "family/unit", real);\n#endif\n')
+            with patch.object(cn, "ROOT", root):
+                self.assertEqual(cn.draft_functions(), {"family/unit": {"real"}})
+
     def test_nested_fix_bugs_does_not_hide_outer_fallback(self) -> None:
         text = ('#ifdef NON_MATCHING\nvoid a(void) {\n'
                 '#ifdef FIX_BUGS\nfixed();\n#else\nretail();\n#endif\n}\n'

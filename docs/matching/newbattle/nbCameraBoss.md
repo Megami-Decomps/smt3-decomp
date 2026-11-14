@@ -384,3 +384,26 @@ sequence matches. The ordinary pointer-only version emits 192 bytes; unsigned
 capture without the binding also loses the native copy. Volatile constraints
 worsen the result. Do not infer a compiler scheduling cause from these scores
 without a separately qualified trace.
+
+
+### Foru E913 entry scheduler priorities (2026-11-14)
+
+A qualified complete-owner replay now identifies the deciding comparator tier
+for the guarded candidate's remaining entry ordering. The camera-address HIGH
+has priority 1; the division literal has priority 14, the frame copy 17, the
+signed conversion 16 and the clamp literal 6. The first scheduler directly
+compares camera HIGH against the division literal with result -13, selecting
+by priority. It compares clamp literal against conversion with result -10,
+also by priority. This is not a final ready-list tie or declaration-order
+choice. The camera HIGH is already ready at cycle zero but issues at cycle
+three, after the frame copy and conversion chain. Camera LOW follows at cycle
+four and later moves into the branch delay slot.
+
+The original compiler and instrumented replay produce identical complete
+assembly, object and diagnostic artifacts; direct/wrapper and plain/dump
+assembly/object parity also pass. The source remains guarded at 43/49 words
+and 196 bytes. This explains the retained candidate's compiler behavior, not
+historical source spelling. Adding an artificial dependency merely to inflate
+the camera-address priority would not be justified. Further source work needs
+a real camera consumer or matched source-family evidence that changes the
+relevant block shape, rather than another pointer-declaration permutation.

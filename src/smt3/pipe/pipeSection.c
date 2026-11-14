@@ -404,7 +404,15 @@ void pipeOffset(void)
     } else {
         offsetStep = 0;
     }
-    offsetCount = next >= 0 ? next : 10;
+    if (next >= 0) {
+        offsetCount = next;
+    } else {
+        next = 10;
+        /* Keep the real fallback store value local so the target compiler
+         * retains the native branch/store tail rather than a conditional move. */
+        FAKEMATCH_ASM_LIVE(next);
+        offsetCount = next;
+    }
 }
 #else
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeOffset);

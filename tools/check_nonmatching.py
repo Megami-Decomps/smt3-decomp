@@ -40,6 +40,10 @@ ASM_NAME = re.compile(r'INCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)')
 
 def draft_names(text: str) -> list[str]:
     """Every function drafted in this unit, across all guarded blocks."""
+    # Phase-2 line splicing precedes token and comment recognition. Match the
+    # compilation-mode scanner so a continued guard, fallback name, or comment
+    # cannot silently change the progress inventory.
+    text = re.sub(r"\\\r?\n", "", text)
     # Keep directive nesting separate from draft selection: FIX_BUGS and other
     # conditionals inside a draft must not consume its outer #else/#endif.
     text = COMMENTS.sub(lambda m: re.sub(r"[^\n]", " ", m.group())

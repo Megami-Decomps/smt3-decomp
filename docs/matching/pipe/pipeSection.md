@@ -221,3 +221,24 @@ Both forms passed three-mode complete-owner plain/dump assembly and object
 parity; production and SKIP_ASM outputs were unchanged by the guarded control.
 Further work should target the remaining allocation/branch structure with
 native evidence, not posit provider writes or repeat blanket volatility.
+
+### Localized negative-position fallback constraint
+
+The retained guarded draft now reaches 30/66 aligned words at the native
+264-byte size (previously 23/66). Its negative-position fallback assigns the
+real value 10 to `next`, constrains only that live store value, and publishes
+it to `offsetCount`. The empty operand emits no instruction, has no fabricated
+consumer and ends at that store. This recovers the native branch/store tail
+rather than the previous conditional-move tail; it is a reconstruction aid,
+not evidence of original spelling. The positive store still uses a different
+register, and the previous-frame reload and other entry/loop differences
+remain. This is not an exact match or full native-access parity.
+
+An ordinary explicit branch without the operand produces 260 bytes and 21/66
+native-window words; moving the operand to the positive path instead produces
+268 bytes and 22/66. Neither control is retained. The selected change leaves
+all assembly outside `pipeOffset` equal modulo local-label numbering in the
+guarded owner and leaves normal/SKIP_ASM complete assembly and objects
+unchanged. Both source forms pass all three modes' plain/dump assembly and
+object parity. A bounded 100,005-case integer model supplements the direct
+fallback-value review.
