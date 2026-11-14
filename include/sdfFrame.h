@@ -26,16 +26,26 @@
 #define SDF_FRAMES_COUNTDOWN(n) (n)
 #endif
 
-/* A value set each tick from one taken at a different offset, so that it also
- * moves by d each tick: feet put back 44 below a collision sphere taken 35
- * above them move 9 unless a floor set the sphere. A host that scales the step
- * scales d; retail's value is x and d is not evaluated. Defined ahead of the
- * default step so that a host's step reaches it. */
-#ifndef SDF_FRAME_SHIFT
+/* A value a tick's step moved from start to x, where the step adds a probe at
+ * retail's per-tick distance so that contact is found as retail finds it. A
+ * host moves start toward x by its share of a retail tick, unless held is true,
+ * as when a floor set x. Retail's value is x. Defined ahead of the default step
+ * so that a host's step reaches it. */
+#ifndef SDF_FRAME_TOWARD
 #ifdef SDF_FRAME_STEP
-#define SDF_FRAME_SHIFT(x, d) ((x) + (SDF_FRAME_STEP(d) - (d)))
+#define SDF_FRAME_TOWARD(start, x, held) ((held) ? (x) : (start) + SDF_FRAME_STEP((x) - (start)))
 #else
-#define SDF_FRAME_SHIFT(x, d) (x)
+#define SDF_FRAME_TOWARD(start, x, held) (x)
+#endif
+#endif
+
+/* SDF_FRAME_FRACTION of a share f that is not a constant: retail's value is f
+ * as written, where 1 - (1 - f) would not fold. */
+#ifndef SDF_FRAME_SHARE
+#ifdef SDF_FRAME_DECAY
+#define SDF_FRAME_SHARE(f) ((f) >= 1.0f ? (f) : 1.0f - SDF_FRAME_DECAY(1.0f - (f)))
+#else
+#define SDF_FRAME_SHARE(f) (f)
 #endif
 #endif
 

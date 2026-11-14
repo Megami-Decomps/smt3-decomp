@@ -1512,7 +1512,7 @@ void fldHitChkUnitVWM(f32 *position)
         if (face->matter != NULL) {
             pose = face->matter->poseset;
             movement.x = pose->pos.x - face->previousPosition[0];
-            movement.y = (pose->pos.y - face->previousPosition[1]) + SDF_FRAME_STEP(10.0f);
+            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
             movement.z = pose->pos.z - face->previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
