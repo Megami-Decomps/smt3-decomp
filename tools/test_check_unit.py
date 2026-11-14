@@ -167,6 +167,46 @@ class FullContextRelocationTests(unittest.TestCase):
         self.assertFalse(self.check([0x8F820004], [0x8F820014], relocs, {"data": GP + 16}))
         self.assertEqual(len(self.check([0x8F820004], [0x8F820014], relocs, {"data": GP + 20})), 1)
 
+    def test_gprel_rejects_wrapped_overflow_fields(self):
+        for displacement in (-0x8001, 0x8000, 0x19000):
+            with self.subTest(displacement=displacement):
+                result = self.check([0x27820000],
+                    [0x27820000 | (displacement & 0xFFFF)],
+                    {0: ("R_MIPS_GPREL16", "data")},
+                    {"data": GP + displacement})
+                self.assertEqual(len(result), 1)
+                self.assertIn("overflow R_MIPS_GPREL16", result[0][3])
+
+    def test_gprel_address_wrap_is_not_signed_displacement(self):
+        for target, gp in ((0xFFFFFFF0, 0x10), (0x10, 0xFFFFFFF0),
+                           (0xFFFF0010, 0xFFFF0000)):
+            with self.subTest(target=target, gp=gp):
+                word = struct.pack("<I", 0x27820000)
+                want = struct.pack("<I", 0x27820000 | ((target - gp) & 0xFFFF))
+                result = check_unit.full_context_relocation_diffs(
+                    word, 0, 4, want, {0: ("R_MIPS_GPREL16", "data")},
+                    [], {"data": target}, gp)
+                self.assertEqual(bool(result), target != 0xFFFF0010)
+
+    def test_gprel_signed_boundaries_remain_valid(self):
+        for displacement in (-0x8000, -1, 0, 0x7FFF):
+            with self.subTest(displacement=displacement):
+                self.assertFalse(self.check([0x27820000],
+                    [0x27820000 | (displacement & 0xFFFF)],
+                    {0: ("R_MIPS_GPREL16", "data")},
+                    {"data": GP + displacement}))
+
+    def test_gprel_range_includes_rel_addend_and_local_gp_bias(self):
+        word = struct.pack("<I", 0x8F82C004)
+        for displacement, overflow in ((0x7FFB, False), (0x7FFC, True),
+                                        (-0x8004, False), (-0x8005, True)):
+            with self.subTest(displacement=displacement):
+                result = check_unit.full_context_relocation_diffs(
+                    word, 0, 4, struct.pack("<I", 0x8F820000 | ((displacement + 4) & 0xFFFF)),
+                    {0: ("R_MIPS_GPREL16", ".sdata+0x4000")}, [], {}, GP,
+                    section_bases={".sdata": GP + displacement}, object_gp=0x4000)
+                self.assertEqual(bool(result), overflow)
+
     def test_local_call_resolves_full_object_offsets(self):
         relocs = {0: ("R_MIPS_26", ".text")}
         funcs = [(0x20, 16, "provider")]
@@ -346,6 +386,18 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_gprel_overflow_rejected_in_standalone_and_full_context(self):
+        for displacement in (-0x8001, 0x8000):
+            with self.subTest(displacement=displacement):
+                status, report = self.run_checker(
+                    "target", code=struct.pack("<I", 0x27820000),
+                    retail_code=struct.pack("<I", 0x27820000 | (displacement & 0xFFFF)),
+                    text_relocs={0: ("R_MIPS_GPREL16", "data")},
+                    extra_symbols=f"data = 0x{GP + displacement:X};\n")
+                self.assertEqual(status, 1, report)
+                self.assertIn("CONTEXT RELOC target", report)
+                self.assertIn("DIFF target", report)
 
     def test_full_literal_requires_actual_pool_value(self):
         status, report = self.run_checker(

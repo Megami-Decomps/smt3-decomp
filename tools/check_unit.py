@@ -752,6 +752,12 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
                 expected = linked_lo_field(target, sext16(mine))
             elif kind == "R_MIPS_GPREL16":
                 addend = sext16(mine) + (object_gp if base.startswith(".") else 0)
+                # The linker requires the displacement to fit signed 16 bits.
+                # Comparing only its masked field would accept a wrapped address
+                # which ee-ld rejects as a truncated relocation.
+                if not -0x8000 <= target + addend - gp <= 0x7FFF:
+                    differences.append((index, mine, want, f"overflow {kind} {symbol}"))
+                    continue
                 expected = linked_gprel_field(target, addend, gp)
         if expected is None and (not base.startswith(".") or
                                  (base == ".text" and kind in ("R_MIPS_26", "R_MIPS_HI16", "R_MIPS_LO16"))):
@@ -1968,7 +1974,8 @@ def main():
             elif rtype == "R_MIPS_LO16":
                 good = (want & 0xFFFF) == linked_lo_field(target, addend)
             elif rtype == "R_MIPS_GPREL16":
-                good = (want & 0xFFFF) == linked_gprel_field(target, addend, gp)
+                good = (-0x8000 <= target + addend - gp <= 0x7FFF
+                        and (want & 0xFFFF) == linked_gprel_field(target, addend, gp))
             else:
                 good = True
             if not good:
