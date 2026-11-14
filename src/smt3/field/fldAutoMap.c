@@ -259,7 +259,7 @@ extern sdfTexHandle_t *fldAutoMapWindowTex[3];
 
 extern void sdfModelRootFree(void *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 
 extern s8 dds3PadButtonState[64];

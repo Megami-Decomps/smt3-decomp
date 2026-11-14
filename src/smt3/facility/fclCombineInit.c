@@ -185,7 +185,7 @@ extern void cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
 
 
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 extern void fclFilterOFF(void);
 
@@ -5589,7 +5589,7 @@ s32 cmbChkPolygonMovie(void)
 
 extern s8 cmbActionStep;
 extern s32 cmpLoadStatusModel(void);
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 extern s8 fclGetWorkValue(s8 index);
 extern void cmbUpdateTimeTable(void);
 

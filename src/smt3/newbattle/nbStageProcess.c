@@ -73,7 +73,7 @@ extern void evtFreeAllUnit(void);
 
 extern void evtFreeStage(void);
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 extern void *memset(void *a, s32 b, size_t c);
 

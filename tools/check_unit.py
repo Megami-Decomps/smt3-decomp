@@ -330,6 +330,35 @@ def sections(obj):
     return data, {data[names + s[0]:data.index(b"\0", names + s[0])].decode(): (s[4], s[5]) for s in sh}
 
 
+def allocated_section_problems(data):
+    """Reject runtime sections outside this verifier's content inventory.
+
+    An otherwise byte-identical C function can acquire .ctors/.dtors or an
+    arbitrary section-attribute payload. Ignoring those sections is not proof
+    of the complete object. MIPS ABI flags are assembler/linker metadata, not
+    source-owned executable storage; require their actual ELF metadata type.
+    """
+    shoff = struct.unpack_from("<I", data, 0x20)[0]
+    count, names_index = struct.unpack_from("<HH", data, 0x30)
+    headers = [struct.unpack_from("<10I", data, shoff + i * 40)
+               for i in range(count)]
+    names = headers[names_index][4]
+    supported = {".text", *DATA_SECTIONS}
+    problems = []
+    for header in headers:
+        name_offset, kind, flags, _, _, size, _, _, _, _ = header
+        if not flags & 2 or not size:  # SHF_ALLOC; empty sections add no payload
+            continue
+        start = names + name_offset
+        name = data[start:data.index(b"\0", start)].decode()
+        if name in supported:
+            continue
+        if name == ".MIPS.abiflags" and kind == 0x7000002A and flags == 2 and size == 24:
+            continue
+        problems.append(f"unsupported allocated section {name}: 0x{size:X} bytes")
+    return problems
+
+
 def text_section(obj):
     data, secs = sections(obj)
     off, size = secs.get(".text", (0, 0))
@@ -1507,6 +1536,8 @@ def main():
             sys.exit(f"compile failed: {args.unit}")
         text = text_section(obj)
         data, secs = sections(obj)
+        if problems := allocated_section_problems(data):
+            sys.exit("DATA " + "; ".join(problems))
         emitted = {n: secs[n][1] for n in DATA_SECTIONS if secs.get(n, (0, 0))[1]}
         l4_off, l4_size = secs.get(".lit4", (0, 0))
         lit4 = data[l4_off:l4_off + l4_size]
@@ -1619,6 +1650,8 @@ def main():
                 return words
 
             fdata, fsecs = sections(full)
+            if problems := allocated_section_problems(fdata):
+                sys.exit("DATA CONTEXT " + "; ".join(problems))
             data_context.extend(full_context_storage_problems(
                 yaml_text, unit_name, fsecs, full_objdump, full_defined_symbols,
                 syms, aliases, symbol_sizes(version)))

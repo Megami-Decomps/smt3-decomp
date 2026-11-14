@@ -61,7 +61,7 @@ extern void evtRunFrame(s32 nowframe);
 extern dds3ProcessID_t *evtInitFrameVar(void);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern void evtFreeStage(void);
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 extern void evtFreeViewerInfo(void);
 extern void **dds3GetProcessData(void *id);
 extern void sdfMemFreeDirect(void *aHandle);

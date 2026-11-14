@@ -4294,38 +4294,36 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
 {
     campInfoWork_t *work = dds3GetProcessData(id);
     u8 flags = work->unk_00;
-
     campDhCalcState = work;
     if (flags & 2) {
         s32 state = work->unk_01;
-
-        switch (state) {
-        case 0: {
+        /* Preserve the native signed dispatch and shared cross-panel call. */
+        if (state == 1) goto one;
+        if (state >= 2) goto done;
+        if (state != 0) goto done;
+        {
             s32 ready = campDhCheckReady();
             campWork_t *camp = campWork;
-
-            if (ready != 0) {
-                cmpSetCrossGeneralVal(camp->crossPanel, -1);
-            } else {
+            s32 value = -1;
+            if (ready == 0) {
                 campDhCheckTextures();
                 camp = campWork;
-                cmpSetCrossGeneralVal(camp->crossPanel, 0);
+                value = 0;
             }
-            break;
+            cmpSetCrossGeneralVal(camp->crossPanel, value);
         }
-        case 1:
-            if (work->unk_04 == state) {
-                campDhFreeTexture(work);
-                while (sdfDelayedResrcCheck() != 0) {
-                }
-                cmpSetStatusStartEff();
-                cmpStatSetTimer(0, 0);
-                cmpModelInit();
-                cmpModelSetup(0, 0);
-            }
-            break;
+        goto done;
+    one:
+        if (work->unk_04 == state) {
+            campDhFreeTexture(work);
+            while (sdfDelayedResrcCheck() != 0) {}
+            cmpSetStatusStartEff();
+            cmpStatSetTimer(0, 0);
+            cmpModelInit();
+            cmpModelSetup(0, 0);
         }
     }
+ done:
     work = campDhCalcState;
     work->unk_04 = 0;
     work = campDhCalcState;

@@ -33,7 +33,7 @@ extern s8 fclEndMessageEx(s8 Mode);
 
 extern void evtFreeStage(void);
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 extern void fclFilterOFF(void);
 

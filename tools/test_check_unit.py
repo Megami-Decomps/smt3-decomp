@@ -362,7 +362,7 @@ class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
                     source_text="void target(void) {}\n", candidate=None, assembly=None,
-                    native_inventory=None, full_nm=None, full_relocs=None, full_rodata=None, full_rodata_owned=True):
+                    native_inventory=None, full_nm=None, full_relocs=None, full_rodata=None, full_rodata_owned=True, allocated_problems=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -400,6 +400,8 @@ class FocusedFunctionTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems",
+                side_effect=allocated_problems or [[], []]))
             stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj:
                 (full_rodata[0], {".rodata": (0, len(full_rodata[0]))})
                 if full_rodata is not None and obj.name == "full.o" else (b"", {})))
@@ -434,6 +436,14 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_allocated_section_gate_in_standalone_and_full_contexts(self):
+        problem = "unsupported allocated section .ctors: 0x4 bytes"
+        for requested in (None, "target"):
+            status, report = self.run_checker(requested, allocated_problems=[[problem]])
+            self.assertIn(problem, str(status))
+            status, report = self.run_checker(requested, allocated_problems=[[], [problem]])
+            self.assertIn(problem, str(status))
 
     def test_jump_invalid_target_rejected_in_both_contexts(self):
         for target in (0x2001, 0x10002000):
@@ -778,6 +788,7 @@ class TextResidualTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", return_value=compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
             stack.enter_context(patch.object(check_unit, "relocations", return_value={".text": {}, ".rodata": {}, ".sdata": {}}))
             stack.enter_context(patch.object(check_unit, "run", side_effect=lambda *args: "0 c T target\n" if "-S" in args else ""))
@@ -1069,6 +1080,7 @@ class FocusedRodataTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", side_effect=lambda obj: full_text if obj.name == "full.o" else compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj: (full_rodata, {".rodata": (0, len(full_rodata))}) if obj.name == "full.o" else (rodata, {".rodata": (0, len(rodata))})))
             stack.enter_context(patch.object(check_unit, "relocations", side_effect=lambda obj: {**relocs, ".rodata": {off: ("R_MIPS_32", ".text") for off in list(range(0,16,4))+list(range(32,48,4))}} if obj.name == "full.o" else relocs))
             stack.enter_context(patch.object(check_unit, "owns_rodata", return_value=True))
@@ -1757,6 +1769,7 @@ class NestedFunctionCheckerTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "load_segments", return_value=[]))
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", side_effect=lambda obj: full_code if str(obj).endswith("full.o") else compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
             stack.enter_context(patch.object(check_unit, "relocations", return_value={
                 ".text": {8: ("R_MIPS_26", ".text")}, ".rodata": {}, ".sdata": {}}))
@@ -1966,6 +1979,7 @@ class OwnedRodataBoundaryTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
             stack.enter_context(patch.object(check_unit, 'off_to_va', side_effect=lambda segs, off: off+0xFF000))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
             stack.enter_context(patch.object(check_unit, 'relocations', return_value=relocs))
             stack.enter_context(patch.object(check_unit, 'owns_rodata', return_value=True))
@@ -2047,11 +2061,13 @@ class InteriorOwnedContextTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, 'va_to_off', side_effect=lambda segs, addr: addr-0xFF000))
             stack.enter_context(patch.object(check_unit, 'off_to_va', side_effect=lambda segs, off: off+0xFF000))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, 'sections', return_value=(data, {'.rodata': (0,len(data))})))
             if full_data_size is not None:
                 def object_sections(obj):
                     blob = data[:full_data_size] if str(obj).endswith('full.o') else data
                     return blob, {'.rodata': (0, len(blob))}
+                stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
                 stack.enter_context(patch.object(check_unit, 'sections', side_effect=object_sections))
             def object_relocs(obj):
                 if full_relocation and str(obj).endswith('full.o'):
@@ -2314,6 +2330,7 @@ class SharedNamedRodataContextTests(unittest.TestCase):
             stack.enter_context(patch('eeas_compat.lit4_range',return_value=(0,0)))
             stack.enter_context(patch.object(check_unit,'load_segments',return_value=[(0x100000,0x1000,0x200)]))
             stack.enter_context(patch.object(check_unit,'text_section',side_effect=lambda obj:full_code if obj.name=='full.o' else compiled))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit,'sections',side_effect=sections))
             stack.enter_context(patch.object(check_unit,'relocations',side_effect=relocations))
             stack.enter_context(patch.object(check_unit,'owns_rodata',return_value=True))
@@ -2459,6 +2476,7 @@ class FullContextStorageTests(unittest.TestCase):
             stack.enter_context(patch('eeas_compat.lit4_range', return_value=(0,0)))
             stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[(0x100000,0x1000,0x200)]))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=code))
+            stack.enter_context(patch.object(check_unit, "allocated_section_problems", return_value=[]))
             stack.enter_context(patch.object(check_unit, 'sections', side_effect=sections))
             if relocation_records is None:
                 stack.enter_context(patch.object(check_unit, 'relocations', return_value={'.text':{},'.rodata':{},'.sdata':{},'.data':{}}))
@@ -2846,6 +2864,43 @@ class RelocationInventoryTests(unittest.TestCase):
                    "00000000 R_MIPS_32 bar\n")
         with self.assertRaisesRegex(ValueError, "multiple relocations"):
             self.read(records)
+
+
+class AllocatedSectionTests(unittest.TestCase):
+    @staticmethod
+    def elf(name, *, flags=2, size=4, kind=1):
+        names = b"\0.shstrtab\0" + name.encode() + b"\0"
+        data = bytearray(64 + 120 + len(names))
+        struct.pack_into("<I", data, 32, 64)
+        struct.pack_into("<HH", data, 48, 3, 1)
+        struct.pack_into("<10I", data, 104, 1, 3, 0, 0, 184, len(names), 0, 0, 1, 0)
+        struct.pack_into("<10I", data, 144, 11, kind, flags, 0, 0, size, 0, 0, 4, 0)
+        data[184:] = names
+        return bytes(data)
+
+    def test_rejects_constructor_destructor_and_custom_runtime_payloads(self):
+        for name in (".ctors", ".dtors", ".init_array", ".fini_array", ".extra", ".text.extra", ".rodata.extra"):
+            for kind in (1, 8):  # file-backed and NOBITS both affect runtime
+                self.assertEqual(check_unit.allocated_section_problems(self.elf(name, kind=kind)),
+                                 [f"unsupported allocated section {name}: 0x4 bytes"])
+
+    def test_supported_content_sections_remain_checked_by_existing_paths(self):
+        for name in (".text", *check_unit.DATA_SECTIONS):
+            self.assertFalse(check_unit.allocated_section_problems(self.elf(name)))
+
+    def test_debug_and_empty_sections_do_not_add_runtime_payloads(self):
+        self.assertFalse(check_unit.allocated_section_problems(self.elf(".debug_info", flags=0)))
+        self.assertFalse(check_unit.allocated_section_problems(self.elf(".ctors", size=0)))
+
+    def test_abi_metadata_exemption_requires_type_and_size(self):
+        self.assertFalse(check_unit.allocated_section_problems(
+            self.elf(".MIPS.abiflags", kind=0x7000002A, size=24)))
+        self.assertTrue(check_unit.allocated_section_problems(self.elf(".MIPS.abiflags", size=24)))
+        for flags in (3, 6):
+            self.assertTrue(check_unit.allocated_section_problems(
+                self.elf(".MIPS.abiflags", kind=0x7000002A, size=24, flags=flags)))
+        self.assertTrue(check_unit.allocated_section_problems(
+            self.elf(".MIPS.abiflags", kind=0x7000002A, size=28)))
 
 
 if __name__ == "__main__":

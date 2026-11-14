@@ -52,7 +52,7 @@ extern s32 fldBgmIsLoading(void);
 
 extern void fldWaitBgmLoad(void);
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 extern s32 fldNext_fld;
 

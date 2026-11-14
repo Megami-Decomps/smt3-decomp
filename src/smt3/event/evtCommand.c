@@ -283,7 +283,7 @@ extern void evtFreeStage(void);
 
 extern void fldSetNextField(s32 command, s32 para);
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 extern const char evtMsgNameNotFound[];
 
