@@ -289,7 +289,7 @@ def full_context_text_problems(text, native, origin, relocs, syms, gp,
     differences = full_context_relocation_diffs(
         text, 0, len(text), want, relocs,
         [(0, len(text), "__check_unit_text_origin")], local_syms, gp,
-        hi_addends, section_bases, object_gp)
+        hi_addends, section_bases, object_gp, origin)
     differences.extend(full_context_literal_diffs(
         text, 0, len(text), want, relocs, lit4, object_gp, retail, segs, gp))
     for i in range(0, len(text), 4):
@@ -675,8 +675,25 @@ def paired_hi16_addends(text, relocs):
 
 
 
+def jump_relocation_fits(target, addend, pc=None):
+    """R_MIPS_26 has a signed REL addend and the PC+4 jump region.
+
+    Field masking alone hides misaligned targets and jumps that ee-ld cannot
+    encode. ee-ld also rejects address-space wrap, rather than wrapping the sum.
+    Without a caller address only range/alignment can be checked; production
+    callers verifying an actual retail span always supply its origin.
+    """
+    delta = (addend & 0x03FFFFFF) << 2
+    if delta & 0x08000000:
+        delta -= 0x10000000
+    destination = target + delta
+    return (0 <= destination <= 0xFFFFFFFF and destination % 4 == 0 and
+            (pc is None or destination >> 28 == (pc + 4) >> 28))
+
+
 def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
-                                   funcs, syms, gp, hi_addends=None, section_bases=None, object_gp=0):
+                                   funcs, syms, gp, hi_addends=None, section_bases=None,
+                                   object_gp=0, native_origin=None):
     """Check resolvable instruction targets in the actual build context.
 
     Masked code equality does not establish relocation equality: conditional
@@ -738,12 +755,21 @@ def full_context_relocation_diffs(text, offset, size, retail_code, relocs,
                           if off <= local < off + width), None)
             origin = address(owner[1], syms) if owner else None
             if origin is not None:
-                expected = ((origin + local - owner[0]) >> 2) & 0x3FFFFFF
+                destination = origin + local - owner[0]
+                pc = native_origin + index if native_origin is not None else None
+                if not jump_relocation_fits(destination, 0, pc):
+                    differences.append((index, mine, want, f"overflow or unaligned {kind} {symbol}"))
+                    continue
+                expected = (destination >> 2) & 0x3FFFFFF
             mask = 0x3FFFFFF
         elif base == ".text" and kind in ("R_MIPS_HI16", "R_MIPS_LO16"):
             expected = local_fields.get(at)
         elif target is not None:
             if kind == "R_MIPS_26":
+                pc = native_origin + index if native_origin is not None else None
+                if not jump_relocation_fits(target, mine & 0x3FFFFFF, pc):
+                    differences.append((index, mine, want, f"overflow or unaligned {kind} {symbol}"))
+                    continue
                 expected = linked_jump_field(target, mine & 0x3FFFFFF)
                 mask = 0x3FFFFFF
             elif kind == "R_MIPS_HI16" and at in hi_addends:
@@ -1627,7 +1653,7 @@ def main():
                         context_relocations[name] = full_context_relocation_diffs(
                             ftext, foff, fsize, retail[roff:roff + fsize], frel,
                             [(o, n, key) for key, (o, n) in fsyms.items()],
-                            syms, gp, full_hi_addends, full_section_bases, full_gp0)
+                            syms, gp, full_hi_addends, full_section_bases, full_gp0, addr)
                         context_relocations[name].extend(full_context_literal_diffs(
                             ftext, foff, fsize, retail[roff:roff + fsize], frel,
                             full_lit4, full_gp0, retail, segs, gp))
@@ -1937,7 +1963,8 @@ def main():
                 tgt = (mine & 0x3FFFFFF) << 2
                 owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
                 where = address(owner[1], syms) if owner else None
-                if where is None or (want & 0x3FFFFFF) != ((where + tgt - owner[0]) >> 2) & 0x3FFFFFF:
+                if (where is None or not jump_relocation_fits(where + tgt - owner[0], 0, addr + i)
+                        or (want & 0x3FFFFFF) != ((where + tgt - owner[0]) >> 2) & 0x3FFFFFF):
                     diffs.append((i, mine, want, f"{rtype} into {owner[1] if owner else '?'} "
                                                  "(retail calls a different function)"))
                 continue
@@ -1963,7 +1990,8 @@ def main():
                 continue  # other local section: masked
             addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else sext16(mine)
             if rtype == "R_MIPS_26":
-                good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
+                good = (jump_relocation_fits(target, addend, addr + i)
+                        and (want & 0x3FFFFFF) == linked_jump_field(target, addend))
             elif rtype == "R_MIPS_HI16":
                 paired_addend = hi16_addends.get(off + i)
                 if paired_addend is None:

@@ -225,7 +225,7 @@ extern void cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s
 
 
 
-extern s32 sdfDelayedResrcCheck(void);
+extern u64 sdfDelayedResrcCheck(void);
 
 typedef struct
 {
@@ -4284,7 +4284,7 @@ void cmpSetStatusStartEff(void)
     }
 }
 
-extern campInfoWork_t *volatile campDhCalcStateLive FAKEMATCH_ASM_NAME("campDhCalcState");
+extern campInfoWork_t *campDhCalcState;
 extern campWork_t *volatile campWorkLive FAKEMATCH_ASM_NAME("campWork");
 extern void cmpSetStatusStartEff(void);
 extern void cmpModelInit(void);
@@ -4293,13 +4293,27 @@ extern void cmpModelInit(void);
 s32 camp_calc_dh_Process(dds3ProcessID_t *id)
 {
     campInfoWork_t *work = dds3GetProcessData(id);
-    u8 flags = ((volatile campInfoWork_t *)work)->unk_00;
+    u8 flags = work->unk_00;
 
-    campDhCalcStateLive = work;
+    campDhCalcState = work;
     if (flags & 2) {
-        s8 state = work->unk_01;
+        s32 state = work->unk_01;
 
-        if (state == 1) {
+        switch (state) {
+        case 0: {
+            s32 ready = campDhCheckReady();
+            campWork_t *camp = campWork;
+
+            if (ready != 0) {
+                cmpSetCrossGeneralVal(camp->crossPanel, -1);
+            } else {
+                campDhCheckTextures();
+                camp = campWork;
+                cmpSetCrossGeneralVal(camp->crossPanel, 0);
+            }
+            break;
+        }
+        case 1:
             if (work->unk_04 == state) {
                 campDhFreeTexture(work);
                 while (sdfDelayedResrcCheck() != 0) {
@@ -4309,22 +4323,12 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
                 cmpModelInit();
                 cmpModelSetup(0, 0);
             }
-        } else if (state == 0) {
-            s32 ready = campDhCheckReady();
-            campWork_t *camp = campWorkLive;
-
-            if (ready != 0) {
-                cmpSetCrossGeneralVal(camp->crossPanel, -1);
-            } else {
-                campDhCheckTextures();
-                camp = campWorkLive;
-                cmpSetCrossGeneralVal(camp->crossPanel, 0);
-            }
+            break;
         }
     }
-    work = campDhCalcStateLive;
+    work = campDhCalcState;
     work->unk_04 = 0;
-    work = campDhCalcStateLive;
+    work = campDhCalcState;
     if (work->unk_00 & 0x10) {
         cmpUpdateTerminate((cmpInfoWindow_t *)work);
         return -1;

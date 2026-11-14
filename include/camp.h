@@ -93,10 +93,18 @@ typedef struct
     } rows[256];
     /* 0x1028 */ u8 unk_1028[0x14];
 } cmpStockInfo_t;
+/* cmpInitCursorRange clears through +0x103B and initializes phase at +0x38.
+ * cmpClearCursorSlots/UpdateCursorSlots traverse 256 rows of two eight-byte
+ * slots starting at +0x3C. Keep the full storage distinct from its header. */
 typedef struct {
     cmpCursorInfo_t cursor;
-    u8 reserved[0x1004];
+    s8 phase;
+    u8 reserved39[3];
+    cmpCursorSlot_t slots[256][2];
 } cmpCursorFullWork_t;
+
+SIZE_CHECK(cmpCursorSlotSizeCheck, cmpCursorSlot_t, 8);
+SIZE_CHECK(cmpCursorFullWorkSizeCheck, cmpCursorFullWork_t, 0x103C);
 
 typedef struct cmpPadStopWork_t {
     cmpCursorInfo_t cursor;

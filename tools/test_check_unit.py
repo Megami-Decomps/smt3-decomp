@@ -283,6 +283,54 @@ class FullRodataRelocationTests(unittest.TestCase):
             self.assertIn("outside owned", problems[0])
 
 
+class JumpRelocationRangeTests(unittest.TestCase):
+    def test_named_jump_matches_linker_boundaries(self):
+        # Signed REL addends, both region edges, alignment and nonwrapping sums.
+        cases = ((0x100000, 0x2000, 0, True),
+                 (0xFFFFFFFC, 0, 0, False),
+                 (0x100000, 4, 0x7FFFFFC, True),
+                 (0x100000, 0x8002000, -0x8000000, True),
+                 (0x100000, 0x7FFFFFF, -0x8000000, False),
+                 (0x100000, 0x2001, 0, False),
+                 (0x100000, 0x10002000, 0, False),
+                 (0x100000, 0x10000000, -4, True),
+                 (0x100000, 0x0FFFFFFC, 4, False),
+                 (0x100000, 0, -4, False),
+                 (0x100000, 0xFFFFFFFC, 4, False),
+                 (0x0FFFFFFC, 0x10000000, 0, True),
+                 (0x0FFFFFFC, 0x0FFFFFFC, 0, False),
+                 (0x8FFFFFFC, 0x90000000, 0, True),
+                 (0x8FFFFFFC, 0x8FFFFFFC, 0, False))
+        for pc, target, delta, valid in cases:
+            with self.subTest(pc=pc, target=target, delta=delta):
+                word = 0x0C000000 | ((delta >> 2) & 0x3FFFFFF)
+                want = 0x0C000000 | (((target + delta) >> 2) & 0x3FFFFFF)
+                problems = check_unit.full_context_text_problems(
+                    struct.pack('<I', word), struct.pack('<I', want), pc,
+                    {0: ('R_MIPS_26', 'provider')}, {'provider': target}, GP,
+                    {}, b'', 0, b'', [])
+                self.assertEqual(not problems, valid, problems)
+
+    def test_local_jump_region_and_alignment(self):
+        for target, invalid in ((0x2000, False), (0x2001, True), (0x10002000, True)):
+            with self.subTest(target=target):
+                problems = check_unit.full_context_relocation_diffs(
+                    struct.pack('<I', 0x0C000008), 0, 4,
+                    struct.pack('<I', 0x0C000000 | ((target >> 2) & 0x3FFFFFF)),
+                    {0: ('R_MIPS_26', '.text')}, [(32, 4, 'provider')],
+                    {'provider': target}, GP, native_origin=0x1000)
+                self.assertEqual(bool(problems), invalid)
+
+    def test_relocation_pc_uses_relative_function_offset(self):
+        text = struct.pack('<III', 0, 0, 0x0C000000)
+        for origin, invalid in ((0x0FFFFFF8, False), (0x0FFFFFF4, True)):
+            problems = check_unit.full_context_relocation_diffs(
+                text, 4, 8, struct.pack('<II', 0, 0x0C000000),
+                {8: ('R_MIPS_26', 'provider')}, [], {'provider': 0x10000000},
+                GP, native_origin=origin)
+            self.assertEqual(bool(problems), invalid)
+
+
 class GeneratedRodataInputTests(unittest.TestCase):
     def test_absent_optional_file(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -386,6 +434,18 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_jump_invalid_target_rejected_in_both_contexts(self):
+        for target in (0x2001, 0x10002000):
+            with self.subTest(target=target):
+                status, report = self.run_checker(
+                    'target', code=struct.pack('<I', 0x0C000000),
+                    retail_code=struct.pack('<I', 0x0C000800),
+                    text_relocs={0: ('R_MIPS_26', 'provider')},
+                    extra_symbols=f'provider = 0x{target:X};\n')
+                self.assertEqual(status, 1, report)
+                self.assertIn('CONTEXT RELOC target', report)
+                self.assertIn('DIFF target', report)
 
     def test_gprel_overflow_rejected_in_standalone_and_full_context(self):
         for displacement in (-0x8001, 0x8000):
