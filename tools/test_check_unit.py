@@ -2317,7 +2317,7 @@ class NativeObjectMappingTests(unittest.TestCase):
 
 class FullContextStorageTests(unittest.TestCase):
     def fixture(self, section='.sdata', payload=b'\x2a\0\0\0', owned=False,
-                native=b'\x2a\0\0\0', nm_extra='', metadata=''):
+                native=b'\x2a\0\0\0', nm_extra='', metadata='', relocation_records=None):
         code = struct.pack('<2I', 0x03e00008, 0)
         retail = bytearray(0x1200)
         retail[0x1000:0x1008] = code
@@ -2333,6 +2333,8 @@ class FullContextStorageTests(unittest.TestCase):
             original = root/RETAIL_PATH; original.parent.mkdir(parents=True); original.write_bytes(retail)
             def run(*args):
                 full = str(args[-1]).endswith('full.o')
+                if '-r' in args and relocation_records is not None:
+                    return relocation_records.get('full.o' if full else 'unit.o', '')
                 if '-S' in args: return '0 8 T target\n' + (nm_extra if full else '')
                 if '-t' in args: return metadata if full else ''
                 return ''
@@ -2346,12 +2348,26 @@ class FullContextStorageTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, 'load_segments', return_value=[(0x100000,0x1000,0x200)]))
             stack.enter_context(patch.object(check_unit, 'text_section', return_value=code))
             stack.enter_context(patch.object(check_unit, 'sections', side_effect=sections))
-            stack.enter_context(patch.object(check_unit, 'relocations', return_value={'.text':{},'.rodata':{},'.sdata':{},'.data':{}}))
+            if relocation_records is None:
+                stack.enter_context(patch.object(check_unit, 'relocations', return_value={'.text':{},'.rodata':{},'.sdata':{},'.data':{}}))
             stack.enter_context(patch.object(check_unit, 'run', side_effect=run))
             stack.enter_context(patch.object(check_unit.subprocess, 'run', return_value=SimpleNamespace(returncode=0,stderr='')))
             output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             with self.assertRaises(SystemExit) as stopped: check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_duplicate_relocations_fail_closed_in_both_compile_contexts(self):
+        records = ("RELOCATION RECORDS FOR [.data]:\n"
+                   "00000000 R_MIPS_32 foo\n"
+                   "00000000 R_MIPS_32 bar\n")
+        for context in ('unit.o', 'full.o'):
+            with self.subTest(context=context):
+                code, report = self.fixture(relocation_records={context: records})
+                self.assertIsInstance(code, str)
+                self.assertIn('infrastructure error:', code)
+                self.assertIn(context, code)
+                self.assertIn('multiple relocations at .data+0x0', code)
+                self.assertNotIn('match,', report)
 
     def test_full_only_unowned_writable_sections_rejected(self):
         for section in ('.sdata','.data','.sbss','.bss'):
@@ -2671,6 +2687,53 @@ class SymbolSizePrecedenceTests(unittest.TestCase):
         self.assertEqual(self.read_sizes(
             "table = 0x1000; // size:0xC\n"
             "alias = 0x1000; // size:0x10\n"), {"table": 12, "alias": 16})
+
+
+class RelocationInventoryTests(unittest.TestCase):
+    def read(self, records):
+        with patch.object(check_unit, "run", return_value=records):
+            return check_unit.relocations(Path("fixture.o"))
+
+    def test_composed_relocations_rejected_in_every_verified_section(self):
+        for section in (".text", ".rodata", ".data", ".sdata"):
+            with self.subTest(section=section):
+                records = (f"RELOCATION RECORDS FOR [{section}]:\n"
+                           "00000000 R_MIPS_32 foo\n"
+                           "00000000 R_MIPS_32 bar\n")
+                with self.assertRaisesRegex(ValueError, "multiple relocations"):
+                    self.read(records)
+
+    def test_identical_repeated_relocation_is_not_redundant(self):
+        records = ("RELOCATION RECORDS FOR [.data]:\n"
+                   "00000000 R_MIPS_32 foo\n"
+                   "00000000 R_MIPS_32 foo\n")
+        with self.assertRaisesRegex(ValueError, "composed relocations"):
+            self.read(records)
+
+    def test_distinct_offsets_retain_elf_order_for_hi_lo_pairing(self):
+        records = ("RELOCATION RECORDS FOR [.text]:\n"
+                   "00000008 R_MIPS_HI16 foo\n"
+                   "00000000 R_MIPS_LO16 foo\n")
+        self.assertEqual(list(self.read(records)[".text"].items()),
+                         [(8, ("R_MIPS_HI16", "foo")),
+                          (0, ("R_MIPS_LO16", "foo"))])
+
+    def test_same_offset_in_independent_sections_is_valid(self):
+        records = ("RELOCATION RECORDS FOR [.data]:\n"
+                   "00000000 R_MIPS_32 foo\n"
+                   "RELOCATION RECORDS FOR [.sdata]:\n"
+                   "00000000 R_MIPS_32 bar\n")
+        result = self.read(records)
+        self.assertEqual(result[".data"], {0: ("R_MIPS_32", "foo")})
+        self.assertEqual(result[".sdata"], {0: ("R_MIPS_32", "bar")})
+
+    def test_repeated_section_header_does_not_hide_composition(self):
+        records = ("RELOCATION RECORDS FOR [.data]:\n"
+                   "00000000 R_MIPS_32 foo\n"
+                   "RELOCATION RECORDS FOR [.data]:\n"
+                   "00000000 R_MIPS_32 bar\n")
+        with self.assertRaisesRegex(ValueError, "multiple relocations"):
+            self.read(records)
 
 
 if __name__ == "__main__":

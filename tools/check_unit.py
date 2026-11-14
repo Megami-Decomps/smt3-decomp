@@ -632,7 +632,12 @@ def source_owned_item_size(definitions, syms, offset, retail_addr):
 
 
 def relocations(obj):
-    """{section: {offset: (type, symbol)}} for verified content sections."""
+    """{section: {offset: (type, symbol)}} for verified content sections.
+
+    Multiple ELF relocations at one offset can compose in relocation order. This
+    verifier supports only one relocation per word; never silently discard an
+    earlier relocation by replacing its dictionary entry.
+    """
     out, section = {name: {} for name in (".text", ".rodata", ".data", ".sdata")}, None
     for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
         if line.startswith("RELOCATION RECORDS FOR"):
@@ -640,7 +645,12 @@ def relocations(obj):
             continue
         parts = line.split()
         if section in out and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
-            out[section][int(parts[0], 16)] = (parts[1], parts[2])
+            offset = int(parts[0], 16)
+            if offset in out[section]:
+                raise ValueError(
+                    f"{obj}: multiple relocations at {section}+0x{offset:X}; "
+                    "composed relocations are unsupported")
+            out[section][offset] = (parts[1], parts[2])
     return out
 
 
@@ -1476,7 +1486,10 @@ def main():
         rodata = data[ro_off:ro_off + ro_size]
         da_off, da_size = secs.get(".data", (0, 0))
         data_section = data[da_off:da_off + da_size]
-        all_relocs = relocations(obj)
+        try:
+            all_relocs = relocations(obj)
+        except ValueError as exc:
+            sys.exit(f"infrastructure error: {exc}")
         relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
         sdata_relocs = all_relocs[".sdata"]
         defined_symbols = run(
@@ -1525,7 +1538,10 @@ def main():
                              str(source), "-o", str(full)],
                             capture_output=True, text=True, env=env)
         if rf.returncode == 0:
-            full_relocs = relocations(full)
+            try:
+                full_relocs = relocations(full)
+            except ValueError as exc:
+                sys.exit(f"infrastructure error: {exc}")
             ftext, frel = text_section(full), full_relocs[".text"]
             full_defined_symbols = run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(full))
             fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
