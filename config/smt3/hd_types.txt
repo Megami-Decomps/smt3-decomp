@@ -3,7 +3,7 @@
 # because the remaster rewrote inline arrays and embedded structs as pointers.
 # T <name> <kind> <size|?> <file> <index in that header>, then M rows:
 # M <offset|?> <size|?> <type> <name>
-T AB_HEADER_t struct 32 libsdf.h 152
+T AB_HEADER_t struct 32 libsdf.h 153
 M 0 1 u8 fileType
 M 1 1 u8 compression
 M 2 2 s16 userId
@@ -21,18 +21,22 @@ M 6 2 s16 h
 M 8 2 s16 ox
 M 10 2 s16 oy
 M 12 4 s32 tex
+T AnimTagSeparatorAttribute struct 4 AnimTagSeparatorAttribute.h 0
+M 0 4 char* _tagSeparator_k__BackingField
 T BillTable_t struct 12 effect.h 17
 M 0 4 char* pPath
 M 4 4 char* pTexFile
 M 8 2 s16 type
 M 10 2 s16 mode
-T DLCAmIcon_t struct 24 field.h 10
+T DLCAmIcon_t struct 24 field.h 14
 M 0 4 s32 fieldID
 M 4 4 s32 areaID
 M 8 4 s32 blockID
 M 12 4 s32 floorID
 M 16 4 s32 nodeIdx
 M 20 4 fldAmIcon_t* fldAmIcon
+T DebugTagSeparatorAttribute struct 4 DebugTagSeparatorAttribute.h 0
+M 0 4 char* _tagSeparator_k__BackingField
 T EffBTL_BillFireball_Part_t struct 44 effect.h 146
 M 0 4 u32 wait
 M 4 4 u32 frame
@@ -211,7 +215,7 @@ M 4 4 Eff_ThunderSpherePolyPart_t* pPart
 M 8 4 u32 abgr
 M 12 4 dds3TrackPoly_t* hPoly
 M 16 4 sdfMemHandle_t* hMem
-T FLDCAM_t struct 16 field.h 15
+T FLDCAM_t struct 16 field.h 19
 M 0 4 f32 leng
 M 4 4 f32 tgty
 M 8 4 f32 camy
@@ -276,7 +280,7 @@ M 4 16 s32 uv
 M 20 4 void* user_data
 M 24 4 FontMem_t* prev
 M 28 4 FontMem_t* next
-T GameFileInfoOld_t struct 20 field.h 81
+T GameFileInfoOld_t struct 20 field.h 85
 M 0 2 u16 TmnlMode
 M 2 2 u16 TmnlId
 M 4 2 u16 Lv
@@ -284,7 +288,7 @@ M 6 2 u16 pad
 M 8 4 s32 PlayTime
 M 12 4 s32 pad2
 M 16 4 s32 pad3
-T GameFileInfo_t struct 104 field.h 2
+T GameFileInfo_t struct 104 field.h 6
 M 0 6 u16 verstr
 M 6 2 u16 ver
 M 8 2 u16 TmnlMode
@@ -317,11 +321,11 @@ M 4 4 char* btnName1
 M 8 4 s32 button2
 M 12 4 char* btnName2
 M 16 4 char* text
-T InnenMotionInfo_s struct 6 newdata.h 24
+T InnenMotionInfo_s struct 6 newdata.h 25
 M 0 2 s16 pageno
 M 2 2 s16 player_motion
 M 4 2 s16 doui
-T MB_HEADER_t struct 32 libsdf.h 151
+T MB_HEADER_t struct 32 libsdf.h 152
 M 0 1 u8 fileType
 M 1 1 u8 compression
 M 2 2 s16 userId
@@ -355,7 +359,7 @@ M 14 2 s16 v2
 M 16 2 s16 texid
 M 18 2 s16 attr
 M 20 4 f32 angle
-T PIPE_EFF_t struct 48 pipe.h 5
+T PIPE_EFF_t struct 44 pipe.h 5
 M 0 4 sdfMemHandle_t* mhFile
 M 4 4 void* ptr
 M 8 4 s32 size
@@ -366,20 +370,18 @@ M 24 4 f32 z
 M 28 8 sdfVector2_t pos2
 M 36 4 s32 offset
 M 40 4 s32 count
-M 44 4 void* tex
-T SOBED_PB_LIST struct 8 newbattle.h 3
-M 0 4 void* gobj
-M 4 4 s32 reversePB
+T SOBED_PB_LIST struct 4 newbattle.h 3
+M 0 4 s32 reversePB
 T Speaker_tag struct 12 Speaker_tag.h 0
 M 0 4 sdfIVector2_t* pos
 M 4 4 _FRQ* pfont
 M 8 2 u16 num
 M 10 2 s16 reserved
-T SpecularTex2 struct 12 libsdf.h 99
+T SpecularTex2 struct 12 libsdf.h 100
 M 0 4 TMX_HEADER_t* header
 M 4 4 u32* clut
 M 8 4 u8** pixel
-T Sprite3D_t struct 56 field.h 51
+T Sprite3D_t struct 56 field.h 55
 M 0 16 sdfVector4_t pos
 M 16 4 UV_t* uv0
 M 20 4 UV_t* uv1
@@ -397,7 +399,7 @@ M 4 4 char* right_string
 M 8 4 s32 font1
 M 12 4 s32 font2
 M 16 4 s32 yPos
-T TB_HEADER_t struct 32 libsdf.h 158
+T TB_HEADER_t struct 32 libsdf.h 159
 M 0 1 u8 fileType
 M 1 1 u8 compression
 M 2 2 s16 userId
@@ -406,7 +408,7 @@ M 8 4 u32 formatId
 M 12 4 s32 realSize
 M 16 4 s32 numOfPack
 M 20 12 u32 offsetTable
-T TMX_HEADER_t struct 36 libsdf.h 100
+T TMX_HEADER_t struct 36 libsdf.h 101
 M 0 1 u8 fileType
 M 1 1 u8 compression
 M 2 2 s16 userId
@@ -424,27 +426,23 @@ M 26 1 u8 flags
 M 27 1 u8 texWrapMode
 M 28 4 u8* userArea
 M 32 4 u8* comment
-T UV_t struct 4 field.h 49
+T UV_t struct 4 field.h 53
 M 0 2 u16 u
 M 2 2 u16 v
-T VIEWTEST_AREA_t struct 28 field.h 84
+T VIEWTEST_AREA_t struct 28 field.h 88
 M 0 4 u32 serialID
 M 4 16 sdfVector4_t CenterPos
 M 20 4 f32 r
 M 24 4 void* workdata
-T VTX_t struct 8 field.h 50
+T VTX_t struct 8 field.h 54
 M 0 4 f32 x
 M 4 4 f32 y
-T XRD773Unity_BoxObjectPool_List_T__ struct 16 XRD773Unity_BoxObjectPool_List_T__.h 0
+T XRD773Unity_BoxObjectPool_List_T__ struct 8 XRD773Unity_BoxObjectPool_List_T__.h 0
 M 0 4 void* m_Stack
-M 4 4 void* m_ActionOnGet
-M 8 4 void* m_ActionOnRelease
-M 12 4 s32 _countAll_k__BackingField
-T XRD773Unity_BoxObjectPool_T_ struct 16 XRD773Unity_BoxObjectPool_T_.h 0
+M 4 4 s32 _countAll_k__BackingField
+T XRD773Unity_BoxObjectPool_T_ struct 8 XRD773Unity_BoxObjectPool_T_.h 0
 M 0 4 void* m_Stack
-M 4 4 void* m_ActionOnGet
-M 8 4 void* m_ActionOnRelease
-M 12 4 s32 _countAll_k__BackingField
+M 4 4 s32 _countAll_k__BackingField
 T _FRQ struct 52 interface.h 0
 M 0 1 u8 draw_spd
 M 1 1 s8 space
@@ -489,7 +487,7 @@ M 52 2 u16 chcode
 T bDrawText struct 8 newbattle.h 5
 M 0 4 char* DrawTxt
 M 4 4 s32 color
-T beDataInfo_u struct ? event.h 21
+T beDataInfo_u union ? event.h 21
 M ? ? s8 c
 M ? ? s16 s
 M ? ? s32 i
@@ -652,15 +650,14 @@ M 387 1 bool bUnlock
 T cmbKeisyoSort_t struct 4 facility.h 43
 M 0 2 u16 KeisyoSkill
 M 2 1 u8 KeiAttr
-T cmbModelPack_t struct 28 facility.h 36
+T cmbModelPack_t struct 24 facility.h 36
 M 0 4 sdfMemHandle_t* MH
 M 4 4 u8* pData
 M 8 4 s32 DataSize
 M 12 2 u16 DevilID
 M 16 4 dds3ModelHandle_t* Model
-M 20 4 void* DevilObj
-M 24 1 bool cmbAct_MdlEffectSkip
-M 25 1 bool bEnabled
+M 20 1 bool cmbAct_MdlEffectSkip
+M 21 1 bool bEnabled
 T cmbRaceLevelSorted_t struct 8 facility.h 44
 M 0 2 u16 ID
 M 4 4 datDevilFormat_t* pData
@@ -880,7 +877,7 @@ M 12 4 dds3ProcessID_t* ScriptPID
 M 16 4 u8* pMainStrScr
 M 20 8 char* pSelStr
 M 28 4 cmpCursorInfo_t* CursorInfo
-T collision_s struct 228 field.h 38
+T collision_s struct 228 field.h 42
 M 0 2 s16 mode2D
 M 2 2 s16 numedges
 M 4 16 sdfVector4_t normal
@@ -908,15 +905,15 @@ M 6 2 s16 ctr1
 M 8 4 u32 ctr_key
 T datAisyoFormat struct 64 datAisyoFormat.h 0
 M 0 64 u32 aisyo
-T datBossPress_t struct 16 newdata.h 11
+T datBossPress_t struct 16 newdata.h 12
 M 0 4 s32 flag
 M 4 4 s32 flag2
 M 8 4 s32 encid
 M 12 4 s32 dbest
-T datDevilAIChk_s struct 12 newdata.h 6
+T datDevilAIChk_s struct 12 newdata.h 7
 M 0 8 u32 check
 M 8 4 u32 table
-T datDevilAITbl_s struct 8 newdata.h 7
+T datDevilAITbl_s struct 8 newdata.h 8
 M 0 2 u16 ritu
 M 2 2 u16 skill
 M 4 4 u32 target
@@ -927,6 +924,16 @@ M 4 4 datDevilAIChk_s* aichk
 M 8 4 datDevilAITbl_s** aitable
 M 12 2 u16 deadscriptid
 M 14 2 u16 deadeventno
+T datDevilAI_t2 struct 44 newdata.h 3
+M 0 2 u16 scriptid
+M 2 2 u16 ailevel
+M 4 12 datDevilAIChk_s* aichk
+M 16 12 datDevilAITbl_s* aitable
+M 28 2 u16 deadscriptid
+M 30 2 u16 deadeventno
+M 32 4 datDevilAITbl_s* aitable1
+M 36 4 datDevilAITbl_s* aitable2
+M 40 4 datDevilAITbl_s* aitable3
 T datDevilFormat_s struct 60 newdata.h 1
 M 0 4 u32 flag
 M 4 1 u8 race
@@ -953,10 +960,10 @@ M 56 1 s8 attackattr
 M 57 1 u8 attackcnt
 M 58 1 u8 attackinterval
 M 59 1 u8 reserve1
-T datDevilHistory_s struct 2 newdata.h 29
+T datDevilHistory_s struct 2 newdata.h 30
 M 0 1 u8 flag
 M 1 1 u8 killcnt
-T datDevilNegoFormat_s struct 36 newdata.h 3
+T datDevilNegoFormat_s struct 36 newdata.h 4
 M 0 4 u32 kucyo
 M 4 4 u32 tokucyo
 M 8 1 u8 tokuboutype
@@ -974,11 +981,11 @@ M 20 2 u16 mukanindex
 M 24 4 datNegoPresent_s* itema
 M 28 4 datNegoPresent_s* itemb
 M 32 4 datNegoPresent_s* stone
-T datEncountFld_t struct 12 newdata.h 14
+T datEncountFld_t struct 12 newdata.h 15
 M 0 4 s32 flag
 M 4 4 s16* Encount1
 M 8 4 s16* Encount2
-T datEncountPack_s struct 24 newdata.h 5
+T datEncountPack_s struct 24 newdata.h 6
 M 0 2 u16 stageid
 M 2 2 u16 areaid
 M 4 2 u16 btlsound
@@ -988,16 +995,16 @@ M 10 2 u16 eventbit1
 M 12 2 u16 eventbit2
 M 16 4 u8* table1
 M 20 4 datEncountTbl_s* enctable
-T datEncountRitu_s struct 8 newdata.h 10
+T datEncountRitu_s struct 8 newdata.h 11
 M 0 2 u16 encountid
 M 2 2 u16 ritu
 M 4 1 u8 sensei
 M 5 1 u8 renzokuritu
 M 6 2 u16 renzokuindex
-T datEncountTbl_s struct 8 newdata.h 9
+T datEncountTbl_s struct 8 newdata.h 10
 M 0 4 s32 normalritu
 M 4 4 datEncountRitu_s* ritu
-T datEncount_s struct 24 newdata.h 4
+T datEncount_s struct 24 newdata.h 5
 M 0 1 s8 backattack
 M 1 1 s8 esc
 M 2 1 u8 item
@@ -1010,10 +1017,10 @@ M 16 2 u16 flag
 M 18 1 u8 maxparty
 M 19 1 u8 maxcall
 M 20 2 u16 btlsound
-T datInfoSelectTable_s struct 8 newdata.h 22
+T datInfoSelectTable_s struct 8 newdata.h 23
 M 0 4 s16* flagcheck
 M 4 4 s16* fieldno
-T datInnenNegoTable_s struct 36 newdata.h 21
+T datInnenNegoTable_s struct 36 newdata.h 22
 M 0 2 s16 check
 M 2 2 u16 id1
 M 4 2 u16 id2
@@ -1025,33 +1032,33 @@ M 16 2 u16 winmes
 M 18 2 u16 losemes
 M 20 2 u16 fullmes
 M 24 12 InnenMotionInfo_s* innen_motion
-T datItem_s struct 8 newdata.h 16
+T datItem_s struct 8 newdata.h 17
 M 0 1 u8 use
 M 1 1 u8 flag
 M 2 2 u16 skillid
 M 4 4 u32 price
-T datNegoAisyo_s struct 12 newdata.h 20
+T datNegoAisyo_s struct 12 newdata.h 21
 M 0 4 u32 from
 M 4 4 u32 to
 M 8 4 s32 mes
-T datNegoNormalQuesInfo_s struct 4 newdata.h 23
+T datNegoNormalQuesInfo_s struct 4 newdata.h 24
 M 0 2 u16 type
 M 2 1 u8 ritu1
 M 3 1 u8 ritu2
-T datNegoPresent_s struct 2 newdata.h 8
+T datNegoPresent_s struct 2 newdata.h 9
 M 0 1 u8 ritu
 M 1 1 u8 item
-T datNegoSkill_s struct 16 newdata.h 19
+T datNegoSkill_s struct 16 newdata.h 20
 M 0 4 u32 type
 M 4 4 u8* rate
 M 8 4 datNegoAisyo_s* killeraisyo
 M 12 4 datNegoAisyo_s* ngaisyo
-T datNormalSkillVisual_s struct 4 newdata.h 26
+T datNormalSkillVisual_s struct 4 newdata.h 27
 M 0 1 u8 motion
 M 1 1 u8 animetype
 M 2 1 u8 hatudo
 M 3 1 u8 bedno
-T datNormalSkill_s struct 60 newdata.h 25
+T datNormalSkill_s struct 60 newdata.h 26
 M 0 1 u8 flag
 M 1 1 u8 use
 M 2 1 u8 koukatype
@@ -1087,28 +1094,28 @@ M 52 2 s16 criticalpoint
 M 54 2 s16 failpoint
 M 56 2 s16 magicbase
 M 58 2 s16 magiclimit
-T datSkill_s struct 8 newdata.h 27
+T datSkill_s struct 8 newdata.h 28
 M 0 1 s8 skillattr
 M 1 1 s8 type
 M 2 2 s16 index
 M 4 2 u16 keisyoform
 M 6 1 s8 capacity
 M 7 1 u8 flag
-T datSpecialSkill_s struct 8 newdata.h 28
+T datSpecialSkill_s struct 8 newdata.h 29
 M 0 2 s16 n
 M 2 2 s16 m
 M 4 2 s16 a
 M 6 2 s16 b
-T datTakaraSagasiI_s struct 4 newdata.h 18
+T datTakaraSagasiI_s struct 4 newdata.h 19
 M 0 2 u16 item
 M 2 2 u16 par
-T datTakaraSagasiT_s struct 36 newdata.h 17
+T datTakaraSagasiT_s struct 36 newdata.h 18
 M 0 4 u32 flag
 M 4 32 datTakaraSagasiI_s* itemtbl
-T datTakaraSagasi_s struct 20 newdata.h 15
+T datTakaraSagasi_s struct 20 newdata.h 16
 M 0 4 u32 flag
 M 4 16 datTakaraSagasiT_s* tbl
-T datUnitMotion_s struct 40 newdata.h 13
+T datUnitMotion_s struct 40 newdata.h 14
 M 0 4 u32 motion_no
 M 4 2 s16 movetype
 M 6 2 u16 actframe
@@ -1121,7 +1128,7 @@ M 28 4 f32 movey
 M 32 4 f32 movez
 M 36 2 s16 bframe
 M 38 2 s16 hframe
-T datUnitVisual_s struct 60 newdata.h 12
+T datUnitVisual_s struct 60 newdata.h 13
 M 0 16 sdfVector4_t center
 M 16 4 f32 formsize
 M 20 4 f32 formheight
@@ -1187,7 +1194,7 @@ M 0 1 s8 flag
 M 4 4 s32 min
 M 8 4 s32 max
 M 12 4 char* str
-T dds3AdditionWork_t struct 80 field.h 45
+T dds3AdditionWork_t struct 80 field.h 49
 M 0 4 s32 fieldID
 M 4 4 s32 areaID
 M 8 16 sdfVector4_t playerPos
@@ -1238,7 +1245,7 @@ M 8 4 void* mainprocuder
 M 12 4 void* drawprocuder
 M 16 4 void* reserve1
 M 20 4 void* reserve2
-T dds3Basic_t struct 72 basic.h 2
+T dds3Basic_t struct 68 basic.h 2
 M 0 4 u32 flag
 M 4 4 u32 serialID
 M 8 4 char* name
@@ -1254,7 +1261,6 @@ M 44 4 dds3Basic_t* workprev
 M 48 4 dds3Basic_t* workpointer
 M 52 4 u32 color
 M 56 12 u32 pad
-M 68 4 void* gameObject
 T dds3BezierTrackPolyABGR_tag struct 16 dds3BezierTrackPolyABGR_tag.h 0
 M 0 4 u32 s_c
 M 4 4 u32 s_e
@@ -1439,12 +1445,11 @@ M 4 4 dds3Effect_Blur_t* Blur
 T dds3Effect_PartialMultiBlurParam_t struct 8 effect.h 11
 M 0 4 s32 area
 M 4 4 dds3Effect_Blur_t* Blur
-T dds3Effect_PartialMultiBlur_t struct 20 effect.h 55
+T dds3Effect_PartialMultiBlur_t struct 16 effect.h 55
 M 0 4 dds3Effect_PartialMultiBlurParam_t* param
 M 4 4 sdfTexHandle_t* hAlphaTex
 M 8 4 XRD773Unity_CommonMesh* pMesh
-M 12 4 void* rImage
-M 16 4 s32 cntRT
+M 12 4 s32 cntRT
 T dds3Effect_PartialMultiFilterParam_t struct 12 effect.h 12
 M 0 4 s32 area
 M 4 4 sdfIVector2_t* center
@@ -1624,18 +1629,16 @@ M 10 2 s16 intervalCount
 M 12 4 s32 keepCount
 M 16 16 sdfVector4_t colorBase
 M 32 16 sdfVector4_t colorDelta
-T dds3ModelBlurInstance_t struct 12 model.h 5
+T dds3ModelBlurInstance_t struct 8 model.h 5
 M 0 4 dds3ModelBlurInstance_t* next
-M 4 4 void* modelobj
-M 8 4 s32 keepCount
-T dds3ModelEffectCtrlr_t struct 24 model.h 2
+M 4 4 s32 keepCount
+T dds3ModelEffectCtrlr_t struct 20 model.h 2
 M 0 4 dds3ModelEffectCtrlr_t* next
 M 4 2 u16 type
 M 6 2 s16 playGroup
 M 8 4 void* handle
 M 12 4 void* work
 M 16 4 s32 mark_id
-M 20 4 void* pTexture
 T dds3ModelFileIndex_t struct 8 model.h 11
 M 0 2 u16 major
 M 2 2 u16 minor
@@ -2069,7 +2072,7 @@ M 76 4 dds3ProcessID_t* prev
 M 80 4 dds3ProcessID_t* parent
 M 84 4 dds3ProcessID_t* child
 M 88 4 dds3ProcessID_t* sibling
-T dds3RingPolyExpList_tag struct 188 dds3RingPolyExpList_tag.h 0
+T dds3RingPolyExpList_tag struct 184 dds3RingPolyExpList_tag.h 0
 M 0 64 sdfMatrix4_t dir
 M 64 64 sdfMatrix4_t rot
 M 128 16 sdfVector4_t pos
@@ -2082,8 +2085,7 @@ M 164 4 u32* pVC
 M 168 4 sdfMat_t* pMat
 M 172 4 sdfMemHandle_t* hMem
 M 176 4 u32 number
-M 180 4 void* pTexture
-M 184 4 XRD773Unity_CommonMesh* pMesh
+M 180 4 XRD773Unity_CommonMesh* pMesh
 T dds3SceneBasicTable_t struct 12 basic.h 16
 M 0 4 s32 linkcount
 M 4 4 dds3Basic_t* firstbasic
@@ -2192,7 +2194,7 @@ M 32 4 u32 color_edge_out
 M 36 4 dds3TrackPoly_t* hTrackPoly
 M 40 4 dds3SpPoly_SphereRingPhysics_t* pPhysics
 M 44 4 sdfMemHandle_t* hMem
-T dds3SystemWork_t struct 52 field.h 46
+T dds3SystemWork_t struct 52 field.h 50
 M 0 8 s8 dlcflg
 M 8 20 s8 dummy
 M 28 2 s16 Transport_Count
@@ -2268,7 +2270,7 @@ M 40 4 u8 skills
 M 44 4 u8 equips
 M 48 4 dds3UnitAction_t* presetact
 M 52 4 dds3UnitAction_t* act
-T dds3WhirlwindPolyList_tag struct 136 dds3WhirlwindPolyList_tag.h 0
+T dds3WhirlwindPolyList_tag struct 132 dds3WhirlwindPolyList_tag.h 0
 M 0 16 sdfVector4_t pos
 M 16 64 sdfMatrix4_t matrix
 M 80 4 u32 blend
@@ -2283,8 +2285,7 @@ M 112 4 u32* pABGR
 M 116 4 sdfMat_t* pMat
 M 120 4 sdfMemHandle_t* hMem
 M 124 4 dds3ScatterPolyListTexResource_tag* hTexRes
-M 128 4 void* pTexture
-M 132 4 XRD773Unity_CommonMesh* pMesh
+M 128 4 XRD773Unity_CommonMesh* pMesh
 T dds3WorldBasic_t struct 40 basic.h 21
 M 0 4 dds3Basic_t* firstscene
 M 4 4 dds3Basic_t* lastscene
@@ -2407,11 +2408,10 @@ T effBTL_SkillModel_t struct 12 effect.h 31
 M 0 4 u32 color
 M 4 4 effBTL_SkillColorAnim_t* color_anim
 M 8 4 u32 motion_timing
-T effBTL_SkillPBFileHeader_t struct 24 effect.h 127
+T effBTL_SkillPBFileHeader_t struct 20 effect.h 127
 M 0 4 u32 size
 M 4 12 u32 reserve
 M 16 4 u8* pbData
-M 20 4 void* oData
 T effBTL_SkillPartsList_t struct 24 effect.h 44
 M 0 2 u16 type
 M 4 4 void* pHandle
@@ -2475,11 +2475,10 @@ M 48 4 f32 r
 M 52 4 f32 h
 M 56 4 f32 scl
 M 60 4 dds3ModelHandle_t* hModel
-T effDistortionBlurHandle_t struct 16 effect.h 53
+T effDistortionBlurHandle_t struct 12 effect.h 53
 M 0 4 dds3Effect_DistortionBlurParam_t* param
-M 4 4 void* hAlphaTex
-M 8 4 sdfMemHandle_t* hMem
-M 12 4 dds3Effect_DistBlurPart_tag* pwork
+M 4 4 sdfMemHandle_t* hMem
+M 8 4 dds3Effect_DistBlurPart_tag* pwork
 T effEVECombParSmokeParam_t struct 124 effect.h 60
 M 0 16 sdfVector4_t pos
 M 16 4 u32 number
@@ -4494,7 +4493,7 @@ M 4 4 s32 eventno
 M 8 4 s32 rid
 M 12 4 s32 OldFrame
 M 16 4 u8** bPlayed
-T evtPackProcessData_t struct 104 event.h 28
+T evtPackProcessData_t struct 100 event.h 28
 M 0 4 s32 eventno
 M 4 4 s32 stat
 M 8 1 bool assetbundle
@@ -4509,12 +4508,11 @@ M 68 4 void* f1_p
 M 72 4 s32 f2_size
 M 76 4 u8* f2_m
 M 80 4 void* f2_p
-M 84 4 void* distblurtex
-M 88 4 sdfTexHandle_t* multblurtex
-M 92 4 sdfTexHandle_t* ripblurtex
-M 96 4 sdfTexHandle_t* multfiltertex
-M 100 4 evtTexManager* e9xxxTexManager
-T evtPicturePriTbl_t struct 60 event.h 31
+M 84 4 sdfTexHandle_t* multblurtex
+M 88 4 sdfTexHandle_t* ripblurtex
+M 92 4 sdfTexHandle_t* multfiltertex
+M 96 4 evtTexManager* e9xxxTexManager
+T evtPicturePriTbl_t struct 56 event.h 31
 M 0 4 sdfTexHandle_t* tex
 M 4 4 s32 ot
 M 8 4 f32 x0
@@ -4528,9 +4526,8 @@ M 36 4 s32 u1
 M 40 4 s32 v1
 M 44 4 s32 alpha
 M 48 4 s32 pri
-M 52 4 void* obj
-M 56 1 bool sp
-T evtPictureProcessData_t struct 112 event.h 30
+M 52 1 bool sp
+T evtPictureProcessData_t struct 108 event.h 30
 M 0 4 u32 flag
 M 4 4 sdfTexHandle_t* tex
 M 8 4 s32 ot
@@ -4557,9 +4554,8 @@ M 88 4 s32 zoom_p0
 M 92 4 s32 zoom_p1
 M 96 4 s32 zoom_time
 M 100 4 s32 zoom_cnt
-M 104 4 void* pic
-M 108 1 bool sp
-T evtUnitHandle_t struct 376 event.h 0
+M 104 1 bool sp
+T evtUnitHandle_t struct 368 event.h 0
 M 0 4 u32 NowLightRGB
 M 4 4 u32 BaseLightRGB
 M 8 4 u32 TargetLightRGB
@@ -4618,16 +4614,14 @@ M 320 2 u16 ModelAAnimeFrame
 M 322 2 u16 ModelAAnimeMaxFrame
 M 324 2 u16 BasicLightAnimeFrame
 M 326 2 u16 BasicLightAnimeMaxFrame
-M 328 4 void* modelobj
-M 332 12 sdfVector3_t modelrot
-M 344 4 void* modelanm
-M 348 12 sdfVector3_t modelofs
-M 360 2 s16 formindex
-M 362 1 u8 e723sp
-M 363 1 u8 modeflg
-M 364 2 s16 modeframe
-M 368 4 f32 soften
-M 372 4 f32 bias
+M 328 12 sdfVector3_t modelrot
+M 340 12 sdfVector3_t modelofs
+M 352 2 s16 formindex
+M 354 1 u8 e723sp
+M 355 1 u8 modeflg
+M 356 2 s16 modeframe
+M 360 4 f32 soften
+M 364 4 f32 bias
 T evtViewerInfo_t struct 1800 event.h 2
 M 0 4 sdfMemHandle_t* mem
 M 4 4 u32 stat
@@ -5070,28 +5064,28 @@ M 20 4 pacFileCb_t* pacEndCallbackLink
 M 24 4 fileCb_t* closeLink
 M 28 1 u8 buffer
 M 32 16 pacBlockData_t* data
-T fldAddressProcessData_t struct 16 field.h 83
+T fldAddressProcessData_t struct 16 field.h 87
 M 0 16 s32 dmy
-T fldAmAreaData_t struct 20 field.h 9
+T fldAmAreaData_t struct 20 field.h 13
 M 0 4 char* pName
 M 4 4 fldAmSBlock_t* pSB
 M 8 4 u32 nSB
 M 12 4 fldAmMdl_t* pMdl
 M 16 4 fldAmXYZ_t* pPos
-T fldAmFileHeader2_t struct 12 field.h 47
+T fldAmFileHeader2_t struct 12 field.h 51
 M 0 4 u32 pAmInfo
 M 4 4 fldAmAreaData_t* pArea
 M 8 4 u32 nArea
-T fldAmFileHeader_t struct 8 field.h 48
+T fldAmFileHeader_t struct 8 field.h 52
 M 0 4 u32 Version
 M 4 4 u8 MagCode
-T fldAmIcon_t struct 8 field.h 14
+T fldAmIcon_t struct 8 field.h 18
 M 0 4 u32 type
 M 4 4 fldAmXYZ_t* pPos
-T fldAmMdl_t struct 8 field.h 11
+T fldAmMdl_t struct 8 field.h 15
 M 0 4 sdfModelDef_t* pMdl
 M 4 4 void* pMat
-T fldAmSBlock_t struct 28 field.h 13
+T fldAmSBlock_t struct 28 field.h 17
 M 0 4 char* pName
 M 4 4 u32 nodeIdx
 M 8 4 fldAmIcon_t* pIcon
@@ -5099,25 +5093,25 @@ M 12 4 u32 nIcon
 M 16 4 s32 floor
 M 20 4 fldAmXYZ_t* pPos0
 M 24 4 fldAmXYZ_t* pPos1
-T fldAmXYZ_t struct 12 field.h 12
+T fldAmXYZ_t struct 12 field.h 16
 M 0 4 f32 x
 M 4 4 f32 y
 M 8 4 f32 z
-T fldAreaName_t struct 8 field.h 25
+T fldAreaName_t struct 8 field.h 29
 M 0 2 s16 _fld
 M 2 2 s16 _area
 M 4 4 char* _name
-T fldAutoMapBuff31_t struct 32 field.h 4
+T fldAutoMapBuff31_t struct 32 field.h 8
 M 0 32 u32* blkOpenFlg
-T fldAutoMapBuffEX_t struct 8 field.h 5
+T fldAutoMapBuffEX_t struct 8 field.h 9
 M 0 8 u32* blkOpenFlg
-T fldAutoMapBuff_t struct 120 field.h 6
+T fldAutoMapBuff_t struct 120 field.h 10
 M 0 120 u32* blkOpenFlg
-T fldBasyoName_t struct 8 field.h 26
+T fldBasyoName_t struct 8 field.h 30
 M 0 2 s16 _fld
 M 2 2 s16 _basyo
 M 4 4 char* _name
-T fldBlockBuff_t struct 30 field.h 7
+T fldBlockBuff_t struct 30 field.h 11
 M 0 2 u16 MviewOffFlg
 M 2 2 u16 ManimeOffFlg
 M 4 2 u16 hitOffFlg
@@ -5126,11 +5120,11 @@ M 8 2 u16 EanimeOffFlg
 M 10 16 u8 EanimeCngID
 M 26 2 u16 npcOffFlg
 M 28 2 u16 gimicLastFlg
-T fldConstruntAreaFL2_t struct 12 field.h 72
+T fldConstruntAreaFL2_t struct 12 field.h 76
 M 0 4 u32 flag
 M 4 4 char* areaName
 M 8 4 u32 areaID
-T fldConstruntObject_t struct 80 field.h 69
+T fldConstruntObject_t struct 80 field.h 73
 M 0 4 u32 type
 M 4 4 u32 objectID
 M 8 4 u32 attachAreaID
@@ -5140,7 +5134,7 @@ M 24 8 u32 padd
 M 32 16 sdfVector4_t pos
 M 48 16 sdfVector4_t quat
 M 64 16 sdfVector4_t scl
-T fldDebug_t struct 144 field.h 24
+T fldDebug_t struct 144 field.h 28
 M 0 4 s32 MenuOn
 M 4 4 s32 MenuCur
 M 8 4 s32 MenuCur1
@@ -5177,37 +5171,37 @@ M 128 4 s32 VibPoworHigh
 M 132 4 s32 VibTimeLow
 M 136 4 s32 VibTimeHigh
 M 140 4 s32 MemoryDisp
-T fldEncountContol_t struct 16 field.h 43
+T fldEncountContol_t struct 16 field.h 47
 M 0 16 sdfVector4_t unitPos
-T fldFileAreaDataFL1_t struct 24 field.h 70
+T fldFileAreaDataFL1_t struct 24 field.h 74
 M 0 4 u32 fileID
 M 4 4 u32 SkyTblIdx
 M 8 4 char* filename0
 M 12 4 char* filename1
 M 16 4 char* filename2
 M 20 4 char* filename3
-T fldFileAreaDataFL2_t struct 12 field.h 71
+T fldFileAreaDataFL2_t struct 12 field.h 75
 M 0 4 u32 fileID
 M 4 4 char* label
 M 8 4 s32 areaFrameno
-T fldFileHeader_t struct 8 field.h 75
+T fldFileHeader_t struct 8 field.h 79
 M 0 4 u32 Version
 M 4 4 u8 MagCode
-T fldFileInfoHeaderFL1_t struct 12 field.h 73
+T fldFileInfoHeaderFL1_t struct 12 field.h 77
 M 0 4 u32 nResourceTypeTable
 M 4 4 fldResourceTypeTable_t* pResourceTypeTable
 M 8 4 fldFileAreaDataFL1_t* pAreaData
-T fldFileInfoHeaderFL2_t struct 20 field.h 74
+T fldFileInfoHeaderFL2_t struct 20 field.h 78
 M 0 4 u32 nResourceTypeTable
 M 4 4 fldResourceTypeTable_t* pResourceTypeTable
 M 8 4 fldFileAreaDataFL2_t* pAreaData
 M 12 4 u32 nArea
 M 16 4 fldConstruntAreaFL2_t* pAreaTable
-T fldFloorName_t struct 8 field.h 27
+T fldFloorName_t struct 8 field.h 31
 M 0 2 s16 _fld
 M 2 2 s16 _floor
 M 4 4 char* _name
-T fldFollowCameraControl_t struct 124 field.h 42
+T fldFollowCameraControl_t struct 124 field.h 46
 M 0 16 sdfVector4_t wideCameraOffset
 M 16 16 sdfVector4_t wideTargetOffset
 M 32 16 sdfVector4_t narrowCameraOffset
@@ -5221,7 +5215,7 @@ M 108 4 f32 t1
 M 112 4 f32 lenFrame
 M 116 4 f32 lenFrameMax
 M 120 4 dds3Basic_t* handle
-T fldGlobalWork_t struct 308 field.h 23
+T fldGlobalWork_t struct 308 field.h 27
 M 0 4 s32 mode
 M 4 4 s32 fieldID
 M 8 4 s32 areaID
@@ -5295,13 +5289,12 @@ M 288 4 f32 PlayerMotionFrame
 M 292 4 f32 PlayerSaka
 M 296 4 s32 HitUpdate
 M 300 8 s32 dmy6
-T fldInputPanelProcessData_t struct 16 field.h 82
+T fldInputPanelProcessData_t struct 12 field.h 86
 M 0 2 u16 Count
 M 2 2 u16 Type
 M 4 2 u16 Draw
 M 6 2 u16 Reserve1
 M 8 4 void* PanelText
-M 12 4 void* PanelObj
 T fldNpcLightTbl_tag struct 8 fldNpcLightTbl_tag.h 0
 M 0 1 u8 r0
 M 1 1 u8 g0
@@ -5311,7 +5304,7 @@ M 4 1 u8 g1
 M 5 1 u8 b1
 M 6 1 u8 sb
 M 7 1 u8 dir
-T fldNpcTable_t struct 16 field.h 29
+T fldNpcTable_t struct 16 field.h 33
 M 0 2 s16 _type
 M 2 2 s16 _model_id1
 M 4 2 s16 _model_id2
@@ -5320,7 +5313,7 @@ M 8 2 s16 _hit_size
 M 10 2 s16 _camera
 M 12 2 s16 _flag
 M 14 2 s16 _flag_switch
-T fldNpcUp_t struct 16 field.h 30
+T fldNpcUp_t struct 16 field.h 34
 M 0 1 s8 _field
 M 1 1 s8 _area
 M 4 4 char* _name
@@ -5330,7 +5323,7 @@ M 10 1 s8 _model_mot
 M 11 1 s8 _hit_size
 M 12 1 s8 _camera
 M 14 2 s16 _flag
-T fldNpc_tag struct 104 fldNpc_tag.h 0
+T fldNpc_tag struct 100 fldNpc_tag.h 0
 M 0 4 s32 Type
 M 4 4 f32 x
 M 8 4 f32 y
@@ -5353,7 +5346,6 @@ M 84 4 s32 tCamera
 M 88 4 s32 tId1
 M 92 4 s32 tId2
 M 96 4 char* name
-M 100 4 void* fldObj
 T fldProgramEveHit_tag struct 20 fldProgramEveHit_tag.h 0
 M 0 4 fldResPutEveBall_t* ball
 M 4 4 fldResPut_t* put
@@ -5364,25 +5356,25 @@ T fldProgramHit_tag struct 148 fldProgramHit_tag.h 0
 M 0 128 sdfVector4_t Vertex
 M 128 16 fldResCollisionPolyFace_t* Face
 M 144 4 fldResCollisionPoly_t* DataPoly
-T fldResCam_t struct 4 field.h 66
+T fldResCam_t struct 4 field.h 70
 M 0 4 f32 fovy
-T fldResCollPolyTomeName_t struct 8 field.h 37
+T fldResCollPolyTomeName_t struct 8 field.h 41
 M 0 4 char* Name
 M 4 4 s32 res
-T fldResCollPolyTome_t struct 132 field.h 36
+T fldResCollPolyTome_t struct 132 field.h 40
 M 0 4 s32 Num
 M 4 128 fldResCollPolyTomeName_t* TomeName
-T fldResCollisionBall_t struct 12 field.h 53
+T fldResCollisionBall_t struct 12 field.h 57
 M 0 4 u32 Attr
 M 4 4 s32 EveResIdx
 M 8 4 f32 r
-T fldResCollisionBox_t struct 20 field.h 54
+T fldResCollisionBox_t struct 20 field.h 58
 M 0 4 u32 Attr
 M 4 4 s32 EveResIdx
 M 8 4 f32 zw
 M 12 4 f32 xw
 M 16 4 f32 yw
-T fldResCollisionPolyFace_t struct 36 field.h 35
+T fldResCollisionPolyFace_t struct 36 field.h 39
 M 0 4 u32 Attr
 M 4 1 u8 Myuka
 M 5 1 u8 Se
@@ -5395,35 +5387,35 @@ M 28 2 s16 EncType
 M 30 2 s16 EncIdx
 M 32 2 s16 Spc1
 M 34 2 s16 Spc2
-T fldResCollisionPoly_t struct 24 field.h 34
+T fldResCollisionPoly_t struct 24 field.h 38
 M 0 4 u32 nVertex
 M 4 4 u32 nFace
 M 8 4 u32 n3
 M 12 4 sdfVector4_t* pVertex
 M 16 4 fldResCollisionPolyFace_t* pFace
 M 20 4 fldResCollPolyTome_t* pTome
-T fldResCollision_t struct 12 field.h 55
+T fldResCollision_t struct 12 field.h 59
 M 0 4 u32 Type
 M 4 4 u32 Attr
 M 8 4 u32 _union
-T fldResEvent_t struct 8 field.h 56
+T fldResEvent_t struct 8 field.h 60
 M 0 4 u32 flag
 M 4 4 char* label
-T fldResHeadAreaName_t struct 8 field.h 20
+T fldResHeadAreaName_t struct 8 field.h 24
 M 0 4 u32 num
 M 4 4 char* name
-T fldResHeadLinkData_t struct 12 field.h 22
+T fldResHeadLinkData_t struct 12 field.h 26
 M 0 4 u32 mode
 M 4 4 char* name
 M 8 4 u32 scl
-T fldResHeadLink_t struct 8 field.h 21
+T fldResHeadLink_t struct 8 field.h 25
 M 0 4 u32 num
 M 4 4 fldResHeadLinkData_t* data
-T fldResHeadPos_t struct 48 field.h 18
+T fldResHeadPos_t struct 48 field.h 22
 M 0 16 sdfVector4_t pos
 M 16 16 sdfVector4_t rot
 M 32 16 sdfVector4_t scl
-T fldResHead_t struct 44 field.h 19
+T fldResHead_t struct 44 field.h 23
 M 0 4 u32 resourceID
 M 4 4 u32 resourceType
 M 8 4 char* resourceName
@@ -5435,7 +5427,7 @@ M 28 4 char* SBlockName
 M 32 4 u32 _union
 M 36 4 u8* pDate
 M 40 4 fldResPut_t* pPut
-T fldResModel_t struct 36 field.h 62
+T fldResModel_t struct 36 field.h 66
 M 0 4 u32 Flag
 M 4 4 u32 nLod
 M 8 4 u32 dmy
@@ -5445,43 +5437,43 @@ M 20 4 u32 pMat
 M 24 4 u32 dmy3
 M 28 4 u32 dmy4
 M 32 4 u32 pMot
-T fldResPutEveBall_t struct 8 field.h 16
+T fldResPutEveBall_t struct 8 field.h 20
 M 0 4 u32 Type
 M 4 4 f32 r
-T fldResPutEveBox_t struct 16 field.h 58
+T fldResPutEveBox_t struct 16 field.h 62
 M 0 4 u32 Type
 M 4 4 f32 y
 M 8 4 f32 x
 M 12 4 f32 z
-T fldResPutEvePoly_t struct 12 field.h 57
+T fldResPutEvePoly_t struct 12 field.h 61
 M 0 4 u32 Type
 M 4 4 f32 y
 M 8 4 f32 z
-T fldResPutItemBox_t struct 4 field.h 60
+T fldResPutItemBox_t struct 4 field.h 64
 M 0 4 u32 id
-T fldResPutNpc_t struct 4 field.h 59
+T fldResPutNpc_t struct 4 field.h 63
 M 0 4 u32 id
-T fldResPutSE_t struct 8 field.h 61
+T fldResPutSE_t struct 8 field.h 65
 M 0 4 f32 r
 M 4 4 s32 id
-T fldResPut_t struct 24 field.h 17
+T fldResPut_t struct 24 field.h 21
 M 0 4 u32 Type
 M 4 4 u32 EveIdx
 M 8 4 u32 Visible
 M 12 4 u32 _union
 M 16 4 u8* pDate
 M 20 4 fldResPutEveBall_t* pEveBall
-T fldResourceAreaRangePlane_t struct 32 field.h 76
+T fldResourceAreaRangePlane_t struct 32 field.h 80
 M 0 16 sdfVector4_t normal
 M 16 16 sdfVector4_t point
-T fldResourceAreaRange_t struct 8 field.h 77
+T fldResourceAreaRange_t struct 8 field.h 81
 M 0 4 u32 nPlane
 M 4 4 fldResourceAreaRangePlane_t* pPlane
-T fldResourceDataTable_t struct 12 field.h 67
+T fldResourceDataTable_t struct 12 field.h 71
 M 0 4 u32 resourceID
 M 4 4 void* pData
 M 8 4 u32 dataTop
-T fldResourceEffect_t struct 40 field.h 52
+T fldResourceEffect_t struct 40 field.h 56
 M 0 4 u32 flag
 M 4 4 u32 type
 M 8 4 u32 noEffect
@@ -5490,7 +5482,7 @@ M 24 4 u32 offsetZ
 M 28 4 u32 groupID
 M 32 4 u32 param0
 M 36 4 u32 param1
-T fldResourceLightPath_t struct 40 field.h 1
+T fldResourceLightPath_t struct 40 field.h 5
 M 0 4 f32 InsideR
 M 4 4 f32 OutsideR
 M 8 4 f32 Soften
@@ -5501,7 +5493,7 @@ M 24 4 f32 DiffuseB
 M 28 4 f32 AmbientR
 M 32 4 f32 AmbientG
 M 36 4 f32 AmbientB
-T fldResourceLight_t struct 52 field.h 8
+T fldResourceLight_t struct 52 field.h 12
 M 0 4 u32 resv
 M 4 4 u32 Flag
 M 8 4 u32 AnimeType
@@ -5515,7 +5507,7 @@ M 36 4 f32 DiffuseB
 M 40 4 f32 AmbientR
 M 44 4 f32 AmbientG
 M 48 4 f32 AmbientB
-T fldResourceModelRange_t struct 20 field.h 79
+T fldResourceModelRange_t struct 20 field.h 83
 M 0 4 u32 nVertex
 M 4 4 u32 nFace
 M 8 4 sdfVector4_t* pVertex
@@ -5525,42 +5517,62 @@ T fldResourcePathData_t struct 12 field.h 0
 M 0 4 u32 nKey
 M 4 4 void* pItem
 M 8 4 u32* pKey
-T fldResourcePathTableInfo_t struct 8 field.h 65
+T fldResourcePathData_t_Float struct 16 field.h 3
+M 0 4 u32 nKey
+M 4 4 void* pItem
+M 8 4 u32* pKey
+M 12 4 f32* pItem
+T fldResourcePathData_t_Light struct 16 field.h 4
+M 0 4 u32 nKey
+M 4 4 void* pItem
+M 8 4 u32* pKey
+M 12 4 fldResourceLightPath_t* pItem
+T fldResourcePathData_t_Vector3 struct 16 field.h 1
+M 0 4 u32 nKey
+M 4 4 void* pItem
+M 8 4 u32* pKey
+M 12 4 sdfVector3_t* pItem
+T fldResourcePathData_t_Vector4 struct 16 field.h 2
+M 0 4 u32 nKey
+M 4 4 void* pItem
+M 8 4 u32* pKey
+M 12 4 sdfVector4_t* pItem
+T fldResourcePathTableInfo_t struct 8 field.h 69
 M 0 4 u32 nPathTable
 M 4 4 fldResourcePathTable_t* pPathTableDat
-T fldResourcePathTable_t struct 8 field.h 64
+T fldResourcePathTable_t struct 8 field.h 68
 M 0 4 u32 type
 M 4 4 fldResourcePathData_t* pData
-T fldResourcePoint_t struct 48 field.h 39
+T fldResourcePoint_t struct 48 field.h 43
 M 0 16 sdfVector4_t pos
 M 16 16 sdfVector4_t rot
 M 32 16 sdfVector4_t scl
-T fldResourcePortal_t struct 24 field.h 78
+T fldResourcePortal_t struct 24 field.h 82
 M 0 4 u32 nVertex
 M 4 4 u32 nFace
 M 8 8 u32 attachAreaID
 M 16 4 sdfVector4_t* pVertex
 M 20 4 sdfIVector3_t* pFace
-T fldResourceRadiusRange_t struct 32 field.h 80
+T fldResourceRadiusRange_t struct 32 field.h 84
 M 0 4 u32 type
 M 4 4 f32 r
 M 8 8 u32 padd
 M 16 16 sdfVector4_t size
-T fldResourceTextureList_t struct 12 field.h 63
+T fldResourceTextureList_t struct 12 field.h 67
 M 0 4 u32 flag
 M 4 4 u32 nTexture
 M 8 4 u32 Texture
-T fldResourceTypeTable_t struct 12 field.h 68
+T fldResourceTypeTable_t struct 12 field.h 72
 M 0 4 u32 type
 M 4 4 u32 nResourceDataTable
 M 8 4 fldResHead_t* pResourceDataTable
-T fldSaveNml_t struct 4 field.h 32
+T fldSaveNml_t struct 4 field.h 36
 M 0 2 s16 _fld
 M 2 2 s16 _flg
-T fldSaveSml_t struct 4 field.h 33
+T fldSaveSml_t struct 4 field.h 37
 M 0 2 s16 _fld
 M 2 2 s16 _jmp
-T fldSave_t struct 260 field.h 3
+T fldSave_t struct 260 field.h 7
 M 0 160 fldBlockBuff_t* PushBlock
 M 160 4 fldAutoMapBuff_t* amap
 M 164 32 u8 takara
@@ -5569,7 +5581,7 @@ M 198 2 s16 tmnlid
 M 200 4 s32 AnahoriCnt
 M 204 12 u8 takara2
 M 216 44 s32 pub
-T fldSceneParam_t struct 176 field.h 40
+T fldSceneParam_t struct 176 field.h 44
 M 0 48 fldResourcePoint_t safeUnitPoint
 M 48 4 u32 flag
 M 52 4 s32 mode
@@ -5596,20 +5608,20 @@ M 8 4 f32 r
 M 12 4 f32 x
 M 16 4 f32 y
 M 20 4 f32 z
-T fldSequenceControl_t struct 8 field.h 44
+T fldSequenceControl_t struct 8 field.h 48
 M 0 4 u32 flag
 M 4 4 s32 phase
-T fldSuspendName_t struct 8 field.h 28
+T fldSuspendName_t struct 8 field.h 32
 M 0 2 s16 _fld
 M 2 2 s16 _area
 M 4 4 char* _name
-T fldTakaraTbl_t struct 16 field.h 31
+T fldTakaraTbl_t struct 16 field.h 35
 M 0 4 s32 _Type
 M 4 2 s16 _ItemID
 M 6 2 s16 _ItemNum
 M 8 4 s32 _Trap
 M 12 4 s32 _Param
-T fldTakaraWork_tag struct 52 fldTakaraWork_tag.h 0
+T fldTakaraWork_tag struct 48 fldTakaraWork_tag.h 0
 M 0 4 dds3Basic_t* Basic
 M 4 4 s32 TakaraIdx
 M 8 4 s32 MotPhase
@@ -5622,8 +5634,7 @@ M 32 4 s32 type
 M 36 4 effHandle_t* d3p
 M 40 4 s32 fldTakaraTblIdx
 M 44 4 s32 dmy
-M 48 4 void* fldObj
-T fldUnitControl_t struct 12 field.h 41
+T fldUnitControl_t struct 12 field.h 45
 M 0 4 dds3Basic_t* handle
 M 4 4 dds3Basic_t* handle2
 M 8 1 s8 moveFlag
@@ -5768,6 +5779,13 @@ T itfMiscCoord_t struct 36 interface.h 17
 M 0 12 sdfVector3_t pos
 M 12 12 sdfVector3_t rot
 M 24 12 sdfVector3_t scl
+T itfPanelTypeWork_t struct 208 itfPanelTypeWork_t.h 0
+M 0 4 sdfDmaTag_t* dmatag
+M 4 4 sdfGifTag_t* giftag
+M 8 4 sdfPrm* primitive
+M 12 160 sdfIVector2_t* pvertex
+M 172 32 sdfIVector4_t* pcolor
+M 204 4 sdfTexHandle_t* texhandle
 T itfmisclinkheader_t struct 12 interface.h 8
 M 0 4 void* pprev
 M 4 4 void* pnext
@@ -5822,12 +5840,11 @@ M 12 2 u16 stat
 M 14 2 s16 reserved
 M 16 4 itfmisclinkstack_t* linkstack
 M 20 512 mesflow_tag* pmesflow
-T mdlEffectResrcItem_t struct 20 model.h 7
+T mdlEffectResrcItem_t struct 16 model.h 7
 M 0 4 u32 type
 M 4 4 s32 count
 M 8 4 void* handle
 M 12 4 sdfMemHandle_t* memHandle
-M 16 4 void* pTexture
 T mdlEffectResrcList_t struct 16 model.h 4
 M 0 4 sdfMemHandle_t* memHandle
 M 4 2 s16 count
@@ -5932,7 +5949,7 @@ M 4 4 s32 ioAddr
 M 8 4 sdfMovieCb_t* memAddr
 M 12 4 s32 ioData
 M 16 64 u8 memData
-T nbActionProcessData_t struct 312 newbattle.h 13
+T nbActionProcessData_t struct 308 newbattle.h 13
 M 0 4 nbMainProcessData_t* data
 M 4 4 u32 stat
 M 8 4 s32 uniqueid
@@ -5974,14 +5991,13 @@ M 136 4 sdfMemHandle_t* hSkillMem
 M 140 4 u32 skillmidi
 M 144 4 char* se0_name
 M 148 4 char* se1_name
-M 152 4 void* pTexture
-M 156 128 nbTimeList_t* timelist
-M 284 4 u32 packettime
-M 288 4 s32 hitstopframe
-M 292 4 u32 aiselect
-M 296 4 s32 aijokentbl
-M 300 5 s8 aichktbl
-M 308 4 u32 aisummonid
+M 152 128 nbTimeList_t* timelist
+M 280 4 u32 packettime
+M 284 4 s32 hitstopframe
+M 288 4 u32 aiselect
+M 292 4 s32 aijokentbl
+M 296 5 s8 aichktbl
+M 304 4 u32 aisummonid
 T nbActionStack_t struct 16 newbattle.h 16
 M 0 4 s32 type
 M 4 4 s32 from
@@ -6106,7 +6122,7 @@ M 4 4 s16 s
 M 8 4 s32 i
 M 12 4 f32 mf
 M 16 4 void* p
-T nbFormation_t struct 280 newbattle.h 0
+T nbFormation_t struct 264 newbattle.h 0
 M 0 16 sdfVector4_t orgpos
 M 16 16 sdfVector4_t orgrot
 M 32 16 sdfVector4_t pos
@@ -6144,20 +6160,16 @@ M 176 4 s32 reserve4
 M 180 4 NB_FILEHANDLE_T* packh
 M 184 4 char* akey
 M 188 4 s32 read_minor
-M 192 4 void* modelobj
-M 196 12 sdfVector3_t modelrot
-M 208 4 void* modelanm
-M 212 4 s32 asyncPhase
-M 216 4 void* aReq
-M 220 4 void* readObject
-M 224 4 u32 tartime
-M 228 4 f32 range
-M 232 4 f32 addmovet
-M 236 4 f32 movet
-M 240 4 nbFormData_t* data1
-M 244 4 nbFormData_t* data2
-M 248 16 sdfVector4_t tarpos
-M 264 16 sdfVector4_t startpos
+M 192 12 sdfVector3_t modelrot
+M 204 4 s32 asyncPhase
+M 208 4 u32 tartime
+M 212 4 f32 range
+M 216 4 f32 addmovet
+M 220 4 f32 movet
+M 224 4 nbFormData_t* data1
+M 228 4 nbFormData_t* data2
+M 232 16 sdfVector4_t tarpos
+M 248 16 sdfVector4_t startpos
 T nbHelpProcessData_t struct 72 newbattle.h 20
 M 0 4 s32 type
 M 4 4 char* text1
@@ -6388,7 +6400,7 @@ M 824 4 s32 selectcur
 T nbNewBattleSeqData_t struct 8 newbattle.h 4
 M 0 4 s32 encountpack
 M 4 4 s32 encounttbl
-T nbPanelFlashData_t struct 60 newbattle.h 2
+T nbPanelFlashData_t struct 56 newbattle.h 2
 M 0 4 s32 PT_1_Frame
 M 4 4 u32 PT_1_Process
 M 8 4 s32 PT_2_Frame
@@ -6403,7 +6415,6 @@ M 40 4 f32 scale_x
 M 44 4 f32 scale_y
 M 48 4 s32 addX
 M 52 4 s32 addY
-M 56 4 void* obj
 T nbParty_t struct 128 newbattle.h 7
 M 0 2 s16 flag
 M 2 2 s16 formindex
@@ -6475,12 +6486,12 @@ M 0 4 char* fname
 M 4 4 s32 length
 M 8 4 s32 mode
 M 12 1 u8 mempointer
-T p2sdIOPtoEEpkt struct 16 libsdf.h 78
+T p2sdIOPtoEEpkt struct 16 libsdf.h 79
 M 0 4 u32 command
 M 4 4 u32 src
 M 8 4 u32 dst
 M 12 4 u32 size
-T p2sdPosvect struct 32 libsdf.h 77
+T p2sdPosvect struct 32 libsdf.h 78
 M 0 4 u32 reqno
 M 4 4 u32 limit
 M 8 4 s32 cx
@@ -6489,14 +6500,14 @@ M 16 4 s32 cz
 M 20 4 s32 px
 M 24 4 s32 py
 M 28 4 s32 pz
-T p2sdSMGstatus struct 8 libsdf.h 81
+T p2sdSMGstatus struct 8 libsdf.h 82
 M 0 4 s32 reqno
 M 4 1 u8 totaltimes
 M 5 1 u8 bgmtimes
-T p2sdSubHandle struct 8 libsdf.h 163
+T p2sdSubHandle struct 8 libsdf.h 164
 M 0 4 void* SpuAddress
 M 4 4 s32 IopHandle
-T p2sdadpcmheader struct 16 libsdf.h 162
+T p2sdadpcmheader struct 16 libsdf.h 163
 M 0 4 u32 strsize
 M 4 4 u32 interleave
 M 8 2 s16 looppoint
@@ -6504,14 +6515,14 @@ M 10 1 u8 mode
 M 11 1 u8 frequensy
 M 12 2 u16 dsp
 M 14 2 u16 reserve
-T p2sdfileheader struct 16 libsdf.h 160
+T p2sdfileheader struct 16 libsdf.h 161
 M 0 1 s8 type
 M 1 1 s8 format
 M 2 2 u16 ID
 M 4 4 u32 fsize
 M 8 4 s8 code
 M 12 4 u32 dsize
-T p2sdsoundheader struct 32 libsdf.h 161
+T p2sdsoundheader struct 32 libsdf.h 162
 M 0 4 u32 hdofs
 M 4 4 u32 hdsize
 M 8 4 u32 bdofs
@@ -6548,6 +6559,11 @@ M 4 4 sdfGrTagStdReg_t* test
 T packetregist_TEXA_tag struct 8 packetregist_TEXA_tag.h 0
 M 0 4 sdfGrPacketHeader_t* header
 M 4 4 sdfGrTagStdReg_t* texa
+T packetregist_tag struct 16 packetregist_tag.h 0
+M 0 4 sdfDmaTag_t* dmatag
+M 4 4 sdfGifTag_t* giftag
+M 8 4 sdfPrm* primitive
+M 12 4 sdfGrTagStdReg_t* regist
 T packettestalpha_tag struct 12 packettestalpha_tag.h 0
 M 0 4 sdfGrPacketHeader_t* header
 M 4 4 sdfGrTagStdReg_t* test
@@ -6657,7 +6673,7 @@ M 0 2 s16 dir
 M 4 4 u32 cnt
 M 8 4 f32 scl
 M 12 4 pbGroupData_t* grp
-T pbMyChar_t struct 40 pbMyChar_t.h 0
+T pbMyChar_t struct 36 pbMyChar_t.h 0
 M 0 4 u32 flg
 M 4 2 s16 x
 M 6 2 s16 y
@@ -6665,7 +6681,6 @@ M 8 4 s32 dir
 M 12 4 s32 dmy
 M 16 16 sdfVector4_t pos
 M 32 4 dds3ModelHandle_t* modelhdl
-M 36 4 void* modelobj
 T pbProcHandle_t struct 16 pb.h 0
 M 0 4 dds3ProcessID_t* id
 M 4 4 s32 mes
@@ -6692,23 +6707,19 @@ T pbViewModeCamera_t struct 36 pbViewModeCamera_t.h 0
 M 0 4 f32 ratio
 M 4 16 sdfVector4_t eye
 M 20 16 sdfVector4_t tgt
-T pbWork_t struct 52 pb.h 6
+T pbWork_t struct 36 pb.h 6
 M 0 4 pbBackup_t* bup
 M 4 4 u32 camera_mode
-M 8 4 void* blockTex
-M 12 4 void* bgTex
-M 16 4 void* etcTex
-M 20 4 void* helpTex
-M 24 4 sdfMemHandle_t* mhscript
-M 28 2 u16 level
-M 30 2 u16 stage
-M 32 1 u8 debug_flag
-M 33 1 u8 reserved0
-M 34 2 u16 reserved1
-M 36 4 u32 debug
-M 40 4 pbProcHandle_t* menu_proc
-M 44 4 pbProcHandle_t* help_proc
-M 48 4 u8* pscript
+M 8 4 sdfMemHandle_t* mhscript
+M 12 2 u16 level
+M 14 2 u16 stage
+M 16 1 u8 debug_flag
+M 17 1 u8 reserved0
+M 18 2 u16 reserved1
+M 20 4 u32 debug
+M 24 4 pbProcHandle_t* menu_proc
+M 28 4 pbProcHandle_t* help_proc
+M 32 4 u8* pscript
 T pb_Define struct 4 pb.h 4
 M 0 4 s32 pbGeneral_h_
 T pb_MCARD_sceMcTblGetDir struct 4 pb.h 9
@@ -6815,7 +6826,7 @@ M 24 4 s32 Reserve2
 M 28 4 s32 Reserve3
 T pmdNameTable_t struct 4 event.h 12
 M 0 4 char* Name
-T pmdProcessWork_t struct 252 event.h 7
+T pmdProcessWork_t struct 244 event.h 7
 M 0 4 u32 flag
 M 4 4 char* filename1
 M 8 4 s32 CameraFirst
@@ -6873,12 +6884,10 @@ M 212 4 f32 NowFrameF
 M 216 4 dds3Basic_t* EffectBasicTable
 M 220 4 void* hide_ypos
 M 224 4 evtTexManager* TexMngr
-M 228 4 void* ChrObj
-M 232 4 void* ChrList
-M 236 4 void* AnmList
-M 240 4 void* FldObj
-M 244 4 void* FldList
-M 248 4 void* anim_list
+M 228 4 void* ChrList
+M 232 4 void* AnmList
+M 236 4 void* FldList
+M 240 4 void* anim_list
 T pmdSceneFogTable_t struct 32 event.h 6
 M 0 4 f32 Min
 M 4 4 f32 Max
@@ -7027,7 +7036,7 @@ T scrProcTable_t struct 32 scr.h 4
 M 0 24 u8 Name
 M 24 4 s32 CodeAddress
 M 28 4 s32 Reserve1
-T scrProcessWork_s struct 616 scr.h 2
+T scrProcessWork_s struct 280 scr.h 2
 M 0 24 u8 Name
 M 24 32 scrHeader_t Header
 M 56 4 scrTypeTable_t* TypeTable
@@ -7039,48 +7048,55 @@ M 76 4 u8* StringData
 M 80 4 s32 CP
 M 84 4 s32 SP
 M 88 28 u8 StackType
-M 116 448 scrStackData_u StackData
-M 564 4 s32 StartProc
-M 568 4 s32 MesHandle
-M 572 4 s32 ScriptTimer
-M 576 4 s32 CommandTimer
-M 580 4 f32 ScriptTimerF
-M 584 4 f32 CommandTimerF
-M 588 4 sdfMemHandle_t* MemHandle
-M 592 4 u32* LocalInt
-M 596 4 f32* LocalFloat
-M 600 4 dds3ProcessID_t* ProcessID
-M 604 4 scrProcessWork_s* prev
-M 608 4 scrProcessWork_s* next
-M 612 4 void* data
-T scrStackData_u struct 16 scr.h 7
+M 116 112 scrStackData_u StackData
+M 228 4 s32 StartProc
+M 232 4 s32 MesHandle
+M 236 4 s32 ScriptTimer
+M 240 4 s32 CommandTimer
+M 244 4 f32 ScriptTimerF
+M 248 4 f32 CommandTimerF
+M 252 4 sdfMemHandle_t* MemHandle
+M 256 4 u32* LocalInt
+M 260 4 f32* LocalFloat
+M 264 4 dds3ProcessID_t* ProcessID
+M 268 4 scrProcessWork_s* prev
+M 272 4 scrProcessWork_s* next
+M 276 4 void* data
+T scrStackData_u union 4 scr.h 7
 M 0 4 s32 i
-M 4 4 f32 f
-M 8 2 s16 s0
-M 10 2 s16 s1
-M 12 1 u8 c0
-M 13 1 u8 c1
-M 14 1 u8 c2
-M 15 1 u8 c3
+M 0 4 f32 f
+M 0 2 s16 s0
+M 0 2 s16 s1
+M 0 1 u8 c0
+M 0 1 u8 c1
+M 0 1 u8 c2
+M 0 1 u8 c3
 T scrTypeTable_t struct 16 scr.h 3
 M 0 4 s32 Type
 M 4 4 s32 ItemSize
 M 8 4 s32 ItemCount
 M 12 4 s32 ItemAddress
-T sdf2DSpriteParm_t struct 20 libsdf.h 130
+T sdf2DSpriteParm_t struct 20 libsdf.h 131
 M 0 4 sdfGrTagRGBA_t* rgba
 M 4 4 sdfGrTagUV_t* uv0
 M 8 4 sdfGrTagXYZ2_t* xyz0
 M 12 4 sdfGrTagUV_t* uv1
 M 16 4 sdfGrTagXYZ2_t* xyz1
-T sdf3DFogPacket_t struct 80 libsdf.h 66
+T sdf2DTexPacket_t struct 24 sdf2DTexPacket_t.h 0
+M 0 4 sdfDmaTag_t* dmatag
+M 4 4 sdfGifTag_t* giftag
+M 8 4 sdfPrm* primitive
+M 12 4 sdfGrTagStdReg_t* tex0
+M 16 4 sdfGrTagStdReg_t* tex1
+M 20 4 sdfGrTagStdReg_t* clamp
+T sdf3DFogPacket_t struct 80 libsdf.h 67
 M 0 16 sdfDmaTag_t dmatag
 M 16 16 f32 fogParm
 M 32 16 sdfGifTag_t giftag
 M 48 16 sdfGrTagStdReg_t fogColor
 M 64 4 u32 mscal
 M 68 12 u32 pad
-T sdf3DFogParam_t struct 20 libsdf.h 60
+T sdf3DFogParam_t struct 20 libsdf.h 61
 M 0 4 f32 fogMax
 M 4 4 f32 fogMin
 M 8 4 f32 fogNear
@@ -7100,7 +7116,7 @@ M 0 16 sdfVector4_t color
 M 16 16 sdfVector4_t v
 M 32 16 sdfVector4_t p
 M 48 16 f32 param
-T sdf3DPrimPolyParm_t struct 44 libsdf.h 59
+T sdf3DPrimPolyParm_t struct 44 libsdf.h 60
 M 0 2 s16 faceCount
 M 2 2 s16 pointCount
 M 4 2 u16 attr
@@ -7114,7 +7130,7 @@ M 28 4 sdfVector2_t* multiUv
 M 32 4 u32* vertexColor
 M 36 4 void* allocator
 M 40 4 f32 zBias
-T sdf3DScreenParam_t struct 160 libsdf.h 64
+T sdf3DScreenParam_t struct 160 libsdf.h 65
 M 0 4 u32 flags
 M 4 4 f32 aspect
 M 8 4 f32 projDist
@@ -7131,10 +7147,20 @@ M 48 64 sdfMatrix4_t TM
 M 112 16 sdfVector4_t scale
 M 128 16 sdfVector4_t trans
 M 144 16 sdfVector4_t cameraPos
-T sdf3DTmPacketData_t struct 128 libsdf.h 75
+T sdf3DTmPacketData_t struct 128 libsdf.h 76
 M 0 112 sdfVector4_t tm
 M 112 16 u32 cmd
-T sdfBillBoard1Packet_t struct 128 libsdf.h 138
+T sdf3DViewportPacket_t struct 204 libsdf.h 36
+M 0 4 sdfDmaTag_t* dmatag
+M 4 4 sdfGifTag_t* giftag
+M 8 4 sdfPrm* primitive
+M 12 64 sdfVector4_t cameraTm
+M 76 64 sdfVector4_t TM
+M 140 16 sdfVector4_t scale
+M 156 16 sdfVector4_t trans
+M 172 16 sdfVector4_t cameraPos
+M 188 16 u32 hooter
+T sdfBillBoard1Packet_t struct 128 libsdf.h 139
 M 0 2 u16 dma_qwc
 M 2 1 u8 dma_pad
 M 3 1 u8 dma_id
@@ -7157,7 +7183,7 @@ M 84 32 f32 xyOffset
 M 116 4 u32 vif_itop
 M 120 4 u32 vif_mscal
 M 124 4 u32 pad
-T sdfBillBoardTMPacket_t struct 56 libsdf.h 137
+T sdfBillBoardTMPacket_t struct 56 libsdf.h 138
 M 0 2 u16 dma_qwc
 M 2 1 u8 dma_pad
 M 3 1 u8 dma_id
@@ -7167,7 +7193,7 @@ M 12 24 f32 tm
 M 36 4 u32 vif_itop
 M 40 4 u32 vif_mscal
 M 44 12 u32 pad
-T sdfBillBoardVc1Packet_t struct 144 libsdf.h 140
+T sdfBillBoardVc1Packet_t struct 144 libsdf.h 141
 M 0 2 u16 dma_qwc
 M 2 1 u8 dma_pad
 M 3 1 u8 dma_id
@@ -7190,7 +7216,7 @@ M 96 32 f32 xyOffset
 M 128 4 u32 vif_itop
 M 132 4 u32 vif_mscal
 M 136 8 u32 pad
-T sdfCdImageDirEntry_t struct 12 libsdf.h 67
+T sdfCdImageDirEntry_t struct 12 libsdf.h 68
 M 0 4 u32 nameOffset_
 M 4 4 u32 offset_
 M 8 4 s32 size_
@@ -7199,7 +7225,7 @@ M 0 4 sdfChipPageInfo_tag* currentPage
 M 4 4 sdfChipPageInfo_tag* freeLink
 M 8 2 s16 chipSize
 M 10 2 s16 chipsPerPage
-T sdfChipInfo_t struct 48 libsdf.h 142
+T sdfChipInfo_t struct 48 libsdf.h 143
 M 0 4 s32 total
 M 4 4 s32 freeSize
 M 8 4 s32 pageCount
@@ -7287,7 +7313,7 @@ M 0 2 u16 faceCount
 M 2 2 u16 pointCount
 M 4 2 u16 attrBits
 M 6 2 u16 packetBits
-T sdfDecompCb_t struct 32 libsdf.h 65
+T sdfDecompCb_t struct 32 libsdf.h 66
 M 0 1 u8 stat
 M 1 1 u8 direc
 M 2 2 u16 direcLeng
@@ -7297,15 +7323,15 @@ M 12 4 u32 srcRemain
 M 16 1 u8 sdOfs
 M 17 3 u8 pad0
 M 20 12 u32 pad1
-T sdfDelayedResrcCB_t struct 8 libsdf.h 68
+T sdfDelayedResrcCB_t struct 8 libsdf.h 69
 M 0 4 free_funcDelegate* freeFuncPtr
 M 4 4 sdfDelayedResrcChunk_t* chunk
-T sdfDelayedResrcChunk_t struct 16 libsdf.h 69
+T sdfDelayedResrcChunk_t struct 16 libsdf.h 70
 M 0 4 sdfDelayedResrcChunk_t* next
 M 4 4 sdfDelayedResrcCB_t* owner
 M 8 4 sdfDelayedResrcItems_t* items
 M 12 4 s32 itemsFreeCount
-T sdfDelayedResrcItems_t struct 256 libsdf.h 70
+T sdfDelayedResrcItems_t struct 256 libsdf.h 71
 M 0 4 sdfDelayedResrcItems_t* next
 M 4 252 void* items
 T sdfDevConsCB_tag struct 32 sdfDevConsCB_tag.h 0
@@ -7337,7 +7363,7 @@ T sdfDevConsDrawCB_t struct 8 sdfDevConsDrawCB_t.h 0
 M 0 4 s32 buffSize
 M 4 2 u16 dblBuffId
 M 6 2 u16 stepY
-T sdfDevPrintCB_t struct 20 libsdf.h 143
+T sdfDevPrintCB_t struct 20 libsdf.h 144
 M 0 4 s32 x
 M 4 4 s32 y
 M 8 4 u32 z
@@ -7366,7 +7392,7 @@ M 12 4 f32 z
 M 16 4 void* lightPacket
 M 20 4 void* fogPacket
 M 24 8 void* texPacket
-T sdfFileCmdCB_t struct 64 libsdf.h 144
+T sdfFileCmdCB_t struct 64 libsdf.h 145
 M 0 4 sdfFileCmdCB_t* next
 M 4 4 sdfFileCmdCB_t* prev
 M 8 4 sdfFileCmdCB_t* deviceNext
@@ -7386,7 +7412,7 @@ M 48 4 u32 currentOffset
 M 52 4 u32 remainder
 M 56 4 sdfFileCmdCallback_t* callback
 M 60 4 void* userData
-T sdfFileCmdHandle_t struct 60 libsdf.h 39
+T sdfFileCmdHandle_t struct 60 libsdf.h 40
 M 0 4 sdfFileCmdHandle_t* next
 M 4 4 sdfFileCmdHandle_t* prev
 M 8 4 sdfFileCmdHandle_t* deviceNext
@@ -7416,24 +7442,24 @@ M 20 4 s32 blockSize
 T sdfGifTag_t struct 16 libsdf.h 31
 M 0 8 u64 parm
 M 8 8 u64 regs
-T sdfGrCallPacketHeader_t struct 8 libsdf.h 88
+T sdfGrCallPacketHeader_t struct 8 libsdf.h 89
 M 0 4 sdfDmaTag_t* calltag
 M 4 4 sdfDmaTag_t* linktag
-T sdfGrClearPacket_t struct 80 libsdf.h 51
+T sdfGrClearPacket_t struct 80 libsdf.h 52
 M 0 16 sdfGrTagStdReg_t test
 M 16 16 sdfGrTagStdReg_t prim
 M 32 16 sdfGrTagStdReg_t rgbaq
 M 48 16 sdfGrTagStdReg_t xyzA
 M 64 16 sdfGrTagStdReg_t xyzB
-T sdfGrDrawDefParmPacket_t struct 64 libsdf.h 49
+T sdfGrDrawDefParmPacket_t struct 64 libsdf.h 50
 M 0 16 sdfGrTagStdReg_t prmodecont
 M 16 16 sdfGrTagStdReg_t colclamp
 M 32 16 sdfGrTagStdReg_t dthe
 M 48 16 sdfGrTagStdReg_t texa
-T sdfGrDrawDefParm_t struct 8 libsdf.h 90
+T sdfGrDrawDefParm_t struct 8 libsdf.h 91
 M 0 4 sdfGrPacketHeader_t* header
 M 4 4 sdfGrDrawDefParmPacket_t* packet
-T sdfGrDrawEnv_t struct 368 libsdf.h 46
+T sdfGrDrawEnv_t struct 368 libsdf.h 47
 M 0 32 sdfGrPacketHeader_t header
 M 32 64 sdfGrDrawDefParmPacket_t defParm
 M 96 64 sdfGrDrawFramePacket_t frame1
@@ -7443,15 +7469,15 @@ M 304 16 sdfGrTagStdReg_t test1
 M 320 16 sdfGrTagStdReg_t alpha1
 M 336 16 sdfGrTagStdReg_t test2
 M 352 16 sdfGrTagStdReg_t alpha2
-T sdfGrDrawFramePacket_t struct 64 libsdf.h 50
+T sdfGrDrawFramePacket_t struct 64 libsdf.h 51
 M 0 16 sdfGrTagStdReg_t frame
 M 16 16 sdfGrTagStdReg_t zbuf
 M 32 16 sdfGrTagStdReg_t xyoffset
 M 48 16 sdfGrTagStdReg_t scissor
-T sdfGrDrawFrame_t struct 8 libsdf.h 91
+T sdfGrDrawFrame_t struct 8 libsdf.h 92
 M 0 4 sdfGrPacketHeader_t* header
 M 4 4 sdfGrDrawFramePacket_t* packet
-T sdfGrFramePacket_t struct 32 libsdf.h 92
+T sdfGrFramePacket_t struct 32 libsdf.h 93
 M 0 4 sdfPreDrawHook_t* worker
 M 4 4 sdfGrPacketHeader_t* header
 M 8 4 sdfGrTagStdReg_t* frame
@@ -7460,7 +7486,7 @@ M 16 4 sdfGrFrameSet_t* frameSet
 M 20 4 u32 frameMask
 M 24 4 u32 zbuffMask
 M 28 4 u32 context
-T sdfGrFrameSet_t struct 20 libsdf.h 93
+T sdfGrFrameSet_t struct 20 libsdf.h 94
 M 0 2 s16 w
 M 2 2 s16 h
 M 4 2 s16 buffH
@@ -7481,12 +7507,12 @@ T sdfGrPacketHeader_t struct 32 libsdf.h 25
 M 0 4 sdfDmaTag_t* dmatag
 M 8 16 sdfGifTag_t giftag
 M 24 4 sdfPrm* primitive
-T sdfGrRefGifPacketHeader_t struct 16 libsdf.h 87
+T sdfGrRefGifPacketHeader_t struct 16 libsdf.h 88
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfGifTag_t* giftag
 M 8 4 sdfDmaTag_t* reftag
 M 12 4 sdfDmaTag_t* linktag
-T sdfGrRefPacketHeader_t struct 8 libsdf.h 86
+T sdfGrRefPacketHeader_t struct 8 libsdf.h 87
 M 0 4 sdfDmaTag_t* reftag
 M 4 4 sdfDmaTag_t* linktag
 T sdfGrScreenDef_t struct 12 sdfGrScreenDef_t.h 0
@@ -7496,7 +7522,7 @@ M 4 2 s16 buffH
 M 6 2 u16 pixelFormat
 M 8 2 u16 zbuffFormat
 M 10 2 u16 fieldFrameMode
-T sdfGrStdDrawEnv_t struct 44 libsdf.h 45
+T sdfGrStdDrawEnv_t struct 44 libsdf.h 46
 M 0 4 sdfPreDrawHook_t* worker
 M 4 4 sdfGrPacketHeader_t* header
 M 8 4 sdfGrDrawDefParmPacket_t* defParm
@@ -7508,28 +7534,28 @@ M 28 4 sdfGrTagStdReg_t* alpha1
 M 32 4 sdfGrTagStdReg_t* test2
 M 36 4 sdfGrTagStdReg_t* alpha2
 M 40 4 sdfGrStdDrawEnv_t_AnonymousClass* ext
-T sdfGrStdDrawEnv_t_AnonymousClass struct 12 libsdf.h 52
+T sdfGrStdDrawEnv_t_AnonymousClass struct 12 libsdf.h 53
 M 0 4 sdfGrStdDrawEnv_t_AnonymousClass_AnonymousClass2* alphaMask
 M 4 4 sdfTexPacket_t* dispTex
 M 8 4 sdfTexPacket_t* drawTex
-T sdfGrStdDrawEnv_t_AnonymousClass_AnonymousClass2 struct 8 libsdf.h 54
+T sdfGrStdDrawEnv_t_AnonymousClass_AnonymousClass2 struct 8 libsdf.h 55
 M 0 4 sdfGrTagStdReg_t* frame1
 M 4 4 sdfGrTagStdReg_t* frame2
-T sdfGrTagFOG_t struct 16 libsdf.h 98
+T sdfGrTagFOG_t struct 16 libsdf.h 99
 M 0 8 u64 pad1
 M 8 4 u32 pad2
 M 12 2 u16 f
 M 14 2 u16 pad3
-T sdfGrTagPRIM_t struct 16 libsdf.h 95
+T sdfGrTagPRIM_t struct 16 libsdf.h 96
 M 0 4 u32 prim
 M 4 4 u32 pad1
 M 8 8 u64 pad2
-T sdfGrTagRGBA_t struct 16 libsdf.h 36
+T sdfGrTagRGBA_t struct 16 libsdf.h 37
 M 0 4 s32 r
 M 4 4 s32 g
 M 8 4 s32 b
 M 12 4 s32 a
-T sdfGrTagSTQ_t struct 16 libsdf.h 96
+T sdfGrTagSTQ_t struct 16 libsdf.h 97
 M 0 4 f32 s
 M 4 4 f32 t
 M 8 4 f32 q
@@ -7537,23 +7563,23 @@ M 12 4 u32 pad
 T sdfGrTagStdReg_t struct 16 libsdf.h 34
 M 0 8 u64 data
 M 8 8 u64 reg
-T sdfGrTagUV_t struct 16 libsdf.h 62
+T sdfGrTagUV_t struct 16 libsdf.h 63
 M 0 4 s32 u
 M 4 4 s32 v
 M 8 8 u64 pad
-T sdfGrTagXYZ2_t struct 16 libsdf.h 37
+T sdfGrTagXYZ2_t struct 16 libsdf.h 38
 M 0 4 s32 x
 M 4 4 s32 y
 M 8 4 s32 z
 M 12 2 u16 adc
 M 14 2 u16 pad
-T sdfGrTagXYZF2_t struct 16 libsdf.h 97
+T sdfGrTagXYZF2_t struct 16 libsdf.h 98
 M 0 4 s32 x
 M 4 4 s32 y
 M 8 4 s32 z
 M 12 2 u16 f
 M 14 2 u16 pad
-T sdfGsFrameBuff_t struct 8 libsdf.h 94
+T sdfGsFrameBuff_t struct 8 libsdf.h 95
 M 0 4 sdfGsMemSlice_t* slice
 M 4 4 s32 pad2
 T sdfGsMemSlice_t struct 28 libsdf.h 19
@@ -7565,16 +7591,16 @@ M 16 4 s32 size
 M 20 2 s16 w
 M 22 2 s16 h
 M 24 4 u32 pixelFormat
-T sdfHandlerLink_t struct 16 libsdf.h 73
+T sdfHandlerLink_t struct 16 libsdf.h 74
 M 0 4 sdfHandlerLink_t* next
 M 4 4 s32 type
 M 8 4 s32 cause
 M 12 4 s32 id
-T sdfIVector2_t struct 8 libsdf.h 42
+T sdfIVector2_t struct 8 libsdf.h 43
 M 0 8 s32 pm
-T sdfIVector3_t struct 12 libsdf.h 136
+T sdfIVector3_t struct 12 libsdf.h 137
 M 0 12 s32 pm
-T sdfIVector4_t struct 16 libsdf.h 61
+T sdfIVector4_t struct 16 libsdf.h 62
 M 0 16 s32 pm
 T sdfImageSetCb_t struct 20 sdfImageSetCb_t.h 0
 M 0 4 s32 semaId
@@ -7597,7 +7623,7 @@ M 12 1 u8 dataMemMode
 M 13 3 u8 pad
 M 16 4 sdfImageSetRegsPacket_t* regsPacket
 M 20 4 sdfImageSetDataPacket_t* dataPacket
-T sdfImageSetParm_t struct 24 libsdf.h 63
+T sdfImageSetParm_t struct 24 libsdf.h 64
 M 0 4 void* data
 M 4 4 sdfMemHandle_t* dataMemHandle
 M 8 1 u8 dataMemMode
@@ -7632,14 +7658,14 @@ M 8 4 s32 fileSize
 M 12 4 s32 readSize
 M 16 4 s32 readPtr
 M 20 4 s32 readTotal
-T sdfIopLoadStartModuleParm_t struct 12 libsdf.h 165
+T sdfIopLoadStartModuleParm_t struct 12 libsdf.h 166
 M 0 4 s32 filenameLeng
 M 4 4 s32 args
 M 8 4 char* filename
-T sdfIopLoadStartModuleResult_t struct 8 libsdf.h 166
+T sdfIopLoadStartModuleResult_t struct 8 libsdf.h 167
 M 0 4 s32 result
 M 4 4 s32 iopResult
-T sdfIpuDecodeCb_t struct 88 libsdf.h 72
+T sdfIpuDecodeCb_t struct 88 libsdf.h 73
 M 0 4 sdfIpuDecodeCb_t* prev
 M 4 4 sdfIpuDecodeCb_t* next
 M 8 4 sdfIpuDecodeCb_t* taskNext
@@ -7685,25 +7711,25 @@ M 4 4 u32 size
 M 8 2 u16 width
 M 10 2 u16 height
 M 12 4 s32 frameCount
-T sdfIpuInitParm_t struct 4 libsdf.h 148
+T sdfIpuInitParm_t struct 4 libsdf.h 149
 M 0 1 u8 rgbMode
 M 1 1 u8 ditherMode
 M 2 1 u8 loopMode
 M 3 1 u8 fps
-T sdfIpuStrmCallback_t struct ? libsdf.h 74
+T sdfIpuStrmCallback_t struct ? libsdf.h 75
 M ? ? sdfIpuDecodeCb_t* cb
 M ? ? intptr_t userdata
 M ? ? s32 cause
 M ? ? intptr_t argp
 M ? ? s32 argi
-T sdfItemArray_t struct 16 libsdf.h 150
+T sdfItemArray_t struct 16 libsdf.h 151
 M 0 4 sdfMemHandle_t* memHandle
 M 4 2 s16 count
 M 6 2 s16 capacity
 M 8 2 s16 elemSize
 M 10 2 s16 growStep
 M 12 4 s32* items
-T sdfLoadImagePacket_t struct 32 libsdf.h 146
+T sdfLoadImagePacket_t struct 32 libsdf.h 147
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfGifTag_t* giftag
 M 8 4 sdfPrimBitBltElem_t* bitblt
@@ -7772,9 +7798,9 @@ M 56 4 sdfMatUvwParm_t* uvwParm
 M 60 4 sdfMatUvwParm_t* multiTexUvwParm
 M 64 4 f32 fdBias
 M 68 4 f32 fdSoften
-T sdfMatrix2_t struct 16 libsdf.h 131
+T sdfMatrix2_t struct 16 libsdf.h 132
 M 0 16 sdfVector2_t pm
-T sdfMatrix3_t struct 36 libsdf.h 132
+T sdfMatrix3_t struct 36 libsdf.h 133
 M 0 36 sdfVector3_t pm
 T sdfMcCb_tag struct 48 sdfMcCb_tag.h 0
 M 0 4 sdfMcCb_tag* next
@@ -7816,7 +7842,18 @@ M 4 4 sdfMemHandle_t* next
 M 8 4 void* ptr
 M 12 2 u16 stat
 M 14 2 u16 mlock
-T sdfMemInfo_t struct 24 libsdf.h 149
+T sdfMemHandle_tag struct 32 sdfMemHandle_tag.h 0
+M 0 4 sdfMemHandle_t* prev
+M 4 4 sdfMemHandle_t* next
+M 8 4 void* ptr
+M 12 2 u16 stat
+M 14 2 u16 mlock
+M 16 4 sdfMemHandle_t* prev
+M 20 4 sdfMemHandle_t* next
+M 24 4 void* ptr
+M 28 2 u16 stat
+M 30 2 u16 mlock
+T sdfMemInfo_t struct 24 libsdf.h 150
 M 0 4 s32 total
 M 4 4 s32 freeSize
 M 8 4 s32 maxFreeSize
@@ -7836,16 +7873,16 @@ M 12 4 sdfMatDef_t* matDef_New
 M 16 4 u32 morphCount
 M 20 4 void* extraData
 M 24 4 sdfModelNodeDef_t* nodeDef
-T sdfModelDrawEnv_t struct 36 libsdf.h 47
+T sdfModelDrawEnv_t struct 36 libsdf.h 48
 M 0 32 sdfModelDrawEnv_t_AnonymousClass set
 M 32 4 sdfModelDrawEnv_t_AnonymousClass2* term
-T sdfModelDrawEnv_t_AnonymousClass struct 8 libsdf.h 56
+T sdfModelDrawEnv_t_AnonymousClass struct 8 libsdf.h 57
 M 0 4 sdfDrawTag_t* drawTag
 M 4 4 sdfPrimTransPacket_t* transPacket
-T sdfModelDrawEnv_t_AnonymousClass2 struct 8 libsdf.h 53
+T sdfModelDrawEnv_t_AnonymousClass2 struct 8 libsdf.h 54
 M 0 4 sdfDrawTag_t* drawTag
 M 4 4 sdfDmaTag_t* footer
-T sdfModelExtraChunkMarkPos_t struct 68 libsdf.h 83
+T sdfModelExtraChunkMarkPos_t struct 64 libsdf.h 84
 M 0 4 s32 nodeId
 M 4 4 s32 id
 M 8 4 u32 param
@@ -7853,8 +7890,7 @@ M 12 4 u32 pad1
 M 16 16 sdfVector4_t pos
 M 32 16 sdfVector4_t forward
 M 48 16 sdfVector4_t up
-M 64 4 void* obj
-T sdfModelExtraChunk_t struct 20 libsdf.h 101
+T sdfModelExtraChunk_t struct 20 libsdf.h 102
 M 0 4 u32 chunkId
 M 4 4 u32 size
 M 8 4 u32 data0
@@ -7923,7 +7959,7 @@ M 5 1 u8 otIndex
 M 6 2 u16 size
 M 8 4 void* dataPtr
 M 12 4 sdfMemHandle_t* memHandle
-T sdfModelRootNode_t struct 168 libsdf.h 1
+T sdfModelRootNode_t struct 160 libsdf.h 1
 M 0 4 sdfModelNodeList_t* nodeList
 M 4 4 sdfModelNode_t* headNode
 M 8 4 sdfModelTexList_t* texList
@@ -7943,10 +7979,8 @@ M 136 4 f32 faceDivSoften
 M 140 4 f32 faceDivBias
 M 144 4 void* extraData
 M 148 4 f32 zBias
-M 152 4 void* modelobj
-M 156 4 void* oData
-M 160 4 s32 effpos_type
-M 164 4 s32 reversePB
+M 152 4 s32 effpos_type
+M 156 4 s32 reversePB
 T sdfModelTexList_t struct 16 libsdf.h 3
 M 0 4 sdfMemHandle_t* memHandle
 M 4 2 s16 count
@@ -7959,6 +7993,12 @@ M 0 4 u8* key_frame
 M 4 4 s32 basePtr
 M 8 4 s32 nextPtr
 M 12 4 f32 rate
+T sdfMotNodeMatBase_t struct 20 sdfMotNodeMatBase_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotionNode_t* nodeBase
+M 16 4 sdfMat_t* matNode
 T sdfMotNodeMatColor_t struct 8 sdfMotNodeMatColor_t.h 0
 M 0 4 sdfMotNodeMatBase_t* base
 M 4 4 u32 blendSrc
@@ -7968,9 +8008,39 @@ M 4 4 f32 blendSrc
 T sdfMotNodeMatUvw_t struct 24 sdfMotNodeMatUvw_t.h 0
 M 0 4 sdfMotNodeMatBase_t* base
 M 4 20 f32 blendSrc
+T sdfMotNodeModel8u_t struct 20 sdfMotNodeModel8u_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotNodeModelBase_t* base
+M 16 1 u8 blendSrc
 T sdfMotNodeModelBase_t struct 16 sdfMotNodeModelBase_t.h 0
 M 0 12 sdfMotionNode_t nodeBase
 M 12 4 sdfModelNode_t* modelNode
+T sdfMotNodeModelLerpRotQuat_t struct 32 sdfMotNodeModelLerpRotQuat_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotNodeModelBase_t* base
+M 16 16 sdfVector4_t blendSrc
+T sdfMotNodeModelLinerPos_t struct 32 sdfMotNodeModelLinerPos_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotNodeModelBase_t* base
+M 16 16 sdfVector4_t blendSrc
+T sdfMotNodeModelLinerRotXYZ_t struct 32 sdfMotNodeModelLinerRotXYZ_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotNodeModelBase_t* base
+M 16 16 sdfVector4_t blendSrc
+T sdfMotNodeModelLinerScale_t struct 32 sdfMotNodeModelLinerScale_t.h 0
+M 0 4 sdfMotionNodeVTBL_t* vtbl
+M 4 4 sdfMotionCtrlr_t* owner
+M 8 4 sdfMotionCutChunk_t* table
+M 12 4 sdfMotNodeModelBase_t* base
+M 16 16 sdfVector4_t blendSrc
 T sdfMotNodeMorph_t struct 12 sdfMotNodeMorph_t.h 0
 M 0 4 sdfMotionNode_t* nodeBase
 M 4 4 sdfModelMorph_t* morphNode
@@ -8027,7 +8097,7 @@ M 0 2 u16 numOfCut
 M 2 2 u16 numOfNode
 M 4 4 sdfMotionCutDef_t* cutList
 M 8 8 sdfMotionNodeDef_t nodeDefList
-T sdfMovieCb_t struct 40 libsdf.h 85
+T sdfMovieCb_t struct 40 libsdf.h 86
 M 0 1 u8 stat
 M 1 1 u8 readStat
 M 2 1 u8 cancel
@@ -8046,7 +8116,7 @@ M 33 1 u8 sndPlaying
 M 34 1 u8 sndVolume
 M 35 1 u8 reserve
 M 36 4 sdfIpuDecodeCb_t* decodeCb
-T sdfMovieInitParm_t struct 24 libsdf.h 84
+T sdfMovieInitParm_t struct 24 libsdf.h 85
 M 0 4 s32 x
 M 4 4 s32 y
 M 8 4 u32 z
@@ -8056,7 +8126,7 @@ M 20 1 u8 rgbMode
 M 21 1 u8 ditherMode
 M 22 1 u8 fps
 M 23 1 u8 pad
-T sdfMultiBillBoard1Packet_t struct 144 libsdf.h 139
+T sdfMultiBillBoard1Packet_t struct 144 libsdf.h 140
 M 0 2 u16 dma_qwc
 M 2 1 u8 dma_pad
 M 3 1 u8 dma_id
@@ -8078,7 +8148,7 @@ M 100 4 u32 vif_unpack6
 M 104 32 f32 xyOffset
 M 136 4 u32 vif_itop
 M 140 4 u32 vif_mscal
-T sdfMultiBillBoardVc1Packet_t struct 144 libsdf.h 141
+T sdfMultiBillBoardVc1Packet_t struct 144 libsdf.h 142
 M 0 2 u16 dma_qwc
 M 2 1 u8 dma_pad
 M 3 1 u8 dma_id
@@ -8100,7 +8170,7 @@ M 96 32 f32 xyOffset
 M 128 4 u32 vif_itop
 M 132 4 u32 vif_mscal
 M 136 8 u32 pad
-T sdfPacDecodeCb_t struct 68 libsdf.h 38
+T sdfPacDecodeCb_t struct 68 libsdf.h 39
 M 0 1 s8 stat
 M 1 1 u8 flag
 M 2 2 s16 currBlockNum
@@ -8128,14 +8198,14 @@ T sdfPacDecodeClass2 struct 16 sdfPacDecodeClass2.h 0
 M 0 4 u32 dataSize
 M 4 4 u32 addrInfoSize
 M 8 8 u32 pad
-T sdfPacDecodeResrc_t struct 24 libsdf.h 40
+T sdfPacDecodeResrc_t struct 24 libsdf.h 41
 M 0 4 sdfPacDecodeResrc_t* next
 M 4 4 sdfPacDecodeCb_t* cb
 M 8 4 void* handle
 M 12 4 void* ptr
 M 16 4 s32 head_index
 M 20 4 sdfPacStdBlockHeader_t* header
-T sdfPacStdBlockHeader_t struct 24 libsdf.h 41
+T sdfPacStdBlockHeader_t struct 24 libsdf.h 42
 M 0 1 u8 fileType
 M 1 1 u8 compression
 M 2 2 u16 userId
@@ -8169,29 +8239,29 @@ M 16 8 u8* analog
 M 24 12 u8 press
 M 36 4 s16 actData
 M 40 4 s16 actDataBack
-T sdfPreDrawChain_t struct 16 libsdf.h 89
+T sdfPreDrawChain_t struct 16 libsdf.h 90
 M 0 4 sdfPreDrawTag_t* tagHead
 M 4 4 sdfPreDrawTag_t* tagTail
 M 8 8 u32 pad
-T sdfPreDrawHook_t struct 16 libsdf.h 48
+T sdfPreDrawHook_t struct 16 libsdf.h 49
 M 0 4 sdfPreDrawHook_t* next
 M 4 4 sdfPreDrawHook_t_predrawFuncDelegate* predrawFunc
 M 8 4 u32 option0
 M 12 4 u32 option1
-T sdfPreDrawTag_t struct 16 libsdf.h 44
+T sdfPreDrawTag_t struct 16 libsdf.h 45
 M 0 4 sdfPreDrawTag_t* next
 M 4 4 sdfPreDrawHook_t* head
 M 8 4 sdfPreDrawHook_t* tail
 M 12 4 u32 pad
-T sdfPrimBitBltElem_t struct 64 libsdf.h 103
+T sdfPrimBitBltElem_t struct 64 libsdf.h 104
 M 0 16 sdfGrTagStdReg_t bitbltbuf
 M 16 16 sdfGrTagStdReg_t trxpos
 M 32 16 sdfGrTagStdReg_t trxreg
 M 48 16 sdfGrTagStdReg_t trxdir
-T sdfPrimBitBltPacket_t struct 96 libsdf.h 104
+T sdfPrimBitBltPacket_t struct 96 libsdf.h 105
 M 0 32 sdfGrPacketHeader_t header
 M 32 64 sdfPrimBitBltElem_t bitblt
-T sdfPrimBoxLineElem_t struct 72 libsdf.h 128
+T sdfPrimBoxLineElem_t struct 72 libsdf.h 129
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8201,10 +8271,10 @@ M 40 8 u64 xy2
 M 48 8 u64 xy3
 M 56 8 u64 xy4
 M 64 8 u64 nop
-T sdfPrimBoxLinePacket_t struct 8 libsdf.h 129
+T sdfPrimBoxLinePacket_t struct 8 libsdf.h 130
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimBoxLineElem_t* line
-T sdfPrimF3Elem_t struct 56 libsdf.h 108
+T sdfPrimF3Elem_t struct 56 libsdf.h 109
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8212,10 +8282,10 @@ M 24 8 u64 xy0
 M 32 8 u64 xy1
 M 40 8 u64 xy2
 M 48 8 u64 nop
-T sdfPrimF3Packet_t struct 8 libsdf.h 109
+T sdfPrimF3Packet_t struct 8 libsdf.h 110
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimF3Elem_t* elem
-T sdfPrimF4Elem_t struct 56 libsdf.h 110
+T sdfPrimF4Elem_t struct 56 libsdf.h 111
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8223,13 +8293,13 @@ M 24 8 u64 xy0
 M 32 8 u64 xy1
 M 40 8 u64 xy2
 M 48 8 u64 xy3
-T sdfPrimF4Packet_t struct 8 libsdf.h 111
+T sdfPrimF4Packet_t struct 8 libsdf.h 112
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimF4Elem_t* elem
-T sdfPrimFrameMovePacket_t struct 8 libsdf.h 105
+T sdfPrimFrameMovePacket_t struct 8 libsdf.h 106
 M 0 4 sdfPreDrawHook_t* worker
 M 4 4 sdfPrimBitBltPacket_t* packet
-T sdfPrimFt3Elem_t struct 72 libsdf.h 116
+T sdfPrimFt3Elem_t struct 72 libsdf.h 117
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8239,10 +8309,10 @@ M 40 8 u64 uv1
 M 48 8 u64 xy1
 M 56 8 u64 uv2
 M 64 8 u64 xy2
-T sdfPrimFt3Packet_t struct 8 libsdf.h 117
+T sdfPrimFt3Packet_t struct 8 libsdf.h 118
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimFt3Elem_t* elem
-T sdfPrimFt4Elem_t struct 88 libsdf.h 118
+T sdfPrimFt4Elem_t struct 88 libsdf.h 119
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8254,10 +8324,10 @@ M 56 8 u64 uv2
 M 64 8 u64 xy2
 M 72 8 u64 uv3
 M 80 8 u64 xy3
-T sdfPrimFt4Packet_t struct 8 libsdf.h 119
+T sdfPrimFt4Packet_t struct 8 libsdf.h 120
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimFt4Elem_t* elem
-T sdfPrimG3Elem_t struct 72 libsdf.h 112
+T sdfPrimG3Elem_t struct 72 libsdf.h 113
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq0
@@ -8267,10 +8337,10 @@ M 40 8 u64 xy1
 M 48 8 u64 rgbaq2
 M 56 8 u64 xy2
 M 64 8 u64 nop
-T sdfPrimG3Packet_t struct 8 libsdf.h 113
+T sdfPrimG3Packet_t struct 8 libsdf.h 114
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimG3Elem_t* elem
-T sdfPrimG4Elem_t struct 88 libsdf.h 114
+T sdfPrimG4Elem_t struct 88 libsdf.h 115
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq0
@@ -8282,10 +8352,10 @@ M 56 8 u64 xy2
 M 64 8 u64 rgbaq3
 M 72 8 u64 xy3
 M 80 8 u64 nop
-T sdfPrimG4Packet_t struct 8 libsdf.h 115
+T sdfPrimG4Packet_t struct 8 libsdf.h 116
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimG4Elem_t* elem
-T sdfPrimGt3Elem_t struct 88 libsdf.h 120
+T sdfPrimGt3Elem_t struct 88 libsdf.h 121
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 uv0
@@ -8297,10 +8367,10 @@ M 56 8 u64 xy1
 M 64 8 u64 uv2
 M 72 8 u64 rgbaq2
 M 80 8 u64 xy2
-T sdfPrimGt3Packet_t struct 8 libsdf.h 121
+T sdfPrimGt3Packet_t struct 8 libsdf.h 122
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimGt3Elem_t* elem
-T sdfPrimGt4Elem_t struct 120 libsdf.h 122
+T sdfPrimGt4Elem_t struct 120 libsdf.h 123
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 uv0
@@ -8316,28 +8386,28 @@ M 88 8 u64 uv3
 M 96 8 u64 rgbaq3
 M 104 8 u64 xy3
 M 112 8 u64 nop
-T sdfPrimGt4Packet_t struct 8 libsdf.h 123
+T sdfPrimGt4Packet_t struct 8 libsdf.h 124
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimGt4Elem_t* elem
-T sdfPrimLineElem_t struct 40 libsdf.h 126
+T sdfPrimLineElem_t struct 40 libsdf.h 127
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
 M 24 8 u64 xy0
 M 32 8 u64 xy1
-T sdfPrimLinePacket_t struct 8 libsdf.h 127
+T sdfPrimLinePacket_t struct 8 libsdf.h 128
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimLineElem_t* line
-T sdfPrimRectElem_t struct 40 libsdf.h 124
+T sdfPrimRectElem_t struct 40 libsdf.h 125
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
 M 24 8 u64 xy0
 M 32 8 u64 xy1
-T sdfPrimRectPacket_t struct 8 libsdf.h 125
+T sdfPrimRectPacket_t struct 8 libsdf.h 126
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimRectElem_t* rect
-T sdfPrimSpriteElem_t struct 56 libsdf.h 106
+T sdfPrimSpriteElem_t struct 56 libsdf.h 107
 M 0 4 sdfGifTag_t* giftag
 M 8 8 u64 prim
 M 16 8 u64 rgbaq
@@ -8345,16 +8415,16 @@ M 24 8 u64 uv0
 M 32 8 u64 xy0
 M 40 8 u64 uv1
 M 48 8 u64 xy1
-T sdfPrimSpritePacket_t struct 8 libsdf.h 107
+T sdfPrimSpritePacket_t struct 8 libsdf.h 108
 M 0 4 sdfDmaTag_t* dmatag
 M 4 4 sdfPrimSpriteElem_t* spr
-T sdfPrimTexflushPacket_t struct 48 libsdf.h 102
+T sdfPrimTexflushPacket_t struct 48 libsdf.h 103
 M 0 32 sdfGrPacketHeader_t header
 M 32 16 sdfGrTagStdReg_t texflush
-T sdfPrimTransElem_t struct 32 libsdf.h 58
+T sdfPrimTransElem_t struct 32 libsdf.h 59
 M 0 16 sdfGrTagStdReg_t test
 M 16 16 sdfGrTagStdReg_t alpha
-T sdfPrimTransPacket_t struct 40 libsdf.h 57
+T sdfPrimTransPacket_t struct 40 libsdf.h 58
 M 0 32 sdfGrPacketHeader_t header
 M 32 4 sdfPrimTransElem_t* trans
 T sdfPrm struct 40 libsdf.h 32
@@ -8375,7 +8445,7 @@ M 24 4 u32 i1
 M 28 4 u32 i2
 M 32 4 f32 f1
 M 36 4 f32 f2
-T sdfRandCB_t struct 16 libsdf.h 43
+T sdfRandCB_t struct 16 libsdf.h 44
 M 0 16 u32 v
 T sdfRingStrmCB_t struct 56 sdfRingStrmCB_t.h 0
 M 0 1 u8 stat
@@ -8396,11 +8466,11 @@ M 40 4 s32 readProgress
 M 44 4 s32 dataPos
 M 48 4 sdfRingStrmCB_t_callbackDelegate* callback
 M 52 4 void* callbackParam
-T sdfSVector2_t struct 4 libsdf.h 133
+T sdfSVector2_t struct 4 libsdf.h 134
 M 0 4 s16 pm
-T sdfSVector3_t struct 6 libsdf.h 134
+T sdfSVector3_t struct 6 libsdf.h 135
 M 0 6 s16 pm
-T sdfSVector4_t struct 8 libsdf.h 135
+T sdfSVector4_t struct 8 libsdf.h 136
 M 0 8 s16 pm
 T sdfShapeClass struct 32 sdfShapeClass.h 0
 M 0 2 u16 numOfPacket
@@ -8426,7 +8496,7 @@ M 216 4 void* packetTop
 M 220 4 s32 vpuMemOffset
 M 224 2 u16 attrBits
 M 226 2 u16 packetBits
-T sdfShape_t struct 152 libsdf.h 153
+T sdfShape_t struct 152 libsdf.h 154
 M 0 4 u32 flags
 M 4 4 s32 vertexCount
 M 8 4 s32 faceCount
@@ -8447,7 +8517,7 @@ M 112 16 sdfVector4_t faceNormalList
 M 128 4 sdfMemHandle_t* faceColorListHandle
 M 132 16 s32 faceColorList
 M 148 4 void* packetPtr
-T sdfSndMap_t struct 232 libsdf.h 76
+T sdfSndMap_t struct 232 libsdf.h 77
 M 0 4 u32 numOfVoice
 M 4 4 u32 numOfSeq
 M 8 4 void* readBuff
@@ -8463,27 +8533,27 @@ M 188 4 s32 error_count
 M 192 4 s32 last_error
 M 196 28 u8* dbg_voltbl_f
 M 224 8 u8* dbg_vostat_f
-T sdfSndReqPlayInfo_t struct 16 libsdf.h 159
+T sdfSndReqPlayInfo_t struct 16 libsdf.h 160
 M 0 4 u32 reqno
 M 4 4 u32 playpos
 M 8 2 u16 volume
 M 12 4 void* pCalback
-T sdfSndReqSeInfo_t struct 12 libsdf.h 164
+T sdfSndReqSeInfo_t struct 12 libsdf.h 165
 M 0 4 u32 reqno
 M 4 4 u32 playpos
 M 8 2 u16 volume
 M 10 2 u16 pan
-T sdfSndSeqInfo_t struct 4 libsdf.h 155
+T sdfSndSeqInfo_t struct 4 libsdf.h 156
 M 0 4 u32 iopSize
-T sdfSndSeqMap_t struct 8 libsdf.h 80
+T sdfSndSeqMap_t struct 8 libsdf.h 81
 M 0 4 u32 iopSize
 M 4 4 void* iopAddr
-T sdfSndVoiceInfo_t struct 8 libsdf.h 154
+T sdfSndVoiceInfo_t struct 8 libsdf.h 155
 M 0 1 u8 priority
 M 1 1 u8 polyCount
 M 2 2 u16 iopSize
 M 4 4 u32 spuSize
-T sdfSndVoiceMap_t struct 16 libsdf.h 79
+T sdfSndVoiceMap_t struct 16 libsdf.h 80
 M 0 1 u8 priority
 M 1 1 u8 polyCount
 M 2 2 u16 iopSize
@@ -8494,10 +8564,10 @@ T sdfSortOtNode_tag struct 16 sdfSortOtNode_tag.h 0
 M 0 8 sdfSortOtNode_tag* child
 M 8 4 sdfDrawTag_t* tag
 M 12 4 s32 balance
-T sdfStoreFrameImagePacket_t struct 8 libsdf.h 147
+T sdfStoreFrameImagePacket_t struct 8 libsdf.h 148
 M 0 4 sdfPreDrawHook_t* worker
 M 4 4 sdfStoreImagePacket_t* packet
-T sdfStoreImagePacket_t struct 80 libsdf.h 145
+T sdfStoreImagePacket_t struct 80 libsdf.h 146
 M 0 4 sdfDmaTag_t* dmaAnchor
 M 8 16 u64 anchor
 M 24 4 sdfDmaTag_t* dmaFinish
@@ -8513,7 +8583,7 @@ M 60 4 void* callbackParam
 M 64 4 sdfDmaTag_t* dmaFooter
 M 68 4 sdfGifTag_t* gifFooter
 M 72 4 sdfGrTagStdReg_t* footer
-T sdfTexHandle_t struct 72 libsdf.h 14
+T sdfTexHandle_t struct 68 libsdf.h 14
 M 0 4 sdfTexHandle_t* prev
 M 4 4 sdfTexHandle_t* next
 M 8 4 sdfTexHandle_t* origin
@@ -8537,23 +8607,22 @@ M 52 4 u32 clutDataSize
 M 56 4 u32 clutColor
 M 60 1 u8 monoClutData
 M 64 4 char* hashname
-M 68 4 void* image
-T sdfTexMapCB_t struct 4 libsdf.h 157
+T sdfTexMapCB_t struct 4 libsdf.h 158
 M 0 4 sdfTexHandle_t* texHandle
-T sdfTexMapPacket_t struct 32 libsdf.h 156
+T sdfTexMapPacket_t struct 32 libsdf.h 157
 M 0 8 u64 tex1
 M 8 8 u64 tex0
 M 16 8 u64 clamp
 M 24 4 u32 tmVifCmd
-T sdfTexPacket_t struct 64 libsdf.h 55
+T sdfTexPacket_t struct 64 libsdf.h 56
 M 0 16 sdfGifTag_t giftag
 M 16 16 sdfGrTagStdReg_t tex1
 M 32 16 sdfGrTagStdReg_t tex0
 M 48 16 sdfGrTagStdReg_t clamp
-T sdfThCB_t struct 8 libsdf.h 71
+T sdfThCB_t struct 8 libsdf.h 72
 M 0 4 sdfThCB_t* next
 M 4 4 s32 thId
-T sdfTime_t struct 8 libsdf.h 82
+T sdfTime_t struct 8 libsdf.h 83
 M 0 1 u8 pad
 M 1 1 u8 sec
 M 2 1 u8 min
@@ -8607,12 +8676,11 @@ M 120 4 s32 ImageDrawing
 T stfNameTbl_s struct 8 stfNameTbl_s.h 0
 M 0 4 char* part
 M 4 4 char* name
-T tagMakaObject struct 24 pipe.h 4
+T tagMakaObject struct 20 pipe.h 4
 M 0 4 u32 maka
 M 4 1 s8 count
 M 8 8 s32 pos
 M 16 3 s8 resv
-M 20 4 void* makaObject
 T tagPipeEnemyInfo struct 12 pipe.h 10
 M 0 1 u8 chID
 M 4 4 f32 w
