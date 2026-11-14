@@ -4289,7 +4289,12 @@ extern campWork_t *volatile campWorkLive FAKEMATCH_ASM_NAME("campWork");
 extern void cmpSetStatusStartEff(void);
 extern void cmpModelInit(void);
 
-#ifdef NON_MATCHING
+/* Keep these calls conservative despite their earlier C definitions. Paired
+ * visible/opaque owner builds differ in branch-delay annulment, not call
+ * targets or provider code. These ABI views are a reconstruction aid, not
+ * evidence of the original source or translation-unit boundary. */
+extern s32 campDhCheckReadyOpaque(void) FAKEMATCH_ASM_NAME("campDhCheckReady");
+extern void campDhFreeTextureOpaque(campInfoWork_t *work) FAKEMATCH_ASM_NAME("campDhFreeTexture");
 s32 camp_calc_dh_Process(dds3ProcessID_t *id)
 {
     campInfoWork_t *work = dds3GetProcessData(id);
@@ -4297,15 +4302,20 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
     campDhCalcState = work;
     if (flags & 2) {
         s32 state = work->unk_01;
-        /* Preserve the native signed dispatch and shared cross-panel call. */
         if (state == 1) goto one;
         if (state >= 2) goto done;
         if (state != 0) goto done;
         {
-            s32 ready = campDhCheckReady();
+            s32 ready = campDhCheckReadyOpaque();
             campWork_t *camp = campWork;
-            s32 value = -1;
-            if (ready == 0) {
+            s8 value;
+            if (ready != 0) {
+                /* Keep the real cross-panel owner live on this arm without
+                 * constraining the following -1 assignment out of its native
+                 * branch delay slot. This empty operand emits no instruction. */
+                FAKEMATCH_ASM_READ(camp);
+                value = -1;
+            } else {
                 campDhCheckTextures();
                 camp = campWork;
                 value = 0;
@@ -4315,7 +4325,7 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
         goto done;
     one:
         if (work->unk_04 == state) {
-            campDhFreeTexture(work);
+            campDhFreeTextureOpaque(work);
             while (sdfDelayedResrcCheck() != 0) {}
             cmpSetStatusStartEff();
             cmpStatSetTimer(0, 0);
@@ -4324,8 +4334,10 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
         }
     }
  done:
-    work = campDhCalcState;
-    work->unk_04 = 0;
+    {
+        campInfoWork_t *ackOwner = campDhCalcState;
+        ackOwner->unk_04 = 0;
+    }
     work = campDhCalcState;
     if (work->unk_00 & 0x10) {
         cmpUpdateTerminate((cmpInfoWindow_t *)work);
@@ -4333,9 +4345,6 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", camp_calc_dh_Process);
-#endif
 
 #ifdef NON_MATCHING
 extern void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g);

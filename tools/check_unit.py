@@ -902,13 +902,37 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
     return bytes(linked), problems
 
 
+def full_context_readonly_problems(yaml_text, unit, sections, *, unowned_only=False):
+    """Require a verifiable owner for full-only read-only payloads."""
+    problems = []
+    # Known read-only section names are not blanket authorization. The
+    # standalone build can omit a full-only declaration, so establish an
+    # owner independently here before the existing payload/literal checks.
+    for section in (".rodata", ".lit4", ".lit8"):
+        size = sections.get(section, (0, 0))[1]
+        if not size:
+            continue
+        if section == ".lit8":
+            problems.append(".lit8: full-unit payload has no supported verification")
+            continue
+        owned = owned_rom_range(yaml_text, unit, section)
+        if owned is None:
+            problems.append(f"{section}: full-unit payload has no bounded YAML owner")
+        elif not unowned_only and size > owned[1] - owned[0]:
+            problems.append(f"{section}: full-unit size 0x{size:X} exceeds owned span "
+                            f"0x{owned[1] - owned[0]:X}")
+    return problems
+
+
 def full_context_storage_problems(yaml_text, unit, sections, symbol_text,
                                   nm_text, syms, aliases=(), explicit_sizes=None):
-    """Require actual-build writable storage to have a bounded native owner.
+    """Require actual-build storage to have a supported bounded native owner.
 
     SKIP_ASM can omit declarations included only in the linked context. Its
     section inventory cannot authorize full-unit storage or COMMON symbols.
-    ROM-owned payloads are checked separately against their retail bytes.
+    Owned ROM payloads are checked separately against their retail bytes.
+    Literal references retain their existing checks; this is an ownership gate,
+    not proof that every byte of an owned literal pool was consumed.
     """
     problems = []
     for section in (".data", ".sdata", ".bss", ".sbss"):
@@ -930,6 +954,7 @@ def full_context_storage_problems(yaml_text, unit, sections, symbol_text,
             elif size > owned[1] - owned[0]:
                 problems.append(f"{section}: full-unit size 0x{size:X} exceeds owned span "
                                 f"0x{owned[1] - owned[0]:X}")
+    problems.extend(full_context_readonly_problems(yaml_text, unit, sections))
     for name, size in common_symbols(nm_text):
         problems.append(f"COMMON {name}: full unit emits 0x{size:X} bytes without an owned definition")
     return problems
@@ -1651,6 +1676,12 @@ def main():
 
             fdata, fsecs = sections(full)
             if problems := allocated_section_problems(fdata):
+                sys.exit("DATA CONTEXT " + "; ".join(problems))
+            # Even focused mode cannot validate a function in an object with
+            # runtime payload outside any supported native owner. Extent/content
+            # differences within known owners retain ordinary focused filtering.
+            if problems := full_context_readonly_problems(
+                    yaml_text, unit_name, fsecs, unowned_only=True):
                 sys.exit("DATA CONTEXT " + "; ".join(problems))
             data_context.extend(full_context_storage_problems(
                 yaml_text, unit_name, fsecs, full_objdump, full_defined_symbols,

@@ -362,7 +362,7 @@ class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
                     source_text="void target(void) {}\n", candidate=None, assembly=None,
-                    native_inventory=None, full_nm=None, full_relocs=None, full_rodata=None, full_rodata_owned=True, allocated_problems=None):
+                    native_inventory=None, full_nm=None, full_relocs=None, full_rodata=None, full_rodata_owned=True, allocated_problems=None, full_sections=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -403,6 +403,7 @@ class FocusedFunctionTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "allocated_section_problems",
                 side_effect=allocated_problems or [[], []]))
             stack.enter_context(patch.object(check_unit, "sections", side_effect=lambda obj:
+                full_sections if full_sections is not None and obj.name == "full.o" else
                 (full_rodata[0], {".rodata": (0, len(full_rodata[0]))})
                 if full_rodata is not None and obj.name == "full.o" else (b"", {})))
             if full_rodata is not None:
@@ -436,6 +437,13 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_full_only_known_readonly_sections_need_verification(self):
+        for section in (".rodata", ".lit4", ".lit8"):
+            for requested in (None, "target"):
+                with self.subTest(section=section, requested=requested):
+                    status, report = self.run_checker(requested, full_sections=(bytes(8), {section: (0, 8)}))
+                    self.assertIn(section + ": full-unit payload", str(status))
 
     def test_allocated_section_gate_in_standalone_and_full_contexts(self):
         problem = "unsupported allocated section .ctors: 0x4 bytes"
@@ -589,8 +597,7 @@ class FocusedFunctionTests(unittest.TestCase):
         status, report = self.run_checker(None,
             full_rodata=(bytes(4), {0: ("R_MIPS_32", ".text")}),
             full_rodata_owned=False)
-        self.assertEqual(status, 1, report)
-        self.assertIn("relocated .rodata has no unambiguous YAML-owned range", report)
+        self.assertIn(".rodata: full-unit payload has no bounded YAML owner", str(status))
 
     def test_full_context_call_can_use_equivalent_symbol_alias(self):
         status, report = self.run_checker(
@@ -2366,7 +2373,10 @@ class SharedNamedRodataContextTests(unittest.TestCase):
         ):
             with self.subTest(changes=changes):
                 code,report=self.check_shared(**changes)
-                self.assertEqual(code,1,report)
+                if changes == dict(yaml=""):
+                    self.assertIn("no bounded YAML owner", str(code))
+                else:
+                    self.assertEqual(code,1,report)
 
 
     def test_full_object_inspected_once_and_refreshed_for_each_compile(self):
@@ -2560,6 +2570,20 @@ class FullContextStorageTests(unittest.TestCase):
         self.assertTrue(check_unit.full_context_storage_problems(*args))
         args[2] = {'.bss':(0,4)}; args[3]=''
         self.assertTrue(check_unit.full_context_storage_problems(*args))
+
+    def test_full_readonly_owner_bounds_and_unsupported_lit8(self):
+        for section in (".rodata", ".lit4"):
+            yaml = f"  - [0x100, {section}, main/unit]\n  - [0x104, {section}, next]\n"
+            for size in (0, 4):
+                self.assertFalse(check_unit.full_context_storage_problems(
+                    yaml, "main/unit", {section: (0, size)}, "", "", {}))
+            self.assertTrue(check_unit.full_context_storage_problems(
+                yaml, "main/unit", {section: (0, 8)}, "", "", {}))
+            self.assertFalse(check_unit.full_context_readonly_problems(
+                yaml, "main/unit", {section: (0, 8)}, unowned_only=True))
+        yaml = "  - [0x100, .lit8, main/unit]\n  - [0x108, .lit8, next]\n"
+        self.assertTrue(check_unit.full_context_storage_problems(
+            yaml, "main/unit", {".lit8": (0, 8)}, "", "", {}))
 
     def test_bounded_storage_helper_keeps_payload_checks_separate(self):
         yaml='  - [0x100, .data, main/unit]\n  - [0x104, .data, next]\n'
