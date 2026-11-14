@@ -57,6 +57,33 @@ class Violations(unittest.TestCase):
         self.assertEqual(self.check(body), [])
 
 
+    def test_spliced_keywords_are_still_violations(self):
+        for keyword in ('asm', '__asm', '__asm__'):
+            for index in range(1, len(keyword)):
+                with self.subTest(keyword=keyword, index=index):
+                    body = 'void f(void) { ' + keyword[:index] + chr(92) + '\n' + keyword[index:] + '("nop"); }'
+                    self.assertEqual(self.check(body), [1])
+
+    def test_spliced_comment_stays_a_comment(self):
+        self.assertEqual(self.check('// comment ' + chr(92) + '\nasm("nop");\n'), [])
+
+    def test_splice_can_form_comment_delimiters(self):
+        splice = chr(92) + '\n'
+        self.assertEqual(self.check('/' + splice + '* asm("nop"); *' + splice + '/'), [])
+        self.assertEqual(self.check('/' + splice + '/ asm("nop");\n'), [])
+
+    def test_spliced_literal_stays_a_literal(self):
+        self.assertEqual(self.check('const char *s = "as' + chr(92) + '\nm";'), [])
+
+    def test_physical_line_numbers_after_multiple_splices(self):
+        splice = chr(92) + '\n'
+        body = '// ignored' + splice + '\n\nvoid f(void) { __as' + splice + 'm__("nop");\nasm("nop"); }'
+        self.assertEqual(self.check(body), [4, 6])
+
+    def test_crlf_splice(self):
+        self.assertEqual(self.check('void f(void) { __as' + chr(92) + '\r\nm__("nop"); }'), [1])
+
+
 class Allowlist(unittest.TestCase):
     def test_every_listed_unit_still_has_inline_asm(self):
         listed = cia.load_allowlist()

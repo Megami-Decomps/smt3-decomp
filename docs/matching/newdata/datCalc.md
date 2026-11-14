@@ -204,3 +204,26 @@ claim is made. Final integrated owner 79/0, target-only 61/80, all three strict-
 plain/dump comparisons, retail checksum/byte comparison/no-op, 450 tests,
 817 layout assertions, fresh stable 141-owner/481-draft qualification and
 seven IRX checks pass. Reports are unchanged.
+
+### Shared-tail allocation frontier
+
+A separate ordinary shared-tail diagnostic initializes a signed bonus to zero,
+conditionally replaces it with `cmbGetHeartsParam`, then subtracts it from the
+captured parameter. Its shared subtraction exists in initial RTL and survives
+combine and if-conversion; the latter converts no blocks. This differs from
+the retained early-return draft, whose zero-hearts path already bypasses the
+subtraction in initial RTL.
+
+The shared-tail diagnostic's extra post-call copy is present before scheduling
+and survives allocation. Local allocation assigns the global-work base and
+parameter address to `$2`; global allocation reports a `$2` conflict for the
+bonus and assigns it to `$6`. The zero initialization is live before the base's
+last use, so simply coalescing the bonus with the call return cannot remove the
+copy in that allocation. This identifies a lifetime/allocation frontier, not
+an if-conversion failure or proof of the allocator's original historical choice.
+The diagnostic remains nine matching words at 80 bytes and is not retained.
+
+Complete-owner assembly and raw-object equality between plain and `-da` builds
+passes in production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` contexts.
+These six successful compiles qualify the observations, not a new exact match
+or a semantic approval of unrelated drafts. The retained target stays 13/20.

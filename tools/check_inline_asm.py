@@ -65,8 +65,22 @@ def code_view(text: str) -> str:
 
 def violations(path: Path) -> list[int]:
     """The lines of the unit that spell an asm keyword themselves."""
-    view = code_view((ROOT / path).read_text(errors="replace"))
-    return [view.count("\n", 0, m.start()) + 1 for m in ASM_KEYWORD.finditer(view)]
+    text = (ROOT / path).read_text(errors="replace")
+    # C removes escaped newlines before recognizing tokens or comments. An asm
+    # keyword may span physical lines, and a // comment may continue across one.
+    # Keep original offsets so diagnostics still name the physical source line.
+    offsets = []
+    pieces = []
+    start = 0
+    for splice in re.finditer(r"\\\r?\n", text):
+        pieces.append(text[start:splice.start()])
+        offsets.extend(range(start, splice.start()))
+        start = splice.end()
+    pieces.append(text[start:])
+    offsets.extend(range(start, len(text)))
+    view = code_view("".join(pieces))
+    return [text.count("\n", 0, offsets[m.start()]) + 1
+            for m in ASM_KEYWORD.finditer(view)]
 
 
 def main() -> None:
