@@ -1,5 +1,6 @@
 #include "font.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 typedef struct frFontHeader_t frFontHeader_t;
 
@@ -1495,6 +1496,7 @@ s32 frDrawEffect(frFontHandle_t *parent, frTextHandle_t *glyph,
         if ((s8)step >= 0) {
             step = (step * 22) / advance;
         }
+        step = SDF_FRAME_DUE() ? step : 0;
         currentFadeWord = *fadeWord;
         if ((u32)(0x80 - (currentFadeWord & 0xFF)) >= step) {
             *fadeWord = currentFadeWord + step;
