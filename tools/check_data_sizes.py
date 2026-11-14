@@ -88,6 +88,7 @@ def scan_text(b, secs, func_starts, gp):
         regs = {}
         pending_call = False
         likely_fallthrough = None
+        link_return = None
         jump_seen = 0  # 1 on a j/jr's delay slot, 2 on the first instruction after it
         for i, w in enumerate(words):
             pc = base_pc + i * 4
@@ -97,6 +98,13 @@ def scan_text(b, secs, func_starts, gp):
                 # not writes made while examining the taken-path delay slot.
                 regs = likely_fallthrough[1]
                 likely_fallthrough = None
+            if pc == link_return:
+                # A conditional branch-and-link may return after clobbering
+                # caller-saved registers. Join taken/return and not-taken paths
+                # conservatively, after restoring a likely branch's annulled slot.
+                for r in CALLER_SAVED:
+                    regs.pop(r, None)
+                link_return = None
             if pc in clear:
                 regs = {}
             if jump_seen == 2:
@@ -108,12 +116,14 @@ def scan_text(b, secs, func_starts, gp):
                 jump_seen = 1
             op, rs, rt, imm = w >> 26, (w >> 21) & 31, (w >> 16) & 31, w & 0xFFFF
             rd = (w >> 11) & 31
+            if op == 1 and rt in (16, 17, 18, 19):
+                # REGIMM branch-and-link writes $ra before its delay slot,
+                # including non-likely forms. The slot still sees arguments.
+                regs.pop(31, None)
+                link_return = pc + 8
             if (op in (0x14, 0x15, 0x16, 0x17)
                     or (op == 1 and rt in (2, 3, 18, 19))
                     or (op in (0x10, 0x11, 0x12) and rs == 8 and rt & 2)):
-                if op == 1 and rt in (18, 19):
-                    # Branch-and-link writes $ra before the delay slot.
-                    regs.pop(31, None)
                 likely_fallthrough = (pc + 8, regs.copy())
             kill = []
             if op == 0x0F:

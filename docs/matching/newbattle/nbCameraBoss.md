@@ -485,3 +485,23 @@ from 41/155 words at 620 bytes to 96/161 at native 644 bytes, but remains guarde
 and nonmatching. The first residual divergence is the special-target branch:
 the compiler shares its final Look call with the other case, unlike retail.
 A target-ID switch was tested and rejected (48 words, 668 bytes).
+
+**DANTE Init qualified cross-jump observation (2026-11-14).** A repaired,
+read-only observer now follows the final jump pass with shallow RTL kind/UID
+reads and hooks gated to this function. Its 103 events include 45 paired
+cross-jump searches and four applications. In particular, the search between
+jump UIDs 218 and 410 with minimum 2 returns call UIDs 213 and 405; the next
+application consumes that pair. The ordinary sched2 dump identifies both calls
+as `effBTLModelLook`; jump2 replaces the first path with a jump to a new label
+immediately before the retained second call. This directly qualifies the
+previously localized tail-sharing decision rather than merely inferring it
+from the final assembly.
+
+All six observed artifacts equal the unobserved replay, and its assembly and
+object equal the ordinary active-draft wrapper outputs. Fresh complete-owner
+plain/dump assembly and object parity also passes in production, SKIP_ASM and
+active-draft modes. The source is unchanged; no match improvement or C-level
+remedy is claimed. The next useful control must address why these two call
+tails are equivalent to this compiler while retail retains them separately,
+without changing callback semantics or introducing dummy dependencies. The
+failed rich-decoder observation is superseded only for this qualified replay.

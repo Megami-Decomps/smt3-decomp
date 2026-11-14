@@ -181,12 +181,13 @@ class LikelyDelaySlots(unittest.TestCase):
                 self.assertEqual(accesses, [])
 
     def test_annulled_overwrite_restores_pre_slot_address(self):
+        # Use a callee-saved register to isolate annulment from call clobbers.
         for branch in self.branches():
             with self.subTest(branch=hex(branch)):
                 accesses, _ = self.scan([
-                    (0xF << 26) | (2 << 16) | 0x32, branch,
-                    (0xF << 26) | (2 << 16) | 0x34,
-                    (0x23 << 26) | (2 << 21) | (3 << 16)])
+                    (0xF << 26) | (16 << 16) | 0x32, branch,
+                    (0xF << 26) | (16 << 16) | 0x34,
+                    (0x23 << 26) | (16 << 21) | (3 << 16)])
                 self.assertEqual([a[1] for a in accesses], [0x320000])
 
     def test_link_likely_invalidates_previous_return_address(self):
@@ -253,6 +254,52 @@ class CallLinkProvenance(unittest.TestCase):
                     (25 << 21) | (link << 11) | 9,
                     (0x23 << 26) | (link << 21) | (3 << 16)])
                 self.assertEqual(accesses, [])
+
+
+class ConditionalCallProvenance(unittest.TestCase):
+    scan = AddressProvenance.scan
+
+    def branch(self, rt):
+        return (1 << 26) | (4 << 21) | (rt << 16) | 8
+
+    def test_all_link_forms_invalidate_old_ra_before_slot(self):
+        for rt in (16, 17, 18, 19):
+            with self.subTest(rt=rt):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (31 << 16) | 0x34,
+                    self.branch(rt),
+                    (0x23 << 26) | (31 << 21) | (3 << 16),
+                    (0x23 << 26) | (31 << 21) | (3 << 16)])
+                self.assertEqual(accesses, [])
+
+    def test_link_slot_reads_argument_but_return_cannot_reuse_it(self):
+        for rt in (16, 17, 18, 19):
+            with self.subTest(rt=rt):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (5 << 16) | 0x34,
+                    self.branch(rt),
+                    (0x23 << 26) | (5 << 21) | (3 << 16),
+                    (0x23 << 26) | (5 << 21) | (3 << 16)])
+                self.assertEqual([a[0] for a in accesses], [0x100008])
+
+    def test_saved_address_survives_link_return(self):
+        for rt in (16, 17, 18, 19):
+            with self.subTest(rt=rt):
+                accesses, _ = self.scan([
+                    (0xF << 26) | (16 << 16) | 0x34,
+                    self.branch(rt), 0,
+                    (0x23 << 26) | (16 << 21) | (3 << 16)])
+                self.assertEqual([a[1] for a in accesses], [0x340000])
+
+    def test_nonlink_regimm_preserves_caller_and_link_registers(self):
+        for rt in (0, 1, 2, 3):
+            for reg in (5, 31):
+                with self.subTest(rt=rt, reg=reg):
+                    accesses, _ = self.scan([
+                        (0xF << 26) | (reg << 16) | 0x34,
+                        self.branch(rt), 0,
+                        (0x23 << 26) | (reg << 21) | (3 << 16)])
+                    self.assertEqual([a[1] for a in accesses], [0x340000])
 
 
 class Controls(unittest.TestCase):
