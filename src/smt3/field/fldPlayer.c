@@ -26,6 +26,7 @@ extern f32 R360_LR(f32 a, f32 b);
 extern f32 fabsf(f32);
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
+extern s32 fldHitChkMatter;
 
 extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
@@ -558,7 +559,7 @@ void fldPlayerCalc_WarpRun(void)
         fldHitChkUnit(&collisionPosition.x);
         if (fldGlobalBase.hitValid != 0) {
             position.x = fldGlobalBase.hitX;
-            position.y = fldGlobalBase.hitY + 44.0f;
+            position.y = SDF_FRAME_SHIFT(fldGlobalBase.hitY + 44.0f, fldHitChkMatter >= 0 ? 0.0f : 9.0f);
             position.z = fldGlobalBase.hitZ;
             fldGlobalBase.x = position.x;
             fldGlobalBase.y = position.y;
@@ -1031,7 +1032,7 @@ s32 fldPlayerCalc_Nml(void)
             fldHitChkUnit(collisionPosition);
             if (fldGlobalBase.hitValid != 0) {
                 position.x = fldGlobalBase.hitX;
-                position.y = fldGlobalBase.hitY + 44.0f;
+                position.y = SDF_FRAME_SHIFT(fldGlobalBase.hitY + 44.0f, fldHitChkMatter >= 0 ? 0.0f : 9.0f);
                 position.z = fldGlobalBase.hitZ;
                 fldGlobalBase.x = position.x;
                 fldGlobalBase.y = position.y;
@@ -1376,7 +1377,6 @@ void fldPlayerCalc_Wm4(void) {
 #ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern s8 dds3PadButtonState[];
-extern s32 fldHitChkMatter;
 extern s32 fldWmapMatterLast, fldWmapBlendStep;
 extern collision_s *fldMatterTable;
 extern sdfVector4_t fldWmapPlayerPos, fldWmapPosFrom, fldWmapPosTo;
@@ -1529,9 +1529,9 @@ s32 fldPlayerCalc_Wm2(void)
             if (fldGlobalBase.hitValid != 0) {
                 fldGlobalBase.x = fldGlobalBase.hitX;
                 if (fldGlobalBase.area == 1) {
-                    fldGlobalBase.y = (fldGlobalBase.hitY + 44.0f) - 11.0f;
+                    fldGlobalBase.y = SDF_FRAME_SHIFT((fldGlobalBase.hitY + 44.0f) - 11.0f, fldHitChkMatter >= 0 ? 0.0f : -2.0f);
                 } else {
-                    fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+                    fldGlobalBase.y = SDF_FRAME_SHIFT(fldGlobalBase.hitY + 44.0f, fldHitChkMatter >= 0 ? 0.0f : 9.0f);
                 }
                 position.x = fldGlobalBase.x;
                 position.y = fldGlobalBase.y;
@@ -1585,9 +1585,9 @@ s32 fldPlayerCalc_Wm2(void)
                 if (fldGlobalBase.hitValid != 0) {
                     fldGlobalBase.x = fldGlobalBase.hitX;
                     if (fldGlobalBase.area == 1) {
-                        fldGlobalBase.y = (fldGlobalBase.hitY + 44.0f) - 11.0f;
+                        fldGlobalBase.y = SDF_FRAME_SHIFT((fldGlobalBase.hitY + 44.0f) - 11.0f, fldHitChkMatter >= 0 ? 0.0f : -2.0f);
                     } else {
-                        fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+                        fldGlobalBase.y = SDF_FRAME_SHIFT(fldGlobalBase.hitY + 44.0f, fldHitChkMatter >= 0 ? 0.0f : 9.0f);
                     }
                     position.x = fldGlobalBase.x;
                     position.y = fldGlobalBase.y;
@@ -1990,7 +1990,7 @@ s32 fldPlayerCalc_Nml_syukan(void)
             if (fldGlobalBase.hitValid != 0) {
                 position.x = fldGlobalBase.hitX;
                 position.z = fldGlobalBase.hitZ;
-                position.y = fldGlobalBase.hitY + 44.0f;
+                position.y = SDF_FRAME_SHIFT(fldGlobalBase.hitY + 44.0f, fldHitChkMatter >= 0 ? 0.0f : 9.0f);
                 fldGlobalBase.x = position.x;
                 fldGlobalBase.y = position.y;
                 fldGlobalBase.z = position.z;

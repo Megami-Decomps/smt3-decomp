@@ -998,7 +998,7 @@ void fldHitChkUnitDamage(f32 *phys_pos)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < 0.099999997f) {
+    if (MATH_VectorLength(&delta) < SDF_FRAME_STEP(0.099999997f)) {
         phys_pos[0] = previous.x;
         phys_pos[1] = previous.y;
         phys_pos[2] = previous.z;
@@ -1170,7 +1170,7 @@ void fldHitChkUnit(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < 0.1f) {
+    if (MATH_VectorLength(&delta) < SDF_FRAME_STEP(0.1f)) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;
@@ -1512,7 +1512,7 @@ void fldHitChkUnitVWM(f32 *position)
         if (face->matter != NULL) {
             pose = face->matter->poseset;
             movement.x = pose->pos.x - face->previousPosition[0];
-            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
+            movement.y = (pose->pos.y - face->previousPosition[1]) + SDF_FRAME_STEP(10.0f);
             movement.z = pose->pos.z - face->previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
@@ -1541,7 +1541,7 @@ void fldHitChkUnitVWM(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < fldHitMinMove) {
+    if (MATH_VectorLength(&delta) < SDF_FRAME_STEP(fldHitMinMove)) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;

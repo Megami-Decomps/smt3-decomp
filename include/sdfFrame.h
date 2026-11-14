@@ -26,6 +26,19 @@
 #define SDF_FRAMES_COUNTDOWN(n) (n)
 #endif
 
+/* A value set each tick from one taken at a different offset, so that it also
+ * moves by d each tick: feet put back 44 below a collision sphere taken 35
+ * above them move 9 unless a floor set the sphere. A host that scales the step
+ * scales d; retail's value is x and d is not evaluated. Defined ahead of the
+ * default step so that a host's step reaches it. */
+#ifndef SDF_FRAME_SHIFT
+#ifdef SDF_FRAME_STEP
+#define SDF_FRAME_SHIFT(x, d) ((x) + (SDF_FRAME_STEP(d) - (d)))
+#else
+#define SDF_FRAME_SHIFT(x, d) (x)
+#endif
+#endif
+
 /* An advance per tick, in whatever unit the counter moves. */
 #ifndef SDF_FRAME_STEP
 #define SDF_FRAME_STEP(d) (d)
