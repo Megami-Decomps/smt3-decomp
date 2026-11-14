@@ -17,6 +17,60 @@ import check_nonmatching as cn
 import check_irx_nonmatching as irx
 
 
+class ConditionalSelection(unittest.TestCase):
+    def test_whitespace_guards(self):
+        self.assertIn("NON_MATCHING", cn.conditional_names(" #  ifdef\tNON_MATCHING\n"))
+
+    def test_expression_and_elif_guards(self):
+        self.assertEqual(cn.conditional_names("#if defined(NON_MATCHING)\n#elif !defined(FIX_BUGS)\n"),
+                         {"if", "elif", "defined", "NON_MATCHING", "FIX_BUGS"})
+
+    def test_comments_and_strings_do_not_select_modes(self):
+        self.assertFalse(cn.conditional_names('/* #ifdef NON_MATCHING */\nconst char *s = "FIX_BUGS";\n// #if FIX_BUGS\n') & {"FIX_BUGS", "NON_MATCHING"})
+
+    def test_identifier_boundaries_and_nonconditional_directives(self):
+        self.assertNotIn("NON_MATCHING", cn.conditional_names("#define FIX_BUGS 1\n#if NOT_NON_MATCHING\n"))
+
+    def test_macro_aliases_preserve_modes(self):
+        for mode in ("FIX_BUGS", "NON_MATCHING"):
+            self.assertIn(mode, cn.conditional_names("#define ALIAS " + mode + "\n#if ALIAS\n"))
+
+    def test_non_directive_mode_use_is_conservatively_selected(self):
+        self.assertIn("FIX_BUGS", cn.conditional_names("int fixed = FIX_BUGS;"))
+
+    def test_alias_reference_runs_both_compiler_modes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit = root / "unit.c"
+            unit.write_text("#define APPLY FIX_BUGS\n#if APPLY\nint fixed;\n#endif\n")
+            modes = []
+            def compile(path, mode, output):
+                modes.append(mode)
+                Path(output).write_text("")
+                return ""
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                self.assertEqual(cn.check_draft_unit(unit, [])[0], 0)
+            self.assertEqual(modes, [False, True])
+
+    def test_spliced_guard_and_continued_comment(self):
+        slash = chr(92)
+        self.assertIn("NON_MATCHING", cn.conditional_names("#if defined(" + slash + "\nNON_MATCHING)\n"))
+        self.assertEqual(cn.conditional_names("// ignored " + slash + "\n#ifdef FIX_BUGS\n"), set())
+
+    def test_unit_selection_uses_condition_tokens(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            src = root / "src/smt3"
+            src.mkdir(parents=True)
+            for name, content in [("a.c", "# ifdef NON_MATCHING\n"),
+                                  ("b.c", "#if defined(FIX_BUGS)\n"),
+                                  ("c.c", "/* #ifdef NON_MATCHING */")]:
+                (src / name).write_text(content)
+            with patch.object(cn, "ROOT", root):
+                self.assertEqual(cn.units([]), [src / "a.c", src / "b.c"])
+                self.assertEqual(cn.units(["explicit.c"]), [Path("explicit.c")])
+
+
 class ParallelDraftChecks(unittest.TestCase):
     def test_worker_bound_is_explicit(self):
         for value in ("1", "4", "8"):
@@ -88,7 +142,7 @@ class ParallelDraftChecks(unittest.TestCase):
             root = Path(directory)
             unit = root / "unit.c"
             unit.write_text("#ifdef NON_MATCHING\nint f(void){return 1;}\n#else\n"
-                            'INCLUDE_ASM(int, "u", f);\n#endif\n/* FIX_BUGS */\n')
+                            'INCLUDE_ASM(int, "u", f);\n#endif\n#ifdef FIX_BUGS\n#endif\n')
             outputs, modes = [], []
             def compile(path, mode, asm):
                 outputs.append(Path(asm))

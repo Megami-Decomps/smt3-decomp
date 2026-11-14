@@ -380,3 +380,26 @@ assembly fallback and matching credit remain unchanged. All 36 exact peers are
 preserved, and production, SKIP_ASM and NON_MATCHING+SKIP_ASM each have identical
 assembly and objects with and without compiler dumps. Ordinary pointer naming
 alone stays at 186/195; fixed binding adds no benefit over the immediate operand.
+
+### SeqStart ordinary field-ID pointer and dependency control (pass148)
+
+With the current guarded draft, the ordinary `sdfVector4_t *fieldId` local now
+produces exactly the same complete-owner assembly and object as the prior `$3`
+binding. The binding is therefore removed. This supersedes the pass144 control
+only for the current source: that older 172-word baseline did need the binding
+for its measured gain. SeqStart remains 187/195 words at 780 bytes; it is not an
+exact match. Production, guarded `SKIP_ASM`, and active
+`NON_MATCHING`+`SKIP_ASM` outputs are individually unchanged, and each source/mode
+pair has equal plain and dump-enabled assembly and objects.
+
+The paired postreload dependency dumps also resolve the proposed alias-edge
+control. The bound and ordinary-pointer variants have identical predecessor and
+successor lists across all 164 instructions and 853 dependency edges. In
+particular, each of the two field X/Z stores still has nine output-dependence
+successors plus the anti-dependence to the first VU copy; camera address
+materialization still has just that copy as its successor. The sole RTL-record
+change is the field-address low instruction's `REG_EQUAL` note becoming
+`REG_EQUIV`. Thus the dense store graph cannot be attributed to the explicit
+register binding in this source context. These are parity-qualified dependency
+dumps, not a fresh runtime priority/rank observation. Direct global field writes
+instead of the pointer score 186/195 and are not adopted.

@@ -1083,31 +1083,36 @@ extern u8 *DDS3_GBWK;
 /* Localised name text, 0x40 bytes after the manager. */
 extern char itfMesMngVarText[];
 
-/* The real working base and two count-address phases remain separate on EE.
- * Local constraints retain native per-iteration address formation and the
- * initial-to-loop count copy; they do not imply original source spelling. */
+/* Target-specific live-value constraints retain native pretest saved-work
+ * and output availability, plus separate tail induction registers. Count $6
+ * is consumed into loopCount before tailB takes $6; no binding crosses a call.
+ * These emit no instructions or memory barrier, and do not imply original
+ * source spelling. The saved pointer supplies each iteration's work refresh. */
 #ifdef NON_MATCHING
 void itfMesMngGetVarLocalize(s32 id)
 {
     FAKEMATCH_ASM_REG(u8 *, work, "$9") = DDS3_GBWK;
     char *out = itfMesMngVarText;
+    FAKEMATCH_ASM_REG(u8 *, saved, "$14") = work;
     s32 lead;
-    s32 tailA;
-    s32 tailB;
+    FAKEMATCH_ASM_REG(s32, tailA, "$10");
+    FAKEMATCH_ASM_REG(s32, tailB, "$6");
     FAKEMATCH_ASM_REG(s32, count, "$6") = id + 0x6650;
     FAKEMATCH_ASM_REG(s32, loopCount, "$13");
     s32 k = 0;
 
+    FAKEMATCH_ASM_LIVE(out);
     FAKEMATCH_ASM_LIVE(count);
+    FAKEMATCH_ASM_LIVE(saved);
     if ((work + 4)[count] != 0) {
         loopCount = count;
         lead = id * 20 + 0x6600;
-        tailA = id * 20 + 0x6601;
         tailB = id * 20 + 0x6601;
+        tailA = id * 20 + 0x6601;
         do {
             u8 *gb = work + 4;
             u8 code = gb[lead];
-            work = DDS3_GBWK;
+            work = saved;
 
             if (code & 0x80) {
                 *out = code;

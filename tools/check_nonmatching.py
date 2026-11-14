@@ -29,7 +29,6 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GUARD = "#ifdef NON_MATCHING"
 # A draft is a guarded block whose #else holds the asm fallback; the
 # INCLUDE_ASM names there name the functions the drafts are for. One block can
 # carry several, so every name in the #else counts: reading only the first made
@@ -70,11 +69,25 @@ def draft_names(text: str) -> list[str]:
     return ASM_NAME.findall("".join(fallback))
 
 
+def conditional_names(text: str) -> set[str]:
+    """Conservative mode references outside comments and string literals.
+
+    C permits spaces between # and ifdef, #if expressions, and macro aliases
+    such as #define BUG FIX_BUGS followed by #if BUG. Scan all identifier tokens
+    rather than trying to evaluate the preprocessor: extra checks are safe,
+    but silently dropping a mode can hide invalid drafts. Splice logical lines
+    before stripping comments, as the preprocessor does.
+    """
+    text = re.sub(r"\\\r?\n", "", text)
+    text = COMMENTS.sub(lambda m: re.sub(r"[^\n]", " ", m.group()), text)
+    return set(re.findall(r"\b[A-Za-z_]\w*\b", text))
+
+
 def units(args):
     if args:
         return [Path(a) for a in args]
     return [Path(p) for p in sorted(glob.glob(str(ROOT / "src/smt3/**/*.c"), recursive=True))
-            if GUARD in (t := Path(p).read_text()) or "FIX_BUGS" in t]
+            if conditional_names(Path(p).read_text()) & {"NON_MATCHING", "FIX_BUGS"}]
 
 
 def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
@@ -205,7 +218,7 @@ def check_draft_unit(path, known):
     rel = path.relative_to(ROOT) if path.is_absolute() else path
     bad, lines = 0, []
     for fix_bugs in (False, True):
-        if fix_bugs and "FIX_BUGS" not in text:
+        if fix_bugs and "FIX_BUGS" not in conditional_names(text):
             continue
         label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
         with tempfile.TemporaryDirectory(prefix="smt3-draft-") as tmp:

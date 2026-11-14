@@ -681,3 +681,29 @@ return, nested comparisons, one-pass control and a real selector read operand
 were bounded diagnostics: none matched. No constraints are retained. All
 199 other functions and owned data check exact; exhaustive 65,536 signed-byte
 state pairs preserve the original and native selection and argument behavior.
+
+### Guarded stock-row arithmetic and blink lifetime
+
+The `cmbDrawStockRow` draft now retains the actual full-width blink callback
+result through a local empty operand constraint before converting its low byte.
+That byte is represented in `u32` for the native unsigned multiply/right-shift
+sequence. This target-specific compiler aid has a real initialized value and
+consumer, emits no instruction itself, and is not evidence of original spelling.
+No new fixed-register binding is used. The x-coordinate addition and z increment
+are expressed modulo 32 bits, avoiding signed C overflow while preserving the
+retail `addu`/`addiu` behavior.
+
+The guarded draft improves from 35 matching native words at 316 bytes to 67 of
+81 words matching at the exact 324-byte native size. It remains assembly-backed. The
+remaining differences include mask placement across the first box call and
+late instruction scheduling, so no exact-match credit is claimed. A plain u32
+control reaches only 36 words at 320 bytes; additional live/volatile controls
+and a redundant fixed-register binding did not improve the retained candidate.
+
+All 199 existing exact C peers remain unchanged. Normal, SKIP_ASM and retained-C
+plain/stock-dump compile pairs agree in entire assembly and object output. The
+extracted candidate agrees with an independent native-width call-argument oracle
+on 200,000 random/boundary cases, including mutated box color buffers, in optimized
+and ASan/UBSan builds. Leak checking is disabled for that sanitizer run because
+LeakSanitizer cannot operate under the executor's tracing environment. The guarded
+production owner and full integration checks remain required for publication.

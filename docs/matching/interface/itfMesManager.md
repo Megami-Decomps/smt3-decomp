@@ -118,3 +118,37 @@ or compiler flag change is justified by this negative control.
 ### itfMesMngGetVarLocalize, three inductions (2026-11-04)
 
 Separate `lead`, `tailA` and `tailB` variables for the two arms, each stepped by two, with the global read at every use, give retail's three inductions and a 152-byte function against 172 (the earlier draft was 136). Still missing: the per-iteration `daddu $9, $14, $0` copy of the global, and the count address (`$13`, constant) added to it inside the loop. A local `work` pointer, a per-iteration `w = work` copy, and `(work + count)[4]` as the bound each emitted 148 to 160 bytes and moved the inductions back together. The output buffer is now `itfMesMngVarText`.
+
+### Localized-name native loop and allocation recovery (2026-11-14)
+
+The guarded draft now emits the full native 172 bytes, with 39 of 43
+positional instruction words matching, up from the preceding 19/43 draft.
+It remains `NON_MATCHING`: the first count-address calculation, output-base
+construction and count-byte load still differ in ordering/register assignment.
+The loop and exit from offset `0x1c` onward match retail.
+
+The real saved work pointer is initialized from the working pointer and
+consumed by each iteration's refresh. Local empty constraints retain that
+pointer and the genuine output pointer before the first count test. They
+emit no instructions and introduce no memory barrier or access. The native
+saved-global copy is not a dummy consumer: it supplies the next iteration's
+base. Separate tail offsets occupy `$10` and `$6`; initial count `$6` is
+copied to the loop count before the tail offset is initialized, so those
+lifetimes do not overlap. Initializing the independent tail offsets in native
+order retains the native copy. These are target-specific reconstruction aids,
+not evidence of original source spelling. No function call crosses a binding.
+Pointer expressions, access widths, glyph branches and count reloads remain
+unchanged; no bounds or volatile accesses were introduced.
+
+The full guarded owner retains 119 exact C functions and owned data. A
+target-only active check differs only in this function and its relocation/
+full-context checks. Plain versus diagnostic complete assembly and raw object
+parity passed in normal, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` modes.
+One million randomized modeled four-row cases with counts zero through ten
+also preserved all 64 output bytes, including untouched guards, under ASan
+and UBSan. That bounded comparison is not an exhaustive input-domain proof.
+
+Controls: binding the output directly to `$7` regressed to 164 bytes; explicit
+initial count-address binding retained 39/43 and did not solve the scheduling
+frontier. Further work should explain the four entry differences rather than
+repeat those controls or change the correctly emitted loop.

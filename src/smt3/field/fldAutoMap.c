@@ -1377,7 +1377,7 @@ void fldAutoMapSeqStart(void) {
     fldAmLightParam_t *light;
     fldAmAreaData_t *rec;
     s32 i;
-    FAKEMATCH_ASM_REG(sdfVector4_t *, fieldId, "$3");
+    sdfVector4_t *fieldId;
     FAKEMATCH_ASM_REG(f32, zOffset, "$f2");
     f32 wx;
     f32 wz;
@@ -1429,7 +1429,7 @@ void fldAutoMapSeqStart(void) {
     wx = fldGlobalBase.x + px;
     /* Keep the native positive-zero scalar live for the three real Y stores. */
     FAKEMATCH_ASM_LIVE_F32(zero);
-    /* Local address binding preserves the native field-ID base register. */
+    /* Materialize the real field-ID base for its three component stores. */
     fieldId = &fldAutoMapFieldId;
     fldAutoMapPosX.x = wx;
     fldAutoMapPosX.y = zero;
