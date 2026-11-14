@@ -39,7 +39,12 @@ DECL = re.compile(r"^extern\s+(.*?)\b([A-Za-z_]\w*)\s*((?:\[[^\]]*\]\s*)*)$")
 
 def externs(unit):
     cmd = ["gcc", "-E", "-P", "-undef", "-nostdinc"] + DEFS + [ASM_ROOT, unit]
-    out = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True).stdout
+    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+    # A failed preprocessor can emit empty or partial output. Neither is a
+    # complete declaration inventory; keep the unit in failed_units instead.
+    if result.returncode != 0:
+        return None
+    out = result.stdout
     found = {}
     for raw in out.splitlines():
         line = raw.strip()
@@ -95,6 +100,8 @@ def compile_probe(unit, names, decls, tmp):
 
 def one(unit):
     decls = externs(unit)
+    if decls is None:
+        return unit, {"__failed__": 1}
     if not decls:
         return unit, {}
     with tempfile.TemporaryDirectory() as tmp:
