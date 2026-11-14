@@ -3195,7 +3195,6 @@ void cmbDrawTopSprite(s32 unusedX, s32 unusedY, u32 unusedZ, s32 unusedOt)
 
 extern const char *cmbTopTextTable[];
 
-#ifdef NON_MATCHING
 s32 cmbDrawTopText(s8 index)
 {
     void *request = frwGetSmallFontFRQ2(0, 0, 0xFFFFF, 0x8CA0FF80,
@@ -3205,12 +3204,12 @@ s32 cmbDrawTopText(s8 index)
     fclDrawPanelSprite(0x33001, 0x47);
     cmbDrawTopSprite(0, 0, 0xFFFFF0, 0x47);
     fclDrawPanelSprite(0x5101B, 0x47);
+    /* Keep the real font request live at its next consumer. This localized
+     * reconstruction aid separates adjacent call-argument scheduling. */
+    FAKEMATCH_ASM_LIVE(request);
     frDrawFontOt(request, 1, 0x47);
     return frDestroyFontRequestAfter(request);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTopText);
-#endif
 
 extern void fclDrawPanelSprite2(s32 id, s32 ot);
 extern s32 cmpCursorBlinkColor(s32 timer);
