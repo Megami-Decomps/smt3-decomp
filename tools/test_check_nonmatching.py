@@ -71,6 +71,57 @@ class ConditionalSelection(unittest.TestCase):
                 self.assertEqual(cn.units(["explicit.c"]), [Path("explicit.c")])
 
 
+class HeaderCorrectionModes(unittest.TestCase):
+    def test_draft_without_local_fix_token_checks_both_modes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit = root / "unit.c"
+            unit.write_text('#include "corrections.h"\n#ifdef NON_MATCHING\nint f(void) { return 0; }\n#endif\n')
+            modes = []
+            def compile(path, mode, output):
+                modes.append(mode)
+                Path(output).write_text("")
+                return ""
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                count, lines = cn.check_draft_unit(unit, [])
+            self.assertEqual(count, 0)
+            self.assertEqual(modes, [False, True])
+            self.assertEqual(len(lines), 2)
+
+    def test_header_only_corrected_error_is_reported(self):
+        # Use real preprocessing to establish that the selected C file need not
+        # contain the correction's mode token. Keep this independent of cc1.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit = root / "unit.c"
+            unit.write_text('#include "corrections.h"\n#ifdef NON_MATCHING\nint f(void) { return 0; }\n#endif\n')
+            (root / "corrections.h").write_text('#ifdef FIX_BUGS\n#error broken correction\n#endif\n')
+            def compile(path, mode, output):
+                result = subprocess.run(["gcc", "-E", "-DNON_MATCHING",
+                                         *(["-DFIX_BUGS"] if mode else []), str(path)],
+                                        capture_output=True, text=True)
+                Path(output).write_text("")
+                return result.stderr if result.returncode else ""
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                count, lines = cn.check_draft_unit(unit, [])
+            self.assertEqual(count, 1)
+            self.assertIn("NON_MATCHING + FIX_BUGS", lines[1])
+            self.assertIn("broken correction", "\n".join(lines))
+
+    def test_header_only_corrected_unresolved_operand_is_reported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unit = root / "unit.c"
+            unit.write_text('#include "corrections.h"\n#ifdef NON_MATCHING\nint f(void) { return 0; }\n#endif\n')
+            def compile(path, mode, output):
+                Path(output).write_text("lw $2,%lo(D_00000010)($3)\n" if mode else "")
+                return ""
+            with patch.object(cn, "ROOT", root), patch.object(cn, "compile_unit", side_effect=compile):
+                count, lines = cn.check_draft_unit(unit, [(8, 32)])
+            self.assertEqual(count, 1)
+            self.assertIn("undefined with NON_MATCHING + FIX_BUGS: D_00000010", lines[1])
+
+
 class ParallelDraftChecks(unittest.TestCase):
     def test_worker_bound_is_explicit(self):
         for value in ("1", "4", "8"):

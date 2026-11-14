@@ -232,8 +232,8 @@ def check_draft_unit(path, known):
     rel = path.relative_to(ROOT) if path.is_absolute() else path
     bad, lines = 0, []
     for fix_bugs in (False, True):
-        if fix_bugs and "FIX_BUGS" not in conditional_names(text):
-            continue
+        # Headers may carry corrected branches even when this unit never
+        # spells FIX_BUGS. Check both modes for every selected draft unit.
         label = "NON_MATCHING + FIX_BUGS" if fix_bugs else "NON_MATCHING"
         with tempfile.TemporaryDirectory(prefix="smt3-draft-") as tmp:
             asm = Path(tmp) / "unit.s"
