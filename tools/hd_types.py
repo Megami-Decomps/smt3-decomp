@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Export the SMT3HD reconstruction's struct members to config/smt3/hd_types.txt.
+"""Export the SMT3HD reconstruction's struct members to config/smt3/hd_types.txt
+(enums to hd_enums.txt, #defines to hd_defines.txt).
 
 Member names and their order are what this corpus is for. Sizes and offsets are
 advisory only: the remaster rewrote inline arrays and embedded structs as pointers
@@ -15,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HD = Path("/home/wsl/projects/smt3hd-reconstructed-sources")
 DEFAULT_OUT = ROOT / "config" / "smt3" / "hd_types.txt"
 DEFAULT_ENUMS = ROOT / "config" / "smt3" / "hd_enums.txt"
+DEFAULT_DEFINES = ROOT / "config" / "smt3" / "hd_defines.txt"
 
 # PS2 ABI: ee-gcc 2.96, 32-bit pointers.
 BASE = {
@@ -71,6 +73,22 @@ def parse_enums(hd):
                     nxt = value + 1
                 i += 1
             i += 1
+    return out
+
+
+DEFINE = re.compile(r"^#define\s+([A-Za-z_]\w*)\s+(\S.*?)\s*$")
+
+
+def parse_defines(hd):
+    """[(name, value text, file)] for every object-like #define in the HD headers.
+
+    Float constants are written as their IEEE bits (1065353216 is 1.0f)."""
+    out = []
+    for path in sorted((hd / "include").glob("*.h")):
+        for line in path.read_text(errors="replace").splitlines():
+            m = DEFINE.match(line)
+            if m:
+                out.append((m.group(1), m.group(2), path.name))
     return out
 
 
@@ -169,6 +187,7 @@ def main():
     ap.add_argument("--hd", type=Path, default=DEFAULT_HD)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--enums-out", type=Path, default=DEFAULT_ENUMS)
+    ap.add_argument("--defines-out", type=Path, default=DEFAULT_DEFINES)
     args = ap.parse_args()
 
     enums = parse_enums(args.hd)
@@ -192,6 +211,15 @@ def main():
     args.enums_out.write_text("\n".join(rows) + "\n")
     print(f"{len(enums)} HD enums, {sum(len(m) for _, _, m in enums)} members, "
           f"{merged} merged -> {args.enums_out}")
+
+    defines = parse_defines(args.hd)
+    drows = [
+        "# SMT3HD reconstruction #defines, from tools/hd_types.py.",
+        "# D <name> <file> <value text, to end of line>",
+    ]
+    drows += [f"D {n} {f} {v}" for n, v, f in sorted(defines, key=lambda d: (d[2], d[0]))]
+    args.defines_out.write_text("\n".join(drows) + "\n")
+    print(f"{len(defines)} HD defines -> {args.defines_out}")
 
     types = parse(args.hd)
     resolved = sizes(types)
