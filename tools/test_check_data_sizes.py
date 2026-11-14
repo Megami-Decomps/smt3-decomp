@@ -391,6 +391,119 @@ class ConditionalCallProvenance(unittest.TestCase):
                     self.assertEqual([a[1] for a in accesses], [0x340000])
 
 
+class MergeAccessSpans(unittest.TestCase):
+    scan = AddressProvenance.scan
+    cases = ((0x22, 0x26, 4), (0x1A, 0x1B, 8),
+             (0x2A, 0x2E, 4), (0x2C, 0x2D, 8))
+
+    def test_left_and_right_spans_at_every_alignment(self):
+        for left, right, size in self.cases:
+            for offset in range(size):
+                for op, start, width in ((left, 0x340000, offset + 1),
+                                         (right, 0x340000 + offset, size - offset)):
+                    with self.subTest(op=op, offset=offset):
+                        accesses, _ = self.scan([
+                            (0xF << 26) | (16 << 16) | 0x34,
+                            (9 << 26) | (16 << 21) | (16 << 16),
+                            (op << 26) | (16 << 21) | (3 << 16) | offset])
+                        self.assertEqual(accesses, [(0x100008, start, width, True,
+                                                     0x340000, op in cds.STORE_W)])
+
+    def test_merge_pairs_cover_exact_unaligned_block(self):
+        for left, right, size in self.cases:
+            for offset in range(size):
+                with self.subTest(size=size, left=left, offset=offset):
+                    accesses, _ = self.scan([
+                        (0xF << 26) | (16 << 16) | 0x34,
+                        (left << 26) | (16 << 21) | (3 << 16) | (offset + size - 1),
+                        (right << 26) | (16 << 21) | (3 << 16) | offset])
+                    touched = {a for _, start, width, *_ in accesses
+                               for a in range(start, start + width)}
+                    self.assertEqual(touched, set(range(0x340000 + offset,
+                                                        0x340000 + offset + size)))
+
+    def test_gp_negative_offsets_use_effective_address_alignment(self):
+        import struct
+        for left, right, size in self.cases:
+            for op in (left, right):
+                with self.subTest(op=op):
+                    word = (op << 26) | (28 << 21) | (3 << 16) | 0xFFFF
+                    data = struct.pack('<I', word)
+                    accesses, _ = cds.scan_text(data, [dict(name='.text', off=0,
+                        size=4, addr=0x100000)], {0x100000}, 0x340002)
+                    start, width = ((0x340000, 2) if op == left
+                                    else (0x340001, size - 1))
+                    self.assertEqual(accesses, [(0x100000, start, width, False,
+                                                 None, op in cds.STORE_W)])
+
+    def test_merge_load_kills_base_destination_but_store_preserves_it(self):
+        for left, right, size in self.cases:
+            for op in (left, right):
+                with self.subTest(op=op):
+                    accesses, _ = self.scan([
+                        (0xF << 26) | (16 << 16) | 0x34,
+                        (op << 26) | (16 << 21) | (16 << 16) | 1,
+                        (0x23 << 26) | (16 << 21) | (3 << 16)])
+                    self.assertEqual(len(accesses), 2 if op in cds.STORE_W else 1)
+
+
+class MergeExtentReports(unittest.TestCase):
+    def report(self, words, start, size, other=None):
+        import contextlib
+        import io
+        import struct
+        data = struct.pack('<%dI' % len(words), *words)
+        sections = [dict(name='.text', off=0, size=len(data), addr=0x100000),
+                    dict(name='.bss', off=0, size=0x100, addr=0x340000, type=8)]
+        symbols = {'object': dict(name='object', addr=start, size=size,
+                                  type='u8', auto=False)}
+        if other is not None:
+            symbols['next'] = dict(name='next', addr=other, size=16, type='u8', auto=False)
+        output = io.StringIO()
+        with mock.patch.object(sys, 'argv', ['check_data_sizes', '--classes',
+                                             'BEYOND,STRADDLE,IN_GAP']), \
+             mock.patch.object(cds, 'load_syms', return_value=symbols), \
+             mock.patch.object(cds, 'load_elf', return_value=(data, sections)), \
+             mock.patch.object(cds, 'load_word_addrs', return_value=set()), \
+             mock.patch.object(cds, 'load_jtbls', return_value=[]), \
+             contextlib.redirect_stdout(output):
+            cds.main()
+        return output.getvalue()
+
+    def setup(self, offset=0):
+        return [(0xF << 26) | (16 << 16) | 0x34,
+                (9 << 26) | (16 << 21) | (16 << 16) | offset]
+
+    def test_right_span_reports_previously_missed_straddle(self):
+        for op in (0x26, 0x1B, 0x2E, 0x2D):
+            with self.subTest(op=op):
+                report = self.report(self.setup() + [
+                    (op << 26) | (16 << 21) | (3 << 16) | 1], 0x340000, 2)
+                self.assertIn('STRADDLE', report)
+                self.assertIn('object', report)
+
+    def test_right_span_reports_beyond_base_into_next_owner(self):
+        for op in (0x26, 0x1B, 0x2E, 0x2D):
+            with self.subTest(op=op):
+                report = self.report(self.setup() + [
+                    (op << 26) | (16 << 21) | (3 << 16) | 4],
+                    0x340000, 4, 0x340004)
+                self.assertIn('BEYOND', report)
+                self.assertIn('into next', report)
+
+    def test_exact_unaligned_pairs_do_not_overrun_object(self):
+        for left, right, size in MergeAccessSpans.cases:
+            for offset in range(1, size):
+                with self.subTest(left=left, offset=offset):
+                    report = self.report(self.setup(offset) + [
+                        (left << 26) | (16 << 21) | (3 << 16) | (size - 1),
+                        (right << 26) | (16 << 21) | (3 << 16)],
+                        0x340000 + offset, size)
+                    self.assertNotIn('BEYOND', report)
+                    self.assertNotIn('STRADDLE', report)
+                    self.assertNotIn('IN_GAP', report)
+
+
 class Controls(unittest.TestCase):
     def test_controls_pass_on_the_real_checks(self):
         cds.run_controls()

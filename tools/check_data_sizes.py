@@ -74,6 +74,24 @@ STORE_W = {0x28: 1, 0x29: 2, 0x2B: 4, 0x39: 4, 0x3F: 8, 0x1F: 16, 0x3A: 4, 0x3E:
 CALLER_SAVED = list(range(1, 16)) + [24, 25]
 
 
+def memory_span(op, addr):
+    """Bytes transferred by an EE little-endian memory operation.
+
+    Merge operations transfer only part of an aligned word/doubleword, not a
+    single byte and not necessarily the whole word. Left transfers end at the
+    effective address; right transfers start there. Keep the original register
+    base separately for provenance and extent checks.
+    """
+    if op in (0x22, 0x2A, 0x1A, 0x2C):  # LWL/SWL, LDL/SDL
+        size = 4 if op in (0x22, 0x2A) else 8
+        offset = addr & (size - 1)
+        return addr - offset, offset + 1
+    if op in (0x26, 0x2E, 0x1B, 0x2D):  # LWR/SWR, LDR/SDR
+        size = 4 if op in (0x26, 0x2E) else 8
+        return addr, size - (addr & (size - 1))
+    return addr, LOAD_W.get(op) or STORE_W[op]
+
+
 def scan_text(b, secs, func_starts, gp):
     """Yield (pc, base, addr, width, via_reg, exact_addr) for each memory access with a known constant address,
     and ('const', value) events for addiu/ori built addresses."""
@@ -151,12 +169,13 @@ def scan_text(b, secs, func_starts, gp):
                 if rt != 0:
                     consts.append((pc, v, True))
             elif op in LOAD_W or op in STORE_W:
-                width = LOAD_W.get(op) or STORE_W.get(op)
                 if rs in regs:
                     v, kind, _ = regs[rs]
-                    accesses.append((pc, (v + sx16(imm)) & 0xFFFFFFFF, width, kind == "addr", v, op in STORE_W))
+                    addr, width = memory_span(op, (v + sx16(imm)) & 0xFFFFFFFF)
+                    accesses.append((pc, addr, width, kind == "addr", v, op in STORE_W))
                 elif rs == 28 and gp:
-                    accesses.append((pc, (gp + sx16(imm)) & 0xFFFFFFFF, width, False, None, op in STORE_W))
+                    addr, width = memory_span(op, (gp + sx16(imm)) & 0xFFFFFFFF)
+                    accesses.append((pc, addr, width, False, None, op in STORE_W))
                 if op in LOAD_W and op not in (0x31, 0x32, 0x36):
                     kill.append(rt)
             elif op == 0:
