@@ -5,7 +5,9 @@
 # SMT3_VERSION selects the INCLUDE_ASM tree (default smt3); SMT3_I386_LIBDIR as
 # for configure.py when the system has no 32-bit loader. SMT3_COMPILER
 # overrides the unit's configured compiler, and SMT3_AS the assembler binary,
-# for point-release sweeps.
+# for point-release sweeps. SMT3_KEEP_DUMPS=new-directory archives scratch
+# source, assembly and natural-name compiler dumps, even on compile failure.
+# This does not enable dumps or establish diagnostic/build output parity.
 set -e
 root=$(cd "$(dirname "$0")/.." && pwd)
 in= out= flags=
@@ -92,8 +94,32 @@ run() {
         $aslr "$@"
     fi
 }
+# Refuse reused destinations: stale dumps must never look like a fresh trace.
+# Resolve before cd so relative destinations are relative to the caller.
+archive=${SMT3_KEEP_DUMPS:-}
+if [ -n "$archive" ]; then
+    [ -n "$canon" ] || { echo "SMT3_KEEP_DUMPS requires a canonical source or SMT3_AS_UNIT" >&2; exit 2; }
+    case $archive in /*) ;; *) archive=$PWD/$archive ;; esac
+    mkdir -p "$(dirname "$archive")"
+    mkdir "$archive"
+fi
 tmp=$(mktemp -d)
-cleanup() { rm -rf "$tmp" ${srcdir:+"$root/$srcdir"} ${outdir:+"$root/$outdir"}; }
+cleanup() {
+    status=$?
+    trap - EXIT
+    if [ -n "$archive" ]; then
+        # Keep only this invocation's separate scratch trees.
+        if ! cp -R "$tmp" "$archive/tmp"; then status=1; fi
+        if [ -n "$srcdir" ]; then
+            if ! cp -R "$root/$srcdir" "$archive/source"; then status=1; fi
+        fi
+        if [ -n "$outdir" ]; then
+            if ! cp -R "$root/$outdir" "$archive/output"; then status=1; fi
+        fi
+    fi
+    rm -rf "$tmp" ${srcdir:+"$root/$srcdir"} ${outdir:+"$root/$outdir"}
+    exit "$status"
+}
 trap cleanup EXIT
 cd "$root"
 # ee-gcc 2.96's code can depend on the lengths of the file names cc1 is given

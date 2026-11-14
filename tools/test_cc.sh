@@ -112,6 +112,75 @@ fi
 grep -F -- 'cc1probe hooks require ee-gcc2.96' "$tmp/probe-error" >/dev/null
 [ ! -e "$tmp/probe" ]
 
+# Natural-name diagnostic capture is opt-in and never reuses stale directories.
+cat > "$ccpath" <<'SCRIPT'
+#!/bin/sh
+input= output=
+while [ $# -gt 0 ]; do
+    case $1 in *.c) input=$1;; -o) output=$2; shift;; esac
+    shift
+done
+printf 'diagnostic\n' > "$input.00.rtl"
+printf 'assembly\n' > "$output"
+exit "${FAKE_CC_RC:-0}"
+SCRIPT
+# ccpath currently names the configured SDK compiler.
+archive="$tmp/archive with spaces"
+CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
+    SMT3_KEEP_DUMPS="$archive" \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o"
+grep -Fx diagnostic "$archive/source/smt3/sdk/libipu.c.00.rtl"
+grep -Fx assembly "$archive/output/smt3/src/smt3/sdk/libipu.o.s"
+if SMT3_ALLOW_ASLR=1 SMT3_KEEP_DUMPS="$archive" \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o" 2>/dev/null; then
+    echo "reused archive accepted" >&2; exit 1
+fi
+# Failed compiles preserve diagnostics but never turn failure into success.
+if SMT3_ALLOW_ASLR=1 SMT3_KEEP_DUMPS="$tmp/failed" FAKE_CC_RC=7 \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o"; then
+    echo "compiler failure lost" >&2; exit 1
+else
+    [ "$?" -eq 7 ]
+fi
+grep -Fx diagnostic "$tmp/failed/source/smt3/sdk/libipu.c.00.rtl"
+# Relative paths resolve against the invoking directory, not the repository.
+(cd "$tmp" && CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
+    SMT3_KEEP_DUMPS=relative/trace \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o")
+test -f "$tmp/relative/trace/source/smt3/sdk/libipu.c.00.rtl"
+# Archive copy failure must not be hidden by otherwise successful compilation.
+mkdir "$tmp/fail-bin"
+real_cp=$(command -v cp)
+cat > "$tmp/fail-bin/cp" <<SCRIPT
+#!/bin/sh
+[ "\$1" != -R ] || exit 23
+exec "$real_cp" "\$@"
+SCRIPT
+chmod +x "$tmp/fail-bin/cp"
+if CC_LOG="$tmp/cc.log" AS_LOG="$tmp/as.log" SMT3_ALLOW_ASLR=1 \
+    PATH="$tmp/fail-bin:$PATH" SMT3_KEEP_DUMPS="$tmp/copy-failed" \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o"; then
+    echo "archive failure lost" >&2; exit 1
+fi
+
+# Noncanonical inputs put dumps beside the input, outside owned scratch.
+# Reject capture rather than silently omitting dumps or globbing stale files.
+if SMT3_ALLOW_ASLR=1 SMT3_KEEP_DUMPS="$tmp/noncanonical" \
+    "$repo/tools/cc.sh" "$tmp/override.c" -o "$tmp/out.o" 2>"$tmp/capture-error"; then
+    echo "noncanonical capture accepted" >&2; exit 1
+else
+    [ "$?" -eq 2 ]
+fi
+grep -F 'requires a canonical source or SMT3_AS_UNIT' "$tmp/capture-error"
+[ ! -e "$tmp/noncanonical" ]
+
+# A file as archive parent must fail before launching the compiler.
+: > "$tmp/not-directory"
+if SMT3_ALLOW_ASLR=1 SMT3_KEEP_DUMPS="$tmp/not-directory/trace" \
+    "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o" 2>/dev/null; then
+    echo "invalid archive accepted" >&2; exit 1
+fi
+
 printf 'sdk/libipu unsupported-compiler\n' > "$repo/config/smt3/compilers.txt"
 if SMT3_ALLOW_ASLR=1 "$repo/tools/cc.sh" "$repo/src/smt3/sdk/libipu.c" -o "$tmp/out.o" 2>"$tmp/error"; then
     echo "unknown compiler was accepted" >&2

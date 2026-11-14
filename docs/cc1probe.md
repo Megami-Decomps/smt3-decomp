@@ -70,6 +70,32 @@ supplies that property. Follow the [canonical matching policy](CONTRIBUTING.md#m
 The complete-unit check and full retail checksum remain necessary after a
 source change; a neutral observation is not a matching result.
 
+## Preserve natural-name dumps without a debugger
+
+For stock compiler dumps, `tools/cc.sh` can preserve its own scratch trees
+without a copied wrapper or a `-dumpbase` override:
+
+```sh
+SMT3_KEEP_DUMPS=/tmp/new-trace SMT3_AS_UNIT=src/smt3/facility/fclShare.c \
+    tools/cc.sh -da /tmp/candidate.c -o /tmp/candidate.o
+```
+
+The destination must not exist; its parent directories are created. Relative
+paths are resolved from the caller's working directory. The archive contains
+`source/` and `output/` for canonical-unit scratch trees, plus `tmp/`.
+Capture requires a canonical source or `SMT3_AS_UNIT`; arbitrary inputs would
+otherwise place dumps beside the input, outside the owned scratch trees. It is private diagnostic material, not a repository
+artifact. The wrapper also attempts archiving on compiler failure, preserves
+that failure status, and returns nonzero if archiving fails. A partial archive
+is not evidence of a completed compile; choose a new destination for a retry.
+
+This option only copies scratch files before cleanup. It adds no compiler
+flags, does not turn on dumps itself, and does not certify parity. Dump flags
+can perturb code generation. Apply the full qualification procedure below;
+merely obtaining an archive or comparing normalized sections is insufficient
+for a compiler-decision claim. Keep each source and compilation context
+separate, and never publish the archived game input, assembly or traces.
+
 ## Stock dumps and exact-binary inspection
 
 Stock dumps can settle a compiler question without an execution observer.
