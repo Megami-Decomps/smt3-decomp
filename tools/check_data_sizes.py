@@ -267,6 +267,17 @@ def cover_crossings(extents, starts):
     return [(addr, addr + size, o) for addr, size in extents for o in starts if addr < o < addr + size]
 
 
+def load_csizes(path):
+    """Reject a known-incomplete probe cache rather than report partial C coverage."""
+    with open(path) as f:
+        cache = json.load(f)
+    failed = cache.get("failed_units", [])
+    if failed:
+        raise ValueError("incomplete C-size cache: %d unit(s) failed to probe: %s" %
+                         (len(failed), ", ".join(failed)))
+    return cache["symbols"]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", default=str(ROOT / "config/smt3/symbol_addrs.txt"))
@@ -276,6 +287,10 @@ def main():
     ap.add_argument("--classes", default=None)
     ap.add_argument("--dump-universe", default=None, help="write the symbol universe and reference sets as JSON")
     a = ap.parse_args()
+    try:
+        cs = load_csizes(a.csizes) if a.csizes else None
+    except ValueError as e:
+        ap.error(str(e))
 
     run_controls()
     word_addrs = load_word_addrs(ROOT / "asm")
@@ -450,8 +465,7 @@ def main():
         add("TAIL", s, "size 0x%X, 0x%X bytes before %s, %d nonzero words, gap start is referenced by nothing" %
             (s["size"], gap, owner(gend)["name"] if owner(gend) else "?", sum(1 for x in gb if x)))
     # CSIZE
-    if a.csizes:
-        cs = json.load(open(a.csizes))["symbols"]
+    if cs is not None:
         for addr in starts:
             s = uni[addr]
             if s["name"] not in cs:

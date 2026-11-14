@@ -1,11 +1,55 @@
 #!/usr/bin/env python3
 """Pin the jump table rule: a data symbol must end at or before the next jtbl_ label."""
 import sys
+import json
+import tempfile
+from unittest import mock
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_data_sizes as cds
+
+
+class CSizeCache(unittest.TestCase):
+    def cache(self, symbols, failed=None):
+        data = {"symbols": symbols}
+        if failed is not None:
+            data["failed_units"] = failed
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        path = Path(tmp.name) / "sizes.json"
+        path.write_text(json.dumps(data))
+        return str(path)
+
+    def test_empty_failed_cache_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "1 unit.*src/broken.c"):
+            cds.load_csizes(self.cache({}, ["src/broken.c"]))
+
+    def test_partial_failed_cache_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "2 unit.*src/a.c, src/b.c"):
+            cds.load_csizes(self.cache({"good": [{"size": 4}]},
+                                      ["src/a.c", "src/b.c"]))
+
+    def test_complete_cache_preserves_views(self):
+        views = {"good": [{"size": 4, "unit": "src/good.c"}]}
+        self.assertEqual(cds.load_csizes(self.cache(views, [])), views)
+
+    def test_legacy_cache_remains_supported(self):
+        self.assertEqual(cds.load_csizes(self.cache({})), {})
+
+    def test_cli_rejects_before_scanning_inputs(self):
+        path = self.cache({}, ["src/broken.c"])
+        with mock.patch.object(sys, "argv", ["check_data_sizes", "--csizes", path]), \
+             mock.patch.object(cds, "load_elf") as elf, \
+             mock.patch.object(cds, "load_word_addrs") as words, \
+             mock.patch.object(sys, "stderr") as stderr:
+            with self.assertRaises(SystemExit) as failure:
+                cds.main()
+        self.assertEqual(failure.exception.code, 2)
+        elf.assert_not_called()
+        words.assert_not_called()
+        self.assertIn("src/broken.c", "".join(c.args[0] for c in stderr.write.call_args_list))
 
 
 class JtblCrossings(unittest.TestCase):
