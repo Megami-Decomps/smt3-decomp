@@ -1116,13 +1116,13 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     if (0.0f < cross) {
         angle = -angle;
     }
-    angle = angle * radio;
+    angle = angle * SDF_FRAME_SHARE(radio);
     if ((h->flags & 0x200000) == 0) {
-        if (angle < -0.15707963f) {
-            angle = -0.15707963f;
+        if (angle < -SDF_FRAME_STEP(0.15707963f)) {
+            angle = -SDF_FRAME_STEP(0.15707963f);
         }
-        if (0.15707963f < angle) {
-            angle = 0.15707963f;
+        if (SDF_FRAME_STEP(0.15707963f) < angle) {
+            angle = SDF_FRAME_STEP(0.15707963f);
         }
     }
     SDF_VU0_LOADVECTOR_MEMOPS(axis);
@@ -1164,7 +1164,7 @@ s32 evtUnitMoveType0(evtUnit_t *h) {
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
     }
-    scale = h->motionParameter * 0.1f;
+    scale = SDF_FRAME_STEP(h->motionParameter * 0.1f);
     SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(&v);
     dds3GetPosPoseSetMCR(obj, (u128 *)&v);
