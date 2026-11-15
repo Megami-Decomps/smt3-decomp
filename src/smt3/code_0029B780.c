@@ -6,6 +6,7 @@
 #include "basic.h"
 #include "motion.h"
 #include "font.h"
+#include "dds3Config.h"
 
 extern void (*sdfTickCallback)(void);
 
@@ -525,13 +526,15 @@ void dds3DrawConfigPanel(s32 ot)
         dds3DrawConfigBackground(ot);
     }
     dds3DrawConfigSlider(0, -0x48, 0, ot);
-    dds3DrawConfigText(0, 0x268, 0, 2, 0,
-                        dds3GetConfigFlag(0, &DDS3_GBWK->configFlags), ot);
-    dds3DrawConfigText(0, 0x4B0, 0, 3, 1,
-                        dds3GetConfigFlag(1, &DDS3_GBWK->configFlags), ot);
-    dds3DrawConfigText(0, 0x7A8, 0, 3, 2,
-                        dds3GetConfigFlag(2, &DDS3_GBWK->configFlags), ot);
-    dds3DrawConfigText(0, 0xAB0, 0, 1, 3, -1, ot);
+    DDS3_CONFIG_ROWS(ot, {
+        dds3DrawConfigText(0, 0x268, 0, 2, 0,
+                            dds3GetConfigFlag(0, &DDS3_GBWK->configFlags), ot);
+        dds3DrawConfigText(0, 0x4B0, 0, 3, 1,
+                            dds3GetConfigFlag(1, &DDS3_GBWK->configFlags), ot);
+        dds3DrawConfigText(0, 0x7A8, 0, 3, 2,
+                            dds3GetConfigFlag(2, &DDS3_GBWK->configFlags), ot);
+        dds3DrawConfigText(0, 0xAB0, 0, 1, 3, -1, ot);
+    });
     color = dds3GetConfigFadeAlpha() | 0x80808000;
     colors[0] = color;
     colors[1] = color;
@@ -578,6 +581,7 @@ void *dds3AllocConfigWork(s32 mode)
     } else {
         work->textureHandle = NULL;
     }
+    DDS3_CONFIG_OPEN(work);
     return work;
 }
 

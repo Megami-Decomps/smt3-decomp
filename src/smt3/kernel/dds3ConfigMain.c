@@ -5,6 +5,7 @@
 #include "basic.h"
 #include "motion.h"
 #include "camp.h"
+#include "dds3Config.h"
 
 extern void (*sdfTickCallback)(void);
 
@@ -141,7 +142,7 @@ s32 dds3UpdateConfig(void *PID)
     if (GBWK[0] & 0x40) {
         return -1;
     }
-    switch (button) {
+    switch (DDS3_CONFIG_BUTTON(button, index)) {
     case 1:
         if (index == 3) {
             goto terminate;
