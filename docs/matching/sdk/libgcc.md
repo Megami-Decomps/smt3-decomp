@@ -88,3 +88,35 @@ The remaining problem is a justified nonrecursive widening lowering. The
 native insertion sequence also carries dead incoming register bits that the
 ordinary body does not fabricate. Do not repeat the closed recursive widening
 control, invent that state, or replay scalar instructions to claim a match.
+
+## libc_2D1FA0: end_fde_sort (0x578)
+
+All 350 words match at the native 1,400-byte extent. The complete owner is
+38 matches, zero differences. No compiler constraint or flag override is used.
+
+The structural donor is GCC `gcc/frame.c` revision
+`89d7f003d32b1ce78b154f42335ee97685245b0f`: its linked predecessor split,
+heapsort, merge and free sequence fits this runtime. The older GCC 2.95
+variable-length predecessor array does not describe this implementation.
+The adapted routines preserve the donor copyright and GPL notice with runtime
+linking exception; the license text is in `docs/licenses/GCC-frame-COPYING`.
+
+`D_0059AD5C` is a four-byte native `.bss` sentinel whose address terminates the
+predecessor chain. The section annotation expresses that real storage class,
+not a small-data flag override. The temporary predecessor links occupy the
+already allocated erratic pointer array, with equal pointer representations
+on the EE ABI. No synthetic frame storage is introduced.
+
+The source preserves initial count validation, the no-erratic-allocation
+fallback, partition count validation, native wrapping subtraction comparator,
+heap ordering, merge into the original linear allocation, and exactly one
+free of the erratic allocation. An independent index-chain model and extracted
+body agreed over 200,002 optimized and ASan/UBSan cases, including duplicate and
+wrapping keys, monotone/reverse inputs, empty and allocation-failure states.
+The native arithmetic comparator is retained rather than replaced by a
+mathematically different total ordering.
+
+Fixed-path ordinary and `-da` compiler output produced byte-identical raw
+assembly and independently assembled objects. Complete-owner, guarded-source,
+regression and retail-image checks qualify promotion; private compiler traces
+are not repository artifacts.

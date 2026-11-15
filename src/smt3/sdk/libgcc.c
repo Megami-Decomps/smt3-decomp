@@ -855,7 +855,178 @@ void libc_2D1EA8(fde_vector *left, const fde_vector *right)
 }
 
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1FA0);
+/* FDE split/heapsort/end_fde_sort adapted from GCC gcc/frame.c,
+ * revision 89d7f003d32b1ce78b154f42335ee97685245b0f.
+ * The following upstream notice applies to these adapted FDE routines.
+ * See docs/licenses/GCC-frame-COPYING for the accompanying license text.
+ * https://github.com/gcc-mirror/gcc/blob/89d7f003d32b1ce78b154f42335ee97685245b0f/gcc/frame.c
+ */
+/* Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Contributed by Jason Merrill <jason@cygnus.com>.
+
+This file is part of GNU CC.
+
+GNU CC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+In addition to the permissions in the GNU General Public License, the
+Free Software Foundation gives you unlimited permission to link the
+compiled version of this file into combinations with other programs,
+and to distribute those combinations without any restriction coming
+from the use of this file.  (The General Public License restrictions
+do apply in other respects; for example, they cover modification of
+the file, and distribution when not linked into a combine
+executable.)
+
+GNU CC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU CC; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+typedef struct {
+    fde_vector linear;
+    fde_vector erratic;
+} fde_accumulator;
+/* Native four-byte .bss marker: only its address is used as chain sentinel. */
+extern u32 *D_0059AD5C __attribute__((section(".bss")));
+static inline void
+fde_split (fde_vector *linear, fde_vector *erratic)
+{
+
+  u32 count = linear->count;
+  u32 **chain_end = &D_0059AD5C;
+  u32 i, j, k;
+
+  /* This should optimize out, but it is wise to make sure this assumption
+     is correct. Should these have different sizes, we cannot cast between
+     them and the overlaying onto ERRATIC will not work.  */
+  if (sizeof (u32 *) != sizeof (u32 **))
+    abort ();
+
+  for (i = 0; i < count; i++)
+    {
+      u32 **probe;
+
+      for (probe = chain_end;
+           probe != &D_0059AD5C && fde_compare (linear->array[i], *probe) < 0;
+           probe = chain_end)
+        {
+          chain_end = (u32 **)erratic->array[probe - linear->array];
+          erratic->array[probe - linear->array] = NULL;
+        }
+      erratic->array[i] = (u32 *)chain_end;
+      chain_end = &linear->array[i];
+    }
+
+  /* Each entry in LINEAR which is part of the linear sequence we have
+     discovered will correspond to a non-NULL entry in the chain we built in
+     the ERRATIC array.  */
+  for (i = j = k = 0; i < count; i++)
+    if (erratic->array[i])
+      linear->array[j++] = linear->array[i];
+    else
+      erratic->array[k++] = linear->array[i];
+  linear->count = j;
+  erratic->count = k;
+}
+
+/* This is O(n log(n)).  BSD/OS defines heapsort in stdlib.h, so we must
+   use a name that does not conflict.  */
+static inline void
+frame_heapsort (fde_vector *erratic)
+{
+  /* For a description of this algorithm, see:
+     Samuel P. Harbison, Guy L. Steele Jr.: C, a reference manual, 2nd ed.,
+     p. 60-61. */
+  u32 ** a = erratic->array;
+  /* A portion of the array is called a "heap" if for all i>=0:
+     If i and 2i+1 are valid indices, then a[i] >= a[2i+1].
+     If i and 2i+2 are valid indices, then a[i] >= a[2i+2]. */
+#define SWAP(x,y) do { u32 * tmp = x; x = y; y = tmp; } while (0)
+  u32 n = erratic->count;
+  u32 m = n;
+  u32 i;
+
+  while (m > 0)
+    {
+      /* Invariant: a[m..n-1] is a heap. */
+      m--;
+      for (i = m; 2*i+1 < n; )
+        {
+          if (2*i+2 < n
+              && fde_compare (a[2*i+2], a[2*i+1]) > 0
+              && fde_compare (a[2*i+2], a[i]) > 0)
+            {
+              SWAP (a[i], a[2*i+2]);
+              i = 2*i+2;
+            }
+          else if (fde_compare (a[2*i+1], a[i]) > 0)
+            {
+              SWAP (a[i], a[2*i+1]);
+              i = 2*i+1;
+            }
+          else
+            break;
+        }
+    }
+  while (n > 1)
+    {
+      /* Invariant: a[0..n-1] is a heap. */
+      n--;
+      SWAP (a[0], a[n]);
+      for (i = 0; 2*i+1 < n; )
+        {
+          if (2*i+2 < n
+              && fde_compare (a[2*i+2], a[2*i+1]) > 0
+              && fde_compare (a[2*i+2], a[i]) > 0)
+            {
+              SWAP (a[i], a[2*i+2]);
+              i = 2*i+2;
+            }
+          else if (fde_compare (a[2*i+1], a[i]) > 0)
+            {
+              SWAP (a[i], a[2*i+1]);
+              i = 2*i+1;
+            }
+          else
+            break;
+        }
+    }
+#undef SWAP
+}
+
+u32 **
+libc_2D1FA0 (fde_accumulator *accu, u32 count)
+{
+  if (accu->linear.array && accu->linear.count != count)
+    abort ();
+
+  if (accu->erratic.array)
+    {
+      fde_split (&accu->linear, &accu->erratic);
+      if (accu->linear.count + accu->erratic.count != count)
+	abort ();
+      frame_heapsort (&accu->erratic);
+      libc_2D1EA8 (&accu->linear, &accu->erratic);
+      free (accu->erratic.array);
+    }
+  else
+    {
+      /* We've not managed to malloc an erratic array, so heap sort in the
+         linear one.  */
+      frame_heapsort (&accu->linear);
+    }
+  return accu->linear.array;
+}
+
+
 
 void __register_frame_info(void *fn, void *entry) {
     object *e = entry;
@@ -971,10 +1142,7 @@ void *libc_2D27F8(u32 *p, u32 addr) {
     return NULL;
 }
 
-typedef struct {
-    fde_vector linear;
-    fde_vector erratic;
-} fde_accumulator;
+
 
 extern u32 **libc_2D1FA0(fde_accumulator *vectors, u32 count);
 

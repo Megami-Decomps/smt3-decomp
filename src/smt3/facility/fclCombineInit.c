@@ -3132,11 +3132,19 @@ extern void fclDrawPanelSprite(s32 id, s32 ot);
 void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
                          u32 color, u32 borderColor, s32 ot)
 {
-    fclDrawPanelSprite(0x33001, 0x47);
+    /* Localized reconstruction aids retain genuine order and depth values
+     * through native allocation; not evidence of original source spelling. */
+    FAKEMATCH_ASM_REG(s32, order, "s2") = 0x47;
+    FAKEMATCH_ASM_LIVE(z);
+    {
+        s32 firstOrder = 0x47;
+        FAKEMATCH_ASM_LIVE(firstOrder);
+        fclDrawPanelSprite(0x33001, firstOrder);
+    }
     fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 7, CMB_GBWK->texHandle,
-                     cmbSpriteTable, 0x47);
+                     cmbSpriteTable, order);
     fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 8, CMB_GBWK->texHandle,
-                     cmbSpriteTable, 0x47);
+                     cmbSpriteTable, order);
     fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 0xD, CMB_GBWK->texHandle,
                      cmbSpriteTable, ot);
     fclDrawPanelSprite(0x5101B, 0x47);

@@ -394,15 +394,21 @@ s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target
     }
     success = 1;
     if (datSkillTable.normal[nskill].badlevel != 0xFF) {
-        /* Ordinary RAM snapshots; the native redundant byte reload and
-         * larger frame remain unresolved, so this draft stays guarded. */
+        /* The native code reobserves badlevel after the sentinel test.
+         * Keep that real memory observation and the shared float conversion
+         * live; these target constraints are reconstruction aids, not evidence
+         * of original spelling. The frame and scheduling remain nonexact. */
         u32 flags = source->flag;
-        s32 level = datSkillTable.normal[nskill].badlevel;
+        s32 level;
         f32 chance;
+        FAKEMATCH_ASM_LIVE_MEM(datSkillTable.normal[nskill].badlevel);
+        level = datSkillTable.normal[nskill].badlevel;
+        chance = (f32)level;
+        FAKEMATCH_ASM_LIVE_F32(chance);
         if (flags & 0x20) {
-            chance = (f32)level / 100.0f * affinity * 100.0f * 0.7f;
+            chance = chance / 100.0f * affinity * 100.0f * 0.7f;
         } else {
-            chance = (f32)level / 100.0f * affinity * 100.0f;
+            chance = chance / 100.0f * affinity * 100.0f;
         }
         success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
     }
