@@ -77,6 +77,12 @@
 #define SDF_FRAME_BEFORE_LAST(stmt)
 #endif
 
+/* Runs one statement on the last host tick of each retail tick only, such as
+ * clearing a draw request that a step made once per retail tick. */
+#ifndef SDF_FRAME_LAST
+#define SDF_FRAME_LAST(stmt) stmt
+#endif
+
 /* The field player's step and the field camera's update, which a host may run
  * its own way, and a statement that runs on each host tick the step ran. */
 #ifndef SDF_FRAME_PLAYER_CALC

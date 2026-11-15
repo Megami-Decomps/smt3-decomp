@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "basic.h"
 #include "field.h"
+#include "sdfFrame.h"
 
 /* The input panel keeps its cursor, message choice and draw request as halfwords. */
 typedef struct
@@ -91,7 +92,7 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *id)
     fldKanjiDraw(fldInputPanelX[work->Type] + 0xA, 0x98, 0xA09DC380,
         fldInputPanelLabel[work->Type]);
     work->Count++;
-    work->Draw = 0;
+    SDF_FRAME_LAST(work->Draw = 0);
 ret0:
     return 0;
 }
