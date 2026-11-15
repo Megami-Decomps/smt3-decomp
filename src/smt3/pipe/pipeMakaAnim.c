@@ -365,39 +365,44 @@ void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
                   MakaTex[3].th);
 }
 
-/* NON_MATCHING: 110 of 184 words match, at the native 736-byte size.
- * Ordinary local cells retain the native signed/unsigned reloads. The real
+/* Ordinary local cells retain the native signed/unsigned reloads. The real
  * two-float origin pair occupies the native x/y stack slots. Both loops run
  * through digit zero: makaGetBarWidth(value) is 0..5 for u16 value, and
  * digit zero returns
  * the -1 cell value, not a negative array index. Keep total-width conversion
  * before the sprite-size phase, as in the native instruction order. */
-#ifdef NON_MATCHING
 void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 {
     f32 origin[2];
     s16 positions[16];
     s8 cells[16];
-    s32 width = makaGetBarWidth(value);
-    s32 i;
+    s32 i = makaGetBarWidth(value);
+    s32 width;
     s32 previous = 0;
     u16 position = 0;
     f32 spriteWidth;
     f32 spriteHeight;
-    u16 totalWidth;
     u32 color;
+    f32 wideStep;
+    f32 narrowStep;
     origin[0] = (f32)x;
     origin[1] = (f32)y;
 
-    i = width;
+    width = i;
+    narrowStep = 10.0f;
+    wideStep = 13.0f;
+    /* SMT3 scheduling aid: keep the initialized, consumed wide-cell spacing
+     * as a real floating operand after the origin setup. This preserves the
+     * native literal/store order, not evidence of original source spelling. */
+    FAKEMATCH_ASM_LIVE_F32(wideStep);
     do {
         s16 step = 0;
         cells[i] = makaGetBarCell(value, i);
         if (i != width) {
             if (previous == 1 || cells[i] == 1) {
-                step = (s16)(s32)(sx * 10.0f);
+                step = (s16)(s32)(sx * narrowStep);
             } else {
-                step = (s16)(s32)(sx * 13.0f);
+                step = (s16)(s32)(sx * wideStep);
             }
         }
         position += step;
@@ -406,23 +411,24 @@ void makaDrawNormalGauge(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
         cells[i]++;
     } while (--i >= 0);
 
-    totalWidth = (u16)(u32)((f32)position + sx * 22.0f);
-    spriteWidth = sx * 22.0f;
+    /* The accumulated offset is finished; the same unsigned-halfword
+     * scratch now holds total width for centering every sprite. */
+    position = (u16)(u32)((f32)position + sx * 22.0f);
     spriteHeight = sy * 26.0f;
+    spriteWidth = sx * 22.0f;
     color = ((u32)alpha << 24) | 0x808080;
     i = width;
     do {
-        s32 cell = cells[i];
-        eglLinkSprite((s32)((origin[0] + (f32)positions[i]) - (f32)(totalWidth >> 1)),
+        /* The native signed cell load feeds both quotient and remainder in
+         * v1. This local allocation aid ends before the sprite call. */
+        FAKEMATCH_ASM_REG(s32, cell, "$3") = cells[i];
+        eglLinkSprite((s32)((origin[0] + (f32)positions[i]) - (f32)(position >> 1)),
                       (s32)(origin[1] - spriteHeight * 0.5f),
                       (s32)spriteWidth, (s32)spriteHeight,
                       cell % 5 * 22 + 1, cell / 5 * 26 + 2, 22, 26,
                       color, color, color, color, MakaTex[0].th);
     } while (--i >= 0);
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);
-#endif
 
 void makaDrawBar(s32 x, s32 y, u16 value, u8 alpha, f32 sx, f32 sy)
 {
