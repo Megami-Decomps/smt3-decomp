@@ -160,7 +160,7 @@ s32 scrCommand_WAIT(void)
     {
         return 1;
     }
-    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0)))
+    if (scrGetCommandTimer() < scrGetIntPara(0))
     {
         return 0;
     }
@@ -248,12 +248,14 @@ s32 scrCommand_SEL_JMP(void)
 
 s32 scrCommand_PAD_TRIG(void)
 {
+    SDF_FRAME_SCRIPT_READS_PAD();
     scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] < 0);
     return 1;
 }
 
 s32 scrCommand_PAD_PRESS(void)
 {
+    SDF_FRAME_SCRIPT_READS_PAD();
     scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] & 1);
     return 1;
 }

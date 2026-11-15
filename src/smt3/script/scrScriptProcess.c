@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "newdata.h"
 #include "scr.h"
@@ -252,7 +253,7 @@ s32 scrRunScript(scrProcessWork_s *h)
 
 s32 scrScriptProcess(dds3ProcessID_t *id)
 {
-    switch (scrTraceCode(dds3GetProcessData(id))) {
+    switch (SDF_FRAME_SCRIPT_STEP(id, scrTraceCode(dds3GetProcessData(id)), SCR_RESULT_CONTINUE)) {
     case SCR_RESULT_ERROR:
         return -1;
     case SCR_RESULT_END:

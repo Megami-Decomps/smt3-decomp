@@ -89,6 +89,16 @@
 #define SDF_FRAME_WHEN_STEPPED(stmt) stmt
 #endif
 
+/* One step of a script process: the interpreter up to its next yield. A host
+ * may skip it on some host ticks, returning idle. */
+#ifndef SDF_FRAME_SCRIPT_STEP
+#define SDF_FRAME_SCRIPT_STEP(id, step, idle) (step)
+#endif
+/* A script command reads the pad. Expands to nothing here. */
+#ifndef SDF_FRAME_SCRIPT_READS_PAD
+#define SDF_FRAME_SCRIPT_READS_PAD()
+#endif
+
 /* An event unit's step (its script-driven move, turn, timers and motion sets),
  * which a host may run its own way. */
 #ifndef SDF_FRAME_UNIT_STEP

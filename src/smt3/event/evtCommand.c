@@ -3035,7 +3035,7 @@ u32 evtCommandSetDrawFlagWhileWaiting(void)
         dds3DrawFlag |= 0x2000000;
         return 1;
     }
-    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0))) {
+    if (scrGetCommandTimer() < scrGetIntPara(0)) {
         dds3DrawFlag |= 0x2000000;
         return 0;
     }
