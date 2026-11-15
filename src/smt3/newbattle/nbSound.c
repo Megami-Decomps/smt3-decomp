@@ -676,21 +676,15 @@ s32 nbMaeCheckDone()
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern s32 nbInitMaeTableDefault(void);
 extern s32 nbInitMaeTable(u32 code);
 
 void nbSetMaeFlag(s32 code)
 {
     s32 maeIndex;
-    /* The zeros cover stack regions reached only if the result count wraps. */
-    s32 table[] = {
-        0, 0, 0, 0, 0, 0,
-        0x160000, 0x170000, 0x180000, 0x190000, 0x1A0000, 0x1B0000, 0x1C0000, 0,
-        0x200000, 0x210000, 0x220000, 0x230000, 0x240000, 0x250000, 0x260000, 0x270000,
-        0x50000, 0x60000, 0x70000, 0x80000, 0x90000, 0xA0000, 0xB0000, 0xC0000,
-    };
-
+    s32 table1[] = {0x160000, 0x170000, 0x180000, 0x190000, 0x1A0000, 0x1B0000, 0x1C0000};
+    s32 table2[] = {0x200000, 0x210000, 0x220000, 0x230000, 0x240000, 0x250000, 0x260000, 0x270000};
+    s32 table3[] = {0x50000, 0x60000, 0x70000, 0x80000, 0x90000, 0xA0000, 0xB0000, 0xC0000};
     if (nbMaeFlag != 0) {
         return;
     }
@@ -705,30 +699,27 @@ void nbSetMaeFlag(s32 code)
     if ((u32)maeIndex < 15) {
         switch (maeIndex) {
         case 0: {
-            s32 rem = nbResultCount % 7;
             bgmno = 0x150001;
             nbBgmSaved = 0x150002;
             nbBgmFadeState = 0x150002;
             nbMaeMidiNo = 0x150000;
-            nbMaeSubMidiNo = table[6 + rem];
+            nbMaeSubMidiNo = table1[nbResultCount % 7];
             break;
         }
         case 1: {
-            s32 rem = nbResultCount % 8;
             bgmno = 0x1F0001;
             nbBgmSaved = 0x1F0002;
             nbBgmFadeState = 0x1F0002;
             nbMaeMidiNo = 0x1F0000;
-            nbMaeSubMidiNo = table[14 + rem];
+            nbMaeSubMidiNo = table2[nbResultCount % 8];
             break;
         }
         case 2: {
-            s32 rem = nbResultCount % 8;
             bgmno = 0x40001;
             nbBgmSaved = 0;
             nbBgmFadeState = 0x40001;
             nbMaeMidiNo = 0x40000;
-            nbMaeSubMidiNo = table[22 + rem];
+            nbMaeSubMidiNo = table3[nbResultCount % 8];
             break;
         }
         case 3:
@@ -826,15 +817,6 @@ void nbSetMaeFlag(s32 code)
     }
 }
 
-#else
-const u16 nbMaeMidiTable1[16] = { 0, 0x16, 0, 0x17, 0, 0x18, 0, 0x19, 0, 0x1a, 0, 0x1b, 0, 0x1c, 0, 0 };
-
-const u16 D_00545C58[16] = { 0, 0x20, 0, 0x21, 0, 0x22, 0, 0x23, 0, 0x24, 0, 0x25, 0, 0x26, 0, 0x27 };
-
-const u16 nbMaeMidiTable2[20] = { 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 0xa, 0, 0xb, 0, 0xc, 0, 0, 0, 0 };
-
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbSetMaeFlag);
-#endif
 
 void nbIncResultCounter(void)
 {
