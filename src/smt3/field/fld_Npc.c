@@ -756,7 +756,7 @@ void fldItemBoxCalcTask(void) {
             FromRotation(fldTakaraSlotTable[i].angle * 3.14f / 180.0f);
             SDF_VU0_STOREVECTOR_NOMEM(&rot);
             dds3SetRotPoseSet(fldTakaraSlotTable[i].object, &rot);
-            fldTakaraSlotTable[i].angle = fldTakaraSlotTable[i].angle + 1.5f;
+            fldTakaraSlotTable[i].angle = fldTakaraSlotTable[i].angle + SDF_FRAME_STEP(1.5f);
             break;
         case 1:
             break;
@@ -1390,7 +1390,7 @@ void fldNpcCalc(void)
     f32 y;
     f32 z;
 
-    fldNpcCamTarget = 0;
+    SDF_FRAME_WHEN(fldNpcCamTarget = 0);
     if (fldGlobalBase.area < 200 && fldAutoMapSeqTestFlag(1) == 0 && fldProcCampChk() == 0 &&
         fldProcAmChk() == 0) {
         if (fldNpcBlurHandle != 0) {
@@ -1423,152 +1423,156 @@ void fldNpcCalc(void)
                 fldNpcBlurHandle = 0;
             }
         } else if (fldGlobalBase.word4C != -1 && fldGlobalBase.playerMoveDistance > 3.0f) {
-            control = fldGetUnitControl();
-            fldSibukiStart(control->handle->poseset->pos2.x, fldGlobalBase.floatC4 - 5.0f,
-                           control->handle->poseset->pos2.z);
+            SDF_FRAME_WHEN({
+                control = fldGetUnitControl();
+                fldSibukiStart(control->handle->poseset->pos2.x, fldGlobalBase.floatC4 - 5.0f,
+                               control->handle->poseset->pos2.z);
+            });
         }
 
-        for (i = 0; i < fldNpcModelTable; i++) {
-            if (fldModelSlotTable[i].room != 0 &&
-                fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                            fldModelSlotTable[i].room) != 0) {
-                continue;
-            }
-            x = fldModelSlotTable[i].x;
-            y = fldModelSlotTable[i].y;
-            z = fldModelSlotTable[i].z;
-            if (fldModelSlotTable[i].type == 999 && fldEncountTestFlag(0x40) == 0) {
-                if (fldCheckEveRngT(fldModelSlotTable[i].itemBoxIdx) != 0) {
-                    fldModelSlotTable[i].cntAnmf += 1.05f;
-                    if (fldModelSlotTable[i].cntAnmf > 1.0f) {
-                        fldModelSlotTable[i].cntAnmf = 1.0f;
-                    }
-                    fldModelSlotTable[i].cntAnmi += 2;
-                    if (fldModelSlotTable[i].cntAnmi >= 49) {
-                        fldModelSlotTable[i].cntAnmi = 48;
-                    }
-                    fldNpcCamPosX = x;
-                    fldNpcCamPosY = y;
-                    fldNpcCamPosZ = z;
-                    fldNpcCamTarget = 2;
-                    SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                    fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                    switch (fldTakaraTable[fldModelSlotTable[i].itemBoxIdx].type) {
-                    case 0:
-                    case 2:
-                        fldCamNpcTarget = -110.0f;
-                        break;
-                    case 1:
-                        fldCamNpcTarget = -90.0f;
-                        break;
-                    case 3:
-                        fldCamNpcTarget = -110.0f;
-                        break;
-                    }
+        SDF_FRAME_WHEN({
+            for (i = 0; i < fldNpcModelTable; i++) {
+                if (fldModelSlotTable[i].room != 0 &&
+                    fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                fldModelSlotTable[i].room) != 0) {
+                    continue;
                 }
-                continue;
-            }
-            switch (fldModelSlotTable[i].kind) {
-            case 0: {
-                s32 talk = 0;
-
-                if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
-                    (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(fldModelSlotTable[i].name) != 0)) {
-                    if (fldModelSlotTable[i].cntAnmi == 0) {
-                        fldSePlay(0x2D);
-                        fldNpcCamSlot = i;
-                        if (fldGlobalBase.area >= 11) {
-                            fldNpcModelStart(i, x, y - 10.0f, z, &fldModelSlotTable[i].rot);
+                x = fldModelSlotTable[i].x;
+                y = fldModelSlotTable[i].y;
+                z = fldModelSlotTable[i].z;
+                if (fldModelSlotTable[i].type == 999 && fldEncountTestFlag(0x40) == 0) {
+                    if (fldCheckEveRngT(fldModelSlotTable[i].itemBoxIdx) != 0) {
+                        fldModelSlotTable[i].cntAnmf += 1.05f;
+                        if (fldModelSlotTable[i].cntAnmf > 1.0f) {
+                            fldModelSlotTable[i].cntAnmf = 1.0f;
                         }
-                        fldModelSlotTable[i].cntAnmi = 128;
+                        fldModelSlotTable[i].cntAnmi += 2;
+                        if (fldModelSlotTable[i].cntAnmi >= 49) {
+                            fldModelSlotTable[i].cntAnmi = 48;
+                        }
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
+                        fldNpcCamTarget = 2;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                        switch (fldTakaraTable[fldModelSlotTable[i].itemBoxIdx].type) {
+                        case 0:
+                        case 2:
+                            fldCamNpcTarget = -110.0f;
+                            break;
+                        case 1:
+                            fldCamNpcTarget = -90.0f;
+                            break;
+                        case 3:
+                            fldCamNpcTarget = -110.0f;
+                            break;
+                        }
                     }
-                    talk = 1;
-                    fldNpcCamTarget = talk;
+                    continue;
                 }
-                if (talk == 0) {
-                    fldModelSlotTable[i].cntf += SDF_FRAME_STEP(0.1f);
-                    fldModelSlotTable[i].cntAnmi = 0;
-                    fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
-                    fldDeleteNpcModel(i);
-                } else {
-                    fldNpcCamPosX = x;
-                    fldNpcCamPosY = y;
-                    fldNpcCamPosZ = z;
-                    SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                    fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                    fldCamNpcTarget = -140.0f;
-                    fldNpcCamTargetY = -140.0f;
-                    fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    fldModelSlotTable[i].cntf += SDF_FRAME_STEP(0.05f);
-                    fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
-                }
-                break;
-            }
-            case 1:
-                if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
-                    fldCheckEveRngN(i) != 0) {
-                    if (fldModelSlotTable[i].camera == 0) {
-                        fldNpcCamTarget = 0;
-                    } else if (fldModelSlotTable[i].camera == 1) {
-                        fldNpcCamTarget = 1;
-                        fldNpcCamSlot = -1;
-                        fldNpcCamPosX = x;
-                        fldNpcCamPosY = y;
-                        fldNpcCamPosZ = z;
-                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                        fldCamNpcTarget = -110.0f;
-                        fldNpcCamTargetY = -110.0f;
-                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    } else if (fldModelSlotTable[i].camera == 2) {
-                        fldNpcCamTarget = 1;
-                        fldNpcCamSlot = -1;
-                        fldNpcCamPosX = x;
-                        fldNpcCamPosY = y;
-                        fldNpcCamPosZ = z;
-                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                        fldCamNpcTarget = -50.0f;
-                        fldNpcCamTargetY = -50.0f;
-                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    } else if (fldModelSlotTable[i].camera == 3) {
-                        fldNpcCamTarget = 1;
-                        fldNpcCamSlot = -1;
-                        fldNpcCamPosX = x;
-                        fldNpcCamPosY = y;
-                        fldNpcCamPosZ = z;
-                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                        fldCamNpcTarget = -180.0f;
-                        fldNpcCamTargetY = -180.0f;
-                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    } else if (fldModelSlotTable[i].camera == 4) {
-                        fldNpcCamTarget = 1;
-                        fldNpcCamSlot = -1;
-                        fldNpcCamPosX = x;
-                        fldNpcCamPosY = y;
-                        fldNpcCamPosZ = z;
-                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                        fldCamNpcTarget = -10.0f;
-                        fldNpcCamTargetY = -170.0f;
-                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                    } else if (fldModelSlotTable[i].camera == 5) {
-                        fldNpcCamTarget = 1;
-                        fldNpcCamSlot = -1;
-                        fldNpcCamPosX = x;
-                        fldNpcCamPosY = y;
-                        fldNpcCamPosZ = z;
-                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
-                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
-                        fldCamNpcTarget = -210.0f;
-                        fldNpcCamTargetY = -180.0f;
-                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                switch (fldModelSlotTable[i].kind) {
+                case 0: {
+                    s32 talk = 0;
+
+                    if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
+                        (fldCheckEveRngN(i) != 0 || fldCamNpcCamChk(fldModelSlotTable[i].name) != 0)) {
+                        if (fldModelSlotTable[i].cntAnmi == 0) {
+                            fldSePlay(0x2D);
+                            fldNpcCamSlot = i;
+                            if (fldGlobalBase.area >= 11) {
+                                fldNpcModelStart(i, x, y - 10.0f, z, &fldModelSlotTable[i].rot);
+                            }
+                            fldModelSlotTable[i].cntAnmi = 128;
+                        }
+                        talk = 1;
+                        fldNpcCamTarget = talk;
                     }
+                    if (talk == 0) {
+                        fldModelSlotTable[i].cntf += 0.1f;
+                        fldModelSlotTable[i].cntAnmi = 0;
+                        fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
+                        fldDeleteNpcModel(i);
+                    } else {
+                        fldNpcCamPosX = x;
+                        fldNpcCamPosY = y;
+                        fldNpcCamPosZ = z;
+                        SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                        fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                        fldCamNpcTarget = -140.0f;
+                        fldNpcCamTargetY = -140.0f;
+                        fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        fldModelSlotTable[i].cntf += 0.05f;
+                        fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
+                    }
+                    break;
                 }
-                break;
+                case 1:
+                    if (fldAutoMapSeqTestFlag(1) == 0 && fldEncountTestFlag(0x40) == 0 &&
+                        fldCheckEveRngN(i) != 0) {
+                        if (fldModelSlotTable[i].camera == 0) {
+                            fldNpcCamTarget = 0;
+                        } else if (fldModelSlotTable[i].camera == 1) {
+                            fldNpcCamTarget = 1;
+                            fldNpcCamSlot = -1;
+                            fldNpcCamPosX = x;
+                            fldNpcCamPosY = y;
+                            fldNpcCamPosZ = z;
+                            SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                            fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                            fldCamNpcTarget = -110.0f;
+                            fldNpcCamTargetY = -110.0f;
+                            fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        } else if (fldModelSlotTable[i].camera == 2) {
+                            fldNpcCamTarget = 1;
+                            fldNpcCamSlot = -1;
+                            fldNpcCamPosX = x;
+                            fldNpcCamPosY = y;
+                            fldNpcCamPosZ = z;
+                            SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                            fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                            fldCamNpcTarget = -50.0f;
+                            fldNpcCamTargetY = -50.0f;
+                            fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        } else if (fldModelSlotTable[i].camera == 3) {
+                            fldNpcCamTarget = 1;
+                            fldNpcCamSlot = -1;
+                            fldNpcCamPosX = x;
+                            fldNpcCamPosY = y;
+                            fldNpcCamPosZ = z;
+                            SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                            fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                            fldCamNpcTarget = -180.0f;
+                            fldNpcCamTargetY = -180.0f;
+                            fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        } else if (fldModelSlotTable[i].camera == 4) {
+                            fldNpcCamTarget = 1;
+                            fldNpcCamSlot = -1;
+                            fldNpcCamPosX = x;
+                            fldNpcCamPosY = y;
+                            fldNpcCamPosZ = z;
+                            SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                            fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                            fldCamNpcTarget = -10.0f;
+                            fldNpcCamTargetY = -170.0f;
+                            fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        } else if (fldModelSlotTable[i].camera == 5) {
+                            fldNpcCamTarget = 1;
+                            fldNpcCamSlot = -1;
+                            fldNpcCamPosX = x;
+                            fldNpcCamPosY = y;
+                            fldNpcCamPosZ = z;
+                            SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
+                            fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
+                            fldCamNpcTarget = -210.0f;
+                            fldNpcCamTargetY = -180.0f;
+                            fldCamNpcTarget2 = fldModelSlotTable[i].csize;
+                        }
+                    }
+                    break;
+                }
             }
-        }
+        });
     }
 }
 
@@ -1709,9 +1713,9 @@ void fldNpcDraw(void)
                 if (slot->cntAnmi == 0 || fldGlobalBase.area < 10) {
                     position.x = x;
                     if (fldGlobalBase.area == 1) {
-                        position.y = (y - 50.0f) + sdfSin(slot->cntf * 1.5f) * 3.0f;
+                        position.y = (y - 50.0f) + sdfSin(SDF_FRAME_INTERPOLATE(&slot->cntf, slot->cntf) * 1.5f) * 3.0f;
                     } else {
-                        position.y = (y - 150.0f) + sdfSin(slot->cntf * 1.5f) * 10.0f;
+                        position.y = (y - 150.0f) + sdfSin(SDF_FRAME_INTERPOLATE(&slot->cntf, slot->cntf) * 1.5f) * 10.0f;
                     }
                     position.z = z;
                     dds3EffectSetPosition(slot->effect, &position);
