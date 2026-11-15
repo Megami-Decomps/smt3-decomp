@@ -679,8 +679,8 @@ void calcCamNormalNPC(void) {
     unit = fldGetUnitControl();
     dds3GetPosPoseSet(unit->handle);
     eye.f[3] = 1.0f;
-    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
-    fldGlobalBase.encountState = SDF_FRAMES(5);
+    fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.encountState = 5;
     if (fldNpcCamTarget == 2) {
         fldCamResetOn = 2;
         eye.f[0] = fldNpcCamPosX;

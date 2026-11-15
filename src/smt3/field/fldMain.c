@@ -750,12 +750,12 @@ void fldRegistUnitPad(void)
         fldEncountSetFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(ctrl->handle, fldUnitPad);
     }
-    fldGlobalBase.word5C = SDF_FRAMES(4);
-    if (fldGlobalBase.menuOpenFlag < SDF_FRAMES(4)) {
-        fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+    fldGlobalBase.word5C = 4;
+    if (fldGlobalBase.menuOpenFlag < 4) {
+        fldGlobalBase.menuOpenFlag = 4;
     }
-    if (fldGlobalBase.encountState < SDF_FRAMES(5)) {
-        fldGlobalBase.encountState = SDF_FRAMES(5);
+    if (fldGlobalBase.encountState < 5) {
+        fldGlobalBase.encountState = 5;
     }
     fldStatusSet();
     fldGlobalBase.hitMatterIndex = -1;
@@ -778,7 +778,7 @@ void fldReleaseUnitPad(void)
         fldEncountClearFlag(0x40);
         dds3ObjectBaseSetPrimaryControl(ctl->handle, 0);
     }
-    fldGlobalBase.word5C = SDF_FRAMES(4);
+    fldGlobalBase.word5C = 4;
 }
 
 const char fldProcSequenceName[16] __attribute__((aligned(16))) = "fldProcSequence";

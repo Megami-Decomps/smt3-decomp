@@ -368,7 +368,7 @@ s32 ProcRandomEncountCheck(void)
     SDF_VU0_STOREVECTOR(&fldPlayerLastPos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
-    if (distance < SDF_FRAME_STEP(0.1999999881f)) distance = 0.0f;
+    if (distance < 0.1999999881f) distance = 0.0f;
     fldGlobalBase.playerMoveDistance = distance;
     oldMoon = evtGetAgeOfMoon16();
     if (fldGlobalBase.word5C > 0) {
@@ -412,7 +412,7 @@ s32 ProcRandomEncountCheck(void)
                 } else damageMode = 2;
             } else damageMode = 1;
             if (damageMode != 0) {
-                fldPlayerStepDist = SDF_FRAMES(60);
+                fldPlayerStepDist = 60;
                 fldGlobalBase.floatB4 = 0.0f;
                 datPartyDamageFld(damageMode);
             }
@@ -612,8 +612,8 @@ s32 ProcCampCheck(void)
     fldReleaseUnitPad();
     fldPlayerPosRot();
     evtDisableMoonDraw();
-    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
-    fldGlobalBase.encountState = SDF_FRAMES(5);
+    fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.encountState = 5;
     fldEncountClearFlag(0x20);
     fldEncountSetFlag(0x80);
     dds3FadeOut(0, 0, 0, 4);
@@ -670,8 +670,8 @@ s32 ProcAmCheck(void)
             goto ret0;
         }
         if (trigger != 0) {
-            fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
-            fldGlobalBase.encountState = SDF_FRAMES(5);
+            fldGlobalBase.menuOpenFlag = 4;
+            fldGlobalBase.encountState = 5;
             fldReleaseUnitPad();
             dds3SceneBasicStartScript(dds3GetActiveScene(), "hirakenai_label");
         }
@@ -702,8 +702,8 @@ s32 ProcAmCheck(void)
         if (fldRunDanteGunFlag.unk48 != 0) {
             goto ret0;
         }
-        fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
-        fldGlobalBase.encountState = SDF_FRAMES(5);
+        fldGlobalBase.menuOpenFlag = 4;
+        fldGlobalBase.encountState = 5;
         fldReleaseUnitPad();
         fldPlayerPosRot();
         dds3FadeOut(0, 0, 0, 4);
@@ -882,17 +882,19 @@ s32 ProcSequence(dds3ProcessID_t *id)
         }
         if (fldEncountTestFlag(0x40) != 0) {
             fldPanelSet(1);
-            ProcRandomEncountCheck();
+            SDF_FRAME_WHEN(ProcRandomEncountCheck());
         }
         if (fldAutoMapSeqTestFlag(2) == 1) {
             controller->stage++;
             break;
         }
-        fldPlayerCalc();
+        SDF_FRAME_WHEN(fldPlayerCalc());
+        SDF_FRAME_INTERPOLATE_BASIC(fldGetUnitControl()->handle);
+        SDF_FRAME_INTERPOLATE_BASIC(fldGetUnitControl()->handle2);
         if (fldEncountTestFlag(0x40) == 0) break;
         if (fldGlobalBase.area < 10 && fldWmWarpMode == 3) break;
     check_hit:
-        fldEveHit_ChkEveHit(fldUnitControlHandle);
+        SDF_FRAME_WHEN(fldEveHit_ChkEveHit(fldUnitControlHandle));
         break;
     case 5:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);

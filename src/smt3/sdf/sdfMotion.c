@@ -273,6 +273,8 @@ s32 sdfMotionNext(sdfMotionCtrlr_t *aCtrlr) {
         break;
     case SDF_MOTION_STAT_SET:
         sdfMotionSeek(aCtrlr, aCtrlr->blendPreLength);
+        /* Retail seeks a set motion for a whole tick before it advances. */
+        SDF_FRAME_BEFORE_LAST(aCtrlr->stat = SDF_MOTION_STAT_SET);
         break;
     case SDF_MOTION_STAT_SEEK:
         frame = aCtrlr->frame + SDF_FRAME_STEP(aCtrlr->speed);

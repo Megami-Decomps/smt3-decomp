@@ -2460,7 +2460,7 @@ void fldRunDanteGun1(void)
                 s32 offset;
 
                 fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = SDF_FRAMES(8);
+                fldPlayerStepDist = 8;
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;
@@ -2546,7 +2546,7 @@ void fldRunDanteGun2(void)
                 s32 offset;
 
                 fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = SDF_FRAMES(8);
+                fldPlayerStepDist = 8;
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;

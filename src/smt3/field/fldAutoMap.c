@@ -1511,7 +1511,7 @@ void fldAutoMapSeqEnd(void) {
     fldAutoMapSeqClearFlag(1);
     fldRegistUnitPad();
     evtEnableMoonDraw();
-    fldGlobalBase.menuOpenFlag = SDF_FRAMES(4);
+    fldGlobalBase.menuOpenFlag = 4;
     frSetFontDrawOT(0x48);
     dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
 }
