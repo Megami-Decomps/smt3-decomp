@@ -1377,7 +1377,6 @@ void fldHitChkUnit(f32 *position)
                             if (floorHit >= 0 && clearance < distance) {
                                 clearance = distance;
                             }
-                            SDF_FRAME_FLOOR_EDGE(clearance, distance, signedDistance);
                             current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
                             current.y = (projected.y + fldMatterTable[index].normal[1] * clearance) - 1.0f;
                             current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
@@ -1763,7 +1762,6 @@ void fldHitChkUnitVWM(f32 *position)
                                 if (floorHit >= 0 && clearance < distance) {
                                     clearance = distance;
                                 }
-                                SDF_FRAME_FLOOR_EDGE(clearance, distance, signedDistance);
                                 mface = &fldMatterTable[index];
                                 current.x = projected.x + mface->normal[0] * clearance;
                                 current.y = (projected.y + mface->normal[1] * clearance) - 1.0f;
