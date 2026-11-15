@@ -663,8 +663,6 @@ f32 effBTLModelGetGroupMaxHeight(u32 group) {
     return max;
 }
 
-/* NON_MATCHING: 4 of 146 words differ (first at +0x70). */
-#ifdef NON_MATCHING
 extern void effBTLPartPtrGetModelCenter(nbFormation_t *pFormation);
 
 void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *pCenter, f32 *pHeightAve,
@@ -674,7 +672,7 @@ void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *pCenter,
     sdfVector4_t scale;
     nbFormation_t *form;
     u32 back;
-    f32 front;
+    FAKEMATCH_ASM_REG(f32, front, "$f21");
     f32 total;
     f32 top;
     f32 depth;
@@ -695,10 +693,14 @@ void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *pCenter,
     if (back == 0) {
         top = 100000.0f;
     }
+    /* Preserve two real accumulator values separately from the next zero
+     * seed; f21 is call-preserved. This local constraint retains native
+     * rematerialization, not evidence of the original source spelling. */
+    FAKEMATCH_ASM_LIVE_F32_PAIR(front, total);
     zero = 0.0f;
-    sum.x = zero;
-    sum.y = zero;
     sum.z = zero;
+    sum.y = zero;
+    sum.x = zero;
     for (i = 0; i < 32; i++) {
         stat = form->stat;
         if ((stat & group) != 0 && (stat & 3) == 3) {
@@ -750,9 +752,6 @@ void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *pCenter,
         *pHeightMax = zero;
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrModelGroupGetCenterAndHeight);
-#endif
 
 void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos) {
     nbSetFormPos(pFormation, pPos);
@@ -1516,13 +1515,14 @@ void effBTLPartGetModelMarkPositionPtr(nbFormation_t *pFormation, effBTLAimParam
     nbMainProcessData_t *data = nbGetMainProcessData();
     s32 modelId;
     s32 skillId;
-    s32 modelIndex;
+    /* Unsigned, range-checked model-table offset. */
+    u32 modelIndex;
     s32 skillRuns;
 
     if ((data->stat & 0x1000) == 0 && pPosPtr->aimMode < 2) {
         modelId = effBTLModelGetID(pFormation);
         skillId = effBTLSkillGetID();
-        modelIndex = modelId - 0x102;
+        modelIndex = modelId - 0x102U;
         if ((u32)modelIndex < 0x40) {
             switch (modelIndex) {
             case 1:
