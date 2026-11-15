@@ -372,18 +372,15 @@ extern void *memcpy(void *destination, const void *source, size_t size);
 
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 
-/* NON_MATCHING: 4 of 113 words differ; exact 452-byte size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq17, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
 {
     s32 colors[4];
     s32 selected[2];
     s32 spriteIds[3][4];
-    s32 zScaled = z << 4;
+    s32 zScaled = (s32)((u32)z << 4);
     u32 alpha;
+    s32 *textures;
+    fclSpriteTbl_t *layout;
 
     memcpy(spriteIds, dds3ConfigBarSprites, sizeof(spriteIds));
     alpha = dds3GetConfigFadeAlpha() | 0x80808000;
@@ -399,16 +396,19 @@ void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
         selected[0] = spriteIds[index][1];
         selected[1] = spriteIds[index][2];
     }
-    fclDrawSpriteRes(x, y + 0x18, zScaled, colors, 0, (u16)selected[0],
-                     D_00345D88, dds3ConfigLayoutTable, ot);
-    fclDrawSpriteRes(x, y + 0x18, zScaled, colors, 0, (u16)selected[1],
-                     D_00345D88, dds3ConfigLayoutTable, ot);
-    fclDrawSpriteRes(0x1130, y + 0x18, zScaled, colors, 0, 0x10,
-                     D_00345D88, dds3ConfigLayoutTable, ot);
+    /* Acquire the two real sprite resources in this order: ee-gcc assigns
+     * their address temporaries in native order. Both pointers feed all three
+     * draws; this is a compiler reconstruction, not original-source spelling. */
+    layout = dds3ConfigLayoutTable;
+    textures = D_00345D88;
+
+    fclDrawSpriteRes(x, (s32)((u32)y + 0x18u), zScaled, colors, 0, (u16)selected[0],
+                     textures, layout, ot);
+    fclDrawSpriteRes(x, (s32)((u32)y + 0x18u), zScaled, colors, 0, (u16)selected[1],
+                     textures, layout, ot);
+    fclDrawSpriteRes(0x1130, (s32)((u32)y + 0x18u), zScaled, colors, 0, 0x10,
+                     textures, layout, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
-#endif
 
 typedef struct frFontRequest_t frFontRequest_t;
 typedef struct {
