@@ -19,6 +19,9 @@
 
 
 
+extern s32 printf(const char *format, ...);
+extern s32 fldPlayerCalcHasigo(void);
+
 dds3Basic_t *dds3GetActiveScene(void);
 
 extern f32 R360_LR(f32 a, f32 b);
@@ -82,12 +85,8 @@ extern collision_s *fldMatterTable;
 #define FLD_HIT_ON_MATTER() (fldHitChkMatter >= 0 && fldMatterTable[fldHitChkMatter].matter != NULL)
 /* Keep the collision probe where retail's step leaves it relative to the
  * player, so that fldHitChkUnitDamage sees retail's distance between them. */
-#define FLD_HIT_WORK_FOLLOW(retail, position)        \
-    do {                                             \
-        fldHitChkWork[0] += (position).x - (retail)[0]; \
-        fldHitChkWork[1] += (position).y - (retail)[1]; \
-        fldHitChkWork[2] += (position).z - (retail)[2]; \
-    } while (0)
+#define FLD_HIT_WORK_FOLLOW(retail, position) \
+    SDF_FRAME_PROBE_FOLLOW(fldHitChkWork, retail, position)
 
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 

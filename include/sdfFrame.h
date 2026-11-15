@@ -26,6 +26,22 @@
 #define SDF_FRAMES_COUNTDOWN(n) (n)
 #endif
 
+/* A host keeps the collision probe at the retail offset after retaining its
+ * share of the player's movement. Detect external movement overrides before
+ * the defaults below are supplied. Retail does not touch the probe here. */
+#ifndef SDF_FRAME_PROBE_FOLLOW
+#if defined(SDF_FRAME_STEP) || defined(SDF_FRAME_TOWARD)
+#define SDF_FRAME_PROBE_FOLLOW(work, retail, position) \
+    do { \
+        (work)[0] += (position).x - (retail)[0]; \
+        (work)[1] += (position).y - (retail)[1]; \
+        (work)[2] += (position).z - (retail)[2]; \
+    } while (0)
+#else
+#define SDF_FRAME_PROBE_FOLLOW(work, retail, position) do { } while (0)
+#endif
+#endif
+
 /* A value a tick's step moved from start to x, where the step adds a probe at
  * retail's per-tick distance so that contact is found as retail finds it. A
  * host moves start toward x by its share of a retail tick, unless held is true,
