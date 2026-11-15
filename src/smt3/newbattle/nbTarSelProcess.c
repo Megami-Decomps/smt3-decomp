@@ -621,7 +621,7 @@ s32 nbTarSelProcess1(dds3ProcessID_t *id)
             resetState = 1;
         }
     }
-    AnimeTargetCursor(process);
+    SDF_FRAME_WHEN(AnimeTargetCursor(process));
     OnOffTargetCursor(process);
     DispTargetHelp(process);
     if (resetState != 0) {
