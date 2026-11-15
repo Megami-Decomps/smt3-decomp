@@ -89,6 +89,12 @@
 #define SDF_FRAME_WHEN_STEPPED(stmt) stmt
 #endif
 
+/* An event unit's step (its script-driven move, turn, timers and motion sets),
+ * which a host may run its own way. */
+#ifndef SDF_FRAME_UNIT_STEP
+#define SDF_FRAME_UNIT_STEP(basic, stmt) stmt
+#endif
+
 /* An advance per tick added to an integer. A host splits d into whole steps
  * that add up to exactly d over each retail tick, where a rounded
  * SDF_FRAME_STEP would stall or run fast. */

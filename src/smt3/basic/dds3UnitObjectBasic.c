@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfFrame.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "event.h"
@@ -166,12 +167,14 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *basic) {
 
     work = basic->workdata;
     if (work->hUnit != NULL) {
-        dds3BackupPoseSet(&callbackPose);
-        if (evtUnitManagerPrimaryFunc(&callbackPose, basic) != 0) {
-            dds3GetSclPoseSetMCR(basic, &callbackPose.scl);
-            dds3AddRotPoseSet(basic, &callbackPose.rot);
-            dds3GetPosPoseSetMCR(basic, &callbackPose.pos);
-        }
+        SDF_FRAME_UNIT_STEP(basic, {
+            dds3BackupPoseSet(&callbackPose);
+            if (evtUnitManagerPrimaryFunc(&callbackPose, basic) != 0) {
+                dds3GetSclPoseSetMCR(basic, &callbackPose.scl);
+                dds3AddRotPoseSet(basic, &callbackPose.rot);
+                dds3GetPosPoseSetMCR(basic, &callbackPose.pos);
+            }
+        });
     }
 
     model = work->pObjectBaseControlWorkData->pModel;

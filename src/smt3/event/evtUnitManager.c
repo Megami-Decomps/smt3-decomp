@@ -193,7 +193,7 @@ s32 evtGetNextMovePos(evtUnit_t *h) {
                 return 0;
             }
         }
-        t += SDF_FRAME_STEP(h->pathSpeed);
+        t += h->pathSpeed;
         if (t < 0.0f) {
             t = 0.0f;
         }
@@ -790,7 +790,7 @@ void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame) {
     } else {
         h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
         h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
-        h->transitionDuration = SDF_FRAMES(frame);
+        h->transitionDuration = frame;
         h->transitionElapsed = 0;
     }
 }
@@ -803,7 +803,7 @@ void evtUnlinkLightObjectBasic(evtUnit_t *h, s32 frame) {
             h->currentTransitionValue = 0;
         } else {
             h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
-            h->transitionDuration = SDF_FRAMES(frame);
+            h->transitionDuration = frame;
             h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
             h->transitionElapsed = 0;
         }
@@ -831,7 +831,7 @@ void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
     u32 light;
     u32 ambient;
 
-    h->colorDuration = SDF_FRAMES(frame);
+    h->colorDuration = frame;
     h->color08 = lrgb;
     h->color58 = argb;
     scale.value = 128.0f;
@@ -849,7 +849,7 @@ void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
 
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {
-    h->directionDuration = SDF_FRAMES(frame);
+    h->directionDuration = frame;
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(h->vec30);
@@ -859,7 +859,7 @@ void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {
 }
 
 void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb) {
-    h->rgbDuration = SDF_FRAMES(frame);
+    h->rgbDuration = frame;
     h->rgbElapsed = 0;
     if (frame == 0) {
         mdlSetColor((mdlObj_t *)h->owner,
@@ -876,7 +876,7 @@ void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb) {
 }
 
 void evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a) {
-    h->alphaDuration = SDF_FRAMES(frame);
+    h->alphaDuration = frame;
     h->alphaElapsed = 0;
     if (frame == 0) {
         mdlSetColor((mdlObj_t *)h->owner,
@@ -1116,13 +1116,13 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     if (0.0f < cross) {
         angle = -angle;
     }
-    angle = angle * SDF_FRAME_SHARE(radio);
+    angle = angle * radio;
     if ((h->flags & 0x200000) == 0) {
-        if (angle < -SDF_FRAME_STEP(0.15707963f)) {
-            angle = -SDF_FRAME_STEP(0.15707963f);
+        if (angle < -0.15707963f) {
+            angle = -0.15707963f;
         }
-        if (SDF_FRAME_STEP(0.15707963f) < angle) {
-            angle = SDF_FRAME_STEP(0.15707963f);
+        if (0.15707963f < angle) {
+            angle = 0.15707963f;
         }
     }
     SDF_VU0_LOADVECTOR_MEMOPS(axis);
@@ -1164,7 +1164,7 @@ s32 evtUnitMoveType0(evtUnit_t *h) {
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
     }
-    scale = SDF_FRAME_STEP(h->motionParameter * 0.1f);
+    scale = h->motionParameter * 0.1f;
     SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(&v);
     dds3GetPosPoseSetMCR(obj, (u128 *)&v);
@@ -1463,7 +1463,7 @@ s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
         wobble = 1;
     }
     if (wobble != 0) {
-        unit->wobblePhase += SDF_FRAME_STEP(0.104719755f);
+        unit->wobblePhase += 0.104719755f;
         if (6.2831853f <= unit->wobblePhase) {
             unit->wobblePhase -= 6.2831853f;
         }
@@ -1500,7 +1500,7 @@ s32 evtUnitManagerPrimaryFunc(dds3PoseSet_t *unused, dds3Basic_t *object) {
         if (unit->idleTicks < 0x7FFF) {
             unit->idleTicks++;
         }
-        if (unit->idleTicks >= SDF_FRAMES(6)) {
+        if (unit->idleTicks >= 6) {
             unit->movingTicks = 0;
         }
     }
