@@ -888,25 +888,28 @@ s32 datCheckPlayerDead(void)
     return (((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->badstatus & 0xFFF) == 0x800;
 }
 
-/* NON_MATCHING: 7 of 20 words differ (first at +0x4). */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq18, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* EE32 byte-address arithmetic retains the native signed-index address wrap.
+ * Local constraints retain the actual base/address and narrowing intermediates;
+ * the live parameter pairs with the shift so its load precedes that shift.
+ * These are target allocation/scheduling aids, not original source spelling. */
 s32 datGetPlayerParam(s32 id)
 {
-    u8 hearts = DDS3_GBWK->heartsequip;
-    /* Address the actual work object with the full parameter byte offset. */
-    s32 param = ((s8 *)DDS3_GBWK)[(s32)((u32)id + 0xA6Au)];
-
-    if (hearts == 0) {
-        return param;
-    }
-    return param - cmbGetHeartsParam(hearts, id);
+    FAKEMATCH_ASM_REG(u32, base, "v1") = EE_ADDR(DDS3_GBWK);
+    FAKEMATCH_ASM_REG(u32, hearts, "a2") = ((dds3GlobalWork_t *)base)->heartsequip;
+    FAKEMATCH_ASM_REG(u32, addr, "a0") = (u32)id + base;
+    s32 param = *(s8 *)(addr + 0xA6Au);
+    s8 signedId = id;
+    s8 signedHearts;
+    FAKEMATCH_ASM_REG(u32, shiftedHearts, "v0");
+    FAKEMATCH_ASM_REG(s32, bonus, "v0");
+    FAKEMATCH_ASM_LIVE(hearts);
+    shiftedHearts = hearts << 24;
+    FAKEMATCH_ASM_LIVE_PAIR(shiftedHearts, param);
+    signedHearts = ((s32)shiftedHearts) >> 24;
+    if (hearts) bonus = cmbGetHeartsParam(signedHearts, signedId);
+    else bonus = 0;
+    return param - bonus;
 }
-#else
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetPlayerParam);
-#endif
 
 void datAddPlayerParam(s32 id, s32 add)
 {
