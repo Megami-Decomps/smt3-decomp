@@ -94,6 +94,12 @@
 #define SDF_FRAME_POS_ROT() fldPlayerPosRot()
 #endif
 
+/* The stage a sequence's switch runs: a host that runs it on every host tick
+ * may hold every stage but the steady one to one step a retail tick. */
+#ifndef SDF_FRAME_STAGE
+#define SDF_FRAME_STAGE(stage, steady) (stage)
+#endif
+
 /* One step of a script process: the interpreter up to its next yield. A host
  * may skip it on some host ticks, returning idle. */
 #ifndef SDF_FRAME_SCRIPT_STEP

@@ -762,7 +762,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
         }
     }
     if (fldEncountTestFlag(0x40) == 0) SDF_FRAME_POS_ROT();
-    switch (controller->stage) {
+    switch (SDF_FRAME_STAGE(controller->stage, 4)) {
     case 0:
         gFldRndEncBtl = 0;
         gFldStart = 1;
