@@ -542,7 +542,7 @@ s32 nbHelpProcess1(dds3ProcessID_t *id)
         switch (w->type) {
         case 1:
             itfMesMngSetMesPosition(w->reqmsgid, x << 4, 0x2A0);
-            itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0);
+            SDF_FRAME_WHEN(itfMesMngRequestMessage(w->reqmsgid, w->mesid, 0));
             break;
         case 2:
             w->textmax = (frFontHandle_t *)frwGetSmallFontFRQ(x << 4, 0x2A0, 0xFF0051, w->textcol, w->text1, 0);
