@@ -1357,20 +1357,32 @@ void nbSetBadStat(s32 formindex, s32 sw, s32 badstat)
 
 extern const char D_00544C10[];
 
-/* NON_MATCHING. Behaviour checked against retail: 9 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_010, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* The shared failure exit preserves the native boolean branches. The early
+ * inactive result is a real initialized return value: ordinary ee-gcc 2.96
+ * CSE folds its pseudo to a zero at the exit; the localized v0 constraint
+ * retains its entry definition through the two guards, before any call.
+ * This is an allocation dependency, not recovered original spelling.
+ *
+ * The zero default of the sparse base selector is retained even though the
+ * outer status switch makes that default unreachable. Retail explicitly
+ * initializes f20 to zero; removing it loses the saved f20/zero setup.
+ * The same selector with a zero default and 20/30/30/40 overrides survives
+ * in the reconstructed HD twin (smt-ret/smt3-reconstructed-sources,
+ * a03e0353, nbCalc.c:238-255). This corroborates only that retained selector
+ * shape under the retained-dead-code exception, not the donor's incorrect
+ * datGetParam arithmetic. The calculation
+ * below follows retail: parameter 5 divided by the integer level divisor.
+ */
 s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type)
 {
+    FAKEMATCH_ASM_REG(s32, inactive, "v0") = 0;
     u32 status;
     f32 ratio;
-    f32 base;
+    f32 base = 0.0f;
     s32 chance;
 
-    if (work == NULL || !(work->flag & 1)) {
-        return 0;
-    }
+    FAKEMATCH_ASM_LIVE(inactive);
+    if (work == NULL || !(work->flag & 1)) return inactive;
     status = work->badstatus & 0xFFF;
     switch (type) {
     case 0:
@@ -1383,38 +1395,39 @@ s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type)
         case 0x10:
         case 0x80:
             ratio = (f32)datGetParam(work, 5) / (f32)((work->level + 20) / 5);
-            if (status == 4) {
-                base = 20.0f;
-            } else if (status == 0x80) {
-                base = 40.0f;
-            } else {
-                base = 30.0f;
+            switch (status) {
+            case 0x80: base = 40.0f; break;
+            case 4: base = 20.0f; break;
+            case 8: case 0x10: base = 30.0f; break;
             }
             chance = (s32)(base * ratio);
             printf(D_00544C10, chance);
-            return (s32)dds3GetRandIntA(NULL, 100) < chance;
+            if ((s32)dds3GetRandIntA(NULL, 100) < chance) return 1;
+            break;
         default:
-            return 0;
+            break;
         }
+        break;
     case 1:
-        return status == 0x10;
+        if (status == 0x10) return 1;
+        break;
     case 2:
-        return status == 4;
+        if (status == 4) return 1;
+        break;
     case 3:
         switch (status) {
         case 1: case 2: case 4: case 8: case 0x10:
         case 0x80: case 0x200: case 0x400:
             return 1;
         default:
-            return 0;
+            break;
         }
+        break;
     default:
-        return 0;
+        break;
     }
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckBadKaifuku);
-#endif
 
 u32 nbGetBadStat(s32 formindex)
 {

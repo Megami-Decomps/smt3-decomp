@@ -168,7 +168,6 @@ void _sceCd_cd_callback(s32 *reason)
 extern s32 D_00598C4C;
 extern void ExitDeleteThread(void);
 
-#ifdef NON_MATCHING
 void _Cdvd_cbLoop(void)
 {
     /* Preserve the interrupt-shared reason and thread-state accesses. The
@@ -176,7 +175,13 @@ void _Cdvd_cbLoop(void)
     for (;;) {
         WaitSema(cdvdScmdSema);
         if ((*(volatile s32 *)&cdvdCallbackReason) == -1) {
-            (*(volatile s32 *)&cdvdNcmdState) = 0;
+            /* SDK 2.9 keeps a loop-end note after this one-pass store.
+             * Paired scheduler dumps preserve the native shutdown store order
+             * and leave the ordinary cleanup word in ExitDeleteThread's delay
+             * slot. This is not a new volatile contract or original spelling. */
+            do {
+                (*(volatile s32 *)&cdvdNcmdState) = 0;
+            } while (0);
             (*(volatile s32 *)&cdvdCallbackReason) = 0;
             (*(volatile s32 *)&cdvdCallbackThreadId) = 0;
             D_00598C4C = 0;
@@ -193,9 +198,6 @@ void _Cdvd_cbLoop(void)
     }
 }
 
-#else
-INCLUDE_ASM(const s32, "sdk/libcdvd", _Cdvd_cbLoop);
-#endif
 
 s32 sceCdInitEeCB(s32 priority, void *stack, s32 stackSize)
 {
