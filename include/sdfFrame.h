@@ -88,6 +88,11 @@
 #ifndef SDF_FRAME_WHEN_STEPPED
 #define SDF_FRAME_WHEN_STEPPED(stmt) stmt
 #endif
+/* fldPlayerPosRot, which copies the player's pose as shown into the field
+ * state. A host that shows poses between ticks may keep the state at R. */
+#ifndef SDF_FRAME_POS_ROT
+#define SDF_FRAME_POS_ROT() fldPlayerPosRot()
+#endif
 
 /* One step of a script process: the interpreter up to its next yield. A host
  * may skip it on some host ticks, returning idle. */

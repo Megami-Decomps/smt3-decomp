@@ -778,7 +778,7 @@ void slMcAccessDraw(void)
         DrwSprite2D(0x102, 0x113, 0xBB, 0x13, 0xFB, 0x6C, -0xBB, 0x13, color, slProcPtr);
         slMcAccessDraw_fc = 0.0f;
     } else {
-        slMcAccessDraw_fc += 0.4f;
+        slMcAccessDraw_fc += SDF_FRAME_STEP(0.4f);
         sdfSin(slMcAccessDraw_fc);
         aDrawBoxF(0, 0x89, 0x200, 0xC, 0, 0, 0, 0x19);
         DrwSprite2D(0x47, 0x113, 0xBB, 0x13, 0x41, 0x6C, 0xBB, 0x13, 0x80808080, slProcPtr);

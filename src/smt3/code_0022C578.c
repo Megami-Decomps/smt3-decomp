@@ -7863,9 +7863,9 @@ s32 camp_calc_status_Process(s32 id)
     cmpStatusPhase = dds3GetProcessData(id);
     if (cmpStatusWindowHidden >= 2) {
         if (cmpStatusWindowHidden == 3) {
-            cmpStatusWindowHidden = 0;
+            SDF_FRAME_WHEN(cmpStatusWindowHidden = 0);
         } else {
-            cmpStatusWindowHidden++;
+            SDF_FRAME_WHEN(cmpStatusWindowHidden++);
         }
     }
     campFreeStatusModel();
@@ -8167,7 +8167,7 @@ void campRunPanelCallback(campCrossPanel_t *panel)
         panel[1].func(panel[1].pos, panel[1].cursor, panel[1].unk_1C, panel[1].flag,
                       panel[1].alpha, 0x47);
         if (panel[1].alpha < 0x100) {
-            panel[1].alpha = panel[1].alpha + 0x40;
+            panel[1].alpha = panel[1].alpha + SDF_FRAME_STEP_INT(0x40);
         }
         if (panel[1].alpha >= 0x101) {
             panel[1].alpha = 0x100;
@@ -8177,7 +8177,7 @@ void campRunPanelCallback(campCrossPanel_t *panel)
         panel[0].func(panel[0].pos, panel[0].cursor, panel[0].unk_1C, panel[0].flag,
                       panel[0].alpha, 0x47);
         if (panel[0].alpha < 0x200) {
-            panel[0].alpha = panel[0].alpha + 0x40;
+            panel[0].alpha = panel[0].alpha + SDF_FRAME_STEP_INT(0x40);
         } else {
             panel[0].func = NULL;
         }
@@ -9893,7 +9893,7 @@ s32 camp_update_paneleff_Process(void)
     if (cmpPanelEffList->flags & 0x40) {
         return -1;
     }
-    cmpUpdatePanelEffSlots();
+    SDF_FRAME_WHEN(cmpUpdatePanelEffSlots());
     return 0;
 }
 

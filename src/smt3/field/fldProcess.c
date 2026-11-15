@@ -548,7 +548,7 @@ s32 ProcCampCheck(void)
         return 0;
     }
     if (fldProcCampWait > 0) {
-        fldProcCampWait = fldProcCampWait - 1;
+        SDF_FRAME_WHEN(fldProcCampWait = fldProcCampWait - 1);
         if (fldProcCampWait == 0) {
             dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
             dds3FadeIn2(4);
@@ -610,7 +610,7 @@ s32 ProcCampCheck(void)
     p2sdPlaySE(0xE, 0x7F, 0x3F);
     fldAutoMapSeqSetFlag(1);
     fldReleaseUnitPad();
-    fldPlayerPosRot();
+    SDF_FRAME_POS_ROT();
     evtDisableMoonDraw();
     fldGlobalBase.menuOpenFlag = 4;
     fldGlobalBase.encountState = 5;
@@ -678,7 +678,7 @@ s32 ProcAmCheck(void)
         goto ret0;
     }
     if (fldProcAmWait > 0) {
-        fldProcAmWait = fldProcAmWait - 1;
+        SDF_FRAME_WHEN(fldProcAmWait = fldProcAmWait - 1);
         if (fldProcAmWait == 0) {
             dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
             dds3FadeIn2(4);
@@ -705,7 +705,7 @@ s32 ProcAmCheck(void)
         fldGlobalBase.menuOpenFlag = 4;
         fldGlobalBase.encountState = 5;
         fldReleaseUnitPad();
-        fldPlayerPosRot();
+        SDF_FRAME_POS_ROT();
         dds3FadeOut(0, 0, 0, 4);
         fldProcAmWait = 5;
         fldPlayerMotReset();
@@ -761,7 +761,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
             return 0;
         }
     }
-    if (fldEncountTestFlag(0x40) == 0) fldPlayerPosRot();
+    if (fldEncountTestFlag(0x40) == 0) SDF_FRAME_POS_ROT();
     switch (controller->stage) {
     case 0:
         gFldRndEncBtl = 0;

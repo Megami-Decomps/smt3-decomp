@@ -1341,7 +1341,7 @@ s32 ClearProc(dds3ProcessID_t *id) {
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
                 pbMapWork->tex34C);
-    work->value = work->value - 1;
+    SDF_FRAME_WHEN(work->value = work->value - 1);
     if (work->value < 0) {
         return -1;
     }

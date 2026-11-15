@@ -1574,35 +1574,35 @@ void fldAutoMapCalc(void) {
                 if ((s8)dds3PadButtonState[0x25] != 0 &&
                     (s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX += 1000;
-                    fldAutoMapCamZ -= 1000;
+                    fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x25] != 0 &&
                            (s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX += 1000;
-                    fldAutoMapCamZ += 1000;
+                    fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                            (s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX -= 1000;
-                    fldAutoMapCamZ -= 1000;
+                    fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                            (s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX -= 1000;
-                    fldAutoMapCamZ += 1000;
+                    fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x25] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX += 1000;
+                    fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x24] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX -= 1000;
+                    fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x27] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamZ -= 1000;
+                    fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
                 } else if ((s8)dds3PadButtonState[0x26] != 0) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamZ += 1000;
+                    fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
                 }
             }
         } else {
@@ -1612,42 +1612,42 @@ void fldAutoMapCalc(void) {
                 (s8)dds3PadButtonState[0x27] != 0) {
                 if (dds3PadButtonState[0x27] & 2) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX += 1000;
-                    fldAutoMapCamZ -= 1000;
+                    fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
                 }
             } else if ((s8)dds3PadButtonState[0x25] != 0 &&
                        (s8)dds3PadButtonState[0x26] != 0) {
                 if (dds3PadButtonState[0x26] & 2) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX += 1000;
-                    fldAutoMapCamZ += 1000;
+                    fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
                 }
             } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                        (s8)dds3PadButtonState[0x27] != 0) {
                 if (dds3PadButtonState[0x27] & 2) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX -= 1000;
-                    fldAutoMapCamZ -= 1000;
+                    fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
                 }
             } else if ((s8)dds3PadButtonState[0x24] != 0 &&
                        (s8)dds3PadButtonState[0x26] != 0) {
                 if (dds3PadButtonState[0x26] & 2) {
                     fldAutoMapSeqState = 1;
-                    fldAutoMapCamX -= 1000;
-                    fldAutoMapCamZ += 1000;
+                    fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
+                    fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
                 }
             } else if (dds3PadButtonState[0x25] & 2) {
                 fldAutoMapSeqState = 1;
-                fldAutoMapCamX += 1000;
+                fldAutoMapCamX += SDF_FRAME_STEP_INT(1000);
             } else if (dds3PadButtonState[0x24] & 2) {
                 fldAutoMapSeqState = 1;
-                fldAutoMapCamX -= 1000;
+                fldAutoMapCamX -= SDF_FRAME_STEP_INT(1000);
             } else if (dds3PadButtonState[0x27] & 2) {
                 fldAutoMapSeqState = 1;
-                fldAutoMapCamZ -= 1000;
+                fldAutoMapCamZ -= SDF_FRAME_STEP_INT(1000);
             } else if (dds3PadButtonState[0x26] & 2) {
                 fldAutoMapSeqState = 1;
-                fldAutoMapCamZ += 1000;
+                fldAutoMapCamZ += SDF_FRAME_STEP_INT(1000);
             }
         }
     }
