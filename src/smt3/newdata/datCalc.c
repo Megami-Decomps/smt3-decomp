@@ -359,7 +359,6 @@ s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d)
 
 
 
-#ifdef NON_MATCHING
 extern s32 datGetBadStatusAttr(s32 bad);
 
 s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target)
@@ -369,7 +368,10 @@ s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target
     s32 success, statusRandom;
 
     if (datSkillTable.normal[nskill].badtype == 3) {
-        s32 candidates[12];
+        /* The 16-slot scratch capacity follows the reconstructed HD allocation.
+         * Native EE frame/output checks support this reconstruction; they
+         * do not establish the original PS2 source spelling. */
+        s32 candidates[16];
         s32 count = 0;
         s32 i;
         for (i = 0; i < 12; i++) {
@@ -394,21 +396,21 @@ s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target
     }
     success = 1;
     if (datSkillTable.normal[nskill].badlevel != 0xFF) {
-        /* The native code reobserves badlevel after the sentinel test.
-         * Keep that real memory observation and the shared float conversion
-         * live; these target constraints are reconstruction aids, not evidence
-         * of original spelling. The frame and scheduling remain nonexact. */
+        /* Preserve the native badlevel reload after the sentinel test and
+         * the shared rate conversion before the source-flag split. These
+         * constraints describe real consumed values, not original spelling. */
         u32 flags = source->flag;
         s32 level;
         f32 chance;
+        f32 rate;
         FAKEMATCH_ASM_LIVE_MEM(datSkillTable.normal[nskill].badlevel);
         level = datSkillTable.normal[nskill].badlevel;
-        chance = (f32)level;
-        FAKEMATCH_ASM_LIVE_F32(chance);
+        rate = (f32)level;
+        FAKEMATCH_ASM_LIVE_F32(rate);
         if (flags & 0x20) {
-            chance = chance / 100.0f * affinity * 100.0f * 0.7f;
+            chance = rate / 100.0f * affinity * 100.0f * 0.7f;
         } else {
-            chance = chance / 100.0f * affinity * 100.0f;
+            chance = rate / 100.0f * affinity * 100.0f;
         }
         success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
     }
@@ -417,9 +419,7 @@ s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *source, datUnitWork_t *target
     }
     return success != 0 ? status : 0;
 }
-#else
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillBadKouka);
-#endif
+
 
 extern s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d);
 extern s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *s, datUnitWork_t *d);

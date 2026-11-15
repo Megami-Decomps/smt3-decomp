@@ -147,17 +147,85 @@ correction is recorded in [NbNegoFlowTwo](../newbattle/NbNegoFlowTwo.md).
 
 ## datGetSkillBadKouka (newdata/datCalc, 0x238)
 
-103 of 142 words match at the native 568-byte extent.
+Matches all 142 words at the native 568-byte extent, including the 128-byte
+frame. Independent complete-function review accepts the native behavior,
+localized constraints and evidence-backed live array capacity.
 
-The draft remains behind `NON_MATCHING`. Target-only compilation produces the native 568-byte extent, with 103 of 142 words equal; the production owner remains 79 matches / 0 differences. Equal total extent does not mean an exact frame: native reserves 128 bytes, while this draft reserves 112. Its 12-entry candidate array is unchanged; no unexplained padding or larger capacity was invented.
+### Rate/chance phases and live array capacity
 
-Ordinary indexed observations, a late success flag, zero-default affinity, and a real promoted badlevel snapshot replace the earlier pointer/volatile formulation. The source-side flag branch is live: only one arm applies 0.7. Both arms preserve division by 100, affinity multiplication, multiplication by 100, and optional 0.7 in that order. RNG100 still precedes the native CVT.W.S comparison; badtype and target status are observed afterward. The exact owned 0.7 cell is represented by its literal.
+The composition separates the initialized `rate` converted from the reobserved
+`badlevel` byte from the resulting `chance`. The existing
+`FAKEMATCH_ASM_LIVE_F32(rate)` constrains a real initialized input consumed by
+both probability arms. Division by 100, affinity multiplication, multiplication
+by 100, and the flagged arm's optional 0.7 remain in native order; they are not
+algebraically simplified. The existing `FAKEMATCH_ASM_LIVE_MEM` is a volatile
+empty `+m` operand on the actual initialized badlevel byte, not an input-only
+operand, runtime store or general memory barrier. It prevents reuse of the
+sentinel observation so the subsequent real reload is retained. It does not
+assert an intervening callback write. No new attribute or compiler flag is used.
 
-Dense enumeration initializes every selected candidate for nonempty 12-bit masks. All 288 initialized normal records were audited; the 12 random-status records have nonempty masks. The inspected dynamic normal-skill writer does not alter their badtype/status/level fields. This is not a global table-writer or valid-index proof. The native zero-count path calls the state-mutating RNG before its divide trap; the draft does not invent a safe return, and portable C modulo-zero semantics or exception-handler recovery are outside the proof. Valid work pointers and normal-table indices remain caller preconditions. The bounded low 16-bit affinity and u8 level ensure the chance conversion is finite and in signed 32-bit range on those inputs.
+With the 12-element array, the rate/chance split removes the interior
+instruction differences but leaves 18 frame/save/restore immediates differing
+by 16 bytes. The composition uses the already tested 16-element capacity of
+the live `s32` candidate array, not a separate unused padding object. The
+[pinned reconstructed-HD function](https://github.com/smt-ret/smt3-reconstructed-sources/blob/a03e0353e335f94a74985477d87df4b24aa331cd/src/datCalc.c#L2136-L2341)
+explicitly allocates `NewSpecific(s32, 0x10u)` before the same dense status-bit
+selection. The pinned [generator's `NewSpecific` handling](https://github.com/smt-ret/smt3-reconstructed-sources/blob/a03e0353e335f94a74985477d87df4b24aa331cd/tools/smt3/smt3dump.py)
+interprets its second integer argument as an element count and removes TypeInfo
+suffixes. This is reconstructed port evidence, not recovered original PS2
+source or independent verification of the original HD allocation helper. The
+[generator input notes](https://github.com/smt-ret/smt3-reconstructed-sources/blob/a03e0353e335f94a74985477d87df4b24aa331cd/tools/inputs/README.md)
+identify original binary/decompiler inputs supplied separately.
 
-A separate ordinary shared-float alternative produces 560 bytes, 78 equal words and 8 uncovered native bytes. Its qualified unmodified compiler dumps preserve the second badlevel load through local allocation, then show its deletion by the global-allocation/reload stage; the conversion consumes the first byte value instead. The retained integer-snapshot draft has two exclusive conversion sites, one executed per path, with different float allocation from native. Neither alternative reconstructs the native redundant reload or explains the 16-byte local-frame difference. No constraint, false volatile, compiler flag or ownership change is retained. Original source spelling is unknown.
+The capacity evidence and a 16-element diagnostic were already recorded in
+November 12 work; this is a new composition with the rate/chance split, not a
+new discovery or a capacity sweep. The scan still visits only indices 0 through
+11 and initializes only the selected prefix. Capacity 16 introduces no reads,
+stores, initialization, pointer escape or changed RNG/loop bounds. Native
+candidate stores occupy SP+0 through SP+0x2C and saved registers start at
+SP+0x40. That frame is compatible with the capacity, but does not independently
+prove the original allocation or spelling.
 
-Final production and target-active plain/dump output parity, full-owner/data checks, and strict retained-C checks are recorded in the review packet. The inherited `memset` built-in diagnostic remains; this is not a warning-clean claim. Independent review approved this guarded reconstruction. Final owners, three strict modes, production/retained plain-dump parity, retail byte comparison/checksum/no-op, 450 tests, 817 layout assertions, fresh stable 141-owner/481-draft checks and seven IRX checks pass. Reports remain unchanged. No new matching credit is claimed.
+### Semantic scope and earlier nonmatching controls
+
+All 288 current normal records were inspected; the 12 random-status records
+have nonempty low-12-bit masks. This is not a universal table-writer or
+valid-index proof. The zero-count native path advances RNG state before its
+divide trap; no early return or invented initialized selection is introduced.
+Portable modulo-zero semantics and resumption after an exception handler are
+not claimed. Existing well-formed work/table object contracts remain; source
+and target may alias. Current providers do not mutate those objects, and
+badtype and final target-status observations retain their native phases.
+Bounded low-16-bit affinity and u8 level keep chance finite and within s32
+range. Conversion follows the pinned EE compiler behavior, not a host rounding
+claim. The final status comparison remains numeric ordering, not a substituted
+bit-overlap test.
+
+Earlier guarded reconstruction reached 103/142 words at 568 bytes with a
+112-byte frame and 12-entry array. Its ordinary indexed observations, late
+success flag, zero-default affinity and promoted integer snapshot replaced an
+earlier pointer/volatile formulation. A separate shared-float alternative
+produced 560 bytes, 78 equal words and eight uncovered native bytes. Qualified
+unmodified dumps retained its second badlevel load through local allocation,
+then deleted it at global allocation/reload; conversion reused the first byte.
+The retained integer-snapshot alternative had two exclusive conversion sites
+and different float allocation. Neither explained the native frame. Those
+negative results are not superseded retroactively by this composition.
+
+The earlier guarded reconstruction's production/retained checks, plain/dump
+parity, retail comparison, regression and draft-suite passes remain historical
+results for that source. Its inherited `memset` diagnostic was not a
+warning-clean claim. They are not qualification of the new composition.
+The initial isolated result resolved all 11 relocation/literal sites by
+finite attribution, with 81 peer bodies, allocated nontext and ordered
+relocations unchanged. Fresh production owner checking subsequently reports
+81 matches and zero differences. Production, SKIP_ASM and retained-C contexts
+have literal assembly and raw ELF parity across plain, dump and strict builds.
+Peer code and data contracts are preserved, including explicit attribution of
+SKIP local-call and jump-table shifts rather than a raw-equality claim. Current
+guarded-draft and IRX checks, regression suites, generated-source positive and
+stale controls, literal retail comparison, checksum and no-op build pass.
+These are checks of this source, not reuse of historical guarded-source gates.
 
 ## datSetAutoKaifukuSkill (newdata/datCalc, 0x140)
 

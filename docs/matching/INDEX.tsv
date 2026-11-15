@@ -351,8 +351,8 @@ datGetPlayerParam	newdata/datCalc	0x50	13 of 20 words match	docs/matching/newdat
 datGetSkillKouka	newdata/datCalc	0x3F8	254 of 254 words match	docs/matching/newdata/datCalc.md	79
 datBossRashGetRec	newdata/datCalc	0x108	66 of 66 words match	docs/matching/newdata/datCalc.md	95
 Unconditional forward declarations				docs/matching/newdata/datCalc.md	120
-datGetSkillBadKouka	newdata/datCalc	0x238	103 of 142 words match	docs/matching/newdata/datCalc.md	148
-datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/newdata/datCalc.md	162
+datGetSkillBadKouka	newdata/datCalc	0x238		docs/matching/newdata/datCalc.md	148
+datSetAutoKaifukuSkill	newdata/datCalc	0x140	61 of 80 words match	docs/matching/newdata/datCalc.md	230
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
