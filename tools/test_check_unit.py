@@ -44,6 +44,35 @@ from check_unit import (
 )
 
 
+class LiteralPoolBoundsTests(unittest.TestCase):
+    def compare(self, pool, offset, retail, address=0x1000, segs=None):
+        return check_unit.literal_pool_difference(pool, offset, retail,
+            [(0x1000, 0, len(retail))] if segs is None else segs, address)
+
+    def test_complete_words_match_by_value(self):
+        word = struct.pack("<I", 0x3F800000)
+        self.assertIsNone(self.compare(word, 0, word))
+        self.assertIn("vs retail", self.compare(word, 0, bytes(4)))
+
+    def test_unmapped_truncated_and_negative_offsets_fail_closed(self):
+        word = bytes(4)
+        for offset in (None, -1, 1, 4, 0x10000000):
+            with self.subTest(offset=offset):
+                self.assertIsNotNone(self.compare(word, offset, word))
+        for address in (None, -1, 0x1001, 0x1004):
+            with self.subTest(address=address):
+                self.assertIsNotNone(self.compare(word, 0, word, address))
+        self.assertIsNotNone(self.compare(b"", 0, b""))
+
+    def test_whole_mapping_and_alignment_are_required(self):
+        for segs in ([], [(0x1000, 0, 3)], [(0x1000, 0, 4)] * 2,
+                     [(0x1000, 0, 2), (0x1002, 2, 2)]):
+            with self.subTest(segs=segs):
+                self.assertIsNotNone(self.compare(bytes(4), 0, bytes(8), segs=segs))
+        self.assertIsNotNone(self.compare(bytes(8), 1, bytes(8)))
+        self.assertIsNotNone(self.compare(bytes(8), 0, bytes(8), 0x1001))
+
+
 class FullContextLiteralTests(unittest.TestCase):
     def check(self, *, mine=0xC780C000, want=0xC7800000,
               value=0x3F800000, native=0x3F800000, kind="R_MIPS_LITERAL",
