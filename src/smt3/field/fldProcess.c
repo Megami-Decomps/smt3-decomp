@@ -316,10 +316,6 @@ void InitOoyTest(void);
 
 void fldRegistUnitPad(void);
 
-/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
- * field underground facility, field unknown realm savestates, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern sdfVector4_t fldPlayerLastPos;
 extern s32 fldPlayerStepDist;
 extern s32 fldEncountCheckWork;
@@ -341,6 +337,8 @@ extern void fclClearTerminalState(void);
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
 
+const char fldKiretaLabel[16] = "kireta_label";
+
 s32 ProcRandomEncountCheck(void)
 {
     dds3Basic_t *scene;
@@ -350,8 +348,8 @@ s32 ProcRandomEncountCheck(void)
     s32 oldMoon;
     s32 newMoon;
     s32 encounter;
-    s32 damageMode;
-    s32 specialFloor;
+    fldAreaWork_t *state;
+    sdfVector4_t *lastPos = &fldPlayerLastPos;
 
     if (fldGlobalBase.menuOpenFlag > 0) fldGlobalBase.menuOpenFlag--;
     if (fldGlobalBase.encountState > 0) fldGlobalBase.encountState--;
@@ -364,20 +362,25 @@ s32 ProcRandomEncountCheck(void)
     if (unit == NULL) return 0;
 
     dds3GetPosPoseSet(unit);
-    SDF_VU0_LOADVECTOR_B(&fldPlayerLastPos);
-    SDF_VU0_STOREVECTOR(&fldPlayerLastPos);
+    SDF_VU0_LOADVECTOR_B(lastPos);
+    SDF_VU0_STOREVECTOR(lastPos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     if (distance < 0.1999999881f) distance = 0.0f;
-    fldGlobalBase.playerMoveDistance = distance;
+    /* The read constraint keeps this real address live at the distance store.
+     * Its later consumers still load after evtGetAgeOfMoon16; no global state
+     * is snapshotted. This is an EE allocation aid, not original spelling. */
+    state = &fldGlobalBase;
+    FAKEMATCH_ASM_READ(state);
+    state->playerMoveDistance = distance;
     oldMoon = evtGetAgeOfMoon16();
-    if (fldGlobalBase.word5C > 0) {
+    if (state->word5C > 0) {
         dds3GetPosPoseSet(unit);
-        SDF_VU0_STOREVECTOR(&fldPlayerLastPos);
+        SDF_VU0_STOREVECTOR(lastPos);
         fldGlobalBase.wordC8 = 0;
         return 0;
     }
-    if (fldGlobalBase.area < 10) evtMoonAddMove(distance * 4.0f);
+    if (state->area < 10) evtMoonAddMove(distance * 4.0f);
     else evtMoonAddMove(distance);
     if (fldGlobalBase.consumedFlags & 0xF) {
         fldReleaseUnitPad();
@@ -386,9 +389,8 @@ s32 ProcRandomEncountCheck(void)
         return 0;
     }
     newMoon = evtGetAgeOfMoon16();
-    specialFloor = (fldGlobalBase.area == 42 && (fldGlobalBase.floor == 13 || fldGlobalBase.floor == 25)) ||
-                   (fldGlobalBase.area == 44 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 4 || fldGlobalBase.floor == 24));
-    if (specialFloor) {
+    if ((fldGlobalBase.area == 42 && (fldGlobalBase.floor == 13 || fldGlobalBase.floor == 25)) ||
+                   (fldGlobalBase.area == 44 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 4 || fldGlobalBase.floor == 24))) {
         if (fldRunDanteGunFlag.word5C != 0) {
             fldGlobalBase.floatB4 += distance;
             if (fldGlobalBase.floatB4 > 450.0f) {
@@ -403,25 +405,30 @@ s32 ProcRandomEncountCheck(void)
         damageDistance = 450.0f;
         fldGlobalBase.floatB4 += distance;
         if (fldGlobalBase.wordB0 == 0 && (fldRunDanteGunFlag.word50 & 1)) damageDistance = 1000.0f;
-        if (damageDistance < fldGlobalBase.floatB4) {
-            if (fldGlobalBase.wordB0 != 0) {
-                if (DDS3_GBWK->maFlags & 4) {
-                    fldGlobalBase.floatB4 = 0.0f;
-                    fldPlayerStepDist = 0;
-                    damageMode = 0;
-                } else damageMode = 2;
-            } else damageMode = 1;
-            if (damageMode != 0) {
-                fldPlayerStepDist = 60;
-                fldGlobalBase.floatB4 = 0.0f;
-                datPartyDamageFld(damageMode);
+        {
+            fldAreaWork_t *damage = &fldGlobalBase;
+            if (damageDistance < damage->floatB4) {
+                if (damage->wordB0 != 0) {
+                    if (DDS3_GBWK->maFlags & 4) {
+                        damage->floatB4 = 0.0f;
+                        fldPlayerStepDist = 0;
+                    } else {
+                        fldPlayerStepDist = 60;
+                        damage->floatB4 = 0.0f;
+                        datPartyDamageFld(2);
+                    }
+                } else {
+                    fldPlayerStepDist = 60;
+                    damage->floatB4 = 0.0f;
+                    datPartyDamageFld(1);
+                }
             }
         }
     } else {
         fldGlobalBase.floatB4 = 450.0f;
     }
     if (oldMoon != newMoon) datFieldSkillKaifuku();
-    if (fldLoadNextGetStatus() == 1) return 0;
+    if (fldLoadNextGetStatus() == 1) goto normalReturn;
     if (fldGlobalBase.area < 10 && fldCheckEveRngEncount() == 0 &&
         fldEncountCheckWork != evtGetAgeOfMoon16() && DDS3_GBWK->unkA42[0] == 0) {
         datDebugPrintf("Takara Sagasi Try!!\n");
@@ -441,9 +448,8 @@ s32 ProcRandomEncountCheck(void)
         fldAutoMapSeqSetFlag(2);
         fldReleaseUnitPad();
         evtKillFieldScript();
-        fldEncountBtlId = 0x40A;
-
         fldEncountTimer[0] = 0;
+        fldEncountTimer[1] = 0x40A;
         switch (fldGlobalBase.floor) {
         case 3: fldSetNextField(43, 200); break;
         case 4: case 5: fldSetNextField(43, 201); break;
@@ -457,8 +463,14 @@ s32 ProcRandomEncountCheck(void)
     encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     fldEncountTimer[0] = encounter;
-    fldEncountBtlId = nbEncountCalc(encounter, distance);
-    if (fldEncountBtlId == 0) return 0;
+    {
+        /* The actual unsigned return feeds the battle-id store and test. Its
+         * v0 binding ends here, before the next call can clobber it. */
+        FAKEMATCH_ASM_REG(u32, battle, "$2") = nbEncountCalc(encounter, distance);
+        FAKEMATCH_ASM_LIVE(battle);
+        fldEncountTimer[1] = battle;
+        if (battle == 0) goto normalReturn;
+    }
     if (fldRunDanteGunFlag.enabled == 1 || distance > 9998.0f) {
         fldEveHit_End();
         fldAutoMapSeqSetFlag(1);
@@ -470,14 +482,14 @@ s32 ProcRandomEncountCheck(void)
     fclClearTerminalState();
     p2sdPlaySE(15, 127, 63);
     dds3FadeIn(128, 128, 128, 6);
-    fldEncountCount++;
+    fldEncountCount = (s32)((u32)fldEncountCount + 1U);
+    /* An explicit forward join retains the native common zero-return block.
+     * The matched ProcCampCheck in this owner uses the same forward return
+     * shape. Separate return statements share an earlier block. The join skips
+     * all later callbacks and the encounter-count update on both paths. */
+normalReturn:
     return 0;
 }
-#else
-const char fldKiretaLabel[16] = "kireta_label";
-
-INCLUDE_ASM(const s32, "field/fldProcess", ProcRandomEncountCheck);
-#endif
 
 s32 fldProcKiretaChk(void)
 {
