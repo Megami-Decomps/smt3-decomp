@@ -72,19 +72,21 @@
 #endif
 
 /* Runs one statement on every host tick of a retail tick but its last, such as
- * holding a state that retail keeps for a whole tick. SDF_FRAME_STEP_INT(1) is 1
- * on the last host tick of each retail tick. Expands to nothing here. */
+ * holding a state that retail keeps for a whole tick. Expands to nothing here. */
 #ifndef SDF_FRAME_BEFORE_LAST
-#ifdef SDF_FRAME_STEP_INT
-#define SDF_FRAME_BEFORE_LAST(stmt)                                                 \
-    do {                                                                            \
-        if (SDF_FRAME_STEP_INT(1) == 0) {                                           \
-            stmt;                                                                   \
-        }                                                                           \
-    } while (0)
-#else
 #define SDF_FRAME_BEFORE_LAST(stmt)
 #endif
+
+/* The field player's step and the field camera's update, which a host may run
+ * its own way, and a statement that runs on each host tick the step ran. */
+#ifndef SDF_FRAME_PLAYER_CALC
+#define SDF_FRAME_PLAYER_CALC() fldPlayerCalc()
+#endif
+#ifndef SDF_FRAME_CAM_MAIN
+#define SDF_FRAME_CAM_MAIN() fldCamMain()
+#endif
+#ifndef SDF_FRAME_WHEN_STEPPED
+#define SDF_FRAME_WHEN_STEPPED(stmt) stmt
 #endif
 
 /* An advance per tick added to an integer. A host splits d into whole steps
@@ -236,33 +238,6 @@
  * sets it again at each SDF_FRAME_INTERPOLATE_POSES as it does positions. */
 #ifndef SDF_FRAME_INTERPOLATE_ROT
 #define SDF_FRAME_INTERPOLATE_ROT(basic, rot) dds3SetRotPoseSet((basic), (rot))
-#endif
-
-/* Draws basic's position and rotation, which a step run under SDF_FRAME_WHEN
- * sets once per retail tick, between their values at the ends of the last two
- * retail ticks on every host tick. basic may be NULL. Expands to nothing here. */
-#ifndef SDF_FRAME_INTERPOLATE_BASIC
-#ifdef SDF_FRAME_INTERPOLATE_POSES
-#define SDF_FRAME_INTERPOLATE_BASIC(basic)                                          \
-    do {                                                                            \
-        static f32 basicPos_[4] __attribute__((aligned(16)));                       \
-        static f32 basicRot_[4] __attribute__((aligned(16)));                       \
-        dds3Basic_t *basic_ = (basic);                                              \
-        int lane_;                                                                  \
-        if (basic_ != NULL && SDF_FRAME_DUE()) {                                    \
-            for (lane_ = 0; lane_ < 4; lane_++) {                                   \
-                basicPos_[lane_] = ((f32 *)&basic_->poseset->pos)[lane_];          \
-                basicRot_[lane_] = ((f32 *)&basic_->poseset->rot)[lane_];          \
-            }                                                                       \
-            SDF_FRAME_INTERPOLATE_POSE(basic_, (sdfVector4_t *)basicPos_);          \
-            SDF_FRAME_INTERPOLATE_ROT(basic_, (sdfVector4_t *)basicRot_);           \
-        } else if (basic_ != NULL) {                                                \
-            SDF_FRAME_INTERPOLATE_POSES();                                          \
-        }                                                                           \
-    } while (0)
-#else
-#define SDF_FRAME_INTERPOLATE_BASIC(basic)
-#endif
 #endif
 
 /* Sets again each position SDF_FRAME_INTERPOLATE_POSE and each rotation

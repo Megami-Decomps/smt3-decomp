@@ -888,13 +888,11 @@ s32 ProcSequence(dds3ProcessID_t *id)
             controller->stage++;
             break;
         }
-        SDF_FRAME_WHEN(fldPlayerCalc());
-        SDF_FRAME_INTERPOLATE_BASIC(fldGetUnitControl()->handle);
-        SDF_FRAME_INTERPOLATE_BASIC(fldGetUnitControl()->handle2);
+        SDF_FRAME_PLAYER_CALC();
         if (fldEncountTestFlag(0x40) == 0) break;
         if (fldGlobalBase.area < 10 && fldWmWarpMode == 3) break;
     check_hit:
-        SDF_FRAME_WHEN(fldEveHit_ChkEveHit(fldUnitControlHandle));
+        SDF_FRAME_WHEN_STEPPED(fldEveHit_ChkEveHit(fldUnitControlHandle));
         break;
     case 5:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
@@ -946,7 +944,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
             fldItemBoxCalcTask();
         }
     }
-    if (fldProcCampChk() != 1) fldCamMain();
+    if (fldProcCampChk() != 1) SDF_FRAME_CAM_MAIN();
     return 0;
 }
 
