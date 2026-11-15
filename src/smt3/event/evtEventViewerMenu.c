@@ -1171,8 +1171,9 @@ s32 evtViewerExit(void)
     }
     return 0;
 }
-/* NON_MATCHING: 20 of 56 words differ (first at +0x4). */
-#ifdef NON_MATCHING
+/* The reconstructed HD control flow supplies the signed conditional update;
+ * the shared success exit retains the native return-one block. This is a
+ * matching reconstruction, not a claim of original PS2 source spelling. */
 s32 evtPollEffectFrameControl(void)
 {
     s32 busy = 1;
@@ -1193,6 +1194,7 @@ s32 evtPollEffectFrameControl(void)
     case 0x10:
     case 0x11:
         if (viewerinfo->menuProcess == 0) {
+        success:
             return 1;
         }
         break;
@@ -1202,22 +1204,29 @@ s32 evtPollEffectFrameControl(void)
     case 0x15:
     case 0x16:
     default:
-        busy = dds3PadButtonState[0x2C] >= 0;
+        if (dds3PadButtonState[0x2C] < 0) {
+            busy = 0;
+        }
         break;
     }
-    if (busy != 0) {
-        return 0;
+    {
+        /* Localized compiler aid for the actual common result test. The
+         * initialized value is consumed here, before the kill callback. The
+         * unconstrained form allocates the common result differently and
+         * does not match; this empty constraint emits no instructions. */
+        FAKEMATCH_ASM_REG(s32, result, "$5") = busy;
+        FAKEMATCH_ASM_READ(result);
+        if (result != 0) {
+            return 0;
+        }
     }
     if (viewerinfo->menuProcess == 0) {
-        return 1;
+        goto success;
     }
     dds3KillProcess(viewerinfo->menuProcess, 1);
     viewerinfo->menuProcess = 0;
-    return 1;
+    goto success;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtPollEffectFrameControl);
-#endif
 
 s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y)
 {
