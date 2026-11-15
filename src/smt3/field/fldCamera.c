@@ -17,6 +17,7 @@
 #include "effect.h"
 #include "sdfFrame.h"
 #include "sdfAspect.h"
+#include "fldCamHook.h"
 
 extern void *memset(void *, int, size_t);
 
@@ -513,6 +514,7 @@ void calcCamNormal(void) {
     farPoint.y = fy;
     fz = fldGlobalBase.z + sdfCos(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex].distance;
     farPoint.z = fz;
+    FLD_CAM_PLACE(&farPoint, &referencePoint);
     if (l_UseCollision) {
         heightOffset = fldCamDist + (fldCamDirLock - fldCamDist) * 0.0625f;
         fldCamDist = fldCamDirLock;
@@ -1383,7 +1385,7 @@ void *fldCamMain(void) {
     if (fldGlobalBase.area == 18 || fldGlobalBase.area == 28 || fldGlobalBase.area == 30) {
         fldGlobalBase.cameraParamIndex = 1;
     }
-    if (fldGlobalBase.area >= 11 && fldEncountTestFlag(0x40)) {
+    if (FLD_CAM_PEEK(fldGlobalBase.area >= 11 && fldEncountTestFlag(0x40))) {
         if (dds3PadStickState[0][0][0] < 0x40) {
             left = 1;
         }

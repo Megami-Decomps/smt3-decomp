@@ -4,6 +4,7 @@
 #include "kernel.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
+#include "fldCamHook.h"
 #include "basic.h"
 #include "dds3obj.h"
 #include "billboard.h"
@@ -846,8 +847,8 @@ s32 fldPlayerCalc_Nml(void)
         forward = dds3PadButtonState[0x26] != 0;
         back = dds3PadButtonState[0x27] != 0;
     }
-    if (((dds3PadStickState[0][0][0] + 0xC0) & 0xFF) >= 0x81 ||
-        dds3PadStickState[0][0][1] < 0x40 || dds3PadStickState[0][0][1] >= 0xC1) {
+    if (FLD_CAM_PEEK(((dds3PadStickState[0][0][0] + 0xC0) & 0xFF) >= 0x81 ||
+                     dds3PadStickState[0][0][1] < 0x40 || dds3PadStickState[0][0][1] >= 0xC1)) {
         left = right = forward = back = 0;
     }
     modifier = dds3PadButtonState[0x23] != 0 ||
@@ -1122,6 +1123,7 @@ s32 fldPlayerCalc_Nml(void)
         if (aiming) {
             fldCamPitch = -fldGlobalBase.camAngle2;
             fldCamPitchTarget = fldCamPitch;
+        } else if (FLD_CAM_TURN()) {
         } else if (fldPlayerSyukanState >= 4 &&
                    (fldPlayerMoveState == 1 || fldPlayerMoveState == 3 ||
                     fldPlayerMoveState == 5 || fldPlayerMoveState == 7)) {
