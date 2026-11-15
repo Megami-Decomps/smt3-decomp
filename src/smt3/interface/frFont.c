@@ -1486,7 +1486,7 @@ s32 frDrawEffect(frFontHandle_t *parent, frTextHandle_t *glyph,
     } else {
         canAdvanceFade = previousFade == 0x80;
     }
-    if (SDF_FRAME_MASK(canAdvanceFade) != 0) {
+    if (canAdvanceFade != 0 && SDF_FRAME_DUE_AGE(glyph->drawCount)) {
         u32 currentFadeWord;
         s32 advance = glyph->advance + parent->glyphCodeOrContext.byteRoles.spacing;
 
