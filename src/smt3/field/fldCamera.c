@@ -1008,15 +1008,9 @@ void fldCamSetChaseCore(f32 divisor)
         fldGlobalBase.cameraParamIndex = 7;
         dds3SetScreenFovy(fldCamParamTable[7].fovy * 3.1399998664855957f / 180.0f);
     }
-/* A camera row's field for this call, blended as the eye and look-at point
- * below are. */
-#define FLD_CAM_ROW(field)                                                                         \
-    (first != 0 ? fldCamParamTable[first].field * inverse + fldCamParamTable[second].field * blend \
-                : fldCamParamTable[fldGlobalBase.cameraParamIndex].field)
-#define FLD_CAM_RISE (FLD_CAM_ROW(eyeHeight) - FLD_CAM_ROW(targetHeight))
     switch (fldGlobalBase.area) {
     case 1:
-        SDF_ASPECT_CLAMP_X(x, -950.0f, 850.0f, FLD_CAM_ROW(distance), FLD_CAM_RISE);
+        SDF_ASPECT_CLAMP_X(x, -950.0f, 850.0f, first, second, inverse, blend);
         if (z < -1100.0f) {
             z = -1100.0f;
         }
@@ -1025,7 +1019,7 @@ void fldCamSetChaseCore(f32 divisor)
         }
         break;
     case 4:
-        SDF_ASPECT_CLAMP_X(x, -3800.0f, 2600.0f, FLD_CAM_ROW(distance), FLD_CAM_RISE);
+        SDF_ASPECT_CLAMP_X(x, -3800.0f, 2600.0f, first, second, inverse, blend);
         if (z < -4000.0f) {
             z = -4000.0f;
         }
@@ -1035,7 +1029,7 @@ void fldCamSetChaseCore(f32 divisor)
         break;
     case 6:
     case 7:
-        SDF_ASPECT_CLAMP_X(x, -2400.0f, 2100.0f, FLD_CAM_ROW(distance), FLD_CAM_RISE);
+        SDF_ASPECT_CLAMP_X(x, -2400.0f, 2100.0f, first, second, inverse, blend);
         if (z < -2348.0f) {
             z = -2348.0f;
         }
@@ -1044,7 +1038,7 @@ void fldCamSetChaseCore(f32 divisor)
         }
         break;
     case 8:
-        SDF_ASPECT_CLAMP_X(x, -3000.0f, 2400.0f, FLD_CAM_ROW(distance), FLD_CAM_RISE);
+        SDF_ASPECT_CLAMP_X(x, -3000.0f, 2400.0f, first, second, inverse, blend);
         if (z < -3100.0f) {
             z = -3100.0f;
         }
