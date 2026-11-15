@@ -360,33 +360,40 @@ void nbSetOrder(void)
     nbSetOrderSide(1);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
+/* Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * capture_009, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void nbSetNextOrder(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     s32 next;
+    /* Keep the live increment in the native temporary through its byte store.
+     * This local binding is a compiler reconstruction aid, not source provenance. */
+    FAKEMATCH_ASM_REG(s32, increment, "v1");
+    u8 *bytes = (u8 *)data + 8;
+    /* EE byte addresses are 32-bit. Integer addition preserves the native
+     * operand order and permits the within-record byte preceding order[0]. */
 
     if (data->orderindex < 0) {
         nbSetOrder();
         return;
     }
+    next = data->orderindex;
     do {
-        next = data->orderindex + 1;
-        data->orderindex = next;
+        increment = next + 1;
+        next = increment;
+        /* Keep the actual carried counter separate from the narrowed byte.
+         * Ordinary C coalesces away the native counter copy. */
+        FAKEMATCH_ASM_LIVE(next);
+        data->orderindex = increment;
         if (data->orderindex >= 12) {
             nbSetOrder();
             break;
         }
-    } while (data->order[data->orderindex] < 0);
+    } while (*(s8 *)((u32)data->orderindex + (u32)bytes + 0x40) < 0);
     /* nbSetOrder can leave -1: retail observes the byte before order[0]. */
-    data->activeunit = *(s8 *)((u8 *)data + 0x48 + data->orderindex);
+    data->activeunit = *(s8 *)((u32)data->orderindex + (u32)bytes + 0x40);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNextOrder);
-#endif
 
 void nbUpdateOrder(void)
 {
