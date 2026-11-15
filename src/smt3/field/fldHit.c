@@ -1170,7 +1170,7 @@ void fldHitChkUnit(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < SDF_FRAME_STEP(0.1f)) {
+    if (MATH_VectorLength(&delta) < 0.1f) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;
@@ -1541,7 +1541,7 @@ void fldHitChkUnitVWM(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < SDF_FRAME_STEP(fldHitMinMove)) {
+    if (MATH_VectorLength(&delta) < fldHitMinMove) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;

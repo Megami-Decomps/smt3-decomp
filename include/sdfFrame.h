@@ -49,6 +49,20 @@
 #endif
 #endif
 
+/* A turn by step, a share of the distance left that is never under floor. A
+ * host takes its share of the proportional turn and steps the floor. Retail's
+ * value is step. */
+#ifndef SDF_FRAME_CHASE
+#ifdef SDF_FRAME_DECAY
+#define SDF_FRAME_CHASE(step, left, floor)                                          \
+    ((step) > (floor) ? ((left) < 0.0f ? -(left) : (left)) *                        \
+                            SDF_FRAME_SHARE((step) / ((left) < 0.0f ? -(left) : (left))) \
+                      : SDF_FRAME_STEP(step))
+#else
+#define SDF_FRAME_CHASE(step, left, floor) (step)
+#endif
+#endif
+
 /* An advance per tick, in whatever unit the counter moves. */
 #ifndef SDF_FRAME_STEP
 #define SDF_FRAME_STEP(d) (d)
