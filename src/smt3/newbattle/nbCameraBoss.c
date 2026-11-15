@@ -55,7 +55,7 @@ extern s32 nbCameraBoss_BSARI1_EP_IT_Set(nbCamera_t *pNbCamera);
 
 extern u32 effBTLSkillGetTargetNumber(void);
 
-extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
+extern void effBTLGetGroupPos(nbFormation_t *pFormation, f32 *pPos);
 
 extern void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
@@ -90,7 +90,7 @@ extern s32 nbCameraBoss_BSARI1_EP_IT_Set(nbCamera_t *pNbCamera);
 
 extern u32 effBTLSkillGetTargetNumber(void);
 
-extern void effBTLGetGroupPos(nbFormation_t *pFormation, sdfVector4_t *pPos);
+extern void effBTLGetGroupPos(nbFormation_t *pFormation, f32 *pPos);
 
 extern void effBTLModelSetPosition(nbFormation_t *pFormation, sdfVector4_t *pPos);
 
@@ -1037,7 +1037,7 @@ s32 nbCameraBoss_BSONGY_Command_Set(nbCamera_t *pNbCamera)
     p = pBase;
     for (i = 0; i < 4; i++) {
         if ((p->stat & 3) == 3) {
-            effBTLGetGroupPos(p, &pos);
+            effBTLGetGroupPos(p, &pos.x);
             pos.z -= depth;
             effBTLModelSetPosition(p, &pos);
         }
@@ -2967,7 +2967,7 @@ s32 nbCameraBoss_Beru_HAENO1_Set(nbCamera_t *pNbCamera)
         Mult();
         SDF_VU0_STOREVECTOR_NOMEM(&rot);
         nbSetFormRot(pFormation, &rot);
-        effBTLGetGroupPos(pFormation, &pos);
+        effBTLGetGroupPos(pFormation, &pos.x);
         SDF_VU0_LOADVECTOR(&aimpos);
         SDF_VU0_COPYVECTOR_A_TO_C();
         SDF_VU0_LOADVECTOR_B(&pos);
@@ -6008,12 +6008,21 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 const f32 nbCameraBossForwardVec[4] __attribute__((aligned(16))) = { 0.0, 0.0, 1.0, 0.0 };
 
-#ifdef NON_MATCHING
 extern void ToMatrix(void);
 extern void effBTLModelLook2(nbFormation_t *pFormation, sdfVector4_t *pTargetPos, f32 angle);
 extern const f32 nbCameraBossForwardVec[4];
 
-s32 nbCameraDANTE_Init(void)
+/* Successful arms share an exit, preserving the two distinct native Look
+ * sites. The sideways move keeps its real z input and newZ result separate;
+ * ordinary C then reproduces all 644 bytes without a compiler constraint.
+ * GroupPos requires loaded formations: registration sets stat bit 2 before
+ * flag 4, RunLoad clears flag 4 after setup, and CheckActionRun blocks active
+ * loading flags before ACTION (native nbMainProcess1, 0x248F58). Retail skills
+ * 0x107/0x10B use target rule 0, excluding inactive-target exceptions; 0x10B
+ * only reads invoke coordinates. This is the normal battle-action domain,
+ * not a promise for malformed direct calls. Both context pointers are opaque
+ * and unused; caller/callee private camera layouts need not be conflated. */
+s32 nbCameraDANTE_Init(void *camera, void *skillInfo)
 {
     nbFormation_t *invoke = effBTLSkillGetInvokeFormation();
     nbFormation_t *target;
@@ -6022,6 +6031,8 @@ s32 nbCameraDANTE_Init(void)
     u32 state;
     s32 id;
     f32 distance;
+    f32 z;
+    f32 newZ;
 
     id = effBTLModelGetID(invoke);
     switch ((u32)id) {
@@ -6047,13 +6058,13 @@ s32 nbCameraDANTE_Init(void)
         effBTLModelInvokeGroupHide();
         id = effBTLModelGetID(target);
         if (id == 0x156 || id == 0x124 || id == 0x103) {
-            effBTLGetGroupPos(invoke, &invokePos);
+            effBTLGetGroupPos(invoke, &invokePos.x);
             effBTLModelLook(target, &invokePos);
-            return 1;
+            break;
         }
         target = effBTLSkillGetTargetFormation(0);
-        effBTLGetGroupPos(invoke, &invokePos);
-        effBTLGetGroupPos(target, &targetPos);
+        effBTLGetGroupPos(invoke, &invokePos.x);
+        effBTLGetGroupPos(target, &targetPos.x);
         if (nbCameraBoss_CheckRotate(target) != 0) {
             effBTLModelLook2(target, &invokePos, 0.08726646f);
         }
@@ -6069,7 +6080,7 @@ s32 nbCameraDANTE_Init(void)
         SDF_VU0_STOREVECTOR(&invokePos);
         effBTLModelSetPosition(invoke, &invokePos);
         effBTLModelLook(invoke, &targetPos);
-        return 1;
+        break;
     case 0x106:
     case 0x108:
     case 0x109:
@@ -6079,25 +6090,25 @@ s32 nbCameraDANTE_Init(void)
     case 0x10B:
         effBTLModelTargetPartyShow();
         effBTLModelInvokeGroupHide();
-        effBTLGetGroupPos(invoke, &invokePos);
+        effBTLGetGroupPos(invoke, &invokePos.x);
+        z = invokePos.z;
         if (invoke->stat & 0x100) {
-            invokePos.z += -300.0f;
+            newZ = z + -300.0f;
         } else {
-            invokePos.z += 300.0f;
+            newZ = z + 300.0f;
         }
+        invokePos.z = newZ;
         effBTLModelSetPosition(invoke, &invokePos);
-        return 1;
+        break;
     case 0x10D:
         effBTLModelTargetPartyShow();
         effBTLModelInvokeGroupHide();
-        return 1;
+        break;
+    default:
+        return 0;
     }
-    return 0;
+    return 1;
 }
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraDANTE_Init);
-#endif
 
 s32 nbCameraDANTE_Run(nbCamera_t *pCamera)
 {

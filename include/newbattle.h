@@ -119,4 +119,7 @@ typedef struct nbParty_t {
     u16 hojoskill[8];
 } nbParty_t;
 
+/* DANTE receives these contexts but does not inspect either pointer. */
+s32 nbCameraDANTE_Init(void *camera, void *skillInfo);
+
 #endif /* NEWBATTLE_H */

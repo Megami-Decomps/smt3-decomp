@@ -2254,7 +2254,6 @@ void nbCameraState_SkillCut1_Calc(void)
 
 extern const char nbCameraSkillCut2NoTargetMsg[];
 extern s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
-extern s32 nbCameraDANTE_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
 extern void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera);
 extern void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo);
