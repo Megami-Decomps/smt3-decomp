@@ -2577,8 +2577,11 @@ void effPCPBossKAGUInvokeDelete(effPCPBossKAGUInvoke_t *hData)
     sdfMemFreeDirect(hData->handle);
 }
 
-/* NON_MATCHING: 3 of 184 words differ (first at +0x1A4). */
-#ifdef NON_MATCHING
+/* The one-based slot cursor addresses point[slot - 1], retaining the native
+ * list traversal without a biased object pointer. The localized store pointer
+ * constraint below keeps its real VU-store input distinct from the later center
+ * address materialization. This is a compiler reconstruction aid, not evidence
+ * of the original source spelling. */
 void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
 {
     nbFormation_t *model;
@@ -2633,7 +2636,7 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
         if (frame < fadeIn && fadeIn != 0) {
             blend = (f32)frame / (f32)fadeIn;
         } else {
-            rest = limit - frame;
+            rest = (s32)((u32)limit - (u32)frame);
             if (fadeOut >= rest && fadeOut != 0) {
                 blend = (f32)rest / (f32)fadeOut;
             } else {
@@ -2647,7 +2650,11 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
             SDF_VU0_STOREVECTOR(&marks[index]);
         }
         effBTLModelGetMarkPosition2(model, 0);
-        SDF_VU0_STOREVECTOR(&center);
+        {
+            effPCPBossVector_t *storeCenter = &center;
+            FAKEMATCH_ASM_LIVE(storeCenter);
+            SDF_VU0_STOREVECTOR(storeCenter);
+        }
         centerPtr = &center;
 
         SDF_VU0_LOADVECTOR_B(centerPtr);
@@ -2655,12 +2662,12 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
         SDF_VU0_SUBVECTOR();
         SDF_VU0_GETLENGTH(distance);
         count = (u32)hData->pTPList;
-        slot = 0;
+        slot = 1;
         distance -= 200.0f;
 
         for (index = 0; index < count; index++) {
             for (listIndex = 0; listIndex < 6; listIndex++) {
-                list = &hData->point[slot];
+                list = &hData->point[slot - 1];
                 param = effPCP_ThunderPolyListGetParam(*list);
                 SDF_VU0_LOADVECTOR_B(centerPtr);
                 for (vertex = 0; vertex < 9; vertex++) {
@@ -2677,11 +2684,8 @@ void effPCPBossKAGUInvokeDraw(effPCPBossKAGUInvoke_t *hData)
             }
         }
     }
-    hData->frame++;
+    hData->frame = (s32)((u32)hData->frame + 1u);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeDraw);
-#endif
 
 void effPCPBossKAGUInvokeSetColor(effPCPBossKAGUInvoke_t *hData, u32 abgr)
 {
