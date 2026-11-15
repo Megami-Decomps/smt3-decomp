@@ -1438,40 +1438,56 @@ s32 cmpGetKugatatiMsg(void)
     return 31;
 }
 
-#ifdef NON_MATCHING
 s32 cmpStartItemMsg(u16 item, s32 errorFlags)
 {
-    u16 skill = datItemTable[cmpGetSelectItemID()].skill;
+    datItemEntry_t *table = datItemTable;
+    FAKEMATCH_ASM_REG(datItemEntry_t *, entry, "v0");
+    u16 skill;
     s32 guide;
     s32 mode;
     s32 index;
 
-    if (item == 0x3A) {
+    entry = &table[cmpGetSelectItemID()];
+    /* Keep the real entry address in its native temporary through the skill
+     * load. This localized empty operand also retains the native comparison
+     * scheduling; the pointer dies before any subsequent call. */
+    FAKEMATCH_ASM_LIVE(entry);
+    skill = entry->skill;
+
+    if (item != 0x3A) {
+        guide = cmpClearButtonGuide(skill, errorFlags);
+        /* The matched skill-message path uses the same split range test. */
+        if (guide >= 5) {
+            goto zero;
+        }
+        if (guide > 0) {
+            mode = 1;
+            goto have_mode;
+        }
+zero:
+        mode = 0;
+have_mode:
+        if (cmpStartItemTokusyuMsg(item) != 0) {
+            return 2;
+        }
+        index = cmpFindItemMsgIndex(mode, item);
+        if (index > 0) {
+            if (mode == 0) {
+                fclStartMessage(index + 0x13);
+            } else {
+                fclStartMessage(index + 0x20);
+            }
+            return mode;
+        }
+        if (skill == 0) {
+            return 0;
+        }
+        return cmpStartSkillMsg(skill, errorFlags);
+    } else {
         fclStartMessage(cmpGetKugatatiMsg());
         return 0;
     }
-    guide = cmpClearButtonGuide(skill, errorFlags);
-    mode = guide > 0 && guide < 5;
-    if (cmpStartItemTokusyuMsg(item) != 0) {
-        return 2;
-    }
-    index = cmpFindItemMsgIndex(mode, item);
-    if (index > 0) {
-        if (mode == 0) {
-            fclStartMessage(index + 0x13);
-        } else {
-            fclStartMessage(index + 0x20);
-        }
-        return mode;
-    }
-    if (skill != 0) {
-        return cmpStartSkillMsg(skill, errorFlags);
-    }
-    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
-#endif
 
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
