@@ -26,57 +26,34 @@
 #define SDF_FRAMES_COUNTDOWN(n) (n)
 #endif
 
-/* A host keeps the collision probe at the retail offset after retaining its
- * share of the player's movement. Detect external movement overrides before
- * the defaults below are supplied. Retail does not touch the probe here. */
-#ifndef SDF_FRAME_PROBE_FOLLOW
-#if defined(SDF_FRAME_STEP) || defined(SDF_FRAME_TOWARD)
-#define SDF_FRAME_PROBE_FOLLOW(work, retail, position) \
-    do { \
-        (work)[0] += (position).x - (retail)[0]; \
-        (work)[1] += (position).y - (retail)[1]; \
-        (work)[2] += (position).z - (retail)[2]; \
-    } while (0)
-#else
-#define SDF_FRAME_PROBE_FOLLOW(work, retail, position) do { } while (0)
-#endif
-#endif
-
-/* A value a tick's step moved from start to x, where the step adds a probe at
- * retail's per-tick distance so that contact is found as retail finds it. A
- * host moves start toward x by its share of a retail tick, unless held is true,
- * as when a floor set x. Retail's value is x. Defined ahead of the default step
- * so that a host's step reaches it. */
-#ifndef SDF_FRAME_TOWARD
-#ifdef SDF_FRAME_STEP
-#define SDF_FRAME_TOWARD(start, x, held) ((held) ? (x) : (start) + SDF_FRAME_STEP((x) - (start)))
-#else
-#define SDF_FRAME_TOWARD(start, x, held) (x)
-#endif
-#endif
-
-/* SDF_FRAME_FRACTION of a share f that is not a constant: retail's value is f
+/* SDF_FRAME_FRACTION of a share f that is not a constant. Retail's value is f
  * as written, where 1 - (1 - f) would not fold. */
 #ifndef SDF_FRAME_SHARE
-#ifdef SDF_FRAME_DECAY
-#define SDF_FRAME_SHARE(f) ((f) >= 1.0f ? (f) : 1.0f - SDF_FRAME_DECAY(1.0f - (f)))
-#else
 #define SDF_FRAME_SHARE(f) (f)
 #endif
-#endif
 
-/* A turn by step, a share of the distance left that is never under floor. A
- * host takes its share of the proportional turn and steps the floor. Retail's
- * value is step. */
+/* A turn by step, a share of the distance left that is never under floor.
+ * Retail's value is step. */
 #ifndef SDF_FRAME_CHASE
-#ifdef SDF_FRAME_DECAY
-#define SDF_FRAME_CHASE(step, left, floor)                                          \
-    ((step) > (floor) ? ((left) < 0.0f ? -(left) : (left)) *                        \
-                            SDF_FRAME_SHARE((step) / ((left) < 0.0f ? -(left) : (left))) \
-                      : SDF_FRAME_STEP(step))
-#else
 #define SDF_FRAME_CHASE(step, left, floor) (step)
 #endif
+
+/* A mover's tick: SDF_FRAME_MOVE_FROM names the vector it starts from,
+ * SDF_FRAME_MOVE and SDF_FRAME_MOVE_HIT give axis i's value x without and with
+ * a collision result, and SDF_FRAME_MOVE_END runs after the collision test with
+ * the mover's basic and vector. Retail's values are x, and FROM and END do
+ * nothing. */
+#ifndef SDF_FRAME_MOVE_FROM
+#define SDF_FRAME_MOVE_FROM(v) do { } while (0)
+#endif
+#ifndef SDF_FRAME_MOVE
+#define SDF_FRAME_MOVE(i, x) (x)
+#endif
+#ifndef SDF_FRAME_MOVE_HIT
+#define SDF_FRAME_MOVE_HIT(i, x) (x)
+#endif
+#ifndef SDF_FRAME_MOVE_END
+#define SDF_FRAME_MOVE_END(basic, v) do { } while (0)
 #endif
 
 /* An advance per tick, in whatever unit the counter moves. */
