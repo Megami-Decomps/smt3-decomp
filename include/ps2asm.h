@@ -1236,7 +1236,7 @@ __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
     "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
-    : "=r" (out) : "f" (255.0f))
+    : "=r" (out) : "f" (255.0f) : "$2")
 
 /* Light and ambient colors scale by 128, and their scratch register is $3. */
 #define MMI_RGBA_PACK_128(out) __asm__ volatile ( \
@@ -1250,7 +1250,7 @@ __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
     "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
-    : "=r" (out) : "f" (128.0f))
+    : "=r" (out) : "f" (128.0f) : "$2")
 
 /* from script/scrCommonCommand.c */
 #define SDF_VU0_SETVECTOR_X_BITS(r) __asm__ volatile ( \
