@@ -1489,7 +1489,7 @@ void fldNpcCalc(void)
                         fldNpcCamTarget = talk;
                     }
                     if (talk == 0) {
-                        fldModelSlotTable[i].cntf += 0.1f;
+                        fldModelSlotTable[i].cntf += SDF_FRAME_TICK_STEP(&fldModelSlotTable[i].cntf, 0.1f);
                         fldModelSlotTable[i].cntAnmi = 0;
                         fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
                         fldDeleteNpcModel(i);
@@ -1502,7 +1502,7 @@ void fldNpcCalc(void)
                         fldCamNpcTarget = -140.0f;
                         fldNpcCamTargetY = -140.0f;
                         fldCamNpcTarget2 = fldModelSlotTable[i].csize;
-                        fldModelSlotTable[i].cntf += 0.05f;
+                        fldModelSlotTable[i].cntf += SDF_FRAME_TICK_STEP(&fldModelSlotTable[i].cntf, 0.05f);
                         fldModelSlotTable[i].cnti = (fldModelSlotTable[i].cnti + 1) & 1;
                     }
                     break;
@@ -1713,9 +1713,9 @@ void fldNpcDraw(void)
                 if (slot->cntAnmi == 0 || fldGlobalBase.area < 10) {
                     position.x = x;
                     if (fldGlobalBase.area == 1) {
-                        position.y = (y - 50.0f) + sdfSin(SDF_FRAME_INTERPOLATE(&slot->cntf, slot->cntf) * 1.5f) * 3.0f;
+                        position.y = (y - 50.0f) + sdfSin(SDF_FRAME_TICK_DRAWN(&slot->cntf, slot->cntf) * 1.5f) * 3.0f;
                     } else {
-                        position.y = (y - 150.0f) + sdfSin(SDF_FRAME_INTERPOLATE(&slot->cntf, slot->cntf) * 1.5f) * 10.0f;
+                        position.y = (y - 150.0f) + sdfSin(SDF_FRAME_TICK_DRAWN(&slot->cntf, slot->cntf) * 1.5f) * 10.0f;
                     }
                     position.z = z;
                     dds3EffectSetPosition(slot->effect, &position);

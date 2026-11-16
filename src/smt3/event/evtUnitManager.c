@@ -1116,7 +1116,7 @@ s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     if (0.0f < cross) {
         angle = -angle;
     }
-    angle = angle * radio;
+    angle = SDF_FRAME_TURN(h->effObj, angle, radio);
     if ((h->flags & 0x200000) == 0) {
         if (angle < -0.15707963f) {
             angle = -0.15707963f;

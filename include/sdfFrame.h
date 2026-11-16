@@ -231,6 +231,23 @@
 #define SDF_FRAME_MASK(bits) (bits)
 #endif
 
+/* A turn by share of the angle left, made once per retail tick by the object
+ * at key. Retail's value is angle * share. */
+#ifndef SDF_FRAME_TURN
+#define SDF_FRAME_TURN(key, angle, share) ((angle) * (share))
+#endif
+
+/* A step d added to a value once per retail tick, keyed by the value's
+ * address, and that value as drawn on a host tick. A host draws it less the
+ * part of d this retail tick has yet to run, so it moves d/n a host tick and is
+ * the stepped value on the tick's last. Retail's values are d and x. */
+#ifndef SDF_FRAME_TICK_STEP
+#define SDF_FRAME_TICK_STEP(key, d) (d)
+#endif
+#ifndef SDF_FRAME_TICK_DRAWN
+#define SDF_FRAME_TICK_DRAWN(key, x) (x)
+#endif
+
 /* A value drawn each host tick from state its owner updates once per retail
  * tick, given a key no other interpolated value uses. A host draws it between its values at the ends of the last two retail
  * ticks by the share of this tick run, so it moves every host tick and lands

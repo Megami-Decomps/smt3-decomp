@@ -1594,42 +1594,38 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
             if (e->stat == 2) {
                 s32 count = e->cnt1;
                 s32 limit = e->cntmax;
-                if (count < limit) {
-                    if (SDF_FRAME_DUE()) {
-                        if (limit == 0x28) {
-                            f32 step = steps[count];
-                            e->x1 += e->mx1 * step;
-                            e->y1 += e->my1 * step;
-                            e->z1 += e->mz1 * step;
-                        } else {
-                            e->x1 += e->mx1;
-                            e->y1 += e->my1;
-                            e->z1 += e->mz1;
-                            if (evtBitCheck(0xAF3) != 0) {
-                                e->x1 += e->mx1;
-                                e->y1 += e->my1;
-                                e->z1 += e->mz1;
-                            }
+                if (count < SDF_FRAMES(limit)) {
+                    if (limit == 0x28) {
+                        f32 step = steps[SDF_FRAME_TICK(count)];
+                        e->x1 += SDF_FRAME_STEP(e->mx1 * step);
+                        e->y1 += SDF_FRAME_STEP(e->my1 * step);
+                        e->z1 += SDF_FRAME_STEP(e->mz1 * step);
+                    } else {
+                        e->x1 += SDF_FRAME_STEP(e->mx1);
+                        e->y1 += SDF_FRAME_STEP(e->my1);
+                        e->z1 += SDF_FRAME_STEP(e->mz1);
+                        if (evtBitCheck(0xAF3) != 0) {
+                            e->x1 += SDF_FRAME_STEP(e->mx1);
+                            e->y1 += SDF_FRAME_STEP(e->my1);
+                            e->z1 += SDF_FRAME_STEP(e->mz1);
                         }
-                        e->cnt1 = e->cnt1 + 1;
                     }
+                    e->cnt1 = e->cnt1 + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
                     e->stat = 3;
                     e->cnt1 = 0;
                 }
             } else if (e->stat == 3) {
-                if (e->cnt1 < 0x14) {
-                    if (SDF_FRAME_DUE()) {
-                        e->x1 -= e->mx1;
-                        e->y1 -= e->my1;
-                        e->z1 -= e->mz1;
-                        if (evtBitCheck(0xAF3) != 0) {
-                            e->x1 -= e->mx1;
-                            e->y1 -= e->my1;
-                            e->z1 -= e->mz1;
-                        }
-                        e->cnt1 = e->cnt1 + 1;
+                if (e->cnt1 < SDF_FRAMES(0x14)) {
+                    e->x1 -= SDF_FRAME_STEP(e->mx1);
+                    e->y1 -= SDF_FRAME_STEP(e->my1);
+                    e->z1 -= SDF_FRAME_STEP(e->mz1);
+                    if (evtBitCheck(0xAF3) != 0) {
+                        e->x1 -= SDF_FRAME_STEP(e->mx1);
+                        e->y1 -= SDF_FRAME_STEP(e->my1);
+                        e->z1 -= SDF_FRAME_STEP(e->mz1);
                     }
+                    e->cnt1 = e->cnt1 + 1;
                 } else {
                     e->cnt1 = 0;
                     e->stat = 1;
@@ -1637,49 +1633,45 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
             } else {
                 continue;
             }
-            *x = SDF_FRAME_INTERPOLATE(&e->x1, e->x1);
-            *y = SDF_FRAME_INTERPOLATE(&e->y1, e->y1);
-            *z = SDF_FRAME_INTERPOLATE(&e->z1, e->z1);
+            *x = e->x1;
+            *y = e->y1;
+            *z = e->z1;
             return 1;
         }
         if (e->matter_resid2 == matter_resid) {
             if (e->stat == 2) {
                 s32 count = e->cnt2;
                 s32 limit = e->cntmax;
-                if (count < limit) {
-                    if (SDF_FRAME_DUE()) {
-                        if (limit == 0x28) {
-                            f32 step = steps[count];
-                            e->x2 += e->mx2 * step;
-                            e->y2 += e->my2 * step;
-                            e->z2 += e->mz2 * step;
-                        } else {
-                            e->x2 += e->mx2;
-                            e->y2 += e->my2;
-                            e->z2 += e->mz2;
-                        }
-                        e->cnt2 = count + 1;
+                if (count < SDF_FRAMES(limit)) {
+                    if (limit == 0x28) {
+                        f32 step = steps[SDF_FRAME_TICK(count)];
+                        e->x2 += SDF_FRAME_STEP(e->mx2 * step);
+                        e->y2 += SDF_FRAME_STEP(e->my2 * step);
+                        e->z2 += SDF_FRAME_STEP(e->mz2 * step);
+                    } else {
+                        e->x2 += SDF_FRAME_STEP(e->mx2);
+                        e->y2 += SDF_FRAME_STEP(e->my2);
+                        e->z2 += SDF_FRAME_STEP(e->mz2);
                     }
+                    e->cnt2 = count + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
                     e->cnt2 = 0;
                 }
             } else if (e->stat == 3) {
-                if (e->cnt2 < 0x14) {
-                    if (SDF_FRAME_DUE()) {
-                        e->x2 -= e->mx2;
-                        e->y2 -= e->my2;
-                        e->z2 -= e->mz2;
-                        e->cnt2 = e->cnt2 + 1;
-                    }
+                if (e->cnt2 < SDF_FRAMES(0x14)) {
+                    e->x2 -= SDF_FRAME_STEP(e->mx2);
+                    e->y2 -= SDF_FRAME_STEP(e->my2);
+                    e->z2 -= SDF_FRAME_STEP(e->mz2);
+                    e->cnt2 = e->cnt2 + 1;
                 } else {
                     e->cnt2 = 0;
                 }
             } else {
                 continue;
             }
-            *x = SDF_FRAME_INTERPOLATE(&e->x2, e->x2);
-            *y = SDF_FRAME_INTERPOLATE(&e->y2, e->y2);
-            *z = SDF_FRAME_INTERPOLATE(&e->z2, e->z2);
+            *x = e->x2;
+            *y = e->y2;
+            *z = e->z2;
             return 1;
         }
     }
