@@ -485,13 +485,13 @@ void CalcCamera(void) {
     dds3Basic_t *camera;
 
     dds3CameraObjectBasicGetCameraTM(pipe_Camera,
-                                     SDF_FRAME_INTERPOLATE_PTR(pipeCamShakeVec, 3));
-    dds3SetPosPoseSet(pipe_Camera, SDF_FRAME_INTERPOLATE_PTR(pipeCamShake, 3));
+                                     SDF_FRAME_PATH_VEC(pipeCamShakeVec));
+    dds3SetPosPoseSet(pipe_Camera, SDF_FRAME_PATH_VEC(pipeCamShake));
     camera = pipe_Camera;
     ((void (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
     cameraData = pipe_Camera->workdata;
-    SDF_VU0_COPYVECTOR(&cameraData->vertical, SDF_FRAME_INTERPOLATE_PTR(pipeCameraPos, 3));
-    SDF_VU0_COPYVECTOR(&cameraData->upVector, SDF_FRAME_INTERPOLATE_PTR(pipeCameraPos, 3));
+    SDF_VU0_COPYVECTOR(&cameraData->vertical, SDF_FRAME_PATH_VEC(pipeCameraPos));
+    SDF_VU0_COPYVECTOR(&cameraData->upVector, SDF_FRAME_PATH_VEC(pipeCameraPos));
 }
 
 s32 pipeCheckLevel(s32 level, s32 type)

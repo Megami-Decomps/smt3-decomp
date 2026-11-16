@@ -248,6 +248,27 @@
 #define SDF_FRAME_TICK_DRAWN(key, x) (x)
 #endif
 
+/* The n floats at dst, which their owner scaled about origin by ratio on this
+ * retail tick, as drawn on a host tick: origin + (dst - origin) * ratio to the
+ * power of the share of the tick run, less one. Retail draws dst as it is. */
+#ifndef SDF_FRAME_SCALE_DRAWN
+#define SDF_FRAME_SCALE_DRAWN(dst, origin, ratio, n)
+#endif
+
+/* Sets the pose of each pipe game model placed from the pipe's path nodes on
+ * this retail tick to where the game's rules put it at this host tick, from
+ * the path position and offsets the tick moved from. Expands to nothing here. */
+#ifndef SDF_FRAME_PATH_POSES
+#define SDF_FRAME_PATH_POSES()
+#endif
+
+/* Four floats the pipe camera sets once per retail tick from the path: a host
+ * points at their value at this host tick's path position. Retail points at
+ * src. */
+#ifndef SDF_FRAME_PATH_VEC
+#define SDF_FRAME_PATH_VEC(src) (src)
+#endif
+
 /* A value drawn each host tick from state its owner updates once per retail
  * tick, given a key no other interpolated value uses. A host draws it between its values at the ends of the last two retail
  * ticks by the share of this tick run, so it moves every host tick and lands

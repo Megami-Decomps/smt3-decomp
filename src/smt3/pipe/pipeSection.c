@@ -125,9 +125,9 @@ s32 pipe_Section(void)
 {
     s32 ret = pipeMainSection();
 
-    SDF_FRAME_INTERPOLATE_POSES();
+    SDF_FRAME_PATH_POSES();
     pipeDrawSection();
-    pipeSoundSection();
+    SDF_FRAME_WHEN(pipeSoundSection());
     CalcCamera();
     return ret;
 }
