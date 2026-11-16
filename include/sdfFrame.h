@@ -263,6 +263,22 @@
 #define SDF_FRAME_TICK_DRAWN(key, x) (x)
 #endif
 
+/* A value x stepped by d once per tick, after it is read, and the step: a host
+ * steps it by d on a retail tick's first host tick and by 0 on the rest. HELD is
+ * x as retail holds it for the tick, for a test made once per tick. DRAWN is x as
+ * drawn on a host tick: less the part of the tick still to run, so it moves d/n a
+ * host tick and is retail's value on the tick's last, and never under floor.
+ * Retail's values are d and x. */
+#ifndef SDF_FRAME_DUE_STEP
+#define SDF_FRAME_DUE_STEP(d) (d)
+#endif
+#ifndef SDF_FRAME_DUE_HELD
+#define SDF_FRAME_DUE_HELD(x, d) (x)
+#endif
+#ifndef SDF_FRAME_DUE_DRAWN
+#define SDF_FRAME_DUE_DRAWN(x, d, floor) (x)
+#endif
+
 /* The n floats at dst, which their owner scaled about origin by ratio on this
  * retail tick, as drawn on a host tick: origin + (dst - origin) * ratio to the
  * power of the share of the tick run, less one. Retail draws dst as it is. */

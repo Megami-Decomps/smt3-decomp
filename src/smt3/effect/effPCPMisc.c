@@ -2715,7 +2715,7 @@ void effPCPHama01Draw(effPCPHama01_tag *hData) {
         SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
         mdlLink(obj[1], sdfModelOtTable);
-        if (hData->frame > SDF_FRAMES(0x18)) {
+        if (hData->frame > SDF_FRAMES(0x18 + 1) - 1) {
             dds3EffectPartSetPosition(hData->shared[slotIndex], posp);
             dds3EffectPartDraw(hData->shared[slotIndex]);
         }
@@ -4339,7 +4339,7 @@ void effPCPFilterExpDelete(effPCPFilterExp_tag *hData) {
 }
 
 void effPCPFilterExpDraw(effPCPFilterExp_tag *hData) {
-    if (hData->frame <= SDF_FRAMES(hData->param.life)) {
+    if (hData->frame <= SDF_FRAMES(hData->param.life + 1) - 1) {
         s32 fadeIn = SDF_FRAMES(hData->param.fade_in);
         s32 fadeOut = SDF_FRAMES(hData->param.fade_out);
         s32 remaining;
@@ -4393,7 +4393,7 @@ void effPCPBlurExpDelete(effPCPBlurExp_tag *hData) {
 }
 
 void effPCPBlurExpDraw(effPCPBlurExp_tag *hData) {
-    if (hData->frame <= SDF_FRAMES(hData->param.duration)) {
+    if (hData->frame <= SDF_FRAMES(hData->param.duration + 1) - 1) {
         s32 fadeIn = SDF_FRAMES(hData->param.fadeIn);
         s32 fadeOut = SDF_FRAMES(hData->param.fadeOut);
         s32 remaining;
@@ -4866,7 +4866,7 @@ void effPCPBreathDraw(effPCPBreath_tag *work) {
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         dds3EffectSetPosition(node, muzzle);
-        if (work->frame > SDF_FRAMES(params->start)) {
+        if (work->frame > SDF_FRAMES(params->start + 1) - 1) {
             work->rotate += SDF_FRAME_STEP(work->speed);
         }
         SetRotateMatrixY(work->rotate);

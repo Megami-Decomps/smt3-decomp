@@ -807,7 +807,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
         remaining = count;
         works = cut->parameterWorks;
         do {
-            if (SDF_FRAMES(entry->timing) < frame) {
+            if (SDF_FRAMES(entry->timing + 1) - 1 < frame) {
                 if (works[0] != NULL) {
                     u8 kind = entry->pos_ptr.scaleKind;
                     FAKEMATCH_ASM_REG(u32, markKind, "$2") = 5;

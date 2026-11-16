@@ -508,7 +508,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     count = list->count;
     flags = hBTLCutEffect->stat;
     for (i = 0; i < count; i++, entry++) {
-        if (SDF_FRAMES(entry->timing) >= frame) {
+        if (SDF_FRAMES(entry->timing + 1) - 1 >= frame) {
             continue;
         }
         kind = entry->reverberations;

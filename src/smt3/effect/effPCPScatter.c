@@ -959,7 +959,7 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
 
     i = 0;
     duration = SDF_FRAMES(hData->param.life);
-    endAge = SDF_FRAMES(hData->param.wait) + duration;
+    endAge = SDF_FRAMES(hData->param.wait + 1) - 1 + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
     VEC3_SPLAT(&halfWidth.x, hData->param.tex_w * 0.5f);
@@ -1276,7 +1276,7 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
 
     i = 0;
     duration = SDF_FRAMES(hData->param.life);
-    endAge = SDF_FRAMES(hData->param.wait) + duration;
+    endAge = SDF_FRAMES(hData->param.wait + 1) - 1 + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.number;
     VEC3_SPLAT(&halfWidth.x, hData->param.tex_w * 0.5f);
@@ -1596,7 +1596,7 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
 
     i = 0;
     duration = SDF_FRAMES(hData->param.duration);
-    endAge = SDF_FRAMES(hData->param.fadeDuration) + duration;
+    endAge = SDF_FRAMES(hData->param.fadeDuration + 1) - 1 + duration;
     duplicates = hData->pAttach != NULL;
     count = hData->param.particleCount;
     VEC3_SPLAT(&halfWidth.x, hData->param.width * 0.5f);
@@ -2049,7 +2049,7 @@ void effPCPWhirlwindPolyDraw(effPCPWhirlwindPoly_tag *hData) {
     u32 count = hData->param.particleCount;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
-    s32 duration = SDF_FRAMES(hData->param.duration);
+    s32 duration = SDF_FRAMES(hData->param.duration + 1) - 1;
     s32 fadeIn;
     s32 fadeRange;
     s32 color;
@@ -2298,7 +2298,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
 void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
     s32 loop;
-    s32 duration = SDF_FRAMES(hData->param.life);
+    s32 duration = SDF_FRAMES(hData->param.life + 1) - 1;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2345,7 +2345,7 @@ void effPCPWhirlwind2PolyDraw(effPCPWhirlwind2Poly_tag *hData) {
                 effPCPWhirlwind2PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -(SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus + 1) - 1);
             } else {
                 particle->frame++;
             }
@@ -2567,7 +2567,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
 void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
     s32 loop;
-    s32 duration = SDF_FRAMES(hData->param.life);
+    s32 duration = SDF_FRAMES(hData->param.life + 1) - 1;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWhirlwindPolyPart_tag *particle = hData->pPart;
     u32 count = hData->param.number;
@@ -2612,7 +2612,7 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
                 effPCPWhirlwind3PolyPartInit(hData, i);
             } else if (particleAge > 0) {
                 particleAgeFloat = (f32)particleAge;
-                color = effColorBlend(startColor, endColor, particleAgeFloat / (f32)duration);
+                color = effColorBlend(startColor, endColor, particleAgeFloat / (f32)(duration - SDF_FRAMES(1) + 1));
                 if (particleAge < fadeIn && fadeIn != 0) {
                     particleFade = particleAgeFloat / (f32)fadeIn;
                 } else {
@@ -2623,7 +2623,7 @@ void effPCPWhirlwind3PolyDraw(effPCPWhirlwind3Poly_tag *hData) {
                 effPCPWhirlwind3PolyPartMove(hData, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+                particle->frame = -(SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus + 1) - 1);
             } else {
                 particle->frame++;
             }
@@ -2821,7 +2821,7 @@ void effPCPWwSpherePolyDraw(effPCPWwSpherePoly_tag *hData) {
     u32 count = hData->param.number;
     dds3WhirlwindPolyList_tag *draw = hData->hPoly;
     effPCPWwSpherePolyPart_tag *particle = hData->pPart;
-    s32 duration = SDF_FRAMES(hData->param.life);
+    s32 duration = SDF_FRAMES(hData->param.life + 1) - 1;
     s32 fadeIn;
     s32 fadeRange;
     s32 color;

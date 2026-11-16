@@ -362,7 +362,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    pPart->delay = SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1));
+    pPart->delay = SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1) + 1) - 1;
     pPart->angle = -3.14159265f;
     quad->rotate = pParam->params.rotate;
     quad->abgr = pParam->params.abgr;
@@ -430,12 +430,12 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
             count = work->params.number;
             do {
                 if (slot->delay == 0) {
-                    if (slot->angle > 3.14159265f) {
+                    if (SDF_FRAME_DUE_HELD(slot->angle, work->params.speed) > 3.14159265f) {
                         dds3EffectDistBlurPartInit(work, slot);
                     }
-                    slot->quad.scale = work->params.distortion * sdfSin(slot->angle) + 1.0f;
+                    slot->quad.scale = work->params.distortion * sdfSin(SDF_FRAME_DUE_DRAWN(slot->angle, work->params.speed, -3.14159265f)) + 1.0f;
                     level = fptodp((f32)(work->params.abgr >> 24));
-                    angle = fptodp(slot->angle);
+                    angle = fptodp(SDF_FRAME_DUE_DRAWN(slot->angle, work->params.speed, -3.14159265f));
                     if (dpcmp(angle, 0.0) < 0) {
                         angle = dpsub(0.0, angle);
                     }
@@ -444,7 +444,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
                     alpha = dptoul(level);
                     slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                    slot->angle += SDF_FRAME_STEP(work->params.speed);
+                    slot->angle += SDF_FRAME_DUE_STEP(work->params.speed);
                 } else {
                     slot->delay--;
                 }

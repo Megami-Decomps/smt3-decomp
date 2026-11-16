@@ -1171,7 +1171,7 @@ void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSmoke->verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * pSmoke->verticalSpeedJitter + (1.0f - pSmoke->verticalSpeedJitter));
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSmoke->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSmoke->spread + 1));
     packet->color = 0;
     jitter = pSmoke->head.speedJitter;
     packet->billboardScale = pSmoke->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -1447,7 +1447,7 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
         }
         break;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSpark->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSpark->spread + 1));
     packet->color = 0;
     jitter = pSpark->head.speedJitter;
     packet->billboardScale = pSpark->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -1757,7 +1757,7 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
 
     packet += number;
     packet->color = 0;
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSpiral->spread + 1));
     speed = pSphereSpiral->speed;
     jitter = pSphereSpiral->jitterA;
     directionVector.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
@@ -1969,7 +1969,7 @@ void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke,
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSphereSmoke->up_s * (dds3GetRandFloatA(dds3EffectBase) * pSphereSmoke->up_s_r + (1.0f - pSphereSmoke->up_s_r));
-    packet->age = ~(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSmoke->spread) + 1));
+    packet->age = ~(SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSmoke->spread + 1) + 1) - 1);
     packet->color = 0;
     jitter = pSphereSmoke->head.speedJitter;
     packet->billboardScale = pSphereSmoke->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -2310,7 +2310,7 @@ void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number) {
         packet->vel[2] = angleSin * cone * speed;
         packet->verticalAcceleration = gravity;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSpark2->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSpark2->spread + 1));
     packet->color = 0;
     jitter = pSpark2->basic.speedJitter;
     packet->billboardScale = pSpark2->basic.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -2459,7 +2459,7 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
         SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
-        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
+        packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSphereAtom->delayRange + 1));
     } else {
         SDF_VU0_COPYVECTOR(packet->position, pSphereAtom->head.origin);
         value = (3.14159265f * 2.0f) / pSphereAtom->head.particleCount * number;
@@ -2469,7 +2469,7 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
         SDF_VU0_LOADVECTOR(&direction);
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR(packet->velocity);
-        packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereAtom->delayRange) + 1));
+        packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSphereAtom->delayRange + 1));
     }
     packet->motionMagnitude = pSphereAtom->motionMagnitude;
     packet->color = 0;
@@ -2870,7 +2870,7 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
         }
         break;
     }
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSparkOffset->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSparkOffset->spread + 1));
     packet->color = 0;
     jitter = pSparkOffset->head.speedJitter;
     packet->billboardScale = pSparkOffset->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
@@ -3045,7 +3045,7 @@ void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset,
     packet->wavePhase = 0;
     packet->previousWaveValue = 0;
     packet->verticalVelocity = pSmokeOffset->verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * pSmokeOffset->verticalSpeedJitter + (1.0f - pSmokeOffset->verticalSpeedJitter));
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSmokeOffset->spread) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSmokeOffset->spread + 1));
     packet->color = 0;
     SDF_VU0_COPYVECTOR(packet, pSmokeOffset->head.origin);
     jitter = pSmokeOffset->head.speedJitter;
@@ -3250,7 +3250,7 @@ void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSp
 
     packet += number;
     packet->color = 0;
-    packet->age = -(dds3GetRandA((effRandState_t *)ParRand) % (SDF_FRAMES(pSphereSpiral2->spawnDelayFrames) + 1));
+    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSphereSpiral2->spawnDelayFrames + 1));
     initialRadius = pSphereSpiral2->initialRadius;
     jitterFactor = pSphereSpiral2->initialRadiusJitter;
     direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
