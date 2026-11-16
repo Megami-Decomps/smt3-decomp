@@ -568,8 +568,12 @@ void RunHatudoEffectEndKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     if (p->cuteff == NULL) {
-        printf("cutcreate 3\n");
-        p->cuteff = effBTLCutCreate(p->data1.p, p->data2.us[0], p->form, p->data2.s[1]);
+        /* The cut draws its first frame on the next run, which is the next
+         * retail tick. */
+        SDF_FRAME_LAST({
+            printf("cutcreate 3\n");
+            p->cuteff = effBTLCutCreate(p->data1.p, p->data2.us[0], p->form, p->data2.s[1]);
+        });
         return;
     }
     switch (p->type) {

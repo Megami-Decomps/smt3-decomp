@@ -472,8 +472,8 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         effBTLPointLightSet(list->colorKeys, formation);
         effBTLModelColorSet(list->rgbKeys, formation);
     }
-    /* A cut made by a battle step starts counting on the next host tick, so the
-     * quake, which draws from the shared random stream, waits for a retail tick. */
+    /* The quake draws from the shared random stream, so it starts on a retail
+     * tick's first host tick. */
     if (list->shake != 0 && list->shakeFrame == SDF_FRAME_TICK(frame) &&
         SDF_FRAME_DUE()) {
         if (list->shake < 0x1F) {

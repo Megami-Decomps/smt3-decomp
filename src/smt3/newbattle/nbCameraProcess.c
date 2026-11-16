@@ -448,8 +448,10 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     volatile sdfVector4_t scale;
     f32 distance;
 
-    nbCameraCheckStateChange();
-    if (pNbCamera.state != pNbCamera.state_change) {
+    /* A shot changes with its calc on a retail tick's first host tick, or its
+     * init shows uncalculated until the next one. */
+    SDF_FRAME_WHEN(nbCameraCheckStateChange());
+    if (pNbCamera.state != pNbCamera.state_change && SDF_FRAME_DUE()) {
         if ((pNbCamera.state_change == 2 || pNbCamera.state_change == 4) && (data->stat & 0x40)) {
             pNbCamera.state_change = 0;
         }
