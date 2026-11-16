@@ -360,6 +360,13 @@
 #define SDF_FRAME_CAMERA_FOVY(fovy) (fovy)
 #endif
 
+/* A battle camera shot's frame count, one per retail tick, where the shot reads
+ * it as a time. A host gives the time of the host tick drawn. Retail's value is
+ * frame. */
+#ifndef SDF_FRAME_CAMERA_TIME
+#define SDF_FRAME_CAMERA_TIME(frame) (frame)
+#endif
+
 /* Sets the n floats at dst to SDF_FRAME_INTERPOLATE of the n floats at src, the
  * i-th keyed by key and i. Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_VEC

@@ -6,6 +6,7 @@
 #include "model.h"
 #include "motion.h"
 #include "effBattle.h"
+#include "sdfFrame.h"
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -474,7 +475,7 @@ void nbCameraBoss_Foru_E913_Run(void)
     f32 rate;
     FAKEMATCH_ASM_LIVE(raw);
     frame = raw;
-    rate = (s32)frame / 190.0f;
+    rate = SDF_FRAME_CAMERA_TIME((s32)frame) / 190.0f;
 
     if (rate > 1.0f) {
         rate = 1.0f;
@@ -902,7 +903,7 @@ s32 nbCameraBoss_Sp_JAREIH_Run(nbCamera_t *pNbCamera)
         SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR_NOMEM(&pNbCamera->direction);
         pNbCamera->fovy = 0.69813163f;
-        SetRotateMatrixY(pNbCamera->frame * -0.008726646f);
+        SetRotateMatrixY(SDF_FRAME_CAMERA_TIME(pNbCamera->frame) * -0.008726646f);
         SDF_VU0_LOADVECTOR(&pNbCamera->direction);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(&pNbCamera->direction);
@@ -1090,7 +1091,7 @@ s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera)
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
     pNbCamera->fovy = 0.6981316209f;
-    SetRotateMatrixY(pNbCamera->frame * -0.0021816615f);
+    SetRotateMatrixY(SDF_FRAME_CAMERA_TIME(pNbCamera->frame) * -0.0021816615f);
     FAKEMATCH_ASM_LIVE(pNbCamera);
     SDF_VU0_LOADVECTOR(&pNbCamera->direction);
     SDF_VU0_APPLYMATRIX();
@@ -1717,7 +1718,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             to.x = 1370.34f;
             to.y = -15.0f;
             to.z = -2046.0f;
-            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+            rate = (SDF_FRAME_CAMERA_TIME((f32)nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
             SDF_VU0_LOADVECTOR(&from);
             SDF_VU0_LOADVECTOR_B(&to);
             SDF_VU0_INTERPOLATE(rate);
@@ -1745,7 +1746,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
         break;
     case 1:
         if (nbCameraBoss_BSARI_MASEHA_Frame < 135) {
-            rate = (f32)nbCameraBoss_BSARI_MASEHA_Frame / 135.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)nbCameraBoss_BSARI_MASEHA_Frame) / 135.0f;
             from.x = -940.78992f;
             from.y = -296.84995f;
             from.z = -1616.1199f;
@@ -1790,7 +1791,7 @@ s32 nbCameraBoss_BSARI_MASEHA_Run(nbCamera_t *pNbCamera)
             pNbCamera->distance = 1.0f;
             pNbCamera->fovy = 0.69813163f;
         } else if (nbCameraBoss_BSARI_MASEHA_Frame < 130) {
-            rate = ((f32)nbCameraBoss_BSARI_MASEHA_Frame - 30.0f) / 100.0f;
+            rate = (SDF_FRAME_CAMERA_TIME((f32)nbCameraBoss_BSARI_MASEHA_Frame) - 30.0f) / 100.0f;
             from.x = -628.99994f;
             from.y = -47.56f;
             from.z = -2074.9898f;
@@ -2029,7 +2030,7 @@ void nbCameraBoss_Kagu_E909_Run(void)
         FAKEMATCH_ASM_LIVE(raw);
         frame = raw;
     }
-    rate = (f32)frame / (f32)nbCameraKaguDuration;
+    rate = SDF_FRAME_CAMERA_TIME((f32)frame) / (f32)nbCameraKaguDuration;
     if (rate > 1.0f) {
         rate = 1.0f;
     }
@@ -2188,7 +2189,7 @@ s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera)
     }
     switch (nbCameraBoss_Kagu_MJINKO_Type) {
     case 0:
-        rate = (f32)pNbCamera->frame / 75.0f;
+        rate = SDF_FRAME_CAMERA_TIME((f32)pNbCamera->frame) / 75.0f;
         if (rate > 1.0f) {
             rate = 1.0f;
         }
@@ -2219,7 +2220,7 @@ s32 nbCameraBoss_Kagu_MJINKO_Set(nbCamera_t *pNbCamera)
         pNbCamera->fovy = 0.698131621f;
         break;
     case 1:
-        rate = (f32)pNbCamera->frame / 75.0f;
+        rate = SDF_FRAME_CAMERA_TIME((f32)pNbCamera->frame) / 75.0f;
         if (rate > 1.0f) {
             rate = 1.0f;
         }
@@ -2341,7 +2342,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
     case 0:
         frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 38) {
-            rate = (f32)frame / 160.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)frame) / 160.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2376,7 +2377,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
                 SDF_VU0_STOREVECTOR(&pNbCamera->direction);
             }
         } else {
-            rate = (f32)(frame - 38) / 122.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)(frame - 38)) / 122.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2414,7 +2415,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
     case 1:
         frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 75) {
-            rate = (f32)frame / 160.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)frame) / 160.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2450,7 +2451,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
                 SDF_VU0_STOREVECTOR(&pNbCamera->direction);
             }
         } else {
-            rate = (f32)(frame - 75) / 85.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)(frame - 75)) / 85.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2488,7 +2489,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
     case 2:
         frame = nbCameraBoss_Pish_MUHENK_Frame;
         if (frame < 75) {
-            rate = (f32)frame / 160.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)frame) / 160.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2524,7 +2525,7 @@ s32 nbCameraBoss_Pish_MUHENK_Run(nbCamera_t *pNbCamera)
                 SDF_VU0_STOREVECTOR(&pNbCamera->direction);
             }
         } else {
-            rate = (f32)(frame - 75) / 85.0f;
+            rate = SDF_FRAME_CAMERA_TIME((f32)(frame - 75)) / 85.0f;
             if (1.0f < rate) {
                 rate = 1.0f;
             }
@@ -2855,7 +2856,7 @@ void nbCameraBoss_BSBERU_E915_0_Set(void)
 
     effBTLModelAllShow();
     camera = &pNbCamera;
-    blend.value = (s32)nbCameraBoss_BSBERU_E915_Frame / 200.0f;
+    blend.value = SDF_FRAME_CAMERA_TIME((s32)nbCameraBoss_BSBERU_E915_Frame) / 200.0f;
     from.x = -1028.459839f;
     from.y = -172.94f;
     from.z = -927.7399292f;
@@ -2902,7 +2903,7 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     f32 blend;
 
     nbCameraBoss_BSBERU_E915_Rate = rate * 0.99f;
-    blend = (s32)nbCameraBoss_BSBERU_E915_Frame / 30.0f;
+    blend = SDF_FRAME_CAMERA_TIME((s32)nbCameraBoss_BSBERU_E915_Frame) / 30.0f;
     from.x = 361.64997f;
     from.y = -627.90992f;
     from.z = -651.73993f;
@@ -3193,7 +3194,7 @@ s32 nbCameraBoss_Lusi_TWORLD_Set(nbCamera_t *pNbCamera)
             effBTLModelAllShow();
             frame = pNbCamera->frame;
         }
-        rate = 1.0f - (f32)frame / 50.0f;
+        rate = 1.0f - SDF_FRAME_CAMERA_TIME((f32)frame) / 50.0f;
         rate = rate * rate;
         if (rate > 1.0f) {
             rate = 1.0f;
@@ -3223,7 +3224,7 @@ s32 nbCameraBoss_Lusi_TWORLD_Set(nbCamera_t *pNbCamera)
         pNbCamera->fovy = deg * 0.017453291f;
     }
     if ((u32)(frame - 51) < 71) {
-        rate = (f32)(frame - 51) / 70.0f;
+        rate = SDF_FRAME_CAMERA_TIME((f32)(frame - 51)) / 70.0f;
         rate = rate * rate;
         if (rate > 1.0f) {
             rate = 1.0f;
@@ -3339,7 +3340,7 @@ s32 nbCameraBoss_Lusi_ASIKIK_Set(nbCamera_t *pNbCamera)
         effBTLModelAllHide();
         effBTLModelInvokeShow();
     }
-    rate = pNbCamera->frame / 60.0f;
+    rate = SDF_FRAME_CAMERA_TIME(pNbCamera->frame) / 60.0f;
     if (rate > 1.0f) {
         rate = 1.0f;
     }
@@ -6168,7 +6169,7 @@ s32 nbCameraDANTE_DCOMBO_Set(s32 frame)
     sdfVector4_t to;
     f32 rate;
 
-    rate = frame / 180.0f;
+    rate = SDF_FRAME_CAMERA_TIME(frame) / 180.0f;
     if (rate > 1.0f) {
         rate = 1.0f;
     }
@@ -6239,7 +6240,7 @@ s32 nbCameraDANTE_DCOMBO_KAGU_Set(s32 frame)
     f32 rate;
 
     if (frame < 70) {
-        rate = frame / 101.0f;
+        rate = SDF_FRAME_CAMERA_TIME(frame) / 101.0f;
         if (rate > 1.0f) {
             rate = 1.0f;
         }
