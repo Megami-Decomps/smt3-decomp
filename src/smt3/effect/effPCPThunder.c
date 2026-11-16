@@ -1255,10 +1255,10 @@ void eff_178128(effPCP_ThunderColumnPolyLow_t *work) {
             spark->rotate += SDF_FRAME_STEP(spark->rotate_s);
             spark->up_s *= verticalDamping;
             spark->rotate_s *= angularDamping;
-            if (age < fadeInTime) {
-                alpha = (f32)age / fadeInTime;
-            } else if (duration - age <= fadeOutTime) {
-                alpha = (f32)(duration - age) / fadeOutTime;
+            if (SDF_FRAME_DRAWN_AGE(age) < fadeInTime) {
+                alpha = (f32)SDF_FRAME_DRAWN_AGE(age) / fadeInTime;
+            } else if (duration - SDF_FRAME_DRAWN_AGE(age) <= fadeOutTime) {
+                alpha = (f32)(duration - SDF_FRAME_DRAWN_AGE(age)) / fadeOutTime;
             } else {
                 alpha = 1.0f;
             }
