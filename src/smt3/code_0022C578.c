@@ -2574,9 +2574,7 @@ void nmeDrawBlendQuad(s32 alpha, s32 ot)
     cmpDrawTriG(coords[0], coords[1], 0, colors, ot);
 }
 
-#ifdef NON_MATCHING
 extern void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g);
-#endif
 
 void nmeDrawBox(s32 color, s32 unused, s32 flag)
 {
@@ -4615,60 +4613,69 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
 
 extern campDhWork_t *volatile campDhBackgroundWork FAKEMATCH_ASM_NAME("campDhDrawWork");
 
-#ifdef NON_MATCHING
 void campDhDrawBackground(s32 x, s32 y, s32 unused, s32 alpha)
 {
+    s32 period = 128;
     campDhWork_t *work;
+    campDhWork_t *animationWork;
     s32 colors[4];
-    s32 color = 0x8080803C;
+    s32 color;
     s32 phase;
+    s32 divisor;
     s32 distance;
-    s32 height = 150;
-    s32 yOffset = 0;
+    s32 height;
+    s32 yOffset;
     s32 drawY;
     s32 i;
 
     fclDrawPanelSprite(0x30000, 0x47);
     cmpDrawBoxF(0, 0, 0xFFFFFF, 0x200, 0x1C0, 0, 0x47);
     fclDrawPanelSprite(0x3000F, 0x47);
-    work = campDhBackgroundWork;
+    /* Each sprite callback may replace the work pointer. */
     for (i = 3; i < 0x21; i++) {
-        fclDrawSpriteRes(x, y, 0, NULL, 8, i,
+        work = campDhDrawWork;
+        fclDrawSpriteRes(x, y, 0, NULL, 8, (u16)i,
                          (s32 *)((u8 *)work + 0x1160), fclSpriteTable, 0x47);
-        work = campDhBackgroundWork;
     }
     fclDrawPanelSprite(0x50000, 0x47);
-    work = campDhBackgroundWork;
-    phase = ((volatile campDhWork_t *)work)->unk_1C % 128;
+    animationWork = campDhBackgroundWork;
+    phase = ((volatile campDhWork_t *)animationWork)->unk_1C % period;
+    color = 0x8080803C;
     if (phase >= 80) {
-        color = 0x80808000 | ((47 - (phase - 80)) * 60 / 47);
+        divisor = 47;
+        phase -= 80;
+        color = 0x80808000 | ((divisor - phase) * 60 / divisor);
     }
     colors[0] = color;
     colors[1] = color;
     colors[2] = color;
     colors[3] = color;
-    phase = ((volatile campDhWork_t *)work)->unk_1C % 128;
-    distance = (phase * 331 / 127) * 16;
+    height = 150;
+    yOffset = 0;
+    phase = ((volatile campDhWork_t *)animationWork)->unk_1C % period;
+    divisor = 127;
+    distance = (phase * 331 / divisor) * 16;
     if (phase >= 80) {
         phase -= 80;
         height = 150 + phase * 8;
-        yOffset = (phase * phase * 40 / 2209) * 8;
+        divisor = 2209;
+        phase = phase * phase;
+        yOffset = (phase * 40 / divisor) * 8;
     }
     drawY = y + yOffset + (141 - (height >> 1)) * 8;
+    period = x + distance - 0x960;
     fclDrawPanelSprite2(0x48, 0x47);
-    fclDrawSpriteSize(x + distance - 0x960, drawY, 0, 150, height, colors, 8, 0x29,
+    fclDrawSpriteSize(period, drawY, 0, 150, height, colors, 8, 0x29,
                       (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    period = x - distance + 0x2000;
     fclDrawPanelSprite2(0x48, 0x47);
-    fclDrawSpriteSize(x - distance + 0x2000, drawY, 0, 150, height, colors, 8, 0x29,
+    fclDrawSpriteSize(period, drawY, 0, 150, height, colors, 8, 0x29,
                       (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
     fclDrawPanelSprite2(0x44, 0x47);
     fclDrawPanelSprite(0x30000, 0x47);
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0, 0x47);
     fclDrawPanelSprite(0x5000F, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBackground);
-#endif
 
 void fclDrawArrowCursorLabel(s32 x, s32 y, s32 z, s32 index, s32 *color, s32 alpha)
 {
