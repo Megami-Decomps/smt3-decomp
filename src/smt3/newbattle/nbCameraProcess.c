@@ -493,7 +493,7 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
     work = camera->workdata;
     /* Steps with the state calc, so the whole shot changes once per retail
-     * tick and the draw below interpolates it evenly. */
+     * tick. */
     if (SDF_FRAME_DUE()) {
         if (pNbCamera.anim.rotate_f > 0) {
             pNbCamera.anim.rotate_f--;
@@ -527,17 +527,11 @@ s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id)
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_B(&work->targetPos);
     SDF_VU0_STOREVECTOR(&eye);
-    /* A shot that starts this tick is a cut: draw it where it is. */
-    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &work->eyeVector.x);
-    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &work->targetPos.x);
-    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.direction.x);
-    SDF_FRAME_INTERPOLATE_RESET_IF(pNbCamera.frame == 0, &pNbCamera.fovy);
-    SDF_FRAME_INTERPOLATE_VEC(&work->eyeVector.x, &eye.x, &eye.x, 3);
-    SDF_FRAME_INTERPOLATE_VEC(&work->targetPos.x, &work->targetPos.x, &work->targetPos.x, 3);
-    /* MakeCamera aims at the eye plus this vector. */
-    SDF_FRAME_INTERPOLATE_VEC(&pNbCamera.direction.x, &work->eyeVector.x, &work->eyeVector.x, 3);
+    /* MakeCamera aims at the eye plus eyeVector. A shot that starts this tick
+     * is a cut. */
+    SDF_FRAME_CAMERA_SHOW(pNbCamera.frame == 0, &eye.x, &work->targetPos.x, &work->eyeVector.x);
     dds3SetPosPoseSet(camera, &eye);
-    dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_INTERPOLATE(&pNbCamera.fovy, pNbCamera.fovy));
+    dds3CameraObjectBasicSetFovy(camera, SDF_FRAME_CAMERA_FOVY(pNbCamera.fovy));
     work->flag |= 1;
     pNbCamera.frame += SDF_FRAME_DUE();
     return 0;

@@ -279,6 +279,34 @@
 #define SDF_FRAME_APPROACH_SET(key, lvalue, to, target)
 #endif
 
+/* A value drawn after its owner moves it once per retail tick a share of the
+ * way to target. A host draws the approach from the value at the end of the
+ * last retail tick to this one at the share of the tick run, given a key no
+ * other drawn value uses. Retail draws the value. */
+#ifndef SDF_FRAME_APPROACH_DRAW
+#define SDF_FRAME_APPROACH_DRAW(key, value, target) (value)
+#endif
+
+/* SDF_FRAME_APPROACH_DRAW of a value that changes between a retail tick's
+ * host ticks, read on its first host tick only. */
+#ifndef SDF_FRAME_APPROACH_DRAW_DUE
+#define SDF_FRAME_APPROACH_DRAW_DUE(key, value, target) (value)
+#endif
+
+/* The battle camera's eye, target and view direction, three floats each, after
+ * its shot steps once per retail tick; cut is true on a shot's first tick. A
+ * host rewrites them to the shot at the share of the tick run. Expands to
+ * nothing here, cut included. */
+#ifndef SDF_FRAME_CAMERA_SHOW
+#define SDF_FRAME_CAMERA_SHOW(cut, eye, target, direction)
+#endif
+
+/* The battle camera's field of view for the host tick SDF_FRAME_CAMERA_SHOW
+ * drew. Retail's value is fovy. */
+#ifndef SDF_FRAME_CAMERA_FOVY
+#define SDF_FRAME_CAMERA_FOVY(fovy) (fovy)
+#endif
+
 /* Sets the n floats at dst to SDF_FRAME_INTERPOLATE of the n floats at src, the
  * i-th keyed by key and i. Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_VEC

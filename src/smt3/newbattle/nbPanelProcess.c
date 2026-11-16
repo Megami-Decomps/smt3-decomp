@@ -1090,7 +1090,8 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    x -= SDF_FRAME_INTERPOLATE(&nbPnlWork[i].OfsX, nbPnlWork[i].OfsX);
+    x -= SDF_FRAME_APPROACH_DRAW(&nbPnlWork[i].OfsX, nbPnlWork[i].OfsX,
+                                 nbPnlWork[i].ActiveMode ? 16.0f : 0.0f);
     if (act) {
         v = sdfSin(nbPnlCnt) * 48.0f;
         v += 0xB0;
@@ -2868,7 +2869,7 @@ u32 nbPanelStockSelect(nbMainProcessData_t *p, u32 pad)
     } else {
         ret = -1;
     }
-    cx = SDF_FRAME_INTERPOLATE_DUE(&nbPanelStockShiftX, nbPanelStockShiftX) + 0xE6;
+    cx = SDF_FRAME_APPROACH_DRAW_DUE(&nbPanelStockShiftX, nbPanelStockShiftX, 0.0f) + 0xE6;
     if (nbPanelStockFrame > 0) {
         s32 frame;
         u32 col;
