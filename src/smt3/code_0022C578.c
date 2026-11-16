@@ -8964,8 +8964,9 @@ s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
  * use callee-saved bindings and a branch-local empty constraint to reproduce
  * allocation; this is a target reconstruction aid, not original spelling. */
 s32 campDrawStockLabel2(s32 incomingX, s32 y, s32 z, s8 slot, s8 localSlot,
-                        cmpCursorSlot_t *cursor, s8 mode, s32 alpha)
+                        cmpCursorSlot_t *cursor, s32 mode, s32 alpha)
 {
+    s8 cursorMode = (s8)mode;
     FAKEMATCH_ASM_REG(s32, x, "$20") = incomingX;
     datUnitWork_t *unit;
     s32 rowY = y + localSlot * 0xC0;
@@ -9003,7 +9004,7 @@ s32 campDrawStockLabel2(s32 incomingX, s32 y, s32 z, s8 slot, s8 localSlot,
         color = 0x754B3D80;
     }
     campDrawStockStatus(x + 0xD20, y + rowY + 0x478, 0, color,
-                        mode, detail, unit, cursor, alpha);
+                        cursorMode, detail, unit, cursor, alpha);
     return 1;
 }
 
@@ -9089,13 +9090,11 @@ void campDrawStockRow1(s32 x, s32 y, s32 z, s8 *rows, s8 *columns,
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
 #endif
 
-/* NON_MATCHING: 27 of 152 words differ at the exact 608-byte size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Word-sized mode forwards the icon result; Label2 performs the native byte
+ * normalization on entry. Phase-local pointer and call-coordinate bindings
+ * reconstruct target allocation, not the original source spelling. */
 extern s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
-                               cmpCursorSlot_t *cursor, s8 mode, s32 alpha);
+                               cmpCursorSlot_t *cursor, s32 mode, s32 alpha);
 
 void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *work)
 {
@@ -9105,6 +9104,7 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
     u8 *cursorBase = (u8 *)work + 0x10E8;
 
     if (DDS3_GBWK->maxstock > 0) {
+        s32 drawOrder = 0x47;
         rowY = 0;
         do {
             s8 index = (s8)i++;
@@ -9117,43 +9117,56 @@ void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *
             colors[2] = color;
             colors[3] = color;
             fclDrawSpriteRes(scale, rowY, 0, colors, 0, 7,
-                             D_00345D88, fclSpriteTable, 0x47);
+                             D_00345D88, fclSpriteTable, drawOrder);
             fclDrawSpriteRes(scale, rowY, 0, colors, 0, 8,
-                             D_00345D88, fclSpriteTable, 0x47);
+                             D_00345D88, fclSpriteTable, drawOrder);
             rowY += 0xC0;
         } while (i < DDS3_GBWK->maxstock);
     }
 
-    visibleRow = 0;
-    i = campWork->drawStock.PartyCnt;
-    while (i < (s32)campWork->drawStock.PartyCnt + campWork->drawStock.StockCnt) {
-        u8 partyCount = (u8)campWork->drawStock.PartyCnt;
-        s32 iconResult = campDrawStockIcon(0, (s8)visibleRow, rows, cols, force);
-        s8 localSlot = (s8)(i - partyCount);
-        s8 slot = campWork->drawStock.StockIdx[i];
-        u32 flag;
-        s32 mode;
-        s32 alpha;
-        cmpCursorSlot_t *cursor;
+    {
+        FAKEMATCH_ASM_REG(campWork_t *, drawWork, "$5") = campWork;
 
-        i++;
-        flag = DDS3_GBWK->party[slot].unit.flag;
-        mode = 0;
-        if ((flag & 0x10) == 0) {
-            mode = iconResult;
-        }
-        if ((flag & 0x2) != 0) {
+        visibleRow = 0;
+        i = drawWork->drawStock.PartyCnt;
+        while (i < (s32)drawWork->drawStock.PartyCnt + drawWork->drawStock.StockCnt) {
+            u8 partyCount = (u8)drawWork->drawStock.PartyCnt;
+            s32 iconResult = campDrawStockIcon(0, (s8)visibleRow, rows, cols, force);
+            s8 localSlot = (s8)(i - partyCount);
+            s8 slot;
+            u32 flag;
+            s32 mode;
+            s32 alpha;
+            cmbUnit_t *partyUnit;
+            FAKEMATCH_ASM_REG(s32, callX, "$4");
+            FAKEMATCH_ASM_REG(s32, callY, "$5");
+            cmpCursorSlot_t *cursor;
+
+            FAKEMATCH_ASM_REG(campWork_t *, slotWork, "$6") = campWork;
+            FAKEMATCH_ASM_REG(dds3GlobalWork_t *, globalWork, "$7") = DDS3_GBWK;
+            slot = slotWork->drawStock.StockIdx[i];
+            i++;
+            partyUnit = &globalWork->party[slot];
+            flag = partyUnit->unit.flag;
             mode = 0;
+            if ((flag & 0x10) == 0) {
+                mode = iconResult;
+            }
+            if ((flag & 0x2) != 0) {
+                mode = 0;
+            }
+            alpha = campGetStockAlpha(localSlot, 1);
+            callX = x;
+            callY = y;
+            cursor = (cmpCursorSlot_t *)(cursorBase + 0x3C + 0x10 * visibleRow);
+            visibleRow = (s8)(visibleRow + campDrawStockLabel2(callX, callY, z, slot, localSlot,
+                                                               cursor, mode, alpha));
+            drawWork = campWork;
+
         }
-        alpha = campGetStockAlpha(localSlot, 1);
-        cursor = (cmpCursorSlot_t *)(cursorBase + 0x3C + 0x10 * visibleRow);
-        visibleRow = (s8)(visibleRow + campDrawStockLabel2(x, y, z, slot, localSlot,
-                                                           cursor, mode, alpha));
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
-#endif
+
 
 /* Callers forward word results; retail normalizes both bytes on entry. */
 s32 cmpFindFreeStockSlot(s32 indexArg, s32 roomArg)
