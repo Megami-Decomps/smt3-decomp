@@ -279,6 +279,21 @@
 #define SDF_FRAME_DUE_DRAWN(x, d, floor) (x)
 #endif
 
+/* A countdown x just lowered by one, counted in host ticks. A host holds it at 1
+ * until a retail tick's last host tick, so what waits for 0 starts on a retail
+ * tick's first host tick. Retail's value is x. */
+#ifndef SDF_FRAME_DELAY_END
+#define SDF_FRAME_DELAY_END(x) (x)
+#endif
+
+/* An age in host ticks, counted from 0 on a retail tick's first host tick, as
+ * the time to draw: a host takes off n - 1, never going under 0, so what is read
+ * from it reaches retail's value on the tick's last host tick. Retail's value is
+ * age. */
+#ifndef SDF_FRAME_DRAWN_AGE
+#define SDF_FRAME_DRAWN_AGE(age) (age)
+#endif
+
 /* The n floats at dst, which their owner scaled about origin by ratio on this
  * retail tick, as drawn on a host tick: origin + (dst - origin) * ratio to the
  * power of the share of the tick run, less one. Retail draws dst as it is. */

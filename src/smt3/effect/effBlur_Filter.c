@@ -362,7 +362,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    pPart->delay = SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1) + 1) - 1;
+    pPart->delay = SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1));
     pPart->angle = -3.14159265f;
     quad->rotate = pParam->params.rotate;
     quad->abgr = pParam->params.abgr;
@@ -446,7 +446,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
                     dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
                     slot->angle += SDF_FRAME_DUE_STEP(work->params.speed);
                 } else {
-                    slot->delay--;
+                    slot->delay = SDF_FRAME_DELAY_END(slot->delay - 1);
                 }
                 count--;
                 slot++;

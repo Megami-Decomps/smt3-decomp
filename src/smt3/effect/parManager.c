@@ -3480,14 +3480,14 @@ u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 
     u32 sum;
     f32 t;
 
-    if (frame >= SDF_FRAMES(pColAnim->frame_end - pColAnim->alpha_e)) {
-        if (SDF_FRAMES(pColAnim->frame_end) < frame) {
+    if (SDF_FRAME_DRAWN_AGE(frame) >= SDF_FRAMES(pColAnim->frame_end - pColAnim->alpha_e)) {
+        if (SDF_FRAMES(pColAnim->frame_end) < SDF_FRAME_DRAWN_AGE(frame)) {
             return 0;
         }
-        alpha = pColAnim->alpha_e_sub * SDF_FRAME_STEP(SDF_FRAMES(pColAnim->frame_end) - frame);
+        alpha = pColAnim->alpha_e_sub * SDF_FRAME_STEP(SDF_FRAMES(pColAnim->frame_end) - SDF_FRAME_DRAWN_AGE(frame));
         alpha &= 0xFF000000;
-    } else if (frame <= SDF_FRAMES(pColAnim->alpha_s)) {
-        alpha = pColAnim->alpha_s_add * SDF_FRAME_STEP(frame);
+    } else if (SDF_FRAME_DRAWN_AGE(frame) <= SDF_FRAMES(pColAnim->alpha_s)) {
+        alpha = pColAnim->alpha_s_add * SDF_FRAME_STEP(SDF_FRAME_DRAWN_AGE(frame));
         alpha &= 0xFF000000;
     } else {
         alpha = pColAnim->alpha << 24;
@@ -3495,8 +3495,8 @@ u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 
     if (pColAnim->type == 1) {
         return pColAnim->color0 | alpha;
     }
-    t = SDF_FRAME_STEP(frame);
-    if (frame < SDF_FRAMES(pColAnim->frame_h)) {
+    t = SDF_FRAME_STEP(SDF_FRAME_DRAWN_AGE(frame));
+    if (SDF_FRAME_DRAWN_AGE(frame) < SDF_FRAMES(pColAnim->frame_h)) {
         s32 red = pColAnim->r01 * t;
         s32 green = pColAnim->g01 * t;
         s32 blue = pColAnim->b01 * t;
