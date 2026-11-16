@@ -313,7 +313,7 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                 SDF_VU0_STOREVECTOR_NOMEM(&position);
 
                 {
-                    f32 elapsed = SDF_FRAME_STEP((f32)slot->frame);
+                    f32 elapsed = SDF_FRAME_STEP((f32)SDF_FRAME_DRAWN_AGE(slot->frame));
                     f32 halfAcceleration = acceleration * 0.5f;
                     f32 distance = speed * elapsed + halfAcceleration * elapsed * elapsed;
 
@@ -329,18 +329,18 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                 SDF_VU0_STOREVECTOR_NOMEM(&position);
                 dds3NeedleModelSetPosition(hData->hNModel, i, &position.x);
 
-                if (age < fadeIn && fadeIn != 0) {
-                    t = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    t = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else if (duration == age && fadeOut != 0) {
                     t = 0.0f;
                 } else {
-                    t = fadeOut < duration - age || fadeOut == 0
-                        ? 1.0f : (f32)(duration - age) / (f32)fadeOut;
+                    t = fadeOut < duration - SDF_FRAME_DRAWN_AGE(age) || fadeOut == 0
+                        ? 1.0f : (f32)(duration - SDF_FRAME_DRAWN_AGE(age)) / (f32)fadeOut;
                 }
                 color = effColorBlend(baseColor & 0xFFFFFF, baseColor, t);
                 dds3NeedleModelSetColor(hData->hNModel, i, color);
 
-                if (age > 0) {
+                if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                     SDF_VU0_LOADVECTOR(&viewOffset);
                     SDF_VU0_LOADVECTOR_B(&position);
                     SDF_VU0_ADDVECTOR();
