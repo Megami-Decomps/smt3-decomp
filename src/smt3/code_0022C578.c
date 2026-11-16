@@ -8960,24 +8960,31 @@ s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
     return 0;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq26, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
-                        cmpCursorSlot_t *cursor, s32 mode, s32 alpha)
+/* Retail sign-extends mode before forwarding it. The real x/spriteX snapshots
+ * use callee-saved bindings and a branch-local empty constraint to reproduce
+ * allocation; this is a target reconstruction aid, not original spelling. */
+s32 campDrawStockLabel2(s32 incomingX, s32 y, s32 z, s8 slot, s8 localSlot,
+                        cmpCursorSlot_t *cursor, s8 mode, s32 alpha)
 {
-    datUnitWork_t *unit = &DDS3_GBWK->party[slot].unit;
+    FAKEMATCH_ASM_REG(s32, x, "$20") = incomingX;
+    datUnitWork_t *unit;
     s32 rowY = y + localSlot * 0xC0;
     s32 colors[4];
     s32 color = 0xA09DC380;
     s32 detail = 0;
-    u32 flags = unit->flag;
+    FAKEMATCH_ASM_REG(s32, spriteX, "$19") = x;
+    u32 flags;
 
-    colors[0] = colors[1] = colors[2] = colors[3] = (alpha / 2) | 0x80808000;
+    colors[0] = (alpha / 2) | 0x80808000;
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    unit = &DDS3_GBWK->party[slot].unit;
+    flags = unit->flag;
     if (flags & 4) {
         return 0;
     }
+    FAKEMATCH_ASM_LIVE(spriteX);
     if (!(flags & 1)) {
         return 0;
     }
@@ -8988,7 +8995,7 @@ s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
         detail = 1;
     }
     if (flags & 0x10) {
-        fclDrawSpriteRes(x, rowY, 0, colors, 0, 10, D_00345D88, fclSpriteTable, 0x47);
+        fclDrawSpriteRes(spriteX, rowY, 0, colors, 0, 10, D_00345D88, fclSpriteTable, 0x47);
         color = 0x4D4B4B4D;
         detail = 1;
     }
@@ -8999,9 +9006,7 @@ s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
                         mode, detail, unit, cursor, alpha);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockLabel2);
-#endif
+
 
 s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index)
 {
@@ -9090,7 +9095,7 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 extern s32 campDrawStockLabel2(s32 x, s32 y, s32 z, s8 slot, s8 localSlot,
-                               cmpCursorSlot_t *cursor, s32 mode, s32 alpha);
+                               cmpCursorSlot_t *cursor, s8 mode, s32 alpha);
 
 void campDrawStockRow2(s32 x, s32 y, s32 z, s8 *rows, s8 *cols, s8 force, void *work)
 {
