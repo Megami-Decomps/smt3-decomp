@@ -527,23 +527,30 @@ void nbCameraShot_TargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *p
     }
 }
 
-#ifdef NON_MATCHING
+/* Keep the real height initializers before the target-query calls and the
+ * group radius in its native callee-saved float register. These local empty
+ * constraints describe ee-gcc scheduling/allocation, not original spelling:
+ * removing either height constraint or the radius binding loses exactness.
+ * Radius is live only across calls that preserve f21; all vector operations
+ * below use the existing SDK VU0 hand-off macros. */
 void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
     sdfVector4_t targetPos;
-    sdfVector4_t invokePos;
     sdfVector4_t shortestPos;
+    sdfVector4_t invokePos;
     sdfVector4_t pos;
+    nbCamera_AllTable_t *table;
     nbMainProcessData_t *data;
     nbFormation_t *invoke;
-    nbFormation_t *shortest = NULL;
+    nbFormation_t *shortest;
     nbFormation_t *form;
-    nbCamera_AllTable_t *table;
     u32 invokeParty, targetParty, count, i;
-    f32 minHeight = 1000000.0f;
-    f32 maxHeight = 0.0f;
-    f32 height, radius, invokeRadius, distance, change;
+    f32 minHeight;
+    f32 maxHeight;
+    f32 height, invokeRadius, distance, change;
+    FAKEMATCH_ASM_REG(f32, radius, "$f21");
     f32 angle;
+    f32 measuredDistance;
 
     effBTLModelTargetPartyShow();
     effBTLModelInvokeGroupHide();
@@ -551,10 +558,15 @@ void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInf
     if (data == NULL) {
         return;
     }
+    shortest = NULL;
     invoke = effBTLSkillGetInvokeFormation();
+    maxHeight = 0.0f;
+    FAKEMATCH_ASM_LIVE_F32(maxHeight);
     invokeParty = effBTLSkillGetInvokeParty();
     targetParty = effBTLSkillGetTargetParty();
     table = nbCameraGetModelAllTable(invoke);
+    minHeight = 1000000.0f;
+    FAKEMATCH_ASM_LIVE_F32(minHeight);
     count = effBTLSkillGetTargetNumber();
     for (i = 0; i < count; i++) {
         form = effBTLSkillGetTargetFormation(i);
@@ -591,8 +603,8 @@ void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInf
     SDF_VU0_LOADVECTOR_B(&invokePos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_COPYVECTOR_A_TO_C();
-    SDF_VU0_GETLENGTH(distance);
-    pNbCamera->distance = distance;
+    SDF_VU0_GETLENGTH(measuredDistance);
+    pNbCamera->distance = measuredDistance;
     angle = sdfAtan(0.34906582f);
     invokeRadius = invoke->r * invoke->scl;
     if (table->distance == 0.0f) {
@@ -612,13 +624,13 @@ void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInf
     }
     distance = radius / angle;
     if (distance > pNbCamera->distance) {
-        change = distance - pNbCamera->distance;
         if (invokeParty & 0x100) {
-            change = -change;
+            change = -(distance - pNbCamera->distance);
+        } else {
+            change = distance - pNbCamera->distance;
         }
-        for (i = 0; i < 32; i++) {
-            form = &data->form[i];
-            if ((form->stat & invokeParty) && (form->stat & 3) == 3) {
+        for (i = 0, form = data->form; i < 32; i++, form++) {
+            if ((form->stat & invokeParty) && (form->stat & 1) && (form->stat & 2)) {
                 effBTLGetGroupPos(form, &pos.x);
                 pos.z += change;
                 effBTLModelSetPosition(form, &pos);
@@ -657,9 +669,6 @@ void nbCameraShot_InvokeTargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInf
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetParty_Set2);
-#endif
 
 void nbCameraShot_Invoke_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
 {
