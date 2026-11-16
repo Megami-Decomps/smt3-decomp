@@ -265,6 +265,20 @@
 #define SDF_FRAME_INTERPOLATE_SET(key, lvalue, value)
 #endif
 
+/* A value its owner moves once per retail tick a share of the way to target,
+ * from before the tick's step to after it. A host draws the approach itself at
+ * the share of the tick run, from the first host tick's from and to. Retail's
+ * value is to. */
+#ifndef SDF_FRAME_APPROACH
+#define SDF_FRAME_APPROACH(key, from, to, target) (to)
+#endif
+
+/* Sets lvalue, which holds from, to SDF_FRAME_APPROACH(key, lvalue, to,
+ * target). Expands to nothing here. */
+#ifndef SDF_FRAME_APPROACH_SET
+#define SDF_FRAME_APPROACH_SET(key, lvalue, to, target)
+#endif
+
 /* Sets the n floats at dst to SDF_FRAME_INTERPOLATE of the n floats at src, the
  * i-th keyed by key and i. Expands to nothing here. */
 #ifndef SDF_FRAME_INTERPOLATE_VEC

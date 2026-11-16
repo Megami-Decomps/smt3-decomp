@@ -735,7 +735,6 @@ void nbRunKoukaType1(s32 partyindex, sdfVector4_t *pos, f32 time)
     SDF_VU0_COPYVECTOR(&form->tarpos, pos);
     form->shakePower = time;
     form->shakePhase = 0;
-    SDF_FRAME_INTERPOLATE_RESET(&form->range);
 }
 
 void nbRunKoukaType2(s32 partyindex, f32 time)
@@ -768,7 +767,6 @@ void nbRunKoukaType2(s32 partyindex, f32 time)
     SDF_VU0_COPYVECTOR(&form->tarpos, &form->orgpos);
     form->shakePower = time;
     form->shakePhase = 0;
-    SDF_FRAME_INTERPOLATE_RESET(&form->range);
 }
 
 void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
@@ -776,7 +774,6 @@ void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
     form->type = 2;
     form->damageRange = range;
     form->shakePhase = 0;
-    SDF_FRAME_INTERPOLATE_RESET(&form->damageRange);
     form->shakePower = power;
     form->addmovet = power;
 }
@@ -1000,7 +997,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
             }
         }
         SDF_VU0_LOADVECTOR(&form->startpos);
-        blend = SDF_FRAME_INTERPOLATE(&form->range, form->range);
+        blend = SDF_FRAME_APPROACH(&form->range, phase, form->range, 1.0f);
         interpolationBlend = blend;
         inversePhase = 1.0f - blend;
         PS2_FLOAT_BITS(phaseBits, inversePhase);
@@ -1019,7 +1016,7 @@ void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork
         if (form->basic != NULL) {
             dds3SetPosPoseSet(form->basic, &form->pos);
             anime = form->anime;
-            blend = SDF_FRAME_INTERPOLATE(&form->range, form->range);
+            blend = SDF_FRAME_APPROACH(&form->range, phase, form->range, 1.0f);
         }
         if (blend >= 1.0f) {
             if ((anime & 0x40) != 0) {
@@ -1127,7 +1124,8 @@ void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
             return;
         }
     }
-    SDF_FRAME_INTERPOLATE_SET(&form->damageRange, x, form->damageRange * form->range);
+    SDF_FRAME_APPROACH_SET(&form->damageRange, x, form->damageRange * form->range,
+                           form->shakePower >= 0.0f ? form->damageRange : 0.0f);
     SDF_VU0_COPYVECTOR(&pos, &form->pos);
     pos.x += x;
     dds3SetPosPoseSet(basic, &pos);
