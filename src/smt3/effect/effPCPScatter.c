@@ -1060,7 +1060,7 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
                 }
                 SDF_VU0_COPYVECTOR(&position, &next);
             }
-            if (moving) {
+            if (SDF_FRAME_STEP_AFTER_DRAW(age, duration)) {
                 particle->radius += SDF_FRAME_STEP(particle->radius_s);
                 particle->radian += SDF_FRAME_STEP(angleStep);
                 particle->height += SDF_FRAME_STEP(heightStep);
@@ -1380,7 +1380,7 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
                 }
                 SDF_VU0_COPYVECTOR(&position, &next);
             }
-            if (moving) {
+            if (SDF_FRAME_STEP_AFTER_DRAW(age, duration)) {
                 particle->radius += SDF_FRAME_STEP(particle->radius_s);
                 particle->radian += SDF_FRAME_STEP(angleStep);
                 particle->roll_s = angleStep * angleDamping;
@@ -1681,7 +1681,7 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
                 }
                 SDF_VU0_COPYVECTOR(&position, &next);
             }
-            if (age < duration) {
+            if (SDF_FRAME_STEP_AFTER_DRAW(age, duration)) {
                 f32 limit = particle->radian_w * 0.5f;
                 f32 tilt = particle->radian + SDF_FRAME_STEP(tiltStep);
                 f32 magnitude;
