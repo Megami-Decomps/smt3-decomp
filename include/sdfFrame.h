@@ -148,6 +148,21 @@
 #define SDF_FRAME_STEP_INT(d) (d)
 #endif
 
+/* A test retail makes once per tick before a step SDF_FRAME_STEP_INT splits.
+ * A host answers it on the first host tick of each retail tick and keeps that
+ * answer, keyed by key, for the tick, so the split step runs whole. */
+#ifndef SDF_FRAME_TICK_TEST
+#define SDF_FRAME_TICK_TEST(key, cond) (cond)
+#endif
+
+/* The stage a switch run each tick takes, kept at key. Retail runs a stage set
+ * on one tick from the next. A host that runs the switch each host tick answers
+ * -1, matching no case, for a stage first seen after its retail tick's first
+ * host tick, until the next retail tick. */
+#ifndef SDF_FRAME_STAGE_HELD
+#define SDF_FRAME_STAGE_HELD(key, stage) (stage)
+#endif
+
 /* SDF_FRAME_STEP_INT counted from an object's own age, a count of host ticks
  * from 0, so the steps keep the object's phase. */
 #ifndef SDF_FRAME_STEP_INT_AGE

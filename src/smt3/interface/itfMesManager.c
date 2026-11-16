@@ -2200,14 +2200,14 @@ void CalcSelect(instanceMes_tag *panel) {
     s32 bottom;
     s32 entryY;
 
-    switch (selection->phase) {
+    switch (SDF_FRAME_STAGE_HELD(&selection->phase, selection->phase)) {
     case 1:
         entryY = entry->y;
         bottom = entryY + entry->lines * (20 << 3);
         /* RequestSelect also permits zero rows: scale in unsigned coordinates. */
         top = selection->y - ((selection->lines * 20U - 20U) << 3);
-        if (entry->pfont != NULL && top < bottom) {
-            func_001D0518(panel, -64);
+        if (entry->pfont != NULL && SDF_FRAME_TICK_TEST(&selection->y, top < bottom)) {
+            func_001D0518(panel, -SDF_FRAME_STEP_INT(64));
             return;
         }
         if ((flags & 0xC00) != 0x400) {
@@ -2243,8 +2243,8 @@ void CalcSelect(instanceMes_tag *panel) {
         ChangeFontAlpha(selection->pfont, selection->glyphColorIntensity);
         return;
     case 4:
-        if (entry->pfont != NULL && entry->y < 0xA88) {
-            func_001D0518(panel, 64);
+        if (entry->pfont != NULL && SDF_FRAME_TICK_TEST(&entry->y, entry->y < 0xA88)) {
+            func_001D0518(panel, SDF_FRAME_STEP_INT(64));
             return;
         }
         selection->phase = -1;
@@ -2367,7 +2367,7 @@ void CalcCurCtr(instanceMes_tag *pinst) {
         if (fade->ctr1 > 0) {
             fade->ctr1 -= SDF_FRAME_STEP(8);
         }
-        switch (fade->phase) {
+        switch (SDF_FRAME_STAGE_HELD(&fade->phase, fade->phase)) {
         case 0:
             fade->ctr0 += SDF_FRAME_STEP(8);
             if (fade->ctr0 >= 0xFF) {
@@ -2410,10 +2410,10 @@ void DrawMesFlow(instanceMes_tag *pinst) {
     if (!(flags & 0x20000)) {
         if ((flags & 7) >= 3) {
             if (frDrawFont(glyph) > 0) {
-                if ((pinst->stat & 7) != 4) {
+                SDF_FRAME_LAST(if ((pinst->stat & 7) != 4) {
                     pinst->curctr.ctr_key = 0;
                     pinst->stat = (pinst->stat & ~7) | 4;
-                }
+                });
             }
         }
     }
@@ -2421,7 +2421,7 @@ void DrawMesFlow(instanceMes_tag *pinst) {
     if (!(flags & 0x40000)) {
         if ((flags & 0x38) >= 0x18) {
             if (frDrawFontEx(glyph, 1) > 0) {
-                if ((flags & 0x38) == 0x18) {
+                SDF_FRAME_LAST(if ((flags & 0x38) == 0x18) {
                     sel = &pinst->select;
                     if (sel->select == -1) {
                         sel->select = 0;
@@ -2430,7 +2430,7 @@ void DrawMesFlow(instanceMes_tag *pinst) {
                     ChangeFontColor(sel->pfont, sel->select, sel->lines, 1);
                     pinst->stat = (pinst->stat & ~0x38) | 0x20;
                     pinst->curctr.isdraw = 2;
-                }
+                });
             }
         }
     }
