@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kernel.h"
+#include "sdfFrame.h"
 
 /* Named scheduler slots: retail strides entries by 0x44 bytes. */
 typedef struct
@@ -160,7 +161,7 @@ saddr_t dds3AdminiStartSequence(dds3ProcessID_t *id)
     work = dds3GetProcessData(id);
     flag = work->Stat;
     if (flag & 1) {
-        if (work->NextSequence >= 0) {
+        if (work->NextSequence >= 0 && SDF_FRAME_DUE()) {
             if (work->CallCount != 0) {
                 work->CallCount--;
                 return 0;
