@@ -121,6 +121,7 @@ shop_206A38	facility/fclCombineInit	0x118	70 of 70 words match	docs/matching/fac
 cmbDrawBirthDevilMaskBG	facility/fclCombineInit	0x160	88 of 88 words match	docs/matching/facility/fclCombineInit.md	529
 cmbDrawUnitLevel	facility/fclCombineInit	0x1C0	112 of 112 words match	docs/matching/facility/fclCombineInit.md	580
 cmbUpdateCameraZoom	facility/fclCombineInit	0xE8	58 of 58 words match	docs/matching/facility/fclCombineInit.md	634
+cmbDrawSequence	facility/fclCombineInit	0x27C		docs/matching/facility/fclCombineInit.md	738
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3

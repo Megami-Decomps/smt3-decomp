@@ -734,3 +734,60 @@ after. Same-path direct replay also agrees with the ordinary wrapper, and
 fresh plain/stock-dump complete-owner assembly and objects agree. This is
 compiler-property evidence, not a new exact match or historical source claim;
 the guarded candidate remains 67/81 words at 324 bytes.
+
+## cmbDrawSequence (facility/fclCombineInit, 0x27C)
+
+159 of 159 instruction words match at the native 636-byte extent (2026-11-16).
+Both 17-entry switch tables retain their case-to-destination mapping. The
+independent, break-terminated cases are listed in native block order, not
+replaced by computed gotos or a fabricated dispatch table.
+
+Case 14 retains an equal-arm decision on the existing signed `actionFrame`
+counter, initialized with the facility work and reset before phase 14 entry.
+It executes the same real camera update once on either path. The counter
+has live introduction, timetable and camera consumers; no dummy state,
+volatile access, numerical range assumption or extra callback is added.
+This is a mechanistic compiler-deletion reconstruction, not evidence of
+original branch spelling or a historical meaning for the threshold.
+
+Fresh complete-owner ordinary and `-da` output agrees literally in assembly
+and ELF. In the final source's actual dumps, the field load (UID432), signed
+comparison (434), decision (435) and both camera calls (443/456) remain through
+`25.sched2`. Adjacent `27.jump2` removes the decision and duplicate call while
+retaining the load and comparison. `29.dbr` puts the comparison in the remaining
+call's delay slot, reproducing native LW/JAL/SLTI120 at
+0x0020231C–0x00202324. This establishes the observed pass boundary, not a
+uniquely identified internal optimizer routine.
+
+Cases 5, 6 and 8 reload the real work pointer after `cmbDrawTopText`, then read
+its signed display flag. Only the root uses a localized native `$2` binding;
+it dies before the next call. Removing the three proposed flag bindings
+preserves all production allocated bytes and relocations, so the final source
+uses ordinary `s32` flag locals. A fresh deletion-only control from this final
+ordinary-flag context removes the three root bindings and leaves 15 differing
+words (144/159) at the same size, with all 214 peers, raw relocations and
+allocated nontext unchanged. This is distinct from the earlier six-word
+root-removal result with fixed flag locals. The conditional result
+panel and subsequent stock-panel calls retain their order. These constraints
+express target-specific allocation dependencies, not hardware requirements.
+
+The existing `fclCombineSeqChangeMsg[32]` object is explicitly 16-byte aligned.
+Retail's second table ends at 0x0053CC54, followed by 12 zero alignment bytes,
+the unchanged string at 0x0053CC60, and the next table at 0x0053CC80. This
+preserves the actual object and extent without inventing padding storage or
+claiming the original declaration. A fresh unaligned-source control fails
+six owner checks through the eight-byte string displacement; the corrected
+and subsequently simplified owners pass 201 match / 0 differ.
+
+Independent review covers source semantics, callback epochs, the causal
+trace, both switch tables and complete peer/data contracts. Production's
+214 peers and allocated nontext bytes are unchanged; SKIP's 200 and retained
+C's 214 peers preserve their resolved contracts, with address shifts and
+target-owned tables explicitly attributed. All three contexts pass literal
+ordinary/dump output parity. Strict production and SKIP compilation still
+fail on the same 13 pre-existing implicit declarations as baseline; retained
+strict compilation passes. No strict failure is waived or described as a pass.
+Current guarded-draft coverage, IRX syntax checks, 794 regression tests,
+generated-source controls, full retail byte equality, no-op rebuild and
+production report scope checks pass. Earlier lost diagnostic packets are
+historical attestations; the ablations and final qualification above are fresh.

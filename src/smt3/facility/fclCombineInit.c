@@ -3566,7 +3566,6 @@ extern void fclDrawBG(fclSprite_t *sprite, s32 ot);
 extern void cmbUpdateCameraZoom(void);
 extern void cmbUpdateCameraPos(void);
 
-#ifdef NON_MATCHING
 s32 cmbDrawSequence(void)
 {
     s32 phase = CMB_GBWK->unk_00001;
@@ -3587,38 +3586,38 @@ s32 cmbDrawSequence(void)
     case 0:
         cmbDrawPhaseDefault(1);
         break;
-    case 2:
-        func_00201FB0(0);
-        break;
     case 3:
         cmbDrawPhase3(1);
         break;
     case 4:
         cmbDrawPhaseDefault(0);
         break;
+    case 2:
+        func_00201FB0(0);
+        break;
+    /* Each panel reloads the root after TopText and consumes its signed flag.
+     * Native homes are $2/$3; neither local remains live across a call. */
     case 5:
         cmbDrawTopText(0);
-        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
-            cmbDrawResultPanel(0);
+        {
+            FAKEMATCH_ASM_REG(cmbGbWork_t *, work, "$2") = CMB_GBWK;
+            s32 displayFlag = (s8)work->displayFlags[0];
+            if (displayFlag == 0) {
+                cmbDrawResultPanel(0);
+            }
         }
         cmbDrawStockPanel1();
         break;
     case 6:
         cmbDrawTopText(1);
-        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
-            cmbDrawResultPanel(1);
+        {
+            FAKEMATCH_ASM_REG(cmbGbWork_t *, work, "$2") = CMB_GBWK;
+            s32 displayFlag = (s8)work->displayFlags[0];
+            if (displayFlag == 0) {
+                cmbDrawResultPanel(1);
+            }
         }
         cmbDrawStockPanel2();
-        break;
-    case 7:
-        cmpDrawStatusCom(&CMB_GBWK->birthUnit[0], 1, 0, 2);
-        break;
-    case 8:
-        cmbDrawTopText(2);
-        if ((s8)CMB_GBWK->displayFlags[0] == 0) {
-            cmbDrawResultPanel(2);
-        }
-        cmbDrawStockPanel3();
         break;
     case 9:
         cmbDrawStatus();
@@ -3626,16 +3625,40 @@ s32 cmbDrawSequence(void)
     case 10:
         cmbDrawBirthDevil(0);
         break;
-    case 11:
-        cmbDrawBirthDevil(1);
+    case 7:
+        cmpDrawStatusCom(&CMB_GBWK->birthUnit[0], 1, 0, 2);
+        break;
+    case 8:
+        cmbDrawTopText(2);
+        {
+            FAKEMATCH_ASM_REG(cmbGbWork_t *, work, "$2") = CMB_GBWK;
+            s32 displayFlag = (s8)work->displayFlags[0];
+            if (displayFlag == 0) {
+                cmbDrawResultPanel(2);
+            }
+        }
+        cmbDrawStockPanel3();
         break;
     case 13:
         cmbUpdateCameraZoom();
         break;
     case 14:
+        /* Mechanistic reconstruction of the native actionFrame < 120 trace:
+         * either arm makes the same real camera call, not an original-source
+         * branch claim. See the matching note for trace qualification status. */
         if (CMB_GBWK->introductionFlag == 0) {
-            cmbUpdateCameraPos();
+            if (CMB_GBWK->actionFrame < SDF_FRAMES(120)) {
+                cmbUpdateCameraPos();
+            } else {
+                cmbUpdateCameraPos();
+            }
         }
+        break;
+    case 11:
+        cmbDrawBirthDevil(1);
+        break;
+    case 16:
+        cmbDrawPhasePanel();
         break;
     case 15:
         if (CMB_GBWK->unk_00003 == 10) {
@@ -3643,18 +3666,12 @@ s32 cmbDrawSequence(void)
             cmbDrawBirthDevilMaskBG();
         }
         break;
-    case 16:
-        cmbDrawPhasePanel();
-        break;
     }
     if ((s8)CMB_GBWK->displayFlags[0] != 0) {
         cmbDrawInfoSprite(0, 0, 0xFFFFF, 0x47);
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawSequence);
-#endif
 
 void cmbExit(void)
 {
@@ -4393,7 +4410,7 @@ s32 cmbHandleDebugExit(void)
 
 extern void fclSetPanelAnimState(void *anim, u8 state);
 
-const char fclCombineSeqChangeMsg[32] = "Sequence change...\n";
+const char fclCombineSeqChangeMsg[32] __attribute__((aligned(16))) = "Sequence change...\n";
 
 s32 cmbUpdatePanelAnim(void)
 {
