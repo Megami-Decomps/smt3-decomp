@@ -8463,51 +8463,59 @@ void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1
 }
 
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Historical behaviour check: 3 PCSX2 call vectors returned the same value and memory
+ * (menu main savestate; sdfport bc29478, tools/funcvec, tests/funcvec.sh).
+ * This covers only those paths. Row coordinates use EE low-word arithmetic;
+ * the first blend replaces its input color. */
 void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                     s8 row, s32 scale, s8 phase, s8 layout,
                     cmpCursorInfo_t *cursor, cmpListRowDraw_t draw, s32 ot)
 {
-    s32 firstWidth = width / 3;
     s32 secondWidth = (s32)((u32)width << 1) / 3;
+    s32 firstWidth = width / 3;
     s32 effect = 0;
     s32 step;
+    s32 rowY;
     s32 alpha;
     s32 baseColor;
     s32 otherColor;
     s32 blink;
-    s32 firstColor;
     s32 secondColor;
+    s32 thirdColor;
 
-    if (phase == -2) {
+    switch (phase) {
+    case -2:
         effect = 2;
-    } else if (phase == -1) {
+        break;
+    case -1:
         effect = 1;
+        break;
+    default:
+        break;
     }
     memcpy(&step, &cursor->StepY, sizeof(step));
-    y += step * row * 8;
-    fclDrawPanelSprite2(layout == 0 ? 0x48 : 0x44, ot);
+    rowY = (s32)((u32)y + (u32)(s32)row * (u32)step * 8u);
+    if (layout == 0) {
+        fclDrawPanelSprite2(0x48, ot);
+    } else {
+        fclDrawPanelSprite2(0x44, ot);
+    }
     if (effect == 0) {
         alpha = cmpCursorBlinkColor(scale) & 0xFF;
     } else {
         alpha = 0x80;
     }
     alpha = (alpha * 70 / 128) & 0xFF;
-    baseColor = 0x00449B00 | alpha;
     otherColor = 0x1BBE8C00 | alpha;
+    baseColor = 0x00449B00 | alpha;
+    thirdColor = 0x1300BF00;
     blink = cmpGetBlinkOffset(scale, (cmpPanelEff_t *)cursor);
-    firstColor = fclBlendColor(baseColor, otherColor, blink);
+    otherColor = fclBlendColor(baseColor, otherColor, blink);
     secondColor = fclBlendColor(baseColor, baseColor, blink);
-    draw(x, y, z, secondWidth, firstWidth, height, firstColor, secondColor,
-         0x1300BF00, effect, scale, ot);
+    draw(x, rowY, z, secondWidth, firstWidth, height,
+         otherColor, secondColor, thirdColor, effect, scale, ot);
     fclDrawPanelSprite2(0x44, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
-#endif
 
 extern void cmpDrawListRows(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
                            s8 mode, s32 scale, s8 phase, s8 layout,

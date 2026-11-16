@@ -56,6 +56,7 @@ cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.
 cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1625
 cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1691
 campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1865
+cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1899
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
