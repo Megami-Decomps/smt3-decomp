@@ -6799,9 +6799,10 @@ void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor)
     }
 }
 
-/* NON_MATCHING: 2 of 46 words differ (first at +0x90), exact size; the last
-   call's two argument setups are scheduled the other way round. */
-#ifdef NON_MATCHING
+/* Local argument bindings retain the native box-call setup phases and the
+ * completed foreground sprite ID before its call. Each value is initialized
+ * for a real call argument and dies at that call; the empty constraints emit
+ * no instructions. This is target allocation/scheduling, not original spelling. */
 void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot)
 {
     s32 colors[4];
@@ -6812,12 +6813,28 @@ void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot)
     colors[0] = color;
     colors[1] = color;
     fclDrawPanelSprite(0x1003, ot);
-    cmpDrawBoxGDefault(x, y, z, 0x95, 0xB6, colors, ot);
-    fclDrawPanelSprite(0x5101B, ot);
+    {
+        FAKEMATCH_ASM_REG(s32, boxX, "$4");
+        FAKEMATCH_ASM_REG(s32, boxY, "$5");
+        FAKEMATCH_ASM_REG(s32 *, boxColors, "$9");
+        FAKEMATCH_ASM_REG(s32, boxZ, "$6");
+        FAKEMATCH_ASM_REG(s32, boxOT, "$10");
+        boxColors = colors;
+        FAKEMATCH_ASM_READ(boxColors);
+        boxZ = z;
+        boxOT = ot;
+        FAKEMATCH_ASM_READ_PAIR(boxZ, boxOT);
+        boxX = x;
+        boxY = y;
+        FAKEMATCH_ASM_READ_PAIR(boxX, boxY);
+        cmpDrawBoxGDefault(boxX, boxY, boxZ, 0x95, 0xB6, boxColors, boxOT);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, spriteId, "$4") = 0x5101B;
+        FAKEMATCH_ASM_READ(spriteId);
+        fclDrawPanelSprite(spriteId, ot);
+    }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListRow);
-#endif
 
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,

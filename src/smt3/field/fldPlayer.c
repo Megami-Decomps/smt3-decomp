@@ -2469,10 +2469,10 @@ void fldPlayerMotReset2(void) {
                     9, 0.0f);
 }
 
-/* NON_MATCHING. Checked against retail with PCSX2 call vectors: 12 match and 3 differ in a byte, capture_008.
- * The differing bytes are float or packet low digits, the fldNpcCalc pattern (sdfport 73e010f, tools/funcvec,
- * tests/funcvec.sh), unconfirmed. */
-#ifdef NON_MATCHING
+/* The native coordinate phases keep real scalar snapshots and pointer/call
+ * arguments in distinct lifetimes. Local bindings and empty constraints retain
+ * their allocation and access order; these are target reconstruction aids,
+ * not evidence of the original source spelling. */
 extern void dds3GetRotPoseSet(dds3Basic_t *basic);
 extern f32 EulerAngleAxisY(void);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
@@ -2487,25 +2487,38 @@ void fldPlayerPosRot(void)
     dds3Basic_t *basic;
     dds3PoseSet_t *pose;
     f32 angle;
-    volatile f32 *camAngle = &fldGlobalBase.camAngle;
-    volatile f32 *camAngle2 = &fldGlobalBase.camAngle2;
 
     if (control == NULL || control->handle == NULL) {
         return;
     }
     dds3ObjectBaseGetModelHandle(control->handle);
     dds3GetRotPoseSet(control->handle);
-    angle = EulerAngleAxisY() * 180.0f / 3.1399999f;
-    *camAngle2 = angle;
-    *camAngle = angle;
-    dds3GetPosPoseSet(control->handle);
+    angle = EulerAngleAxisY() * 180.0f;
+    {
+        FAKEMATCH_ASM_REG(dds3Basic_t *, positionHandle, "$4");
+        FAKEMATCH_ASM_REG(fldAreaWork_t *, area, "$2");
+        positionHandle = control->handle;
+        angle = angle / 3.1399999f;
+        area = &fldGlobalBase;
+        FAKEMATCH_ASM_READ(area);
+        area->camAngle2 = angle;
+        FAKEMATCH_ASM_LIVE_F32(angle);
+        area->camAngle = angle;
+        dds3GetPosPoseSet(positionHandle);
+    }
     SDF_VU0_STOREVECTOR(&pos);
-    fldGlobalBase.prevX = fldGlobalBase.x;
-    fldGlobalBase.prevY = fldGlobalBase.y;
-    fldGlobalBase.prevZ = fldGlobalBase.z;
-    fldGlobalBase.x = pos.x;
-    fldGlobalBase.y = pos.y;
-    fldGlobalBase.z = pos.z;
+    {
+        FAKEMATCH_ASM_REG(f32, newX, "$f3") = pos.x;
+        FAKEMATCH_ASM_REG(f32, oldX, "$f5") = fldGlobalBase.x;
+        FAKEMATCH_ASM_REG(f32, oldY, "$f1") = fldGlobalBase.y;
+        FAKEMATCH_ASM_REG(f32, oldZ, "$f2") = fldGlobalBase.z;
+        fldGlobalBase.prevX = oldX;
+        fldGlobalBase.prevY = oldY;
+        fldGlobalBase.prevZ = oldZ;
+        fldGlobalBase.x = newX;
+        fldGlobalBase.y = pos.y;
+        fldGlobalBase.z = pos.z;
+    }
     dds3OnPoseSetFlag(control->handle->poseset, 1);
     dds3OnPoseSetFlag(control->handle->poseset, 8);
     if (control->handle2 != NULL) {
@@ -2517,49 +2530,82 @@ void fldPlayerPosRot(void)
         pose = basic->poseset;
         SDF_VU0_COPYVECTOR(&pose->pos2, &pose->pos);
     } else {
+        FAKEMATCH_ASM_REG(dds3Basic_t *, interpolationBasic, "$6");
+        FAKEMATCH_ASM_REG(sdfVector4_t *, interpolationPos, "$3");
+        FAKEMATCH_ASM_REG(sdfVector4_t *, oldPosition, "$4");
         fldPlayerSdwOn();
         basic = control->handle;
+        oldPosition = &oldPos;
         pose = basic->poseset;
-        SDF_VU0_COPYVECTOR(&oldPos, &pose->pos2);
-        if (sdfFabs(oldPos.x - pos.x) < 1.0f) {
-            pose->pos2.x = pos.x;
-        } else {
-            pose->pos2.x = oldPos.x + (pos.x - oldPos.x) / 3.0f;
+        interpolationBasic = basic;
+        FAKEMATCH_ASM_LIVE(interpolationBasic);
+        interpolationPos = &pose->pos2;
+        FAKEMATCH_ASM_READ(interpolationPos);
+        SDF_VU0_COPYVECTOR(oldPosition, interpolationPos);
+        {
+            f32 previousX = oldPos.x;
+            f32 targetX = pos.x;
+            FAKEMATCH_ASM_LIVE_F32_VOLATILE(targetX);
+            if (sdfFabs(previousX - targetX) < 1.0f) {
+                interpolationPos->x = targetX;
+            } else {
+                interpolationPos->x = previousX + (targetX - previousX) / 3.0f;
+            }
         }
         if (sdfFabs(oldPos.y - pos.y) < 1.0f) {
-            basic->poseset->pos2.y = pos.y;
+            interpolationBasic->poseset->pos2.y = pos.y;
         } else {
-            basic->poseset->pos2.y = oldPos.y + (pos.y - oldPos.y) / 3.0f;
+            interpolationBasic->poseset->pos2.y = oldPos.y + (pos.y - oldPos.y) / 3.0f;
         }
+        FAKEMATCH_ASM_LIVE(interpolationBasic);
         if (sdfFabs(oldPos.z - pos.z) < 1.0f) {
-            basic->poseset->pos2.z = pos.z;
+            interpolationBasic->poseset->pos2.z = pos.z;
         } else {
-            basic->poseset->pos2.z = oldPos.z + (pos.z - oldPos.z) / 3.0f;
+            interpolationBasic->poseset->pos2.z = oldPos.z + (pos.z - oldPos.z) / 3.0f;
         }
-        basic->poseset->pos2.w = 1.0f;
+        FAKEMATCH_ASM_LIVE(interpolationBasic);
+        {
+            FAKEMATCH_ASM_REG(dds3PoseSet_t *, currentPose, "$2");
+            currentPose = interpolationBasic->poseset;
+            FAKEMATCH_ASM_READ(currentPose);
+            currentPose->pos2.w = 1.0f;
+        }
     }
-    if (control->handle2 != NULL) {
-        dds3PoseSet_t *other = control->handle2->poseset;
-        pose = basic->poseset;
-        other->pos2.x = pose->pos2.x;
-        other->pos2.y = pose->pos2.y;
-        other->pos2.z = pose->pos2.z;
-        other->pos2.w = pose->pos2.w;
-        other->pos.x = pose->pos.x;
-        other->pos.y = pose->pos.y;
-        other->pos.z = pose->pos.z;
-        other->pos.w = pose->pos.w;
-        other->rot.x = pose->rot.x;
-        other->rot.y = pose->rot.y;
-        other->rot.z = pose->rot.z;
-        other->rot.w = pose->rot.w;
-        rot.x = pose->rot.x;
-        rot.y = pose->rot.y;
-        rot.z = pose->rot.z;
-        rot.w = pose->rot.w;
-        dds3SetPosPoseSet(control->handle2, &pos);
-        dds3SetRotPoseSet(control->handle2, &rot);
-        basic = control->handle;
+    {
+        FAKEMATCH_ASM_REG(dds3Basic_t *, otherHandle, "$3") = control->handle2;
+        if (otherHandle != NULL) {
+            FAKEMATCH_ASM_REG(dds3Basic_t *, callHandle, "$4") = otherHandle;
+            FAKEMATCH_ASM_REG(dds3PoseSet_t *, other, "$3");
+            FAKEMATCH_ASM_REG(dds3PoseSet_t *, sourcePose, "$2");
+            FAKEMATCH_ASM_REG(sdfVector4_t *, callPos, "$5");
+            sourcePose = basic->poseset;
+            callPos = &pos;
+            FAKEMATCH_ASM_READ_PAIR(sourcePose, callPos);
+            other = otherHandle->poseset;
+            FAKEMATCH_ASM_READ_PAIR(other, sourcePose);
+            {
+                FAKEMATCH_ASM_REG(f32, copyX, "$f1") = sourcePose->pos2.x;
+                other->pos2.x = copyX;
+            }
+            other->pos2.y = sourcePose->pos2.y;
+            other->pos2.z = sourcePose->pos2.z;
+            other->pos2.w = sourcePose->pos2.w;
+            other->pos.x = sourcePose->pos.x;
+            other->pos.y = sourcePose->pos.y;
+            other->pos.z = sourcePose->pos.z;
+            other->pos.w = sourcePose->pos.w;
+            other->rot.x = sourcePose->rot.x;
+            other->rot.y = sourcePose->rot.y;
+            other->rot.z = sourcePose->rot.z;
+            other->rot.w = sourcePose->rot.w;
+            rot.x = sourcePose->rot.x;
+            rot.y = sourcePose->rot.y;
+            rot.z = sourcePose->rot.z;
+            rot.w = sourcePose->rot.w;
+            dds3SetPosPoseSet(callHandle, callPos);
+            dds3SetRotPoseSet(control->handle2, &rot);
+            basic = control->handle;
+        }
     }
     pose = basic->poseset;
     fldPlayerPosRotWork.pos.x = pose->pos2.x;
@@ -2571,9 +2617,6 @@ void fldPlayerPosRot(void)
     fldPlayerPosRotWork.rot.z = pose->rot.z;
     fldPlayerPosRotWork.rot.w = pose->rot.w;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerPosRot);
-#endif
 const sdfVector4Unaligned_t fldWm3Scale = {1.0f, 1.0f, 1.0f, 1.0f};
 
 const sdfVector4Unaligned_t fldWm4Scale = {1.0f, 1.0f, 1.0f, 1.0f};
