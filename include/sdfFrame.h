@@ -106,6 +106,18 @@
 #define SDF_FRAME_STAGE(stage, steady) (stage)
 #endif
 
+/* Whether a battle action process runs its sequence's check on this host tick,
+ * given its seq and stat. A host may hold it to one check a retail tick. */
+#ifndef SDF_FRAME_ACTION_CHECK
+#define SDF_FRAME_ACTION_CHECK(seq, stat) 1
+#endif
+
+/* A countdown below zero that a host keeps until the next retail tick's first
+ * host tick, skipped like a paused one, so it ends where retail ends it. */
+#ifndef SDF_FRAME_EXPIRED
+#define SDF_FRAME_EXPIRED(count) 0
+#endif
+
 /* One step of a script process: the interpreter up to its next yield. A host
  * may skip it on some host ticks, returning idle. */
 #ifndef SDF_FRAME_SCRIPT_STEP

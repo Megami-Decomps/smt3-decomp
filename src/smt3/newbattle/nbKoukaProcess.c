@@ -1576,10 +1576,10 @@ s32 nbKoukaProcess1(dds3ProcessID_t *id)
             p = next;
             continue;
         }
-        if (p->framelength < 0) {
+        if (p->framelength < 0 && SDF_FRAME_DUE()) {
             goto del;
         }
-        if ((p->flag & 2) != 0) {
+        if ((p->flag & 2) != 0 || SDF_FRAME_EXPIRED(p->framelength)) {
             p = next;
             continue;
         }

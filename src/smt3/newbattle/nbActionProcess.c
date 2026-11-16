@@ -4195,8 +4195,7 @@ s32 CheckAction_CHECK1(nbActionProcessData_t *a)
         return 0;
     }
     if (a->packettime >= 16) {
-        /* Tested before it counts down, so it counts on a retail tick's last host tick. */
-        a->packettime -= SDF_FRAME_DUE_AGE(dds3GetKernelCount() + 1);
+        a->packettime -= SDF_FRAME_DUE();
         return 0;
     }
     nbUpdateOrder();
@@ -4425,7 +4424,7 @@ void *nbActionProcess1(dds3ProcessID_t *id)
         if ((u16)a->seqtime == 0 && !SDF_FRAME_DUE()) {
             return 0;
         }
-        if (ActionFuncTable[a->seq].check(a) != 0) {
+        if (SDF_FRAME_ACTION_CHECK(a->seq, a->stat) && ActionFuncTable[a->seq].check(a) != 0) {
             a->stat |= 2;
         }
         if ((u16)a->seqtime <= 0xFFFE) {
