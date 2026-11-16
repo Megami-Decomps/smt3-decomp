@@ -943,7 +943,7 @@ s32 nbResultProcess2(dds3ProcessID_t *id)
         if (nbResultFindBestScore(data) >= 15) {
             if (dds3PadButtonState[0x21] != 0 || dds3PadButtonState[0x23] != 0) {
                 if (nbResultState == 0) {
-                    nbResultState = 1;
+                    nbResultState = SDF_FRAMES(1);
                 }
             }
         }

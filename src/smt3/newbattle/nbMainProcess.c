@@ -1283,7 +1283,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         data->battletime = data->battletime + 1;
         return 0;
     }
-    switch (data->phase) {
+    switch (SDF_FRAME_STAGE(data->phase, -1)) {
     case NB_PHASE_NON:
         nbSetNextPhase(MAE);
         next = 1;

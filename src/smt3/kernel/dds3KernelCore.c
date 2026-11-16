@@ -272,7 +272,8 @@ s32 RunProcess(dds3ProcessID_t *pro)
         }
     }
 
-    if (pro->processfunc != NULL && pro->processfunc != (dds3ProcessFunc_t)-1) {
+    if (pro->processfunc != NULL && pro->processfunc != (dds3ProcessFunc_t)-1 &&
+        SDF_FRAME_PROCESS_RUN(pro)) {
         nextUpdate = pro->processfunc(pro);
         if (nextUpdate != 0) {
             pro->processfunc = EE_ADDR_AS(dds3ProcessFunc_t, nextUpdate);

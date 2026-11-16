@@ -538,10 +538,11 @@ void dds3RunQuake(void)
             }
         }
     }
-    if (dds3QuakeFrame > 0) {
-        s32 divisor = SDF_FRAME_TICK(dds3QuakeFrame) + 5;
-        dds3QuakeXRange -= SDF_FRAME_STEP_INT(dds3QuakeXRange / divisor);
-        dds3QuakeYRange -= SDF_FRAME_STEP_INT(dds3QuakeYRange / divisor);
+    /* The quake's frame counts retail ticks. */
+    if (dds3QuakeFrame > 0 && SDF_FRAME_DUE()) {
+        s32 divisor = dds3QuakeFrame + 5;
+        dds3QuakeXRange -= dds3QuakeXRange / divisor;
+        dds3QuakeYRange -= dds3QuakeYRange / divisor;
         dds3QuakeFrame--;
     }
 }
@@ -557,7 +558,7 @@ void dds3SetQuake(s32 frame, s32 range)
     if (frame == 0) {
         dds3QuakeFrame = -1;
     } else {
-        dds3QuakeFrame = SDF_FRAMES(frame);
+        dds3QuakeFrame = frame;
     }
     dds3QuakeYRange = range * 10;
     dds3QuakeXRange = dds3QuakeYRange * 4 / 10;

@@ -112,6 +112,13 @@
 #define SDF_FRAME_ACTION_CHECK(seq, stat) 1
 #endif
 
+/* Whether the kernel calls process id's step function on this host tick. A
+ * host may hold a function the process switched to until the next retail
+ * tick's first host tick, so a chain of one-shot steps takes a tick a step. */
+#ifndef SDF_FRAME_PROCESS_RUN
+#define SDF_FRAME_PROCESS_RUN(id) 1
+#endif
+
 /* A countdown below zero that a host keeps until the next retail tick's first
  * host tick, skipped like a paused one, so it ends where retail ends it. */
 #ifndef SDF_FRAME_EXPIRED

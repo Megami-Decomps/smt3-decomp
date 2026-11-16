@@ -131,7 +131,7 @@ dds3ProcessFunc_t nbAtoProcess1(dds3ProcessID_t *id)
     case 9:
         break;
     }
-    return EE_ADDR_AS(dds3ProcessFunc_t, (dds3GetProcessRunTime(id) != 0 ? -1 : 0));
+    return EE_ADDR_AS(dds3ProcessFunc_t, (SDF_FRAME_TICK(dds3GetProcessRunTime(id)) != 0 ? -1 : 0));
 }
 
 void nbAtoShutdown(void)
