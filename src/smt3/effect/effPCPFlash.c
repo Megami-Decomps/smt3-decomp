@@ -1134,7 +1134,7 @@ void effPCPFlashPolySphere2Draw(effPCPFlashPolySphere2_tag *hData) {
     lifetime = SDF_FRAMES(hData->lifetime);
     particleCount = hData->particleCount;
     part = hData->pPart;
-    half = lifetime >> 1;
+    half = SDF_FRAMES(hData->lifetime >> 1);
     ramp = SDF_FRAMES(hData->scaleRampTime);
     maxScale = hData->maxScale;
     restart = hData->restartRandomly;
@@ -1160,20 +1160,20 @@ void effPCPFlashPolySphere2Draw(effPCPFlashPolySphere2_tag *hData) {
                 }
                 color = 0;
                 effPCPFlashPolySphere2PartSetVC(hData, particleIndex, color);
-            } else if (part->frame > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(part->frame) > 0) {
                 if (ramp == 0) {
                     part->radius = maxScale;
                 } else {
-                    part->radius = (maxScale * (f32)part->frame) / (f32)ramp;
+                    part->radius = (maxScale * (f32)SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)ramp;
                     if (maxScale < part->radius) {
                         part->radius = maxScale;
                     }
                 }
                 effPCPFlashPolySphere2PartSetVertex(hData, particleIndex, &axis);
-                if (part->frame < half) {
-                    blend = (f32)age / (f32)half;
+                if (SDF_FRAME_DRAWN_AGE(part->frame) < half) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)half;
                 } else {
-                    blend = (f32)(lifetime - age) / (f32)half;
+                    blend = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(age)) / (f32)half;
                 }
                 color = effMagaCylinderCalcColor(effColorBlend(0, part->abgr, blend), tintColor);
                 effPCPFlashPolySphere2PartSetVC(hData, particleIndex, color);
@@ -1392,7 +1392,7 @@ void effPCPFlashPolySphereDraw(effPCPFlashPolySphere_tag *hData) {
     lifetime = SDF_FRAMES(hData->lifetime);
     count = hData->particleCount;
     part = hData->pPart;
-    half = lifetime >> 1;
+    half = SDF_FRAMES(hData->lifetime >> 1);
     ramp = SDF_FRAMES(hData->scaleRampTime);
     maxScale = hData->maxScale;
     restart = hData->restartRandomly;
@@ -1420,21 +1420,21 @@ void effPCPFlashPolySphereDraw(effPCPFlashPolySphere_tag *hData) {
                 }
                 color = 0;
                 effPCPFlashPolySpherePartSetVC(hData, index, color);
-            } else if (part->frame > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(part->frame) > 0) {
                 if (ramp == 0) {
                     part->radius = maxScale;
                 } else {
-                    part->radius = (maxScale * (f32)part->frame) / (f32)ramp;
+                    part->radius = (maxScale * (f32)SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)ramp;
                     if (maxScale < part->radius) {
                         part->radius = maxScale;
                     }
                 }
                 effPCPFlashPolySpherePartRotate(hData, index, &axis);
                 effPCPFlashPolySpherePartSetVertex(hData, index, &axis);
-                if (part->frame < half) {
-                    blend = (f32)age / (f32)half;
+                if (SDF_FRAME_DRAWN_AGE(part->frame) < half) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)half;
                 } else {
-                    blend = (f32)(lifetime - age) / (f32)half;
+                    blend = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(age)) / (f32)half;
                 }
                 color = effMagaCylinderCalcColor(effColorBlend(0, part->abgr, blend), tintColor);
                 effPCPFlashPolySpherePartSetVC(hData, index, color);
@@ -1631,7 +1631,7 @@ void effPCPFlashPolyRingDraw(effPCPFlashPolyRing_tag *hData) {
     lifetime = SDF_FRAMES(hData->lifetime);
     count = hData->particleCount;
     part = hData->parts;
-    half = lifetime >> 1;
+    half = SDF_FRAMES(hData->lifetime >> 1);
     ramp = SDF_FRAMES(hData->scaleRampTime);
     maxScale = hData->maxScale;
     restart = hData->restartRandomly;
@@ -1659,21 +1659,21 @@ void effPCPFlashPolyRingDraw(effPCPFlashPolyRing_tag *hData) {
                 }
                 color = 0;
                 effPCPFlashPolyRingPartSetVC(hData, index, color);
-            } else if (part->frame > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(part->frame) > 0) {
                 if (ramp == 0) {
                     part->length = maxScale;
                 } else {
-                    part->length = (maxScale * (f32)part->frame) / (f32)ramp;
+                    part->length = (maxScale * (f32)SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)ramp;
                     if (maxScale < part->length) {
                         part->length = maxScale;
                     }
                 }
                 effPCPFlashPolyRingPartRotate(hData, index);
                 effPCPFlashPolyRingPartSetVertex(hData, index);
-                if (part->frame < half) {
-                    blend = (f32)age / (f32)half;
+                if (SDF_FRAME_DRAWN_AGE(part->frame) < half) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)half;
                 } else {
-                    blend = (f32)(lifetime - age) / (f32)half;
+                    blend = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(age)) / (f32)half;
                 }
                 color = effMagaCylinderCalcColor(effColorBlend(0, part->abgr, blend), tintColor);
                 effPCPFlashPolyRingPartSetVC(hData, index, color);
@@ -1910,13 +1910,13 @@ void effPCPFlashPolyPipeDraw(effPCPFlashPolyPipe_tag *hData)
             }
             color = 0;
             effPCPFlashPolyPipePartSetVC(hData, index, color);
-        } else if (age > 0) {
+        } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
             effPCPFlashPolyPipePartRotate(hData, index);
             effPCPFlashPolyPipePartSetVertex(hData, index);
-            if (part->frame < fadeIn && fadeIn != 0) {
-                factor = (f32)part->frame / (f32)fadeIn;
-            } else if (fadeOut >= lifetime - part->frame && fadeOut != 0) {
-                factor = (f32)(lifetime - part->frame) / (f32)fadeOut;
+            if (SDF_FRAME_DRAWN_AGE(part->frame) < fadeIn && fadeIn != 0) {
+                factor = (f32)SDF_FRAME_DRAWN_AGE(part->frame) / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - SDF_FRAME_DRAWN_AGE(part->frame) && fadeOut != 0) {
+                factor = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)fadeOut;
             } else {
                 factor = 1.0f;
             }
@@ -2133,7 +2133,7 @@ void effPCPFlashPolyRingExpDraw(effPCPFlashPolyRingExp_tag *hData)
     heightDelta = hData->heightEnd - hData->heightStart;
     progress = 1.0f;
     if (lifetime > 0) {
-        progress = (f32)hData->frame / (f32)lifetime;
+        progress = (f32)SDF_FRAME_DRAWN_AGE(hData->frame) / (f32)lifetime;
     }
     start = hData->orbitRadiusStart;
     radiusEnd = hData->orbitRadiusEnd;
@@ -2172,15 +2172,15 @@ void effPCPFlashPolyRingExpDraw(effPCPFlashPolyRingExp_tag *hData)
             }
             color = 0;
             effPCPFlashPolyRingExpPartSetVC(hData, index, color);
-        } else if (age > 0) {
-            progress = (f32)age / (f32)lifetime;
+        } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
+            progress = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)lifetime;
             part->stepSpeed = heightDelta * progress + hData->heightStart;
             effPCPFlashPolyRingExpPartRotate(hData, index);
             effPCPFlashPolyRingExpPartSetVertex(hData, index);
-            if (part->frame < fadeIn && fadeIn != 0) {
-                factor = (f32)part->frame / (f32)fadeIn;
-            } else if (fadeOut >= lifetime - part->frame && fadeOut != 0) {
-                factor = (f32)(lifetime - part->frame) / (f32)fadeOut;
+            if (SDF_FRAME_DRAWN_AGE(part->frame) < fadeIn && fadeIn != 0) {
+                factor = (f32)SDF_FRAME_DRAWN_AGE(part->frame) / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - SDF_FRAME_DRAWN_AGE(part->frame) && fadeOut != 0) {
+                factor = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)fadeOut;
             } else {
                 factor = 1.0f;
             }
@@ -2189,7 +2189,7 @@ void effPCPFlashPolyRingExpDraw(effPCPFlashPolyRingExp_tag *hData)
         }
         part->frame = part->frame + 1;
     }
-    if (hData->frame == lifetime) {
+    if (SDF_FRAME_DRAWN_AGE(hData->frame) == lifetime) {
         hData->frame = 0;
     } else {
         hData->frame++;
@@ -2418,13 +2418,13 @@ void effPCPFlashPolySphereExpDraw(effPCPFlashPolySphereExp_tag *hData) {
                 }
                 color = 0;
                 effPCPFlashPolySphereExpPartSetVC(hData, index, color);
-            } else if (part->frame > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(part->frame) > 0) {
                 s32 remain;
 
                 if (ramp == 0) {
                     part->radius = maxScale;
                 } else {
-                    part->radius = (maxScale * (f32)part->frame) / (f32)ramp;
+                    part->radius = (maxScale * (f32)SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)ramp;
                     if (maxScale < part->radius) {
                         part->radius = maxScale;
                     }
@@ -2432,10 +2432,10 @@ void effPCPFlashPolySphereExpDraw(effPCPFlashPolySphereExp_tag *hData) {
                 effPCPFlashPolySphereExpPartRotate(hData, index, &axis);
                 effPCPFlashPolySphereExpPartSetVertex(hData, index, &axis);
                 age = part->frame;
-                if (age < fadeIn && fadeIn != 0) {
-                    blend = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else {
-                    remain = lifetime - age;
+                    remain = lifetime - SDF_FRAME_DRAWN_AGE(age);
                     if (fadeOut >= remain && fadeOut != 0) {
                         blend = (f32)remain / (f32)fadeOut;
                     } else {
@@ -2599,7 +2599,7 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
     for (index = 0; index < count; index++, part++) {
         s32 age = part->frame;
 
-        if (lifetime < age) {
+        if (lifetime < SDF_FRAME_DRAWN_AGE(age)) {
             effPCPFlashPolySphere2ExpPartSetVC(hData, index, 0);
         } else {
             if (age == 0) {
@@ -2608,7 +2608,7 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
                 part->accumulator = startA;
                 part->stepSpeed = startB;
                 part->color = EFF_NEUTRAL_COLOR;
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 f32 speed = part->stepSpeed;
                 s32 remain;
                 f32 blend;
@@ -2616,10 +2616,10 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
                 part->stepSpeed = speed * SDF_FRAME_DECAY(decay);
                 part->accumulator = part->accumulator + SDF_FRAME_STEP(speed);
                 effPCPFlashPolySphere2ExpPartSetVertex(hData, index, &axis);
-                if (age < fadeIn && fadeIn != 0) {
-                    blend = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else {
-                    remain = lifetime - age;
+                    remain = lifetime - SDF_FRAME_DRAWN_AGE(age);
                     if (fadeOut >= remain && fadeOut != 0) {
                         blend = (f32)remain / (f32)fadeOut;
                     } else {
@@ -2629,7 +2629,7 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
                 active++;
                 effPCPFlashPolySphere2ExpPartSetVC(hData, index, effMagaCylinderCalcColor(effColorBlend(0, part->color, blend), tintColor));
             }
-            if (age == lifetime && restart != 0) {
+            if (SDF_FRAME_DRAWN_AGE(age) == lifetime && restart != 0) {
                 part->frame = 0;
             } else {
                 part->frame = part->frame + 1;
@@ -2867,7 +2867,7 @@ void effPCPFlashPolySphere3Draw(effPCPFlashPolySphere3_tag *hData) {
                 part->move = startA;
                 part->move_s = startB;
                 part->abgr = EFF_NEUTRAL_COLOR;
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 f32 speed = part->move_s;
                 s32 remain;
                 f32 blend;
@@ -2877,10 +2877,10 @@ void effPCPFlashPolySphere3Draw(effPCPFlashPolySphere3_tag *hData) {
                 effPCPFlashPolySphere3PartRotate(hData, index, &axis);
                 effPCPFlashPolySphere3PartSetVertex(hData, index, &axis);
                 age = part->frame;
-                if (age < fadeIn && fadeIn != 0) {
-                    blend = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else {
-                    remain = lifetime - age;
+                    remain = lifetime - SDF_FRAME_DRAWN_AGE(age);
                     if (fadeOut >= remain && fadeOut != 0) {
                         blend = (f32)remain / (f32)fadeOut;
                     } else {
@@ -3110,24 +3110,24 @@ void effPCPFlashPolyRingExp2Draw(effPCPFlashPolyRingExp2_tag *hData) {
                 effPCPFlashPolyRingExp2PartSetVertex(hData, index);
                 effPCPFlashPolyRingExp2PartSetVC(hData, index, 0);
                 part->abgr = EFF_NEUTRAL_COLOR;
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 s32 remain;
                 f32 blend;
 
                 if (ramp == 0) {
                     part->length = maxScale;
                 } else {
-                    part->length = (maxScale * (f32)age) / (f32)ramp;
+                    part->length = (maxScale * (f32)SDF_FRAME_DRAWN_AGE(age)) / (f32)ramp;
                     if (maxScale < part->length) {
                         part->length = maxScale;
                     }
                 }
                 effPCPFlashPolyRingExp2PartRotate(hData, index);
                 effPCPFlashPolyRingExp2PartSetVertex(hData, index);
-                if (age < fadeIn && fadeIn != 0) {
-                    blend = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else {
-                    remain = lifetime - age;
+                    remain = lifetime - SDF_FRAME_DRAWN_AGE(age);
                     if (fadeOut >= remain && fadeOut != 0) {
                         blend = (f32)remain / (f32)fadeOut;
                     } else {
@@ -3296,7 +3296,7 @@ void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
     for (index = 0; index < count; index++, part++) {
         s32 age = part->frame;
 
-        if (lifetime < age) {
+        if (lifetime < SDF_FRAME_DRAWN_AGE(age)) {
             effPCPFlashPolyCirclePartSetVC(hData, index, 0);
         } else {
             if (age == 0) {
@@ -3305,7 +3305,7 @@ void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
                 part->accumulator = startA;
                 part->stepSpeed = startB;
                 part->color = EFF_NEUTRAL_COLOR;
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 f32 speed = part->stepSpeed;
                 s32 remain;
                 f32 blend;
@@ -3313,10 +3313,10 @@ void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
                 part->stepSpeed = speed * SDF_FRAME_DECAY(decay);
                 part->accumulator = part->accumulator + SDF_FRAME_STEP(speed);
                 effPCPFlashPolyCirclePartSetVertex(hData, index, &axis);
-                if (age < fadeIn && fadeIn != 0) {
-                    blend = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else {
-                    remain = lifetime - age;
+                    remain = lifetime - SDF_FRAME_DRAWN_AGE(age);
                     if (fadeOut >= remain && fadeOut != 0) {
                         blend = (f32)remain / (f32)fadeOut;
                     } else {
@@ -3326,7 +3326,7 @@ void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
                 active++;
                 effPCPFlashPolyCirclePartSetVC(hData, index, effMagaCylinderCalcColor(effColorBlend(0, part->color, blend), tintColor));
             }
-            if (age == lifetime && restart != 0) {
+            if (SDF_FRAME_DRAWN_AGE(age) == lifetime && restart != 0) {
                 part->frame = 0;
             } else {
                 part->frame = part->frame + 1;
@@ -3546,7 +3546,7 @@ void effPCPFlashPolyRingExpHDraw(effPCPFlashPolyRingExpH_tag *hData)
     heightDelta = hData->param4C - hData->param48;
     progress = 1.0f;
     if (lifetime > 0) {
-        progress = (f32)hData->frame / (f32)lifetime;
+        progress = (f32)SDF_FRAME_DRAWN_AGE(hData->frame) / (f32)lifetime;
     }
     start = hData->param38;
     radiusEnd = hData->param3C;
@@ -3585,15 +3585,15 @@ void effPCPFlashPolyRingExpHDraw(effPCPFlashPolyRingExpH_tag *hData)
             }
             color = 0;
             effPCPFlashPolyRingExpHPartSetVC(hData, index, color);
-        } else if (age > 0) {
-            progress = (f32)age / (f32)lifetime;
+        } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
+            progress = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)lifetime;
             part->spread = heightDelta * progress + hData->param48;
             effPCPFlashPolyRingExpHPartRotate(hData, index);
             effPCPFlashPolyRingExpHPartSetVertex(hData, index);
-            if (part->frame < fadeIn && fadeIn != 0) {
-                factor = (f32)part->frame / (f32)fadeIn;
-            } else if (fadeOut >= lifetime - part->frame && fadeOut != 0) {
-                factor = (f32)(lifetime - part->frame) / (f32)fadeOut;
+            if (SDF_FRAME_DRAWN_AGE(part->frame) < fadeIn && fadeIn != 0) {
+                factor = (f32)SDF_FRAME_DRAWN_AGE(part->frame) / (f32)fadeIn;
+            } else if (fadeOut >= lifetime - SDF_FRAME_DRAWN_AGE(part->frame) && fadeOut != 0) {
+                factor = (f32)(lifetime - SDF_FRAME_DRAWN_AGE(part->frame)) / (f32)fadeOut;
             } else {
                 factor = 1.0f;
             }
@@ -3602,7 +3602,7 @@ void effPCPFlashPolyRingExpHDraw(effPCPFlashPolyRingExpH_tag *hData)
         }
         part->frame = part->frame + 1;
     }
-    if (hData->frame == lifetime) {
+    if (SDF_FRAME_DRAWN_AGE(hData->frame) == lifetime) {
         hData->frame = 0;
     } else {
         hData->frame++;
