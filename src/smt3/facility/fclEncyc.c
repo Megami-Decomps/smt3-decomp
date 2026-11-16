@@ -15,9 +15,6 @@
 
 extern u32 dds3GetKernelCount(void);
 
-/* A slide or fade value its Calc function steps once per tick, drawn after it. */
-#define FCL_ENCYC_DRAWN(v) SDF_FRAME_INTERPOLATE(&(v), (v))
-
 extern s32 fclEncycGetRatio(void);
 extern void ReleaseWork(fclEncyc_instance_tag *pinst);
 extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
@@ -923,14 +920,14 @@ extern void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst);
 void DrawPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
 {
     fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
-    s32 alpha = FCL_ENCYC_DRAWN(work->phase.statusAlpha);
+    s32 alpha = work->phase.statusAlpha;
 
     if (alpha < 0x80) {
-        cmpDrawStatusComEx2(&work->units[0], FCL_ENCYC_DRAWN(work->phase.xRecord), 0,
+        cmpDrawStatusComEx2(&work->units[0], work->phase.xRecord, 0,
             (u8)(0x80 - alpha), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
     }
     if (alpha > 0x20) {
-        cmpDrawStatusComEx2(&work->units[1], FCL_ENCYC_DRAWN(work->phase.xNow), 0,
+        cmpDrawStatusComEx2(&work->units[1], work->phase.xNow, 0,
             (u8)(alpha - 0x20), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
     }
     cmpDrawStatusModel(sdfModelOtTable);
@@ -1408,8 +1405,8 @@ void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
     }
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY), 0xFFFFF0,
-               FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 5, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
+               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
     if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
@@ -1494,8 +1491,8 @@ void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
     }
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0, 0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY), 0xFFFFF0,
-               FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 5, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY, 0xFFFFF0,
+               work->phase.ribbonAlpha, 5, 0x3A0, 0x47);
     if (work->phase.ribbonAlpha < 0x80) {
         DrawReadStatusMoney(pinst);
     }
@@ -1584,8 +1581,8 @@ void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
     cmpDrawStatusComEx(&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0,
                        0xA09DC380, 1, 0, 0);
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY),
-               0xFFFFF0, FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 4, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
+               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
     DrawReadMainHelp(pinst);
     frDrawFontOt(work->explainFont, 0, 0x47);
 }
@@ -1693,8 +1690,8 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
                            0, 0, 0, 0xA09DC380, 1, 0, 0);
     }
     DrawExplainBack(work->explainAlpha);
-    fclRbnDraw(work->ribbon, FCL_ENCYC_DRAWN(work->phase.ribbonX), FCL_ENCYC_DRAWN(work->phase.ribbonY),
-               0xFFFFF0, FCL_ENCYC_DRAWN(work->phase.ribbonAlpha), 4, 0x3A0, 0x47);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
+               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
     DrawReadMainHelp(pinst);
 }
 
@@ -1737,27 +1734,26 @@ void AcceptKeyRegistConfirm(fclEncyc_instance_tag *pinst)
 
 void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
 {
-    if (!SDF_FRAME_DUE()) return;
     if (work->flag == 0) {
-        work->statusAlpha += 0x10;
+        work->statusAlpha += SDF_FRAME_STEP_INT(0x10);
         if (work->statusAlpha >= 0xA1) {
             work->statusAlpha = 0xA0;
             return;
         }
-        work->incNow += 4;
-        work->xNow -= work->incNow;
-        work->xRecord += work->incRecord;
-        work->incRecord += 4;
+        SDF_FRAME_WHEN(work->incNow += 4);
+        work->xNow -= SDF_FRAME_STEP_INT(work->incNow);
+        work->xRecord += SDF_FRAME_STEP_INT(work->incRecord);
+        SDF_FRAME_LAST(work->incRecord += 4);
     } else {
-        work->statusAlpha -= 0x10;
+        work->statusAlpha -= SDF_FRAME_STEP_INT(0x10);
         if (work->statusAlpha < 0) {
             work->statusAlpha = 0;
             return;
         }
-        work->incRecord -= 4;
-        work->xNow += work->incNow;
-        work->xRecord -= work->incRecord;
-        work->incNow -= 4;
+        SDF_FRAME_WHEN(work->incRecord -= 4);
+        work->xNow += SDF_FRAME_STEP_INT(work->incNow);
+        work->xRecord -= SDF_FRAME_STEP_INT(work->incRecord);
+        SDF_FRAME_LAST(work->incNow -= 4);
     }
 }
 
@@ -2431,28 +2427,26 @@ void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 
 void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
 {
-    if (!SDF_FRAME_DUE()) return;
-    pwork->ribbonAlpha -= 0x10;
+    pwork->ribbonAlpha -= SDF_FRAME_STEP_INT(0x10);
     if (pwork->ribbonAlpha < 0) {
         pwork->ribbonAlpha = 0;
     }
-    pwork->ribbonVelocity += 0x20;
-    pwork->ribbonX -= pwork->ribbonVelocity;
-    pwork->ribbonWidth -= pwork->ribbon_accel;
-    pwork->ribbon_accel -= 0x20;
+    SDF_FRAME_WHEN(pwork->ribbonVelocity += 0x20);
+    pwork->ribbonX -= SDF_FRAME_STEP_INT(pwork->ribbonVelocity);
+    pwork->ribbonWidth -= SDF_FRAME_STEP_INT(pwork->ribbon_accel);
+    SDF_FRAME_LAST(pwork->ribbon_accel -= 0x20);
 }
 
 void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
 {
-    if (!SDF_FRAME_DUE()) return;
-    pwork->ribbonAlpha += 0x10;
+    pwork->ribbonAlpha += SDF_FRAME_STEP_INT(0x10);
     if (pwork->ribbonAlpha >= 0x81) {
         pwork->ribbonAlpha = 0x80;
     }
-    pwork->ribbon_accel += 0x20;
-    pwork->ribbonX += pwork->ribbonVelocity;
-    pwork->ribbonVelocity -= 0x20;
-    pwork->ribbonWidth += pwork->ribbon_accel;
+    SDF_FRAME_WHEN(pwork->ribbon_accel += 0x20);
+    pwork->ribbonX += SDF_FRAME_STEP_INT(pwork->ribbonVelocity);
+    SDF_FRAME_LAST(pwork->ribbonVelocity -= 0x20);
+    pwork->ribbonWidth += SDF_FRAME_STEP_INT(pwork->ribbon_accel);
 }
 
 s32 GetDevilParam(fclencyceelem_t *pelem, s32 type)
@@ -2730,8 +2724,7 @@ void func_0021B480(fclEncyc_instance_tag *pinst)
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR(600.0f);
     SDF_VU0_ADDVECTOR();
-    /* The quake moves once per retail tick. */
-    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3QuakeOffset, 3));
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     SDF_VU0_LOADVECTOR(&aViewEye);
@@ -3181,25 +3174,24 @@ void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
 {
     s32 alpha = pwork->registAlpha;
 
-    if (!SDF_FRAME_DUE()) return;
     if (pwork->dispregist != 0) {
-        alpha += 0x10;
+        alpha += SDF_FRAME_STEP_INT(0x10);
         if (alpha > 0x80) {
             alpha = 0x80;
         } else {
-            pwork->registY -= pwork->registInc;
-            pwork->registInc -= 4;
+            pwork->registY -= SDF_FRAME_STEP_INT(pwork->registInc);
+            SDF_FRAME_LAST(pwork->registInc -= 4);
         }
     } else {
-        alpha -= 0x10;
+        alpha -= SDF_FRAME_STEP_INT(0x10);
         if (alpha < 0) {
             pwork->registX = 0x1370;
             pwork->registY = 0xD20;
             pwork->registInc = 0x20;
             alpha = 0;
         } else {
-            pwork->registInc += 4;
-            pwork->registY += pwork->registInc;
+            SDF_FRAME_WHEN(pwork->registInc += 4);
+            pwork->registY += SDF_FRAME_STEP_INT(pwork->registInc);
         }
     }
     pwork->registAlpha = alpha;
@@ -3218,47 +3210,46 @@ void CalcMoveReadMainHelp(fclEncycReadHelpWork_t *work)
     s32 secondaryAlpha = work->panels[1].alpha;
     s32 primaryAlpha;
 
-    if (!SDF_FRAME_DUE()) return;
     if (flags & 0x10) {
-        secondaryAlpha += 0x10;
+        secondaryAlpha += SDF_FRAME_STEP_INT(0x10);
         if (secondaryAlpha > 0x80) {
             secondaryAlpha = 0x80;
         } else {
-            work->panels[1].y -= work->panels[1].speed;
-            work->panels[1].speed -= 4;
+            work->panels[1].y -= SDF_FRAME_STEP_INT(work->panels[1].speed);
+            SDF_FRAME_LAST(work->panels[1].speed -= 4);
         }
     } else {
-        secondaryAlpha -= 0x10;
+        secondaryAlpha -= SDF_FRAME_STEP_INT(0x10);
         if (secondaryAlpha < 0) {
             work->panels[1].x = 0x1370;
             work->panels[1].y = 0xD20;
             work->panels[1].speed = 0x20;
             secondaryAlpha = 0;
         } else {
-            work->panels[1].speed += 4;
-            work->panels[1].y += work->panels[1].speed;
+            SDF_FRAME_WHEN(work->panels[1].speed += 4);
+            work->panels[1].y += SDF_FRAME_STEP_INT(work->panels[1].speed);
         }
     }
     work->panels[1].alpha = secondaryAlpha;
     primaryAlpha = work->panels[0].alpha;
     if (flags & 8) {
-        primaryAlpha += 0x10;
+        primaryAlpha += SDF_FRAME_STEP_INT(0x10);
         if (primaryAlpha > 0x80) {
             primaryAlpha = 0x80;
         } else {
-            work->panels[0].y -= work->panels[0].speed;
-            work->panels[0].speed -= 4;
+            work->panels[0].y -= SDF_FRAME_STEP_INT(work->panels[0].speed);
+            SDF_FRAME_LAST(work->panels[0].speed -= 4);
         }
     } else {
-        primaryAlpha -= 0x10;
+        primaryAlpha -= SDF_FRAME_STEP_INT(0x10);
         if (primaryAlpha < 0) {
             work->panels[0].y = 0xCE8;
             work->panels[0].speed = 0x20;
             primaryAlpha = 0;
             work->panels[0].x = 0;
         } else {
-            work->panels[0].speed += 4;
-            work->panels[0].y += work->panels[0].speed;
+            SDF_FRAME_WHEN(work->panels[0].speed += 4);
+            work->panels[0].y += SDF_FRAME_STEP_INT(work->panels[0].speed);
         }
     }
     work->panels[0].alpha = primaryAlpha;
@@ -3268,24 +3259,23 @@ void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     s32 alpha = pwork->ribbonAlpha;
 
-    if (!SDF_FRAME_DUE()) return;
     if ((pwork->flags & 0x20) == 0) {
-        alpha += 0x10;
+        alpha += SDF_FRAME_STEP_INT(0x10);
         if (alpha >= 0x81) {
             pwork->ribbonY = 0x58;
             pwork->ribbonVelocity = 0;
             alpha = 0x80;
         } else {
-            pwork->ribbonY += pwork->ribbonVelocity;
-            pwork->ribbonVelocity -= 4;
+            pwork->ribbonY += SDF_FRAME_STEP_INT(pwork->ribbonVelocity);
+            SDF_FRAME_LAST(pwork->ribbonVelocity -= 4);
         }
     } else {
-        alpha -= 0x10;
+        alpha -= SDF_FRAME_STEP_INT(0x10);
         if (alpha < 0) {
             alpha = 0;
         } else {
-            pwork->ribbonVelocity += 4;
-            pwork->ribbonY -= pwork->ribbonVelocity;
+            SDF_FRAME_WHEN(pwork->ribbonVelocity += 4);
+            pwork->ribbonY -= SDF_FRAME_STEP_INT(pwork->ribbonVelocity);
         }
     }
     pwork->ribbonAlpha = alpha;
@@ -3599,9 +3589,9 @@ void DrawReadStatusMoney(fclEncyc_instance_tag *pinst)
 
     draw.color = fclEncycMoneyBaseColor;
     work = pinst->pwork;
-    x = FCL_ENCYC_DRAWN(work->phase.ribbonWidth);
+    x = work->phase.ribbonWidth;
     y = work->phase.ribbonHeight;
-    draw.color.components[3] = 0x80 - FCL_ENCYC_DRAWN(work->phase.ribbonAlpha);
+    draw.color.components[3] = 0x80 - work->phase.ribbonAlpha;
     tag = sdfGrAllocPacketBuff(sizeof(*tag));
     sdfDrawTagInit(tag);
     draw.pos[0].x = x + 0x12F0;
@@ -3773,8 +3763,8 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     }
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    x = FCL_ENCYC_DRAWN(work->registX);
-    y = FCL_ENCYC_DRAWN(work->registY);
+    x = work->registX;
+    y = work->registY;
     prim.pos[0].x = x;
     prim.pos[0].y = y;
     prim.pos[1].x = x + 0xC90;
@@ -3782,7 +3772,7 @@ void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst)
     prim.color.components[0] = 0x80;
     prim.color.components[1] = 0x80;
     prim.color.components[2] = 0x80;
-    prim.color.components[3] = FCL_ENCYC_DRAWN(work->registAlpha);
+    prim.color.components[3] = work->registAlpha;
     itfMiscDrawSpritePrim(prim.pos, fclEncycHelpPanelUv, &prim.color, 0xFFFFF0,
                           pinst->texHandle[3], 0, tag);
     prim.pos[0].x = x + 0x720;
@@ -3810,9 +3800,9 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         s32 alpha;
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
-        x = FCL_ENCYC_DRAWN(work->help[1].x);
-        y = FCL_ENCYC_DRAWN(work->help[1].y);
-        alpha = FCL_ENCYC_DRAWN(work->help[1].alpha);
+        x = work->help[1].x;
+        y = work->help[1].y;
+        alpha = work->help[1].alpha;
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;
@@ -3831,11 +3821,11 @@ void DrawReadMainHelp(fclEncyc_instance_tag *pinst)
         s16 *alphaField;
         tag = sdfGrAllocPacketBuff(sizeof(*tag));
         sdfDrawTagInit(tag);
-        x = FCL_ENCYC_DRAWN(work->help[0].x);
-        y = FCL_ENCYC_DRAWN(work->help[0].y);
+        x = work->help[0].x;
+        y = work->help[0].y;
         /* Keep the final alpha read through its actual signed-halfword field. */
         alphaField = &work->help[0].alpha;
-        alpha = FCL_ENCYC_DRAWN(*alphaField);
+        alpha = *alphaField;
         color.components[0] = 0x80;
         color.components[1] = 0x80;
         color.components[2] = 0x80;

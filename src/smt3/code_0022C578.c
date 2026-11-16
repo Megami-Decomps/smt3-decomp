@@ -2915,7 +2915,6 @@ void campDrawNumber(void)
             timer %= 0x100;
             fade = (0x100 - timer) / 2;
         }
-        fade = SDF_FRAME_INTERPOLATE_DUE(&campWork->RootTimer, fade);
         colors[0] = 0x80808000 | fade;
         colors[1] = 0x80808000 | fade;
         colors[2] = 0x80808000 | fade;
@@ -2951,7 +2950,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if (campWork->RootTimer < 0x100) {
-            campWork->RootTimer += 0x2A * SDF_FRAME_DUE();
+            campWork->RootTimer += SDF_FRAME_STEP_INT(0x2A);
         }
         if (campWork->RootTimer > 0x100) {
             campWork->RootTimer = 0x100;
@@ -2961,7 +2960,7 @@ void campDrawNumber(void)
             campWork->RootTimer = 0x200 - campWork->RootTimer;
         }
         if ((u32)(campWork->RootTimer - 0x100) < 0x100) {
-            campWork->RootTimer += 0x2A * SDF_FRAME_DUE();
+            campWork->RootTimer += SDF_FRAME_STEP_INT(0x2A);
         }
         if (campWork->RootTimer > 0x200) {
             campWork->RootTimer = 0x200;
@@ -3606,13 +3605,12 @@ s32 func_00232198(void)
 {
     s32 i;
 
-    if (!SDF_FRAME_DUE()) return 0;
     for (i = 0; i < 0x10; i++) {
         if (campWork->stockDelay[i] > 0) {
-            campWork->stockDelay[i]--;
+            SDF_FRAME_LAST(campWork->stockDelay[i]--);
         } else {
             if (campWork->stockAlpha[i] < 0x100) {
-                campWork->stockAlpha[i] += campWork->stockStep[i];
+                campWork->stockAlpha[i] += SDF_FRAME_STEP_INT(campWork->stockStep[i]);
                 if (campWork->stockAlpha[i] < 0x100) {
                     continue;
                 }
@@ -4611,7 +4609,7 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
         f32 angle = entry->unk_18;
         fclDrawArrowCursorBox(x - inset, y - (inset >> 1), 0,
             (inset >> 3) + 35, (inset >> 3) + 36, entry->color, entry->unk_01,
-            1, SDF_FRAME_INTERPOLATE_DUE(&entry->unk_2C, entry->unk_2C), angle);
+            1, entry->unk_2C, angle);
     }
 }
 
@@ -5582,9 +5580,9 @@ void campDhScanEntries(void)
             entry->unk_10 -= 1;
             continue;
         }
-        if ((entry->unk_2C = entry->unk_2C + entry->unk_30 * SDF_FRAME_DUE()) >= 0x201) {
+        if ((entry->unk_2C = entry->unk_2C + SDF_FRAME_STEP_INT(entry->unk_30)) >= 0x201) {
             entry->unk_2C = 0;
-            SDF_FRAME_INTERPOLATE_RESET(&entry->unk_2C);
+            SDF_FRAME_BEFORE_LAST(entry->unk_2C = 0x200);
         }
     }
 }
@@ -8868,8 +8866,7 @@ s32 campGetCursorColorAlt2(s32 color, cmpCursorSlot_t *slot)
 
 s32 campGetStockAlpha(s8 index, s8 row)
 {
-    return SDF_FRAME_INTERPOLATE_DUE(&campWork->stockAlpha[index + row * 4],
-                                     campWork->stockAlpha[index + row * 4]);
+    return campWork->stockAlpha[index + row * 4];
 }
 
 s32 campCalcStockScale(s8 index, s8 row)
@@ -10398,8 +10395,7 @@ void cmpSetStatusModelParam(void)
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR(600.0f);
     SDF_VU0_ADDVECTOR();
-    /* The quake moves once per retail tick. */
-    SDF_VU0_LOADVECTOR_B(SDF_FRAME_INTERPOLATE_PTR(dds3QuakeOffset, 3));
+    SDF_VU0_LOADVECTOR_B(dds3QuakeOffset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR_NOMEM(&target);
     SDF_VU0_LOADVECTOR(aViewEye);
