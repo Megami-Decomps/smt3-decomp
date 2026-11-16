@@ -530,25 +530,21 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
 #endif
 
-/* NON_MATCHING: 63 of 150 words match (first differing word at +0x0); eight
- * saved registers where retail fits seven. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+/* Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * capture_009, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t *aDataPtr,
                                   sdfDrawTag_t *aDrawTag, s32 aId)
 {
     sdfModelMorphParm_t out[2];
     s32 used = 0;
     s32 j = 0;
-    s32 k;
-    s32 i;
     u32 packed;
     u16 matIndex;
     s32 listCount;
     sdfModelMorph_t *morph;
     void *buf;
+    FAKEMATCH_ASM_REG(void *, allocation, "$6");
     sdfDmaTag_t *tag;
     sdfModelShapeList_t **cursor;
 
@@ -564,45 +560,75 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
         }
         j++;
     } while (j != 2);
-    buf = EE_ADDR_AS(void *, sdfGrAllocPacketBuff((used * 16 + 0x10) * listCount + 0x40));
-    tag = sdfModelSetMatRefPacket(aNode->root, matIndex, buf, aId);
-    *(u64 *)tag = 0x10000001;
-    *(u64 *)&tag->dat0 = (u64)0x6002C000 << 32;
-    for (k = 0; k < used; k++) {
-        ((sdfModelShapedHeader_t *)tag)->weight[k] = out[k].blend;
+    /* The allocation argument dies at MatRef; its saved buffer copy outlives
+     * the node. These local constraints reproduce that target allocation. */
+    allocation = EE_ADDR_AS(void *, sdfGrAllocPacketBuff((used * 16 + 0x10) * listCount + 0x40));
+    FAKEMATCH_ASM_LIVE(allocation);
+    buf = allocation;
+    {
+        FAKEMATCH_ASM_REG(u64, vif, "$3");
+        {
+            FAKEMATCH_ASM_REG(sdfDmaTag_t *, result, "$2") =
+                sdfModelSetMatRefPacket(aNode->root, matIndex, allocation, aId);
+            vif = (u64)0x6002C000 << 32;
+            FAKEMATCH_ASM_READ_PAIR(result, vif);
+            tag = result;
+        }
+        {
+            FAKEMATCH_ASM_REG(u32, dma, "$2") = 0x10000001;
+            FAKEMATCH_ASM_READ(dma);
+            *(u64 *)tag = dma;
+        }
+        *(u64 *)&tag->dat0 = vif;
     }
-    for (; k < 2; k++) {
-        ((sdfModelShapedHeader_t *)tag)->weight[k] = 0.0f;
+    /* The counter is reset for each disjoint scan/copy/list phase. */
+    for (j = 0; j < used; j++) {
+        ((sdfModelShapedHeader_t *)tag)->weight[j] = out[j].blend;
+    }
+    for (; j < 2; j++) {
+        ((sdfModelShapedHeader_t *)tag)->weight[j] = 0.0f;
     }
     ((sdfModelShapedHeader_t *)tag)->code0 = 0x0400000A;
     ((sdfModelShapedHeader_t *)tag)->code1 = 0x14000000;
+    /* Genuine cursor inputs constrain the header-to-list scheduling phase;
+     * they are not memory barriers or claims about original source spelling. */
+    FAKEMATCH_ASM_READ(tag);
     tag += 2;
+    FAKEMATCH_ASM_READ(aDataPtr);
     cursor = aDataPtr->shapeList;
-    i = 0;
+    j = 0;
     do {
-        sdfModelShapeList_t *list = *cursor++;
+        sdfModelShapeList_t *list = *cursor;
         s32 m;
 
         for (m = 0; m < used; m++) {
             sdfModelShapeEntry_t *entry =
                 (sdfModelShapeEntry_t *)(EE_ADDR_AS(u8 *, (out[m].targetId * 8)) + EE_ADDR(list));
 
-            *(u64 *)&tag->dat0 = 0;
-            *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(entry[1].dataPtr),
-                                      entry[1].qwc | 0x30000000);
+            {
+                FAKEMATCH_ASM_REG(u32, address, "$4") = EE_ADDR(entry[1].dataPtr);
+                u32 count = entry[1].qwc;
+                *(u64 *)&tag->dat0 = 0;
+                *(u64 *)tag =
+                    SDF_DMA_TAG_WORD_FIRST((u64)(count | 0x30000000), address);
+            }
             tag++;
         }
-        *(u64 *)&tag->dat0 = 0;
-        *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(list->next), list->count | 0x30000000);
+        {
+            FAKEMATCH_ASM_REG(u32, address, "$4") = EE_ADDR(list->next);
+            FAKEMATCH_ASM_REG(u32, count, "$3") = list->count;
+            u32 word = count | 0x30000000;
+            FAKEMATCH_ASM_REG(u32, physical, "$2") = EE_PHYSICAL(address);
+            *(u64 *)&tag->dat0 = 0;
+            *(u64 *)tag = (u64)word | ((u64)physical << 32);
+        }
         tag++;
-        i++;
-    } while (i != listCount);
+        cursor++;
+        j++;
+    } while (j != listCount);
     QUAD_ZERO(*(u128 *)tag);
     sdfDrawTagLink2(aDrawTag, EE_ADDR(buf), EE_ADDR(tag));
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
-#endif
 
 sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOtIndex, s32 aId)
 {
