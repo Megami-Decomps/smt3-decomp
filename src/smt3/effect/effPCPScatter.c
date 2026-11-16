@@ -993,8 +993,8 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
             u32 j;
 
             if (age <= endAge) {
-                if (age < fadeIn && fadeIn != 0) {
-                    factor = (f32)age / fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    factor = (f32)SDF_FRAME_DRAWN_AGE(age) / fadeIn;
                 } else if (endAge - age <= fadeOut && fadeOut != 0) {
                     factor = (f32)(endAge - age) / fadeOut;
                 } else {
@@ -1307,8 +1307,8 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
             u32 j;
 
             if (age <= endAge) {
-                if (age < fadeIn && fadeIn != 0) {
-                    factor = (f32)age / fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    factor = (f32)SDF_FRAME_DRAWN_AGE(age) / fadeIn;
                 } else if (endAge - age <= fadeOut && fadeOut != 0) {
                     factor = (f32)(endAge - age) / fadeOut;
                 } else {
@@ -1625,8 +1625,8 @@ void effPCPHamaCardScatterDraw(effPCPHamaCardScatter_tag *hData) {
             u32 j;
 
             if (age <= endAge) {
-                if (age < fadeIn && fadeIn != 0) {
-                    factor = (f32)age / fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    factor = (f32)SDF_FRAME_DRAWN_AGE(age) / fadeIn;
                 } else if (endAge - age <= fadeOut && fadeOut != 0) {
                     factor = (f32)(endAge - age) / fadeOut;
                 } else {
@@ -2065,11 +2065,11 @@ void effPCPWhirlwindPolyDraw(effPCPWhirlwindPoly_tag *hData) {
         } else {
             if (age == 0) {
                 effPCPWhirlwindPolyPartInit(hData, i);
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 s32 remaining = duration - age;
                 f32 factor;
-                if (age < fadeIn && fadeIn != 0) {
-                    factor = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    factor = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else if (fadeRange >= remaining && fadeRange != 0) {
                     factor = (f32)remaining / (f32)fadeRange;
                 } else {
@@ -2837,11 +2837,11 @@ void effPCPWwSpherePolyDraw(effPCPWwSpherePoly_tag *hData) {
         } else {
             if (age == 0) {
                 effPCPWwSpherePolyPartInit(hData, i);
-            } else if (age > 0) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) > 0) {
                 s32 remaining = duration - age;
                 f32 factor;
-                if (age < fadeIn && fadeIn != 0) {
-                    factor = (f32)age / (f32)fadeIn;
+                if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
+                    factor = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
                 } else if (fadeRange >= remaining && fadeRange != 0) {
                     factor = (f32)remaining / (f32)fadeRange;
                 } else {
