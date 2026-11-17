@@ -505,3 +505,35 @@ remedy is claimed. The next useful control must address why these two call
 tails are equivalent to this compiler while retail retains them separately,
 without changing callback semantics or introducing dummy dependencies. The
 failed rich-decoder observation is superseded only for this qualified replay.
+
+## nbCameraBoss_Sp_MURET2_Set (newbattle/nbCameraBoss, 0x460)
+
+All 280 words match at the native 1120-byte extent. Ordinary initialization
+follows the state gate; a real formation cursor advances through the ten
+candidate slots. The radius scalar holds its product, then its doubled value,
+before the width accumulation. A shared 0.5f local is initialized before
+sdfAtan and consumed by either extent branch. Real point cursors advance within
+each four-point curve. One empty live-pointer operand immediately before the
+final curve[0].step store retains native publication scheduling. It consumes
+an initialized actual curve address, crosses no call, and is not a memory
+barrier or evidence of historical source spelling. No float register binding
+or extra numeric operation is retained.
+
+Independent semantic review preserves the callback snapshots, unsigned count
+conversion, native zero-selection behavior, numeric operation sequence and
+VU scratch-vector lane consumers. The original decimal literals are retained:
+host float conversion is not evidence of pinned ee-gcc literal bytes.
+
+The complete owner passes 118 match, 0 differ. Finite production/SKIP/retained
+contracts preserve 125/117/125 peers and symmetric allocated sections, owned
+data, ordered relocations, alignment gaps, tails and NOBITS extents. The SKIP
+pool gains nine target-only literals (36 bytes); all nine new references belong
+to this target. The production target's previously resolved GP-relative Accele
+store is explicitly reconciled with its C relocation. Retained target growth
+of 36 bytes and the following four-byte padding removal are accounted for.
+Six canonical/final-source by production/SKIP/strict-retained groups pass raw
+wrapper/plain/-da assembly and ELF equality at identical paths, with frozen
+compiler, runtime, source and generated inputs. Integrated owner and literal
+retail checks pass, including regeneration. All 34 tooling test files (794
+unittest cases), guarded drafts including FIX_BUGS, IRX drafts, documentation
+indexes and primary/audit report-scope checks pass before publication.

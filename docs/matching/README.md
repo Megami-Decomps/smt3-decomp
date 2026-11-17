@@ -18,8 +18,8 @@ both native and emitted sizes when they differ.
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
-| 10 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 10 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 8 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |

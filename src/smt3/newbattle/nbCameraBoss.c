@@ -498,7 +498,6 @@ void nbCameraBoss_Foru_E913_Run(void)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Foru_E913_Run);
 #endif
 
-#ifdef NON_MATCHING
 extern u32 effBTLSkillGetTargetBit(void);
 extern f32 nbGetEnemyInterval(void);
 extern f32 nbCameraGetBossDistance(void);
@@ -511,16 +510,19 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     nbFormation_t *invoke;
     nbFormation_t *forms;
     nbFormation_t *form;
-    nbFormation_t *first = NULL;
+    nbFormation_t *first;
     u32 targets;
-    u32 count = 0;
+    u32 count;
     u32 i;
-    f32 width = 0.0f;
-    f32 height = 0.0f;
+    f32 width;
+    f32 height;
     f32 size;
     f32 r;
     f32 angle;
+    f32 half;
     f32 firstX;
+    sdfVector3_t *point;
+    effBezier4PPart_t *curve;
     sdfVector4_t offset;
     sdfVector4_t result;
     sdfVector4_t eye;
@@ -528,18 +530,24 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     sdfVector4_t target;
 
     if (effBTLSkillGetState() & 0xC) return 0;
+    first = NULL;
+    count = 0;
+    width = 0.0f;
+    height = 0.0f;
     effBTLModelAllHide();
     effBTLModelTargetPartyShow();
     effBTLModelInvokeShow();
     data = nbGetMainProcessData();
     forms = data->form;
+    form = &forms[4];
     invoke = effBTLSkillGetInvokeFormation();
     targets = effBTLSkillGetTargetBit();
-    for (i = 4; i < 14; i++) {
-        form = &forms[i];
+    for (i = 4; i < 14; i++, form++) {
         if (form == invoke || (targets & (1 << i))) {
-            size = form->r * form->scl;
-            width += size + size;
+            f32 radius = form->r;
+            radius *= form->scl;
+            radius += radius;
+            width += radius;
             size = effBTLModelGetHeight(form);
             if (height < size) height = size;
             if (count == 0) first = form;
@@ -547,9 +555,11 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
         }
     }
     width += nbGetEnemyInterval() * (f32)(count - 1);
+    /* A real shared half factor spans sdfAtan and both radius branches. */
+    half = 0.5f;
     angle = sdfAtan(0.45378551f);
-    if (width < height) r = height * 0.5f;
-    else r = width * 0.5f;
+    if (width < height) r = height * half;
+    else r = width * half;
     if (r < 400.0f) r = 400.0f;
     r /= angle;
     target.x = 0.0f;
@@ -565,6 +575,7 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     if (r < 250.0f) r = 250.0f;
     r /= angle;
 
+    point = &nbCameraMuret2Bezier[1].point[0];
     offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
     SetRotateMatrixY(1.3089967f);
     SDF_VU0_LOADVECTOR(&offset);
@@ -572,9 +583,10 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    nbCameraMuret2Bezier[1].point[0].x = result.x;
-    nbCameraMuret2Bezier[1].point[0].y = result.y;
-    nbCameraMuret2Bezier[1].point[0].z = result.z;
+    point->x = result.x;
+    point->y = result.y;
+    point->z  = result.z;
+    point++;
     firstX = result.x;
 
     offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
@@ -584,9 +596,10 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    nbCameraMuret2Bezier[1].point[1].x = firstX + (eye.x - firstX) * 0.5f;
-    nbCameraMuret2Bezier[1].point[1].y = result.y;
-    nbCameraMuret2Bezier[1].point[1].z = result.z;
+    point->x = firstX + (eye.x - firstX) * 0.5f;
+    point->y = result.y;
+    point->z  = result.z;
+    point++;
 
     offset.x = 0.0f; offset.y = 0.0f; offset.z = -r * 1.15f;
     SetRotateMatrixY(0.87266455f);
@@ -595,35 +608,42 @@ s32 nbCameraBoss_Sp_MURET2_Set(nbCamera_t *camera)
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&result);
-    nbCameraMuret2Bezier[1].point[2].x = firstX + (eye.x - firstX) * 0.83333335f;
-    nbCameraMuret2Bezier[1].point[2].y = result.y;
-    nbCameraMuret2Bezier[1].point[2].z = result.z;
-    nbCameraMuret2Bezier[1].point[3].x = eye.x;
-    nbCameraMuret2Bezier[1].point[3].y = eye.y;
-    nbCameraMuret2Bezier[1].point[3].z = eye.z;
-    nbCameraMuret2Bezier[0].point[0].x = center.x;
-    nbCameraMuret2Bezier[0].point[0].y = center.y;
-    nbCameraMuret2Bezier[0].point[0].z = center.z;
-    nbCameraMuret2Bezier[0].point[1].x = (center.x + target.x + width * 0.25f) * 0.5f;
-    nbCameraMuret2Bezier[0].point[1].y = center.y;
-    nbCameraMuret2Bezier[0].point[1].z = center.z;
-    nbCameraMuret2Bezier[0].point[2].x = target.x + width * 0.25f;
-    nbCameraMuret2Bezier[0].point[2].y = center.y;
-    nbCameraMuret2Bezier[0].point[2].z = center.z;
-    nbCameraMuret2Bezier[0].point[3].x = target.x;
-    nbCameraMuret2Bezier[0].point[3].y = target.y;
-    nbCameraMuret2Bezier[0].point[3].z = target.z;
-    nbCameraMuret2Bezier[1].step = 0.000952380884f;
-    nbCameraMuret2Bezier[0].weight = 0.0f;
-    nbCameraMuret2Bezier[1].weight = 0.0f;
+    point->x = firstX + (eye.x - firstX) * 0.83333335f;
+    point->y = result.y;
+    point->z  = result.z;
+    point++;
+    point->x = eye.x;
+    point->y = eye.y;
+    point->z  = eye.z;
+    point = &nbCameraMuret2Bezier[0].point[0];
+    point->x = center.x;
+    point->y = center.y;
+    point->z  = center.z;
+    point++;
+    point->x = (center.x + target.x + width * 0.25f) * 0.5f;
+    point->y = center.y;
+    point->z  = center.z;
+    point++;
+    point->x = target.x + width * 0.25f;
+    point->y = center.y;
+    point->z  = center.z;
+    point++;
+    point->x = target.x;
+    point->y = target.y;
+    point->z  = target.z;
+    curve = nbCameraMuret2Bezier;
+    curve[1].step = 0.000952380884f;
+    curve[0].weight = 0.0f;
+    curve[1].weight = 0.0f;
     nbCameraBoss_Sp_MURET2_Accele = 0.000952380884f;
-    nbCameraMuret2Bezier[0].step = 0.000952380884f;
+    /* Keep the actual final-step address available at its native consumer.
+     * This target-local constraint recovers publication scheduling, not a
+     * memory barrier or evidence of the original source spelling. */
+    FAKEMATCH_ASM_LIVE(curve);
+    curve[0].step = 0.000952380884f;
     nbCameraBoss_Sp_MURET2_Run(camera);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Sp_MURET2_Set);
-#endif
 
 s32 nbCameraBoss_Sp_MURET2_Run(nbCamera_t *pNbCamera)
 {
