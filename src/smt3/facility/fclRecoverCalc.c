@@ -7,6 +7,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "dds3Difficulty.h"
 
 extern u32 datGetMaxHp(datUnitWork_t *work);
 
@@ -227,7 +228,7 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
             (!excludeDead || (DDS3_GBWK->akuma[slot].badstatus & 0x800) == 0) &&
             (rcvFullHeal(&DDS3_GBWK->unitwork[slot]) & mask) != 0) {
             index = list->partyCount;
-            price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
+            price = DDS3_RECOVER_PRICE(rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask));
             rcvCalcState->recoverPrices[index] = price;
             list->stock[index] = slot;
             list->partyCount++;
@@ -239,7 +240,7 @@ void rcvCreateLocalStock(rcvStockList_t *list, s8 mask)
             (!excludeDead || (DDS3_GBWK->akuma[slot].badstatus & 0x800) == 0) &&
             (rcvFullHeal(&DDS3_GBWK->unitwork[slot]) & mask) != 0) {
             index = list->partyCount + list->reserveCount;
-            price = rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask);
+            price = DDS3_RECOVER_PRICE(rcvGetRecoverPrice(&DDS3_GBWK->unitwork[slot], (u8)mask));
             rcvCalcState->recoverPrices[index] = price;
             list->stock[index] = slot;
             list->reserveCount++;

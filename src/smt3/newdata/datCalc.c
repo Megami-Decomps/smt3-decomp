@@ -2,6 +2,7 @@
 #include "sdk_libgcc.h"
 #include "datCalc.h"
 #include "ps2asm.h"
+#include "dds3Difficulty.h"
 
 extern s32 evtBitCheck(s32 no);
 typedef struct datTakaraSagasiItem_t {
@@ -1037,7 +1038,7 @@ void datPartyDamage(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1058,7 +1059,7 @@ void datPartyDamage(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1113,7 +1114,7 @@ void datPartyDamageFld(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1134,7 +1135,7 @@ void datPartyDamageFld(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1155,7 +1156,7 @@ void datPartyDamageFld(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1173,7 +1174,7 @@ void datPartyDamageFld(s32 mode)
                     if (damage == 0) {
                         damage = 1;
                     }
-                    hp -= damage;
+                    hp -= DDS3_FIELD_DAMAGE(damage);
                     if (hp <= 0) {
                         hp = 1;
                     }
@@ -1208,7 +1209,7 @@ void datPartyDamagePipe(s32 big, s32 sml)
                 if (damage == 0) {
                     damage = 1;
                 }
-                hp -= damage;
+                hp -= DDS3_FIELD_DAMAGE(damage);
                 if (hp <= 0) {
                     hp = 1;
                 }
@@ -1239,7 +1240,7 @@ void datPartyDamagePipe(s32 big, s32 sml)
             if (damage == 0) {
                 damage = 1;
             }
-            hp -= damage;
+            hp -= DDS3_FIELD_DAMAGE(damage);
             if (hp <= 0) {
                 hp = 1;
             }

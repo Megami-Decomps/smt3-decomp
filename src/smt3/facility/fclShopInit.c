@@ -8,6 +8,7 @@
 #include "event.h"
 #include "kernel.h"
 #include "interface.h"
+#include "dds3Difficulty.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -444,7 +445,7 @@ s32 shpGetSellPrice(s32 index, s8 sell)
     } else {
         ret = datItemTable[item].price >> 1;
     }
-    return ret;
+    return DDS3_SHOP_PRICE(ret, sell);
 }
 
 const char shpMessagePathF[32] = "/facility/scr/shop/mes_f.bf";

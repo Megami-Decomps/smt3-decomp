@@ -8,6 +8,7 @@ extern u32 dds3GetKernelCount(void);
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "dds3Difficulty.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -516,7 +517,7 @@ s32 nbGetNegoYaruMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
     s32 maka;
 
     maka = (datDevilTable[b->id].dropmakka * ((s32)dds3GetRandIntA(0, 4) + 5) + 5) / 10 * 10;
-    return maka != 0 ? maka : 1;
+    return DDS3_NEGO_MAKA(maka != 0 ? maka : 1);
 }
 
 s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
@@ -525,7 +526,7 @@ s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t 
 
     maka = nbGetNegoKureMakkaA(n, a, b);
     maka = (maka * ((s32)dds3GetRandIntA(0, 30) + 40) / 100 + 5) / 10 * 10;
-    return maka != 0 ? maka : 1;
+    return DDS3_NEGO_MAKA(maka != 0 ? maka : 1);
 }
 
 s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)

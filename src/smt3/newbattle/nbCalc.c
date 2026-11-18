@@ -6,6 +6,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "dds3Difficulty.h"
 /* FAKEMATCH: unused; shifts the compiler's declaration count, without it nbGetHojoCounterMin does not match. */
 extern s32 nbCalcFakematchDeclPad;
 
@@ -438,7 +439,7 @@ s32 nbGetHitType(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dform
                 }
                 criticalChance = (hitRate / baseRate) * (f32)datSkillTable.normal[nskill].criticalpoint * factor;
             }
-            point = (s32)criticalChance;
+            point = DDS3_BATTLE_CRITICAL((s32)criticalChance, sformindex, dformindex);
             printf("critical p:%d, z = %d, a = %d\n",
                    datSkillTable.normal[nskill].criticalpoint, (s32)hitRate, point);
             if ((s32)dds3GetRandIntA(NULL, 100) < point) {
@@ -644,7 +645,7 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
         if (chance < 50.0f) chance = 50.0f;
         if (chance > 100.0f) chance = 100.0f;
         if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
-        hit = (s32)chance;
+        hit = DDS3_BATTLE_HIT((s32)chance, sformindex, dformindex);
         printf("\312\252\315\375\245\322\245\303\245\310\316\250 = %d\n", hit);
         if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
             return (formatFlag & 0x800) ? 5 : 4;
@@ -664,7 +665,7 @@ s32 nbGetKoukaType(s32 nskill, s32 sformindex, s32 dformindex)
         if (chance < 50.0f) chance = 50.0f;
         if (chance > 100.0f) chance = 100.0f;
         if (nbGetBadStat(sformindex) == 0x100) chance *= 0.25f;
-        hit = (s32)chance;
+        hit = DDS3_BATTLE_HIT((s32)chance, sformindex, dformindex);
         printf("\313\342\313\241\245\322\245\303\245\310\316\250 = %d\n", hit);
         if ((s32)dds3GetRandIntA(NULL, 100) >= hit) {
             return (formatFlag & 0x800) ? 5 : 4;
@@ -949,7 +950,7 @@ s32 nbGetKoukaHp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
                 }
             }
         }
-        return adjusted;
+        return DDS3_BATTLE_HP_DAMAGE(adjusted, nskill, sformindex, dformindex);
     }
     return result;
 }
@@ -1094,7 +1095,7 @@ s32 nbGetKoukaMp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
         if (dwork->mp < adjusted) {
             adjusted = dwork->mp;
         }
-        return adjusted;
+        return DDS3_BATTLE_MP_DAMAGE(adjusted, nskill, sformindex, dformindex);
     }
     return result;
 }
@@ -2326,22 +2327,22 @@ void nbGetExpMakaItem(datUnitWork_t *unit)
 
     if (devil->specialbit == 0 || evtBitCheck(devil->specialbit) != 0) {
         if (devil->specialitem != 0 &&
-            (s32)dds3GetRandIntA(NULL, 100) < devil->specialpoint) {
+            (s32)dds3GetRandIntA(NULL, 100) < DDS3_BATTLE_DROP(devil->specialpoint)) {
             item = devil->specialitem;
         }
     }
 
     for (i = 0; i < 2 && item == 0; i++) {
         if (devil->dropitem[i] != 0 &&
-            (s32)dds3GetRandIntA(NULL, 100) < devil->droppoint[i]) {
+            (s32)dds3GetRandIntA(NULL, 100) < DDS3_BATTLE_DROP(devil->droppoint[i])) {
             item = devil->dropitem[i];
         }
     }
 
-    if ((s32)dds3GetRandIntA(NULL, 100) < devil->hougyokupoint && item == 0) {
+    if ((s32)dds3GetRandIntA(NULL, 100) < DDS3_BATTLE_DROP(devil->hougyokupoint) && item == 0) {
         item = 4;
     }
-    if ((s32)dds3GetRandIntA(NULL, 100) < devil->masekipoint && item == 0) {
+    if ((s32)dds3GetRandIntA(NULL, 100) < DDS3_BATTLE_DROP(devil->masekipoint) && item == 0) {
         item = 3;
     }
 
@@ -2903,7 +2904,7 @@ s32 nbGetKakutokuExp(nbMainProcessData_t *data)
             exp = 20000;
         }
     }
-    return exp;
+    return DDS3_BATTLE_EXP(exp);
 }
 
 s32 nbGetKakutokuMaka(nbMainProcessData_t *data)
@@ -2918,7 +2919,7 @@ s32 nbGetKakutokuMaka(nbMainProcessData_t *data)
             maka = 10000;
         }
     }
-    return maka;
+    return DDS3_BATTLE_MAKA(maka);
 }
 
 const char D_00544D30[40] = "\262\363\311\374 waza = %d, atkritu = %f \262\363\311\374\303\315=%d\n";

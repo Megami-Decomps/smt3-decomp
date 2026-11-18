@@ -12,6 +12,7 @@
 #include "font.h"
 #include "kernel_draw.h"
 #include "sdfFrame.h"
+#include "dds3Difficulty.h"
 
 extern u32 dds3GetKernelCount(void);
 
@@ -168,7 +169,7 @@ s32 GetPriceForSummon(s32 id, s32 exp, s32 level, s32 str, s32 mgc, s32 pow, s32
 {
     s32 total = str + mgc + pow + spd + luk;
 
-    return total * total / 20 * 100;
+    return DDS3_SUMMON_PRICE(total * total / 20 * 100);
 }
 
 s32 fclEncycWork(void)

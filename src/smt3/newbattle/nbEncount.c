@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
+#include "dds3Difficulty.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -361,7 +362,7 @@ u32 nbEncountCalc(s32 id, f32 length)
     if (maximum == 0) {
         return 0;
     }
-    DDS3_GBWK->encountkyori += length;
+    DDS3_GBWK->encountkyori += DDS3_ENCOUNTER_DISTANCE(length);
     if (DDS3_GBWK->encountkyori < 100.0f) {
         return 0;
     }
