@@ -1134,7 +1134,7 @@ void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work) {
         if (age == 0) {
             effEVECombParSmokePartInit(work, i);
         }
-        if (age > 0 && age <= duration) {
+        if (SDF_FRAME_DRAWN_AGE(age) > 0 && SDF_FRAME_DRAWN_AGE(age) <= duration) {
             if (particle->wait >= 0) {
                 drift = SDF_FRAME_STEP(particle->shift_s);
                 particle->pos[0] += side[0] * drift;
@@ -1155,10 +1155,10 @@ void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work) {
                 offset.y = particle->pos[1];
                 offset.z = particle->pos[2];
             }
-            if (age < fadeIn) {
-                ratio = (f32)age / (f32)fadeIn;
+            if (SDF_FRAME_DRAWN_AGE(age) < fadeIn) {
+                ratio = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
             } else {
-                remaining = duration - age;
+                remaining = duration - SDF_FRAME_DRAWN_AGE(age);
                 if (remaining <= fadeOut) {
                     ratio = (f32)remaining / (f32)fadeOut;
                 } else {
@@ -1187,7 +1187,7 @@ void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work) {
             particle->s_h_r += SDF_FRAME_STEP(particle->scalePhaseStepY);
             particle->roll += SDF_FRAME_STEP(particle->roll_s);
         }
-        if (duration == age && repeat != 0) {
+        if (duration + SDF_FRAMES(1) - 1 == age && repeat != 0) {
             particle->frame = 0;
         } else {
             particle->frame++;
@@ -1295,7 +1295,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
         if (age == 0) {
             effEVECombParSmokePartInit(work, index);
         }
-        if (age > 0 && age <= duration) {
+        if (SDF_FRAME_DRAWN_AGE(age) > 0 && SDF_FRAME_DRAWN_AGE(age) <= duration) {
             f32 swaySine, sway, alpha, transition;
             f32 modulationX, scaleX, scaleY, phaseCosine;
             f32 halfWidth, halfHeight;
@@ -1323,18 +1323,18 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
                 position.y = particle->pos[1];
                 position.z = particle->pos[2];
             }
-            if (age < fadeIn) {
-                alpha = (f32)age / (f32)fadeIn;
-            } else if (duration - age <= fadeOut) {
-                alpha = (f32)(duration - age) / (f32)fadeOut;
+            if (SDF_FRAME_DRAWN_AGE(age) < fadeIn) {
+                alpha = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
+            } else if (duration - SDF_FRAME_DRAWN_AGE(age) <= fadeOut) {
+                alpha = (f32)(duration - SDF_FRAME_DRAWN_AGE(age)) / (f32)fadeOut;
             } else {
                 alpha = 1.0f;
             }
-            if (age < colorStart) {
+            if (SDF_FRAME_DRAWN_AGE(age) < colorStart) {
                 primaryColor = effColorBlend(0, color & 0xFF000000, alpha);
-            } else if (age < colorStart + colorFrames) {
+            } else if (SDF_FRAME_DRAWN_AGE(age) < colorStart + colorFrames) {
                 if (colorFrames > 0) {
-                    transition = (f32)(age - colorStart) / (f32)colorFrames;
+                    transition = (f32)(SDF_FRAME_DRAWN_AGE(age) - colorStart) / (f32)colorFrames;
                     if (1.0f < transition) transition = 1.0f;
                 } else {
                     transition = 1.0f;
@@ -1445,7 +1445,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             particle->s_h_r += SDF_FRAME_STEP(particle->scalePhaseStepY);
             particle->roll += SDF_FRAME_STEP(particle->roll_s);
         }
-        if (duration == age && repeat) particle->frame = 0;
+        if (duration + SDF_FRAMES(1) - 1 == age && repeat) particle->frame = 0;
         else particle->frame++;
     }
     if (primary.count > 0) {
