@@ -204,3 +204,83 @@ Full linked retail bytes, generated-source negative controls, 505 tooling tests
 without optional skips, 818 layout assertions, frozen EE/IRX drafts, inline-asm
 policy and primary/audit report scope pass. All preceding landed owners remain
 intact: facility 197/0, recovery 391/0, music 27/0, Flow10 33/0 and status 24/0.
+
+
+## fldHitChkUnitVWM (field/fldHit, 0xCB8)
+
+All 814 words match at 3,256 bytes. The two-pass collision traversal, callback
+order, table/count reloads, moving-matter translations and collision/trigger
+publication remain unchanged. This is a source reconstruction, not recovery
+of the original spelling.
+
+### Actual acquisition and publication phases
+
+The four pose cursors are local to their six translation/restoration consumers.
+They do not extend across a callback or reuse a stale pose. Initial position
+XYZ is acquired before the previous-position initialization and additions;
+final current XYZ is captured after the last vector-length call, then copied
+to position and the work vector in ordinary XYZ source order. The compiler
+emits the native X/Z/Y and Z/X/Y final store order without a terminal constraint.
+All position writes precede all work-vector writes, including when the two
+arrays overlap.
+
+Direct typed `fldMatterTable[index].member` accesses replace the four explicit
+row-address-result phases. They retain the actual root-read epochs and do not
+cache a row across a mutating callback. A complete-output-parity stock `-da`
+observation found the former root-first `addu` operand order already in the
+initial RTL; allocation and scheduling did not introduce it. Matched same-owner
+member accesses supplied the alternative shape. Direct members remove exactly
+four commuted address instructions. This is not evidence of a universal register
+number ordering rule or a hooked frontend decision.
+
+### Narrow constraints and their ablations
+
+Three initialized `u16` hitflag values retain native `$4` through their immediate
+halfword stores. The floor and wall publication blocks capture real XYZ and keep
+Y/Z in native `$f1`/`$f2` with an empty operand pair. Each constrained value has
+its actual store consumer; no call or FP arithmetic crosses these lifetimes.
+The constraints emit no instructions and claim neither a memory barrier nor
+original-source register names. The three nonempty regions reported by the
+checker are the preexisting `sdfFabs`/`abs.s` hardware macros, not opcode replay.
+
+Removing the halfword constraint group loses 24 bytes and regresses instruction
+selection. Removing the two FP pairs preserves the native size but leaves eight
+publication-home differences. Ordinary capture and single-value controls were
+also measured. These are group-necessity results, not a claim that every operand
+has been independently proved minimal.
+
+### Source and data contracts
+
+The cutoff is native binary32 `0x3DCCCCCC`, spelled `0.099999997f`. Its actual
+configured-compiler pool bytes, rather than a host decimal conversion, are checked. An earlier exact target scan used an extern name for that `.lit4`
+entry; the owner checker rejected it and production could not link it. The
+source now uses the actual literal. The added pool word and the following
+`HitPositionInside3` literal relocation require finite owner-data attribution,
+not a raw-pool-equality claim.
+
+Actual callers initialize XYZ and the vector providers consume XYZ only. No
+unset W is consumed. The existing unreferenced 16-byte vector accounts for the
+native frame gap at SP+0x70..0x7F; no access or escaped stack address reaches it.
+Removing only that local reduces the compiled frame from 0x140 to 0x130, moving
+the following movement object from SP+0x80 to SP+0x70. The same-owner native
+`fldHitChkUnit` corroborates the identical unused slot between its travel and
+movement objects. Both complete native bodies were checked against retail.
+This is the documented frame-gap exception, not an invented live consumer.
+The real allocation is 2,048 collision records of 0xE4 bytes. Existing unchecked
+producer counts, persistent indices and provider input contracts are retained,
+not clamped or replaced by invented bounds. Arithmetic and comparison polarity,
+including `!(signedDistance < 0.0f)`, are unchanged; no finite-only FP restriction
+is introduced.
+
+The complete final owner passes 19 match, 0 differ, and the linked 4,551,696-byte
+image is literally equal to retail. Production, SKIP and retained contexts each
+resolve all 814 target words; all six ordinary/`-da` context pairs preserve full
+assembly and ELF output. Complete peer/data review attributes only the exact
+literal insertion, two same-callee placement shifts, the unchanged 96-byte
+provider's undefined-symbol size annotation and named zero-addend relocation ordering. No
+metadata or relocation class is generically ignored. Strict implicit-declaration
+checks pass in all six contexts; inherited pointer warnings are not called clean.
+Generated/stale controls, 34 tooling scripts, 240 guarded draft modes with their
+negative controls, 14 IRX host checks and inline-asm/static checks pass. Native
+semantics, the two constraint-group ablations and finite peer/data exceptions
+have independent review. Exact-commit CI is verified separately after publication.

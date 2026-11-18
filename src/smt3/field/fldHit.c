@@ -1077,7 +1077,6 @@ void fldHitChkUnitDamage(f32 *phys_pos)
     }
 }
 
-#ifdef NON_MATCHING
 extern fldDanteGunState_t fldRunDanteGunFlag;
 extern s8 dds3PadButtonState[];
 extern s32 fldHitChkSlope, fldHitMatterIndex;
@@ -1090,6 +1089,7 @@ extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32 mode);
 
+#ifdef NON_MATCHING
 /* 684 of 772 words match, first differing word at +0x70; 3088 of 3088 native
  * bytes, with the frame, every block and every branch in place. The 88 left
  * are one compiler property and its knock-ons: retail rematerialises the
@@ -1101,7 +1101,7 @@ extern void rsetAlpha(s32 mode);
  * other block. The reference that gives the invariant 1 flips its allocation
  * order with the fldGlobalBase base pointer ($19/$20, ~20 words); the rest is
  * the float schedule of the position+movement block and the +0x70 store pair.
- * fldHitChkUnitVWM has the same blocker. */
+ * VWM formerly shared the hitflag blocker; its constraints are localized below. */
 void fldHitChkUnit(f32 *position)
 {
     sdfVector4_t current;
@@ -1454,16 +1454,16 @@ void fldHitChkUnit(f32 *position)
 INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnit);
 #endif
 
-#ifdef NON_MATCHING
-extern f32 fldHitMinMove;
 extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
-/* 487 of 808 words match, first differing word at +0x7C; 3232 of 3256 native
- * bytes. The 24 missing bytes are three `addiu $4,$0,1` for the HImode `1`
- * stored into hitflag (cse2 here substitutes the lowpart of the SImode `1`
- * already in `inside`, retail rematerialises it) plus the three R5900 pad
- * nops that follow from the shorter blocks. The rest is register choice:
- * the prologue table pointer and the fldGlobalBase base register. */
+/* Read each pose only for its translation/restoration phase, and capture XYZ
+ * before publishing the resulting position. Indexed record members retain the
+ * native table-read epochs without extending a row-pointer lifetime.
+ *
+ * The three hitflag stores and two coordinate publications use localized
+ * constraints on real initialized values. They preserve the native a0 halfword
+ * temporary and f1/f2 Y/Z homes; no call crosses any constrained lifetime.
+ * These are target-specific compiler aids, not original-source evidence. */
 void fldHitChkUnitVWM(f32 *position)
 {
     sdfVector4_t current;
@@ -1473,7 +1473,7 @@ void fldHitChkUnitVWM(f32 *position)
     sdfVector4_t currentSave;
     sdfVector4_t previousSave;
     sdfVector4_t travel;
-    sdfVector4_t unused;  /* retail leaves 16 bytes unused here, at sp+0x70 */
+    sdfVector4_t unused;  /* Native SP+0x70 gap, also in fldHitChkUnit; removal shrinks frame by 16. */
     sdfVector4_t movement;
     sdfVector4_t xs;
     sdfVector4_t ys;
@@ -1490,8 +1490,6 @@ void fldHitChkUnitVWM(f32 *position)
     s32 debug;
     s32 moved;
     s32 inside;
-    collision_s *face;
-    collision_s *mface;
     fldCollisionFace_t *data;
     u32 attributes;
     dds3PoseSet_t *pose;
@@ -1507,12 +1505,11 @@ void fldHitChkUnitVWM(f32 *position)
     fldGlobalBase.word44 = 0;
     if (fldGlobalBase.hitMatterIndex != -1) {
         index = fldGlobalBase.hitMatterIndex;
-        face = &fldMatterTable[index];
-        if (face->matter != NULL) {
-            pose = face->matter->poseset;
-            movement.x = pose->pos.x - face->previousPosition[0];
-            movement.y = (pose->pos.y - face->previousPosition[1]) + 10.0f;
-            movement.z = pose->pos.z - face->previousPosition[2];
+        if (fldMatterTable[index].matter != NULL) {
+            pose = fldMatterTable[index].matter->poseset;
+            movement.x = pose->pos.x - fldMatterTable[index].previousPosition[0];
+            movement.y = (pose->pos.y - fldMatterTable[index].previousPosition[1]) + 10.0f;
+            movement.z = pose->pos.z - fldMatterTable[index].previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
     }
@@ -1521,12 +1518,18 @@ void fldHitChkUnitVWM(f32 *position)
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
         rsetAlpha(0);
     }
-    previous.x = fldHitChkWork[0];
-    previous.y = fldHitChkWork[1];
-    previous.z = fldHitChkWork[2];
-    current.x = position[0] + movement.x;
-    current.y = position[1] + movement.y;
-    current.z = position[2] + movement.z;
+    {
+        f32 inputX = position[0];
+        f32 inputY = position[1];
+        f32 inputZ = position[2];
+
+        previous.x = fldHitChkWork[0];
+        previous.y = fldHitChkWork[1];
+        previous.z = fldHitChkWork[2];
+        current.x = inputX + movement.x;
+        current.y = inputY + movement.y;
+        current.z = inputZ + movement.z;
+    }
     if (fldGlobalBase.area == 1) {
         radius = 25.0f;
         current.y = current.y - 35.0f;
@@ -1540,7 +1543,7 @@ void fldHitChkUnitVWM(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < fldHitMinMove) {
+    if (MATH_VectorLength(&delta) < 0.099999997f) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;
@@ -1586,14 +1589,16 @@ void fldHitChkUnitVWM(f32 *position)
             previousSave.y = previous.y;
             previousSave.z = previous.z;
             if (fldMatterTable[index].matter != NULL) {
-                pose = fldMatterTable[index].matter->poseset;
+                /* Actual pose read cursor; its six consumers finish before fldVecDot. */
+                dds3PoseSet_t *translationPose =
+                    fldMatterTable[index].matter->poseset;
                 moved = 1;
-                current.x = currentSave.x - pose->pos.x;
-                current.y = currentSave.y - pose->pos.y;
-                current.z = currentSave.z - pose->pos.z;
-                previous.x = previousSave.x - pose->pos.x;
-                previous.y = previousSave.y - pose->pos.y;
-                previous.z = previousSave.z - pose->pos.z;
+                current.x = currentSave.x - translationPose->pos.x;
+                current.y = currentSave.y - translationPose->pos.y;
+                current.z = currentSave.z - translationPose->pos.z;
+                previous.x = previousSave.x - translationPose->pos.x;
+                previous.y = previousSave.y - translationPose->pos.y;
+                previous.z = previousSave.z - translationPose->pos.z;
             } else {
                 moved = 0;
             }
@@ -1733,44 +1738,48 @@ void fldHitChkUnitVWM(f32 *position)
                     if (inside == 1 &&
                         (fldRunDanteGunFlag.counter == 0 ||
                          dds3PadButtonState[0x2B] == 0)) {
-                        mface = &fldMatterTable[index];
-                        if (mface->mode2D == 1) {
-                            xs.x = mface->point[0][0];
-                            ys.x = mface->point[0][1];
-                            zs.x = mface->point[0][2];
-                            xs.y = mface->point[1][0];
-                            ys.y = mface->point[1][1];
-                            zs.y = mface->point[1][2];
-                            xs.z = mface->point[2][0];
-                            ys.z = mface->point[2][1];
-                            zs.z = mface->point[2][2];
+                        if (fldMatterTable[index].mode2D == 1) {
+                            xs.x = fldMatterTable[index].point[0][0];
+                            ys.x = fldMatterTable[index].point[0][1];
+                            zs.x = fldMatterTable[index].point[0][2];
+                            xs.y = fldMatterTable[index].point[1][0];
+                            ys.y = fldMatterTable[index].point[1][1];
+                            zs.y = fldMatterTable[index].point[1][2];
+                            xs.z = fldMatterTable[index].point[2][0];
+                            ys.z = fldMatterTable[index].point[2][1];
+                            zs.z = fldMatterTable[index].point[2][2];
                             current.y = fldCamCalcSlopeOffset(current.x, current.z,
                                                                &xs.x, &ys.x, &zs.x) - 35.0f;
                             fldHitChkMatter = index;
                             fldGlobalBase.hitValid = 1;
-                            fldMatterTable[index].hitflag = 1;
+                            {
+                                /* Actual halfword publication value; native temporary is a0.
+                                 * Local constraint, not a call-crossing register contract. */
+                                FAKEMATCH_ASM_REG(u16, hitValue, "$4") = 1;
+                                FAKEMATCH_ASM_LIVE(hitValue);
+                                fldMatterTable[index].hitflag = hitValue;
+                            }
                             fldGlobalBase.hitX = current.x;
                             fldGlobalBase.hitY = current.y;
                             fldGlobalBase.hitZ = current.z;
                             fldHitMatterIndex = index;
                         } else {
-                            projected.x = current.x - mface->normal[0] * signedDistance;
-                            projected.y = current.y - mface->normal[1] * signedDistance;
-                            projected.z = current.z - mface->normal[2] * signedDistance;
-                            if (mface->normal[1] < -0.75f) {
+                            projected.x = current.x - fldMatterTable[index].normal[0] * signedDistance;
+                            projected.y = current.y - fldMatterTable[index].normal[1] * signedDistance;
+                            projected.z = current.z - fldMatterTable[index].normal[2] * signedDistance;
+                            if (fldMatterTable[index].normal[1] < -0.75f) {
                                 fldHitChkMatter = index;
                                 if (floorHit >= 0 && clearance < distance) {
                                     clearance = distance;
                                 }
-                                mface = &fldMatterTable[index];
-                                current.x = projected.x + mface->normal[0] * clearance;
-                                current.y = (projected.y + mface->normal[1] * clearance) - 1.0f;
-                                current.z = projected.z + mface->normal[2] * clearance;
+                                current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
+                                current.y = (projected.y + fldMatterTable[index].normal[1] * clearance) - 1.0f;
+                                current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
                                 if (clearance == radius) {
                                     floorHit = index;
                                 }
-                                if (mface->matter != NULL) {
-                                    pose = mface->matter->poseset;
+                                if (fldMatterTable[index].matter != NULL) {
+                                    dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
                                     moved = 0;
                                     current.x = current.x + pose->pos.x;
                                     current.y = current.y + pose->pos.y;
@@ -1779,22 +1788,31 @@ void fldHitChkUnitVWM(f32 *position)
                                     previous.y = previous.y + pose->pos.y;
                                     previous.z = previous.z + pose->pos.z;
                                 }
-                                fldMatterTable[index].hitflag = 1;
-                                fldGlobalBase.hitX = current.x;
-                                fldGlobalBase.hitY = current.y;
-                                fldGlobalBase.hitZ = current.z;
-                                fldGlobalBase.hitValid = 1;
-                                fldHitMatterIndex = index;
+                                {
+                                    f32 hitX = current.x;
+                                    FAKEMATCH_ASM_REG(f32, hitY, "$f1") = current.y;
+                                    FAKEMATCH_ASM_REG(f32, hitZ, "$f2") = current.z;
+                                    FAKEMATCH_ASM_LIVE_F32_PAIR(hitY, hitZ);
+                                    {
+                                        FAKEMATCH_ASM_REG(u16, hitValue, "$4") = 1;
+                                        FAKEMATCH_ASM_LIVE(hitValue);
+                                        fldMatterTable[index].hitflag = hitValue;
+                                    }
+                                    fldGlobalBase.hitX = hitX;
+                                    fldGlobalBase.hitY = hitY;
+                                    fldGlobalBase.hitZ = hitZ;
+                                    fldGlobalBase.hitValid = 1;
+                                    fldHitMatterIndex = index;
+                                }
                             } else if (!(signedDistance < 0.0f)) {
                                 if (clearance < distance) {
                                     clearance = distance;
                                 }
-                                mface = &fldMatterTable[index];
-                                current.x = projected.x + mface->normal[0] * clearance;
-                                current.y = projected.y + mface->normal[1] * clearance;
-                                current.z = projected.z + mface->normal[2] * clearance;
-                                if (mface->matter != NULL) {
-                                    pose = mface->matter->poseset;
+                                current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
+                                current.y = projected.y + fldMatterTable[index].normal[1] * clearance;
+                                current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
+                                if (fldMatterTable[index].matter != NULL) {
+                                    dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
                                     moved = 0;
                                     current.x = current.x + pose->pos.x;
                                     current.y = current.y + pose->pos.y;
@@ -1803,18 +1821,28 @@ void fldHitChkUnitVWM(f32 *position)
                                     previous.y = previous.y + pose->pos.y;
                                     previous.z = previous.z + pose->pos.z;
                                 }
-                                fldMatterTable[index].hitflag = 1;
-                                fldGlobalBase.hitValid = 1;
-                                fldGlobalBase.hitX = current.x;
-                                fldGlobalBase.hitY = current.y;
-                                fldGlobalBase.hitZ = current.z;
-                                fldHitMatterIndex = index;
+                                {
+                                    f32 hitX = current.x;
+                                    FAKEMATCH_ASM_REG(f32, hitY, "$f1") = current.y;
+                                    FAKEMATCH_ASM_REG(f32, hitZ, "$f2") = current.z;
+                                    FAKEMATCH_ASM_LIVE_F32_PAIR(hitY, hitZ);
+                                    {
+                                        FAKEMATCH_ASM_REG(u16, hitValue, "$4") = 1;
+                                        FAKEMATCH_ASM_LIVE(hitValue);
+                                        fldMatterTable[index].hitflag = hitValue;
+                                    }
+                                    fldGlobalBase.hitValid = 1;
+                                    fldGlobalBase.hitX = hitX;
+                                    fldGlobalBase.hitY = hitY;
+                                    fldGlobalBase.hitZ = hitZ;
+                                    fldHitMatterIndex = index;
+                                }
                             }
                         }
                     }
                 }
                 if (moved != 0) {
-                    pose = fldMatterTable[index].matter->poseset;
+                    dds3PoseSet_t *pose = fldMatterTable[index].matter->poseset;
                     current.x = current.x + pose->pos.x;
                     current.y = current.y + pose->pos.y;
                     current.z = current.z + pose->pos.z;
@@ -1834,16 +1862,20 @@ void fldHitChkUnitVWM(f32 *position)
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
     MATH_VectorLength(&delta);
-    position[0] = current.x;
-    position[2] = current.z;
-    position[1] = current.y;
-    fldHitChkWork[2] = current.z;
-    fldHitChkWork[0] = current.x;
-    fldHitChkWork[1] = current.y;
+    {
+        f32 outputX = current.x;
+        f32 outputY = current.y;
+        f32 outputZ = current.z;
+
+        position[0] = outputX;
+        position[1] = outputY;
+        position[2] = outputZ;
+        fldHitChkWork[0] = outputX;
+        fldHitChkWork[1] = outputY;
+        fldHitChkWork[2] = outputZ;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnitVWM);
-#endif
+
 
 void func_0013B658(void) {
 }
