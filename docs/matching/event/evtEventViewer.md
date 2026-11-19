@@ -336,3 +336,20 @@ retail checksum and report gates. Unchanged previously qualified owner contexts
 and IRX results are carried only with their applicable input identities checked;
 changed dependencies and integrated outputs are freshly checked. The linked
 image is byte-identical to retail. Exact-commit CI is checked after publication.
+
+## RunFrame2 (event/evtEventViewer, 0x850)
+
+The viewer's frame dispatch reproduces all 532 native instructions and its
+23-entry jump table. Camera interpolation preserves the initialized fraction,
+nearest-frame update, depth-of-field and sky phases. The fade branches keep
+their real black, full-weight and interpolated endpoints. The effect branches
+prepare the next and previous data only where the corresponding frame
+exists. The screen-blur branch preserves the fixed fallback halfwords and
+the two interpolated values through their original publication.
+
+The local register constraints track actual inputs, scratch state and
+outputs. Each retained binding was independently necessary with the pinned
+compiler. All 31 direct calls retain their native locations and targets.
+The complete owner includes this function and the previously matched
+EnterData. The inherited SKIP_ASM camera-name lookup diagnostics are
+unchanged; the linked image verifies the actual pointers and strings.

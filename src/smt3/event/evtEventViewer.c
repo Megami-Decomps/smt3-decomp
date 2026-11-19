@@ -945,7 +945,6 @@ void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node, s32 nowFrame, s32
     }
 }
 
-#ifdef NON_MATCHING
 extern evtViewerObject_s *evt_camera;
 extern s8 dds3ScreenBlurFlag;
 extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
@@ -989,86 +988,131 @@ extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
 void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next, evtFrameInfo_t *previous,
                s32 nowFrame, s32 *nearestFrame)
 {
+    /* These local EE homes preserve the native fade arguments and the
+     * disjoint time/selector and previous-frame/output work phases. */
+    s32 color = 0;
+    FAKEMATCH_ASM_REG(s32, alpha, "$8") = 0;
+    s32 hokan = 1;
+    FAKEMATCH_ASM_REG(s32, current, "$6") = nowFrame;
+    FAKEMATCH_ASM_REG(void *, saved, "$16") = previous;
     evtViewerInfo_t *viewer = viewerinfo;
-    s32 start = previous != NULL ? previous->frame : viewer->firstframe;
+    s32 start = ((evtFrameInfo_t *)saved) != NULL ? ((evtFrameInfo_t *)saved)->frame : viewer->firstframe;
     s32 end = next != NULL ? next->frame : viewer->lastframe;
-    f32 ratio = end != start ? (f32)(s32)((u32)nowFrame - (u32)start) / (f32)(s32)((u32)end - (u32)start) : 0.0f;
-    s32 hokan = 1, color = 0, alpha = 0, elapsed, duration, remaining, type;
-    f32 fade = 1.0f, firstSoften, firstBias, nextSoften, nextBias;
+    f32 ratio;
+    s32 duration, remaining, type;
+    /* Blur uses the time delta, then the two signed-short publications. */
+    FAKEMATCH_ASM_REG(s32, elapsed, "$8");
+    f32 firstSoften, firstBias, nextSoften, nextBias;
     void *first, *second;
     s16 blurAlpha, blurScale;
+    FAKEMATCH_ASM_REG(s32, outputScale, "$6");
+    FAKEMATCH_ASM_REG(s32, outputAlpha, "$5");
     evtFrameInfo_t *after;
 
+    if (end != start) {
+        ratio = (f32)(s32)((u32)current - (u32)start) /
+                (f32)(s32)((u32)end - (u32)start);
+    } else {
+        ratio = 0.0f;
+    }
     type = track->type;
     switch (type) {
+    case 1:
+        break;
     case 2:
-        if (previous != NULL) {
-            elapsed = (s32)((u32)nowFrame - previous->frame);
-            if (elapsed < *nearestFrame) {
-                *nearestFrame = elapsed;
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            current = (s32)((u32)current - ((evtFrameInfo_t *)saved)->frame);
+            if (current < *nearestFrame) {
+                *nearestFrame = current;
                 evt_camera = track;
             }
         }
         break;
     case 22:
-        evtSetBokasi(previous != NULL && (s16)previous->param.sh[0] != 0);
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            if ((s16)((evtFrameInfo_t *)saved)->param.sh[0] != 0) {
+                evtSetBokasi(1);
+            } else {
+                evtSetBokasi(0);
+            }
+        } else {
+            evtSetBokasi(0);
+        }
         break;
     case 12:
-        if (previous != NULL) {
-            if (viewer->fldfilter != previous->param.sw[1]) {
-                fldSkySetFilter(previous->param.sw[1], (s16)previous->param.sh[0], previous->index);
-                evtSetSkyAlpha(previous->index, (s16)previous->param.sh[1]);
-                viewerinfo->fldfilter = previous->param.sw[1];
-            } else if (evtCheckSkyAlphaAnime() == 0 && fldSkyGetAlpha() != (s16)previous->param.sh[1]) {
-                evtSetSkyAlpha(previous->index, (s16)previous->param.sh[1]);
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            if (viewer->fldfilter != ((evtFrameInfo_t *)saved)->param.sw[1]) {
+                fldSkySetFilter(((evtFrameInfo_t *)saved)->param.sw[1], (s16)((evtFrameInfo_t *)saved)->param.sh[0], ((evtFrameInfo_t *)saved)->index);
+                evtSetSkyAlpha(((evtFrameInfo_t *)saved)->index, (s16)((evtFrameInfo_t *)saved)->param.sh[1]);
+                viewerinfo->fldfilter = ((evtFrameInfo_t *)saved)->param.sw[1];
+            } else if (evtCheckSkyAlphaAnime() == 0 && fldSkyGetAlpha() != (s16)((evtFrameInfo_t *)saved)->param.sh[1]) {
+                evtSetSkyAlpha(((evtFrameInfo_t *)saved)->index, (s16)((evtFrameInfo_t *)saved)->param.sh[1]);
             }
         } else if (viewer->fldfilter != 0) {
             fldSkySetFilter(0, 1, 0);
             viewerinfo->fldfilter = 0;
         }
         break;
-    case 6:
-        if (previous == NULL) {
+    case 6: {
+        f32 fade;
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            if (((evtFrameInfo_t *)saved)->index == 0) {
+                fade = 1.0f;
+            } else {
+                /* Keep the active start frame through the fade comparison. */
+                FAKEMATCH_ASM_REG(s32, begin, "$7") = ((evtFrameInfo_t *)saved)->frame;
+                s32 length = ((evtFrameInfo_t *)saved)->index;
+                s32 limit = begin + length;
+                if (current < limit) {
+                    limit = (s32)((u32)current - (u32)begin);
+                    fade = (f32)limit / (f32)length;
+                } else {
+                    fade = 1.0f;
+                }
+            }
+            current = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+            switch (current) {
+            case 0:
+                color = 0xFF;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    alpha = (s32)(128.0f * (1.0f - fade));
+                }
+                break;
+            case 1:
+                color = 0xFF;
+                alpha = 0x80;
+                if (fade != 1.0f) {
+                    alpha = (s32)(fade * 128.0f);
+                }
+                break;
+            case 2:
+                color = 0;
+                alpha = 0;
+                if (fade != 1.0f) {
+                    alpha = (s32)(128.0f * (1.0f - fade));
+                }
+                break;
+            case 3:
+                color = 0;
+                alpha = 0x80;
+                if (fade != 1.0f) {
+                    alpha = (s32)(fade * 128.0f);
+                }
+                break;
+            }
+            dds3FadeSet(color, color, color, alpha);
+        } else {
             dds3FadeClear();
-            break;
         }
-        if (previous->index != 0 && nowFrame < previous->frame + previous->index) {
-            fade = (f32)(nowFrame - previous->frame) / (f32)previous->index;
-        }
-        switch ((s16)previous->param.sh[0]) {
-        case 0:
-            color = 0xFF;
-            if (fade != 1.0f) {
-                alpha = (s32)(128.0f * (1.0f - fade));
-            }
-            break;
-        case 1:
-            color = 0xFF;
-            alpha = 0x80;
-            if (fade != 1.0f) {
-                alpha = (s32)(fade * 128.0f);
-            }
-            break;
-        case 2:
-            if (fade != 1.0f) {
-                alpha = (s32)(128.0f * (1.0f - fade));
-            }
-            break;
-        case 3:
-            alpha = 0x80;
-            if (fade != 1.0f) {
-                alpha = (s32)(fade * 128.0f);
-            }
-            break;
-        }
-        dds3FadeSet(color, color, color, alpha);
         break;
+    }
     case 10:
-        if (previous != NULL) {
-            hokan = previous->nameIndex;
-            first = previous->work;
-            firstSoften = previous->param.sf[0];
-            firstBias = previous->param.sf[1];
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            first = ((evtFrameInfo_t *)saved)->work;
+            firstSoften = ((evtFrameInfo_t *)saved)->param.sf[0];
+            firstBias = ((evtFrameInfo_t *)saved)->param.sf[1];
+            hokan = ((evtFrameInfo_t *)saved)->nameIndex;
         } else {
             first = NULL;
             firstSoften = 7.0f;
@@ -1084,103 +1128,216 @@ void RunFrame2(evtViewerObject_s *track, evtFrameInfo_t *next, evtFrameInfo_t *p
             nextBias = 0.0f;
         }
         if (first != NULL || second != NULL) {
-            evtHokanSceneLight(hokan, ratio, first, second, evtViewerLightParam.color);
-            dds3SetLightColor(0, 0, evtViewerLightParam.color);
-            dds3SetLightDir(0, 0, evtViewerLightParam.direction);
-            dds3SetAmbientColor(0, evtViewerLightParam.ambient);
+            saved = &evtViewerLightParam;
+            evtHokanSceneLight(hokan, ratio, first, second, ((pmdSceneLightTable_t *)saved)->color);
+            dds3SetLightColor(0, 0, ((pmdSceneLightTable_t *)saved)->color);
+            dds3SetLightDir(0, 0, ((pmdSceneLightTable_t *)saved)->direction);
+            dds3SetAmbientColor(0, ((pmdSceneLightTable_t *)saved)->ambient);
             sdfFaceDivSoften = evtHokanFloat(hokan, ratio, firstSoften, nextSoften);
             sdfFaceDivBias = evtHokanFloat(hokan, ratio, firstBias, nextBias);
         }
         break;
-    case 11:
-    case 13:
-    case 14:
-    case 15:
-    case 16:
-    case 17:
-    case 23:
-        first = NULL;
-        second = NULL;
-        if (previous != NULL) {
-            hokan = (s16)previous->param.sh[0];
-            first = previous->work;
+    case 11: {
+        evtBlendVecColor_t *previousWork;
+        evtBlendVecColor_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
         }
         if (next != NULL) {
-            second = next->work;
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
         }
-        if (first == NULL && second == NULL) {
-            break;
-        }
-        switch (type) {
-        case 11:
-            evtHokanSceneFog(hokan, ratio, first, second, &evtViewerFogParam);
-            dds3SetFogPara(0, evtViewerFogParam.vec[1], evtViewerFogParam.vec[0], evtViewerFogParam.vec[2], evtViewerFogParam.vec[3]);
-            dds3LightParam.fog.color = evtViewerFogParam.color;
-            break;
-        case 13:
-            evtHokanBlur2(hokan, ratio, first, second, &evtViewerBlurParam);
-            evtSetUnityCalcArea(&evtViewerBlurParam);
-            viewerinfo->drawblur2 = 1;
-            break;
-        case 14:
-            evtHokanMultBlur(hokan, ratio, first, second, &evtViewerMultiBlurParam);
-            Eve_PartialMultiBlurSetParam(&evtViewerMultiBlurParam);
-            viewerinfo->drawmblur = 1;
-            break;
-        case 15:
-            evtHokanDistBlur(hokan, ratio, first, second, &evtViewerDistBlurParam);
-            Eve_DistortionBlurSetParam(&evtViewerDistBlurParam);
-            viewerinfo->drawdblur = 1;
-            break;
-        case 23:
-            evtHokanRipBlur(hokan, ratio, first, second, &evtViewerRippleBlurParam);
-            Eve_RippleBlurSetParam(&evtViewerRippleBlurParam);
-            viewerinfo->drawrblur = 1;
-            break;
-        case 16:
-            evtHokanFilter(hokan, ratio, first, second, &evtViewerFilterParam);
-            Eve_FilterSetParam(&evtViewerFilterParam);
-            viewerinfo->filter = 1;
-            break;
-        case 17:
-            evtHokanMultFilter(hokan, ratio, first, second, &evtViewerMultiFilterParam);
-            Eve_PartialMultiFilterSetParam(&evtViewerMultiFilterParam);
-            viewerinfo->drawmfilter = 1;
+        if (previousWork == NULL && nextWork == NULL) {
             break;
         }
+        saved = &evtViewerFogParam;
+        evtHokanSceneFog(hokan, ratio, previousWork, nextWork, (evtBlendVecColor_t *)saved);
+        dds3SetFogPara(0, ((evtBlendVecColor_t *)saved)->vec[1], ((evtBlendVecColor_t *)saved)->vec[0], ((evtBlendVecColor_t *)saved)->vec[2], ((evtBlendVecColor_t *)saved)->vec[3]);
+        dds3LightParam.fog.color = ((evtBlendVecColor_t *)saved)->color;
         break;
-    case 8:
-        blurAlpha = 0;
-        blurScale = 0;
-        if (previous != NULL) {
-            if ((s16)previous->param.sh[2] != 0 && (after = previous->next) != NULL) {
-                elapsed = (s32)((u32)nowFrame - previous->frame);
-                duration = after->frame - previous->frame;
-                remaining = (s32)((u32)duration - (u32)elapsed);
-                blurAlpha = (s32)((u32)(s16)previous->param.sh[0] * (u32)remaining +
-                                  (u32)(s16)after->param.sh[0] * (u32)elapsed) / duration;
-                blurScale = (s32)((u32)(s16)previous->param.sh[1] * (u32)remaining +
-                                  (u32)(s16)after->param.sh[1] * (u32)elapsed) / duration;
-            } else {
-                blurAlpha = previous->param.sh[0];
-                blurScale = previous->param.sh[1];
-            }
+    }
+    case 13: {
+        dds3Effect_Blur_t *previousWork;
+        dds3Effect_Blur_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
         }
-        if (blurAlpha != 0 || blurScale != 0) {
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerBlurParam;
+        evtHokanBlur2(hokan, ratio, previousWork, nextWork, (dds3Effect_Blur_t *)saved);
+        evtSetUnityCalcArea((dds3Effect_Blur_t *)saved);
+        viewerinfo->drawblur2 = 1;
+        break;
+    }
+    case 14: {
+        dds3Effect_PartialMultiBlurParam_t *previousWork;
+        dds3Effect_PartialMultiBlurParam_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
+        }
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerMultiBlurParam;
+        evtHokanMultBlur(hokan, ratio, previousWork, nextWork, (dds3Effect_PartialMultiBlurParam_t *)saved);
+        Eve_PartialMultiBlurSetParam((dds3Effect_PartialMultiBlurParam_t *)saved);
+        viewerinfo->drawmblur = 1;
+        break;
+    }
+    case 15: {
+        dds3Effect_DistortionBlurParam_t *previousWork;
+        dds3Effect_DistortionBlurParam_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
+        }
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerDistBlurParam;
+        evtHokanDistBlur(hokan, ratio, previousWork, nextWork, (dds3Effect_DistortionBlurParam_t *)saved);
+        Eve_DistortionBlurSetParam((dds3Effect_DistortionBlurParam_t *)saved);
+        viewerinfo->drawdblur = 1;
+        break;
+    }
+    case 23: {
+        dds3Effect_RippleBlurParam_t *previousWork;
+        dds3Effect_RippleBlurParam_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
+        }
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerRippleBlurParam;
+        evtHokanRipBlur(hokan, ratio, previousWork, nextWork, (dds3Effect_RippleBlurParam_t *)saved);
+        Eve_RippleBlurSetParam((dds3Effect_RippleBlurParam_t *)saved);
+        viewerinfo->drawrblur = 1;
+        break;
+    }
+    case 16: {
+        dds3Effect_Filter_t *previousWork;
+        dds3Effect_Filter_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
+        }
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerFilterParam;
+        evtHokanFilter(hokan, ratio, previousWork, nextWork, (dds3Effect_Filter_t *)saved);
+        Eve_FilterSetParam((dds3Effect_Filter_t *)saved);
+        viewerinfo->filter = 1;
+        break;
+    }
+    case 17: {
+        dds3Effect_PartialMultiFilterParam_t *previousWork;
+        dds3Effect_PartialMultiFilterParam_t *nextWork;
+
+        if (((evtFrameInfo_t *)saved) != NULL) {
+            previousWork = ((evtFrameInfo_t *)saved)->work;
+            hokan = (s16)((evtFrameInfo_t *)saved)->param.sh[0];
+        } else {
+            previousWork = NULL;
+        }
+        if (next != NULL) {
+            nextWork = next->work;
+        } else {
+            nextWork = NULL;
+        }
+        if (previousWork == NULL && nextWork == NULL) {
+            break;
+        }
+        saved = &evtViewerMultiFilterParam;
+        evtHokanMultFilter(hokan, ratio, previousWork, nextWork, (dds3Effect_PartialMultiFilterParam_t *)saved);
+        Eve_PartialMultiFilterSetParam((dds3Effect_PartialMultiFilterParam_t *)saved);
+        viewerinfo->drawmfilter = 1;
+        break;
+    }
+    case 8:
+        if (((evtFrameInfo_t *)saved) == NULL) {
+            goto clearBlur;
+        }
+        if ((s16)((evtFrameInfo_t *)saved)->param.sh[2] == 0 || (after = ((evtFrameInfo_t *)saved)->next) == NULL) {
+            blurAlpha = ((evtFrameInfo_t *)saved)->param.sh[0];
+            blurScale = ((evtFrameInfo_t *)saved)->param.sh[1];
+        } else {
+            s32 begin = ((evtFrameInfo_t *)saved)->frame;
+            elapsed = (s32)((u32)current - (u32)begin);
+            duration = after->frame - begin;
+            remaining = (s32)((u32)duration - (u32)elapsed);
+            blurAlpha = (s32)((u32)(s16)((evtFrameInfo_t *)saved)->param.sh[0] * (u32)remaining +
+                              (u32)(s16)after->param.sh[0] * (u32)elapsed) / duration;
+            blurScale = (s32)((u32)(s16)((evtFrameInfo_t *)saved)->param.sh[1] * (u32)remaining +
+                              (u32)(s16)after->param.sh[1] * (u32)elapsed) / duration;
+        }
+
+        outputScale = (s32)blurScale;
+        outputAlpha = (s32)blurAlpha;
+        if (outputAlpha != 0 || outputScale != 0) {
             viewer->flags |= 4;
             dds3ScreenBlurFlag = 1;
-            dds3ScreenBlurAlpha = blurAlpha;
-            dds3ScreenBlurScale = blurScale;
+            dds3ScreenBlurAlpha = (s16)outputAlpha;
+            dds3ScreenBlurScale = (s16)outputScale;
         } else {
+    clearBlur:
             viewer->flags &= ~4;
             dds3ScreenBlurFlag = 0;
         }
         break;
     }
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame2);
-#endif
 
 extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *basic);
 extern void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *light,

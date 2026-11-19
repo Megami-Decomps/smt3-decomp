@@ -61,10 +61,36 @@ The editor descriptor at D_0031CA50 uses func_00174DC0 as its create callback an
 
 The local effDebugWireframeCylinderDraw declaration now matches the provider's const f32 * parameter. Both owner callers pass &center.x from the unchanged aligned vector object. The cylinder consumes the address only through its actual VU vector loads, with no scalar C indexing across struct fields.
 
-Production, SKIP_ASM, and NON_MATCHING/SKIP_ASM preserve literal complete assembly and entire ELF objects before/after. Complete owner checking remains 290 matches and zero differences; strict implicit-declaration checks pass in all three modes. All fallbacks and function bodies are retained. This is a truthful type correction with no new matching credit, not a demonstrated native runtime change or recovered original spelling.
+That earlier type-only repair preserved literal complete assembly and ELF
+objects in production, SKIP_ASM, and NON_MATCHING/SKIP_ASM. At that
+point the retained fallbacks and body gave 290 matching functions; strict
+implicit-declaration checks passed in all three modes. The repair itself
+did not change runtime behavior or earn matching credit.
 
 Fresh complete-source plain/dump and wrapper/direct comparisons qualify all
 three before/after contexts with 21,227 unchanged actual-runtime input files.
 The native descriptor and actual callback dispatchers were independently
 reviewed. The nearby branch/VU and allocation experiments remain private and
 are not part of this contract repair.
+
+**Exact compiler reconstruction (2026-11-19).** Both functions now compile
+as ordinary C with localized constraints on the actual light state. The
+create path checks the party and formation flags before calling
+`mdlGetColor`, then reloads the selected formation's unit after the call.
+It packs that unit's ambient and light RGB lanes with the native alpha bit,
+clears the three owned selector bytes in native order, and publishes the
+model callback's unmodified return value. Its public callback result is
+still NULL on every path.
+
+The update path snapshots the formation array before reselection and reads
+the live party array afterward. The scan tests the old index before the
+explicitly wrapping increment, publishes the next index, and reloads it after
+the call. The native lighting callbacks, direction VU load and formation
+position copy retain their order. The temporary sphere center goes directly
+to the cylinder renderer's VU load rather than a scalar C observer.
+
+Both entry points match all 155 native words, with 292 matching functions
+and zero differences in the affected owner. Independent host fixtures
+exercise replaced units, party/formation snapshots, both light branches,
+selector-byte canaries, and VU handoff values. The narrow constraints
+reconstruct compiler behavior, not original source spelling.

@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 48 |  | [code_0022C578.md](code_0022C578.md) |
+| 49 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 18 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
@@ -22,10 +22,10 @@ both native and emitted sizes when they differ.
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
 | 10 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
+| 9 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 8 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
-| 8 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |

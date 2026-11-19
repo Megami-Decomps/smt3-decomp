@@ -7101,7 +7101,6 @@ u16 cmpGetSkillCost(u16 skill, u16 *work)
 extern const u8 D_0053FEB8[];
 extern char cmpFmtSkillCost[];
 
-#ifdef NON_MATCHING
 void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
                          s8 rowFlag, s8 selected, u16 *work, u16 skill, s32 alpha)
 {
@@ -7109,59 +7108,89 @@ void cmpDrawSkillListRow(s32 x, s32 y, s32 textColor, u16 unusedSkill,
     s32 colors[4];
     s32 adjustedAlpha;
     s32 scaled;
-    s32 sprite;
+    /* The sprite and returned font have distinct live phases around the draw calls. */
+    FAKEMATCH_ASM_REG(s32, sprite, "$17");
     s32 icon;
     frFontHandle_t *font;
+    FAKEMATCH_ASM_REG(s32, baseIcon, "$21");
 
     buffer[0] = D_0053FEB8[0];
     memset(buffer + 1, 0, 0x1F);
-    adjustedAlpha = alpha;
-    if (alpha >= 0x101) {
-        adjustedAlpha = 0x200 - alpha;
+    {
+        s32 untouched = alpha < 0x101;
+        adjustedAlpha = alpha;
+        if (!untouched) {
+            adjustedAlpha = (s32)(0x200u - (u32)alpha);
+        }
     }
-    scaled = (s32)(adjustedAlpha * 96);
+    scaled = (s32)((u32)adjustedAlpha * 96u);
     if (scaled < 0) {
         scaled += 0xFF;
     }
-    colors[0] = (scaled >> 8) | 0x80808000;
-    colors[1] = colors[0];
-    colors[2] = colors[0];
-    colors[3] = colors[0];
+    colors[3] = colors[2] = colors[1] = colors[0] = (scaled >> 8) | 0x80808000;
 
     if (skill >= 0x120) {
-        if (selected != 0 || rowFlag == 0) {
-            sprite = 0x14;
-        } else {
+        sprite = 0x14;
+        if (selected == 0) {
+            s32 plain = sprite;
             sprite = 0x15;
+            FAKEMATCH_ASM_LIVE(sprite);
+            if (rowFlag == 0) {
+                sprite = plain;
+            }
         }
-        fclDrawSpriteRes(x + 0x120, y + 0x38, 0x10, colors, 7, sprite,
+        fclDrawSpriteRes((s32)((u32)x + 0x120u), (s32)((u32)y + 0x38u), 0x10, colors, 7, (u16)sprite,
                          D_00345D88, fclSpriteTable, 0x47);
     } else {
-        sprintf(buffer, cmpFmtSkillCost, cmpGetSkillCost(skill, work));
-        font = (frFontHandle_t *)frwGetSmallNumFontFRQ(x, y + 0x10, 0x10, (u32)textColor, buffer, NULL);
+        u16 cost = cmpGetSkillCost(skill, work);
+        /* Keep the real default available for the later icon classification. */
+        baseIcon = 2;
+        FAKEMATCH_ASM_LIVE(baseIcon);
+        sprintf(buffer, cmpFmtSkillCost, cost);
+        {
+            /* The native font call prepares X and priority before its sprite delay slot. */
+            FAKEMATCH_ASM_REG(s32, fontX, "$4") = x;
+            s32 priority = 0x10;
+            FAKEMATCH_ASM_LIVE(fontX);
+            sprite = baseIcon;
+            FAKEMATCH_ASM_LIVE(priority);
+            font = frwGetSmallNumFontFRQ(fontX, (s32)((u32)y + 0x10u), priority, (u32)textColor, buffer, NULL);
+        }
         frDrawFontOt(font, 1, 0x47);
         frDestroyFontRequestAfter(font);
 
-        sprite = 2;
-        if (selected == 0) {
-            sprite = rowFlag != 0;
+        {
+            s32 alternate = rowFlag != 0;
+            if (selected == 0) {
+                sprite = alternate;
+            }
         }
         icon = cmpGetSkillIcon(skill);
-        if (icon == 1) {
-            sprite += 0xE;
-        } else if (icon == 2) {
-            sprite += 0x11;
-        } else {
-            return;
+        switch (icon) {
+        case 1:
+            sprite += 14;
+            goto drawIconOne;
+        default:
+            if (icon != baseIcon) {
+                goto done;
+            }
+            goto drawIconTwo;
         }
-        fclDrawSpriteRes(x + 0x230, y + 0x20, 0x10, colors, 7, sprite,
+drawIconOne:
+        fclDrawSpriteRes((s32)((u32)x + 0x230u), (s32)((u32)y + 0x20u), 0x10, colors, 7, (u16)sprite,
+                         D_00345D88, fclSpriteTable, 0x47);
+        return;
+drawIconTwo:
+        /* Keep the actual icon-two ID calculation here, before atlas setup. */
+        sprite += 17;
+        FAKEMATCH_ASM_READ(sprite);
+        fclDrawSpriteRes((s32)((u32)x + 0x230u), (s32)((u32)y + 0x20u), 0x10, colors, 7, (u16)sprite,
                          D_00345D88, fclSpriteTable, 0x47);
     }
+done:
+    return;
 }
 
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillListRow);
-#endif
 
 void cmpDrawSkillListScrollBar(s32 a, cmpCursorInfo_t *cursor)
 {

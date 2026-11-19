@@ -3340,33 +3340,53 @@ extern u32 effBTLUnitAmbientColor;
 extern effBTLAimParams_t effBTLAimParams;
 extern u32 mdlGetColor(mdlObj_t *model);
 
-#ifdef NON_MATCHING
 void *func_00174DC0(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     struct nbParty_t *party = &data->party[effBTLPartyIndex];
+    nbFormation_t *formations = data->form;
     nbFormation_t *formation;
-    evtUnit_t *unit;
-    u32 color;
+    /* The model callback result stays in its return register until it is published. */
+    FAKEMATCH_ASM_REG(u32, color, "$2");
+    FAKEMATCH_ASM_REG(void *, result, "$2") = NULL;
 
-    if (party->flag & 1) {
-        formation = &data->form[party->formindex];
+    if (!(party->flag & 1))
+        return result;
+    {
+        s32 index = party->formindex;
+        formation = &formations[index];
         if (formation->stat & 2) {
             color = mdlGetColor(formation->hunit->owner);
-            unit = formation->hunit;
-            effBTLUnitAmbientColor = (unit->color50 & 0x00FFFFFF) | 0x80000000;
-            effBTLUnitLightColor = (unit->color & 0x00FFFFFF) | 0x80000000;
-            effBTLAimParams.directionMode = 0;
-            effBTLAimParams.scaleKind = 0;
-            effBTLAimParams.aimMode = 0;
+            {
+                evtUnit_t *unit = formation->hunit;
+                /* Keep the actual ambient and light lanes separate after the model callback. */
+                FAKEMATCH_ASM_REG(u32, ambient, "$4");
+                u32 lightWord;
+                FAKEMATCH_ASM_REG(u32, mask, "$3") = 0x00FFFFFF;
+                u32 alpha = 0x80000000;
+                effBTLAimParams_t *aim = &effBTLAimParams;
+                ambient = unit->color50;
+                lightWord = unit->color;
+                ambient &= mask;
+                /* Materialize the real selector address and keep its initialized
+                 * direction byte at the native store before the RGB packing. */
+                FAKEMATCH_ASM_READ(aim);
+                aim->directionMode = 0;
+                FAKEMATCH_ASM_READ_MEM(aim->directionMode);
+                mask = lightWord & mask;
+                ambient |= alpha;
+                mask |= alpha;
+                effBTLUnitAmbientColor = ambient;
+                effBTLUnitLightColor = mask;
+                aim->aimMode = 0;
+                aim->scaleKind = 0;
+            }
             effBTLUnitColor = color;
+            result = NULL;
         }
     }
-    return 0;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_00174DC0);
-#endif
 
 extern void *func_00174DC0(void *unused);
 extern s8 dds3PadBitTable[] __attribute__((section(".data")));
@@ -3379,7 +3399,6 @@ extern void evtSetUnitLightDir(evtUnit_t *unit, s32 frame);
 extern void effBTLPartGetPointLightPtr(nbFormation_t *formation, effBTLAimParams_t *params,
                                       sdfVector4_t *direction);
 
-#ifdef NON_MATCHING
 void eff_174E88(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
@@ -3397,7 +3416,8 @@ void eff_174E88(void *unused)
                 effBTLPartyIndex = 0;
                 break;
             }
-            effBTLPartyIndex = index + 1;
+            index = (u32)index + 1;
+            effBTLPartyIndex = index;
             func_00174DC0(0);
             index = effBTLPartyIndex;
             if (formations[index].stat & 1) {
@@ -3411,20 +3431,22 @@ void eff_174E88(void *unused)
         formation = &formations[party->formindex];
         if (formation->stat & 2) {
             evtSetUnitColorRGB(formation->hunit, 0, effBTLUnitColor);
-            if (effBTLUnitLightOn == 0) {
-                evtUnitLightOff(formation->hunit, 0);
-            } else {
+            if (effBTLUnitLightOn != 0) {
                 evtUnitLightOn(formation->hunit);
                 evtSetUnitLightAndAmbient(formation->hunit, 0, effBTLUnitLightColor, effBTLUnitAmbientColor);
                 effBTLPartGetPointLightPtr(formation, &effBTLAimParams, &direction);
                 SDF_VU0_LOADVECTOR(&direction);
                 evtSetUnitLightDir(formation->hunit, 0);
+            } else {
+                evtUnitLightOff(formation->hunit, 0);
             }
             SDF_VU0_COPYVECTOR(&effBTLLastFormationPos, &formation->pos);
             effDebugPointDraw(&formation->pos);
             if (effBTLDebugSphereOn != 0) {
                 effBTLModelGetSphereCenter(formation);
-                SDF_VU0_STOREVECTOR(&center);
+                /* This scratch vector is handed directly to the cylinder
+                 * provider, whose VU loads are its only consumers. */
+                SDF_VU0_STOREVECTOR_NOMEM(&center);
                 effDebugWireframeCylinderDraw(&center.x, 0x80802020,
                                               formation->r * formation->scl,
                                               formation->h * formation->scl);
@@ -3432,9 +3454,6 @@ void eff_174E88(void *unused)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleSystem", eff_174E88);
-#endif
 
 extern dds3LightState_t dds3LightParam;
 SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
