@@ -2028,7 +2028,6 @@ s32 cmpCalcDestroyItem(void)
     return 1;
 }
 
-#ifdef NON_MATCHING
 extern void cmpCalcItemEntry(fclPanelPos_t *pos, cmpCursorInfo_t *cursor, s32 context,
                              s8 flag, s32 alpha, s32 ot);
 
@@ -2076,20 +2075,26 @@ s32 cmpCalcItem(void)
             if (status == 1) {
                 switch (campWork->page[0].cursor.unk_22 +
                         (u8)campWork->page[0].cursor.unk_24) {
-                case 0:
-                    if (cmpGetSkillTargetArea(datItemTable[cmpGetSelectItemID()].skill) == 0) {
+                case 0: {
+                    const datItemEntry_t *table = datItemTable;
+                    u16 item = cmpGetSelectItemID();
+                    const datItemEntry_t *entry = table + item;
+                    if (cmpGetSkillTargetArea(entry->skill) == 0) {
                         cmpUseItem();
                         campWork->unk_0001 = phase;
                         return 1;
                     }
                     campWork->unk_0001 = 9;
                     break;
+                }
                 case 1:
                     if (cmpCalcDestroyItem() == 0) {
                         return 1;
                     }
                     campWork->unk_0001 = 0x10;
                     campWork->unk_0004 = status;
+                    /* Reload the actual work root before the panel update. */
+                    FAKEMATCH_ASM_LIVE_MEM(campWork);
                     result = 1;
                     break;
                 case 2:
@@ -2136,9 +2141,6 @@ s32 cmpCalcItem(void)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
-#endif
 
 s32 cmpSetPartyDSL(void)
 {
