@@ -446,7 +446,9 @@ extern s8 gMessageSpaceX;
 
 extern u16 frMessageCode;
 
-extern s32 frFindTagCode(u16 code);
+/* The actual provider is a bounded read-only table scan, without calls
+ * or observable writes. This is the canonical declaration in this unit. */
+extern s32 __attribute__((pure)) frFindTagCode(u16 code);
 
 extern s32 frFindTagCode2(u16 code);
 
@@ -1926,8 +1928,7 @@ void frPushTagChar(frMsgInfo_t *ctx, u16 code) {
     frSetPriority(ctx->pFRQ, ctx->Z);
 }
 
-/* NON_MATCHING: 280 of 322 words differ (first at +0x44). */
-#ifdef NON_MATCHING
+/* Decode the current message control tag. */
 s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
     s32 *offset = &mi->Ofs;
     s32 argCount = code & 0xF;
@@ -1935,7 +1936,7 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
     u8 *text = mi->pMsg;
     s8 firstOption = mi->ColNo;
 
-    code = (code << FR_FONT_BYTE_SHIFT) | text[pos];
+    code = (s32)(((u32)code << FR_FONT_BYTE_SHIFT) | text[pos]);
     pos++;
     *offset = pos;
     switch (code) {
@@ -1962,43 +1963,75 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         }
         *offset += 2;
         break;
+    /* The raw glyph is read before the cursor publication, then the actual
+     * owner argument is prepared before the handle callback. Separate
+     * input constraints preserve those two real scheduling phases; they
+     * do not add a memory barrier or promise anything about the callback. */
     case 0xF20A: {
-        s32 nameIndex;
-
-        *offset = pos + 2;
-        nameIndex = text[pos] - 1;
-        frCreateNewHandle(mi);
-        mi->pFRQ = frGetNameFRQ(nameIndex, mi->pFRQ, firstOption);
+        FAKEMATCH_ASM_REG(s32, raw, "$5") = text[pos];
+        FAKEMATCH_ASM_REG(s32, nameIndex, "$16");
+        s32 argument;
+        frMsgInfo_t *owner;
+        s32 next = pos + 2;
+        FAKEMATCH_ASM_READ(raw);
+        owner = mi;
+        FAKEMATCH_ASM_READ(owner);
+        *offset = next;
+        nameIndex = (s32)raw - 1;
+        frCreateNewHandle(owner);
+        argument = (s8)nameIndex;
+        mi->pFRQ = frGetNameFRQ(argument, mi->pFRQ, firstOption);
         frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20B: {
-        s32 nameIndex;
-
-        *offset = pos + 2;
-        nameIndex = text[pos] - 1;
-        frCreateNewHandle(mi);
-        mi->pFRQ = frGetName1NFRQ(nameIndex, mi->pFRQ, firstOption);
+        FAKEMATCH_ASM_REG(s32, raw, "$5") = text[pos];
+        FAKEMATCH_ASM_REG(s32, nameIndex, "$16");
+        s32 argument;
+        frMsgInfo_t *owner;
+        s32 next = pos + 2;
+        FAKEMATCH_ASM_READ(raw);
+        owner = mi;
+        FAKEMATCH_ASM_READ(owner);
+        *offset = next;
+        nameIndex = (s32)raw - 1;
+        frCreateNewHandle(owner);
+        argument = (s8)nameIndex;
+        mi->pFRQ = frGetName1NFRQ(argument, mi->pFRQ, firstOption);
         frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20C: {
-        s32 nameIndex;
-
-        *offset = pos + 2;
-        nameIndex = text[pos] - 1;
-        frCreateNewHandle(mi);
-        mi->pFRQ = frGetName2NFRQ(nameIndex, mi->pFRQ, firstOption);
+        FAKEMATCH_ASM_REG(s32, raw, "$5") = text[pos];
+        FAKEMATCH_ASM_REG(s32, nameIndex, "$16");
+        s32 argument;
+        frMsgInfo_t *owner;
+        s32 next = pos + 2;
+        FAKEMATCH_ASM_READ(raw);
+        owner = mi;
+        FAKEMATCH_ASM_READ(owner);
+        *offset = next;
+        nameIndex = (s32)raw - 1;
+        frCreateNewHandle(owner);
+        argument = (s8)nameIndex;
+        mi->pFRQ = frGetName2NFRQ(argument, mi->pFRQ, firstOption);
         frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20D: {
-        s32 nameIndex;
-
-        *offset = pos + 2;
-        nameIndex = text[pos] - 1;
-        frCreateNewHandle(mi);
-        mi->pFRQ = frGetCNameFRQ(nameIndex, mi->Style, mi->pFRQ, (s8)firstOption);
+        FAKEMATCH_ASM_REG(s32, raw, "$5") = text[pos];
+        FAKEMATCH_ASM_REG(s32, nameIndex, "$16");
+        s32 argument;
+        frMsgInfo_t *owner;
+        s32 next = pos + 2;
+        FAKEMATCH_ASM_READ(raw);
+        owner = mi;
+        FAKEMATCH_ASM_READ(owner);
+        *offset = next;
+        nameIndex = (s32)raw - 1;
+        frCreateNewHandle(owner);
+        argument = (s8)nameIndex;
+        mi->pFRQ = frGetCNameFRQ(argument, mi->Style, mi->pFRQ, (s8)firstOption);
         frEnableMode(1);
         frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         frSetDrawSpeed(mi->pFRQ, mi->Spd);
@@ -2027,28 +2060,43 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         gMessageRequestResult |= 4;
         break;
     case 0xF113: {
-        s32 tagChar = 0x80E3;
+        s32 result;
+        s32 tagChar;
+        s32 alt;
 
-        if (frFindTagCode(frMessageCode) < 0) {
-            tagChar = 0x80E2;
+        result = frFindTagCode(frMessageCode);
+        alt = 0x80E2;
+        tagChar = 0x80E3;
+        if (result < 0) {
+            tagChar = alt;
         }
         frPushTagChar(mi, tagChar);
         break;
     }
     case 0xF114: {
-        s32 tagChar = 0x80E5;
+        s32 result;
+        s32 tagChar;
+        s32 alt;
 
-        if (frFindTagCode(frMessageCode) < 0) {
-            tagChar = 0x80E4;
+        result = frFindTagCode(frMessageCode);
+        alt = 0x80E4;
+        tagChar = 0x80E5;
+        if (result < 0) {
+            tagChar = alt;
         }
         frPushTagChar(mi, tagChar);
         break;
     }
     case 0xF115: {
-        s32 tagChar = 0x80E1;
+        s32 result;
+        s32 tagChar;
+        s32 alt;
 
-        if (frFindTagCode(frMessageCode) < 0) {
-            tagChar = 0x80E0;
+        result = frFindTagCode(frMessageCode);
+        alt = 0x80E0;
+        tagChar = 0x80E1;
+        if (result < 0) {
+            tagChar = alt;
         }
         frPushTagChar(mi, tagChar);
         break;
@@ -2065,26 +2113,38 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
             frPushTagChar(mi, 0x80E6);
         }
         break;
-    case 0xF118:
-        if (frFindTagCode(frMessageCode) < 0) {
-            if (frFindTagCode2(frMessageCode) < 0) {
-                frPushTagChar(mi, 0x80E9);
+    case 0xF118: {
+        /* Keep the first lookup key as its own read through the actual
+         * halfword, so the alternate lookup retains the native reload. */
+        const u16 *key = &frMessageCode;
+        s32 first;
+        FAKEMATCH_ASM_REG(frMsgInfo_t *, owner, "$4");
+        first = frFindTagCode(*key);
+        owner = mi;
+        if (first < 0) {
+            s32 second = frFindTagCode2(frMessageCode);
+            owner = mi;
+            if (second < 0) {
+                frPushTagChar(owner, 0x80E9);
+                owner = mi;
             }
         }
-        frPushTagChar(mi, 0x80E8);
+        frPushTagChar(owner, 0x80E8);
         break;
-    default:
-        mi->Ofs = (argCount - 1) * 2 + mi->Ofs;
+    }
+    default: {
+        s32 skipCount = argCount - 1;
+        s32 offsetValue = mi->Ofs;
+        offsetValue = skipCount * 2 + offsetValue;
+        mi->Ofs = offsetValue;
         break;
+    }
     }
     if (mi->FrqFlag == 0) {
         mi->FrqFlag = 1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "interface/frFont", frAnalyzeTag);
-#endif
 
 s32 frGetTagArgCount(s32 tagCode) {
     s32 argCount = 2;
@@ -2166,23 +2226,31 @@ s32 frCalcStringHash(s8 *text) {
     return lineCount;
 }
 
-/* NON_MATCHING: 7 of 128 words differ (first at +0x6C). */
-#ifdef NON_MATCHING
+/* Keep the native tag decoder visible to the message loop compiler. */
 frFontHandle_t *frAnalyzeMessage(frMsgInfo_t *pMsgInfo) {
     u8 encoded[3];
     s32 isFirst = 1;
     s32 *offset;
+    u8 *text;
 
     if (((pMsgInfo->pMsg[0] & 0xF0) != 0xF0) && (pMsgInfo->pMsg[1] == 8)) {
         pMsgInfo->Ofs += 4;
     }
-    gMessageRequestResult &= ~1;
-    gMessageRequestResult &= ~2;
-    gMessageRequestResult &= ~4;
+    {
+        u32 request = gMessageRequestResult;
+        request &= ~1;
+        request &= ~2;
+        request &= ~4;
+        gMessageRequestResult = request;
+    }
     frEnableMode(1);
+    text = pMsgInfo->pMsg;
+    /* Keep the real message base and text together before initializing the
+     * loop cursor, without broadening the context pointer alias set. */
+    FAKEMATCH_ASM_READ_PAIR(pMsgInfo, text);
     offset = &pMsgInfo->Ofs;
     while (1) {
-        s32 code = pMsgInfo->pMsg[*offset];
+        s32 code = text[*offset];
 
         (*offset)++;
         if (code == 0) {
@@ -2192,11 +2260,13 @@ frFontHandle_t *frAnalyzeMessage(frMsgInfo_t *pMsgInfo) {
             if (frAnalyzeTag(code, pMsgInfo) != 0) {
                 break;
             }
+            text = pMsgInfo->pMsg;
             continue;
         }
         if (code == 0xA) {
             if ((gModeFlag & 4) != 0) {
                 frMessageReturnCode(pMsgInfo);
+                text = pMsgInfo->pMsg;
             }
             isFirst = 1;
             continue;
@@ -2225,14 +2295,12 @@ frFontHandle_t *frAnalyzeMessage(frMsgInfo_t *pMsgInfo) {
         isFirst = 0;
         frSetFontSpace(pMsgInfo->pFRQ, gMessageSpaceX);
         frSetPriority(pMsgInfo->pFRQ, pMsgInfo->Z);
+        text = pMsgInfo->pMsg;
     }
     frDisableMode(1);
     frEnableMode(2);
     return pMsgInfo->pFRQ;
 }
-#else
-INCLUDE_ASM(const s32, "interface/frFont", frAnalyzeMessage);
-#endif
 
 frFontHandle_t *MessageRequest(s32 X, s32 Y, u8 *pMsg, frFontHandle_t *pFRQ) {
     return MessageRequestEx2(X, Y, 0, 0, 0, 0, 0x80, pMsg, pFRQ);

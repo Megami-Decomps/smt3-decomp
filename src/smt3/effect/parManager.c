@@ -757,11 +757,15 @@ void Eff_ModelTrackPolyListDelete(effTrackPolyList_t *list);
 void dds3BillboardDelete(struct billHandle_t *hData);
 void *sdfChipAllocDirect(s32 aSize);
 void sdfChipFreeDirect(void *aPtr);
-f32 dds3GetRandFloatA(effRandState_t *name);
+typedef struct sdfRandCB_t sdfRandCB_t;
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
+/* Particle code names the storage via its layout-compatible effect view.
+ * Pass the same storage address through the RNG provider's declared type. */
+#define dds3GetRandFloatA(state) (dds3GetRandFloatA)((sdfRandCB_t *)(state))
 f32 sdfCos(f32 aRadius);
 f32 sdfSin(f32 aRadius);
 u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 frame);
-u32 dds3GetRandA(effRandState_t *name);
+u32 dds3GetRandA(void *name);
 void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDown);
 void ReverseMatrix(void);
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);
@@ -1308,8 +1312,6 @@ void dds3Particle_SparkDelete(void *hData) {
 
 /* vu0 routine: seed a ballistic packet; positions are emitter-relative and
  * then offset by the origin. */
-/* NON_MATCHING: 22 of 512 words differ (first at +0x90). */
-#ifdef NON_MATCHING
 void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
     parSparkPacket_t *packet = (parSparkPacket_t *)pSpark->head.buffer->pPhysics;
     sdfVector4_t position;
@@ -1331,12 +1333,19 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
     radius = pSpark->radius;
     cone = pSpark->cone;
     speed = pSpark->speed;
+    /* The local float constraints name the real computed launch values at
+     * their consumers. This keeps the native RNG-state address allocation
+     * without exposing partial addresses or altering any draw. */
     switch (pSpark->mode) {
     case 0:
         if (pSpark->randomDir != 0) {
             direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
             direction.y = 0;
-            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            {
+                f32 draw = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.z = draw;
+            }
             SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(&direction);
@@ -1352,7 +1361,11 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[2] += pSpark->head.origin[2];
             direction.x = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
             direction.y = -(1.0f - cone);
-            direction.z = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            {
+                f32 draw = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.z = draw;
+            }
             SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(&direction);
@@ -1360,7 +1373,11 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->vel[0] = direction.x * speed * jitter;
             packet->vel[1] = direction.y * speed * jitter;
             packet->vel[2] = direction.z * speed * jitter;
-            packet->verticalAcceleration = (dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f) * gravity;
+            {
+                f32 draw = (dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f) * gravity;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                packet->verticalAcceleration = draw;
+            }
         } else {
             angle = (3.14159265f * 2.0f) / pSpark->head.particleCount * number;
             angleCos = sdfCos(angle);
@@ -1386,9 +1403,21 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[0] = pSpark->head.origin[0];
             packet->pos[1] = pSpark->head.origin[1];
             packet->pos[2] = pSpark->head.origin[2];
-            direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction.y = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
-            direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            {
+                f32 draw = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.x = draw;
+            }
+            {
+                f32 draw = -((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f);
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.y = draw;
+            }
+            {
+                f32 draw = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.z = draw;
+            }
             SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(&direction);
@@ -1413,7 +1442,11 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             decay = pSpark->decayPct / 100.0f + 1.0f;
             SDF_VU0_STOREIDENTITY(pSpark->head.matrix);
             direction.x = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
-            direction.y = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+            {
+                f32 draw = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                direction.y = draw;
+            }
             direction.z = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
             SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
@@ -1447,24 +1480,39 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
         }
         break;
     }
-    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSpark->spread + 1));
-    packet->color = 0;
-    jitter = pSpark->head.speedJitter;
-    packet->billboardScale = pSpark->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
-    jitter = pSpark->head.spinJitter;
-    if (jitter != 0) {
-        packet->spin = (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
-    } else {
-        packet->spin = 0;
+    {
+        effRandState_t *state = (effRandState_t *)ParRand;
+        u32 sample;
+        u32 spread;
+        effRandState_t *effectState = dds3EffectBase;
+        effRandState_t *first;
+        /* Keep the particle RNG argument in its native local lifetime. */
+        FAKEMATCH_ASM_LIVE(state);
+        sample = dds3GetRandA(state);
+        spread = pSpark->spread;
+        first = effectState;
+        /* Keep the next shared effect RNG argument ready before the age
+         * divide, without introducing a value definition here. */
+        FAKEMATCH_ASM_READ(first);
+        packet->age = -SDF_FRAMES(sample % (spread + 1));
+        packet->color = 0;
+        jitter = pSpark->head.speedJitter;
+        packet->billboardScale = pSpark->head.scale[0] * (dds3GetRandFloatA(first) * jitter + (1.0f - jitter));
+        jitter = pSpark->head.spinJitter;
+        if (jitter != 0) {
+            {
+                f32 draw = (dds3GetRandFloatA(effectState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+                FAKEMATCH_ASM_LIVE_F32(draw);
+                packet->spin = draw;
+            }
+        } else {
+            packet->spin = 0;
+        }
     }
     dds3Particle_EffectReset(&pSpark->head.sub, number);
 }
-#else
-INCLUDE_ASM(const s32, "effect/parManager", dds3Particle_SparkBuffInit);
-#endif
 
 
-/* Spark launch initialization retains an s4/s5 RNG-address allocation residual. */
 /* Scale velocity, add its stored vertical acceleration, and advance position.
  * Only mode zero transforms the displacement through the emitter matrix. */
 void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {

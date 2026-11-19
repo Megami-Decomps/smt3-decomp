@@ -78,86 +78,40 @@ Do not repeat binding, operand or setup-order variants without new evidence.
 
 ## frAnalyzeTag (interface/frFont, 0x518)
 
-Forty-two of three hundred twenty-two words match at the head, and the draft
-emits 1288 bytes against retail's 1304. The word count overstates the gap: a
-normalised instruction diff (both listings with branch targets and `gp`
-displacements masked) leaves only four real differences, and everything else
-in the 280 is branch displacements cascading from the four-word shortfall.
+326 of 326 words match at 1,304 bytes. The tag parser keeps the signed
+cursor, actual text pointer, option, and low-nibble argument count in
+their native phases. The four name tags read the glyph byte before
+publishing the new cursor, create the handle, then use the fresh handle
+and the signed-byte name selector. The narrow register bindings and
+input operands apply to these genuine values at their real consumers;
+the callback state and addressing are unchanged.
 
-What is confirmed and worth not rediscovering:
-
-- The twenty-two case values and the body order. Bodies are laid out `0xF206`,
-  `0xF202`, `0xF209`, `0xF207`, `0xF203`, `0xF20A`, `0xF20B`, `0xF20C`,
-  `0xF20D`, `0xF20E`, `0xF10F`, `0xF110`, `0xF111`, `0xF104`, `0xF112`,
-  `0xF113`, `0xF114`, `0xF115`, `0xF116`, `0xF117`, `0xF118`, default, and
-  written in that order the compare tree comes out exactly.
-- `0xF111` falls through into `0xF104`: both end in
-  `gMessageRequestResult |= 1; return 1;` and retail shares the block.
-- The prologue holds five things in locals, and all five are needed to reach
-  the matching prologue: the `s32 *` to `ctx->encodedTextOffset`, the nibble
-  `code & 0xF`, the offset *value*, `ctx->encodedText`, and
-  `ctx->firstOption`. `code` is then reused for the tag, which is what makes
-  the nibble get computed in the prologue before `$4` is overwritten. Reading
-  the offset or the text pointer through `ctx` inside the arms instead costs a
-  saved register and the whole body shifts.
-- `gVarStr[text[pos] - 1]` is the `0xF203` guard: the `-1` folds into the
-  symbol, which is why spimdisasm names it `D_0056BBCC`, four bytes below
-  `gVarStr`.
-- The three `frFindTagCode` arms want `s32 tagChar = <high>; if (... < 0) {
-  tagChar = <low>; } frPushTagChar(ctx, tagChar);` declared inside the arm's
-  own block. The ternary spelling gives `movz` where retail has `movn`, and
-  the same local at function scope adds a fifth saved register and costs the
-  whole prologue.
-- The default arm writes `ctx->encodedTextOffset`, not `*offset`, and the
-  reload has to land in `$3`: `ctx->encodedTextOffset = (argCount - 1) * 2 +
-  ctx->encodedTextOffset;` gives that, where `+=` leaves it in `$2`.
-
-The four residual differences:
-
-- Two `nop`s in the compare tree. Retail leaves the delay slot of the
-  `beq` against `0xF115` and the one against `0xF113` empty; the draft fills
-  both from the fall-through `slt`. This is reorg's fall-through heuristic,
-  not anything the source states.
-- One more delay slot in the `0xF116` arm, retail `nop` against the draft's
-  `lhu frMessageCode`.
-- The four name arms (`0xF20A` to `0xF20D`) read the glyph byte *before*
-  storing `pos + 2`, keeping it in `$5` and forming `nameIndex` in the
-  `frCreateNewHandle` delay slot. The draft stores first and loads into `$16`
-  in that delay slot instead. Four spellings were measured and every one that
-  moves the read ahead of the store adds a fifth saved register and goes from
-  280 of 322 to 311: a second local for the raw byte, one local decremented in
-  place either side of the store, and reusing `pos` itself for the byte.
+The declaration of the actual `frFindTagCode(u16)` provider is
+uniformly pure here. The provider is a bounded, read-only scan of 416
+ordinary halfwords, returning the first index or -1, with no writes,
+callbacks or alternate input. It can depend on table contents: this is
+not a const attribute. The unchanged provider and its caller ABI are
+exact. The truthful declaration preserves the two native empty branch
+delay slots for the tag cases. In F118, reading the first actual key
+through an ordinary pointer to its halfword retains the separate read
+for the secondary lookup. Neither the key nor table is made volatile;
+both glyph emissions and their callback order are unchanged.
 
 ## frAnalyzeMessage (interface/frFont, 0x200)
 
-One hundred twenty-one of one hundred twenty-eight words match at the exact
-512-byte size, and that measurement is with `frAnalyzeTag` compiled as C
-above it; with `frAnalyzeTag` back behind its own fallback it is eight,
-because the `frAnalyzeTag(code, ctx) != 0` test then emits `bnel` where retail
-has `bne`. That is the callee-visibility mechanism, measured here in both
-directions, so this draft should be rechecked the moment `frAnalyzeTag`
-matches rather than permuted.
+128 of 128 words match at 512 bytes. Making the independently exact tag
+body visible reproduces the native tag-continue branch. The message
+parser keeps the native header skip and request-bit clear, then consumes
+and advances through the actual encoded text. It reloads the text base
+after a tag that continues, a newline callback, or the glyph sequence
+that can affect the context. The second byte of a two-byte glyph comes
+from the post-handle callback context.
 
-Confirmed: `offset` is an `s32 *` local to `ctx->encodedTextOffset`, assigned
-just before the loop, and without it the function is nine words short and one
-saved register down. The second byte of a two-byte code has to be read with a
-post-increment in one expression,
-`code = (code << 8) | ctx->encodedText[(*offset)++];`, which took it from 20
-differing words to 10. `encoded[0] = (u32)code >> 8` needs the unsigned cast:
-`code` is `s32` everywhere else, because the `< 0x80` and `<= 0xC07F` tests
-are `slti`/`slt`, but the byte extraction is `srl`. The `<= 0xC07F` and
-`> 0xC07F` arms each write the three `encoded` stores and the
-`frSetFontString` call out in full and let gcc cross-jump the tail; sharing
-them after the merge is six words short.
-
-The seven remaining words are two things:
-
-- Five: `addiu $18, $17, 0x18` sits ahead of the last `gMessageRequestResult`
-  mask and the `frEnableMode` call, where retail has it in the loop
-  preheader's `b` delay slot. Assigning `offset` before `frEnableMode(1)`,
-  after it, at its declaration, and in a `for` init clause all emit the same
-  thing; only dropping the local moves it, and that costs far more.
-- Two: `isFirst = 0` lands in the `frSetFontSpace` delay slot with the
-  `gMessageSpaceX` load ahead of it, where retail has the order the other way
-  round. Both source orders of the assignment and the call give the same
-  output.
+The loop preserves the two-byte split and remapping, native temporary
+encoding, setter order and final mode transition. The ordinary request snapshot
+keeps the three bit clears together, and the localized text/context
+operand preserves the actual cursor setup. They add no new memory
+operation or promise about a callback.
+The input domain is a valid game-encoded message, including any bytes
+required by its tags. The two independently exact functions and all 79
+previous owner peers are validated together; the complete owner is 81/0.

@@ -32,56 +32,30 @@ last statement of both mode-1 arms, as in the sibling.
 
 ## dds3Particle_SparkBuffInit (effect/parManager, 0x800)
 
-490 of 512 words match, at the exact 2048-byte size. The 22 that differ are
-one thing: retail keeps `dds3EffectBase` in `$21` and `ParRand` in `$20`, the
-draft the other way round, so every `lui %hi`, every `addiu %lo` and the two
-`addiu $4` argument setups name the other register. Nothing else in the
-function differs, in any arm. The pre-existing source note calling this an
-"s4/s5 RNG-address allocation residual" is this exact swap.
+512 of 512 words match at 2,048 bytes. Each initialized particle uses
+the native 0x40-byte physics record and the original mode 0, 1, or 2
+launch path. The mode-2 random step loop is a do/while: it executes at
+least once, not zero times for a nonpositive step bound. The vector
+stores and VU0 operations are unchanged, including the mode-0 matrix
+operation on the full four-lane packet position. No new value is
+invented for the native W lane.
 
-Four shapes had to be right, and each is worth recording:
+The real effect and particle RNGs keep their original call targets,
+state objects, and mode-specific draw order. The tail draws the
+particle integer first, derives initial age from its remainder against
+the then-current spread plus one, and then draws effect scale and
+conditional spin before resetting the particle. Valid callers choose
+an existing packet index and a nonzero age modulus. Each floating
+draw uses the actual provider's low 24 bits scaled by 2^-24 and the
+native per-mode binary32 operations.
 
-- The `mode` dispatch is a `switch` with cases 0, 1 and 2 in that order and no
-  default: ee-gcc builds retail's `beq 1` / `slti 2` / `beqz 0` / `beq 2`
-  decision tree from it. All five other case orders are far worse (233 words
-  up to 471 words differing), so the order is evidence, not taste.
-- The two local vectors are `f32 position[4]` declared **before**
-  `f32 direction[4]`, which is what puts `direction` at `0x10($29)` and makes
-  `SDF_VU0_LOADVECTOR` materialize retail's `addiu $2, $29, 0x10`. With
-  `direction` at offset 0 cc1 addresses it through `$29` directly and the
-  whole body shifts one word (2008 bytes, 55 words matching).
-- The step integration in case 2 is a **`do`/`while`**, not a `for`: retail
-  enters the loop unconditionally and keeps the up-counter with
-  `slt $2, $3, $4`. A `for (step = 0; step < steps; step++)` adds the `blez`
-  zero-trip guard and lets gcc flip the counter to `addiu $2, $2, -1`, which
-  cost 8 words and 40 bytes of size. This was the single biggest jump:
-  164 differing words to 48.
-- The per-arm jitter scale and the tail's `head.speedJitter`/`head.spinJitter`
-  are **the same local**. Retail holds that value in `$f20`, a callee-saved
-  register, which only happens because the allocno crosses the tail's calls.
-  Given its own local the value is a cross-block allocno that does not cross
-  a call and lands in `$f5`; given one local per arm it is block-local and
-  lands in `$f0`. Both cost the three `mul.s` registers and the schedule of
-  the `verticalAcceleration` store around them.
-- `packet->verticalAcceleration = gravity;` is the **last** statement of both
-  case 1 arms, after `packet->vel[2]`, even though retail emits the store
-  between the `vel[2]` load and its multiplies. Writing it between `vel[1]`
-  and `vel[2]`, where the emitted order suggests, costs four words in each
-  arm (48 to 26 to 22 as the two arms were moved).
+Localized operands on real computed random-derived values and the
+actual tail argument preserve the two RNG address allocations and
+dependent floating-point schedule. These are compiler reconstruction
+aids: they emit no instructions, add no draws, and do not imply the
+original source had the same spelling.
 
-Also settled: `effect->jitter` is read inline at both of its uses in the scale
-expression rather than through a local, which is what gives retail's
-short-lived `$f3`; a `jitter` local there takes `$f20` and displaces the
-scale.
-
-Ruled out for the register swap, all leaving it at 22 words:
-`(effRandState_t *)&ParRand` in place of `(effRandState_t *)ParRand`;
-`packet->color = 0;` before the `packet->age` line that is `ParRand`'s only
-use in the tail (32 words); one scale local per arm (52); merging the scale
-with `angle` (69) or with `angle` and `jitter` together (77); moving the
-scale declaration to the top of the function (no change). The two address
-pseudos have identical reference counts and identical first-reference order
-in the draft and in retail, so what is left is the allocator's priority
-tie-break, the same class of difference as the spill-slot rotation in
-`fldSkyDrawFilter`: whoever picks this up needs to change which pseudo is
-created first, not what the source says.
+The C declarations use the actual integer and float RNG provider types.
+The local argument type bridge forwards the same four-word storage
+address, evaluates its argument once, emits no wrapper, and changes no
+existing peer or provider.
