@@ -17,9 +17,18 @@ Ruled out: the `effPCPCrackCopy` result stored directly against held in a
 named local; reading `src->bed` before the crack copy instead of after;
 storing `work->crack` before `work->bed` instead of after.
 
-## effPCP_BED_Create (effect/effPCPBoss, 248 bytes)
+## effPCP_BED_Create (effect/effPCPBoss, 0x100)
 
-33 of 63 words match, one word short of retail's 62.
+**Matched: all 64 words / 256 native bytes at 0x001A0C90.**
+Use a short integer binding for the initial work color and separate
+short floating-point bindings for the actual 1.0 and 100.0 placement
+values. The work color ends at its initial store, before either VU
+identity write. The placement values end at their payload stores before
+either create call. The second color is the same literal, as in retail;
+the VU writes touch only the matrix and position and cannot change the
+work color. No empty operands are needed.
+
+The earlier draft used 252 bytes and did not match.
 
 Retail materialises `0x80808080` twice: once as `lui`/`ori` before the parameter
 copy for `work->color`, and again for `place.color`, with the second `ori`
@@ -32,8 +41,8 @@ pseudo at the `work->color` store, and the head then comes out exact, including
 retail's `$2`/`$3`/`$4` in the 12-byte parameter copy and the `addiu $6, $18,
 0x40` ahead of the colour store. Only the guarded arm is left, where retail's
 `lui`/`ori` pair is one `lw` in the draft and everything after it shifts by a
-word. So the structure is settled and the one remaining question is how retail
-gets a second constant.
+word. That diagnostic isolated the second materialization; the matching
+shape above retains the two independent literal uses.
 
 Ruled out for the duplicated constant: the literal in a `u32` local, assigned
 at the top of the function, before the two VU0 macros, between them, before the

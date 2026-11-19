@@ -362,26 +362,40 @@ s32 Flow5_5(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 29 of 52 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
+/* The item and count share a typed phase entry. The integer byte offset
+ * spans full table records; do not walk out of a phase array with a pointer.
+ * The short v0 offset range ends at address formation. Reuse v0 separately
+ * for the count load so cc1 does not coalesce the offset and entry address.
+ * The next phase guard still reloads the ID after datAddItem. */
 s32 Flow5_6(nbNegoProcessData_t *n)
 {
-    s32 i;
+    s32 i = 0;
 
-    for (i = 0; i < 6; i++) {
-        if (nbInnenTable[n->innen_id].phase_record.phase[i].item == 0) {
-            break;
+    if (nbInnenTable[n->innen_id].phase_record.phase[0].item != 0) {
+        while (1) {
+            FAKEMATCH_ASM_REG(addr_t, offset, "$2") =
+                ((u32)n->innen_id * (sizeof(nbInnenRec_t) / sizeof(nbInnenPhase_t)) + i)
+                * sizeof(nbInnenPhase_t);
+            nbInnenPhase_t *phase;
+            s32 item;
+            s32 count;
+            FAKEMATCH_ASM_REG(nbInnenPhase_t *, count_phase, "$2");
+
+            phase = (nbInnenPhase_t *)((addr_t)&nbInnenTable[0].phase_record.phase[0] + offset);
+            ++i;
+            item = phase->item;
+            count_phase = phase;
+            FAKEMATCH_ASM_LIVE(count_phase);
+            count = count_phase->cnt;
+            n->getitem = item;
+            datAddItem(item, count);
+            if (i >= 6 || nbInnenTable[n->innen_id].phase_record.phase[i].item == 0)
+                break;
         }
-        n->getitem = nbInnenTable[n->innen_id].phase_record.phase[i].item;
-        datAddItem(nbInnenTable[n->innen_id].phase_record.phase[i].item,
-                   ((nbInnenPhase_t *)&nbInnenTable[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50009);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_6);
-#endif
 
 s32 Flow5_7(nbNegoProcessData_t *n)
 {
@@ -447,26 +461,36 @@ s32 Flow5_17(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 29 of 52 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
+/* Same item-phase loop and short address lifetimes as Flow5_6. */
 s32 Flow5_18(nbNegoProcessData_t *n)
 {
-    s32 i;
+    s32 i = 0;
 
-    for (i = 0; i < 6; i++) {
-        if (nbInnenTable[n->innen_id].phase_record.phase[i].item == 0) {
-            break;
+    if (nbInnenTable[n->innen_id].phase_record.phase[0].item != 0) {
+        while (1) {
+            FAKEMATCH_ASM_REG(addr_t, offset, "$2") =
+                ((u32)n->innen_id * (sizeof(nbInnenRec_t) / sizeof(nbInnenPhase_t)) + i)
+                * sizeof(nbInnenPhase_t);
+            nbInnenPhase_t *phase;
+            s32 item;
+            s32 count;
+            FAKEMATCH_ASM_REG(nbInnenPhase_t *, count_phase, "$2");
+
+            phase = (nbInnenPhase_t *)((addr_t)&nbInnenTable[0].phase_record.phase[0] + offset);
+            ++i;
+            item = phase->item;
+            count_phase = phase;
+            FAKEMATCH_ASM_LIVE(count_phase);
+            count = count_phase->cnt;
+            n->getitem = item;
+            datAddItem(item, count);
+            if (i >= 6 || nbInnenTable[n->innen_id].phase_record.phase[i].item == 0)
+                break;
         }
-        n->getitem = nbInnenTable[n->innen_id].phase_record.phase[i].item;
-        datAddItem(nbInnenTable[n->innen_id].phase_record.phase[i].item,
-                   ((nbInnenPhase_t *)&nbInnenTable[n->innen_id].phase_record.phase[i])->cnt);
     }
     nbAddNegoIdKouho(n, 0x50015);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowInnen", Flow5_18);
-#endif
 
 s32 Flow5_19(nbNegoProcessData_t *n)
 {

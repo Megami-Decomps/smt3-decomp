@@ -2,9 +2,19 @@
 
 ## nbPanelDrawPP (0xA84)
 
-671 of 673 words match at the native 2692-byte size, with the same instruction
-count and schedule. The two differing words are the reads of `hp` and `maxhp`
-for the gauge ratio: retail loads each spill slot straight into the float
+**Matched: 673 of 673 words / 2692 native bytes at 0x0027B7A8.**
+The zero guards use separate, short-lived integer snapshots of the loaded
+HP and max HP. The HP snapshot is established before the max-HP load.
+The max-HP snapshot is introduced only in the nonzero HP arm, after that load.
+Each uses one localized tied empty operand; their placement leaves the
+original spill values as the float-division inputs. Neither binding lives
+across a draw, color, or formatting call. Both halfword reads still occur
+before the nested nonzero tests, and the numerator, denominator, division,
+and subsequent callbacks are unchanged. This is a compiler reconstruction
+aid, not an original-source claim.
+
+The previous 671/673-word draft differed only at the two reads of `hp` and
+`maxhp` for the gauge ratio: retail loads each spill slot straight into the float
 register (`lwc1`/`cvt.s.w`), the draft inherits the `lhu` result still live in
 a general register and moves it across (`mtc1`/`cvt.s.w`). Both slots are
 compiler spill slots, not frame variables. An actual-owner allocation trace
@@ -20,10 +30,8 @@ without RTL dumps. This establishes the rewriting pass, not the original
 source context that prevented those substitutions in retail. The trace does
 not observe the equivalence cache's reset decisions.
 
-Writing the HP and max-HP guards as nested positive tests leaves the same
-671/673-word result. No source change qualified; the existing draft remains
-preferred. A future explanation must account for the post-reload equivalences,
-rather than forcing the two already-correct spill homes.
+Nested tests alone leave the original 671/673 result. The separate guard
+values resolve those two equivalences without forcing either spill home.
 
 What the body needed, all of it worth more than fifty words each:
 

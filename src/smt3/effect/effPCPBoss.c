@@ -4665,20 +4665,25 @@ void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_tag *hData, const voi
     SDF_VU0_COPYVECTOR(hData, pPos);
 }
 
-/* NON_MATCHING: 30 of 63 words differ (first at +0x80). */
-#ifdef NON_MATCHING
 effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED)
 {
     effPCP_BED_tag *work = sdfChipAllocDirect(0x6C);
     effPCPBossPlace_t place;
     effPCPBossBED_t *bed;
-
+    /* Keep the work color separate from the later placement color: its native
+     * home is live only through the initial field store, before the VU writes. */
+    FAKEMATCH_ASM_REG(u32, workColor, "$2") = 0x80808080;
     work->param = *pParam;
     work->frame = 0;
-    work->abgr = 0x80808080;
+    work->abgr = workColor;
     SDF_VU0_STOREIDENTITYVECTOR(work->pos);
     SDF_VU0_STOREIDENTITY(work);
     if (pBED != NULL) {
+        /* Keep the two placement constants in their native homes until the
+         * payload stores. Neither value survives the first create call. */
+        FAKEMATCH_ASM_REG(f32, one, "$f1") = 1.0f;
+        FAKEMATCH_ASM_REG(f32, hundred, "$f0") = 100.0f;
+
         place.payload[0] = 0.0f;
         place.payload[1] = 0.0f;
         place.payload[2] = 0.0f;
@@ -4686,20 +4691,17 @@ effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED)
         place.payload[4] = 0.0f;
         place.payload[5] = 0.0f;
         place.payload[6] = 0.0f;
-        place.payload[7] = 1.0f;
-        place.payload[8] = 100.0f;
-        place.payload[9] = 100.0f;
-        place.payload[10] = 1.0f;
-        place.color = work->abgr;
+        place.payload[7] = one;
+        place.payload[8] = hundred;
+        place.payload[9] = hundred;
+        place.payload[10] = one;
+        place.color = 0x80808080;
         bed = effEveBEDCreate(pBED);
         work->hBED = bed;
         work->hBEDCut = effEveBEDCutCreate(bed, 2, &place);
     }
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Create);
-#endif
 
 effPCP_BED_tag *effPCP_BED_CreatePCF(void *parameterTable) {
     void *firstBlock;

@@ -12,51 +12,52 @@ nbCameraHelperViewer_Draw	code_001C55F8	336 bytes	48 of 83 words match	docs/matc
 moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/matching/code_001D1470.md	3
 pbStartErrorDraw	pb/pbErrorDraw	0xBC	47 of 47 words match	docs/matching/code_001D1470.md	26
 func_001D4C08	pb/pbMain	0x94		docs/matching/code_001D1470.md	101
-cmp_241A10	code_0022C578	0x74		docs/matching/code_0022C578.md	3
-cmpClearCursorSlots	code_0022C578	0x54		docs/matching/code_0022C578.md	31
-cmpSetCursorSlot	code_0022C578	0x3C		docs/matching/code_0022C578.md	148
-cmp_23A918	code_0022C578	0x40	16 of 16 words match	docs/matching/code_0022C578.md	161
-cmpItemHasFlag	code_0022C578	0x54	21 of 21 words match	docs/matching/code_0022C578.md	201
-cmpClearStatusFlags	code_0022C578	0x30	1 of 10 words match	docs/matching/code_0022C578.md	235
-cmpGetStockInfoIndex	code_0022C578	0x80	32 of 32 words match	docs/matching/code_0022C578.md	262
-cmpDisablePadBitStop	code_0022C578	0x80	32 of 32 words match	docs/matching/code_0022C578.md	309
-cmpReCalcStockCursorPos	code_0022C578	0x84	33 of 33 words match	docs/matching/code_0022C578.md	344
-cmpSetIniStockRecoverEff	code_0022C578	0x84		docs/matching/code_0022C578.md	400
-cmpUpdateCursorSlots	code_0022C578	0x84		docs/matching/code_0022C578.md	421
-cmpChkDoNotUseSkill	code_0022C578	0x98		docs/matching/code_0022C578.md	543
-cmpInitCursorLayout	code_0022C578	0x94	30 of 37 words match	docs/matching/code_0022C578.md	562
-campDhCheckTextures	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	577
-cmpItemIsUsable	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	613
-cmpSetStockRemoveEff	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	626
-cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/code_0022C578.md	648
-cmpStartSkillMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	672
-cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	760
-cmpGetKugatatiMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	780
-campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	824
-cmpAddQuePanelEff	code_0022C578	0xB8	46 of 46 words match	docs/matching/code_0022C578.md	840
-campDrawInfoText	code_0022C578	0xBC		docs/matching/code_0022C578.md	875
-cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	903
-campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	920
-camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	955
-campDrawText	code_0022C578	0x170	92 of 92 words match	docs/matching/code_0022C578.md	997
-campDrawStatusRow2	code_0022C578	0x134	77 of 77 words match	docs/matching/code_0022C578.md	1020
-campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	1069
-cmpDrawPanelEffQuad	code_0022C578	0x20C		docs/matching/code_0022C578.md	1108
-campDhUpdateCursor	code_0022C578	0x248	146 of 146 words match	docs/matching/code_0022C578.md	1177
-campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1226
-campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1250
-cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1302
-cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1332
-cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1370
-campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1418
-cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1455
-cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1497
-cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1540
-cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1580
-cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1640
-cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1706
-campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1880
-cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1914
+campDrawStatusRow1 (0x104)				docs/matching/code_0022C578.md	3
+cmp_241A10	code_0022C578	0x74		docs/matching/code_0022C578.md	14
+cmpClearCursorSlots	code_0022C578	0x54		docs/matching/code_0022C578.md	42
+cmpSetCursorSlot	code_0022C578	0x3C		docs/matching/code_0022C578.md	159
+cmp_23A918	code_0022C578	0x40	16 of 16 words match	docs/matching/code_0022C578.md	172
+cmpItemHasFlag	code_0022C578	0x54	21 of 21 words match	docs/matching/code_0022C578.md	212
+cmpClearStatusFlags	code_0022C578	0x30	1 of 10 words match	docs/matching/code_0022C578.md	246
+cmpGetStockInfoIndex	code_0022C578	0x80	32 of 32 words match	docs/matching/code_0022C578.md	273
+cmpDisablePadBitStop	code_0022C578	0x80	32 of 32 words match	docs/matching/code_0022C578.md	320
+cmpReCalcStockCursorPos	code_0022C578	0x84	33 of 33 words match	docs/matching/code_0022C578.md	355
+cmpSetIniStockRecoverEff	code_0022C578	0x84		docs/matching/code_0022C578.md	411
+cmpUpdateCursorSlots	code_0022C578	0x84		docs/matching/code_0022C578.md	432
+cmpChkDoNotUseSkill	code_0022C578	0x98		docs/matching/code_0022C578.md	554
+cmpInitCursorLayout	code_0022C578	0x94	30 of 37 words match	docs/matching/code_0022C578.md	573
+campDhCheckTextures	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	588
+cmpItemIsUsable	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	624
+cmpSetStockRemoveEff	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	637
+cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/code_0022C578.md	659
+cmpStartSkillMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	683
+cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	771
+cmpGetKugatatiMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	791
+campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	835
+cmpAddQuePanelEff	code_0022C578	0xB8	46 of 46 words match	docs/matching/code_0022C578.md	851
+campDrawInfoText	code_0022C578	0xBC		docs/matching/code_0022C578.md	886
+cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	914
+campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	931
+camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	966
+campDrawText	code_0022C578	0x170	92 of 92 words match	docs/matching/code_0022C578.md	1008
+campDrawStatusRow2	code_0022C578	0x134	77 of 77 words match	docs/matching/code_0022C578.md	1031
+campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	1080
+cmpDrawPanelEffQuad	code_0022C578	0x20C		docs/matching/code_0022C578.md	1119
+campDhUpdateCursor	code_0022C578	0x248	146 of 146 words match	docs/matching/code_0022C578.md	1188
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1237
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1261
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1313
+cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1343
+cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1381
+campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1429
+cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1466
+cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1508
+cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1551
+cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1591
+cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1651
+cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1717
+campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1891
+cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1925
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -76,19 +77,19 @@ effDebugDrawRectLine	effect/effMagatuhi	0x154	85 of 85 words match	docs/matching
 effDebugMoveCamera	effect/effMagatuhi	0x628	377 of 394 words match	docs/matching/effect/effMagatuhi.md	24
 effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	89
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
-effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/matching/effect/effPCPBoss.md	20
-effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/matching/effect/effPCPBoss.md	53
-effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/matching/effect/effPCPBoss.md	98
-effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	90 of 90 words match	docs/matching/effect/effPCPBoss.md	127
-effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/matching/effect/effPCPBoss.md	174
-effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/matching/effect/effPCPBoss.md	213
-effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	248
-effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	293
-effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	322
-effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	361
-dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	399
-effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	411
-effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	448
+effPCP_BED_Create	effect/effPCPBoss	0x100		docs/matching/effect/effPCPBoss.md	20
+effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/matching/effect/effPCPBoss.md	62
+effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/matching/effect/effPCPBoss.md	107
+effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	90 of 90 words match	docs/matching/effect/effPCPBoss.md	136
+effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/matching/effect/effPCPBoss.md	183
+effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/matching/effect/effPCPBoss.md	222
+effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	257
+effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	302
+effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	331
+effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	370
+dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	408
+effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	420
+effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	457
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
@@ -224,7 +225,8 @@ slSaveData_writeFile	mc/slMain	0x238	94 of 142 words match	docs/matching/mc/slMa
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	76
 slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
-Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	3
+Flow5_6 and Flow5_18 (0xD8 each)				docs/matching/newbattle/NbNegoFlowInnen.md	3
+Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	21
 Flow15_5	newbattle/NbNegoFlowInoti	0x148	82 of 82 words match	docs/matching/newbattle/NbNegoFlowInoti.md	3
 Flow10_10	newbattle/NbNegoFlowNg	0x90	36 of 36 words match	docs/matching/newbattle/NbNegoFlowNg.md	3
 Flow10_21	newbattle/NbNegoFlowNg	0x98	38 of 38 words match	docs/matching/newbattle/NbNegoFlowNg.md	31
@@ -322,13 +324,13 @@ nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/ma
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76
 nbGetQuestionType	newbattle/nbNegoProcess	0x25C	100 of 151 words match	docs/matching/newbattle/nbNegoProcess.md	122
-nbPanelDrawPP (0xA84)			671 of 673 words match	docs/matching/newbattle/nbPanelProcess.md	3
-nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	65
-nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	127
-nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	153
-nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	165
-nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	218
-nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	286
+nbPanelDrawPP (0xA84)			673 of 673 words	docs/matching/newbattle/nbPanelProcess.md	3
+nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	73
+nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	135
+nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	161
+nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	173
+nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	226
+nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	294
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3

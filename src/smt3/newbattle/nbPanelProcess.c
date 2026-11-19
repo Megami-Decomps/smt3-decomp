@@ -1264,10 +1264,7 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
 #endif
 
-/* NON_MATCHING: 671 of 673 words match at the native 2692-byte size. The two
- * differing words read hp and maxhp out of their spill slots. */
 
-#ifdef NON_MATCHING
 
 extern sdfTexHandle_t *D_00345D88[];
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPartXYZ[];
@@ -1361,6 +1358,8 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         sdfTexHandle_t *hTex1;
         fldAnahoriAkuma_t *ak;
         s32 ofs;
+        FAKEMATCH_ASM_REG(s32, guardHP, "$4");
+        FAKEMATCH_ASM_REG(s32, guardMaxHP, "$3");
         u32 col;
 
         nbPnlSprite(xyz0->x + x, xyz0->y + y, xyz0->w, xyz0->h, uv0->u0, uv0->v0, uv0->u1,
@@ -1371,18 +1370,28 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         ofs = statindex * sizeof(fldAnahoriAkuma_t) + 0xA50;
         ak = (fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + ofs);
         hp = ak->hp;
+        /* Keep each zero test on its own short-lived integer value. These
+         * empty constraints preserve the original HP and max-HP spill inputs
+         * to the ratio instead of letting post-reload CSE reuse the test
+         * registers. They do not change either value. */
+        guardHP = hp;
+        FAKEMATCH_ASM_LIVE(guardHP);
         maxhp = *(u16 *)&ak->unk0C[0];
-        if (hp != 0 && maxhp != 0) {
-            nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[4];
-            nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[0];
-            sdfTexHandle_t *hTex2;
+        if (guardHP != 0) {
+            guardMaxHP = maxhp;
+            FAKEMATCH_ASM_LIVE(guardMaxHP);
+            if (guardMaxHP != 0) {
+                nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[4];
+                nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[0];
+                sdfTexHandle_t *hTex2;
 
-            rate = (f32)hp;
-            rate = rate / (f32)maxhp;
-            hTex2 = p->pnltex[0];
-            nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
-                        uv2->u1 * rate, uv2->v1,
-                        effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
+                rate = (f32)hp;
+                rate = rate / (f32)maxhp;
+                hTex2 = p->pnltex[0];
+                nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
+                            uv2->u1 * rate, uv2->v1,
+                            effMagaCylinderCalcColor(0x80808080, nbPanelBaseABGR), hTex2);
+            }
         }
         sprintf(buf, nbPanelNumFormat, hp);
         col = nbPanelHPColor((datUnitWork_t *)&DDS3_GBWK->akuma[statindex].flag);
@@ -1496,12 +1505,6 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
         }
     }
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP);
-
-#endif
 
 void nbPanelPressGaugeInit(void)
 {

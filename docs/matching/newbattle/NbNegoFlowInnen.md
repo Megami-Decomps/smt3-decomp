@@ -1,5 +1,23 @@
 # Matching notes: newbattle/NbNegoFlowInnen
 
+## Flow5_6 and Flow5_18 (0xD8 each)
+
+Both item-phase loops match 54/54 native words. The phase's unsigned item
+and count are adjacent halfwords in a four-byte entry, within the existing
+60-byte record. The byte offset is computed as an integer from the full
+record stride, then added to the typed first phase address. This does not
+traverse past an individual phase array with C pointer arithmetic.
+
+One short `v0` range carries the byte offset until the phase address is
+formed. A separate short `v0` range carries the real count-load address.
+A localized empty operand on the count-load address preserves its real
+placement instead of coalescing it with the item address. Neither range
+survives a call. The offset needs its short binding but no empty operand.
+The item is stored to `n->getitem` for every nonzero entry before addition.
+The next guard reloads the current record ID after the item callback and
+stops at the first zero item or after six phases. The two functions retain
+their distinct final negotiation IDs and return zero.
+
 ## Flow5_3 (newbattle/NbNegoFlowInnen, 0x164)
 
 89 of 89 words match at 356 bytes. Direct field expressions and two complete

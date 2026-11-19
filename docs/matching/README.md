@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 45 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 46 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 18 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
@@ -86,6 +86,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbCameraProcess | [newbattle/nbCameraProcess.md](newbattle/nbCameraProcess.md) |
 | 2 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
+| 2 |  | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
@@ -124,7 +125,6 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/NbNegoFlowQuestion | [newbattle/NbNegoFlowQuestion.md](newbattle/NbNegoFlowQuestion.md) |
 | 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |
-| 1 | newbattle/NbNegoFlowInnen | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 1 | newbattle/NbNegoFlowFullMoon | [newbattle/NbNegoFlowFullMoon.md](newbattle/NbNegoFlowFullMoon.md) |
 | 1 | kernel/dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3SequenceList | [kernel/dds3SequenceList.md](kernel/dds3SequenceList.md) |
