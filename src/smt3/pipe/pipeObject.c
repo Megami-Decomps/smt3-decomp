@@ -440,19 +440,16 @@ extern u32 dds3GetRandA(void *state);
 extern void objOptionInc(tagPipeObject *objPtr, u8 op);
 extern u16 myStatus;
 
-/* NON_MATCHING: 78 of 152 words match at 608 native/emitted bytes. The
- * table-copy temporaries, status-threshold allocation and loop scheduling
- * remain different; the corrected sixteen-construction behavior is retained. */
-#ifdef NON_MATCHING
 void objOption(tagPipeObject *objPtr, u8 option)
 {
     tagPipeObject object;
     u8 ways[16];
     u8 action = objPtr->action;
-    u8 *way = ways;
+    u8 *way;
     u8 id;
 
     memcpy(ways, objOptionWays, sizeof(ways));
+    way = ways;
     if (action == 0x1A) {
         objCopy2(objPtr->offset, objPtr->pos[0], objPtr->pos[1], 5, 0, 0, 5, 100);
         return;
@@ -464,12 +461,15 @@ void objOption(tagPipeObject *objPtr, u8 option)
     if (id == 10) {
         s32 status = (myStatus & 0xF00) >> 8;
         u32 randomValue;
-        u32 threshold = option;
+        FAKEMATCH_ASM_REG(u32, threshold, "$16") = option;
 
         switch (status) {
         case 0:
             threshold += 0x80;
-            randomValue = dds3GetRandA(NULL) & 0xFF;
+            randomValue = dds3GetRandA(NULL);
+            /* Keep the actual widened threshold through this RNG phase. */
+            FAKEMATCH_ASM_LIVE(threshold);
+            randomValue = (u8)randomValue;
             break;
         case 1:
             randomValue = dds3GetRandA(NULL) & 0xFF;
@@ -480,9 +480,12 @@ void objOption(tagPipeObject *objPtr, u8 option)
         default:
             return;
         }
-        if (randomValue >= threshold) {
-            objAdd(objPtr);
+        {
+            FAKEMATCH_ASM_REG(s32, reject, "$2");
+            reject = randomValue < threshold;
+            if (reject) return;
         }
+        objAdd(objPtr);
         return;
     }
     if (option < 100) {
@@ -501,7 +504,14 @@ void objOption(tagPipeObject *objPtr, u8 option)
         u8 remaining = 15;
         for (; remaining != 0xFF; remaining--) {
             u8 wayCode = *way++;
-            objMake(&object, objPtr->offset, (u8)objPtr->id, wayCode, objPtr->action, 0);
+            s32 currentOffset = objPtr->offset;
+            tagPipeObject *dst = &object;
+            u8 currentId;
+            /* The constructor consumes this real source and destination. */
+            FAKEMATCH_ASM_LIVE_PAIR(objPtr, dst);
+            FAKEMATCH_ASM_READ(currentOffset);
+            currentId = objPtr->id;
+            objMake(dst, currentOffset, currentId, wayCode, objPtr->action, 0);
             objAdd(&object);
         }
         return;
@@ -512,9 +522,6 @@ void objOption(tagPipeObject *objPtr, u8 option)
     }
 }
 
-#else
-INCLUDE_ASM(const s32, "pipe/pipeObject", objOption);
-#endif
 
 void objOptionInc(tagPipeObject *objPtr, u8 op)
 {

@@ -99,3 +99,24 @@ paths. This is not EE execution or an exhaustive RNG-state proof.
 Full retail checksum, generated-source, 569 regression tests, guarded-source,
 report and compiler-ownership gates pass. Game coverage gains one function and
 552 bytes; SDK coverage is unchanged.
+
+## objOption exact match (0x260)
+
+All 152 retail instructions match. Action 0x1A takes precedence over
+ID dispatch. The three supported random cases preserve their individual
+call sites and masks, with a widened threshold plus 128 only in status
+zero. Equality meets the threshold and adds the object.
+
+Option 100 copies the 16-way table and performs 16 separate construction
+and add pairs. Both calls use the same 32-byte temporary. The parent
+offset, ID, and action are read anew for each construction, including the
+first, rather than reusing the earlier dispatch values. The constructor
+initializes the temporary even on its early return. The remaining paths
+preserve the by-value option boundary and the pre-add flag update.
+
+The source and destination pointer pair keeps a single native loop
+entry without volatile memory. The actual offset operand preserves the
+operand schedule at the constructor call. The widened threshold and
+branch predicate use their respective native registers; their lifetimes
+and the two provider interfaces are unchanged. Complete owner: 42
+matches, zero differences.
