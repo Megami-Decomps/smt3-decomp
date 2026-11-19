@@ -917,9 +917,6 @@ s32 sceCdStStop(void)
     return sceCdStream(0, 0, 0, 3, cdvdDefaultStreamMode);
 }
 
-/* NON_MATCHING: native size; the active-flag address/load uses the opposite
- * pair of temporary registers (three words). */
-#ifdef NON_MATCHING
 s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
 {
     /* Native sll/addu use the low 32 bits, including wraparound.
@@ -934,8 +931,13 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
         scePrintf("sceCdStRead call read size= %d mode= %d\n", sectors, mode);
     }
     error = 0;
-    if (cdvdStreamActive == 0) {
-        return 0;
+    {
+        /* The EE load sign-extends the flag. Keep the full register value
+         * for the branch, separate from the 32-bit return value. */
+        FAKEMATCH_ASM_REG(s64, active, "$3") = cdvdStreamActive;
+        if (active == 0) {
+            return 0;
+        }
     }
     completed = 0;
     sceSifWriteBackDCache(buffer, sectors << 11);
@@ -968,9 +970,6 @@ s32 sceCdStRead(u32 sectors, u32 *buffer, u32 mode, u32 *status)
     }
     return completed;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdStRead);
-#endif
 
 s32 sceCdStPause(void)
 {

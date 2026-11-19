@@ -67,33 +67,30 @@ assembly and objects agree. Broad global qualification changed peers and was
 rejected. The consumer remains assembly-backed at 184 of 188 bytes: its final
 saved-reason reload is unresolved; changing the callback return type is invalid.
 
-## sceCdStRead
+## sceCdStRead (sdk/libcdvd, 392 bytes)
 
-392 bytes, 95 of 98 words matching. Only the stream-active flag check at
-+0x58 differs: the candidate uses r3 for the address and r2 for its loaded
-value; retail uses r2 and r3 respectively, including the following branch.
-The remaining instructions and complete frame match. The three diagnostic
-literals follow native text; production assembly retains their ownership.
-The guarded whole-owner diagnostic additionally reports three shared-rodata
-ownership warnings for the target's assembly fallback.
+98 of 98 words match, including the inactive-stream branch and its return.
+The stream flag remains a signed 32-bit global. The EE's `lw` sign-extends
+that flag, and a block-local signed 64-bit value bound to the native `$3`
+register represents that one load for the comparison. On the inactive path
+the function returns an independent 32-bit zero and leaves the status output
+untouched. The local is consumed by the branch and does not cross a call.
+There is no additional load, empty constraint or ABI change.
 
-The initial diagnostic precedes sticky-error initialization. Initializing
-that error at declaration moves the prologue and emits only 74 matching
-words; moving initialization after the inactive guard swaps two saved
-registers and leaves 88 matching words. Initializing it between diagnostic
-and guard gives the preferred 95-word result. An explicit active-flag local
-is inert and was removed. A positive outer guard changes the control layout
-and was discarded; no further scheduling search was performed.
+The previous signed-32-bit check selected the opposite two temporaries.
+Using the native-width local keeps the branch's flag value separate from
+the 32-bit return. The fixed register is a localized constraint for SDK
+ee-gcc 2.9; it does not change which values make the stream active. The
+diagnostic messages still follow the native order and are checked with their
+owning section.
 
-The inactive path returns zero without writing the status output. Mode zero
-performs one read and splits its reply into sector count and error. Nonzero
-mode accumulates sectors, remembers the most recent nonzero error, and
-continues after a partial read even when that read reports an error. A zero
-error with zero progress delays eight ticks; a nonzero error with zero
-progress terminates. Each subsequent request uses remaining sectors and the
-buffer offset in 2048-byte sectors. The final diagnostic precedes publishing
-the sticky error. The configured SDK 2.9 register choice at the active check
-remains unresolved; no dummy dependency, qualifier or primitive was added.
+Mode zero performs one read and splits its reply into sector count and error.
+Nonzero mode accumulates sectors, remembers the most recent nonzero error,
+and continues after a partial read even when that read reports an error.
+Zero error with zero progress delays eight ticks; nonzero error with zero
+progress terminates. Each subsequent request uses the remaining sectors and
+the buffer offset in 2048-byte sectors. The final diagnostic precedes
+publishing the sticky error. Native 32-bit wraparound is retained.
 
 ## cdvd_exit (sdk/libcdvd, 148 bytes)
 
@@ -184,8 +181,8 @@ and paired resolved targets. Allocated data and semantic symbol contracts
 remain equal after the explicit target-string mapping: production removes
 only its two target-owned labels without changing bytes; SKIP modes insert
 exactly the target's 64-byte string block at rodata offset 32. All single
-ablations preserve peers and nontext data. Retained sceCdStRead remains a
-known mismatch and receives no new credit.
+ablations preserved peers and nontext data. In this earlier pass,
+`sceCdStRead` was still a guarded draft and received no credit.
 
 Raw relocation serialization is not identical. Production changes the order
 in _sceCd_ncmd_prechk; both SKIP modes change order in sceCdInitEeCB,
@@ -273,8 +270,8 @@ also agrees. SKIP and retained raw order differs for sceCdSync, cdvd_exit and
 sceCdNcmdDiskReady; resolved per-offset contracts agree. This is explicitly
 not raw ordered identity. Allocated non-target data/symbol contracts agree
 after mapping the expected 64-byte target string block inserted at rodata zero
-in nonproduction modes. Production data matches retail exactly. The retained
-sceCdStRead mismatch is unchanged and receives no credit.
+in nonproduction modes. Production data matched retail exactly. This earlier pass did not
+change or promote the `sceCdStRead` draft.
 
 Independent review approves the exact frozen source. Fresh source-extracted
 fixtures pass all 1,080 cases with the semaphore changed to 41 inside sync,

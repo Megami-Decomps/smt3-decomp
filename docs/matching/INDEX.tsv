@@ -456,10 +456,10 @@ _calloc_r				docs/matching/sdk/libc.md	423
 What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51
-sceCdStRead			95 of 98 words matching	docs/matching/sdk/libcdvd.md	70
-cdvd_exit	sdk/libcdvd	148 bytes	37 of 37 words match	docs/matching/sdk/libcdvd.md	98
-_sceCd_scmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	134
-_sceCd_ncmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	209
+sceCdStRead	sdk/libcdvd	392 bytes	98 of 98 words match	docs/matching/sdk/libcdvd.md	70
+cdvd_exit	sdk/libcdvd	148 bytes	37 of 37 words match	docs/matching/sdk/libcdvd.md	95
+_sceCd_scmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	131
+_sceCd_ncmd_prechk	sdk/libcdvd	368 bytes	92 of 92 words match	docs/matching/sdk/libcdvd.md	206
 sceDmaPutEnv			15 of 118 words differ	docs/matching/sdk/libdma.md	3
 __do_global_ctors	sdk/libgcc	0xC0		docs/matching/sdk/libgcc.md	3
 __muldi3	sdk/libgcc	0x74	0 of 29 words match	docs/matching/sdk/libgcc.md	65
