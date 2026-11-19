@@ -310,6 +310,13 @@
 #define SDF_FRAME_STEP_AFTER_DRAW_BY(age, d) (d)
 #endif
 
+/* Updates run at once for n queued at a particle's create or reset. A host runs
+ * n game ticks of updates less the tick's other host ticks, so each later game
+ * tick's first update falls on its first host tick. The original runs n. */
+#ifndef SDF_FRAME_PRESTEP_COUNT
+#define SDF_FRAME_PRESTEP_COUNT(n) (n)
+#endif
+
 /* The n floats at dst, which their owner scaled about origin by ratio on this
  * retail tick, as drawn on a host tick: origin + (dst - origin) * ratio to the
  * power of the share of the tick run, less one. Retail draws dst as it is. */
