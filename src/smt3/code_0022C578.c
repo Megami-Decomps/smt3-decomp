@@ -1631,33 +1631,43 @@ s32 cmpItemIsStockFull(u16 id)
     return 0;
 }
 
-/* NON_MATCHING: 13 of 28 words differ, 112 bytes against retail's 140. */
-#ifdef NON_MATCHING
 s32 cmpItemIsUsable(u16 item)
 {
     u8 flags = datItemTable[item].flags;
     u8 usable = flags & 1;
-
+    s32 count;
+    FAKEMATCH_ASM_REG(s32, result, "$2");
     if (usable == 0) {
-        return 1;
+        result = 1;
+        goto done;
     }
-    switch (campWork->page[0].cursor.unk_22 + (u8)campWork->page[0].cursor.unk_24) {
-    case 0:
-        if (cmpItemIsStockFull(item) != 0) {
-            return 1;
-        }
-        return 0;
-    case 1:
-        if ((flags & 2) != 0) {
-            return 0;
-        }
-        return 1;
+
+    count = campWork->page[0].cursor.unk_22 + (u8)campWork->page[0].cursor.unk_24;
+    if (count == 0) {
+        goto stock;
     }
-    return 0;
+    if (count == 1) {
+        goto flag;
+    }
+    result = 0;
+    goto done;
+stock:
+    if (cmpItemIsStockFull(item) == 0) {
+        goto no;
+    }
+    result = 1;
+    goto done;
+flag:
+    result = 1;
+    if ((flags & 2) == 0) {
+        goto done;
+    }
+no:
+    result = 0;
+done:
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpItemIsUsable);
-#endif
+
 
 #ifdef NON_MATCHING
 extern void cmpCompactStockList(s8 devilId);
