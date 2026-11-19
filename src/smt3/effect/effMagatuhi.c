@@ -1171,7 +1171,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     SDF_VU0_COPYVECTOR(&origin, &pData->head.originX);
     captureDistance = pData->head.captureDistance;
     pathJitter = pData->head.c_ampli;
-    pathStep = SDF_FRAME_STEP(pData->head.c_step);
+    pathStep = SDF_FRAME_STEP_DECAYED(pData->head.c_step, SDF_FRAME_DECAY(pData->head.c_step_a));
     pathAcceleration = SDF_FRAME_DECAY(pData->head.c_step_a);
     SDF_VU0_COPYVECTOR(&target, &pData->head.targetX);
     for (i = 0; i < count; i++, particle++, slot++) {

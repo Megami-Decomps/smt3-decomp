@@ -6403,7 +6403,8 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
         SetRotateMatrixZ(pPCPRingPolyExp2->rotate_z);
         SetRotateMatrixY_B(pPCPRingPolyExp2->rotate_y);
         MultMatrixRevNoArg();
-        pPCPRingPolyExp2->rotate_y += SDF_FRAME_STEP(pPCPRingPolyExp2->rotate_s);
+        pPCPRingPolyExp2->rotate_y += SDF_FRAME_STEP_DECAYED(pPCPRingPolyExp2->rotate_s,
+                                                        SDF_FRAME_DECAY(pPCPRingPolyExp2->head.rotate_a));
         pPCPRingPolyExp2->rotate_s *= SDF_FRAME_DECAY(pPCPRingPolyExp2->head.rotate_a);
     }
     for (i = 0; i < n; i++) {
@@ -6508,7 +6509,7 @@ void effPCPRingPolyExp2Draw(effPCPRingPolyExp2_tag *hData) {
     if (duration < frame) {
         return;
     }
-    hData->radius += SDF_FRAME_STEP(hData->radius_s);
+    hData->radius += SDF_FRAME_STEP_DECAYED(hData->radius_s, SDF_FRAME_DECAY(hData->head.radiusDecay));
     effPCPRingPolyExp2SetVertex(hData, hData->radius);
     hData->radius_s *= SDF_FRAME_DECAY(hData->head.radiusDecay);
     t = 1.0f;
@@ -6774,7 +6775,7 @@ void effPCPRadiateThunderDraw(effPCPRadiateThunder_tag *work)
                 point[1] = origin[1];
                 point[2] = origin[2] + sine * radius;
                 entry->radius += SDF_FRAME_STEP(entry->radius_s);
-                entry->radian += SDF_FRAME_STEP(entry->radian_s);
+                entry->radian += SDF_FRAME_STEP_DECAYED(entry->radian_s, angularDamping);
                 entry->radian_s *= angularDamping;
                 fragment = effPCP_ThunderPolyGetParam(entry->pThunderPoly);
                 blend = startRadialBlend +
@@ -7152,7 +7153,7 @@ void effPCPRadiateBEDDraw(effPCPRadiateBED_tag *hData) {
                 place.center[1] = base[1];
                 place.center[2] = base[2] + sine * radius;
                 entry->radius += SDF_FRAME_STEP(entry->radius_s);
-                entry->radian += SDF_FRAME_STEP(entry->radian_s);
+                entry->radian += SDF_FRAME_STEP_DECAYED(entry->radian_s, angleDecay);
                 entry->radian_s *= angleDecay;
                 if (frame < fadeIn && fadeIn != 0) {
                     t = (f32)frame / (f32)fadeIn;
@@ -7605,9 +7606,9 @@ void effPCPSpiralBEDDraw(effPCPSpiralBED_tag *hData) {
                 place.center[0] = origin[0] + cosine * radius;
                 place.center[1] = origin[1] + entry->up;
                 place.center[2] = origin[2] + sine * radius;
-                entry->up += SDF_FRAME_STEP(entry->up_s);
+                entry->up += SDF_FRAME_STEP_DECAYED(entry->up_s, heightDamping);
                 entry->radius += SDF_FRAME_STEP(entry->radius_s);
-                entry->rotate += SDF_FRAME_STEP(entry->rotate_s);
+                entry->rotate += SDF_FRAME_STEP_DECAYED(entry->rotate_s, angularDamping);
                 entry->up_s *= heightDamping;
                 entry->rotate_s *= angularDamping;
                 if (frame < fadeIn && fadeIn != 0) {

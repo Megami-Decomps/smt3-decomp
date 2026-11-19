@@ -1062,8 +1062,8 @@ void effPCPHamaCardSpiralDraw(effPCPHamaCardSpiral_tag *hData) {
             }
             if (SDF_FRAME_STEP_AFTER_DRAW(age, duration)) {
                 particle->radius += SDF_FRAME_STEP(particle->radius_s);
-                particle->radian += SDF_FRAME_STEP(angleStep);
-                particle->height += SDF_FRAME_STEP(heightStep);
+                particle->radian += SDF_FRAME_STEP_DECAYED(angleStep, angleDamping);
+                particle->height += SDF_FRAME_STEP_DECAYED(heightStep, heightDamping);
                 particle->roll_s = angleStep * angleDamping;
                 particle->up_s = heightStep * heightDamping;
             }
@@ -1382,7 +1382,7 @@ void effPCPHamaCardSphereDraw(effPCPHamaCardSphere_tag *hData) {
             }
             if (SDF_FRAME_STEP_AFTER_DRAW(age, duration)) {
                 particle->radius += SDF_FRAME_STEP(particle->radius_s);
-                particle->radian += SDF_FRAME_STEP(angleStep);
+                particle->radian += SDF_FRAME_STEP_DECAYED(angleStep, angleDamping);
                 particle->roll_s = angleStep * angleDamping;
             }
         } else {
@@ -2019,7 +2019,7 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->rot_y += SDF_FRAME_STEP_DECAYED(ring->radian_s, SDF_FRAME_DECAY(pWhirlwindPoly->param.tiltDamping));
     ring->radian_s *= SDF_FRAME_DECAY(pWhirlwindPoly->param.tiltDamping);
     ring->radius = radius;
     ring->up_s = rise * SDF_FRAME_DECAY(pWhirlwindPoly->param.riseDecay);
@@ -2027,10 +2027,10 @@ void effPCPWhirlwindPolyPartMove(effPCPWhirlwindPoly_tag *pWhirlwindPoly, s32 in
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += SDF_FRAME_STEP(rise);
+        vertex[1] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwindPoly->param.riseDecay));
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += SDF_FRAME_STEP(rise);
+        vertex[5] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwindPoly->param.riseDecay));
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2263,7 +2263,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind2Poly->hPoly, index);
     ring = &pWhirlwind2Poly->pPart[index];
-    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
+    radius = ring->radius + SDF_FRAME_STEP_DECAYED(ring->radius_s, SDF_FRAME_DECAY(pWhirlwind2Poly->param.radius_a));
     count = pWhirlwind2Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2271,7 +2271,7 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->rot_y += SDF_FRAME_STEP_DECAYED(ring->radian_s, SDF_FRAME_DECAY(pWhirlwind2Poly->param.roll_a));
     ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.roll_a);
     ring->radius = radius;
     ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind2Poly->param.radius_a);
@@ -2280,10 +2280,10 @@ void effPCPWhirlwind2PolyPartMove(effPCPWhirlwind2Poly_tag *pWhirlwind2Poly, s32
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += SDF_FRAME_STEP(rise);
+        vertex[1] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwind2Poly->param.up_a));
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += SDF_FRAME_STEP(rise);
+        vertex[5] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwind2Poly->param.up_a));
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2532,7 +2532,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
 
     dds3WhirlwindPolyListGetUV(pWhirlwind3Poly->hPoly, index);
     ring = &pWhirlwind3Poly->pPart[index];
-    radius = ring->radius + SDF_FRAME_STEP(ring->radius_s);
+    radius = ring->radius + SDF_FRAME_STEP_DECAYED(ring->radius_s, SDF_FRAME_DECAY(pWhirlwind3Poly->param.radius_a));
     count = pWhirlwind3Poly->hPoly->vectorsPerParticle >> 1;
     rise = ring->up_s;
     angle = ring->radian;
@@ -2540,7 +2540,7 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
     SetRotateMatrixX(ring->rot_x);
     SetRotateMatrixY_B(ring->rot_y);
     MultMatrixRevNoArg();
-    ring->rot_y += SDF_FRAME_STEP(ring->radian_s);
+    ring->rot_y += SDF_FRAME_STEP_DECAYED(ring->radian_s, SDF_FRAME_DECAY(pWhirlwind3Poly->param.roll_a));
     ring->radian_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.roll_a);
     ring->radius = radius;
     ring->radius_s *= SDF_FRAME_DECAY(pWhirlwind3Poly->param.radius_a);
@@ -2549,10 +2549,10 @@ void effPCPWhirlwind3PolyPartMove(effPCPWhirlwind3Poly_tag *pWhirlwind3Poly, s32
         f32 s;
 
         vertex[0] = sdfCos(angle) * radius;
-        vertex[1] += SDF_FRAME_STEP(rise);
+        vertex[1] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwind3Poly->param.up_a));
         s = sdfSin(angle);
         vertex[4] = vertex[0];
-        vertex[5] += SDF_FRAME_STEP(rise);
+        vertex[5] += SDF_FRAME_STEP_DECAYED(rise, SDF_FRAME_DECAY(pWhirlwind3Poly->param.up_a));
         vertex[6] = vertex[2] = s * radius;
         SDF_VU0_LOADVECTOR(vertex);
         SDF_VU0_APPLYMATRIX();
@@ -2785,10 +2785,13 @@ void effPCPWwSpherePolyPartMove(effPCPWwSpherePoly_tag *pWwSpherePoly, s32 index
     dds3WhirlwindPolyListGetUV(pWwSpherePoly->hPoly, index);
     ring = &pWwSpherePoly->pPart[index];
     count = pWwSpherePoly->hPoly->vectorsPerParticle >> 1;
-    angle = ring->radian + SDF_FRAME_STEP(ring->radian_s);
+    angle = ring->radian + SDF_FRAME_STEP_DECAYED(ring->radian_s, SDF_FRAME_DECAY(pWwSpherePoly->param.roll_a));
     radius = ring->radius;
     step = ring->radian_add;
-    radius += SDF_FRAME_STEP(ring->radius_s);
+    radius += SDF_FRAME_STEP_DECAYED(ring->radius_s,
+                                     ring->frame >= SDF_FRAMES(pWwSpherePoly->param.radius_aw)
+                                         ? SDF_FRAME_DECAY(pWwSpherePoly->param.radius_a)
+                                         : 1.0f);
     if (ring->frame >= SDF_FRAMES(pWwSpherePoly->param.radius_aw)) {
         ring->radius_s *= SDF_FRAME_DECAY(pWwSpherePoly->param.radius_a);
     }

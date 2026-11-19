@@ -1136,12 +1136,12 @@ void effEventUpdateBillboardParticles(effEVECombParSmoke_t *work) {
         }
         if (SDF_FRAME_DRAWN_AGE(age) > 0 && SDF_FRAME_DRAWN_AGE(age) <= duration) {
             if (particle->wait >= 0) {
-                drift = SDF_FRAME_STEP(particle->shift_s);
+                drift = SDF_FRAME_STEP_DECAYED(particle->shift_s, growth);
                 particle->pos[0] += side[0] * drift;
                 particle->pos[1] += side[1] * drift;
                 particle->pos[2] += side[2] * drift;
                 wave = particle->amplitude * sdfSin(particle->angle);
-                particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
+                particle->motion[1] += SDF_FRAME_STEP_DECAYED(particle->up_s, growth);
                 offset.x = particle->pos[0] + particle->motion[0] * wave;
                 offset.y = particle->pos[1] + particle->motion[1];
                 offset.z = particle->pos[2] + particle->motion[2] * wave;
@@ -1303,13 +1303,13 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *work) {
             s32 slot;
             s16 u, v;
             if (particle->wait >= 0) {
-                f32 lateralSpeed = SDF_FRAME_STEP(particle->shift_s);
+                f32 lateralSpeed = SDF_FRAME_STEP_DECAYED(particle->shift_s, acceleration);
                 particle->pos[0] += lateral.x * lateralSpeed;
                 particle->pos[1] += lateral.y * lateralSpeed;
                 particle->pos[2] += lateral.z * lateralSpeed;
                 swaySine = sdfSin(particle->angle);
                 sway = particle->amplitude * swaySine;
-                particle->motion[1] += SDF_FRAME_STEP(particle->up_s);
+                particle->motion[1] += SDF_FRAME_STEP_DECAYED(particle->up_s, acceleration);
                 position.x = particle->pos[0] + particle->motion[0] * sway;
                 position.y = particle->pos[1] + particle->motion[1];
                 position.z = particle->pos[2] + particle->motion[2] * sway;

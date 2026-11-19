@@ -175,6 +175,13 @@
 #define SDF_FRAME_DECAY(k) (k)
 #endif
 
+/* A step d added before d is multiplied by the per-tick decay k, as
+ * x += d; d *= k, with k the SDF_FRAME_DECAY value. A host scales d so its
+ * decayed host steps sum to d over a tick. */
+#ifndef SDF_FRAME_STEP_DECAYED
+#define SDF_FRAME_STEP_DECAYED(d, k) (d)
+#endif
+
 /* A divisor applied once per tick, as x += (target - x) / d: the decay
  * 1 - 1/d, so a host's SDF_FRAME_DECAY scales it. Folds to d here. */
 #ifndef SDF_FRAME_DIVISOR

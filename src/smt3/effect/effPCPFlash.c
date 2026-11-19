@@ -2614,7 +2614,7 @@ void effPCPFlashPolySphere2ExpDraw(effPCPFlashPolySphere2Exp_tag *hData) {
                 f32 blend;
 
                 part->stepSpeed = speed * SDF_FRAME_DECAY(decay);
-                part->accumulator = part->accumulator + SDF_FRAME_STEP(speed);
+                part->accumulator = part->accumulator + SDF_FRAME_STEP_DECAYED(speed, SDF_FRAME_DECAY(decay));
                 effPCPFlashPolySphere2ExpPartSetVertex(hData, index, &axis);
                 if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
                     blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;
@@ -2873,7 +2873,7 @@ void effPCPFlashPolySphere3Draw(effPCPFlashPolySphere3_tag *hData) {
                 f32 blend;
 
                 part->move_s = speed * SDF_FRAME_DECAY(decay);
-                part->move = part->move + SDF_FRAME_STEP(speed);
+                part->move = part->move + SDF_FRAME_STEP_DECAYED(speed, SDF_FRAME_DECAY(decay));
                 effPCPFlashPolySphere3PartRotate(hData, index, &axis);
                 effPCPFlashPolySphere3PartSetVertex(hData, index, &axis);
                 age = part->frame;
@@ -3311,7 +3311,7 @@ void effPCPFlashPolyCircleDraw(effPCPFlashPolyCircle_tag *hData) {
                 f32 blend;
 
                 part->stepSpeed = speed * SDF_FRAME_DECAY(decay);
-                part->accumulator = part->accumulator + SDF_FRAME_STEP(speed);
+                part->accumulator = part->accumulator + SDF_FRAME_STEP_DECAYED(speed, SDF_FRAME_DECAY(decay));
                 effPCPFlashPolyCirclePartSetVertex(hData, index, &axis);
                 if (SDF_FRAME_DRAWN_AGE(age) < fadeIn && fadeIn != 0) {
                     blend = (f32)SDF_FRAME_DRAWN_AGE(age) / (f32)fadeIn;

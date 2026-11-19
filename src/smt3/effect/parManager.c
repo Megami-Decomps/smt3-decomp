@@ -1058,7 +1058,7 @@ void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
             if (packet->radialDistance < 0) {
                 packet->radialDistance = 0;
             }
-            packet->verticalOffset += SDF_FRAME_STEP(packet->verticalSpeed);
+            packet->verticalOffset += SDF_FRAME_STEP_DECAYED(packet->verticalSpeed, verticalScale);
             theta = packet->phase;
             radius = packet->radialDistance;
             offset.x = sdfCos(theta) * radius;
@@ -1232,7 +1232,7 @@ void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionDelta.x = packet->vel[0] * factor;
-            positionDelta.y = SDF_FRAME_STEP(verticalStep);
+            positionDelta.y = SDF_FRAME_STEP_DECAYED(verticalStep, verticalScale);
             positionDelta.z = packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(&positionDelta);
             SDF_VU0_APPLYMATRIX();
@@ -1484,7 +1484,7 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
     if (mode == 0) {
         SDF_VU0_LOADMATRIX(hData->head.matrix);
     }
-    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
+    velocityScale = hData->decayPct / 100.0f + 1.0f;
     completedCount = 0;
     lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
     packetCount = hData->head.particleCount;
@@ -1502,9 +1502,11 @@ void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
-            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->verticalAcceleration);
-            packet->vel[0] *= velocityScale;
-            packet->vel[2] *= velocityScale;
+            SDF_FRAME_WHEN_AGE(age, {
+                packet->vel[1] = packet->vel[1] * velocityScale + packet->verticalAcceleration;
+                packet->vel[0] *= velocityScale;
+                packet->vel[2] *= velocityScale;
+            });
             SDF_VU0_LOADVECTOR(packet->vel);
             if (mode == 0) {
                 SDF_VU0_APPLYMATRIX();
@@ -2030,7 +2032,7 @@ void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionDelta.x = packet->vel[0] * factor;
-            positionDelta.y = SDF_FRAME_STEP(verticalStep);
+            positionDelta.y = SDF_FRAME_STEP_DECAYED(verticalStep, verticalScale);
             positionDelta.z = packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(&positionDelta);
             SDF_VU0_APPLYMATRIX();
@@ -2337,7 +2339,7 @@ void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
 
     dds3Particle_EffectInit(&hData->basic.sub);
     SDF_VU0_LOADMATRIX(hData->basic.matrix);
-    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
+    velocityScale = hData->decayPct / 100.0f + 1.0f;
     completedCount = 0;
     lifetimeFrames = SDF_FRAMES(hData->basic.lifetimeFrames);
     packetCount = hData->basic.particleCount;
@@ -2355,9 +2357,11 @@ void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
-            packet->vel[0] *= velocityScale;
-            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->verticalAcceleration);
-            packet->vel[2] *= velocityScale;
+            SDF_FRAME_WHEN_AGE(age, {
+                packet->vel[0] *= velocityScale;
+                packet->vel[1] = packet->vel[1] * velocityScale + packet->verticalAcceleration;
+                packet->vel[2] *= velocityScale;
+            });
             SDF_VU0_LOADVECTOR(packet->vel);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&positionDelta);
@@ -2551,9 +2555,9 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
             dx = packet->vel[0] * magnitude;
             dy = packet->vel[1] * magnitude;
             dz = packet->vel[2] * magnitude;
-            packet->pos[0] += SDF_FRAME_STEP(dx);
-            packet->pos[1] += SDF_FRAME_STEP(dy);
-            packet->pos[2] += SDF_FRAME_STEP(dz);
+            packet->pos[0] += SDF_FRAME_STEP_DECAYED(dx, velocityScale);
+            packet->pos[1] += SDF_FRAME_STEP_DECAYED(dy, velocityScale);
+            packet->pos[2] += SDF_FRAME_STEP_DECAYED(dz, velocityScale);
             magnitude *= velocityScale;
             packet->motionMagnitude = magnitude;
             SDF_VU0_LOADVECTOR(packet->pos);
@@ -2907,7 +2911,7 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
     if (mode == 0) {
         SDF_VU0_LOADMATRIX(hData->head.matrix);
     }
-    velocityScale = SDF_FRAME_DECAY(hData->decayPct / 100.0f + 1.0f);
+    velocityScale = hData->decayPct / 100.0f + 1.0f;
     completedCount = 0;
     packetCount = hData->head.particleCount;
     lifetimeFrames = SDF_FRAMES(hData->head.lifetimeFrames);
@@ -2926,9 +2930,11 @@ void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
             if (subeffectKind != 0) {
                 SDF_VU0_LOADVECTOR_C(packet);
             }
-            packet->vel[1] = packet->vel[1] * velocityScale + SDF_FRAME_STEP(packet->offsetAcceleration);
-            packet->vel[0] *= velocityScale;
-            packet->vel[2] *= velocityScale;
+            SDF_FRAME_WHEN_AGE(age, {
+                packet->vel[1] = packet->vel[1] * velocityScale + packet->offsetAcceleration;
+                packet->vel[0] *= velocityScale;
+                packet->vel[2] *= velocityScale;
+            });
             SDF_VU0_LOADVECTOR(packet->vel);
             if (mode == 0) {
                 SDF_VU0_APPLYMATRIX();
@@ -3111,7 +3117,7 @@ void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
             packet->previousWaveValue = factor;
             factor = (factor - previousWaveValue) * packet->waveAmplitude;
             positionVector.x = (*auxiliaryCursor)[0] + packet->vel[0] * factor;
-            positionVector.y = (*auxiliaryCursor)[1] + SDF_FRAME_STEP(verticalStep);
+            positionVector.y = (*auxiliaryCursor)[1] + SDF_FRAME_STEP_DECAYED(verticalStep, verticalScale);
             positionVector.z = (*auxiliaryCursor)[2] + packet->vel[2] * factor;
             SDF_VU0_LOADVECTOR(&positionVector);
             SDF_VU0_STOREVECTOR(*auxiliaryCursor);

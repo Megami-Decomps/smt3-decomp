@@ -1251,8 +1251,8 @@ void eff_178128(effPCP_ThunderColumnPolyLow_t *work) {
             position[0] = origin[0] + sdfCos(angle) * radius;
             position[1] = origin[1] + spark->up - spark->height;
             position[2] = origin[2] + sdfSin(angle) * radius;
-            spark->up += SDF_FRAME_STEP(spark->up_s);
-            spark->rotate += SDF_FRAME_STEP(spark->rotate_s);
+            spark->up += SDF_FRAME_STEP_DECAYED(spark->up_s, verticalDamping);
+            spark->rotate += SDF_FRAME_STEP_DECAYED(spark->rotate_s, angularDamping);
             spark->up_s *= verticalDamping;
             spark->rotate_s *= angularDamping;
             if (SDF_FRAME_DRAWN_AGE(age) < fadeInTime) {
