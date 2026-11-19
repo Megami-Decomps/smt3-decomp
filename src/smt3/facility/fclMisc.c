@@ -85,7 +85,7 @@ void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pP
 
 extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
-extern s32 cmpItemOrder(u8 *a, u8 *b);
+extern s32 cmpItemOrder(const void *a, const void *b);
 
 extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
@@ -241,10 +241,10 @@ void fclCreateItemListEx(fclItemList_t *list, s8 which)
     }
 }
 
-s32 cmpItemOrder(u8 *a, u8 *b)
+s32 cmpItemOrder(const void *a, const void *b)
 {
-    u8 va = *a;
-    u8 vb = *b;
+    u8 va = *(const u8 *)a;
+    u8 vb = *(const u8 *)b;
 
     if (va > vb) {
         return 1;

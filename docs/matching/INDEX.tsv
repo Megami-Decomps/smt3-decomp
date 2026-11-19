@@ -35,31 +35,31 @@ cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/
 cmpStartSkillMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	710
 cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	798
 cmpGetKugatatiMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	818
-campCheckStockRoom	code_0022C578	0x9C	14 of 39 words differ	docs/matching/code_0022C578.md	862
-cmpAddQuePanelEff	code_0022C578	0xB8	46 of 46 words match	docs/matching/code_0022C578.md	878
-campDrawInfoText	code_0022C578	0xBC		docs/matching/code_0022C578.md	913
-cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	941
-campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	958
-camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	993
-campDrawText	code_0022C578	0x170	92 of 92 words match	docs/matching/code_0022C578.md	1035
-campDrawStatusRow2	code_0022C578	0x134	77 of 77 words match	docs/matching/code_0022C578.md	1058
-campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	1107
-cmpDrawPanelEffQuad	code_0022C578	0x20C		docs/matching/code_0022C578.md	1146
-campDhUpdateCursor	code_0022C578	0x248	146 of 146 words match	docs/matching/code_0022C578.md	1215
-campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1264
-campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1288
-cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1340
-cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1370
-cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1408
-campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1456
-cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1493
-cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1535
-cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1578
-cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1618
-cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1678
-cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1744
-campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1918
-cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1952
+campCheckStockRoom	0x0023E428	156 bytes		docs/matching/code_0022C578.md	862
+cmpAddQuePanelEff	code_0022C578	0xB8	46 of 46 words match	docs/matching/code_0022C578.md	895
+campDrawInfoText	code_0022C578	0xBC		docs/matching/code_0022C578.md	930
+cmpDrawItemListRow	code_0022C578	0xB8	2 of 46 words differ	docs/matching/code_0022C578.md	958
+campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/matching/code_0022C578.md	975
+camp_draw_Process	code_0022C578	0x1A0	104 of 104 words match	docs/matching/code_0022C578.md	1010
+campDrawText	code_0022C578	0x170	92 of 92 words match	docs/matching/code_0022C578.md	1052
+campDrawStatusRow2	code_0022C578	0x134	77 of 77 words match	docs/matching/code_0022C578.md	1075
+campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	1124
+cmpDrawPanelEffQuad	code_0022C578	0x20C		docs/matching/code_0022C578.md	1163
+campDhUpdateCursor	code_0022C578	0x248	146 of 146 words match	docs/matching/code_0022C578.md	1232
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1281
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1305
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1357
+cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1387
+cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1425
+campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1473
+cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1510
+cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1552
+cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1595
+cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1635
+cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1695
+cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1761
+campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1935
+cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1969
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
@@ -164,6 +164,7 @@ shpUpdateSeqPay	facility/fclShopUpdate	0x218	134 of 134 words match	docs/matchin
 fclTerminalLoadTextures	fclTerminalInit	0x70	28 of 28 words match	docs/matching/facility/fclTerminalInit.md	3
 trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 trmUpdateSeqRoot	facility/fclTerminalUpdate	0x290	164 of 164 words match	docs/matching/facility/fclTerminalUpdate.md	37
+ragBuildList2 and ragBuildList3 (372 bytes each)				docs/matching/fclRagInit.md	3
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	42 of 42 words match	docs/matching/field/fldAutoMap.md	3
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/matching/field/fldAutoMap.md	83
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	130
@@ -203,6 +204,7 @@ fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Np
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/fld_Npc.md	80
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
 fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	179
+fldSnowTask (1280 bytes)				docs/matching/fldSnow.md	3
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
 frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	79
 frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	131

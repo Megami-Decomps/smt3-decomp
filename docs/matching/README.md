@@ -132,11 +132,13 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
+| 1 |  | [fldSnow.md](fldSnow.md) |
 | 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
+| 1 |  | [fclRagInit.md](fclRagInit.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc-destroy.md](facility/fclEncyc-destroy.md) |
 | 1 | facility/fclDraw | [facility/fclDraw.md](facility/fclDraw.md) |

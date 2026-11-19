@@ -86,7 +86,11 @@ typedef struct
     /* 0x0000 */ u8 unk_0000[0xE];
     /* 0x000E */ s16 unk_0E;
     /* 0x0010 */ u8 unk_10;
-    /* 0x0011 */ u8 unk_0011[0x17];
+    /* 0x0011 */ u8 unk_0011[0xB];
+    /* 0x001C */ s32 highlightValue;
+    /* 0x0020 */ u8 reserved20[4];
+    /* 0x0024 */ u8 highlightFlag;
+    /* 0x0025 */ u8 reserved25[3];
     /* 0x0028 */ struct {
         cmpCursorSlot_t slot;
         u8 reserved[8];

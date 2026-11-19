@@ -360,10 +360,9 @@ void fldSnowSeedReset(void)
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 6 PCSX2 call vectors give the same return and memory,
+/* Behaviour also checked against retail: 6 PCSX2 call vectors give the same return and memory,
  * field underground facility, field unknown realm savestates, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 extern void rsetAlpha(s32 mode);
@@ -373,16 +372,18 @@ extern volatile sdfVector4_t fldCamTarget;
 
 void fldSnowTask(void)
 {
-    volatile sdfVector4_t direction;
+    /* ee-gcc retains these unconsumed stores, including Y in the mode branch delay slot. */
+    sdfVector4_t direction;
     Sprite3D_t sprite;
     fldSeedWork_t *seed;
     s32 i;
     s32 mode;
+    /* Both spawn paths carry X across the second coordinate RNG call. */
+    f32 x;
     f32 speed;
-    f32 radius;
     f32 drift;
-    f32 cameraX;
-    f32 cameraZ;
+    FAKEMATCH_ASM_REG(f32, cameraX, "$f1");
+    FAKEMATCH_ASM_REG(f32, cameraZ, "$f3");
     f32 eyeX;
     f32 eyeZ;
 
@@ -393,8 +394,8 @@ void fldSnowTask(void)
         for (i = 0; i < 2 * SDF_FRAME_DUE(); i++) {
             if ((dds3GetRandA(NULL) & 3) == 0) {
                 u32 random = dds3GetRandA(NULL) & 0xFF;
-                f32 x = gFldSnowX + (f32)random * gFldSnowW;
                 f32 z;
+                x = gFldSnowX + (f32)random * gFldSnowW;
                 random = dds3GetRandA(NULL) & 0xFF;
                 z = gFldSnowZ + (f32)random * gFldSnowW;
                 fldInitSnowSeed(x, gFldSnowY, z);
@@ -404,9 +405,9 @@ void fldSnowTask(void)
         for (i = 0; i < 12 * SDF_FRAME_DUE(); i++) {
             if ((dds3GetRandA(NULL) & 3) == 0) {
                 u32 random = dds3GetRandA(NULL) & 0xFF;
-                f32 x = fldGlobalBase.x + gFldSnowX;
                 f32 z;
-                x += (f32)random * gFldSnowW;
+                f32 origin = fldGlobalBase.x + gFldSnowX;
+                x = origin + (f32)random * gFldSnowW;
                 random = dds3GetRandA(NULL) & 0xFF;
                 z = fldGlobalBase.z + gFldSnowZ;
                 z += (f32)random * gFldSnowW;
@@ -417,33 +418,46 @@ void fldSnowTask(void)
     rsetOtOfs(0x2C);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
     rsetAlpha(1);
-    radius = 12.0f;
-    cameraZ = fldCamTarget.z;
-    cameraX = fldCamTarget.x;
-    eyeZ = fldCamEye.z;
-    eyeX = fldCamEye.x;
-    direction.x = eyeX - cameraX;
-    direction.y = 0.0f;
-    direction.z = eyeZ - cameraZ;
-    direction.w = 1.0f;
-    sprite.uv[0].u = 0;
-    sprite.uv[0].v = 0;
-    sprite.uv[1].u = 0x100;
-    sprite.uv[1].v = 0;
-    sprite.uv[2].u = 0x100;
-    sprite.uv[2].v = 0x100;
-    sprite.uv[3].u = 0;
-    sprite.uv[3].v = 0x100;
-    sprite.vt[0].x = -radius;
-    sprite.vt[0].y = -radius;
-    sprite.vt[1].x = radius;
-    sprite.vt[1].y = -radius;
-    sprite.vt[2].x = radius;
-    sprite.vt[2].y = radius;
-    sprite.vt[3].x = -radius;
-    sprite.vt[3].y = radius;
-    sprite.rot = 0.0f;
-    mode = gFldSnowMode;
+    {
+        /* Real positive and negative offsets feed the four drawn corners. */
+        FAKEMATCH_ASM_REG(f32, positive, "$f5") = 12.0f;
+        FAKEMATCH_ASM_REG(f32, negative, "$f4") = -positive;
+        FAKEMATCH_ASM_REG(volatile sdfVector4_t *, eye, "$2") = &fldCamEye;
+        FAKEMATCH_ASM_REG(volatile sdfVector4_t *, target, "$3") = &fldCamTarget;
+        FAKEMATCH_ASM_REG(f32, one, "$f6");
+        FAKEMATCH_ASM_REG(u16, fullUV, "$4");
+        FAKEMATCH_ASM_LIVE_F32_PAIR(positive, negative);
+        cameraZ = target->z;
+        cameraX = target->x;
+        fullUV = 0x100;
+        /* Keep the actual 16-bit endpoint live for its four UV stores. */
+        FAKEMATCH_ASM_LIVE(fullUV);
+        eyeZ = eye->z;
+        eyeX = eye->x;
+        direction.x = eyeX - cameraX;
+        sprite.uv[0].u = 0;
+        sprite.uv[0].v = 0;
+        sprite.uv[1].u = fullUV;
+        sprite.uv[1].v = 0;
+        sprite.uv[2].u = fullUV;
+        sprite.uv[2].v = fullUV;
+        sprite.uv[3].u = 0;
+        sprite.uv[3].v = fullUV;
+        sprite.vt[0].x = negative;
+        sprite.vt[0].y = negative;
+        sprite.vt[1].x = positive;
+        sprite.vt[1].y = negative;
+        sprite.vt[2].x = positive;
+        sprite.vt[2].y = positive;
+        sprite.vt[3].x = negative;
+        sprite.vt[3].y = positive;
+        direction.z = eyeZ - cameraZ;
+        one = 1.0f;
+        direction.w = one;
+        sprite.rot = 0.0f;
+        direction.y = 0.0f;
+        mode = gFldSnowMode;
+    }
     if (mode == 0) {
         drift = 0.125f;
         speed = gFldSnowSpd;
@@ -462,15 +476,23 @@ void fldSnowTask(void)
         }
         fldSnowSpriteTex(fldSnowBlurHandle);
         for (i = 0; i < 700; i++) {
-            fldSeedWork_t *item = &gFldSeedBuff[i];
+            addr_t offset = (u32)i * sizeof(fldSeedWork_t);
+            fldSeedWork_t *item = (fldSeedWork_t *)(offset + (addr_t)gFldSeedBuff);
             if ((item->flg & 1) && item->y < gFldSnowYD) {
-                s32 color;
+                FAKEMATCH_ASM_REG(s32, color, "$6");
                 s32 alpha;
+                u32 middle, outer;
+                u32 upper;
+                FAKEMATCH_ASM_REG(s32, speedY, "$3");
+                speedY = item->spdy;
+                color = 0x80 - speedY;
                 sprite.pos.x = item->x;
-                color = 0x80 - item->spdy;
                 alpha = item->alp;
                 sprite.pos.y = item->y;
-                sprite.col = (((u32)alpha << 24) | (u32)color) | (((u32)color << 8) | ((u32)color << 16));
+                upper = (u32)color << 16;
+                middle = ((u32)color << 8) | upper;
+                outer = ((u32)alpha << 24) | (u32)color;
+                sprite.col = outer | middle;
                 sprite.pos.z = item->z;
                 fldSnowSprite3D(&sprite);
             }
@@ -495,21 +517,26 @@ void fldSnowTask(void)
         }
         fldSnowSpriteTex(fldSnowBlurHandle);
         for (i = 0; i < 700; i++) {
-            fldSeedWork_t *item = &gFldSeedBuff[i];
+            addr_t offset = (u32)i * sizeof(fldSeedWork_t);
+            fldSeedWork_t *item = (fldSeedWork_t *)(offset + (addr_t)gFldSeedBuff);
             if ((item->flg & 1) && item->y < gFldSnowYD) {
-                s32 color;
+                FAKEMATCH_ASM_REG(s32, color, "$6");
                 s32 alpha;
+                u32 middle, outer;
+                u32 upper;
+                FAKEMATCH_ASM_REG(s32, speedY, "$3");
+                speedY = item->spdy;
+                color = 0x80 - speedY;
                 sprite.pos.x = item->x;
-                color = 0x80 - item->spdy;
                 alpha = item->alp;
                 sprite.pos.y = item->y;
-                sprite.col = (((u32)alpha << 24) | (u32)color) | (((u32)color << 8) | ((u32)color << 16));
+                upper = (u32)color << 16;
+                middle = ((u32)color << 8) | upper;
+                outer = ((u32)alpha << 24) | (u32)color;
+                sprite.col = outer | middle;
                 sprite.pos.z = item->z;
                 fldSnowSprite3D(&sprite);
             }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSnow", fldSnowTask);
-#endif

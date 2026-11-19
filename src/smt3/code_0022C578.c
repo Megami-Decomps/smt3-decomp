@@ -9330,31 +9330,35 @@ s32 campCheckStockFree(s32 x, s32 y, s8 index, s8 room, s8 known, s32 f, s8 g)
 }
 
 
-/* NON_MATCHING: 14 of 39 words differ at the exact size: retail keeps a second
- * register holding work + ofs that the C coalesces away. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 campCheckStockRoom(s8 index, s8 listIndex, s8 *pRoom, u8 *pFlag, cmpStockWork_t *work, s8 skip)
 {
     s32 ofs = index * 0x103C + 0xD0;
-    u8 *p = (u8 *)work + ofs;
-    s32 ret = *(s32 *)(p + 0xC);
-    s8 room;
+    FAKEMATCH_ASM_REG(u8 *, phase, "$8") = (u8 *)work;
+    u8 *p;
+    FAKEMATCH_ASM_REG(u8 *, q, "$8");
+    FAKEMATCH_ASM_REG(u8, flag, "$6");
+    FAKEMATCH_ASM_REG(s8 *, roomOut, "$18") = pRoom;
+    s32 ret;
+    s32 room;
 
-    *pFlag = p[0x14];
-    if (skip == 0)
-    {
+    /* Preserve the native incoming base, byte-load and status-load phases.
+     * The row copy feeds the actual status read before publishing the flag.
+     * Both pointers are kept at the native +0x10 row position. */
+    FAKEMATCH_ASM_LIVE_PAIR(phase, ofs);
+    p = phase + ofs;
+    flag = ((cmpStockInfo_t *)(p - 0x10))->highlightFlag;
+    q = p;
+    FAKEMATCH_ASM_LIVE_PAIR(q, flag);
+    ret = ((cmpStockInfo_t *)(q - 0x10))->highlightValue;
+    *pFlag = flag;
+
+    if (skip == 0) {
         room = cmpStockHasRoom(work, index);
-        *pRoom = room;
-        cmpFindFreeStockSlot(listIndex, room);
+        *roomOut = room;
+        cmpFindFreeStockSlot(listIndex, (s8)room);
     }
     return ret;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campCheckStockRoom);
-#endif
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * menu main savestate, covering only the paths those calls took.

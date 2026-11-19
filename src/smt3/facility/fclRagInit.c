@@ -40,7 +40,7 @@ typedef struct
     /* 0x39 */ s8 slotCursor;
 } campStatusPanel_t;
 
-extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, const void *b));
+extern void qsort(void *base, u32 count, u32 size, s32 (*cmp)(const void *a, const void *b));
 
 extern s8 gProcessStat_1;
 
@@ -214,7 +214,7 @@ extern ragHeartsEntry_t ragHeartEntries[] FAKEMATCH_ASM_NAME("ragHeartsTable");
 extern u8 ragHeartsIndexTable[][32];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
-extern s32 cmpItemOrder(u8 *a, u8 *b);
+extern s32 cmpItemOrder(const void *a, const void *b);
 
 s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
 {
@@ -238,41 +238,38 @@ s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
             items[count++] = index;
         }
     }
-    qsort(items, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    qsort(items, count, 1, cmpItemOrder);
     fclSetWorkValue(4, work->hasUnregistered);
     return count;
 }
 
 extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
-extern s32 cmpItemOrder(u8 *a, u8 *b);
+extern s32 cmpItemOrder(const void *a, const void *b);
 
 extern u8 ragList2Fixed[];
 
 extern u8 ragList3Fixed[];
 
-/* NON_MATCHING: 22 of 93 words differ, a real divide where retail folded the
- * VLA size into an andi, and the register cascade that follows. */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq29, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s8 ragBuildList2(u8 index, u8 *work)
 {
-    u8 *dst = work + 0x3B;
+    u8 *dst;
     s8 k = 0;
     s32 roll = dds3GetRandA(0);
+    u32 pickSize = 4;
+    s8 pick[pickSize];
+    FAKEMATCH_ASM_REG(s32, extra, "$19") = (u32)roll % sizeof(pick);
     u32 n = 4;
-    s8 pick[n];
-    s32 extra = (u32)roll % sizeof(pick);
     u8 *src;
-    s8 *p;
-    u8 count;
+    addr_t p;
+    FAKEMATCH_ASM_REG(u8, count, "$20");
     s32 i;
 
-    p = &pick[n - 1];
+    dst = work + 0x3B;
+    p = EE_ADDR(&pick[n - 1]);
     for (i = n - 1; i >= 0; i--) {
-        *p-- = i;
+        *(s8 *)EE_ADDR_PTR(p) = i;
+        p--;
     }
     shuffleIndices(pick, n, 0x10);
     src = ragList2Fixed;
@@ -281,38 +278,44 @@ s8 ragBuildList2(u8 index, u8 *work)
         src += 2;
     }
     count = n;
-    for (i = 0; i < extra; i++) {
-        dst[k++] = ragGetListItem2(index, pick[i]);
+    FAKEMATCH_ASM_LIVE(count);
+    i = 0;
+    if (extra != 0) {
+        do {
+            dst[k++] = ragGetListItem2(index, pick[i]);
+        } while (++i < extra);
     }
-    count += extra;
-    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
-    return count;
+    {
+        FAKEMATCH_ASM_REG(u32, total, "$2");
+        FAKEMATCH_ASM_REG(u32, num, "$20");
+        /* Materialize the real total before the byte count sent to qsort. */
+        total = count + extra;
+        num = (u8)total;
+        FAKEMATCH_ASM_LIVE(num);
+        qsort(dst, num, 1, cmpItemOrder);
+        return (s8)num;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList2);
-#endif
 
-/* NON_MATCHING: 22 of 93 words differ, the same residual as ragBuildList2. */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq29, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s8 ragBuildList3(u8 index, u8 *work)
 {
-    u8 *dst = work + 0x44;
+    u8 *dst;
     s8 k = 0;
     s32 roll = dds3GetRandA(0);
+    u32 pickSize = 4;
+    s8 pick[pickSize];
+    FAKEMATCH_ASM_REG(s32, extra, "$19") = (u32)roll % sizeof(pick);
     u32 n = 4;
-    s8 pick[n];
-    s32 extra = (u32)roll % sizeof(pick);
     u8 *src;
-    s8 *p;
-    u8 count;
+    addr_t p;
+    FAKEMATCH_ASM_REG(u8, count, "$20");
     s32 i;
 
-    p = &pick[n - 1];
+    dst = work + 0x44;
+    p = EE_ADDR(&pick[n - 1]);
     for (i = n - 1; i >= 0; i--) {
-        *p-- = i;
+        *(s8 *)EE_ADDR_PTR(p) = i;
+        p--;
     }
     shuffleIndices(pick, n, 0x10);
     src = ragList3Fixed;
@@ -321,16 +324,24 @@ s8 ragBuildList3(u8 index, u8 *work)
         src += 2;
     }
     count = n;
-    for (i = 0; i < extra; i++) {
-        dst[k++] = ragGetListItem3(index, pick[i]);
+    FAKEMATCH_ASM_LIVE(count);
+    i = 0;
+    if (extra != 0) {
+        do {
+            dst[k++] = ragGetListItem3(index, pick[i]);
+        } while (++i < extra);
     }
-    count += extra;
-    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
-    return count;
+    {
+        FAKEMATCH_ASM_REG(u32, total, "$2");
+        FAKEMATCH_ASM_REG(u32, num, "$20");
+        /* Materialize the real total before the byte count sent to qsort. */
+        total = count + extra;
+        num = (u8)total;
+        FAKEMATCH_ASM_LIVE(num);
+        qsort(dst, num, 1, cmpItemOrder);
+        return (s8)num;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList3);
-#endif
 
 typedef struct {
     u8 reserved00[2];
