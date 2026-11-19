@@ -1368,44 +1368,47 @@ void fldRunTamaInit(void)
     res->mhFile = sdfDevLoadFileEx(fldDflash1Path, (u32 *)&res->ptr, &res->size);
 }
 
-/* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * capture_008, event602, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void fldRunTamaFree(void)
 {
+    fldTest_FLDRUN_EFFTBL_t **table = fldRunEffTables;
     fldTest_FLDRUN_EFFTBL_t *entry;
     fldTest_FLDRUN_EFF_t *res;
-    void *handle;
+    FAKEMATCH_ASM_REG(void *, handle, "$4");
     s32 i;
 
-    for (i = 0; i < 2; i++) {
-        for (entry = fldRunEffTables[i]; (res = entry->pEff) != NULL; entry++) {
+    for (i = 1; i >= 0; i--, table++) {
+        entry = *table;
+        do {
+            res = entry->pEff;
+            if (res == NULL) {
+                break;
+            }
             if (entry->effmode == 0) {
                 handle = res->d3p;
-                if (handle != NULL) {
+                if (handle) {
                     dds3EffectDelete(handle);
                     res->d3p = NULL;
                 }
             } else {
                 handle = res->pcf;
-                if (handle != NULL) {
+                if (handle) {
                     dds3EffectPartDelete(handle);
                     res->pcf = NULL;
                 }
             }
             handle = res->mhFile;
-            if (handle != NULL) {
+            /* Keep the current loop entry live until the free check,
+             * so the entry advances in its native branch slot. */
+            FAKEMATCH_ASM_READ(entry);
+            entry++;
+            if (handle) {
                 sdfMemFreeDelayedDirect(handle);
                 res->mhFile = NULL;
             }
-        }
+        } while (1);
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaFree);
-#endif
+
 
 void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
 {
@@ -2359,7 +2362,12 @@ void fldRunDantePatr(void)
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
         fldGetDistAngleTo(&distance, &angle, targetX, targetZ);
         {
-            f32 frames = distance / fldRun_Dante.speed;
+            /* Keep the native speed load ahead of the distance reload when
+             * compiling this owner with fldRunTamaFree present. */
+            FAKEMATCH_ASM_REG(f32, speedForDistance, "$f1") = fldRun_Dante.speed;
+            f32 frames;
+            FAKEMATCH_ASM_LIVE_F32_VOLATILE(speedForDistance);
+            frames = distance / speedForDistance;
             fldRun_Dante.angleToPlayer = angle;
             fldRun_Dante.nextframe = (s32)frames;
         }

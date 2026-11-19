@@ -31,6 +31,13 @@ target-specific reconstruction aid, not a general memory barrier or evidence
 of the original source spelling. See the
 [SMT3-local policy](../../CONTRIBUTING.md#localized-compiler-constraints-smt3-only).
 
+Matching [`fldRunTamaFree`](../code_00116AD0.md#fldruntamafree-fieldfldtest-188-bytes)
+in this owner later exchanged those two loads again. The localized `$f1`
+speed-divisor constraint restores their retail order in the new production
+context. The same `f32` speed and distance feed the same divide; the register
+value is not live across a call. The complete owner reports 39 matches and
+zero differences with both bodies active.
+
 ### Historical residual and controls
 
 The earlier `376abcae` draft matched 178 of 180 words at the native 720-byte

@@ -1,8 +1,8 @@
 function	unit	size	distance	page	line
-fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/matching/code_00116AD0.md	3
-fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	129
-fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	146
-fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	173
+fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
+fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153
+fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	170
+fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/matching/code_00116AD0.md	197
 slCopyNonZero	historical code_00144798	0x40	16 of 16 words now match	docs/matching/code_00144798.md	3
 fldCommand_DIR_HIT_CNTR	field/fldCommand	0xC0	10 of 42 words match	docs/matching/code_00144798.md	30
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/matching/code_00144798.md	66
@@ -193,7 +193,7 @@ fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md
 fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
-fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	68
+fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
 fldSetupDoorScenes	field/fldWap	0xBC8	754 of 754 words match	docs/matching/field/fldWap.md	3
 fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
