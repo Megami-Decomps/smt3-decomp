@@ -966,8 +966,13 @@
   statement order, so assigning the one retail gives the lower register first
   gets the registers right and the two `lui` the wrong way round; assigning the
   other first gets the `lui` order right and swaps the registers.
-  `dds3BillboardManagerInit` sits two words from exact on that, and neither
-  declaration order nor any loop-body or guard spelling separates them.
+  In `dds3BillboardManagerInit`, declaration order, loop-body and guard
+  spellings left two differing words. A real row-base temporary resolves it:
+  initialize the row base, then the handle cursor, then copy the row base
+  into the row cursor. All 46 words (184 bytes) now match with ordinary C;
+  no artificial dependency, dummy consumer or register constraint is needed.
+  See [the matching note](../matching/effect/billManager.md) for the old
+  scheduling evidence and the minimized resolution.
 - Two pointers of the same type that a function needs again after its calls,
   where retail spills them to two adjacent 4-byte stack slots instead of using
   callee-saved registers, are **elements of a local array**, `T *batch[2]`, not

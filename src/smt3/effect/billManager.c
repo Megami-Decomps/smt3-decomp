@@ -266,21 +266,21 @@ void dds3P2APolygonSetRotateMatrix(dds3P2APolygon_tag *hData, void *pMatrix);
 void dds3P2APolygonSetRGBA(dds3P2APolygon_tag *hData, u32 abgr);
 void dds3P2APolygonSetDirection(void *hData, void *pMatrix);
 
-/* NON_MATCHING: 2 of 46 words differ (first at +0x40). */
-#ifdef NON_MATCHING
 void dds3BillboardManagerInit(void) {
     fileRequest_t *request;
     sdfPacDecodeResrc_t *work;
     billGeneralRow_t *row;
     billHandle_t **slot;
+    billGeneralRow_t *rowBase;
 
     dds3BillboardTag = NULL;
     request = pacLoad("/bill/billtmx.LB");
     pacSync(request);
     work = request->pac.resrcHead;
     if (work != NULL) {
+        rowBase = dds3BillboardGeneralRows;
         slot = hGeneralBillboard;
-        row = dds3BillboardGeneralRows;
+        row = rowBase;
         do {
             void *data = sdfMemGetPtr(work->resrc);
             *slot = dds3BillboardCreate(row->kind, EE_ADDR(data));
@@ -293,9 +293,6 @@ void dds3BillboardManagerInit(void) {
     pacFileHandleFree_(request);
     printf("billManager:[%s]\n", "/bill/billtmx.LB");
 }
-#else
-INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardManagerInit);
-#endif
 
 void dds3BillboardManagerExit(void) {
     u32 i;

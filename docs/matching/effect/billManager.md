@@ -2,7 +2,20 @@
 
 ## dds3BillboardManagerInit (effect/billManager, 0xB8)
 
-44 of 46 words match, at the exact 184-byte size. The two differing words are
+Resolved: 46 of 46 words match at the native 184-byte size. The ordinary C
+initializes `rowBase = dds3BillboardGeneralRows`, then the handle cursor,
+then `row = rowBase`. The temporary supplies the real row cursor without
+changing its type, table accesses, loop or resource lifetime. This separates
+base materialization order from cursor initialization order; no register
+constraint, artificial consumer or assembly is added. Removing the row-base
+temporary returns the previous two-word mismatch. The complete owner checks
+65 match, 0 differ, including owned data and production context. This establishes
+a working compiler input, not original source spelling.
+
+### Previous two-word residual
+
+The previous draft had 44 of 46 words match at the exact 184-byte size.
+Its two differing words were
 the `lui` halves of the two walking pointers' addresses, emitted in the other
 order: retail has `lui $3, %hi(D_00316FF0)` in the `beqz`'s delay slot and
 `lui $2, %hi(hGeneralBillboard)` after it, the draft the reverse. Both
@@ -15,7 +28,7 @@ The register assignment and the `lui` order are coupled through statement
 order and pull opposite ways. Assigning the `hGeneralBillboard` cursor first
 gives retail's `$18`/`$17` pair and the wrong `lui` order (2 words); assigning
 the row cursor first gives retail's `lui` order and swaps the two saved
-registers (8 words). No spelling found separates them.
+registers (8 words). The row-base temporary above separates these orders.
 
 Ruled out, each measured: both declaration orders of the two cursors (no
 effect at all, the registers follow statement order); both cursors assigned
@@ -39,8 +52,8 @@ slot-before-row order. Separately, global allocation ranks row cursor pseudo
 (7 references, live length 30, priority 4666), assigning registers 17 and 18.
 Thus the load order is already selected before hard-register allocation and
 retained afterward; no unresolved register preference explains the two words.
-A new source proposal must change that scheduling input while preserving the
-real cursor lifetimes, rather than repeat the measured assignment swaps.
+These measurements describe the old draft, not an instrumented trace of the
+resolved form; the resolved source preserves the real cursor lifetimes.
 
 The row type is a unit-local `BillGeneralRow` of stride 8 reading its `s16` at
 `+4`, which is the same table `dds3BillboardGeneral` reaches as
