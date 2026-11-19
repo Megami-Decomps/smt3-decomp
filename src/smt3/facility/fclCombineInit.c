@@ -5672,7 +5672,7 @@ void cmbUpdateAction(void)
         if ((*(u32 *)dds3GetProcessData(EE_ADDR_S(movie)) & 8) == 0) {
             return;
         }
-        if (fclGetFlag(4) == 0) {
+        if (fclGetFlag(4) == 0 || !SDF_FRAME_DUE()) {
             return;
         }
         cmbActionBGM(1);
