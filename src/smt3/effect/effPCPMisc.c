@@ -6823,7 +6823,7 @@ void effPCPRadiateThunderDraw(effPCPRadiateThunder_tag *work)
                 frame = entry->frame;
             }
             if (repeat != 0 && frame >= duration) {
-                entry->frame = 0;
+                entry->frame = -(SDF_FRAMES(1) - 1);
             } else {
                 entry->frame = frame + 1;
             }
@@ -7416,7 +7416,7 @@ void effPCPRadiateTBDraw(effPCPRadiateTB_tag *hData) {
                 frame = entry->frame;
             }
             if (repeat != 0 && frame >= duration) {
-                entry->frame = -SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
+                entry->frame = -(SDF_FRAMES(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread + 1) - 1);
             } else {
                 entry->frame = frame + 1;
             }
@@ -7802,7 +7802,7 @@ void effPCPHelperBEDDraw(effPCPHelperBED_tag *hData) {
                         SDF_VU0_LOADVECTOR_B(initialPosition);
                         SDF_VU0_SUBVECTOR();
                         SDF_VU0_GETLENGTH(distance);
-                        if (distance > 1.0f) {
+                        if (distance > 1.0f && SDF_FRAME_DUE_AGE(frame)) {
                             entry->life = frameLimit - frame;
                             entry->move = 1;
                         }
