@@ -2611,8 +2611,6 @@ void effDebugDrawRect2(s32 x, s32 y) {
                    EE_ADDR(dds3PrimFrameRect(x * 16 + 0x8000, y * 8 + 0x8000, 0xFF0000, 0x60, 0x30, 0x80008080, 0x80000000)));
 }
 
-/* NON_MATCHING: 13 of 85 words differ (first at +0x84). */
-#ifdef NON_MATCHING
 void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
     s32 left = x - radius + 0x100;
     s32 top = y - radius + 0xE0;
@@ -2628,16 +2626,27 @@ void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
     top += radius;
     x1 = left * 16 + 0x7000;
     y1 = top * 8 + 0x7900;
-    if (drawCross != 0) {
-        sdfDrawTagLink(effDebugDrawTag,
-                       EE_ADDR(dds3PrimLine(x0, y0, 0xFF0000, 0x60008080, x1, y1, 0xFF0000, 0x60008080, 0)));
-        sdfDrawTagLink(effDebugDrawTag,
-                       EE_ADDR(dds3PrimLine(x1, y0, 0xFF0000, 0x60008080, x0, y1, 0xFF0000, 0x60008080, 0)));
+    {
+        /* Target-specific reconstruction aid: keep the first line's genuine
+           argument setup in its native order across the drawCross branch.
+           These initialized bindings end at their first call; none carries a
+           live value across a call. This does not imply original spelling. */
+        FAKEMATCH_ASM_REG(u32, firstColor, "$7") = 0x60008080;
+        FAKEMATCH_ASM_REG(u32, firstDepth, "$6") = 0xFF0000;
+        FAKEMATCH_ASM_REG(s32, secondX, "$8") = x1;
+        FAKEMATCH_ASM_REG(s32, secondY, "$9") = y1;
+        FAKEMATCH_ASM_REG(u32, secondDepth, "$10") = 0xFF0000;
+        FAKEMATCH_ASM_REG(u32, secondColor, "$11") = 0x60008080;
+        FAKEMATCH_ASM_REG(s32, firstX, "$4") = x0;
+        FAKEMATCH_ASM_REG(s32, firstY, "$5") = y0;
+        if (drawCross != 0) {
+            sdfDrawTagLink(effDebugDrawTag,
+                           EE_ADDR(dds3PrimLine(firstX, firstY, firstDepth, firstColor, secondX, secondY, secondDepth, secondColor, 0)));
+            sdfDrawTagLink(effDebugDrawTag,
+                           EE_ADDR(dds3PrimLine(x1, y0, 0xFF0000, 0x60008080, x0, y1, 0xFF0000, 0x60008080, 0)));
+        }
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectLine);
-#endif
 
 extern u32 effDebugStopTimer, effDebugRunTimer;
 extern char effDebugTitleFormat[], effDebugLabelFormat[], effDebugTrueText[], effDebugFalseText[], effDebugHeaderFormat[];

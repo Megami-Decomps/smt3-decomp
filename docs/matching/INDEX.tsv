@@ -72,9 +72,9 @@ effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/mat
 func_00174DC0 and eff_174E88	effect/effBattleSystem	0xC8 and 0x1A4		docs/matching/effect/effBattleSystem.md	58
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
-effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/matching/effect/effMagatuhi.md	3
-effDebugMoveCamera	effect/effMagatuhi	0x628	377 of 394 words match	docs/matching/effect/effMagatuhi.md	37
-effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	102
+effDebugDrawRectLine	effect/effMagatuhi	0x154	85 of 85 words match	docs/matching/effect/effMagatuhi.md	3
+effDebugMoveCamera	effect/effMagatuhi	0x628	377 of 394 words match	docs/matching/effect/effMagatuhi.md	24
+effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	89
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
 effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/matching/effect/effPCPBoss.md	20
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/matching/effect/effPCPBoss.md	53
