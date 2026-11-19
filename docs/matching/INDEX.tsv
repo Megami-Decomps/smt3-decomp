@@ -500,9 +500,9 @@ iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	775
 LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	826
 _request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	943
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
-sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	30
-sceMcSync				docs/matching/sdk/libmc.md	79
-sceMcSetFileInfo	sdk/libmc	0x1D8		docs/matching/sdk/libmc.md	90
+sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	29
+sceMcSync	sdk/libmc	0xE0	56 of 56 words (224 bytes) match	docs/matching/sdk/libmc.md	78
+sceMcSetFileInfo	sdk/libmc	0x1D8		docs/matching/sdk/libmc.md	89
 sceSifMInitRpc	sdk/libmrpc	196 bytes	49 of 49 words match	docs/matching/sdk/libmrpc.md	3
 sceSifMUnBindRpc	sdk/libmrpc	284 bytes	71 of 71 words now match	docs/matching/sdk/libmrpc.md	42
 _request_end	sdk/libmrpc	264 bytes	66 of 66 words match	docs/matching/sdk/libmrpc.md	135

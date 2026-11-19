@@ -357,7 +357,7 @@ loop; and six libraries worked, 85 functions in all.
 | Unit | Matched | Left |
 |---|---|---|
 | `libpad` | 27 of 29 | `scePadPortOpen`, `_send_to_iop`, both drafted |
-| `libmc` | 21 of 22 | `sceMcSync` remains drafted; six internal helpers also match |
+| `libmc` | 22 of 22 | All entry points and six internal helpers match |
 | `libdma` | 18 of 19 | `sceDmaPutEnv`, drafted one instruction out |
 | `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
 | `libipu` | 1 of 4 | `sceIpuStopDMA`, `sceIpuRestartDMA`, `sceIpuSync` |

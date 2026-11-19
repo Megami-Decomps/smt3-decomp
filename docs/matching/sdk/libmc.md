@@ -1,8 +1,7 @@
 # sdk/libmc
 
-Twenty-one of the library's twenty-two `sceMc*` entry points match. Only
-`sceMcSync` remains drafted. Most command-submission entry points follow this
-template:
+All twenty-two `sceMc*` entry points and six internal helpers match. Most
+command-submission entry points follow this template:
 
     if (PollSema(D_0052BB24) < 0) return -200;
     if (D_00599740.bound == 0) { SignalSema(D_0052BB24); return -100; }
@@ -76,16 +75,16 @@ production, `SKIP_ASM`, and retained-C builds pass; ordinary versus dump output
 agrees in complete assembly, the ELF header, allocated-section headers/data,
 non-file symbols and relocations. All other emitted functions and owned data are preserved.
 
-## sceMcSync
+## sceMcSync (sdk/libmc, 0xE0)
 
-224 bytes, retail's size, with every instruction but two in place. The loop
+Matched: 56 of 56 words (224 bytes) match. Blocking mode keeps polling and
+delaying while the RPC is busy. On completion, it takes the actual zero status
+from the successful poll. Nonblocking mode retains the initial RPC status.
+Output writes, command clearing and semaphore release retain their order.
 
-    while (1) { done = 0; if (sceSifCheckStatRpc(&cd) == 0) break; mcDelayThread(60); }
-
-puts `done = 0` in the branch delay slot where retail keeps a `nop`. Rewriting
-it as `while (check() != 0) delay(60); done = 0;` is 12 bytes short, so the
-`done = 0`-per-iteration shape is the right one and only its scheduling is
-wrong.
+A localized callee-saved `$16` binding holds the real completion status,
+restoring the native zeroing delay slot. Removing just the binding yields a
+nonmatching 212-byte function. The complete owner checks 28 functions exact.
 
 ## sceMcSetFileInfo (sdk/libmc, 0x1D8)
 

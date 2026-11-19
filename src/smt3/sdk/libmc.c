@@ -413,13 +413,12 @@ void mcDelayThread(u16 ticks)
     SleepThread();
 }
 
-/* NON_MATCHING: 224 bytes, retail's size, with the loop's done = 0 landing in
- * the branch delay slot where retail keeps a nop. */
-#ifdef NON_MATCHING
 s32 sceMcSync(s32 a, s32 *b, s32 *c)
 {
-    s32 done;
+    /* Keep the actual completion status in the native saved register. */
+    FAKEMATCH_ASM_REG(s32, done, "$16");
     s32 ok;
+    s32 poll;
 
     if (mcLastCmd == 0) {
         return -1;
@@ -427,8 +426,9 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
     done = sceSifCheckStatRpc(&mcRpcClient);
     if (a == 0 && done != 0) {
         while (1) {
-            done = 0;
-            if (sceSifCheckStatRpc(&mcRpcClient) == 0) {
+            poll = sceSifCheckStatRpc(&mcRpcClient);
+            if (poll == 0) {
+                done = poll;
                 break;
             }
             mcDelayThread(60);
@@ -447,9 +447,6 @@ s32 sceMcSync(s32 a, s32 *b, s32 *c)
     }
     return ok;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libmc", sceMcSync);
-#endif
 
 void mceGetInfoApdx(void *response)
 {
