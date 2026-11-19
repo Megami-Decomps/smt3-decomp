@@ -991,27 +991,37 @@ u8 cmpGetLoadState(void)
     return cmpLoadState;
 }
 
-/* NON_MATCHING: 9 of 35 words differ, exact size. */
-#ifdef NON_MATCHING
 extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 extern s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
 
+/* Target-specific reconstruction aids retain genuine index/result phases and
+ * the selected-row offset; these do not establish original source spelling. */
 s32 cmpSetStockRemoveEff(u8 *work)
 {
-    s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
-    s32 room = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    FAKEMATCH_ASM_REG(s32, index, "$17") = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
+    s32 raw = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    FAKEMATCH_ASM_REG(s32, room, "$18");
+    s32 arg;
     s32 slot;
-
+    s32 offset;
+    u8 *target;
     work += 0xAC;
-    slot = cmpFindFreeStockSlot(index, room);
-    if (room == 0) {
-        return cmpGetCursorSlotValue(0, (cmpCursorSlot_t *)(work + slot * 16 + 0x1078)) != 0x100;
+    FAKEMATCH_ASM_READ(index);
+    arg = index;
+    FAKEMATCH_ASM_READ(arg);
+    room = raw;
+    slot = cmpFindFreeStockSlot(arg, room);
+    offset = slot * 16;
+    target = work + offset;
+    target += 0x1078;
+    if (room != 0) {
+        /* Keep the real row offset separate from the default-row pointer. */
+        FAKEMATCH_ASM_LIVE(offset);
+        target = work + offset + 0x3C;
     }
-    return cmpGetCursorSlotValue(0, (cmpCursorSlot_t *)(work + slot * 16 + 0x3C)) != 0x100;
+    return cmpGetCursorSlotValue(0, (cmpCursorSlot_t *)target) != 0x100;
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
-#endif
+
 
 extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 

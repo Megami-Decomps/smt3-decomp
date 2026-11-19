@@ -27,7 +27,7 @@ cmpChkDoNotUseSkill	code_0022C578	0x98		docs/matching/code_0022C578.md	543
 cmpInitCursorLayout	code_0022C578	0x94	30 of 37 words match	docs/matching/code_0022C578.md	562
 campDhCheckTextures	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	577
 cmpItemIsUsable	code_0022C578	0x8C	15 of 28 words match	docs/matching/code_0022C578.md	613
-cmpSetStockRemoveEff	code_0022C578	0x8C	26 of 35 words match	docs/matching/code_0022C578.md	636
+cmpSetStockRemoveEff	code_0022C578	0x8C	35 of 35 words match	docs/matching/code_0022C578.md	636
 cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/matching/code_0022C578.md	658
 cmpStartSkillMsg	code_0022C578	0xA0	40 of 40 words match	docs/matching/code_0022C578.md	682
 cmp_23C918	code_0022C578	0xA8		docs/matching/code_0022C578.md	770
