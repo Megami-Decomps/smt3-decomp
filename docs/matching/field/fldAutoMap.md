@@ -82,50 +82,36 @@ checks, truncation, input restrictions or matching credit were introduced.
 
 ## fldAutoMapDrawIconOfsR (field/fldAutoMap, 0x244)
 
-10 of 146 words match, at the exact 584-byte size.
+Exact, 580 bytes (145 words). The function appends one textured icon quad.
+It reserves a 0x20-byte tag, initializes it, links texture context 0, reads
+the signed halfword lookup row, and calls `sdfPrimLinkFt4` with color
+`0x80808080`, primitive mode `0x44`, and zero depth and allocator arguments.
+The allocator parameter of the primitive is a callback; zero selects its
+normal packet allocator.
 
-The function builds one textured quad for an icon. What it does is fully
-recovered; what is left is register allocation.
+The lookup occupies 0x100 bytes: 16 rows of eight halfwords. Entries
+0/1 are the U/V origin, 2/3 the width/height, and 4/5 the anchor biases.
+Both U and V coordinates use 16 times the stored halfword units. The
+incoming screen coordinates are first multiplied by 16 and converted to
+signed words; the X bias and extent scale by 16, and the Y bias and extent
+scale by 8. Mode 4 swaps the axes of the anchor and extent and changes
+the corner order; mode 8 flips the rows; other modes use the default
+corner order and reload the geometry from the row. The coordinates use
+32-bit wraparound, matching native `addu`/`subu`.
 
-`fldAutoMapIconOfsTable` is `s16 [][8]`: `[0]` and `[1]` are the texture
-origin, `[2]` and `[3]` the size, `[4]` and `[5]` the anchor offset. The u
-coordinates and the x coordinates scale by 16, the v and y coordinates by 8.
-`sdfPrimLinkFt4` takes 21 arguments, the last 13 in the outgoing frame at
-`0x0` through `0x60` in 8-byte EABI slots:
+The known direct callers in `fldAutoMapDrawOneArea` pass icon-row choices
+and coordinates calculated by `fldPoint3To2H`; the reconstruction
+inherits the valid-row and representable float-to-word conversion domain.
+The tail deliberately calls `fldDrawGetOt` twice. The first result is
+the registration receiver, while the second supplies its function pointer.
 
-    sdfPrimLinkFt4(tag, color, mode,
-                   x0, y0, u0, v0,  x1, y1, u1, v1,
-                   x2, y2, u2, v2,  x3, y3, u3, v3,  mask, next)
-
-`mode` selects the quad's winding: the default lays the four corners out
-top-left, top-right, bottom-left, bottom-right; `mode == 8` flips the rows;
-`mode == 4` transposes, taking the anchor from `[4]`/`[5]` the other way
-round and the extent from `[3]`/`[2]`. The tail is two separate
-`fldDrawGetOt` calls, the first supplying the argument and the second the
-`regFunc` to call through, so the source reads
-`((...)fldDrawGetOt()->regFunc)(ot, tag)` with `ot` from an earlier call.
-
-What is needed to get the three `lh` loads and their shifts right: `s32`
-locals for `t[0]`..`t[3]`. Read as `s16` at each use, ee-gcc loads `lhu` for
-the `* 16` use and then sign-extends with `sll 16`, `sra 13` for the `* 8`
-one, which adds two instructions per arm. `s16 *t = fldAutoMapIconOfsTable
-[index];` as an initializer at the declaration is what gives retail's four
-saved registers and the 0xB0 frame; assigning it after the three leading
-calls spends one fewer and lands at 564 bytes.
-
-The remaining difference: retail copies `x` into `$f21` and `y` into `$f20`,
-the draft the other way round, so every `mul.s` and the two `cvt.w.s`/`mfc1`
-pairs in each of the three arms name the other register. Both compute `y`
-first, in the same statement order, and swapping the statement order does not
-move the assignment. Retail also keeps `index * 16` in `$16` and rebuilds the
-table address into a temp after the calls, while the draft keeps the whole
-pointer in `$16`; recomputing `fldAutoMapIconOfsTable[index]` inside the
-default arm does reproduce that, but costs size elsewhere.
-
-Measured and rejected: the row addressed as `fldAutoMapIconOfsTable[index][k]`
-at every use (ee-gcc builds a chain of pointer copies, 620 bytes), `x0` before
-`y0` in each arm, and the four combinations of those with the pointer either
-initialized or assigned.
+The old compiler needs actual packet-request and row-offset operands to
+retain the pre-allocation row scaling. The equivalent branch layout
+retains the native first comparison and table address order. The three
+geometry paths keep their actual loaded biases, converted coordinates,
+and corner or extent values in the native live ranges. These constraints
+emit no instructions and do not imply the retail source had the same
+spelling.
 
 ## fldAutoMapSeqStart (field/fldAutoMap, 0x30C)
 

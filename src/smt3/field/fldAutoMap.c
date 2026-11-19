@@ -561,98 +561,154 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     sdfModelLinkOt(&sdfModelOtTable[9], emitter);
 }
 
-/* NON_MATCHING: 584 emitted bytes versus 580 native bytes; 10 native-prefix
- * words match. The saved fp registers hold x and y the other way round, and
- * the native default arm rematerializes the row and reloads its geometry. */
-#ifdef NON_MATCHING
+/* The live operands below preserve the packet request and the real signed
+ * geometry phases; the equivalent branch layout keeps the first table
+ * address after the mode literal. */
 void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
-    s16 *t = fldAutoMapIconOfsTable[index];
+    s32 modeU;
+    s32 rowBytes = index;
+    s32 packetSize = 0x20;
+    s16 *t;
     s32 tu;
     s32 tv;
     s32 tw;
     s32 th;
+    /* The scaled UV extents also feed the rotated quad geometry. */
+    s32 w16;
+    s32 h16;
     s32 u0;
     s32 v0;
     s32 u1;
     s32 v1;
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
     s32 ax;
     s32 ay;
     s32 bx;
-    s32 by;
+    FAKEMATCH_ASM_REG(s32, by, "$14");
     s32 cx;
-    s32 cy;
+    FAKEMATCH_ASM_REG(s32, cy, "$12");
     s32 dx;
     s32 dy;
 
-    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
+    /* Keep the actual request live while scaling the saved row before allocation. */
+    FAKEMATCH_ASM_LIVE(packetSize);
+    FAKEMATCH_ASM_LIVE_PAIR(rowBytes, packetSize);
+    rowBytes = (s32)((u32)rowBytes * sizeof(fldAutoMapIconOfsTable[0]));
+    tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(packetSize));
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, fldAutoMapSpriteTex[0], 0);
+    modeU = 4;
+    t = (s16 *)((u8 *)&fldAutoMapIconOfsTable + rowBytes);
     tu = t[0];
     tv = t[1];
     tw = t[2];
     th = t[3];
     u0 = tu * 16;
     v0 = tv * 16;
-    u1 = u0 + tw * 16;
-    v1 = v0 + th * 16;
-    switch (mode) {
-    case 4:
-        y0 = (s32)(y * 16.0f) - t[4] * 8;
-        x0 = (s32)(x * 16.0f) - t[5] * 16;
-        y1 = y0 + tw * 8;
-        x1 = x0 + th * 16;
-        ax = x1;
-        ay = y0;
-        bx = x1;
-        by = y1;
-        cx = x0;
-        cy = y0;
-        dx = x0;
-        dy = y1;
-        break;
-    case 8:
-        y0 = (s32)(y * 16.0f) - t[5] * 8;
-        x0 = (s32)(x * 16.0f) - t[4] * 16;
-        y1 = y0 + th * 8;
-        x1 = x0 + tw * 16;
-        ax = x0;
-        ay = y1;
-        bx = x1;
-        by = y1;
-        cx = x0;
-        cy = y0;
-        dx = x1;
-        dy = y0;
-        break;
-    default:
-        y0 = (s32)(y * 16.0f) - t[5] * 8;
-        x0 = (s32)(x * 16.0f) - t[4] * 16;
-        y1 = y0 + th * 8;
-        x1 = x0 + tw * 16;
-        ax = x0;
-        ay = y0;
-        bx = x1;
-        by = y0;
-        cx = x0;
-        cy = y1;
-        dx = x1;
-        dy = y1;
-        break;
+    w16 = tw * 16;
+    h16 = th * 16;
+    u1 = u0 + w16;
+    v1 = v0 + h16;
+    if (mode != modeU) goto notU;
+    goto rotatedU;
+notU:
+    if (mode != 8) goto unrotated;
+    goto rotatedV;
+rotatedU: {
+        /* Mode 4 uses the U extent for screen Y. */
+        FAKEMATCH_ASM_REG(s32, extentY, "$6");
+        f32 scale = 16.0f;
+        f32 scaledY;
+        FAKEMATCH_ASM_REG(s32, yBias, "$3");
+        s32 xBias;
+        FAKEMATCH_ASM_REG(s32, intY, "$4");
+        s32 intX;
+        yBias = t[4];
+        xBias = t[5];
+        scaledY = y * scale;
+        scale = x * scale;
+        yBias *= 8;
+        FAKEMATCH_ASM_LIVE(xBias);
+        xBias *= 16;
+        intY = (s32)scaledY;
+        intX = (s32)scale;
+        cy = (s32)((u32)intY - (u32)yBias);
+        cx = (s32)((u32)intX - (u32)xBias);
+        extentY = tw * 8;
+        by = (s32)((u32)cy + (u32)extentY);
+        bx = (s32)((u32)cx + (u32)h16);
+        FAKEMATCH_ASM_READ(by);
+        ay = cy;
+        ax = bx;
+        dx = cx;
+        dy = by;
+        goto draw;
     }
+rotatedV: {
+        /* Mode 8 uses the V extent for screen Y. */
+        s32 extentY;
+        f32 scale = 16.0f;
+        f32 scaledY;
+        s32 intY;
+        s32 intX;
+        FAKEMATCH_ASM_REG(s32, yBias, "$3");
+        s32 xBias;
+        yBias = t[5];
+        xBias = t[4];
+        scaledY = y * scale;
+        scale = x * scale;
+        intY = (s32)scaledY;
+        intX = (s32)scale;
+        yBias *= 8;
+        FAKEMATCH_ASM_LIVE_PAIR(yBias, xBias);
+        xBias *= 16;
+        dy = (s32)((u32)intY - (u32)yBias);
+        ax = (s32)((u32)intX - (u32)xBias);
+        extentY = th * 8;
+        ay = (s32)((u32)dy + (u32)extentY);
+        dx = (s32)((u32)ax + (u32)w16);
+        goto finishGeometry;
+    }
+unrotated: {
+        s16 *geometry = (s16 *)((u8 *)&fldAutoMapIconOfsTable + rowBytes);
+        s32 xBias;
+        FAKEMATCH_ASM_REG(s32, yBias, "$3");
+        FAKEMATCH_ASM_REG(s32, geomHeight, "$5");
+        s32 geomWidth;
+        s32 intY;
+        s32 intX;
+        f32 scale = 16.0f;
+        f32 scaledY;
+        scaledY = y * scale;
+        scale = x * scale;
+        xBias = geometry[4];
+        yBias = geometry[5];
+        geomHeight = geometry[3];
+        xBias *= 16;
+        geomWidth = geometry[2];
+        intY = (s32)scaledY;
+        intX = (s32)scale;
+        yBias *= 8;
+        geomHeight *= 8;
+        FAKEMATCH_ASM_LIVE_PAIR(geomHeight, geomWidth);
+        geomWidth *= 16;
+        ay = (s32)((u32)intY - (u32)yBias);
+        ax = (s32)((u32)intX - (u32)xBias);
+        dy = (s32)((u32)ay + (u32)geomHeight);
+        dx = (s32)((u32)ax + (u32)geomWidth);
+    }
+finishGeometry:
+    by = ay;
+    bx = dx;
+    cx = ax;
+    cy = dy;
+draw:
     sdfPrimLinkFt4(tag, 0x80808080, 0x44, ax, ay, u0, v0, bx, by, u1, v0, cx, cy, u0, v1,
                    dx, dy, u1, v1, 0, 0);
     ot = fldDrawGetOt();
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
-#endif
 
 extern f32 sdfSin(f32 aRadius);
 extern void SetRotateMatrixY(f32 aAngle);
