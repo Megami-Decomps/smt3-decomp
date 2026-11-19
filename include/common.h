@@ -193,6 +193,10 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_WITH_MEM
 #define FAKEMATCH_ASM_LIVE_WITH_MEM(value, lvalue) __asm__("" : "+r" (value) : "m" (lvalue))
 #endif
+#ifndef FAKEMATCH_ASM_LIVE_REG_MEM_REG
+#define FAKEMATCH_ASM_LIVE_REG_MEM_REG(first, lvalue, second) \
+    __asm__("" : "+r" (first), "+m" (lvalue), "+r" (second))
+#endif
 #ifndef FAKEMATCH_ASM_LIVE_F32_WITH_MEM
 #define FAKEMATCH_ASM_LIVE_F32_WITH_MEM(value, lvalue) __asm__("" : "+f" (value) : "m" (lvalue))
 #endif

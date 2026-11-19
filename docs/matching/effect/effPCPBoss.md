@@ -453,9 +453,31 @@ and data layout are unchanged.
 
 ## effPCPDANTE_ShowTime_Bingo_Draw (effect/effPCPBoss, 0x370)
 
-107 of 220 words match in the retained draft: 876 emitted bytes versus
-880 native bytes, with 4 uncovered bytes, at 0x19FF88. The original guarded source
-remains unchanged; this investigation contributes no matching credit.
+220 of 220 instruction words match at 880 bytes. The complete owner checks
+165 match, 0 differ. The entry phase draws on frames 0 through 20, with an
+extra overlay on frame 10. The hold and glow phases both use ages 0 through
+16 measured from frame 10. The independent exit phase runs on frames 27
+through 47. Snapshot the starting frame for phase selection, reload the
+texture handle for every sprite, and increment the live frame after the last
+callback with the native wrapping behavior.
+
+The signed X scratch is reused after entry for the actual wrapping hold and
+glow age. An empty constraint names that age before the exit subtraction so
+the glow test is computed separately from the earlier hold test. Stock RTL
+and final assembly show the duplicate glow comparison filling the exit
+branch's annulled delay slot rather than using a cached predicate. The exit
+uses the live rate scalar for its own fade. The age square is signed and
+bounded by the exit guard. No register binding, fabricated state or emitted
+instruction is used. The source and its stock dump build have the same
+complete owner assembly, allocated sections, symbols and relocation records.
+
+Independent optimized and ASan/UBSan actual-body fixtures each pass 139,266
+cases, checking callback order and mutation, sprite coordinates, packed
+colors, scale bits and the final frame reload. Native matching qualifies the
+EE floating-point output; the host fixtures separately test the C phases.
+
+### Historical guarded controls (before the match)
+
 At base ebdef479fa77eb5b66a40f1cd070e506b178d041, the unsigned draft emits
 876 bytes, with 107 matching / 112 differing prefix words and 4 uncovered bytes.
 All 157 existing exact owner functions remain exact in every control below.

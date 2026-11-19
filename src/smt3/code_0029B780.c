@@ -452,47 +452,59 @@ void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     frDestroyFontRequestAfter((frFontHandle_t *)font);
 }
 
-/* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq17, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot)
+void dds3DrawConfigText(s32 inputX, s32 y, s32 z, s32 count, s32 index, s32 inputValue, s32 ot)
 {
-    s32 drawOptions = index < 3;
-    s32 selected = index == (*(s16 *)(GBWK + 0x3E) + GBWK[0x40]);
+    FAKEMATCH_ASM_REG(s32, x, "$20") = inputX;
+    FAKEMATCH_ASM_REG(s32, value, "$16") = inputValue;
+    const u8 *work = GBWK;
+    s32 row = index;
+    s32 drawOptions;
+    s32 selected;
     s32 colors[4];
     s32 color;
     s32 startY;
     s32 i;
 
-    dds3DrawConfigValue(x, y, z, index, selected, ot);
+    {
+        FAKEMATCH_ASM_REG(s32, valueRow, "$7");
+        FAKEMATCH_ASM_REG(u32, difference, "$3");
+        FAKEMATCH_ASM_REG(s32, valueOt, "$9") = ot;
+        /* The first value draw consumes the GBWK cursor, the saved row and
+         * its ordering-table argument together. Keep those real operands in
+         * one handoff so ee-gcc issues the OT move before the cursor reloads. */
+        FAKEMATCH_ASM_LIVE_REG_MEM_REG(work, row, valueOt);
+        valueRow = row;
+        drawOptions = valueRow < 3;
+        difference = (u32)valueRow ^ (u32)(*(const s16 *)(work + 0x3E) + work[0x40]);
+        FAKEMATCH_ASM_LIVE(difference);
+        selected = difference == 0;
+        dds3DrawConfigValue(x, y, z, valueRow, selected, valueOt);
+    }
+    FAKEMATCH_ASM_LIVE(x);
+    FAKEMATCH_ASM_LIVE(value);
     if (drawOptions && value >= 0)
-        dds3DrawConfigBar(x, y, z, index, value, ot);
+        dds3DrawConfigBar(x, y, z, row, value, ot);
     color = dds3GetConfigFadeAlpha() | 0x80808000;
     colors[0] = color;
     colors[1] = color;
     colors[2] = color;
     colors[3] = color;
     if (drawOptions) {
-        y += 0xA8;
+        y = (s32)((u32)y + 0xA8u);
         startY = y;
         for (i = 0; i < count; i++) {
-            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 0,
+            fclDrawSpriteFilter(x, y, (s32)((u32)z << 4), 0, colors, 0, 0,
                                D_00345D88, dds3ConfigLayoutTable, ot);
-            fclDrawSpriteFilter(x, y, z << 4, 0, colors, 0, 1,
+            fclDrawSpriteFilter(x, y, (s32)((u32)z << 4), 0, colors, 0, 1,
                                D_00345D88, dds3ConfigLayoutTable, ot);
-            y += 0xB0;
+            y = (s32)((u32)y + 0xB0u);
         }
-        dds3DrawConfigLabel(x + 0x540, startY + 8, z, index, selected, ot);
-        fclDrawSpriteRes(0, y, z << 4, colors, 0, 10, D_00345D88, dds3ConfigLayoutTable, ot);
-        fclDrawSpriteRes(0, y, z << 4, colors, 0, 11, D_00345D88, dds3ConfigLayoutTable, ot);
-        fclDrawSpriteRes(0, y, z << 4, colors, 0, 12, D_00345D88, dds3ConfigLayoutTable, ot);
+        dds3DrawConfigLabel((s32)((u32)x + 0x540u), (s32)((u32)startY + 8u), z, row, selected, ot);
+        fclDrawSpriteRes(0, y, (s32)((u32)z << 4), colors, 0, 10, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, (s32)((u32)z << 4), colors, 0, 11, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0, y, (s32)((u32)z << 4), colors, 0, 12, D_00345D88, dds3ConfigLayoutTable, ot);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigText);
-#endif
 
 s32 dds3DrawConfigBackground(s32 flags)
 {

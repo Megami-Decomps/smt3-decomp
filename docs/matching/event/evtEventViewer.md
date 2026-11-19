@@ -181,27 +181,28 @@ including build and deploy.
 
 ## EnterData (event/evtEventViewer, 0x378)
 
-189 of 222 words match at the native 888-byte size; the ordinary draft remains guarded.
+222 of 222 instruction words match at 888 bytes. The complete owner checks
+57 match, 0 differ. EnterData ignores its two incoming callback arguments.
+It dispatches through the target type, copies the selected record or
+updates the selected lighting and fog data, then runs the active viewer's
+current frame, pops the menu and returns zero.
 
-EnterData's ordinary reconstruction was investigated without promoting it. The complete owner retains its 55 existing exact functions. The strongest ordinary body emits the correct 888-byte extent and matches 189 of 222 instruction positions, while preserving typed, unaligned parameter-record copies, actual lighting hardware copies, source-subobject origins and callback ordering. One separately retained selected-frame allocation diagnostic matches 203 positions but is also nonmatching.
+The selected frame and mode pointers are ordinary initialized values. Only
+the live active viewer is bound to its EE dispatch register; it is reloaded
+after calls and not pinned across a clobber. Removing that binding or the
+ordinary mode snapshot changes the native branch and call schedule. Each effect
+provider path snapshots the destination before the provider, copies the
+actual record with its established packed view, and reloads the active
+viewer afterward. The direct light path copies color, direction and the
+ambient vector at its actual offset within the light state. The fog and
+face-division paths preserve the observed viewer and scalar load/store
+ordering, including the separate softened and bias values.
 
-The remaining differences concern pointer allocation, lighting address materialization and a post-light global observation. No fake volatile, padding, register search or memory barrier was introduced. Real callback arguments and the target-only declaration visibility adjustment were qualified separately.
-
-Both diagnostic bodies pass strict production, SKIP_ASM and NON_MATCHING compilation. Full-owner plain/dump assembly, allocated sections, symbols and ordered relocations agree. The proposed guarded ordinary draft preserves the production fallback and checks 55 match, 0 differ; it earns no new matching credit. Independent review approved only the ordinary guarded proposal. The private investigation did not run full repository gates; final integration results are recorded below.
-
-The canonical patch changes only the guarded ordinary definition and its
-truthful `s32 EnterData(s32 action, s32 previousMenu)` callback contract.
-Native ignores the incoming arguments and returns zero after evtRunFrame and
-PopMenu. The separate 203/222 diagnostic binds a real selected frame, but
-that binding and private diagnostic declaration-visibility changes are not
-retained. Its higher score does not authorize promotion.
-
-Provider copies use the qualified packed/unaligned record views and native
-lighting helpers, with valid live allocations and the EE GNU object domain.
-This is not a portable ISO C, overlapping/corrupt-storage or asynchronous
-mutation claim. No source ownership or literal changes are made.
-
-Final owner 55/0 and ordinary target-active 55/1 checks pass with data intact. Three strict modes, production/retained plain-dump parity, fresh stable 141-owner/481-draft qualification, 450 tests, 817 layout assertions, seven IRX modules, retail checksum/byte comparison/no-op and reconciled unchanged reports pass.
+The former guarded ordinary draft was 189/222; a separate frame-only
+allocation diagnostic was 203/222. Matching requires the genuine active
+viewer snapshots and reloads as well as the frame allocation. The existing
+valid live-buffer and provider contracts are unchanged. No instruction is
+inserted to hide a residual, and no translation-unit ownership changes.
 
 ## evtAddFrameInfo (event/evtEventViewer, 0x540)
 

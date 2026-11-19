@@ -210,7 +210,6 @@ void SortFrameInfo(evtViewerObject_s *parent) {
     }
 }
 
-#ifdef NON_MATCHING
 /* The viewer copies these records through pointers with no alignment guarantee. */
 typedef struct __attribute__((packed)) { dds3Effect_Blur_t value; } evtBlurCopy_t;
 typedef struct __attribute__((packed)) { dds3Effect_PartialMultiBlurParam_t value; } evtMultiBlurCopy_t;
@@ -221,7 +220,6 @@ typedef struct __attribute__((packed)) { dds3Effect_PartialMultiFilterParam_t va
 
 extern dds3LightState_t dds3LightParam;
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
-#endif
 
 #ifdef NON_MATCHING
 extern s32 evtAddNameTable(const char *name);
@@ -2323,12 +2321,14 @@ s32 EnterEventPos(void)
     return 0;
 }
 
-#ifdef NON_MATCHING
 extern dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void);
 extern dds3Effect_DistortionBlurParam_t *dblurGetParam(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_Filter_t *dblurGetParam2(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
+
+/* The ambient vector is a separate address within the light state. */
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 s32 EnterData(s32 action, s32 previousMenu)
 {
@@ -2337,20 +2337,28 @@ s32 EnterData(s32 action, s32 previousMenu)
     pmdSceneFogTable_t *fog;
     sdf3DFogParam_t *sourceFog;
 
-    switch (viewerinfo->framelist_target->type) {
+    /* Keep the live viewer in its EE dispatch register. Refresh it after
+       provider calls before running its current frame. */
+    FAKEMATCH_ASM_REG(evtViewerInfo_t *, activeViewer, "$7") = viewerinfo;
+    evtViewerInfo_t *modeViewer = activeViewer;
+
+    switch (activeViewer->framelist_target->type) {
     case 10:
-        switch (viewerinfo->framelist_type) {
+        switch (modeViewer->framelist_type) {
         case 13: {
             sdf3DLight_t *light = dds3LightParam.parallel[0];
             pmdSceneLightTable_t *sceneLight = frame->work;
             SDF_VU0_COPYVECTOR(sceneLight->color, &light->color);
             SDF_VU0_COPYVECTOR(sceneLight->direction, &light->v);
-            SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3LightParam.ambient);
+            SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3AmbientColor);
             break;
         }
         case 14: {
-            frame->param.sf[0] = sdfFaceDivSoften;
-            frame->param.sf[1] = sdfFaceDivBias;
+            f32 soften = sdfFaceDivSoften;
+            f32 bias = sdfFaceDivBias;
+            activeViewer = viewerinfo;
+            frame->param.sf[1] = bias;
+            frame->param.sf[0] = soften;
             break;
         }
         }
@@ -2358,6 +2366,7 @@ s32 EnterData(s32 action, s32 previousMenu)
     case 11:
         fog = frame->work;
         sourceFog = &dds3LightParam.fog;
+        activeViewer = viewerinfo;
         fog->fog.vec[0] = sourceFog->fogMin;
         fog->fog.color = sourceFog->color;
         fog->fog.vec[1] = sourceFog->fogMax;
@@ -2367,36 +2376,38 @@ s32 EnterData(s32 action, s32 previousMenu)
     case 13:
         destination = frame->work;
         *(evtBlurCopy_t *)destination = *(evtBlurCopy_t *)&evtGetUnityCalcArea()->source;
+        activeViewer = viewerinfo;
         break;
     case 14:
         destination = frame->work;
         *(evtMultiBlurCopy_t *)destination = *(evtMultiBlurCopy_t *)mblurGetParam();
+        activeViewer = viewerinfo;
         break;
     case 15:
         destination = frame->work;
         *(evtDistBlurCopy_t *)destination = *(evtDistBlurCopy_t *)dblurGetParam();
+        activeViewer = viewerinfo;
         break;
     case 23:
         destination = frame->work;
         *(evtRippleBlurCopy_t *)destination = *(evtRippleBlurCopy_t *)rblurGetParam();
+        activeViewer = viewerinfo;
         break;
     case 16:
         destination = frame->work;
         *(evtFilterCopy_t *)destination = *(evtFilterCopy_t *)dblurGetParam2();
+        activeViewer = viewerinfo;
         break;
     case 17:
         destination = frame->work;
         *(evtMultiFilterCopy_t *)destination = *(evtMultiFilterCopy_t *)mfilterGetParam();
+        activeViewer = viewerinfo;
         break;
     }
-    evtRunFrame(viewerinfo->nowframe);
+    evtRunFrame(activeViewer->nowframe);
     PopMenu();
     return 0;
 }
-
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
-#endif
 
 extern s16 winoff_x;
 extern s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y);

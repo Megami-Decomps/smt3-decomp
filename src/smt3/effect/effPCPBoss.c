@@ -4460,25 +4460,23 @@ void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_
 extern effPCPDANTE_UV_tag effPCPDANTE_Bingo_UV;
 extern void nbPnl_rsetAlpha(s32 mode);
 
-#ifdef NON_MATCHING
 void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
 {
-    u32 frame = SDF_FRAME_TICK(work->frameParts[0]);
-    u32 age;
+    s32 frame = SDF_FRAME_TICK(work->frameParts[0]);
     u32 color;
     s32 x;
     f32 rate;
     f32 fade;
 
-    if (frame < 21) {
-        rate = (f32)(s32)frame / 10.0f;
+    if ((u32)frame < 21) {
+        rate = (f32)frame / 10.0f;
         fade = rate > 1.0f ? 2.0f - rate : rate;
-        if (frame < 11) {
-            fade *= fade;
-            nbPnl_rsetAlpha(0);
-        } else {
+        if (frame > 10) {
             rate = 1.0f;
             nbPnl_rsetAlpha(1);
+        } else {
+            fade *= fade;
+            nbPnl_rsetAlpha(0);
         }
         x = (s32)(rate * 370.0f);
         color = ((u32)(fade * 128.0f) << 24) | 0x808080;
@@ -4488,22 +4486,29 @@ void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
             effPCPDANTE_Sprite_Draw(x, 244, 1.0f, 0x20808080, &effPCPDANTE_Bingo_UV, work->hTex[0]);
         }
     }
-    age = frame - 10;
-    if (age < 17) {
+    /* Reuse the X scratch after the entry draws for the hold/glow age. */
+    x = (u32)frame - 10;
+    if ((u32)x < 17) {
         nbPnl_rsetAlpha(0);
         effPCPDANTE_Sprite_Draw(370, 244, 1.0f, 0x80808080, &effPCPDANTE_Bingo_UV, work->hTex[0]);
     }
-    if (frame - 27 < 21) {
-        u32 exitAge = frame - 27;
+    /* Keep the live age for the native glow test, independent of the
+     * earlier hold predicate. The empty constraint emits no instruction. */
+    FAKEMATCH_ASM_LIVE(x);
+    frame = (u32)frame - 27;
+    if ((u32)frame < 21) {
+        s32 exitAge;
 
         nbPnl_rsetAlpha(0);
-        color = ((u32)((1.0f - (f32)(s32)exitAge / 20.0f) * 128.0f) << 24) | 0x808080;
-        x = (s32)((f32)(s32)(exitAge * exitAge) * 1.5f) + 370;
-        effPCPDANTE_Sprite_Draw(x, 244, 1.0f, color, &effPCPDANTE_Bingo_UV, work->hTex[0]);
+        exitAge = frame;
+        rate = 1.0f - (f32)exitAge / 20.0f;
+        color = ((u32)(rate * 128.0f) << 24) | 0x808080;
+        effPCPDANTE_Sprite_Draw((s32)((f32)(exitAge * exitAge) * 1.5f) + 370,
+                               244, 1.0f, color, &effPCPDANTE_Bingo_UV, work->hTex[0]);
     }
-    if (age < 17) {
+    if ((u32)x < 17) {
         nbPnl_rsetAlpha(1);
-        rate = (f32)(s32)age * 0.0625f;
+        rate = (f32)x * 0.0625f;
         color = ((u32)((1.0f - rate) * 64.0f) << 24) | 0x808080;
         effPCPDANTE_Sprite_Draw(370, 244, rate * rate + 1.0f, color,
                                &effPCPDANTE_Bingo_UV, work->hTex[0]);
@@ -4512,9 +4517,6 @@ void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
     }
     work->frameParts[0] = (u32)work->frameParts[0] + 1;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Bingo_Draw);
-#endif
 
 extern effPCPDANTE_UV_tag effPCPDANTE_AreYouReady_UV;
 

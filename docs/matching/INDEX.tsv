@@ -61,11 +61,11 @@ cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0
 campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1935
 cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1969
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
-dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/matching/code_0029B780.md	30
-dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	54
-dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	90
-dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/code_0029B780.md	107
-dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	182
+dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
+dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
+dds3DrawConfigBar	code_0029B780	0x1C4		docs/matching/code_0029B780.md	96
+dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/code_0029B780.md	113
+dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	188
 dds3BillboardManagerInit	effect/billManager	0xB8	46 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
@@ -91,7 +91,7 @@ effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/mat
 effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	367
 dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	405
 effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	417
-effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	454
+effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370		docs/matching/effect/effPCPBoss.md	454
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
@@ -99,9 +99,9 @@ RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/
 evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/event/evtEventViewer.md	66
 evtStopFrame	event/evtEventViewer	0x2A4	169 of 169 words match	docs/matching/event/evtEventViewer.md	100
 evtEventViewerProcess4	event/evtEventViewer	0x280	160 of 160 words match	docs/matching/event/evtEventViewer.md	138
-EnterData	event/evtEventViewer	0x378	189 of 222 words match	docs/matching/event/evtEventViewer.md	182
-evtAddFrameInfo	event/evtEventViewer	0x540	305 of 336 words match	docs/matching/event/evtEventViewer.md	206
-EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	278
+EnterData	event/evtEventViewer	0x378		docs/matching/event/evtEventViewer.md	182
+evtAddFrameInfo	event/evtEventViewer	0x540	305 of 336 words match	docs/matching/event/evtEventViewer.md	207
+EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	279
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 evtPollEffectFrameControl	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	78 of 78 words match	docs/matching/event/evtEventViewerMenu.md	58
