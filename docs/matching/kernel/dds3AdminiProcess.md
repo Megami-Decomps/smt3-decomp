@@ -1,10 +1,20 @@
 # Matching notes: kernel/dds3AdminiProcess
 
+The five registry routines below now match exactly after distinguishing the
+actual no-argument cleanup callback from the scheduler update callback.
+The row keeps the native layout and unchanged four-byte callback storage.
+The registration wrappers retain their existing exported types and convert
+the cleanup pointer only when storing it. Native registrants pass
+`fclEncycDebugShutdown` and `pbDebugShutdown` for cleanup. No consumer,
+required data representation, callback invocation, or field-store
+statement was added or changed. The former common function-pointer type
+recreated the shared scheduling differences; the corrected representation
+matches without constraints.
+
 ## fclEncycFindFreeSlot (kernel/dds3AdminiProcess, 0x1C4)
 
-111 of 113 words match, at the exact 452-byte size, with zero instruction
-differences. Registers, the name copy and the list splice are all exact. The
-two differing words are the `task` and `update` zeroing stores swapped:
+**Matched: all 113 words / 452 bytes.** In the historical draft, the
+two differing words were the `task` and `update` zeroing stores swapped:
 retail writes `sw $0, 0($6)` (offset 0x24) second and `sw $0, 0($3)` (0x28)
 fourth, the draft the other way round. Both address temps are computed by the
 same two `addu` in the same order and get the same registers, so this is the
@@ -38,9 +48,8 @@ not last were not swept.
 
 ## fclEncycFreeEntries (kernel/dds3AdminiProcess, 0x1E8)
 
-120 of 122 words match at the exact 488-byte size. The two differing words are
-the `task` and `update` zeroing stores swapped, the same residual
-`fclEncycFindFreeSlot` stops on.
+**Matched: all 122 words / 488 bytes.** The historical draft swapped two
+zeroing stores, as with `fclEncycFindFreeSlot`.
 
 What took this from 54 differing words to 2 was writing `kind > 0 && kind < 3`
 as nested `if`s. Both spellings give retail's `blezl` then `slti`/`beqz`, so
@@ -61,10 +70,10 @@ its size.
 
 ## fclEncycConfigureMode3, fclEncycAllocEntry and fclEncycConfigureMode2 (kernel/dds3AdminiProcess, 0x94, 0xA8, 0xAC)
 
-The three slot-registration wrappers, each at the exact retail size: 30 of 37,
-31 of 42 and 32 of 43 words match. All three are the same function with a
-different `kind` constant (3, 1, 2), and all three differ from retail the same
-way: two address temps for the row are exchanged, which swaps the order of the
+**Matched: all 37, 42 and 43 words / 148, 168 and 172 bytes.**
+The three slot-registration wrappers differ in the `kind` constant and
+which callback payload they store. Their historical drafts shared the same
+scheduling defect: two address temps for the row are exchanged, which swaps the order of the
 `destroy` and `userValue` stores. In `fclEncycAllocEntry` and `fclEncycConfigureMode2` the
 three incoming function-pointer arguments are also rotated between `$16`,
 `$17` and `$18`: retail takes them in parameter order, the drafts one place

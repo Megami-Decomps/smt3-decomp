@@ -9,7 +9,8 @@ typedef struct
     char name[32];
     dds3ProcessID_t *task;
     dds3ProcessFunc_t update;
-    dds3ProcessFunc_t destroy;
+    /* Cleanup callbacks have no process argument (see the debug registrants). */
+    void (*destroy)(void);
     void (*setState)(s32);
     s32 enabled;
     void *userValue;
@@ -317,8 +318,6 @@ void dds3InitAdmini(void)
     }
 }
 
-/* NON_MATCHING: 2 of 113 words differ (first at +0x158). */
-#ifdef NON_MATCHING
 s32 fclEncycFindFreeSlot(const char *name)
 {
     s32 slot;
@@ -369,9 +368,6 @@ s32 fclEncycFindFreeSlot(const char *name)
     fclEncycCount++;
     return slot;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFindFreeSlot);
-#endif
 
 s32 fclEncycFreeEntry(const char *name)
 {
@@ -394,8 +390,6 @@ s32 fclEncycFreeEntry(const char *name)
     return -1;
 }
 
-/* NON_MATCHING: 2 of 122 words differ (first at +0x100). */
-#ifdef NON_MATCHING
 s32 fclEncycFreeEntries(const char *name)
 {
     s32 slot;
@@ -444,12 +438,7 @@ s32 fclEncycFreeEntries(const char *name)
     fclEncycCount--;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFreeEntries);
-#endif
 
-/* NON_MATCHING: 7 of 37 words differ (first at +0x3C). */
-#ifdef NON_MATCHING
 s32 fclEncycConfigureMode3(const char *name, void (*setState)(s32))
 {
     s32 slot = fclEncycFindFreeSlot(name);
@@ -466,15 +455,7 @@ s32 fclEncycConfigureMode3(const char *name, void (*setState)(s32))
     fclEncycTable[slot].userValue = NULL;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycConfigureMode3);
-#endif
 
-/* NON_MATCHING: 11 of 42 words differ (first at +0x8). */
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * seq38, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy,
                        void *userValue)
 {
@@ -486,18 +467,14 @@ s32 fclEncycAllocEntry(const char *name, dds3ProcessFunc_t update, dds3ProcessFu
     fclEncycTable[slot].kind = 1;
     fclEncycTable[slot].task = NULL;
     fclEncycTable[slot].update = update;
-    fclEncycTable[slot].destroy = destroy;
+    /* The public registry entry points still take scheduler callback pointers. */
+    fclEncycTable[slot].destroy = (void (*)(void))destroy;
     fclEncycTable[slot].setState = NULL;
     fclEncycTable[slot].enabled = 0;
     fclEncycTable[slot].userValue = userValue;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycAllocEntry);
-#endif
 
-/* NON_MATCHING: 11 of 43 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 s32 fclEncycConfigureMode2(const char *name, dds3ProcessFunc_t update, dds3ProcessFunc_t destroy,
                void *userValue)
 {
@@ -509,15 +486,13 @@ s32 fclEncycConfigureMode2(const char *name, dds3ProcessFunc_t update, dds3Proce
     fclEncycTable[slot].kind = 2;
     fclEncycTable[slot].task = NULL;
     fclEncycTable[slot].update = update;
-    fclEncycTable[slot].destroy = destroy;
+    /* The public registry entry points still take scheduler callback pointers. */
+    fclEncycTable[slot].destroy = (void (*)(void))destroy;
     fclEncycTable[slot].setState = NULL;
     fclEncycTable[slot].enabled = 0;
     fclEncycTable[slot].userValue = userValue;
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycConfigureMode2);
-#endif
 
 
 s32 CallDebug(s32 restored, void *reqdata);

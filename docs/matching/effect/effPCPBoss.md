@@ -106,9 +106,15 @@ are added.
 
 ## effPCPBossMETATOBeamDraw (effect/effPCPBoss, 0x25C)
 
-7 of 151 words differ, at the exact 604-byte size.
+**Matched: all 151 words / 604 native bytes at 0x0019E518.**
+Carry the two unchanged interpolation bit patterns in ordinary `u64` EE
+general-register values. The existing VU transfer copies the low 32-bit lane
+used for interpolation, so the wider carrier does not change either factor or
+the arithmetic. No new operand, binding, load, or effect is required. Using a
+32-bit carrier for either value alone loses exactness at the same native size.
 
-Where the two interpolation factors finish being built. Retail materialises both
+The earlier seven differences concerned where the two interpolation factors
+finished being built. Retail materialises both
 `0x3EA8F5C2` and `0x3F28F5C2` with `lui`/`ori` pairs before the
 `effColorBlend` argument setup, so the `and $4, $5, $4` lands in the call's
 delay slot; the draft's scheduler sinks `lui $20` and both `ori`s past the
@@ -116,7 +122,7 @@ delay slot; the draft's scheduler sinks `lui $20` and both `ori`s past the
 
 Two facts carried this one most of the way, both reusable:
 
-- The lerp factors have to be `u32` locals holding the binary32 bits, assigned
+- The lerp factors are locals holding the binary32 bits, assigned
   just before the `effColorBlend` call. Written as literals inside
   `SDF_VU0_INTERPOLATE` in the loop body, gcc hoists the materialisation into
   the loop preheader and the whole saved-register assignment rotates by one

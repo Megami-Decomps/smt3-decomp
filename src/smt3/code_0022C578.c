@@ -5962,13 +5962,9 @@ void cmpDrawStatusIcons(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit
     cmpDrawStatusIconRow(x + 0x960, y + 0x3C8, 0xFFFF, colors[0], unit, mpIconFlags, 0x47);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
 {
-    volatile s32 colors[4];
+    s32 colors[4];
     s32 *texList;
     fclSpriteTbl_t *spriteTable;
     s32 mode = 0;
@@ -5980,26 +5976,26 @@ void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
     if (status & 0x8000) mode = 3;
     if (mode == 0) return;
 
-    if (mode == 3) {
-        colors[0] = 0x09051C00;
-        colors[1] = 0x09051C40;
-    } else {
+    if (mode != 3) {
         colors[0] = 0;
         colors[1] = 0x40;
+    } else {
+        colors[0] = 0x09051C00;
+        colors[1] = 0x09051C40;
     }
     {
-        s32 first = colors[0];
-        s32 second = colors[1];
+        s32 first, second;
+
+        first = colors[0];
+        second = colors[1];
 
         colors[2] = first;
         colors[3] = second;
     }
-    cmpDrawBoxGDefault(0x11B0, 0, 0, 0xE5, 0x1C0, (s32 *)colors, 0x47);
-    colors[2] = 0x1D053400;
-    colors[3] = 0x01010120;
-    colors[0] = 0x1D053400;
-    colors[1] = 0x01010120;
-    cmpDrawBoxGDefault(0x4A0, 0, 0, 0x1B6, 0x1C0, (s32 *)colors, 0x47);
+    cmpDrawBoxGDefault(0x11B0, 0, 0, 0xE5, 0x1C0, colors, 0x47);
+    colors[2] = colors[0] = 0x1D053400;
+    colors[3] = colors[1] = 0x01010120;
+    cmpDrawBoxGDefault(0x4A0, 0, 0, 0x1B6, 0x1C0, colors, 0x47);
     texList = D_00345D88;
     spriteTable = fclSpriteTable;
     fclDrawSpriteRes(0, 0, 0, NULL, 2, 0x12, texList, spriteTable, 0x47);
@@ -6017,9 +6013,7 @@ void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
         break;
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusName);
-#endif
+
 
 extern char *datExplainTable[];
 extern u32 strlen(const char *text);

@@ -3602,8 +3602,6 @@ void effPCPBossMETATOBeamDelete(effPCPBossMETATOBeam_t *hData)
     sdfChipFreeDirect(hData);
 }
 
-/* NON_MATCHING: 7 of 151 words differ (first at +0x170). */
-#ifdef NON_MATCHING
 void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
 {
     effPCPBossVector_t pos;
@@ -3619,8 +3617,11 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
     u32 j;
     f32 blend;
     u32 color;
-    u32 blendInner;
-    u32 blendOuter;
+    /* The VU transfer takes these bit patterns from EE GPRs; interpolation
+     * reads their low 32-bit lane. This width keeps both loads ahead of the
+     * color call under the target compiler. */
+    u64 blendInner;
+    u64 blendOuter;
     nbFormation_t *found;
 
     if (effBTLSkillCheckRun() != 0) {
@@ -3676,9 +3677,6 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
     }
     hData->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamDraw);
-#endif
 
 void effPCPBossMETATOBeamSetPosition(effPCPBossMETATOBeam_t *hData, const void *pPos)
 {
