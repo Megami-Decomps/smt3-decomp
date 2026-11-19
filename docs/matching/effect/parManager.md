@@ -2,16 +2,20 @@
 
 ## dds3Particle_SparkOffsetBuffInit (effect/parManager, 0x790)
 
-462 of 484 words match, at the exact 1936-byte size, and the 22 that differ
-are the same `$20`/`$21` swap of `dds3EffectBase` and `ParRand` as its
-sibling `dds3Particle_SparkBuffInit` above: retail holds `dds3EffectBase` in
-`$21` and `ParRand` in `$20`, the draft the other way round. Nothing else
-differs anywhere in the function. Written straight off the SparkBuffInit
-draft once that one was settled, so the four shapes recorded in that entry
-(the `switch` with cases 0, 1, 2; `position[4]` declared before
-`direction[4]`; the step integration as a `do`/`while`; the per-arm jitter
-scale sharing the tail's `jitter` local) all carry over unchanged and are not
-re-derived here.
+Exact at 484/484 words (1936 bytes). Spark and SparkOffset share the
+three-mode switch, two aligned stack vectors, nonempty step integration
+loop, and the jitter local shared by the mode arms and the tail.
+
+The tail retains the two real RNG states: the particle state supplies the
+unsigned activation-delay draw; the effect state supplies the scale and
+optional spin draws. A local input/output constraint on the particle state
+pointer preserves the native `$20`/`$21` assignment of the two symbols.
+A second local constraint names the actual effect argument and unsigned
+spread after the integer draw returns, so cc1 finishes the argument setup
+ahead of the divide. The argument still comes from the shared effect-state
+address and the spread is read once; no fixed register, extra call or memory
+read is needed. Removing the first constraint restores the global register
+swap, while replacing the second with input-only operands fails to match.
 
 What is different from the sibling, all confirmed by the bytes: the
 displacement lives in `offsetX`/`offsetY`/`offsetZ` at `+0x30` and the
@@ -25,10 +29,6 @@ mode-2 integration starts from `position[] = 0` instead of the origin; and
 the direction table is `D_003171B0`, the same twelve icosahedral unit vectors
 as `D_003170E0` at a second address. `offsetAcceleration = gravity;` is the
 last statement of both mode-1 arms, as in the sibling.
-
-Nothing further was tried here: whatever flips the register pair in
-`dds3Particle_SparkBuffInit` flips this one too, and the list of shapes
-already ruled out for it is in that entry.
 
 ## dds3Particle_SparkBuffInit (effect/parManager, 0x800)
 

@@ -1,31 +1,7 @@
 # Matching notes: field/fldDraw
 
-## fldSkyDrawFilter (field/fldDraw, 0xAD8)
-
-682 of 694 words match, at the exact 2776-byte size. Transliterated from
-dds-decomp's `fldDrawSkyGradient`, the same function at the same size, which
-is the one dds pairing that has held exactly.
-
-The remaining twelve words are three reload spill slots rotated. Retail
-numbers them `0x118` `fldSkyDataTable`, `0x11C` `row*8`, `0x120` `row*32`;
-the draft gives `row*8`, `row*32`, `fldSkyDataTable`. Every instruction is
-otherwise identical, so it is purely which pseudo-register gets which slot.
-`-fno-gcse` moves 653 of the 682 words and `-fno-strength-reduce` changes
-nothing, which puts the mechanism in GCSE and reload pseudo numbering rather
-than anything the source can state. Someone attacking this needs to change
-what order the pseudos are created in, not what the source says.
-
-Ruled out: a `fldSkyData_t *` local at four scopes, which gcc folds back to
-the global with byte-identical output; the flattened colour array; pointer
-and `(p + i)->` subscript forms; `<<` for `*`; a `mode` local for the switch;
-an if/else chain for the switch; `u32` loop indices; a row-base `s32 *` with
-`cur[column+9]` and `cur[column+10]`; alpha extracted before rgb; hoisted `x`
-and `y`; and nine declaration-order permutations.
-
-Confirmed on the way: `fldSkyDataTable`'s row stride is
-`{s32 mode; s32 colors[8][9];}`, 292 bytes; `rsetOtOfs` takes `0x39` here
-where DDS1 passes `0x44`; the sway offset global is `fldRunDanteGunFlag[14]`,
-not `[16]`; and the clamp list is three alphas with `a3` unclamped.
+The sky-gradient investigation and exact match are recorded under the
+current owner, [field/fldSky](fldSky.md#fldskydrawfilter-fieldfldsky-0xad8).
 
 The historical fldStatusSet experiments moved to its current owner,
 [field/fldEveHit](fldEveHit.md#fldstatusset-fieldfldevehit-0xf8), with the final

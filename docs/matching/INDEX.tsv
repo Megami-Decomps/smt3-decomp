@@ -89,7 +89,7 @@ effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words matc
 dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	399
 effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	411
 effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	448
-dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
+dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
 RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/evtEventViewer.md	30
@@ -168,13 +168,12 @@ fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/match
 fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	229
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
-fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/matching/field/fldDraw.md	3
-fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	34
-fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	66
-fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	108
-fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	157
-fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	184
-fldPlayerCalc	field/fldDraw	0x2A4		docs/matching/field/fldDraw.md	222
+fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	10
+fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	42
+fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	84
+fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/matching/field/fldDraw.md	133
+fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/matching/field/fldDraw.md	160
+fldPlayerCalc	field/fldDraw	0x2A4		docs/matching/field/fldDraw.md	198
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
@@ -190,7 +189,7 @@ fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	
 fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md	34
 fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	84
 fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	132
-fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/matching/field/fldSky.md	3
+fldSkyDrawFilter	field/fldSky	0xAD8		docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
 fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75

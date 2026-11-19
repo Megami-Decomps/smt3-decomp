@@ -298,13 +298,18 @@ void fldSkyCalcFilter(void) {
     }
 }
 
-/* NON_MATCHING: 12 of 694 words differ, first at +0x11C; see docs/matching/field/fldSky.md. */
-#ifdef NON_MATCHING
 extern u32 fldAutoMapChkMode(void);
 extern void rsetOtOfs(s32);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32);
 extern void aDrawBoxG(s32, s32, s32, s32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
+
+/* Factor the signed channel blend consistently; inlining this form also gives
+ * the native order of temporary stack slots in the enclosing draw loop. */
+static inline s32 fldSkyBlendChannel(s32 current, f32 currentWeight, s32 previous, f32 previousWeight)
+{
+    return (s32)(current * currentWeight + previous * previousWeight);
+}
 
 void fldSkyDrawFilter(void) {
     s32 column, row;
@@ -428,22 +433,22 @@ void fldSkyDrawFilter(void) {
                 if (oldA2 < 0) oldA2 = 0;
                 if (oldA2 > 255) oldA2 = 255;
 
-                r0 = (s32)(r0 * currentWeight + oldR0 * previousWeight);
-                g0 = (s32)(g0 * currentWeight + oldG0 * previousWeight);
-                b0 = (s32)(b0 * currentWeight + oldB0 * previousWeight);
-                a0 = (s32)(a0 * currentWeight + oldA0 * previousWeight);
-                r1 = (s32)(r1 * currentWeight + oldR1 * previousWeight);
-                g1 = (s32)(g1 * currentWeight + oldG1 * previousWeight);
-                b1 = (s32)(b1 * currentWeight + oldB1 * previousWeight);
-                a1 = (s32)(a1 * currentWeight + oldA1 * previousWeight);
-                r2 = (s32)(r2 * currentWeight + oldR2 * previousWeight);
-                g2 = (s32)(g2 * currentWeight + oldG2 * previousWeight);
-                b2 = (s32)(b2 * currentWeight + oldB2 * previousWeight);
-                a2 = (s32)(a2 * currentWeight + oldA2 * previousWeight);
-                r3 = (s32)(r3 * currentWeight + oldR3 * previousWeight);
-                g3 = (s32)(g3 * currentWeight + oldG3 * previousWeight);
-                b3 = (s32)(b3 * currentWeight + oldB3 * previousWeight);
-                a3 = (s32)(a3 * currentWeight + oldA3 * previousWeight);
+                r0 = fldSkyBlendChannel(r0, currentWeight, oldR0, previousWeight);
+                g0 = fldSkyBlendChannel(g0, currentWeight, oldG0, previousWeight);
+                b0 = fldSkyBlendChannel(b0, currentWeight, oldB0, previousWeight);
+                a0 = fldSkyBlendChannel(a0, currentWeight, oldA0, previousWeight);
+                r1 = fldSkyBlendChannel(r1, currentWeight, oldR1, previousWeight);
+                g1 = fldSkyBlendChannel(g1, currentWeight, oldG1, previousWeight);
+                b1 = fldSkyBlendChannel(b1, currentWeight, oldB1, previousWeight);
+                a1 = fldSkyBlendChannel(a1, currentWeight, oldA1, previousWeight);
+                r2 = fldSkyBlendChannel(r2, currentWeight, oldR2, previousWeight);
+                g2 = fldSkyBlendChannel(g2, currentWeight, oldG2, previousWeight);
+                b2 = fldSkyBlendChannel(b2, currentWeight, oldB2, previousWeight);
+                a2 = fldSkyBlendChannel(a2, currentWeight, oldA2, previousWeight);
+                r3 = fldSkyBlendChannel(r3, currentWeight, oldR3, previousWeight);
+                g3 = fldSkyBlendChannel(g3, currentWeight, oldG3, previousWeight);
+                b3 = fldSkyBlendChannel(b3, currentWeight, oldB3, previousWeight);
+                a3 = fldSkyBlendChannel(a3, currentWeight, oldA3, previousWeight);
             }
 
             if (gFilterAlpha != 0x80) {
@@ -472,9 +477,7 @@ void fldSkyDrawFilter(void) {
     rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     rsetAlpha(0);
 }
-#else
-INCLUDE_ASM(const s32, "field/fldSky", fldSkyDrawFilter);
-#endif
+
 
 void fldSkySetFilter(s32 idx, s32 mode, s32 hokan) {
     if (fldSkyEnable == 0 && fldGlobalBase.area < 0x32) {

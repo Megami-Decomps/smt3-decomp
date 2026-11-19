@@ -2739,8 +2739,6 @@ void dds3Particle_SparkOffsetDelete(void *hData) {
 
 /* vu0 routine: seed an offset-gravity packet; the displacement is tracked
  * apart from the emitter origin. */
-/* NON_MATCHING: 22 of 484 words differ (first at +0x90). */
-#ifdef NON_MATCHING
 void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset, s32 number) {
     parSparkOffsetPacket_t *packet = (parSparkOffsetPacket_t *)pSparkOffset->head.buffer->pPhysics;
     sdfVector4_t position;
@@ -2874,21 +2872,33 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
         }
         break;
     }
-    packet->age = -SDF_FRAMES(dds3GetRandA((effRandState_t *)ParRand) % (pSparkOffset->spread + 1));
-    packet->color = 0;
-    jitter = pSparkOffset->head.speedJitter;
-    packet->billboardScale = pSparkOffset->head.scale[0] * (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter));
-    jitter = pSparkOffset->head.spinJitter;
-    if (jitter != 0) {
-        packet->spin = (dds3GetRandFloatA(dds3EffectBase) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
-    } else {
-        packet->spin = 0;
+    {
+        effRandState_t *state = (effRandState_t *)ParRand;
+        u32 sample;
+        u32 spread;
+        effRandState_t *effectState = dds3EffectBase;
+        effRandState_t *first;
+        /* Keep the particle RNG argument in its native local lifetime. */
+        FAKEMATCH_ASM_LIVE(state);
+        sample = dds3GetRandA(state);
+        spread = pSparkOffset->spread;
+        first = effectState;
+        /* The actual emitter argument and spread feed the next call and
+         * the age calculation. Keep their native setup order at this cut. */
+        FAKEMATCH_ASM_LIVE_PAIR(first, spread);
+        packet->age = -SDF_FRAMES(sample % (spread + 1));
+        packet->color = 0;
+        jitter = pSparkOffset->head.speedJitter;
+        packet->billboardScale = pSparkOffset->head.scale[0] * (dds3GetRandFloatA(first) * jitter + (1.0f - jitter));
+        jitter = pSparkOffset->head.spinJitter;
+        if (jitter != 0) {
+            packet->spin = (dds3GetRandFloatA(effectState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        } else {
+            packet->spin = 0;
+        }
     }
     dds3Particle_EffectReset(&pSparkOffset->head.sub, number);
 }
-#else
-INCLUDE_ASM(const s32, "effect/parManager", dds3Particle_SparkOffsetBuffInit);
-#endif
 
 
 /* Accumulate motion in the stored offset, then add the emitter origin.
