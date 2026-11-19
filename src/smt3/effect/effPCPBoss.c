@@ -2319,7 +2319,7 @@ void effPCPBossDengekiDraw(effPCPBossDengeki_t *hData)
     SDF_VU0_COPYMATRIX_A_TO_C();
     SDF_VU0_LOADIDENTITYVECTOR();
     SDF_VU0_SETVECTOR_Z(1.0f);
-    r = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
+    r = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3EffectBase)) - 0.5f;
     r = r + r;
     SetRotateMatrixY_B(r * 0.26179934f);
     MultMatrixNoArg();
@@ -2340,7 +2340,7 @@ void effPCPBossDengekiDraw(effPCPBossDengeki_t *hData)
     SDF_VU0_COPYMATRIX_C_TO_A();
     SDF_VU0_LOADIDENTITYVECTOR();
     SDF_VU0_SETVECTOR_Z(1.0f);
-    r = dds3GetRandFloatA(dds3EffectBase) - 0.5f;
+    r = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3EffectBase)) - 0.5f;
     r = r + r;
     SetRotateMatrixY_B(r * 0.26179934f);
     MultMatrixNoArg();
@@ -3278,7 +3278,7 @@ void effPCPBossKAGU2AttackGetSplitPoint(u128 *pPosBuff, const u128 *pPoint1, con
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(&axis);
-    r = dds3GetRandFloatA(dds3EffectBase);
+    r = dds3GetRandFloatA(SDF_FRAME_RAND_STATE(dds3EffectBase));
     rotate += (1.0f - (r * rand + (1.0f - rand))) * 0.61086511611938477f;
     SetRotateMatrixAxis(rotate, &axis);
     i = 0;
