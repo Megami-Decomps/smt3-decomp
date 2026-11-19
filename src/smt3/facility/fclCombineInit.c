@@ -5030,7 +5030,7 @@ void cmbDrawTargetModel(f32 (*positions)[4], f32 *sizes, s32 *enabled,
     s32 i = 0;
 
     for (; i < 2; i++) {
-        if (enabled[i] != 0 && CMB_GBWK->actionZoom > 0.5f && draw != 0) {
+        if (enabled[i] != 0 && SDF_FRAME_TICK_TEST(&CMB_GBWK->actionZoom, CMB_GBWK->actionZoom > 0.5f) && draw != 0) {
             f32 value = sizes[i] * scale;
             f32 offset = cmbGetModelScaleById(CMB_GBWK->actionData[i].id);
             cmbDrawModelAt(i, *positions, sizes[i], value + offset);
