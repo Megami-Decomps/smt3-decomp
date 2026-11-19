@@ -45,6 +45,16 @@ a further control needs a real consumer and preserved native memory accesses.
 
 ## nmeInitNameRow (nme/Nme_Init, 0x144)
 
+Matched at 324 bytes. The clear loop starts at the second byte of each glyph
+and writes both bytes. The decode loop also uses the second-byte cursor, based
+on the enclosing work object's byte representation. After the nonempty check,
+a local operand keeps the real signed row available for the separate decode
+address. A short native-register binding holds the real unsigned glyph byte
+until its consumer. The signed stop test, decode call, store order and final
+byte-sized count are unchanged.
+
+### Earlier guarded reconstruction
+
 52 of 81 words match at the native 324-byte size, improved from
 6 matching words in a 316-byte draft. The mode byte is multiplied in place,
 preserving signed-byte truncation before indexing the name table. The decoded

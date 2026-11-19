@@ -163,6 +163,11 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_PAIR
 #define FAKEMATCH_ASM_LIVE_PAIR(first, second) __asm__("" : "+r" (first), "+r" (second))
 #endif
+#ifndef FAKEMATCH_ASM_LIVE_AFTER_MEM_PAIR
+#define FAKEMATCH_ASM_LIVE_AFTER_MEM_PAIR(value, first, second) \
+    __asm__("" : "+r" (value) : "m" (first), "m" (second))
+#endif
+
 #ifndef FAKEMATCH_ASM_LIVE_F32
 #define FAKEMATCH_ASM_LIVE_F32(value) __asm__("" : "+f" (value))
 #endif
@@ -182,6 +187,14 @@ typedef SADDR_TYPE saddr_t;
 #endif
 #ifndef FAKEMATCH_ASM_READ_PAIR
 #define FAKEMATCH_ASM_READ_PAIR(first, second) __asm__("" : : "r" (first), "r" (second))
+#endif
+/* Keep a real scalar live alongside a real initialized memory operand.
+ * Neither macro emits instructions or acts as a general memory barrier. */
+#ifndef FAKEMATCH_ASM_LIVE_WITH_MEM
+#define FAKEMATCH_ASM_LIVE_WITH_MEM(value, lvalue) __asm__("" : "+r" (value) : "m" (lvalue))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_F32_WITH_MEM
+#define FAKEMATCH_ASM_LIVE_F32_WITH_MEM(value, lvalue) __asm__("" : "+f" (value) : "m" (lvalue))
 #endif
 #ifndef FAKEMATCH_ASM_LIVE_MEM
 #define FAKEMATCH_ASM_LIVE_MEM(lvalue) __asm__ volatile ("" : "+m" (lvalue))

@@ -658,10 +658,6 @@ draw_digits:
     }
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
- * capture_006, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid);
 
@@ -673,6 +669,7 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
     s32 area = 0;
     s32 skill;
     s32 firstBit;
+    const datNormalSkill_t *normal;
     u8 targetarea;
     u8 targetrule;
 
@@ -689,19 +686,30 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
         case 1: type = 1; break;
         case 2: type = 2; break;
         }
-        targetarea = datSkillTable.normal[skill].targetarea;
+        normal = &datSkillTable.normal[skill];
+        /* Consume the selected row address before reading its fields so the
+         * native table-base and row-offset calculation order is retained. */
+        FAKEMATCH_ASM_READ(normal);
+        targetarea = normal->targetarea;
         /* This initialized bit supplies both the area selector and rule bit
          * zero below. Keep that live operand opaque so ee-gcc retains retail's
          * conditional construction of the first three rule bits instead of
          * collapsing them to & 7.
          * This localized constraint is not a historical-source claim. */
-        firstBit = 1;
-        FAKEMATCH_ASM_LIVE(firstBit);
         if ((u8)(targetarea & 1)) {
+            firstBit = 1;
+            FAKEMATCH_ASM_LIVE(firstBit);
             area = mode != 0 ? 2 : firstBit;
+        } else {
+            firstBit = 1;
         }
-        area |= targetarea & 2;
-        targetrule = datSkillTable.normal[skill].targetrule;
+        {
+            u32 areaHigh = targetarea & 2;
+            u32 areaLow = area;
+
+            area = areaHigh | areaLow;
+        }
+        targetrule = normal->targetrule;
         rule = 0;
         if (targetrule & 1) rule = firstBit;
         if (targetrule & 2) rule |= 2;
@@ -726,28 +734,25 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
         rule = 0;
         area = 2;
         break;
-    case 6:
-        if ((a->data->stat & 8) == 0) {
+    case 6: {
+        const nbMainProcessData_t *data = a->data;
+        if ((data->stat & 8) == 0) {
             type = 0;
-            if (a->data->playerpcnt >= 4) {
+            if (data->playerpcnt >= 4) {
                 rule = 2;
-                /* The selected rule is consumed by the final output store.
-                 * Its local operand keeps the native branch rather than movn. */
-                FAKEMATCH_ASM_LIVE(rule);
+                area = 1;
             } else {
                 rule = 12;
+                area = 1;
             }
-            area = 1;
         }
         break;
+    }
     }
     if (ctype != NULL) *ctype = type;
     if (crule != NULL) *crule = rule;
     if (carea != NULL) *carea = area;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
-#endif
 
 /* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * capture_015, covering only the paths those calls took.

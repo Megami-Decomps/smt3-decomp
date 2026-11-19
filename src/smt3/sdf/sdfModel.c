@@ -470,19 +470,18 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
     return body + 1;
 }
 
-/* NON_MATCHING: 82 of 96 words match at the exact size (first differing word
- * at +0x38); aDataPtr and the 0x6C07C000 constant swap $23 and $30. */
-/* NON_MATCHING. Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
+/* Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
  * battle_0_1, seq28, seq32, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkinPacket_t *aDataPtr,
                                           sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 packed = *(u32 *)&aDataPtr->packetSize;
+    u32 packed = aDataPtr->sizeAndMaterial;
     u16 matIndex = packed >> 16;
+    u32 physicalMask = EE_PHYSICAL(~0U);
     s32 ofs;
     u32 vuAddr = 1;
+    FAKEMATCH_ASM_REG(u32, unpack, "$23") = 0x6C07C000;
     s32 i = 0;
     sdfDmaTag_t *tag;
     s32 count;
@@ -504,8 +503,8 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
         tag->id = 0x30;
         addr = EE_ADDR(sdfModelAllocTmPacket(node));
         tag->dat0 = 0;
-        tag->dat1 = vuAddr | 0x6C07C000;
-        tag->addr = EE_ADDR_AS(void *, EE_PHYSICAL(addr + ofs));
+        tag->dat1 = vuAddr | unpack;
+        tag->addr = EE_ADDR_AS(void *, ((addr + ofs) & physicalMask));
         vuAddr += 7;
         tag++;
     } while (i != count);
@@ -519,16 +518,25 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
     words[2] = 0x0400000E;
     words[3] = 0x14000000;
     tag += 2;
-    tag->qwc = packed;
-    tag->id = 0x30;
-    tag->dat0 = 0;
-    tag->dat1 = 0;
-    tag->addr = (void *)EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
-    return tag + 1;
+    {
+        addr_t dataBody;
+        sdfDmaTag_t *next;
+        tag->qwc = packed;
+        tag->id = 0x30;
+        next = tag + 1;
+        dataBody = EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
+        /* Keep the actual final tag cursor and masked body address live. */
+        FAKEMATCH_ASM_LIVE_PAIR(tag, dataBody);
+        tag->dat0 = 0;
+        tag->dat1 = 0;
+        /* Keep the masked address live after both initialized VIF NOP words.
+         * The empty constraint orders these real operands without a CPU load
+         * or a general memory clobber. */
+        FAKEMATCH_ASM_LIVE_AFTER_MEM_PAIR(dataBody, tag->dat0, tag->dat1);
+        tag->addr = (void *)dataBody;
+        return next;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
-#endif
 
 /* Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * capture_009, covering only the paths those calls took.

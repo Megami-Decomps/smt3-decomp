@@ -81,14 +81,14 @@ effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/
 effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/matching/effect/effPCPBoss.md	98
 effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	90 of 90 words match	docs/matching/effect/effPCPBoss.md	127
 effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/matching/effect/effPCPBoss.md	174
-effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/matching/effect/effPCPBoss.md	204
-effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	239
-effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	284
-effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	313
-effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	352
-dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	390
-effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	402
-effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	439
+effPCPBossKAGUInvokeDraw	effect/effPCPBoss	0x2E0	181 of 184 words match	docs/matching/effect/effPCPBoss.md	213
+effPCPBossONGYDraw (1432 bytes)				docs/matching/effect/effPCPBoss.md	248
+effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	293
+effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	322
+effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	361
+dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	399
+effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	411
+effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370	107 of 220 words match	docs/matching/effect/effPCPBoss.md	448
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/matching/effect/parManager.md	33
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
@@ -200,7 +200,7 @@ fldItemBoxAdd (0x680)			294 of 416 words differ	docs/matching/field/fld_Npc.md	3
 fldNpcCalc	field/fld_Npc	0x7B0	487 of 492 words match	docs/matching/field/fld_Npc.md	35
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/fld_Npc.md	80
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	114
-fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	170
+fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	179
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
 frAnalyzeTag	interface/frFont	0x518		docs/matching/interface/frFont.md	79
 frAnalyzeMessage	interface/frFont	0x200		docs/matching/interface/frFont.md	131
@@ -364,7 +364,7 @@ nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_C
 nmeMoveCursorBy	nme/Nme_Draw	0x10C	2 of 67 words match	docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46
-nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	165
+nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	175
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	35 of 35 words match	docs/matching/pb/pbGame.md	48
@@ -419,9 +419,9 @@ sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/s
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	82 of 96 words match	docs/matching/sdf/sdfModel.md	3
-sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	62
-sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Sixty-three of 150 words match	docs/matching/sdf/sdfModel.md	97
-sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	sixty-three of 282 words match	docs/matching/sdf/sdfModel.md	192
+sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	72
+sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Sixty-three of 150 words match	docs/matching/sdf/sdfModel.md	107
+sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	sixty-three of 282 words match	docs/matching/sdf/sdfModel.md	202
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/matching/sdf/sdfMovie.md	3
 Provider declarations	sdf/sdfSound	byte-neutral		docs/matching/sdf/sdfSound-declarations.md	3
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3

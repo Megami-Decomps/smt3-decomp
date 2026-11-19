@@ -113,6 +113,15 @@ words when before); `ev` computed before `eu`; and `uw * 16 + su` instead of
 
 ## fldSibukiStart (field/fld_Npc, 0x98)
 
+Matched at 152 bytes. The stack vector remains the real argument to
+the position provider. Scoped operands keep Y in its native saved float
+register through the zeroing call and reproduce the order of initialized
+X, W and Y stores before reading the reset handle. No vector field or handle
+table read is made volatile. The later position and loop calls each read the
+current handle from the table, as in retail.
+
+### Earlier guarded reconstruction
+
 28 of 38 words match, at the exact 152-byte size. `fldBlurEffectId` has to be an
 incomplete array so the three handle reads go through one `lui`/`addiu` pair
 in `$16` rather than `$gp`; with a plain `extern void *` the function is

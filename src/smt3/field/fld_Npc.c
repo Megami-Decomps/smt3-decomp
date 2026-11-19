@@ -844,24 +844,33 @@ void fldDmgStart(f32 x, f32 y, f32 z) {
     fldDmgBlurHandle = 1;
 }
 
-/* NON_MATCHING: 10 of 38 words differ (first at +0x8). */
-#ifdef NON_MATCHING
-void fldSibukiStart(f32 x, f32 y, f32 z) {
+void fldSibukiStart(f32 x, f32 y, f32 z)
+{
     sdfVector4_t position;
+    void **slots = fldBlurEffectId;
+    struct effNode_t *handle;
+    f32 homogeneous = 1.0f;
+    FAKEMATCH_ASM_REG(f32, positionY, "$f21") = y;
 
     memset(&position, 0, sizeof(position));
-    position.w = 1.0f;
+
+    /* Match the native save of Y across memset and the scheduling of the
+     * actual X/W/Y stores before the Reset handle load. These operands do
+     * not add memory accesses or make the vector or handle table volatile. */
     position.x = x;
-    position.y = y;
+    FAKEMATCH_ASM_LIVE_F32_WITH_MEM(homogeneous, position.x);
+    position.w = homogeneous;
+    FAKEMATCH_ASM_LIVE_F32_WITH_MEM(positionY, position.w);
+    position.y = positionY;
+    FAKEMATCH_ASM_LIVE_WITH_MEM(slots, position.y);
+    handle = slots[0];
     position.z = z;
-    dds3EffectReset(fldBlurEffectId[0]);
-    dds3EffectSetPosition(fldBlurEffectId[0], &position);
-    dds3EffectSetLoop(fldBlurEffectId[0], 0);
+
+    dds3EffectReset(handle);
+    dds3EffectSetPosition(slots[0], &position);
+    dds3EffectSetLoop(slots[0], 0);
     fldNpcBlurHandle = 1;
 }
-#else
-INCLUDE_ASM(const s32, "field/fld_Npc", fldSibukiStart);
-#endif
 
 /* NON_MATCHING: 65 of 208 words differ (first at +0x30). */
 #ifdef NON_MATCHING

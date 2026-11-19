@@ -1403,13 +1403,18 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly);
 #endif
 
 /* vu0 routine: the BUNSIN billboard quad. */
-/* NON_MATCHING: 9 of 117 words differ (first at +0x90). */
-#ifdef NON_MATCHING
 void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 color, f32 width,
                                f32 height)
 {
-    effPCPBossVector_t points[4];
-    f32 uv[8];
+    struct {
+        effPCPBossVector_t points[4];
+        union {
+            f32 flat[8];
+            f32 st[4][2];
+        } uv;
+    } quad;
+    f32 *texCoords;
+    u16 primCount;
 
     SDF_VU0_LOADIDENTITY();
     SDF_VU0_LOADVECTOR(center);
@@ -1417,55 +1422,57 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
     sdf3DPrimLinkTm(tag, 0);
     LookAtMatrix(dds3RenderTargetVector, dds3RenderEyeVector, effPCPBossTexRect);
     ReverseMatrix();
+    texCoords = quad.uv.flat;
+    primCount = 2;
     width = width * 0.5f;
     height = height * 0.5f;
     effPCPBossWork.color = color;
     effPCPBossWork.vertexCount = 4;
-    effPCPBossWork.uvs = uv;
-    effPCPBossWork.primCount = 2;
-    uv[7] = 1.0f;
-    effPCPBossWork.positions = points;
-    points[0].f[1] = -height;
-    points[0].f[0] = -width;
+    /* The packet builder reads four consecutive s/t pairs. */
+    effPCPBossWork.uvs = texCoords;
+    effPCPBossWork.primCount = primCount;
+    quad.uv.st[3][1] = 1.0f;
+    effPCPBossWork.positions = quad.points;
+    quad.points[0].f[1] = -height;
+    quad.points[0].f[0] = -width;
+    /* VU0 reads this coordinate through the vector address below. */
+    FAKEMATCH_ASM_LIVE_MEM(quad.points[0].f[0]);
     effPCPBossWork.colors = NULL;
-    uv[2] = 1.0f;
-    uv[5] = 1.0f;
-    uv[6] = 1.0f;
-    uv[0] = 0.0f;
-    uv[1] = 0.0f;
-    uv[3] = 0.0f;
-    uv[4] = 0.0f;
-    points[0].f[2] = 0.0f;
-    points[0].f[3] = 0.0f;
-    SDF_VU0_LOADVECTOR(&points[0]);
+    quad.uv.st[2][1] = 1.0f;
+    quad.uv.st[3][0] = 1.0f;
+    quad.uv.st[1][0] = 1.0f;
+    quad.uv.st[0][0] = 0.0f;
+    quad.uv.st[0][1] = 0.0f;
+    quad.uv.st[1][1] = 0.0f;
+    quad.uv.st[2][0] = 0.0f;
+    quad.points[0].f[2] = 0.0f;
+    quad.points[0].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&quad.points[0]);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&points[0]);
-    points[1].f[0] = width;
-    points[1].f[1] = -height;
-    points[1].f[2] = 0.0f;
-    points[1].f[3] = 0.0f;
-    SDF_VU0_LOADVECTOR(&points[1]);
+    SDF_VU0_STOREVECTOR(&quad.points[0]);
+    quad.points[1].f[0] = width;
+    quad.points[1].f[1] = -height;
+    quad.points[1].f[2] = 0.0f;
+    quad.points[1].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&quad.points[1]);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&points[1]);
-    points[2].f[0] = -width;
-    points[2].f[1] = height;
-    points[2].f[2] = 0.0f;
-    points[2].f[3] = 0.0f;
-    SDF_VU0_LOADVECTOR(&points[2]);
+    SDF_VU0_STOREVECTOR(&quad.points[1]);
+    quad.points[2].f[0] = -width;
+    quad.points[2].f[1] = height;
+    quad.points[2].f[2] = 0.0f;
+    quad.points[2].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&quad.points[2]);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&points[2]);
-    points[3].f[0] = width;
-    points[3].f[1] = height;
-    points[3].f[2] = 0.0f;
-    points[3].f[3] = 0.0f;
-    SDF_VU0_LOADVECTOR(&points[3]);
+    SDF_VU0_STOREVECTOR(&quad.points[2]);
+    quad.points[3].f[0] = width;
+    quad.points[3].f[1] = height;
+    quad.points[3].f[2] = 0.0f;
+    quad.points[3].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&quad.points[3]);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&points[3]);
+    SDF_VU0_STOREVECTOR(&quad.points[3]);
     sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
-#endif
 
 void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work);
 

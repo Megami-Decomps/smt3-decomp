@@ -173,6 +173,15 @@ remain important native source shapes.
 
 ## effPCPBossBUNSINDrawPoly2 (effect/effPCPBoss, 468 bytes)
 
+Matched. One local quad holds the four transformed positions and four
+consecutive s/t pairs. The packet builder consumes the flat view of the same
+eight floats. A localized operand on the first vertex's actual x storage
+preserves its placement before the VU0 vector load without adding an
+instruction. The VU0 transforms and the packet-builder/link calls retain
+their native order. No host tick logic changed.
+
+### Earlier guarded reconstruction
+
 108 of 117 words match, at the exact 468-byte size.
 
 Scheduling inside one basic block. Retail emits the eight stores that set up

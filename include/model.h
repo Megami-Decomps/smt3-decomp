@@ -237,8 +237,14 @@ typedef struct
     u8 packetType;
     u8 mpgType;
     u16 packetPrio;
-    u16 packetSize;
-    u16 matIndex;
+    union {
+        struct {
+            u16 packetSize;
+            u16 matIndex;
+        };
+        /* Native packed word: QWC in low 16 bits, material index above. */
+        u32 sizeAndMaterial;
+    };
     void *dataBody;
     u32 boneCount;
     u16 boneId[1];

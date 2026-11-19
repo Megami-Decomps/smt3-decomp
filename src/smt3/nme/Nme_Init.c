@@ -87,51 +87,66 @@ s8 nmeGetModeFlag(nmeWork_t *work) {
 
 extern const char *nmeDefaultNames[];
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq41, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void nmeInitNameRow(s8 mode, s32 rowValue, void *data)
 {
     nmeWork_t *work = data;
     s8 row = rowValue;
     s32 maxLength;
     const char *name;
-    u8 (*characters)[2];
+    u8 *characters;
     s8 count;
+    /* Keep the currently loaded payload in native $5 until its consumer.
+     * The independent signed stop value still tests the source for NUL. */
+    FAKEMATCH_ASM_REG(u8, byte, "$5");
+    s8 stop;
     s32 i = 0;
+    u8 *rowBase;
+    u8 *clear;
+    s8 fill;
 
     mode *= 3;
     maxLength = nmeGetMaxNameLen(row);
 
+    rowBase = EE_ADDR_AS(u8 *, row * (s32)sizeof(work->inputChars[0]) + EE_ADDR(work));
+    fill = -128;
+    clear = rowBase + (EE_ADDR(&work->inputChars[0][0][1]) - EE_ADDR(work));
     if (maxLength > 0) {
         do {
-            work->inputChars[row][i][0] = 0x80;
-            work->inputChars[row][i][1] = 0x80;
+            clear[-1] = fill;
+            clear[0] = fill;
             i++;
+            clear += 2;
         } while (i < maxLength);
     }
     count = 0;
     name = nmeDefaultNames[mode + row];
-    characters = work->inputChars[row];
-    while (*name != 0) {
-        if (*name & 0x80) {
-            (*characters)[0] = *name++;
-            (*characters)[1] = *name;
-        } else {
-            u32 code = nmeDecodeChar(*name);
-            (*characters)[1] = code;
-            (*characters)[0] = code >> 8;
-        }
-        name++;
-        characters++;
-        count++;
+    if (*name != 0) {
+        /* Recompute the decode destination from the real row after the clear loop. */
+        FAKEMATCH_ASM_LIVE(row);
+        byte = *(const u8 *)name;
+        /* Traverse the enclosing work object representation, not one row's
+         * subarray: an exact-width row advances the cursor beyond its last
+         * glyph after that last store without forming an out-of-bounds pointer. */
+        characters = (u8 *)work + (EE_ADDR(&work->inputChars[row][0][1]) - EE_ADDR(work));
+        do {
+            if ((s8)byte & 0x80) {
+                characters[-1] = byte;
+                name++;
+                characters[0] = *name;
+            } else {
+                u32 code = nmeDecodeChar((s8)byte);
+                characters[0] = code;
+                characters[-1] = code >> 8;
+            }
+            name++;
+            characters += 2;
+            count++;
+            stop = *(const s8 *)name;
+            byte = *(const u8 *)name;
+        } while (stop != 0);
     }
     work->inputRowEnabled[row] = count;
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
-#endif
 
 extern void nmeInitNameRow(s8 mode, s32 row, void *data);
 void nmeInitNameRows(s8 mode, nmeWork_t *work) {

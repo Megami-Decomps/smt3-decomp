@@ -2,6 +2,16 @@
 
 ## sdfModelSetOneSkinDrawPacket (sdf/sdfModel, 0x180)
 
+Matched at 384 bytes. The packet header exposes the real packed QWC/material
+word through its union, without dereferencing a pointer cast from a
+halfword field. The halfword views and packet offsets remain unchanged.
+The loop uses its allocated transform address and a localized binding of the
+actual VIF unpack word. For the final REF tag, a constraint on the live masked
+body address and the two initialized VIF NOP words reproduces the native store
+sequence. It emits no CPU loads or new hardware operations.
+
+### Earlier guarded reconstruction
+
 82 of 96 words match at the exact 384-byte size, first difference at +0x38.
 Four source properties got it from 3 of 90 to here, and all four are worth
 carrying to the sibling packet writers:

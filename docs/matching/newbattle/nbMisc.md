@@ -181,7 +181,21 @@ cases each at O0, O2 and ASan/UBSan. These retain the preselected entry while
 observing the native post-call flag and ID reads. Actual provider source was
 separately checked; the fixtures use mocked callbacks, not game execution.
 
-### nbSetTargetSkill (retained nonmatching draft, native 560 bytes)
+### nbSetTargetSkill (matched, 560 bytes)
+
+The native target selection now builds from C. A read-only compiler operand
+uses the real selected skill-row address before loading its area and rule
+bytes. That preserves the order of table-base and row-offset calculation.
+The initialized bit-one operand is kept opaque only on the branch that can
+use it for the area, and still supplies rule bit zero. Removing either
+operand changes the native output. Command six uses ordinary C without a
+fixed register or an operand constraint.
+
+The normal and item paths keep the original provider calls and table reads;
+the item callback precedes its selected row read. The final nullable writes
+remain in type, rule, area order, including when pointers alias.
+
+#### Earlier guarded reconstruction
 
 The guarded reconstruction now retains the native command-block order and
 explicit target-rule bit construction. Its isolated enabled body improves
