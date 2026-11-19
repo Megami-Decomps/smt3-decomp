@@ -302,6 +302,14 @@
 #define SDF_FRAME_STEP_AFTER_DRAW(age, end) ((age) < (end))
 #endif
 
+/* A step d made after the draw where no test holds the step, with age in host
+ * ticks from a tick's first host tick. A host adds d / n while the drawn age is
+ * n or more, so the next draw is the original's on a tick's last host tick. The
+ * original adds d. */
+#ifndef SDF_FRAME_STEP_AFTER_DRAW_BY
+#define SDF_FRAME_STEP_AFTER_DRAW_BY(age, d) (d)
+#endif
+
 /* The n floats at dst, which their owner scaled about origin by ratio on this
  * retail tick, as drawn on a host tick: origin + (dst - origin) * ratio to the
  * power of the share of the tick run, less one. Retail draws dst as it is. */

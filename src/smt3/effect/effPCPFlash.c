@@ -1800,7 +1800,7 @@ void effPCPFlashPolyPipePartSetVertex(effPCPFlashPolyPipe_tag *work, s32 index)
     VEC3_SPLAT(&outer.x, outerEdge);
     innerEdge = center - part->length;
     VEC3_SPLAT(&inner.x, innerEdge);
-    part->up = part->up + work->radialStep;
+    part->up = part->up + SDF_FRAME_STEP_AFTER_DRAW_BY(part->frame, work->radialStep);
     span = part->width_in;
     VEC3_SPLAT(&size.x, span);
     unit.x = sdfCos(part->rotate);
