@@ -1621,35 +1621,33 @@ s32 func_002229E8(u16 value)
     return 0;
 }
 
-/* NON_MATCHING: the native lookup retains a table offset and a separate
- * address for the first matching entry. */
-#ifdef NON_MATCHING
+/* Scan the 24 event records using one byte offset. The EE address views keep
+ * the row-header-relative load and entry-relative result separate. The actual
+ * first-match discriminator is constrained locally to its native register;
+ * this is a target compiler aid, not recovered original source spelling. */
 fclSkillParam_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *outcount)
 {
-    datLevelUpRecord_t *table = datLevelUpTable;
-    fclSkillParam_t *entry = table[unit->id].entry;
+    u32 base = (u32)&datLevelUpTable;
+    u32 id = unit->id;
+    u32 tripled = id * 3;
+    u32 offset = tripled * (sizeof(datLevelUpRecord_t) / 3);
     u8 level = unit->level;
     fclSkillParam_t *found = NULL;
     u8 count = 0;
     s32 i;
-
+    FAKEMATCH_ASM_REG(u32, first, "$13") = 1;
+    u32 entries = (u32)&datLevelUpTable[0].entry;
     for (i = 23; i >= 0; i--) {
-        if (entry->level == level) {
+        u32 address = offset + base; /* entry level is six bytes past the header base. */
+        if (((u8 *)address)[6] == level) {
             count++;
-            if (count == 1) {
-                found = entry;
-            }
+            if (count == first) found = (fclSkillParam_t *)(offset + entries);
         }
-        entry++;
+        offset += sizeof(fclSkillParam_t);
     }
-    if (outcount != NULL) {
-        *outcount = count;
-    }
+    if (outcount != NULL) *outcount = count;
     return found;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", datFindKugatatiEntry);
-#endif
 
 /* Header row contains sixteen source keys; each following row starts with its target key. */
 extern s16 cmbEvoStatTable[][17];

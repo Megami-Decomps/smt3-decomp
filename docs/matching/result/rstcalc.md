@@ -85,26 +85,16 @@ the real row type before its members are accessed.
 
 ## datFindKugatatiEntry (rstcalc, 0x74)
 
-The guarded typed lookup emits 108 bytes against 116 native bytes, with all
-27 emitted words differing. It scans 24 level-event records after a six-byte
-header. Each four-byte record contains a level byte, kind byte and u16 value;
-the lookup compares the level as a low byte, returns the first matching
-record and optionally writes the eight-bit match count.
+29 of 29 words match at 116 bytes. The lookup scans the 24 four-byte
+level-event records after the six-byte row header, returns the first matching
+record, and optionally stores the eight-bit match count. The existing valid
+row-index contract is unchanged.
 
-The consumer `rstCalcEventInfo` now uses that record view directly. Its signed
-count/index, halfword value store and signed event-kind return are recovered;
-the lookup remains assembly-backed.
-
-Native keeps `id * 0x66 + 4 * i` as a byte offset, the bare table base in `$10`
-and a separate `$12 = $10 + 6`. Its level load is `lbu 6($6 + $10)` and its
-returned entry address is `$6 + $12`. The typed pointer walk folds these into
-one induction pointer. The source-level representation preserving both native
-address forms is still unresolved; the size gap also remains.
-
-Typed nested-row indexing emitted 128 bytes. A direct byte-offset form emitted
-116 bytes but matched only two of 29 words, so correct size alone does not close
-this function. Earlier integer-address and explicit two-base forms either
-rematerialised the table inside the loop or added another induction variable.
+The EE-specific byte-address calculation retains the native row offset and
+separate table and entry bases. The locally bound first-match discriminator
+is the real value used in the comparison, not a claim about original source
+spelling. Without that binding the same source matches 25 of 29 words. The
+complete owner check matches all 99 functions and owned data.
 
 ## cmbGetHeartsParamByIndex (rstcalc, 0x58)
 
