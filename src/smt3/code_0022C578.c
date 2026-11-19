@@ -11013,22 +11013,25 @@ void cmpClearCursorSlots(cmpCursorInfo_t *cur)
 }
 
 
-/* NON_MATCHING: 8 of 15 words differ (first at +0xC). */
-#ifdef NON_MATCHING
+/* Keep the real row address and update pointer in their native short-lived
+ * homes. Re-form the update pointer from the input slot/index after the row
+ * constraint; copying row instead schedules its move before state extension.
+ * The discriminator is the actual comparison constant. These local matching
+ * constraints emit no instructions and do not establish original spelling. */
 void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot)
 {
-    cmpCursorSlot_t *p = &slot[index];
-    s32 *v = &slot[index].value;
-
-    if (p->state != 3) {
-        *v = 0;
-        p->param = param;
-        p->state = state;
+    FAKEMATCH_ASM_REG(cmpCursorSlot_t *, row, "$8") = &slot[index];
+    FAKEMATCH_ASM_REG(s32, first, "$2") = 3;
+    FAKEMATCH_ASM_LIVE(row);
+    {
+        FAKEMATCH_ASM_REG(cmpCursorSlot_t *, p, "$7") = &slot[index];
+        if (p->state != first) {
+            p->state = state;
+            p->param = param;
+            row->value = 0;
+        }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetCursorSlot);
-#endif
 
 s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot)
 {
