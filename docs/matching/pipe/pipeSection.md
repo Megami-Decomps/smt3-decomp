@@ -264,3 +264,19 @@ The two whole-owner observations preserve all six baseline artifacts each;
 fresh normal, SKIP_ASM and guarded plain/dump compilations also preserve
 complete assembly and object parity. No source change or matching credit is
 claimed by this diagnostic.
+
+## pipeOffset exact match (0x108)
+
+All 66 retail instruction words match. The routine traverses signed part
+IDs and keeps the selected link ID, with separate unsigned end-frame
+and signed start-frame tests. It reloads the prior part's extent and
+then gets the next descriptor, preserving the post-provider position
+and node-ID observations. The terminal link remains 0xFFFF.
+
+The signed step and count and later unsigned count read are distinct.
+Unsigned addition preserves the EE's low 32 bits, and the selected ID
+is stored between the two coordinate additions. The localized operands
+keep these real snapshots and the accepted coordinate in their native
+phases without volatile memory, additional reads, or an ABI change.
+If the biased coordinate is negative, the routine stores 10.
+Complete owner: 34 matches, zero differences.

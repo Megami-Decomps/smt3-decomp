@@ -363,7 +363,6 @@ s32 pipeSoundSection(void)
     return ObjectSound();
 }
 
-#ifdef NON_MATCHING
 extern tagPipePartsInfo *getPartsInfo(s16 partsID);
 extern s32 pipeLinkId;
 
@@ -372,29 +371,69 @@ void pipeOffset(void)
     tagPipeLinkData *node = linkHeader00.head;
     tagPipePartsType *part = getPartsInfo(node->partsID)->data;
     s32 start = 0;
-    s32 position = offsetCount;
+    s32 position;
     u16 id = node->id;
+    u16 sentinel;
     s8 step;
     s8 count;
-    u8 countBits;
+    s32 countBits;
     s32 next;
+    FAKEMATCH_ASM_REG(s32, storableNext, "$5");
 
-    if ((u32)position >= part->frame && position >= 0 && id != 0xFFFF) {
-        do {
-            tagPipePartsInfo *info;
-            node = node->next;
-            start = (s32)((u32)start + part->frame);
-            info = getPartsInfo(node->partsID);
-            id = node->id;
-            part = info->data;
-            position = offsetCount;
-        } while ((u32)position >= (u32)start + part->frame && position >= start && id != 0xFFFF);
+    position = offsetCount;
+    if ((u32)position < part->frame || position < 0)
+        goto step_late;
+    if (id == 0xFFFF) {
+        step = *(s8 *)&offsetStep;
+        goto adjust;
     }
+    sentinel = 0xffff;
+    /* Retain the real loop sentinel before the first next-link load. */
+    FAKEMATCH_ASM_READ(sentinel);
+    node = node->next;
+    do {
+        tagPipePartsInfo *info;
+        u32 prev;
+        /* Read the prior reached part before advancing its real frame. */
+        FAKEMATCH_ASM_LIVE(part);
+        prev = part->frame;
+        FAKEMATCH_ASM_READ(prev);
+        start = (s32)((u32)start + prev);
+        info = getPartsInfo(node->partsID);
+        id = node->id;
+        part = info->data;
+        /* Compare the reached part frame against the post-provider position. */
+        position = offsetCount;
+        FAKEMATCH_ASM_LIVE_PAIR(part, position);
+        if ((u32)position < (u32)start + part->frame)
+            goto step_late;
+        if (position < start) {
+            step = *(s8 *)&offsetStep;
+            goto adjust;
+        }
+        if (id == sentinel)
+            break;
+        node = node->next;
+    } while (1);
+step_late:
     step = *(s8 *)&offsetStep;
+adjust:
     count = *(s8 *)&offsetStepCount;
-    pipeLinkId = id;
-    next = (s32)((u32)position + (u32)(s32)step + 7);
+    /* Keep the signed test first, before the separate unsigned snapshot. */
+    FAKEMATCH_ASM_READ(count);
+    {
+        u32 stepped = (u32)position + (u32)(s32)step;
+        /* These real values hold the ID publication between the two
+         * coordinate adds, without introducing a new memory access. */
+        FAKEMATCH_ASM_READ(id);
+        FAKEMATCH_ASM_LIVE(stepped);
+        pipeLinkId = id;
+        next = (s32)(stepped + 7);
+    }
     countBits = offsetStepCount;
+    /* Preserve distinct signed-test and accepted-store phases for next. */
+    storableNext = next;
+
     if (count > 0) {
         offsetStepCount = countBits - 1;
         offsetStep = (u8)-3;
@@ -404,19 +443,15 @@ void pipeOffset(void)
     } else {
         offsetStep = 0;
     }
-    if (next >= 0) {
-        offsetCount = next;
-    } else {
+    if (next < 0) {
         next = 10;
-        /* Keep the real fallback store value local so the target compiler
-         * retains the native branch/store tail rather than a conditional move. */
-        FAKEMATCH_ASM_LIVE(next);
         offsetCount = next;
+        goto finish;
     }
+    offsetCount = storableNext;
+finish:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeSection", pipeOffset);
-#endif
 
 void pipeStart(void)
 {
