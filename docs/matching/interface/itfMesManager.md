@@ -57,6 +57,8 @@ problem does not justify more statement permutations or fabricated consumers.
 
 ## itfMesMngGetVarLocalize (interface/itfMesManager, 0xAC)
 
+**Matched (2026-11-17):** All 43 words match. The native initial unsigned-byte count is locally constrained to `$4` at its actual zero test; the existing loop still reloads the count. Complete-owner and retail-image checks pass. Earlier measurements below describe the historical draft.
+
 One of thirty-four words matches and the draft emits 136 bytes against
 retail's 172, so this is a structural draft rather than a near miss. It is
 kept for the data layout it pins down, which took the longest to find:

@@ -1088,7 +1088,6 @@ extern char itfMesMngVarText[];
  * is consumed into loopCount before tailB takes $6; no binding crosses a call.
  * These emit no instructions or memory barrier, and do not imply original
  * source spelling. The saved pointer supplies each iteration's work refresh. */
-#ifdef NON_MATCHING
 void itfMesMngGetVarLocalize(s32 id)
 {
     FAKEMATCH_ASM_REG(u8 *, work, "$9") = DDS3_GBWK;
@@ -1104,35 +1103,39 @@ void itfMesMngGetVarLocalize(s32 id)
     FAKEMATCH_ASM_LIVE(out);
     FAKEMATCH_ASM_LIVE(count);
     FAKEMATCH_ASM_LIVE(saved);
-    if ((work + 4)[count] != 0) {
-        loopCount = count;
-        lead = id * 20 + 0x6600;
-        tailB = id * 20 + 0x6601;
-        tailA = id * 20 + 0x6601;
-        do {
-            u8 *gb = work + 4;
-            u8 code = gb[lead];
-            work = saved;
+    /* The native first byte count is consumed in $4 by this zero test.
+     * This local operand constrains that actual value, not memory ordering;
+     * it emits no instruction and ends before $4 is reused for lead. */
+    {
+        FAKEMATCH_ASM_REG(u32, initialCount, "$4") = (work + 4)[count];
+        FAKEMATCH_ASM_LIVE(initialCount);
+        if (initialCount != 0) {
+            loopCount = count;
+            lead = id * 20 + 0x6600;
+            tailB = id * 20 + 0x6601;
+            tailA = id * 20 + 0x6601;
+            do {
+                u8 *gb = work + 4;
+                u8 code = gb[lead];
+                work = saved;
 
-            if (code & 0x80) {
-                *out = code;
+                if (code & 0x80) {
+                    *out = code;
+                    out++;
+                    *out = gb[tailA];
+                } else {
+                    *out = gb[tailB];
+                }
                 out++;
-                *out = gb[tailA];
-            } else {
-                *out = gb[tailB];
-            }
-            out++;
-            lead += 2;
-            tailA += 2;
-            tailB += 2;
-            k++;
-        } while (k < (work + 4)[loopCount]);
+                lead += 2;
+                tailA += 2;
+                tailB += 2;
+                k++;
+            } while (k < (work + 4)[loopCount]);
+        }
+        *out = 0;
     }
-    *out = 0;
 }
-#else
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngGetVarLocalize);
-#endif
 
 extern char itfMesFmtInt[];
 
