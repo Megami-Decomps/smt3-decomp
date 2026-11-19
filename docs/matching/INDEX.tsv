@@ -191,6 +191,7 @@ fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fld
 fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field/fldMain.md	56
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	1
 fldPlayerCalc	field/fldPlayer	0x2A4		docs/matching/field/fldPlayer.md	102
+fldPlayerCalcHasigo	field/fldPlayer	0xE8		docs/matching/field/fldPlayer.md	149
 fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	3
 fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md	34
 fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	84

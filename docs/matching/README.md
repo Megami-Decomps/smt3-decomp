@@ -63,6 +63,7 @@ both native and emitted sizes when they differ.
 | 3 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
+| 3 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 3 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 3 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
@@ -90,7 +91,6 @@ both native and emitted sizes when they differ.
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
-| 2 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |

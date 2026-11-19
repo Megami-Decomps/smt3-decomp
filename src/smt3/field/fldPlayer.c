@@ -642,51 +642,65 @@ void fldPlayerCalc_WarpRun(void)
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_WarpRun);
 #endif
 
-/* NON_MATCHING: 14 of 58 words differ (first at +0x44). */
-#ifdef NON_MATCHING
-extern void fldPlayerSdwOff(void);
-extern void fldPlayerSvsOff(void);
-
 s32 fldPlayerCalcHasigo(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
     sdfVector4_t pos;
-
+    /* The signed arms share the updated Y/Z pair in their native FPRs. */
+    FAKEMATCH_ASM_REG(f32, y, "$f0");
+    FAKEMATCH_ASM_REG(f32, x, "$f5");
+    FAKEMATCH_ASM_REG(f32, z, "$f4");
+    f32 prevX;
+    f32 prevY, prevZ;
+    fldAreaWork_t *global;
+    const sdfVector4_t *next;
+    dds3Basic_t *target;
     if (gfldPlayerDamegeCnt > 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(&pos);
-        pos.y -= 2.0f;
-        fldGlobalBase.prevX = fldGlobalBase.x;
-        fldGlobalBase.prevY = fldGlobalBase.y;
-        fldGlobalBase.prevZ = fldGlobalBase.z;
-        fldGlobalBase.x = pos.x;
-        fldGlobalBase.y = pos.y;
-        fldGlobalBase.z = pos.z;
-        pos.y = fldGlobalBase.y;
-        pos.z = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
+        global = &fldGlobalBase;
+        next = &pos;
+        FAKEMATCH_ASM_LIVE_PAIR(global, next);
+        y = pos.y - 2.0f;
+        z = pos.z;
+        FAKEMATCH_ASM_LIVE_F32(z);
     } else if (gfldPlayerDamegeCnt < 0) {
         dds3GetPosPoseSet(ctl->handle);
         SDF_VU0_STOREVECTOR(&pos);
-        pos.y += 2.0f;
-        fldGlobalBase.prevX = fldGlobalBase.x;
-        fldGlobalBase.prevY = fldGlobalBase.y;
-        fldGlobalBase.prevZ = fldGlobalBase.z;
-        fldGlobalBase.x = pos.x;
-        fldGlobalBase.y = pos.y;
-        fldGlobalBase.z = pos.z;
-        pos.y = fldGlobalBase.y;
-        pos.z = fldGlobalBase.z;
-        dds3SetPosPoseSet(ctl->handle, (const sdfVector4_t *)&pos);
+        global = &fldGlobalBase;
+        next = &pos;
+        FAKEMATCH_ASM_LIVE_PAIR(global, next);
+        y = pos.y + 2.0f;
+        z = pos.z;
+        FAKEMATCH_ASM_LIVE_F32(z);
     } else {
         return 0;
     }
+    /* Keep old and outgoing X together at the head of the commit. */
+    prevX = global->x;
+    x = pos.x;
+    FAKEMATCH_ASM_LIVE_F32_PAIR(prevX, x);
+    prevY = global->y;
+    prevZ = global->z;
+    target = ctl->handle;
+    /* The local Y write precedes Z; the setter consumes the completed pose. */
+    FAKEMATCH_ASM_LIVE_F32(y);
+    pos.y = y;
+    pos.z = z;
+    global->prevX = prevX;
+    /* Publish the previous X before the other previous coordinates. */
+    FAKEMATCH_ASM_READ_MEM(global->prevX);
+    global->prevY = prevY;
+    global->prevZ = prevZ;
+    global->z = z;
+    global->x = x;
+    /* Keep the real setter argument ready for the native Y delay slot. */
+    FAKEMATCH_ASM_READ(target);
+    global->y = y;
+    dds3SetPosPoseSet(target, next);
     fldPlayerSdwOff();
     fldPlayerSvsOff();
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalcHasigo);
-#endif
 
 const sdfVector4_t fldWarpRunAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 

@@ -145,3 +145,19 @@ contexts. All 29/22/29 peer functions, allocated data, NOBITS and ordered
 relocations are unchanged; MotionSe is checked explicitly in every context.
 Full retail, generated-source, regression, retained-draft, IRX, report-scope
 and compiler-owned production-provenance gates pass on the publication base.
+
+## fldPlayerCalcHasigo (field/fldPlayer, 0xE8)
+
+The ladder update matches all 58 retail instruction words. It takes the
+signed direction after getting the player control, reads the selected
+model pose, and adjusts the Y lane by two without affecting W. The
+shared commit captures the three old position coordinates before
+publication and passes the updated vector to the current control handle.
+The shadow and SVS disables occur only on a nonzero direction.
+
+The localized operands keep the actual outgoing Y/Z and last-use model
+pointer in their native schedule; they do not introduce additional
+loads, writes or calls. The old position and new X use their distinct
+existing floating-point lanes. Complete owner: 26 matches, zero
+differences. Callback mutation checks cover replacements of the control
+handle and old position across the pose-provider call.
