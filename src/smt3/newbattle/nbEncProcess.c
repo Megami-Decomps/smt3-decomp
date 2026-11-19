@@ -926,13 +926,10 @@ void nbInitBadCurseState(nbActionProcessData_t *a)
 
 extern void nbInitBadCurseState(nbActionProcessData_t *a);
 
-/* NON_MATCHING: 13 of 93 words differ; see docs/matching/newbattle/nbEncProcess.md. */
 const char nbBadCurseDebugFormat[31] = "BAD\xB9\xD4\xC6\xB0\xB3\xCE\xCE\xA8  type:%d  ritu:%d\n";
 
-#ifdef NON_MATCHING
 s32 nbApplyBadCurse(nbActionProcessData_t *a)
 {
-    nbBadCurseEntry_t *entry;
     s32 result;
     s32 step;
     s32 i;
@@ -976,9 +973,8 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
         }
         if (step >= 0 && result != 0) {
             for (i = 0; i < nbBadCurseTimer; i++) {
-                entry = &nbBadCurseTable[i];
-                if ((*entry)[0] == step) {
-                    (*entry)[1] = 0;
+                if (nbBadCurseTable[i][0] == step) {
+                    nbBadCurseTable[i][1] = 0;
                     break;
                 }
             }
@@ -991,10 +987,7 @@ s32 nbApplyBadCurse(nbActionProcessData_t *a)
     } while (result != 0);
     return 0;
 }
-#else
 
-INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbApplyBadCurse);
-#endif
 s32 readbasetime = 0;
 
 s32 readtime = 0;
