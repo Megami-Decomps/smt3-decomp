@@ -1056,7 +1056,7 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
     s32 ret;
 
     work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
-    FrameRun(work);
+    SDF_FRAME_WHEN(FrameRun(work));
     work->nowFrame += SDF_FRAME_DUE();
     ret = 0;
     if (work->nowFrame >= work->cutInfo->LastFrame) {
