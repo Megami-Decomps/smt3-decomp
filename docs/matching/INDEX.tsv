@@ -254,10 +254,10 @@ nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newba
 nbCheckBackAttack	newbattle/nbCalc	0x178	94 of 94 words match	docs/matching/newbattle/nbCalc.md	28
 nbGetKoukaType	newbattle/nbCalc	0x774	477 of 477 words match	docs/matching/newbattle/nbCalc.md	61
 nbGetHitType	newbattle/nbCalc	0x3AC	235 of 235 words match	docs/matching/newbattle/nbCalc.md	169
-nbGetKoukaBadKaifuku	newbattle/nbCalc	0x1EC	98 of 123 words match	docs/matching/newbattle/nbCalc.md	274
-nbGetKoukaBadDamage	newbattle/nbCalc	0x41C	263 of 263 words match	docs/matching/newbattle/nbCalc.md	395
-nbGetMagicAttack	newbattle/nbCalc	0x38C	227 of 227 words match	docs/matching/newbattle/nbCalc.md	469
-nbGetMakaBaramaki	newbattle/nbCalc	0x1D4	117 of 117 words match	docs/matching/newbattle/nbCalc.md	562
+nbGetKoukaBadKaifuku	newbattle/nbCalc	0x1EC		docs/matching/newbattle/nbCalc.md	274
+nbGetKoukaBadDamage	newbattle/nbCalc	0x41C	263 of 263 words match	docs/matching/newbattle/nbCalc.md	404
+nbGetMagicAttack	newbattle/nbCalc	0x38C	227 of 227 words match	docs/matching/newbattle/nbCalc.md	478
+nbGetMakaBaramaki	newbattle/nbCalc	0x1D4	117 of 117 words match	docs/matching/newbattle/nbCalc.md	571
 nbCameraBoss_Sp_DOUTYO_TPFix_Set	newbattle/nbCameraBoss	0x64		docs/matching/newbattle/nbCameraBoss.md	3
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	36
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	44

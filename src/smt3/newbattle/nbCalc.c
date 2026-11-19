@@ -1248,14 +1248,12 @@ u32 nbGetKoukaBadDamage(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s3
 
 extern const char D_00544BE8[];
 
-#ifdef NON_MATCHING
 u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 nvirtual)
 {
     datUnitWork_t *source;
     datUnitWork_t *target;
     u32 status;
     s32 sourceParam;
-    s32 targetParam;
     s32 success;
     f32 chance;
 
@@ -1266,17 +1264,30 @@ u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
     target = nbGetUnitWorkFromFormindex(dformindex);
     status = datSkillTable.normal[nskill].basstatus & 0xFFF;
     success = 1;
-    if (datSkillTable.normal[nskill].badlevel != 0xFF && nvirtual == 0) {
-        chance = (f32)datSkillTable.normal[nskill].badlevel;
-        sourceParam = datGetParam(source, 2);
-        sourceParam += datGetParam(source, 5) / 4;
-        chance *= (f32)sourceParam;
-        chance /= 100.0f;
-        targetParam = datGetParam(target, 2);
-        targetParam += datGetParam(target, 5) / 4;
-        chance *= ((ritu * 100.0f) / (f32)targetParam);
-        printf("bad ritu:%f\n", (double)chance);
-        success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
+    if (datSkillTable.normal[nskill].badlevel != 0xFF) {
+        /* Like the matched datCalc bad-status sibling, retain the native
+           second byte observation without marking ordinary RAM volatile.
+           This localized empty operand is a reconstruction aid. */
+        FAKEMATCH_ASM_LIVE_MEM(datSkillTable.normal[nskill].badlevel);
+        if (nvirtual == 0) {
+            /* The first target parameter survives the second datGetParam
+               call in its native callee-saved register. */
+            FAKEMATCH_ASM_REG(s32, targetParam, "$17");
+            /* Reuse the scale as the source divisor and target-rate factor. */
+            f32 targetRate = 100.0f;
+            chance = (f32)datSkillTable.normal[nskill].badlevel;
+            sourceParam = datGetParam(source, 2);
+            sourceParam += datGetParam(source, 5) / 4;
+            chance *= (f32)sourceParam;
+            chance /= targetRate;
+            targetParam = datGetParam(target, 2);
+            targetParam += datGetParam(target, 5) / 4;
+            targetRate *= ritu;
+            targetRate /= (f32)targetParam;
+            chance *= targetRate;
+            printf("bad ritu:%f\n", (double)chance);
+            success = (s32)dds3GetRandIntA(NULL, 100) < (s32)chance;
+        }
     }
     /* Retail retains separate virtual and actual status-test tails at
        0x267300..0x267334; both return the complete skill status mask. */
@@ -1289,10 +1300,6 @@ u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s
     }
     return 0;
 }
-
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaBadKaifuku);
-#endif
 
 u32 nbCheckHitEffect(s32 nskill, s32 sformindex, s32 dformindex)
 {

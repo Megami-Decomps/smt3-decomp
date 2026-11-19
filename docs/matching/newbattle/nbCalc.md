@@ -273,10 +273,19 @@ these focused checks.
 
 ## nbGetKoukaBadKaifuku (newbattle/nbCalc, 0x1EC)
 
-98 of 123 words match at the full 492-byte native size. The function remains
-`NON_MATCHING` with its assembly fallback; this work adds no matching credit.
-Native code runs from `0x267180` through `0x267368`, excluding the alignment
-word at `0x26736C`. This is distinct from `nbCheckBadKaifuku`.
+All 123 words match at the full 492-byte native size. The complete owner
+reports 65 matches and zero differences. Native code runs from `0x267180`
+through `0x267368`, excluding the alignment word at `0x26736C`. This is
+distinct from `nbCheckBadKaifuku`.
+
+The real second badlevel byte observation uses a local memory operand without
+making the ordinary table volatile. The actual signed target parameter stays
+in native callee-preserved `$17` across its second parameter call. The rate
+uses the same ordinary 100.0f local for source normalization and the later
+multiplication by ritu, and the converted target parameter is the actual
+divisor. The float operations need no fixed register or empty operands. No provider,
+calling convention, status mask or table layout
+changes.
 
 ### Ordinary reconstruction and native behavior
 
@@ -308,8 +317,8 @@ The affinity provider alone also cannot establish the complete input range.
 Nonfinite or out-of-range chance would retain the old draft's language-level
 conversion risk; emitting native CVT.W.S does not prove that cast safe for
 arbitrary inputs. No reachable failure is established for the observed retail
-data. The draft stays guarded and unpromoted, without a clamp or a claim of
-complete arbitrary-input semantic qualification.
+data. The matched source does not add a clamp or claim portable C behavior for
+arbitrary modified inputs.
 
 Badlevel 0xFF or nonzero nvirtual bypasses the parameter calls, diagnostic,
 RNG and conversion. Otherwise the native source 2/source 5/target 2/target 5,
@@ -319,9 +328,9 @@ The native virtual/actual tails both return the complete skill status mask
 on overlap, not the intersection. These two live tails are visible at
 `0x267300..0x267334`; no dead calculation or artificial barrier was added.
 
-### Qualified compiler blocker
+### Earlier compiler blocker and controls
 
-With this ordinary draft, the second badlevel load survives through the real
+With the earlier 98/123 draft, the second badlevel load survives through the real
 compiler's `19.lreg` snapshot as insn 144, but becomes a copy from a0 to v0
 in `20.greg`. Retail instead reloads the byte at `0x26721C`. There is no
 intervening call or write requiring the reload; the ordinary table has no
