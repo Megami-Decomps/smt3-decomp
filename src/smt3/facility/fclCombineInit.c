@@ -5717,17 +5717,21 @@ typedef struct
     s16 h[288];
 } cmbCopy576_t;
 
-/* NON_MATCHING: 35 of 176 words differ, two registers exchanged and two
- * instructions scheduled elsewhere. */
-#ifdef NON_MATCHING
-void func_00206308(u8 *dst, u8 *src)
+void func_00206308(u8 *out, u8 *src)
 {
+    FAKEMATCH_ASM_REG(u8 *, dst, "$8") = out;
     *(s32 *)(dst + 0x00) = *(s32 *)(src + 0x10);
     *(u16 *)(dst + 0x04) = *(u16 *)(src + 0x14);
     *(cmbCopy36_t *)(dst + 0x06) = *(cmbCopy36_t *)(src + 0x16);
     *(cmbCopy32_t *)(dst + 0x0C) = *(cmbCopy32_t *)(src + 0x1C);
-    *(u16 *)(dst + 0x12) = *(u16 *)(src + 0x38);
-    *(s32 *)(dst + 0x2C) = *(s32 *)(src + 0x3C);
+    {
+        FAKEMATCH_ASM_REG(s32, footerWord, "$2");
+        FAKEMATCH_ASM_REG(u16, footerHalf, "$2");
+        footerWord = *(s32 *)(src + 0x3C);
+        *(s32 *)(dst + 0x2C) = footerWord;
+        footerHalf = *(u16 *)(src + 0x38);
+        *(u16 *)(dst + 0x12) = footerHalf;
+    }
     *(cmbCopy576_t *)(dst + 0x14) = *(cmbCopy576_t *)(src + 0x3A);
     *(cmbCopy36_t *)(dst + 0x44) = *(cmbCopy36_t *)(src + 0x7A);
     *(cmbCopy36_t *)(dst + 0x4A) = *(cmbCopy36_t *)(src + 0x80);
@@ -5735,20 +5739,22 @@ void func_00206308(u8 *dst, u8 *src)
     *(u16 *)(dst + 0x80) = *(u16 *)(src + 0xCE);
     *(s32 *)(dst + 0x84) = *(s32 *)(src + 0xD8);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00206308);
-#endif
 
-/* NON_MATCHING: 35 of 176 words differ, the same residual as func_00206308. */
-#ifdef NON_MATCHING
-void func_002065C8(u8 *dst, u8 *src)
+void func_002065C8(u8 *out, u8 *src)
 {
+    FAKEMATCH_ASM_REG(u8 *, dst, "$8") = out;
     *(s32 *)(dst + 0x10) = *(s32 *)(src + 0x00);
     *(u16 *)(dst + 0x14) = *(u16 *)(src + 0x04);
     *(cmbCopy36_t *)(dst + 0x16) = *(cmbCopy36_t *)(src + 0x06);
     *(cmbCopy32_t *)(dst + 0x1C) = *(cmbCopy32_t *)(src + 0x0C);
-    *(u16 *)(dst + 0x38) = *(u16 *)(src + 0x12);
-    *(s32 *)(dst + 0x3C) = *(s32 *)(src + 0x2C);
+    {
+        FAKEMATCH_ASM_REG(s32, footerWord, "$2");
+        FAKEMATCH_ASM_REG(u16, footerHalf, "$2");
+        footerWord = *(s32 *)(src + 0x2C);
+        *(s32 *)(dst + 0x3C) = footerWord;
+        footerHalf = *(u16 *)(src + 0x12);
+        *(u16 *)(dst + 0x38) = footerHalf;
+    }
     *(cmbCopy576_t *)(dst + 0x3A) = *(cmbCopy576_t *)(src + 0x14);
     *(cmbCopy36_t *)(dst + 0x7A) = *(cmbCopy36_t *)(src + 0x44);
     *(cmbCopy36_t *)(dst + 0x80) = *(cmbCopy36_t *)(src + 0x4A);
@@ -5756,9 +5762,6 @@ void func_002065C8(u8 *dst, u8 *src)
     *(u16 *)(dst + 0xCE) = *(u16 *)(src + 0x80);
     *(s32 *)(dst + 0xD8) = *(s32 *)(src + 0x84);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_002065C8);
-#endif
 
 void func_00206888(s32 a0, s32 a1, s32 a2, s8 cursorCount, s32 a4, cmbListWork_t *work)
 {

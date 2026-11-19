@@ -2,41 +2,27 @@
 
 ## func_00206308, func_002065C8 (fclCombineInit, 0x2C0 each)
 
-35 of 176 words differ, at the exact 704-byte size, for each of the pair. They
-are the same copy in opposite directions: `func_00206308` moves the fields of
-one work struct down into a smaller one, `func_002065C8` moves them back, with
-every source and destination displacement exchanged. One analysis covers both.
+Both directions reproduce all 176 native words. The routines copy the same
+fields between two layouts, with exchanged source and destination offsets.
+The early word and halfword remain separate typed operations. In the
+middle group the actual footer word is loaded and stored, then the actual
+footer halfword is loaded and stored. The two same-register lifetimes are
+disjoint; no temporary lives across another write to that register and no
+empty operand is required. The real destination stays in its native
+incoming register.
 
-Every instruction matches. The whole function is twelve copies between the two
-pointers, and both big ones are 576-byte block moves that ee-gcc expands with a
-runtime alignment test, `or` of the two pointers against 7, then an unaligned
-`ldl`/`ldr` loop and an aligned `ld`/`sd` loop. That shape, the twelve copies,
-their order, the two 36-byte and one 32-byte straight-line `ldl`/`ldr` blocks,
-the loop bounds and the branch delay slots all reproduce from
+The 36-, 32- and 576-byte blocks retain their existing halfword-aligned
+representations. The compiler emits the native block-copy alignment check
+and loop paths; no alignment assumption, restrict qualifier, replacement
+copy procedure, or artificial read is added. Each individual block copy
+requires valid readable and writable storage at its native offsets and
+cannot be assumed to support partial input/output overlap. No claim is made
+about arbitrary overlap or about the original source spelling.
 
-    *(s32 *)(dst + 0x00) = *(s32 *)(src + 0x10);
-    *(u16 *)(dst + 0x04) = *(u16 *)(src + 0x14);
-    *(cmbCopy36_t *)(dst + 0x06) = *(cmbCopy36_t *)(src + 0x16);
-    ...
-
-with `cmbCopy36_t`, `cmbCopy32_t` and `cmbCopy576_t` as all-`s16` structs, whose
-alignment of 2 is what selects the unaligned path.
-
-What is left is one register pair and the scheduling it drags with it. Retail
-reuses the incoming `$4` for the first loaded word and for the second chunk of
-the 36-byte block, and keeps `$3` for the alignment test; this uses `$3` for the
-loaded word and `$4` for the test. Retail also emits the test's `andi`
-immediately after its `or`, nine words in, where this emits it after the
-36-byte block, 37 words in. The second group of copies allocates and schedules
-identically in both.
-
-Ruled out: statement order, searched over the twelve copies including every
-swap of the two scalar pairs and moving the block copies ahead of them, which
-plateaus at 35 or loses 100 words; `s32` against `u32` for the 4-byte copies;
-`u8 *`, `s8 *` and `void *` parameters; explicit `u8 *` locals for the big
-copy's two pointers; and the first six bytes as a single block move, which
-ee-gcc compiles with `lh` rather than retail's `lhu` whether the alignment
-comes from the type or from an `aligned(4)` field, so it cannot be one.
+Earlier drafts swapped the initial transfer and alignment-test register
+homes. Folding their data into one aggregate changed the native halfword
+load, and forcing a tied destination operand disturbed scheduling. The
+current source preserves the transfer widths and all existing owner bytes.
 
 ## cmbDrawFullScreenPanel (fclCombineInit, 0x68)
 
