@@ -6451,57 +6451,92 @@ void cmpDrawStatusBars(s32 x, s32 y, u8 *alpha)
     fclDrawSpriteRes(x << 4, y << 3, 0, colors, 1, 11, D_00345D88, fclSpriteTable, 0x47);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* EE drawing coordinates keep the low 32 bits. The signed count is read
+ * after the grid and again after each row's drawing callbacks. */
 void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
                          s32 mode, s8 *count)
 {
     s32 row;
     s32 col;
-    s32 i;
+    FAKEMATCH_ASM_REG(s32, i, "$16");
+    FAKEMATCH_ASM_REG(u32, alpha, "$6") = 0x80;
 
     if ((unit->flag & 4) != 0 && DDS3_GBWK->equipHearts == 0) {
-        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xC,
+        fclDrawSpriteRes((s32)((u32)x * 16u), (s32)((u32)y * 8u + 4u), 0, colors, 1, 0xC,
                          D_00345D88, fclSpriteTable, 0x47);
-        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xD,
+        fclDrawSpriteRes((s32)((u32)x * 16u), (s32)((u32)y * 8u + 4u), 0, colors, 1, 0xD,
                          D_00345D88, fclSpriteTable, 0x47);
-        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xE,
+        fclDrawSpriteRes((s32)((u32)x * 16u), (s32)((u32)y * 8u + 4u), 0, colors, 1, 0xE,
                          D_00345D88, fclSpriteTable, 0x47);
-        fclDrawSpriteRes(x * 16, y * 8 + 4, 0, colors, 1, 0xF,
+        fclDrawSpriteRes((s32)((u32)x * 16u), (s32)((u32)y * 8u + 4u), 0, colors, 1, 0xF,
                          D_00345D88, fclSpriteTable, 0x47);
     } else {
-        s32 alpha = colors != NULL ? *(u8 *)colors : 0x80;
-        cmpDrawBoxF(x * 16, (y + 0x136) * 8, 0, 0x200, 0x61,
-                    alpha * 13 / 64, 0x47);
+        s32 boxY;
+        u32 numerator;
+        if (colors != NULL) alpha = *(u8 *)colors;
+        boxY = (s32)((u32)y + 0x136u);
+        FAKEMATCH_ASM_LIVE(boxY);
+        boxY = (s32)((u32)boxY << 3);
+        numerator = alpha * 13;
+        FAKEMATCH_ASM_LIVE(boxY);
+        FAKEMATCH_ASM_LIVE(numerator);
+        alpha = 0;
+        FAKEMATCH_ASM_LIVE(alpha);
+        cmpDrawBoxF((s32)((u32)x * 16u), boxY, alpha, 0x200, 0x61,
+                    numerator / 64, 0x47);
     }
     for (row = 0; row < 4; row++) {
+        FAKEMATCH_ASM_REG(s32, curY, "$19") = (s32)((u32)y + (u32)row * 0x16u);
         s32 sprite = row < 3 ? 1 : 2;
+        /* Keep this row Y as the same live value through grid setup.
+         * An input-only constraint leaves the two sprite constants transposed. */
+        FAKEMATCH_ASM_LIVE(curY);
         for (col = 0; col < 2; col++) {
-            fclDrawSpriteRes(x * 16 + col * 0x740, (y + row * 0x16) * 8,
-                             0, colors, 5, sprite, D_00345D88, fclSpriteTable, 0x47);
+            s32 drawId = sprite;
+            FAKEMATCH_ASM_LIVE(drawId);
+            fclDrawSpriteRes((s32)((u32)x * 16u + (u32)col * 0x740u), (s32)((u32)curY * 8u),
+                             0, colors, 5, (u16)drawId, D_00345D88, fclSpriteTable, 0x47);
         }
     }
-    for (i = 0; i < *count; i++) {
-        s32 column = i / 4;
-        s32 line = i % 4;
-        s32 xOffset = column * 116;
-        s32 yOffset = line * 22;
+    i = 0;
+    if (*count > 0) {
+        s32 rowOrder = 0x47;
+        FAKEMATCH_ASM_REG(s32, panelMode, "$17") = 4;
+        do {
+            FAKEMATCH_ASM_REG(s32, biased, "$3") = i + 3;
+            FAKEMATCH_ASM_REG(s32, column, "$4");
+            s32 xOffset;
+            FAKEMATCH_ASM_REG(s32, multiple, "$5");
+            s32 line;
 
-        fclDrawSpriteRes((x + xOffset) * 16, (y + yOffset) * 8, 0, colors,
-                         5, 3, D_00345D88, fclSpriteTable, 0x47);
-        if (mode == 4) {
-            fclDrawPanelSprite2(0x48, 0x47);
-            cmpDrawBoxF((xOffset + 0x101) * 16, (yOffset + 0x13C) * 8,
-                        0, 0x71, 0x12, 0x171580, 0x47);
-            fclDrawPanelSprite2(0x44, 0x47);
-        }
+            if (i >= 0) column = i;
+            else column = biased;
+            column >>= 2;
+            multiple = column * 4;
+            line = i - multiple;
+            xOffset = column * 116;
+            row = line * 22;
+
+            fclDrawSpriteRes((s32)(((u32)x + (u32)xOffset) * 16u), (s32)(((u32)y + (u32)row) * 8u), 0, colors,
+                             5, 3, D_00345D88, fclSpriteTable, rowOrder);
+            if (mode == panelMode) {
+                s32 boxX;
+                s32 boxY;
+                fclDrawPanelSprite2(0x48, 0x47);
+                boxX = xOffset + 0x101;
+                boxY = row + 0x13C;
+                cmpDrawBoxF((s32)((u32)boxX << 4), (s32)((u32)boxY << 3),
+                            0, 0x71, 0x12, 0x171580, 0x47);
+                fclDrawPanelSprite2(0x44, 0x47);
+            }
+            i++;
+            {
+                FAKEMATCH_ASM_REG(s32, more, "$2") = i < *count;
+                if (!more) break;
+            }
+        } while (1);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillRowText);
-#endif
 
 extern volatile s32 cmpStatusAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 

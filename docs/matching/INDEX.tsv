@@ -61,6 +61,7 @@ cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0
 campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1935
 cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1969
 cmpDrawSkillListRow	code_0022C578	0x230		docs/matching/code_0022C578.md	2013
+cmpDrawSkillRowText (0x314)				docs/matching/code_0022C578.md	2030
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
