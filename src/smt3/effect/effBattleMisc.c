@@ -378,12 +378,12 @@ f32 effBTLModelGroupGetSphere2(u32 group) {
     return effBTLModelGroupGetSphereExp(group, 1);
 }
 
-/* NON_MATCHING: 6 of 156 words differ in the final midpoint calculation. */
-#ifdef NON_MATCHING
 f32 effBTLModelGroupGetSphereExp(u32 group, u32 model) {
     nbFormation_t *form;
     sdfVector4_t center;
-    f32 radiusMax, maxX, minX, maxZ, minZ, maxHeight;
+    f32 radiusMax, maxX, minX, minZ, maxHeight;
+    /* Keep the live Z maximum in the native callee-saved register. */
+    FAKEMATCH_ASM_REG(f32, maxZ, "$f21");
     s32 first = 1;
     s32 i;
     /* Per-model radius, then the combined group radius after the scan. */
@@ -448,14 +448,18 @@ f32 effBTLModelGroupGetSphereExp(u32 group, u32 model) {
     {
         f32 xExtent, zExtent, heightExtent;
         f32 padding;
+        /* Reuse the native scalar for the X interval and then the Z sum. */
+        FAKEMATCH_ASM_REG(f32, span, "$f1");
 
-        center.w = 0.0f;
-        xExtent = (maxX - minX) * 0.5f;
+        span = maxX - minX;
+        xExtent = span * 0.5f;
         zExtent = (maxZ - minZ) * 0.5f;
-        heightExtent = maxHeight * 0.5f;
-        center.z = (maxZ + minZ) * 0.5f;
+        center.w = 0.0f;
         center.x = (maxX + minX) * 0.5f;
         center.y = -maxHeight * 0.5f;
+        heightExtent = maxHeight * 0.5f;
+        span = maxZ + minZ;
+        center.z = span * 0.5f;
         if (zExtent < xExtent) {
             radius = heightExtent < xExtent ? xExtent : heightExtent;
         } else {
@@ -467,9 +471,6 @@ f32 effBTLModelGroupGetSphereExp(u32 group, u32 model) {
         return radius;
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetSphereExp);
-#endif
 
 /* Returns world-space radius in f0 and the selected midpoint in vf10. */
 #ifdef NON_MATCHING

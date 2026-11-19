@@ -1413,3 +1413,4 @@ src/smt3/effect/effPCPBoss.c	KiB-ongy-20261119	done	2026-11-19	1 fn / 1432 B	ONG
 src/smt3/code_0029B780.c	KiB-config-text-20261119	done	2026-11-19	0 fn / 0 B	dds3DrawConfigText exact 145/145 at 580 B; real order-table, row and cursor handoff, independently checked callback and signed-depth semantics; complete owner 26/0
 src/smt3/effect/effPCPBoss.c	KiB-bingo-20261119	done	2026-11-19	1 matched / 880 B	effPCPDANTE_ShowTime_Bingo_Draw exact 220/220, signed live frame phases and real glow-age constraint; complete owner 165/0
 src/smt3/event/evtEventViewer.c	KiB-enter-data-20261119	done	2026-11-19	1 matched / 888 B	EnterData exact 222/222, truthful frame, viewer, ambient and packed provider records; complete owner 57/0; EnterFrameList untouched
+src/smt3/effect/effBattleMisc.c	KiB-sphere-exp-20261119	done	2026-11-19	1 matched / 624 B	effBTLModelGroupGetSphereExp exact 156/156, live maximum-Z and shared X-span/Z-sum; complete owner 80/0

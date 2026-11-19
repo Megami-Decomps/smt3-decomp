@@ -68,9 +68,9 @@ dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/co
 dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	188
 dds3BillboardManagerInit	effect/billManager	0xB8	46 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
-effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270	6 of 156 words differ	docs/matching/effect/effBattleMisc.md	3
-effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	39
-effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	142 of 146 words match	docs/matching/effect/effBattleMisc.md	70
+effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270		docs/matching/effect/effBattleMisc.md	3
+effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	40
+effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	142 of 146 words match	docs/matching/effect/effBattleMisc.md	71
 effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/matching/effect/effBattleSystem.md	3
 func_00174DC0 and eff_174E88	effect/effBattleSystem	0xC8 and 0x1A4		docs/matching/effect/effBattleSystem.md	58
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
