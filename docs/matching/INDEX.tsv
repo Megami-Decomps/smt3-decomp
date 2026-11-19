@@ -304,17 +304,17 @@ nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	1 of 18 words differ	docs/m
 nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C	2 of 11 words differ	docs/matching/newbattle/nbMakePacket.md	99
 Flow5_6, Flow5_18	newbattle/nbMakePacket	0xD8 each	23 of 52 words match	docs/matching/newbattle/nbMakePacket.md	128
 Flow6_37	newbattle/NbNegoFlowTwo	0x10C	67 of 67 words match	docs/matching/newbattle/nbMakePacket.md	165
-Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/matching/newbattle/nbMakePacket.md	205
-Flow7_20	newbattle/NbNegoFlowQuestion	0x130	76 of 76 words match	docs/matching/newbattle/nbMakePacket.md	227
-Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbattle/nbMakePacket.md	233
-Flow9_16	newbattle/NbNegoFlowOk	0x168	90 of 90 words match	docs/matching/newbattle/nbMakePacket.md	254
-Flow6_65	newbattle/NbNegoFlowTwo	0x190	100 of 100 words now match	docs/matching/newbattle/nbMakePacket.md	308
-nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	317
-ChkCost	newbattle/nbAi	0xC8	50 of 50 words match	docs/matching/newbattle/nbMakePacket.md	335
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	364
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	392
-nbMakeKaifukuPacket	newbattle/nbMakePacket	0x1E8	122 of 122 words match	docs/matching/newbattle/nbMakePacket.md	449
-nbMakeDeadVisualPacket, nbMakeDamagePacket	newbattle/nbMakePacket	0x2E8 / 0x410	446 of 446 words match	docs/matching/newbattle/nbMakePacket.md	494
+Flow6_43	newbattle/NbNegoFlowTwo	0x10C	67 of 67 words match	docs/matching/newbattle/nbMakePacket.md	205
+Flow7_20	newbattle/NbNegoFlowQuestion	0x130	76 of 76 words match	docs/matching/newbattle/nbMakePacket.md	219
+Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/matching/newbattle/nbMakePacket.md	225
+Flow9_16	newbattle/NbNegoFlowOk	0x168	90 of 90 words match	docs/matching/newbattle/nbMakePacket.md	246
+Flow6_65	newbattle/NbNegoFlowTwo	0x190	100 of 100 words now match	docs/matching/newbattle/nbMakePacket.md	300
+nbCollectBadCurseUnits	newbattle/nbEncProcess	0xA4	23 of 41 words match	docs/matching/newbattle/nbMakePacket.md	309
+ChkCost	newbattle/nbAi	0xC8	50 of 50 words match	docs/matching/newbattle/nbMakePacket.md	327
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/matching/newbattle/nbMakePacket.md	356
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/matching/newbattle/nbMakePacket.md	384
+nbMakeKaifukuPacket	newbattle/nbMakePacket	0x1E8	122 of 122 words match	docs/matching/newbattle/nbMakePacket.md	441
+nbMakeDeadVisualPacket, nbMakeDamagePacket	newbattle/nbMakePacket	0x2E8 / 0x410	446 of 446 words match	docs/matching/newbattle/nbMakePacket.md	486
 nbDrawRotatedModelX	newbattle/nbMisc	404 bytes	101 of 101 words match	docs/matching/newbattle/nbMisc.md	3
 nbDrawRotatedModel	newbattle/nbMisc	508 bytes	127 of 127 words match	docs/matching/newbattle/nbMisc.md	29
 Combined rotated-model literal ownership				docs/matching/newbattle/nbMisc.md	57

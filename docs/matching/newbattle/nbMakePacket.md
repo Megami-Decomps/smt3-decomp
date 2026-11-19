@@ -202,27 +202,19 @@ Strict implicit-declaration checking still fails on the unchanged unrelated
 strict-warning-clean claim is made. Full retail checksum, byte comparison,
 repository regressions and fresh guarded-owner checks pass.
 
-## Flow6_43 (newbattle/nbMakePacket, 0x10C)
+## Flow6_43 (newbattle/NbNegoFlowTwo, 0x10C)
 
-45 of 68 words match, one word over retail's 268.
+67 of 67 words match at the native 268-byte size.
 
-The two-case `switch` on `nownegophase`, both `nbDispNegoMessage` message
-numbers (`0x4E`, `0x61`, `0x62`), the two `nbAddNegoIdKouho` ids and the
-`n->data->enemypcnt == 1 && n->cnt6_36 >= 4 && (u32)dds3GetRandIntA(0, 0xA) < 6`
-chain are all confirmed, as is the `enemypcnt` test reusing the phase
-register that `case 1` already knows holds 1.
+The case-one checks each acquire the current message index before entering the
+selected tail. The phase value is reused for the enemy-count check, since case
+one has established its value. The candidates, random draw conditions, message
+IDs, and next negotiation selection preserve the retail order and values.
 
-The extra word is the `flowmsg[ekucyo]` load in the `0x62` arm. Retail emits
-that load three times, twice annulled into the two `bnel` delay slots and once
-in the plain `beqz`'s slot, and the `0x62` block then reads `$2` straight from
-whichever predecessor's slot set it; ee-gcc keeps all three slot copies and
-re-emits the load at the top of the block as well. That is the delay-slot
-filler's redundant-insn elimination, not a source shape, and it shifts every
-branch offset after it.
-
-Ruled out: nested `if`s in place of the `&&` chain (identical), and the two
-`nbDispNegoMessage` calls shared through a `mes` local, which hoists the
-argument setup above the test.
+The fallback uses a localized binding and read constraint for its actual owner
+argument, keeping it ready before the message lookup. The message ID is an
+ordinary scalar. This retains the retail fallback block without reloading the
+selected index.
 
 ## Flow7_20 (newbattle/NbNegoFlowQuestion, 0x130)
 

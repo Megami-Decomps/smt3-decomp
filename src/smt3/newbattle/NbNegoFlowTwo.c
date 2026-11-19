@@ -1438,35 +1438,50 @@ s32 Flow6_42(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 23 of 68 words differ (first at +0x28). */
-#ifdef NON_MATCHING
 s32 Flow6_43(nbNegoProcessData_t *n)
 {
-    switch (n->nownegophase) {
+    s32 index;
+    s32 phase = n->nownegophase;
+
+    switch (phase) {
     case 0:
         nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x4E, 0);
         break;
     case 1:
         nbAddNegoIdKouho(n, 0x6002C);
         nbAddNegoIdKouho(n, 0x90001);
-        if (n->data->enemypcnt == 1) {
-            if (n->cnt6_36 >= 4) {
-                if ((u32)dds3GetRandIntA(0, 0xA) < 6) {
-                    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x61, 0);
-                    n->nextnegoid = n->nextkouho[1];
-                    break;
-                }
-            }
+        if (n->data->enemypcnt != phase) {
+            index = n->ekucyo;
+            goto failed;
         }
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x62, 0);
+        if (n->cnt6_36 < 4) {
+            index = n->ekucyo;
+            goto failed;
+        }
+        if ((u32)dds3GetRandIntA(0, 0xA) < 6) {
+            index = n->ekucyo;
+            goto success;
+        }
+        index = n->ekucyo;
+        goto failed;
+    success:
+        nbDispNegoMessage(n, n->flowmsg[index], 0x61, 0);
+        n->nextnegoid = n->nextkouho[1];
+        break;
+    failed:
+        {
+            FAKEMATCH_ASM_REG(nbNegoProcessData_t *, owner, "$4") = n;
+            s32 message = 0x62;
+
+            /* Keep the real fallback owner ready before indexing its message. */
+            FAKEMATCH_ASM_READ(owner);
+            nbDispNegoMessage(owner, n->flowmsg[index], message, 0);
+        }
         n->nextnegoid = n->nextkouho[0];
         break;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_43);
-#endif
 
 s32 Flow6_44(nbNegoProcessData_t *n)
 {
