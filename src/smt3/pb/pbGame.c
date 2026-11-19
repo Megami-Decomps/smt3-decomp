@@ -1135,8 +1135,6 @@ s32 moveBlock(dds3ProcessID_t *id) {
     return 0;
 }
 
-/* NON_MATCHING: native-sized loop; residual allocation and scheduling differ. */
-#ifdef NON_MATCHING
 void deleteMoveBlock(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
@@ -1151,25 +1149,51 @@ void deleteMoveBlock(dds3ProcessID_t *id) {
         }
     } else {
         pbGroupData_t *block;
+        pbGroupData_t *loopBlock;
         u32 i;
         dds3SetQuake(0x1E, 0x50);
         pbPushRecord(record);
         block = work->block;
         i = 0;
+        loopBlock = block;
         if (block->num != 0) {
             pbMapArea_t *a = &pbMapWork->area;
-            pbGroupData_t *loopBlock = block;
+            u32 byteOffset = 0;
             do {
-                s16 y, x;
-                /* Keep the real group pointer local to this loop consumer.
-                 * This empty target constraint restores the native per-pass
-                 * blk reload; block remains the final group-ID consumer. */
-                FAKEMATCH_ASM_LIVE(loopBlock);
-                y = loopBlock->cellY + (loopBlock->blk + i)->y;
-                x = loopBlock->cellX + (loopBlock->blk + i)->x;
-                a->map.blk[y][x] &= 0xF7FF;
+                /* size_t carries the EE address and byte stride without changing
+                 * the entry type or its real halfword loads. */
+                size_t blockAddress = (size_t)loopBlock->blk;
+                pbBlockEntry_t *entry = (void *)(byteOffset + blockAddress);
+                s32 y;
+                s32 x;
+                u32 nblock;
+                FAKEMATCH_ASM_REG(u32, baseY, "$2");
+                u32 offY;
+                FAKEMATCH_ASM_REG(u32, baseX, "$3");
+                u32 offX;
+                s32 cellOffset;
+                size_t displacement;
                 i++;
-            } while (i < loopBlock->num);
+                baseY = (u16)loopBlock->cellY;
+                offY = (u16)entry->y;
+                /* Retain the entry Y offset and group X origin at their
+                 * native read phases, before forming the signed coordinates. */
+                FAKEMATCH_ASM_READ(offY);
+                baseX = (u16)loopBlock->cellX;
+                FAKEMATCH_ASM_READ(baseX);
+                y = (s16)(baseY + offY);
+                offX = (u16)entry->x;
+                x = (s16)(baseX + offX);
+                cellOffset = 20 * y + x;
+                /* Flag halfwords follow the area header at byte offset 0x10. */
+                displacement = 2 * cellOffset + (s32)sizeof(a->unk00);
+                *(u16 *)((size_t)a + displacement) &= 0xF7FF;
+                /* Preserve actual carried offset until the old entry was consumed. */
+                FAKEMATCH_ASM_LIVE_PAIR(loopBlock, byteOffset);
+                byteOffset += sizeof(*entry);
+                nblock = loopBlock->num;
+                if (i >= nblock) break;
+            } while (1);
         }
         pbDeleteGroupEntry(blockDB, block->grpID);
         moveB = NULL;
@@ -1177,9 +1201,6 @@ void deleteMoveBlock(dds3ProcessID_t *id) {
     sdfChipFreeDelayedDirect(work);
     sdfChipFreeDelayedDirect(panel);
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveBlock);
-#endif
 
 void rotXY(s16 *x, s16 *y, s32 dir) {
     s16 ox = *x;

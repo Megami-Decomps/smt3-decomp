@@ -385,3 +385,19 @@ condition chose the successor load instead of the offset increment. The latter
 is the next useful diagnostic; the evidence does not justify another blind
 constraint-placement sweep. The guarded source is unchanged and receives no
 new matching credit.
+
+## deleteMoveBlock (0x144)
+
+All 81 retail words match. Normal moves clear the group state, set the
+direction, and check the destination before starting the next move or
+recording the result. Mode four records the quake and reloads the group
+after the callbacks. It visits each block entry and clears bit 0x800 in
+the addressed map halfword, then removes the group and frees both work
+objects in retail order.
+
+The two coordinate sums narrow to signed halfwords before calculating
+the cell offset in the 20-wide map. The loop reloads the entry base and
+count, and advances by the native 0x90-byte descriptor size. The actual
+Y offset, X origin and carried entry offset use local operands to retain
+that read order, without volatile memory, new reads, or ABI changes.
+Complete owner: 70 matches, zero differences.

@@ -382,6 +382,7 @@ roundDirCheck	pbGame	0x2B4	173 of 173 words match	docs/matching/pb/pbGame.md	135
 pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/pb/pbGame.md	170
 viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	216
 moveBlock	pb/pbGame	0x8C	31 of 35 words match	docs/matching/pb/pbGame.md	273
+deleteMoveBlock (0x144)				docs/matching/pb/pbGame.md	389
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
