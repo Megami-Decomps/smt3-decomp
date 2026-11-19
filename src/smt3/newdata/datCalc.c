@@ -1483,19 +1483,29 @@ void datEquipHearts(s32 HeartsID)
     }
 }
 
-#ifdef NON_MATCHING
-void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill)
+void datSetAutoKaifukuSkill(datUnitWork_t *funcWork, s32 skill)
 {
     s32 hp = 0;
     s32 mp = 0;
+    FAKEMATCH_ASM_REG(datUnitWork_t *, work, "s0") = funcWork;
     s16 n;
     s16 m;
 
     if (datCheckSyojiSkill(work, skill) == 0) {
         return;
     }
-    n = datSkillTable.special[skill - 288].n;
-    m = datSkillTable.special[skill - 288].m;
+    {
+        const datSpecialSkill_t *table = &datSkillTable.special[0];
+        u32 offset = ((u32)skill << 3) - 0x900;
+        const datSpecialSkill_t *row;
+        const s16 *np;
+        const s16 *mp;
+        row = (const datSpecialSkill_t *)((addr_t)table + offset);
+        np = &row->n;
+        mp = (const s16 *)((addr_t)&table->m + offset);
+        n = *np;
+        m = *mp;
+    }
     switch (skill) {
     case 0x15C:
         if (n > 0) {
@@ -1525,9 +1535,6 @@ void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill)
         datAddMp(work, mp);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newdata/datCalc", datSetAutoKaifukuSkill);
-#endif
 
 void datFieldSkillKaifuku(void)
 {

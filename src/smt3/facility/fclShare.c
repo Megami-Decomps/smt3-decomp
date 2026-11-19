@@ -144,10 +144,9 @@ void func_002146F8(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
 }
 
 /* NON_MATCHING: 104 of 180 words differ (first at +0x20). */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+/* Behaviour also checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * menu main savestate, covering only the paths those calls took.
  * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern void fclDrawPanelSprite2(s32 id, s32 arg);
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
@@ -172,40 +171,72 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     u32 y1;
     u32 t;
     u32 c;
+    u32 wide;
+    u32 tall;
+    FAKEMATCH_ASM_REG(u32, uMin, "$5");
+    FAKEMATCH_ASM_REG(u32, vMin, "$3");
+    FAKEMATCH_ASM_REG(u32, uMax, "$2");
+    FAKEMATCH_ASM_REG(u32, vMax, "$4");
+    u8 flip = FlipFlag;
 
     if (FilterFlag == 0) {
-        sdfTexSetFilter(pSprite->tex, 0, 1);
+        sdfTexSetFilter(EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 0, 1);
     } else {
-        sdfTexSetFilter(pSprite->tex, 1, 1);
+        sdfTexSetFilter(EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 1, 1);
     }
     packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1)));
     sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x43431, 1);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
-    uv[0] = pSprite->unk_08 + 8;
-    uv[1] = pSprite->unk_0A + 8;
-    uv[2] = pSprite->unk_0C + 8;
-    uv[3] = pSprite->unk_0E + 8;
-    x0 = X + 0x6FF8;
-    y0 = Y + 0x78FC;
-    x1 = x0 + (W << 4);
-    y1 = y0 + (H << 3);
-    if ((FlipFlag & 1) != 0) {
+    {
+        /* Snapshot the four actual UV fields via their halfword addresses. */
+        const u16 *leftU = &pSprite->u0;
+        const u16 *leftV = &pSprite->v0;
+        const u16 *rightU = &pSprite->u1;
+        const u16 *rightV = &pSprite->v1;
+        x0 = (u32)X + 0x6FF8;
+        uMin = *leftU;
+        vMin = *leftV;
+        uMax = *rightU;
+        vMax = *rightV;
+        y0 = (u32)Y + 0x78FC;
+        wide = (u32)W << 4;
+        tall = (u32)H << 3;
+        uv[0] = uMin + 8;
+        uv[2] = uMax + 8;
+        uv[1] = vMin + 8;
+        uv[3] = vMax + 8;
+        x1 = x0 + wide;
+        y1 = y0 + tall;
+    }
+    if ((flip & 1) != 0) {
         t = x0;
         x0 = x1;
         x1 = t;
     }
-    if ((FlipFlag & 2) != 0) {
-        t = y0;
-        y0 = y1;
-        y1 = t;
+    {
+        FAKEMATCH_ASM_REG(s32, yFlip, "$2") = flip & 2;
+        if (yFlip != 0) {
+            t = y0;
+            y0 = y1;
+            y1 = t;
+        }
     }
     if (pCol == NULL) {
         prim[0] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
         prim[1] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
     } else {
-        c = *(u32 *)pCol;
-        prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
-        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        u32 alpha;
+        u32 red;
+        u32 green;
+        u32 blue;
+        c = (u32)*pCol;
+        /* Native loads the actual low byte separately from the packed word. */
+        alpha = *(const u8 *)pCol;
+        red = (c >> 24) & 0xFF;
+        green = (c >> 16) & 0xFF;
+        blue = (c >> 8) & 0xFF;
+        prim[0] = (u64)red | ((u64)green << 32);
+        prim[1] = (u64)blue | ((u64)alpha << 32);
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = x0 | ((u64)y0 << 32);
@@ -226,15 +257,12 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     }
     tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, pSprite->tex, 0);
+    sdf2DLinkTexPacket(tag, EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 0);
     sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteCore);
-#endif
 
 extern f32 sdfSin(f32 aRadius);
 

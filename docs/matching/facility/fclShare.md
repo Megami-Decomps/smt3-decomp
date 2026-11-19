@@ -66,60 +66,24 @@ and input contracts are not newly qualified by this local lane proof.
 
 ## fclDrawSpriteCore (fclShare, 728 bytes)
 
-The exact native extent is `[0x214730, 0x214A08)`, 728 bytes. A fresh
-target-active compile emits 720 bytes: 76 of 180 positional words agree,
-104 differ, and eight native bytes remain uncovered. The two depth casts
-described below leave that positional score and size unchanged. This is a
-guarded-draft correctness repair, not an exact match or new matching credit.
+All 182 native words match. Four genuine unsigned halfword UV fields are
+read through their typed member addresses after packet setup. The widened
+values feed the real UV array, without a redundant mask on the selected
+endpoint. Coordinates and dimensions use unsigned intermediates for the
+native wrapping 32-bit arithmetic. The ordinary narrow flip flag drives
+the two coordinate swaps.
 
-### Zero-extended depth packet field
+The optional override uses both the packed color word and the native
+separate low-byte access. A null override loads the four per-sprite
+channels instead. The signed depth field still converts through u32, so
+the two native 64-bit depth stores have zero high halves even for negative
+sprite depths. Packet and draw-tag allocations, alpha panel sprites, and
+texture registration preserve native callbacks and layout.
 
-`fclSprite_t.Z` remains signed, as do its setters. Native `lwu` at `0x2148F4`
-zero-extends the 32-bit field at sprite offset `0x18`; that value feeds the
-64-bit stores at primitive offsets `0x48` and `0x28`. The old C assigned the
-signed field directly to `u64`, producing all-one upper bits for negative
-values. Both assignments now cast the actual field to `u32` before the ordinary
-conversion to `u64`. Thus depth `-1` produces `0x00000000FFFFFFFF`, not
-`0xFFFFFFFFFFFFFFFF`, and every 32-bit depth pattern has the native zero upper
-half. No nonnegative-depth assumption, type/layout change or extra access is
-introduced.
-
-Independent complete-owner comparisons cover normal production, assembly
-skipping, all retained drafts with and without assembly, and target-only
-activation with and without assembly. Each context compiling the target C
-changes exactly its depth load at target offset `0x1C0` from `lw` to `lwu`.
-Both stores and every other text byte, allocated data, function/data symbol and ordered
-relocation remain identical. Normal production retains the assembly fallback;
-assembly-skipping output still omits the guarded target C. Both are unchanged. The native
-listing and full-depth packing proof support this local repair; they do not
-establish whole-function equivalence or valid arbitrary geometry, storage or
-allocator capacity.
-
-### Remaining allocation and source-shape questions
-
-Retail places the actual incoming X in `$19` and FlipFlag in `$20`; the
-current target C swaps those homes. The real X value survives five leaf
-provider calls before its first coordinate calculation, and each native
-provider preserves those saved registers. No X binding is included in this
-repair. The swap is a demonstrated allocation difference, not proof that it
-causes every residual: UV scheduling, color-byte folding and the eight-byte
-size deficit remain distinct observations. The earlier claim that the entire
-body was settled except for this swap was too strong.
-
-Keep the genuine addressable `u32 uv[4]`, whose stack stores and unsigned
-reloads are visible in native code, and the actual two-argument
-`sdf2DGetPrimPacketSize(5, 1)` contract. The canonical allocator, packet-header,
-texture and draw-tag provider signatures were checked; no declaration changes
-are part of this repair.
-
-Earlier closed controls include all six UV/screen/color block orders; three
-local-declaration orders; signed versus unsigned corner locals with casts at
-the stores; conditional-arm versus temporary swaps; repeated X-plus-offset
-calculation; a separate byte flag local before or after UV setup; explicit
-nonzero versus direct flag tests; and hoisting the order-table pointer. Their
-old scores describe their historical compiler contexts, not fresh acceptance.
-Do not repeat that grid or infer original source spelling from a positional
-score. Any later live-X constraint must be isolated and independently qualified.
+Earlier drafts were guarded while the UV loads, primitive-pointer copy,
+and width/height setup differed. The complete matched owner still uses
+the genuine addressable UV array and the two-argument packet-size
+provider. This C shape is not a claim about original source spelling.
 
 ## fclDrawPhaseValue (facility/fclShare, 380 bytes)
 

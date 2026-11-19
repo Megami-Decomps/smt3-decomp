@@ -76,6 +76,29 @@ earlier signed-offset cleanup. Diagnostic flags are not production settings.
 These observations locate the unresolved argument/lifetime boundary, not an
 instrumented allocator decision or proof of original source spelling.
 
+### Shared-tail allocation frontier
+
+A separate ordinary shared-tail diagnostic initializes a signed bonus to zero,
+conditionally replaces it with `cmbGetHeartsParam`, then subtracts it from the
+captured parameter. Its shared subtraction exists in initial RTL and survives
+combine and if-conversion; the latter converts no blocks. This differs from
+the retained early-return draft, whose zero-hearts path already bypasses the
+subtraction in initial RTL.
+
+The shared-tail diagnostic's extra post-call copy is present before scheduling
+and survives allocation. Local allocation assigns the global-work base and
+parameter address to `$2`; global allocation reports a `$2` conflict for the
+bonus and assigns it to `$6`. The zero initialization is live before the base's
+last use, so simply coalescing the bonus with the call return cannot remove the
+copy in that allocation. This identifies a lifetime/allocation frontier, not
+an if-conversion failure or proof of the allocator's original historical choice.
+The diagnostic remains nine matching words at 80 bytes and is not retained.
+
+Complete-owner assembly and raw-object equality between plain and `-da` builds
+passes in production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` contexts.
+These six successful compiles qualify the observations, not a new exact match
+or a semantic approval of unrelated drafts. The retained target stays 13/20.
+
 ## datGetSkillKouka (newdata/datCalc, 0x3F8)
 
 254 of 254 words match in `9b5853f0` (1016 bytes). The earlier private
@@ -229,69 +252,21 @@ These are checks of this source, not reuse of historical guarded-source gates.
 
 ## datSetAutoKaifukuSkill (newdata/datCalc, 0x140)
 
-61 of 80 words match at the native 320-byte extent; the draft remains guarded.
+All 80 native words match at 320 bytes. A real typed base for the special
+skill table precedes the unsigned slot offset; the two views resolve to
+the actual signed halfwords at offsets zero and two within the selected
+record. Both loads precede case selection. The function still checks skill
+ownership first and dispatches HP-only, MP-only, and dual recovery as before.
+The real unit-work pointer stays in a callee-saved register across its
+calls. No empty asm operand is required.
 
-The retained `NON_MATCHING` draft puts the genuine dual HP/MP recovery arm
-(0x15C) first, matching the native block layout, ahead of HP-only (0x15A/0x15D)
-and MP-only (0x15B/0x15E). Both divisor guards, independent initialized outputs,
-pre-switch signed table observations and shared HP-then-MP call tail are unchanged.
-This is an ordinary source reconstruction, not evidence of original spelling.
+Only positive signed divisors are used. The unsigned HP and MP maxima and
+both positive results are sampled or calculated before recovery calls; HP
+is applied before MP. Callbacks may change the work or table afterward
+without changing the already calculated MP amount. Valid successful indices
+remain 288 through 382. Known callers use 346 through 350.
 
-On the 2026-11-03 owner, activating only this target improves from 42/80 to
-61/80 matching words at the exact 320-byte extent. All 79 existing exact code
-peers remain exact. The five target jump-table destinations now match; the
-complete 24-byte table-plus-zero region, all 231 emitted owner rodata bytes,
-the final one-byte native alignment pad and all 60 owned literal bytes are
-qualified against retail. The extra native MFLO reads arise naturally, without
-dummy operations. Saved work/skill register allocation, table addressing/load
-schedule and the final MP branch still differ. The fallback remains assembly;
-this change receives no exact matching credit.
-
-An ordinary explicit typed special-table base and a paired empty operand
-constraint on that real initialized pointer were negative controls. Both
-shortened the function to 312 bytes and disturbed table destinations. Neither
-is retained; no register or arbitrary case-order sweep was used.
-
-For defined C accesses, successful skill ownership must still be accompanied
-by a valid special-table index (288 through 382), a valid work object and
-bounded skill inventory/devil indices. Identified field/battle callers use
-346 through 350; this is not a claim of global writer or arbitrary-call closure.
-The ownership check does not itself prove the index bounds. Both signed 16-bit
-parameters are read before switch gating, including unrecognized but owned
-special skills. Positive denominator guards and unsigned 16-bit maxima make every
-reached quotient defined and every positive HP/MP addition fit signed 32-bit.
-Truthful existing s32 provider returns and native call ordering are preserved.
-
-Complete-owner ordinary and unhooked diagnostic dump outputs agree in normalized
-assembly, allocated sections, symbol contracts and ordered relocations. This
-is pass-snapshot/output-parity evidence, not a GDB or hooked-decision claim.
-Production, SKIP_ASM and NON_MATCHING/SKIP_ASM strict-declaration modes compile,
-and each has full plain/dump parity; the guarded change has identical production
-and SKIP_ASM output to the starting owner. The inherited memset built-in declaration warning remains; no warning-clean
-claim is made. Final integrated owner 79/0, target-only 61/80, all three strict-mode
-plain/dump comparisons, retail checksum/byte comparison/no-op, 450 tests,
-817 layout assertions, fresh stable 141-owner/481-draft qualification and
-seven IRX checks pass. Reports are unchanged.
-
-### Shared-tail allocation frontier
-
-A separate ordinary shared-tail diagnostic initializes a signed bonus to zero,
-conditionally replaces it with `cmbGetHeartsParam`, then subtracts it from the
-captured parameter. Its shared subtraction exists in initial RTL and survives
-combine and if-conversion; the latter converts no blocks. This differs from
-the retained early-return draft, whose zero-hearts path already bypasses the
-subtraction in initial RTL.
-
-The shared-tail diagnostic's extra post-call copy is present before scheduling
-and survives allocation. Local allocation assigns the global-work base and
-parameter address to `$2`; global allocation reports a `$2` conflict for the
-bonus and assigns it to `$6`. The zero initialization is live before the base's
-last use, so simply coalescing the bonus with the call return cannot remove the
-copy in that allocation. This identifies a lifetime/allocation frontier, not
-an if-conversion failure or proof of the allocator's original historical choice.
-The diagnostic remains nine matching words at 80 bytes and is not retained.
-
-Complete-owner assembly and raw-object equality between plain and `-da` builds
-passes in production, `SKIP_ASM`, and `NON_MATCHING` plus `SKIP_ASM` contexts.
-These six successful compiles qualify the observations, not a new exact match
-or a semantic approval of unrelated drafts. The retained target stays 13/20.
+Earlier guarded experiments reached 61/80 by putting the dual-increment
+arm first. The complete landed owner retains those exact table destinations
+and all previously exact peers. Earlier typed-base controls that collapsed
+both address views shortened the code and are not retained.
