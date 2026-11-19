@@ -1015,8 +1015,8 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
 
 extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 
-/* NON_MATCHING: native-size branch/address phases; allocation still differs. */
-#ifdef NON_MATCHING
+/* Target-specific reconstruction aids preserve real operand scheduling;
+ * the register bindings and phase constraints are not original source spelling. */
 /* Called above its definition, where ee-gcc assumed int. */
 s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
 
@@ -1024,16 +1024,24 @@ extern void cmpSetCursorSlot(s8 index, s8 state, u8 param, cmpCursorSlot_t *slot
 
 void cmpSetIniStockRecoverEff(u8 *work)
 {
-    s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
-    s32 room = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    FAKEMATCH_ASM_REG(s32, index, "$17") = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
+    s32 raw = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    FAKEMATCH_ASM_REG(s32, room, "$18");
+    FAKEMATCH_ASM_REG(s32, arg, "$4");
     s32 slot;
-    s32 offset;
-    u8 *target;
+    FAKEMATCH_ASM_REG(s32, offset, "$2");
+    FAKEMATCH_ASM_REG(u8 *, target, "$7");
 
     work += 0xAC;
-    slot = cmpFindFreeStockSlot(index, room);
+    FAKEMATCH_ASM_READ(index);
+    arg = index;
+    /* Materialize the real $4 argument before capturing the room result. */
+    FAKEMATCH_ASM_READ(arg);
+    room = raw;
+    slot = cmpFindFreeStockSlot(arg, room);
     offset = slot * 16;
-    target = work + offset + 0x1078;
+    target = work + offset;
+    target += 0x1078;
     if (room != 0) {
         /* Keep the real selected-row offset as a distinct consumed phase. */
         FAKEMATCH_ASM_LIVE(offset);
@@ -1041,9 +1049,7 @@ void cmpSetIniStockRecoverEff(u8 *work)
     }
     cmpSetCursorSlot(0, 4, 0x10, (cmpCursorSlot_t *)target);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetIniStockRecoverEff);
-#endif
+
 
 #ifdef NON_MATCHING
 extern s32 cmpStockEffIsActive(u8 *work);
