@@ -5624,7 +5624,7 @@ void cmbUpdateAction(void)
     s32 allowSkip = 0;
 
     if (CMB_GBWK->actionPhase == 0) {
-        if (cmpLoadStatusModel() != 0) {
+        if (cmpLoadStatusModel() != 0 || !SDF_FRAME_DUE()) {
             return;
         }
         cmbInitAction();
