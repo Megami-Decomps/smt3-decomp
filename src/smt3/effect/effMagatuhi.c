@@ -3008,29 +3008,38 @@ s32 effDebugClearPad(void) {
     return 0;
 }
 
-/* NON_MATCHING: native size/frame; 17 words still differ. */
-#ifdef NON_MATCHING
 extern u8 sdfPadAnalogSticks[8];
 extern void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
+
+/* The inline byte reader retains the pad-relative access without obscuring
+ * the base's address from the scheduler. */
+static __inline__ u8 effDebugStickSample(const u8 *sample)
+{
+    return *sample;
+}
 
 /* vu0 routine: pad-driven camera translation and axis rotation. */
 void effDebugMoveCamera(void)
 {
     sdfVector4_t axis;
-    /* XYZ is handed to VU0 by address; native leaves W uninitialized. */
+    /* The retail VU0 hand-off writes only XYZ; .xyzw carries raw W. */
     volatile f32 scale[4];
     /* Right stick pair; the left pair precedes it in the same pad buffer. */
     s32 y;
     s32 x;
+    s32 deadZone;
     f32 angle;
     f32 step;
     const u8 *stick = &sdfPadAnalogSticks[2];
-    /* Keep this real across-call address live; target-specific CSE constraint, not original spelling. */
-    FAKEMATCH_ASM_LIVE(stick);
-    y = stick[1];
+    /* Keep the first sampled Y and its widened dead-zone sum in the
+     * native prologue schedule without making pad memory volatile. */
+    y = effDebugStickSample(stick + 1);
+    FAKEMATCH_ASM_LIVE(y);
+    deadZone = y + 0xC0;
+    FAKEMATCH_ASM_LIVE_VOLATILE(deadZone);
     x = stick[0];
 
-    if ((u8)(y + 0xC0) > 0x80) {
+    if ((u8)deadZone > 0x80) {
         step = (128 - y) * (1.0f / 128.0f) * 22.5f;
         scale[1] = step;
         scale[0] = step;
@@ -3050,7 +3059,8 @@ void effDebugMoveCamera(void)
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(aViewTarget);
     }
-    if ((u8)(x + 0xC0) > 0x80) {
+    deadZone = x + 0xC0;
+    if ((u8)deadZone > 0x80) {
         angle = (128 - x) * (1.0f / 128.0f) * 0.06f;
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
@@ -3073,9 +3083,10 @@ void effDebugMoveCamera(void)
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(aViewTarget);
     }
-    y = stick[-1];
-    x = stick[-2];
-    if ((u8)(y + 0xC0) > 0x80) {
+    y = effDebugStickSample(stick - 1);
+    deadZone = y + 0xC0;
+    x = effDebugStickSample(stick - 2);
+    if ((u8)deadZone > 0x80) {
         angle = (128 - y) * (1.0f / 128.0f) * 0.06f;
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
@@ -3147,7 +3158,8 @@ void effDebugMoveCamera(void)
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(aViewTarget);
     }
-    if ((u8)(x + 0xC0) > 0x80) {
+    deadZone = x + 0xC0;
+    if ((u8)deadZone > 0x80) {
         angle = (128 - x) * (1.0f / 128.0f) * 0.06f;
         SDF_VU0_LOADVECTOR(aViewTarget);
         SDF_VU0_LOADVECTOR_B(aViewEye);
@@ -3171,9 +3183,6 @@ void effDebugMoveCamera(void)
         SDF_VU0_STOREVECTOR(aViewTarget);
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugMoveCamera);
-#endif
 
 s32 effDebugIsEnabled(void) {
     return effDebugEnabled;

@@ -146,23 +146,27 @@ cached-delta spellings was inert; chained color assignments worsened the
 result. Revisit the value ranges or compiler decision before repeating those
 source forms. The complete normal owner remains exact, including its data.
 
-### Type-one panel: captured depth and consumed width phases
+## fclDrawPanelType1 (facility/fclPanel, 0x1B4)
 
-The guarded reconstruction matches 102 of 109 words at the native 436-byte
-size. It keeps the entry width across the initial sprite callback, subtracts
-the border before the first box, and subtracts 19 before passing that width
-to the second box. The entry depth is captured before the callback and shifted
-by four for subsequent sprites; the box callbacks still read fresh depth.
+109 of 109 words match at 436 bytes. The entry samples the panel flag,
+unsigned width and unscaled depth before the first sprite call. The flag
+selects border 6 or 24; the width loses that border and then another 19
+before the second box. Both boxes use fresh coordinates and depth. The
+remaining draws use the entry depth scaled by 16, with the coordinates and
+height read after the preceding callbacks. Coordinate arithmetic preserves
+the native modulo-32-bit results. The three sprites share the actual fixed
+table and texture-list addresses; the table is an array symbol, not a
+mutable pointer loaded across calls.
 
-Localized constraints on these real values preserve the second-box width
-phase and native callee-saved depth and border-offset registers. These are
-reconstruction aids, not evidence of original source spelling. Every value
-has an actual consumer, and both bound registers are callee-saved across the
-calls they span. Unsigned-word coordinate arithmetic preserves native wrap.
-A paired operand holds the first post-box X load and the real border offset
-at their coordinate consumer. Both values are initialized and consumed; no
-call or memory effect is moved across the second box callback. This replaces
-the single offset operand and improves the remaining arithmetic ordering.
-The seven residual words concern scheduling around the second box and texture
-address materialization. The assembly fallback remains active; no exact
-matching credit is claimed.
+The localized bindings reconstruct the native homes of the actual width,
+border offset, and 24-wide branch value. The depth and table address
+allocate naturally; neither needs a binding. The subtraction
+operand preserves the real width phase between the two box calls. Pairing
+the outgoing width with the still-live panel pointer keeps its genuine
+second-box argument loads and subsequent consumers on the native schedule.
+The pointer is not refetched or observed by a new operation. These are
+target-specific compiler aids, not evidence of original source spelling.
+
+The border call now uses the actual provider declaration with a `void *work`
+argument. Its underlying panel field layout is unchanged. The previously
+matched Type5 caller and all other owner peers remain exact.

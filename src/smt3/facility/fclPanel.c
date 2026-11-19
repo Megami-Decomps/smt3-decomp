@@ -184,36 +184,36 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *color,
 extern void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 z, s32 width, s32 height,
                                     u8 filter, s32 *color, s32 id, u16 spriteId,
                                     s32 *textures, fclSpriteTbl_t *table, s32 ot);
-extern void fclDrawPanelBorder(fclPanel_t *panel, s32 z, s32 type, s32 ot);
+extern void fclDrawPanelBorder(void *work, s32 z, s32 inset, s32 ot);
 
-#ifdef NON_MATCHING
 void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
 {
     s32 border = 6;
     s32 x;
-    /* These localized constraints keep the real depth and border-offset
-     * values in their native callee-saved registers. The width constraint
-     * preserves its consumed second-box subtraction phase. They are
-     * reconstruction aids; the remaining schedule is still nonmatching. */
+    /* Localized reconstruction aids for the native border-offset and
+     * saved width homes. Keep the captured width's separate subtraction. */
     FAKEMATCH_ASM_REG(s32, offset, "s6");
-    s32 width = (u16)panel->W;
-    FAKEMATCH_ASM_REG(s32, z, "s4") = panel->Z;
+    FAKEMATCH_ASM_REG(s32, width, "s1") = (u16)panel->W;
+    s32 z = panel->Z;
 
-    if (panel->Flag & 0x10000) border = 0x18;
+    /* The wide border literal ends at the initial conditional move. */
+    FAKEMATCH_ASM_REG(s32, thick, "$6") = 0x18;
+    if (panel->Flag & 0x10000) border = thick;
     fclDrawPanelSprite2(0x44, ot);
     width -= border;
     z = (u32)z << 4;
     cmpDrawBoxF(panel->X, panel->Y, panel->Z, border, (u16)panel->H, 0x13141559, ot);
     width -= 0x13;
     FAKEMATCH_ASM_LIVE(width);
-    cmpDrawBoxF((s32)((u32)panel->X + ((u32)(border + 0x13) << 4)), panel->Y, panel->Z,
-                width, (u16)panel->H, 0x13141559, ot);
-    /* Pair the freshly loaded X with the real border offset at their shared
-     * coordinate consumer. This localized scheduling aid emits no instruction
-     * and preserves the post-box reload; it is not original-source evidence. */
+    {
+        /* Complete the fresh X before the outgoing width argument. */
+        s32 boxX = (s32)((u32)panel->X + ((u32)(border + 0x13) << 4));
+        /* Pair the outgoing width with the live panel used for Y/Z/H. */
+        FAKEMATCH_ASM_LIVE_PAIR(width, panel);
+        cmpDrawBoxF(boxX, panel->Y, panel->Z, width, (u16)panel->H, 0x13141559, ot);
+    }
     x = panel->X;
     offset = border << 4;
-    FAKEMATCH_ASM_LIVE_PAIR(offset, x);
     fclDrawSpriteFilter((s32)((u32)x + (u32)offset), panel->Y, z, 0, NULL,
                         10, 3, D_00345D88, fclSpriteTable, ot);
     fclDrawSpriteSizeFilter((s32)((u32)panel->X + (u32)offset), (s32)((u32)panel->Y + 0xC8), z, 0x13,
@@ -223,10 +223,6 @@ void fclDrawPanelType1(fclPanel_t *panel, s32 ot)
                         z, 0, NULL, 10, 4, D_00345D88, fclSpriteTable, ot);
     fclDrawPanelBorder(panel, z, border, ot);
 }
-
-#else
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
-#endif
 
 void fclUpdatePanelType1(fclPanel_t *pPanel)
 {

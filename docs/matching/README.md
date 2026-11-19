@@ -46,6 +46,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
+| 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
@@ -72,7 +73,6 @@ both native and emitted sizes when they differ.
 | 3 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
-| 3 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |

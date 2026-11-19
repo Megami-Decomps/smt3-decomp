@@ -78,8 +78,8 @@ func_00174DC0 and eff_174E88	effect/effBattleSystem	0xC8 and 0x1A4		docs/matchin
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
 effDebugDrawRectLine	effect/effMagatuhi	0x154	85 of 85 words match	docs/matching/effect/effMagatuhi.md	3
-effDebugMoveCamera	effect/effMagatuhi	0x628	377 of 394 words match	docs/matching/effect/effMagatuhi.md	24
-effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	89
+effDebugMoveCamera	effect/effMagatuhi	0x628	394 of 394 words match	docs/matching/effect/effMagatuhi.md	24
+effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	60
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
 effPCP_BED_Create	effect/effPCPBoss	0x100		docs/matching/effect/effPCPBoss.md	20
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/matching/effect/effPCPBoss.md	62
@@ -143,6 +143,7 @@ DrawReadMainHelp	facility/fclEncyc	0x540	336 of 336 words	docs/matching/facility
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	174 of 229 words match	docs/matching/facility/fclPanel.md	75
+fclDrawPanelType1	facility/fclPanel	0x1B4	109 of 109 words match	docs/matching/facility/fclPanel.md	149
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each		docs/matching/facility/fclRagCalc.md	3
 ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility/fclRagCalc.md	21
 ragDrawHeartsRows	fclRagCalc	0x21C	135 of 135 words match	docs/matching/facility/fclRagCalc.md	41
