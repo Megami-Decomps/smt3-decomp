@@ -1193,7 +1193,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
                 SDF_VU0_LOADVECTOR_B(&point);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_GETLENGTH(distance);
-                if (distance <= captureDistance) {
+                if (distance <= captureDistance && SDF_FRAME_DUE_AGE(age)) {
                     SDF_VU0_NORMALIZE();
                     SDF_VU0_STOREVECTOR(&towardTarget);
                     SDF_VU0_LOADVECTOR_B(&viewDirection);
@@ -1239,7 +1239,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
             if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &point);
         }
         if (age >= life && respawn) {
-            particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->age = -(SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread + 1) - 1);
         } else {
             particle->age++;
         }
@@ -1424,7 +1424,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
             if (SDF_FRAME_DUE_AGE(frame)) effMagaCylinderSetPartPos(valueWork, particleIndex, &out);
         }
         if (frame >= life && respawn) {
-            *delays = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            *delays = -(SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread + 1) - 1);
         } else {
             (*delays)++;
         }
@@ -1600,7 +1600,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
-            particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -(SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread + 1) - 1);
         } else {
             particle->frame++;
         }
@@ -1801,7 +1801,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
-            particle->frame = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -(SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread + 1) - 1);
         } else {
             particle->frame++;
         }
@@ -2026,7 +2026,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             if (SDF_FRAME_DUE_AGE(age)) effMagaCylinderSetPartPos(valueWork, i, &out);
         }
         if (age >= life && respawn) {
-            particle->age = -SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->age = -(SDF_FRAMES(dds3GetRandA((u8 *)dds3EffectBase) % spread + 1) - 1);
         } else {
             particle->age++;
         }
