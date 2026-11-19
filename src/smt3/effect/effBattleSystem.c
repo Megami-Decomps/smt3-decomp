@@ -3098,8 +3098,8 @@ void effCAMPBadDraw(effBattleSystem_effCAMPBad_tag *work)
     }
     if (work->params.hModel != NULL) {
         color = effBTLSystemTable[work->id].rgba;
-        if (work->frame < SDF_FRAMES(8)) {
-            color = effColorBlend(0x80808080, color, work->frame * SDF_FRAME_STEP(0.125f));
+        if (SDF_FRAME_DRAWN_AGE(work->frame) < SDF_FRAMES(8)) {
+            color = effColorBlend(0x80808080, color, SDF_FRAME_DRAWN_AGE(work->frame) * SDF_FRAME_STEP(0.125f));
         }
         mdlSetColor(work->params.hModel, color);
     }
