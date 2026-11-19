@@ -119,15 +119,14 @@ extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 extern void fclClearFlag(s8 index);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-/* NON_MATCHING. Behaviour checked against retail: 2 PCSX2 call vectors give the same return and memory,
+/* Earlier behavioral draft checked against retail: 2 PCSX2 call vectors give the same return and memory,
  * seq28, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
-/* NON_MATCHING: 37 of 64 words match at the exact 256-byte size. */
 extern void cmpUpdateTerminate(void *work);
 
 s32 shop_Process(dds3ProcessID_t *id)
 {
+    s8 state;
     shopProcWork = dds3GetProcessData(id);
     if (fclChkDbgProcess() != 0) {
         return 0;
@@ -139,32 +138,41 @@ s32 shop_Process(dds3ProcessID_t *id)
     if (fclGetFlag(1) == 0) {
         return 0;
     }
-    switch (shopProcWork->state) {
-    case 0:
-        shopProcWork->unk_23F4 = 0;
-        if (shopProcWork->step == 1) {
-            if (dds3GetProcessStat(EE_ADDR_AS(void *, shopProcWork->scriptProc)) != 2) {
-                shopProcWork->scriptProc =
-                    fclScriptStart(shopProcWork->script, 0, NULL);
-            }
-        }
-        break;
-    case 8:
-        if (shopProcWork->step == 1) {
-            fclClearFlag(2);
-        }
-        break;
+    state = shopProcWork->state;
+    if (state == 0) {
+        goto state_zero;
     }
+    if (state < 0) {
+        goto finish;
+    }
+    if (state == 8) {
+        goto state_eight;
+    }
+    /* Nonnegative unhandled states reset the step before joining the flag check. */
     shopProcWork->step = 0;
-    if ((shopProcWork->flags & 0x10) == 0) {
-        return 0;
+    goto flags;
+state_zero:
+    shopProcWork->unk_23F4 = 0;
+    if (shopProcWork->step == 1) {
+        if (dds3GetProcessStat(EE_ADDR_AS(void *, shopProcWork->scriptProc)) != 2) {
+            shopProcWork->scriptProc =
+                fclScriptStart(shopProcWork->script, 0, NULL);
+        }
     }
-    cmpUpdateTerminate(shopProcWork);
-    return -1;
+    goto finish;
+state_eight:
+    if (shopProcWork->step == 1) {
+        fclClearFlag(2);
+    }
+finish:
+    shopProcWork->step = 0;
+flags:
+    if ((shopProcWork->flags & 0x10) != 0) {
+        cmpUpdateTerminate(shopProcWork);
+        return -1;
+    }
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_Process);
-#endif
 
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);

@@ -153,8 +153,8 @@ Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.m
 fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
 fclDrawSpriteCore	fclShare	728 bytes		docs/matching/facility/fclShare.md	67
 fclDrawPhaseValue	facility/fclShare	380 bytes	95 of 95 words match	docs/matching/facility/fclShare.md	124
-shop_Process	facility/fclShopCalc	0x100	37 of 64 words match	docs/matching/facility/fclShopCalc.md	3
-shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	41
+shop_Process	facility/fclShopCalc	0x100	64 of 64 words match	docs/matching/facility/fclShopCalc.md	3
+shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	18
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
 shpGetItemFromItemBox	facility/fclShopUpdate	0x148	82 of 82 words match	docs/matching/facility/fclShopUpdate.md	47
 shpUpdateSeqPay	facility/fclShopUpdate	0x218	134 of 134 words match	docs/matching/facility/fclShopUpdate.md	84
