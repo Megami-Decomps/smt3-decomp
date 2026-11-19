@@ -810,8 +810,6 @@ void effPCPBossONGYDelete(effPCPBossONGY_t *pPCPBossONGY)
     sdfChipFreeDirect(pPCPBossONGY);
 }
 
-/* NON_MATCHING: 306 of 358 words match at the exact 1432-byte size. */
-#ifdef NON_MATCHING
 extern u32 dds3CheckRenderTexture(void);
 extern void *dds3GetRenderTexture(void);
 extern void sdfMatSetTex(sdfMat_t *mat, sdfTexHandle_t *tex);
@@ -838,23 +836,28 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     effPCPBossVector_t *point;
     f32 *st;
     u32 *color;
+    u32 *firstColors;
     u32 count;
     u32 i;
     u32 phase;
     f32 rate;
+    u16 vertices;
+    /* Actual packet count and descriptor base, live only until their setup stores. */
+    FAKEMATCH_ASM_REG(u16, polygons, "$5");
+    FAKEMATCH_ASM_REG(effPCPBossWork_t *, prim, "$3");
     f32 angle;
     f32 angleStep;
     f32 sway;
     f32 y;
-    f32 v;
+    FAKEMATCH_ASM_REG(f32, v, "$f4");
     f32 nextV;
     f32 x;
     f32 width;
     f32 uvStep;
-    f32 yStep;
+    FAKEMATCH_ASM_REG(f32, yStep, "$f24");
     f32 height;
     f32 renderHeight;
-    f32 offset;
+    FAKEMATCH_ASM_REG(f32, offset, "$f20");
     f32 scaleValue;
     mdlObj_t *model;
     sdfGrOt_t *ot;
@@ -872,8 +875,8 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     form = work->param;
     height = 340.0f;
     renderHeight = height;
-    offset = 0.0f;
     width = 271.999969482421875f;
+    offset = 0.0f;
     SDF_VU0_LOADVECTOR(&form->pos);
     SDF_VU0_STOREVECTOR_MEMOPS(origin);
     SDF_VU0_STOREVECTOR(&target);
@@ -884,9 +887,9 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     mdlSetRotate(effPCPBossTexHandle);
     scaleValue = form->scl;
     scale.f[3] = 0.0f;
-    scale.f[2] = scaleValue;
     scale.f[0] = scaleValue;
     scale.f[1] = scaleValue;
+    scale.f[2] = scaleValue;
     SDF_VU0_LOADVECTOR(&scale);
     offset = height + offset;
     mdlSetScale(effPCPBossTexHandle);
@@ -894,8 +897,13 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
                        mdlGetMotionNum(form->hunit->owner, 0), 0.0f, 4.0f);
     sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first,
                   (form->hunit->owner)->first->frame);
-    target.f[1] -= offset;
-    effPCPBossONGYModelTexRender(&target, form, renderHeight);
+    {
+        FAKEMATCH_ASM_REG(f32, drawHeight, "$f12") = renderHeight;
+        FAKEMATCH_ASM_REG(nbFormation_t *, drawForm, "$5") = form;
+
+        target.f[1] -= offset;
+        effPCPBossONGYModelTexRender(&target, drawForm, drawHeight);
+    }
     if (work->frame >= SDF_FRAMES(12)) {
         return;
     }
@@ -912,30 +920,38 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     ReverseMatrix();
     rate = (f32)work->frame / SDF_FRAMES_F(12.0f);
     effPCPBossWork.color = ((u32)((1.0f - rate) * 128.0f) << 24) | 0x808080;
-    effPCPBossWork.vertexCount = 32;
-    effPCPBossWork.positions = points;
-    effPCPBossWork.uvs = uv;
-    effPCPBossWork.primCount = 16;
-    effPCPBossWork.colors = colors;
+    prim = &effPCPBossWork;
+    vertices = 32;
+    prim->positions = points;
+    prim->uvs = uv;
+    firstColors = colors;
+    polygons = 16;
+    prim->primCount = polygons;
+    prim->colors = firstColors;
+    prim->vertexCount = vertices;
     count = 0;
     phase = (u32)(rate * 15.0f);
     angle = work->radian;
     work->radian = angle + SDF_FRAME_STEP(0.043633227f);
     angleStep = ((f32)phase * 3.141592502593994140625f) / 300.0f;
     sway = rate * 67.99999237060546875f;
-    uvStep = 0.0033333333f;
     y = -height;
     v = 0.0f;
+    uvStep = 0.0033333333f;
     yStep = 2.2666666507720947265625f;
     point = points;
     st = uv;
-    color = colors;
+    color = firstColors;
     for (i = 0; i < 300; i++) {
+        FAKEMATCH_ASM_REG(f32, angleArg, "$f12");
+        f32 lastY;
         nextV = v + uvStep;
         st[1] = v;
         st[0] = 0.0f;
         st += 2;
         st[0] = 1.0f;
+        angleArg = angle;
+        FAKEMATCH_ASM_LIVE_F32_WITH_MEM(angleArg,st[0]);
         st[1] = v;
         st += 2;
         st[1] = nextV;
@@ -944,7 +960,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
         st[0] = 1.0f;
         st[1] = nextV;
         st += 2;
-        x = sdfSin(angle) * sway;
+        x = sdfSin(angleArg) * sway;
         point->f[1] = y;
         point->f[2] = 0.0f;
         point->f[3] = 0.0f;
@@ -972,7 +988,8 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
         point->f[2] = 0.0f;
         point->f[3] = 0.0f;
         point->f[0] = width + x;
-        point->f[1] = y + yStep;
+        lastY = y + yStep;
+        point->f[1] = lastY;
         SDF_VU0_LOADVECTOR(point);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(point);
@@ -983,7 +1000,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
         color[2] = 0x80808080;
         color[3] = 0x80808080;
         color += 4;
-        y += yStep;
+        y = lastY;
         angle += angleStep;
         if (count >= 32) {
             sdfDrawTagLink(tag, EE_ADDR(effPkt3DPrimMakePoly(&effPCPBossWork)));
@@ -1003,9 +1020,7 @@ void effPCPBossONGYDraw(effPCPBossONGY_t *work)
     ot->regFunc(ot, tag);
     work->frame++;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYDraw);
-#endif
+
 
 s32 effPCPBossONGYGetLength(void)
 {

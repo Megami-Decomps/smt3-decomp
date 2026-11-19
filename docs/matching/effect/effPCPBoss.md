@@ -260,50 +260,41 @@ at UID 541, then supplies the group bound (UID 324). Global allocation combines
 it `$19`. Independent review confirms that each phase defines the value before
 use, the type is truthful, and no address escapes or artificial uses are added.
 
-## effPCPBossONGYDraw (1432 bytes)
+## effPCPBossONGYDraw (effect/effPCPBoss, 0x598)
 
-306 of 358 instruction words match at the exact native size. The reconstruction
-is guarded; normal builds retain assembly and receive no exact matching credit.
+All 358 instruction words match at 1432 bytes. The complete owner, including
+the existing BED and METATO paths and owned data, remains exact.
 
-The effect work contains a formation pointer, material pointer, floating angle
-and signed frame counter. Its two constructors retain their exact bytes with
-these contracts. Position and rotation come from the formation. The model under
-its helper unit supplies the motion number and controller frame; reload the
-render-model global at the native callback boundaries. The first model-position
-call uses the model pointer checked before the VU transfers. Cache the formation
-scale once before writing its three equal vector components.
+This effect uses a formation pointer, material pointer, floating angle and
+signed frame counter. Position and rotation come from the formation; the
+actor supplies the motion number and controller frame. Preserve model and
+texture reloads across the native callbacks, both position snapshots and
+the scale vector's zero fourth lane. Model-texture rendering precedes the
+twelve-frame ribbon limit. Only the packet path increments the frame.
 
-Preserve both position snapshots and the zero scale-vector fourth lane. The
-model texture is rendered before testing the twelve-frame ribbon limit. Only
-the packet path advances the effect counter. Material and render-texture reads
-follow their preceding callbacks. The existing primitive descriptor retains its
-constructor-owned fields at offsets 4 and 0xC.
+The 300 iterations each emit four transformed vertices, four UV pairs and
+four colors. Reset all three array cursors after linking a full packet of
+32 vertices and 16 primitives. The final 16 vertices form eight primitives.
+File the tag through ordering-table entry 43, then increment the live frame
+after that callback. Keep the constructor-owned descriptor fields at 4 and
+0xC intact. The float literals `0.043633227f` and `0.0033333333f` give
+native words `0x3D32B8C1` and `0x3B5A740D` with this compiler.
 
-The frame ratio drives an unsigned alpha conversion and an unsigned phase count.
-The angle advances once in the work record; a separate local angle walks the
-ribbon. Cache the native width, UV step and vertical step across VU operations
-and packet callbacks. Caching the UV and vertical steps raises the initial comparison from 42 to
-246 matching words at the same total size; the later snapshot and literal fixes
-raise it to 306.
-Use literal-pool values rather than new global data. The decimal spellings
-`0.043633227f` and `0.0033333333f` reproduce words `0x3D32B8C1` and
-`0x3B5A740D` with the original compiler; their exact binary values written as
-long decimal fractions truncate one word low in that compiler's parser.
+The remaining scheduling mismatch in the earlier draft was two disjoint
+descriptor stores on opposite sides of the phase conversion branch. Writing
+the actual vertex-count halfword last in C moves the descriptor address's last
+source use from the colors store to the count store. The original compiler's
+first scheduler then no longer favors the color store on register pressure.
+The count still stores early in retail order, and the UV store and colors
+branch-delay store both become exact. No call or observer intervenes between
+the stores. The initialized UV step also precedes the vertical step in the
+loop's setup, recovering the native floating-point preheader.
 
-The 300 iterations each generate four transformed vertices, four UV pairs and
-four colors. Full packets contain 32 vertices and 16 primitives. Reset all three
-array cursors and the count after linking a full packet. The final sixteen
-vertices form eight primitives. File the tag through ordering-table entry 43,
-then reload and increment the live frame counter.
-
-The remaining words concern scale-store and argument scheduling, primitive
-setup register choices, and floating-register allocation in the loop. Descriptor
-store reordering and a named next-Y value worsen the result. Separating the
-angle-step numerator does not improve it. No artificial dependency or register
-constraint is used.
-
-Reproduce with `tools/check_unit.py src/smt3/effect/effPCPBoss.c
---cflags=-DNON_MATCHING --func effPCPBossONGYDraw -v`.
+The localized constraints apply only to the real descriptor, polygon count,
+float phases and outgoing render arguments. The empty operand in the loop
+names the real angle and UV memory handoff; it emits no instruction and is
+not a general memory barrier. These constraints recover register lifetimes
+without claiming the original source spelling.
 
 ## effPCPBossKAGU2AttackDraw (effect/effPCPBoss, 0x424)
 

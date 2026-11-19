@@ -41,15 +41,17 @@ These have been ruled out repeatedly and are not worth a second attempt:
 - A plain register-to-register copy retail keeps and the C coalesces away,
   normally of a parameter or of a value read once and used twice. It costs a
   word, so the function comes out short and every later allocation shifts.
-  Four in `code_001FAE80`: `ragBuildList2`/`3` copy the second parameter with
-  `daddu $16, $5, $0` before adding the row offset, `cmbCountEvoReady` narrows
-  its count parameter in place and then copies it to `$17`, and
-  `cmbGetLevelUpCount` copies the level read so the compare and the increment
-  use different registers. A separate local initialised from the parameter, a
-  second local for the second use, `&a[k]` against `a + k`, a `(u32)` cast
-  through the arithmetic and a `for` head that moves the update all coalesce
-  the same way. The copy is the register allocator declining to coalesce, not
-  a source shape, so measure it and move on.
+  Earlier drafts of `ragBuildList2` and `ragBuildList3` both missed retail's
+  `daddu $16, $5, $0` before the row offset. Separate locals, alternate array
+  address spellings, casts and moving the loop update all coalesced the same
+  way. Both functions later matched by preserving the real output-address
+  formation and the separate count lifetimes; see [the list builders](
+  ../matching/fclRagInit.md#ragbuildlist2-and-ragbuildlist3-372-bytes-each).
+  The remaining cases in `code_001FAE80` are `cmbCountEvoReady`, which
+  narrows its count parameter in place and then copies it to `$17`, and
+  `cmbGetLevelUpCount`, which copies the level so the compare and increment
+  use different registers. Measure the size and change the underlying
+  use or lifetime before trying more copy spellings.
 - A set of reload spill slots that appear in a rotated order. `alter_reg`
   hands slots out in ascending pseudo number, so permuting declarations or
   pointer spellings often cannot help. The earlier [sky-gradient draft](
