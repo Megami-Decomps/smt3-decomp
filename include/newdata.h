@@ -415,7 +415,7 @@ typedef struct
     datNormalSkill_t normal[288];
     u8 reserve[8];
     datNormalSkillVisual_t visual[288];
-    datSpecialSkill_t special[95];
+    datSpecialSkill_t special[96];
 } datSkillTable_t;
 
 extern datSkillTable_t datSkillTable;

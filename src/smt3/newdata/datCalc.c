@@ -54,7 +54,7 @@ extern void datAddHeartsEntry(s32 id, datUnitWork_t *work);
 extern void evtBitOn(s32 no);
 extern void cmbAddHeartsParam(s32 devilId, datUnitWork_t *work);
 extern void rstLoadHeartsSkill(s8 HeartsID, datUnitWork_t *pStock);
-extern u32 datAisyoTable[248][16];
+extern u32 datAisyoTable[448][16];
 extern void cmbSubHeartsParam(s32 devilId, datUnitWork_t *work);
 extern void rstStoreHeartsSkill(s8 HeartsID, datUnitWork_t *pStock);
 extern void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill);

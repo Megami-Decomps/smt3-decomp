@@ -850,7 +850,7 @@ OFF(ds04, datSpecialSkill_t, n, 0);
 OFF(ds05, datSpecialSkill_t, m, 2);
 OFF(ds06, datSkillTable_t, visual, 0x4388);
 OFF(ds07, datSkillTable_t, special, 0x4808);
-SZ(ds08, datSkillTable_t, 0x4B00);
+SZ(ds08, datSkillTable_t, 0x4B08);
 
 /* Shared name-entry work, verified by its init and draw access offsets. */
 OFF(nm01, nmeWork_t, memHandle, 0x14);

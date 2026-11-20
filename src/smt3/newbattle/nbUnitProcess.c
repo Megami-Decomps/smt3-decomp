@@ -436,7 +436,7 @@ s32 nbGetMotionNo(nbFormation_t *form, s32 motion)
 
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern s16 rstGetEquipHeartsAisyo(void);
-extern u32 datAisyoTable[248][16];
+extern u32 datAisyoTable[448][16];
 
 void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex)
 {

@@ -1487,7 +1487,7 @@ s32 nbGetAisyoTable(s32 formindex)
     return ret;
 }
 
-extern u32 datAisyoTable[248][16];
+extern u32 datAisyoTable[448][16];
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 
 const char D_00544BF8[24] = "\300\320\262\275\260\354\267\342\263\316\316\250 =%d\n";

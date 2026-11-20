@@ -1500,8 +1500,10 @@ three-byte/nine-byte partial view incorrectly grouped the same twelve bytes.
 ### Special-skill table records (`newdata.h`)
 
 `datSkillTable` has 288 normal records of 0x3C bytes, eight reserved bytes,
-288 four-byte visual records, then 95 eight-byte special records at +0x4808.
-The complete 0x4B00-byte extent is bounded in
+288 four-byte visual records, then 96 eight-byte special records at +0x4808.
+The special region covers skill numbers 0x120 through 0x17F. The final
+row keeps the same four signed halfwords as the preceding reserved skills;
+item data starts immediately after it. The complete 0x4B08-byte extent is bounded in
 `config/smt3/symbol_addrs.txt`. `datSetAutoKaifukuSkill` indexes the tail as
 `special[skill - 288]`, reading signed halfwords at offsets 0 and 2;
 `nbCheckBackAttack` and `nbCheckEscape` independently read slots 10 and 8.
