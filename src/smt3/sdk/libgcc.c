@@ -1356,9 +1356,12 @@ typedef union __attribute__((packed)) {
     u32 word;
 } cfiEncodedValue_t;
 
-INCLUDE_RODATA(const s32, "sdk/libgcc", libgccDfInvalidResult);
+/* Invalid operations supply an all-zero NaN-class record to __pack_df. */
+const fp_number_type_df libgccDfInvalidResult = {0, 0, 0, 0};
 
-const char libgccCieAugEmpty[8] __attribute__((section(".rodata"))) = "";
+/* First data in the original frame-dwarf2 object: its rodata input section
+ * is 16-byte aligned, independently of the preceding 24-byte DF record. */
+const char libgccCieAugEmpty[8] __attribute__((section(".rodata"), aligned(16))) = "";
 
 const char libgccCieAugEh[8] __attribute__((section(".rodata"))) = "eh";
 

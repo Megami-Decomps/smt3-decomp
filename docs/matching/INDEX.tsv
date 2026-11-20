@@ -487,6 +487,7 @@ sceDmaPutEnv			15 of 118 words differ	docs/matching/sdk/libdma.md	3
 __do_global_ctors	sdk/libgcc	0xC0		docs/matching/sdk/libgcc.md	3
 __muldi3	sdk/libgcc	0x74	0 of 29 words match	docs/matching/sdk/libgcc.md	65
 libc_2D1FA0: end_fde_sort (0x578)				docs/matching/sdk/libgcc.md	92
+libgccDfInvalidResult data	sdk/libgcc	24 bytes		docs/matching/sdk/libgcc.md	124
 __umoddi3	sdk/libgcc_longlong	0x568	130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	3
 __moddi3	sdk/libgcc_longlong	0x690		docs/matching/sdk/libgcc_longlong.md	33
 __errno_8	sdk/libgcc_longlong_tail	0xC	3 of 3 words match	docs/matching/sdk/libgcc_longlong.md	67

@@ -120,3 +120,23 @@ Fixed-path ordinary and `-da` compiler output produced byte-identical raw
 assembly and independently assembled objects. Complete-owner, guarded-source,
 regression and retail-image checks qualify promotion; private compiler traces
 are not repository artifacts.
+
+## libgccDfInvalidResult data (sdk/libgcc, 24 bytes)
+
+Invalid double arithmetic returns the existing all-zero NaN-class record
+to the DF packer. A pinned EE libgcc archive's `_thenan_df.o` defines a
+24-byte object; the neighboring eight zero bytes at `0x0054B478` bring the
+next input section to its original 16-byte boundary. They are not part of the
+record. The first CIE augmentation object at `0x0054B480` carries that
+alignment, matching the archived `frame-dwarf2.o` input section.
+
+Both CIE strings and all 48 existing table targets stay put. With the
+separate alignment restored, all 40 owner functions and the complete
+240-byte owned read-only span remain unchanged. This replaces only the
+assembly-backed data declaration; no function fallback is removed.
+
+The configured owner checker reports 38 matches, zero differences. Actual
+production and stock-dump assembly and ELF are identical, and the full
+retail image matches. The full report's 240-byte read-only section fuzzy
+score rises from 6.6666665% to 18.09524%, with no aggregate matched-data, code,
+or function gain. The primary game report is unchanged.
