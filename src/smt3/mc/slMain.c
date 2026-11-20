@@ -8,6 +8,7 @@
 #include "field.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
+#include "slIconSys.h"
 
 typedef struct fileRequest fileRequest_t;
 
@@ -329,8 +330,6 @@ extern const char slSaveDirFmt[];
 extern s8 D_00569743[];
 
 extern s32 version_convert_ver;
-
-extern u8 slIconSysBuf[];
 
 extern void *slIconSysSaveBuff;
 
@@ -1998,10 +1997,13 @@ saddr_t slSaveWriteEnd_iconSys(void) {
 }
 
 s32 slSaveWriteEnd_baseIcon(void) {
-    slIconSysBuf[0xE2] = -0x7E;
-    slIconSysBuf[0xE3] = slFileSelError + 0x50;
-    slIconSysBuf[0xE4] = 0;
-    slIconSysBuf[0xE5] = 0;
+    u8 *icon = (u8 *)&slIconSysBuf;
+
+    /* Write the two Shift-JIS suffix bytes and the title terminator. */
+    icon[0xE2] = -0x7E;
+    icon[0xE3] = slFileSelError + 0x50;
+    icon[0xE4] = 0;
+    icon[0xE5] = 0;
     return slSaveWriteFile(slIconSysName, &slIconSysSaveBuff, &slIconSysSaveSize, slSaveWriteEnd_iconSys, 0);
 }
 
@@ -3180,3 +3182,36 @@ void slSetTmnlID(s16 type, u16 id) {
     state->previewX = type;
     state->previewY = id;
 }
+
+/* Default memory-card icon.sys, with the save-slot suffix filled in on write. */
+slIconSys_t slIconSysBuf = {
+    "PS2D",
+    0, 26, 0, 96,
+    {
+        {128,   0,   0, 0},
+        {  0, 128,   0, 0},
+        {  0,   0, 128, 0},
+        {128, 128, 128, 0},
+    },
+    {
+        { 0.5f,  0.5f,         0.5f,         0.0f},
+        { 0.0f, -0.39999998f, -0.099999996f, 0.0f},
+        {-0.5f, -0.5f,         0.5f,         0.0f},
+    },
+    {
+        {0.48f,       0.48f,       0.03f,       0.0f},
+        {0.5f,        0.32999999f, 0.19999999f, 0.0f},
+        {0.13999999f, 0.13999999f, 0.38f,       0.0f},
+    },
+    {0.5f, 0.5f, 0.5f, 0.0f},
+    {
+        /* Shift-JIS: full-width SMT: NOCTURNEFILE. */
+        0x7282, 0x6C82, 0x7382, 0x4681, 0x4081, 0x6D82, 0x6E82, 0x6282,
+        0x7382, 0x7482, 0x7182, 0x6D82, 0x6482, 0x6582, 0x6882, 0x6B82,
+        0x6482,
+    },
+    "base.ico",
+    "base.ico",
+    "base.ico",
+    {0},
+};

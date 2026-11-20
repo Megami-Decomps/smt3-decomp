@@ -7,6 +7,7 @@
 #include "field.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
+#include "slIconSys.h"
 
 /* Field-only views, with offsets taken from the SMT3 retail accesses. */
 typedef struct
@@ -1181,10 +1182,9 @@ f32 slMcAccessDraw_fc = 0.0f;
 
 s32 gSlWindowCnt = 0;
 
-extern u8 slIconSysBuf[];
-void *slIconSysSaveBuff = slIconSysBuf;
+void *slIconSysSaveBuff = &slIconSysBuf;
 
-u32 slIconSysSaveSize = 0x3c4;
+u32 slIconSysSaveSize = sizeof(slIconSysBuf);
 
 f32 slFileSelPulsePhase = 0.0f;
 
