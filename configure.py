@@ -634,14 +634,29 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule("configure", f"{sys.executable} configure.py $args", description="configure", generator=True)
     n.newline()
 
+    tail_paths = {v: Path(f"config/{v}/native_data_tails.json") for v in versions}
+    tails = {v: {} for v in versions}
+    if any((ROOT / p).exists() for p in tail_paths.values()):
+        from tools.native_data_tail import opt_ins, pad_assets, yaml_inputs
+
+        tails = {v: opt_ins(ROOT / path) for v, path in tail_paths.items()}
+        n.rule("native_data_tail",
+               f"{sys.executable} tools/native_data_tail.py $version $unit $in $out",
+               description="native data tail $unit")
     units: dict[str, list[dict]] = {}
     defaults = []
     for version in versions:
+        unseen_tails = set(tails[version])
         serial = VERSIONS[version]["serial"]
         yaml = Path("config") / version / f"{serial}.yaml"
         if not args.no_split:
             run_splat(version, ROOT / yaml, args.force_split)
         provide_symbol_aliases(version)
+        tail_pads = pad_assets(ROOT, version, serial, tails[version]) if unseen_tails else {}
+        tail_relocs = (
+            [str(p.relative_to(ROOT)) for p in yaml_inputs(ROOT, version, serial)[2]]
+            if unseen_tails else []
+        )
         ld_script = Path("build") / version / f"{serial}.ld"
         if not (ROOT / ld_script).exists():
             sys.exit(f"{ld_script} missing; run configure.py without --no-split")
@@ -654,6 +669,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
             if kind == "s":
                 # The .vutext unit assembles the VU listings and incbins what they produce.
                 extra = vu_binaries(n, version) if src == VU_UNIT.get(version) else []
+                if src in tail_pads:
+                    extra.append(str(tail_pads.pop(src)))
                 n.build(str(obj), "as", str(src), implicit=["include/macro.inc"] + extra)
                 units[version].append({"name": str(src.with_suffix("")), "target": str(obj), "base": None})
             elif kind == "bin":
@@ -698,9 +715,23 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = objdiff_reference(version, src, object_sections[obj])
                 target = Path("build") / version / "target" / full.with_suffix(".o")
-                if (ROOT / full).exists():
+                if unit in unseen_tails:
+                    if object_sections[obj] != [".data"]:
+                        raise SystemExit(f"{src}: native tail needs a data-only C owner")
+                    unseen_tails.remove(unit)
+                    corrected = Path(f"build/{version}/native-data-tail/{unit}.s")
+                    n.build(str(corrected), "native_data_tail", str(full),
+                            implicit=["tools/native_data_tail.py", "tools/check_unit.py", "tools/retail_elf.py",
+                                      "config/versions.json", str(yaml), str(tail_paths[version]),
+                                      f"config/{version}/symbol_addrs.txt", *tail_relocs,
+                                      f"orig/{version}/{serial}"],
+                            variables={"version": version, "unit": unit})
+                    n.build(str(target), "as", str(corrected), implicit=["include/macro.inc"])
+                elif (ROOT / full).exists():
                     n.build(str(target), "as", str(full), implicit=["include/macro.inc"])
                 units[version].append({"name": str(src.with_suffix("")), "target": str(target), "base": str(base)})
+        if unseen_tails or tail_pads:
+            raise SystemExit(f"{version}: missing native tail owners or raw pad edges")
         elf = Path("build") / version / f"{serial}.elf"
         image = Path("build") / version / serial
         n.build(
@@ -741,6 +772,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         alias_metadata = ROOT / "config" / version / "symbol_aliases.json"
         if alias_metadata.exists():
             configure_inputs.append(str(alias_metadata.relative_to(ROOT)))
+    tail_metadata = [str(path) for path in tail_paths.values() if (ROOT / path).exists()]
+    if tail_metadata:
+        configure_inputs += ["tools/native_data_tail.py", *tail_metadata]
     write_configure_build(n, configure_inputs, sys.argv[1:])
     n.default(defaults)
     n.close()
