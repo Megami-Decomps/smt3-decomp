@@ -509,12 +509,12 @@ void nbMakeUnitDrawMatrix(nbFormation_t *form)
     SDF_VU0_ADDVECTOR();
 }
 
-extern const f32 nbRotatedModelXVerts[][4];
-extern const u32 nbRotatedModelXColors[];
-extern const f32 nbRotatedModelVerts30[][4];
-extern const u32 nbRotatedModelColors30[];
-extern const f32 nbRotatedModelVerts12[][4];
-extern const u32 nbRotatedModelColors12[];
+extern f32 nbRotatedModelXVerts[66][4];
+extern u32 nbRotatedModelXColors[66];
+extern f32 nbRotatedModelVerts30[48][4];
+extern u32 nbRotatedModelColors30[48];
+extern f32 nbRotatedModelVerts12[18][4];
+extern u32 nbRotatedModelColors12[18];
 extern sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors,
                                                 s32 vertexCount, u32 primitiveFlags);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, addr_t packet);
@@ -545,11 +545,11 @@ void nbDrawRotatedModelX(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
     SDF_VU0_COPYMATRIX_A_TO_C();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelXVerts, nbRotatedModelXColors, 0x42, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel((const f32 (*)[4])nbRotatedModelXVerts, nbRotatedModelXColors, 0x42, 0x80)));
     SDF_VU0_COPYMATRIX_C_TO_A();
     SetRotateMatrixX_B(3.1415926f);
     MultMatrixNoArg();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelXVerts, nbRotatedModelXColors, 0x40, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel((const f32 (*)[4])nbRotatedModelXVerts, nbRotatedModelXColors, 0x40, 0x80)));
 }
 
 /* vu0 routine: transform and submit the two battle-marker models. */
@@ -576,7 +576,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelVerts30, nbRotatedModelColors30, 0x30, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel((const f32 (*)[4])nbRotatedModelVerts30, nbRotatedModelColors30, 0x30, 0x80)));
     SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_COPYMATRIX_A_TO_B();
@@ -593,7 +593,7 @@ void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
     SDF_VU0_SCALEVECTOR_BITS(scl);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SCALE_XYZW();
-    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel(nbRotatedModelVerts12, nbRotatedModelColors12, 0x12, 0x80)));
+    sdfDrawTagLink(tag, EE_ADDR(sdfDrawRotatedModel((const f32 (*)[4])nbRotatedModelVerts12, nbRotatedModelColors12, 0x12, 0x80)));
 }
 
 void nbGetUnitMarkPos(nbMainProcessData_t *data, nbFormation_t *form, sdfDrawTag_t *tag)
@@ -1148,3 +1148,175 @@ s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
 
 const char D_00544170[32] = "\245\271\245\255\245\353\275\361\244\255\264\271\244\250!!\n";
 
+/* Quad-aligned vertex rows and packed per-vertex RGBA for the battle markers. */
+f32 nbRotatedModelXVerts[66][4] __attribute__((aligned(16))) = {
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { 0.0f, -0.7071f, 0.7071f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { 0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { 0.7071f, -0.7071f, 0.0f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { 0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { 0.0f, -0.7071f, -0.7071f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { -0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { -0.7071f, -0.7071f, 0.0f, 0.0f },
+    { 0.0f, -1.0f, 0.0f, 0.0f },
+    { -0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.0f, -0.7071f, 0.7071f, 0.0f },
+    { 0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.7071f, -0.7071f, 0.0f, 0.0f },
+    { 0.7071f, -0.7071f, 0.0f, 0.0f },
+    { 0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { 0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { 0.0f, -0.7071f, -0.7071f, 0.0f },
+    { 0.0f, -0.7071f, -0.7071f, 0.0f },
+    { -0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { -0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { -0.7071f, -0.7071f, 0.0f, 0.0f },
+    { -0.7071f, -0.7071f, 0.0f, 0.0f },
+    { -0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { -0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.0f, -0.7071f, 0.7071f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, -0.7071f, 0.7071f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.7071f, -0.7071f, 0.0f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { 0.0f, -0.7071f, -0.7071f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -0.49999035f, -0.7071f, -0.49999035f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -0.7071f, -0.7071f, 0.0f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { -0.49999035f, -0.7071f, 0.49999035f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 1.5f, 0.0f },
+};
+
+u32 nbRotatedModelXColors[66] = {
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x80006060u, 0x80006060u,
+};
+
+f32 nbRotatedModelVerts12[18][4] __attribute__((aligned(16))) = {
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 1.5f, 0.0f },
+};
+
+u32 nbRotatedModelColors12[18] = {
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x80006060u, 0x80006060u,
+};
+
+f32 nbRotatedModelVerts30[48][4] __attribute__((aligned(16))) = {
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.0f, -1.0f, 1.0f, 0.0f },
+    { 0.7071f, -1.0f, 0.7071f, 0.0f },
+    { 0.7071f, -1.0f, 0.7071f, 0.0f },
+    { 1.0f, -1.0f, 0.0f, 0.0f },
+    { 1.0f, -1.0f, 0.0f, 0.0f },
+    { 0.7071f, -1.0f, -0.7071f, 0.0f },
+    { 0.7071f, -1.0f, -0.7071f, 0.0f },
+    { 0.0f, -1.0f, -1.0f, 0.0f },
+    { 0.0f, -1.0f, -1.0f, 0.0f },
+    { -0.7071f, -1.0f, -0.7071f, 0.0f },
+    { -0.7071f, -1.0f, -0.7071f, 0.0f },
+    { -1.0f, -1.0f, 0.0f, 0.0f },
+    { -1.0f, -1.0f, 0.0f, 0.0f },
+    { -0.7071f, -1.0f, 0.7071f, 0.0f },
+    { -0.7071f, -1.0f, 0.7071f, 0.0f },
+    { 0.0f, -1.0f, 1.0f, 0.0f },
+    { 0.0f, -1.0f, 1.0f, 0.0f },
+    { 0.0f, 0.0f, 1.0f, 0.0f },
+    { 0.7071f, -1.0f, 0.7071f, 0.0f },
+    { 0.7071f, 0.0f, 0.7071f, 0.0f },
+    { 1.0f, -1.0f, 0.0f, 0.0f },
+    { 1.0f, 0.0f, 0.0f, 0.0f },
+    { 0.7071f, -1.0f, -0.7071f, 0.0f },
+    { 0.7071f, 0.0f, -0.7071f, 0.0f },
+    { 0.0f, -1.0f, -1.0f, 0.0f },
+    { 0.0f, 0.0f, -1.0f, 0.0f },
+    { -0.7071f, -1.0f, -0.7071f, 0.0f },
+    { -0.7071f, 0.0f, -0.7071f, 0.0f },
+    { -1.0f, -1.0f, 0.0f, 0.0f },
+    { -1.0f, 0.0f, 0.0f, 0.0f },
+    { -0.7071f, -1.0f, 0.7071f, 0.0f },
+    { -0.7071f, 0.0f, 0.7071f, 0.0f },
+};
+
+u32 nbRotatedModelColors30[48] = {
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+    0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u, 0x20000060u,
+};
