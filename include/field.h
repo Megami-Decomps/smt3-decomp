@@ -222,7 +222,9 @@ typedef struct {
     s32 param;
 } fldTakaraTbl_t;
 
-extern fldTakaraTbl_t fldTakaraTable[];
+enum { FLD_TAKARA_TABLE_COUNT = 352 };
+
+extern fldTakaraTbl_t fldTakaraTable[FLD_TAKARA_TABLE_COUNT];
 
 typedef struct {
     u8 x;

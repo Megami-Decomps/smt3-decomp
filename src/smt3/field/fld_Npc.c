@@ -10,10 +10,14 @@
 #include "event.h"
 #include "field.h"
 #include "fldNpc_tag.h"
+#include "fldNpcOverride.h"
 #include "fldTakaraWork_tag.h"
 #include "ps2asm.h"
 #include "billboard.h"
 #include "effect.h"
+
+/* fldAllTblLoad fills these file-backed records before fldNpcLoad scans them. */
+fldNpcOverride_t fldNpcOverrides[FLD_NPC_OVERRIDE_COUNT] = {{0}};
 
 struct effNode_t;
 struct effResourceHeader_t;
@@ -293,19 +297,6 @@ typedef struct {
     s16 flagSwitch;
 } fldNpcTable_t;
 
-typedef struct {
-    s8 field;
-    s8 floor;
-    char name[14];
-    u8 unused;
-    s8 modelMajor;
-    u8 modelMinor;
-    s8 motion;
-    s8 hitSize;
-    s8 camera;
-    s16 eventBit;
-} fldNpcOverride_t;
-
 #include "fldNpcPath.h"
 typedef union {
     struct {
@@ -316,7 +307,6 @@ typedef union {
 } fldNpcPaths_t;
 
 extern fldNpcTable_t fldNpcDefaults[];
-extern fldNpcOverride_t fldNpcOverrides[];
 extern const fldNpcPathGroup1_t fldNpcLoadPathsFirst;
 extern const fldNpcPathGroup2_t fldNpcLoadPathsSecond;
 extern const volatile sdfVector4Unaligned_t fldNpcLoadScale, fldNpcLoadAxis;
@@ -379,7 +369,7 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     minor = fldNpcDefaults[npcId].modelMinor;
     motion = fldNpcDefaults[npcId].motion;
     camera = fldNpcDefaults[npcId].camera;
-    for (i = 0; i < 448; i++) {
+    for (i = 0; i < FLD_NPC_OVERRIDE_COUNT; i++) {
         if (fldNpcOverrides[i].field != fldGlobalBase.area || fldNpcOverrides[i].floor != fldGlobalBase.floor + 1 ||
             strcmp(fldNpcOverrides[i].name, name) != 0) {
             continue;

@@ -5,23 +5,16 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "fldLocationNames.h"
+#include "fldNpcOverride.h"
+
+/* The field table file populates these records for the chest and script code. */
+fldTakaraTbl_t fldTakaraTable[FLD_TAKARA_TABLE_COUNT] = {{0}};
 
 
 extern s32 dds3EffectFldTypeIsSpecial(s32 charId);
 
 extern s32 dds3EffectFldCharToType(s32 charId);
-
-typedef struct {
-    s16 fld;
-    s16 area;
-    u8 unk04[0x18];
-} fldNameEntry_t;
-
-extern fldNameEntry_t fldAreaNameTable[];
-
-extern fldNameEntry_t fldPlaceNameTable[];
-
-extern fldNameEntry_t fldFloorNameTable[];
 
 extern fldDanteGunState_t fldRunDanteGunFlag;
 
@@ -35,7 +28,7 @@ extern void sdfFileClose(s32 aHandle);
 
 extern const char fldAllTblPath[];
 
-extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldNpcOverrides[], fldTerminalTable[];
+extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldTerminalTable[];
 
 extern u8 fldAllCnt[];
 
@@ -56,13 +49,13 @@ void fldAllTblLoad(void)
     s32 fd = sdfFileOpen(fldAllTblPath);
 
     sdfFileRead(fd, fldAutoMapTitleTable, 0x4E0);
-    sdfFileRead(fd, fldAreaNameTable, 0x2BC0);
-    sdfFileRead(fd, fldPlaceNameTable, 0x24C0);
-    sdfFileRead(fd, fldFloorNameTable, 0x1880);
+    sdfFileRead(fd, fldAreaNameTable, sizeof(fldAreaNameTable));
+    sdfFileRead(fd, fldPlaceNameTable, sizeof(fldPlaceNameTable));
+    sdfFileRead(fd, fldFloorNameTable, sizeof(fldFloorNameTable));
     sdfFileRead(fd, D_00311450, 0x400);
     sdfFileRead(fd, D_00311850, 0x800);
-    sdfFileRead(fd, fldNpcOverrides, 0x2A00);
-    sdfFileRead(fd, fldTakaraTable, 0x1600);
+    sdfFileRead(fd, fldNpcOverrides, sizeof(fldNpcOverrides));
+    sdfFileRead(fd, fldTakaraTable, sizeof(fldTakaraTable));
     sdfFileRead(fd, fldTerminalTable, 0x80);
     sdfFileRead(fd, fldAllCnt, 0x100);
     sdfFileClose(fd);
@@ -627,7 +620,7 @@ s32 fldAutoMapFindArea(s32 fld, s32 area)
 {
     s32 i;
 
-    for (i = 1; i < 0x190; i++) {
+    for (i = 1; i < FLD_AREA_NAME_COUNT; i++) {
         if (fld == fldAreaNameTable[i].fld && area == fldAreaNameTable[i].area) {
             return i;
         }
@@ -639,7 +632,7 @@ s32 fldAutoMapFindPlace(s32 fld, s32 area)
 {
     s32 i;
 
-    for (i = 1; i < 0x150; i++) {
+    for (i = 1; i < FLD_PLACE_NAME_COUNT; i++) {
         if (fld == fldPlaceNameTable[i].fld && area == fldPlaceNameTable[i].area) {
             return i;
         }
@@ -651,7 +644,7 @@ s32 fldAutoMapFindFloor(s32 fld, s32 area)
 {
     s32 i;
 
-    for (i = 1; i < 0xE0; i++) {
+    for (i = 1; i < FLD_FLOOR_NAME_COUNT; i++) {
         if (fld == fldFloorNameTable[i].fld && area == fldFloorNameTable[i].area) {
             return i;
         }

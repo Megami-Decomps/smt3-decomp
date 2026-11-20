@@ -38,5 +38,29 @@
     "section": ".data",
     "offset": 1100,
     "owner_size": 1200
+  },
+  {
+    "name": "fldAutoMapAreaTable",
+    "owner": "fldAreaNameTable",
+    "unit": "field/fldAreaNames",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 11200
+  },
+  {
+    "name": "fldAutoMapPlaceTable",
+    "owner": "fldPlaceNameTable",
+    "unit": "field/fldPlaceNames",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 9408
+  },
+  {
+    "name": "fldAutoMapFloorTable",
+    "owner": "fldFloorNameTable",
+    "unit": "field/fldFloorNames",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 6272
   }
 ]
