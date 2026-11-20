@@ -611,6 +611,11 @@ void drawSceneBasicList(void) {
     }
 }
 
+typedef union {
+    u64 pairs[8];
+    u32 indices[16];
+} fldSdwIndices_t;
+
 #ifdef NON_MATCHING
 #include "draw3d.h"
 
@@ -626,11 +631,6 @@ typedef struct {
     u8 count;
     s8 reverse;
 } fldSdwEdge_t;
-
-typedef union {
-    u64 pairs[8];
-    u32 indices[16];
-} fldSdwIndices_t;
 
 extern sdfVector3_t fldSdwVertices04[], fldSdwVertices03[], fldSdwVertices08[], fldSdwVertices09[];
 extern sdfVector3_t fldSdwVertices07[], fldSdwVertices05[], fldSdwVertices06[], fldSdwVertices14[];
@@ -3498,3 +3498,32 @@ u32 fldPlayerUnit = 0;
 
 dds3Basic_t *fldDanteUnit = NULL;
 
+/* Individual triangles are 3 byte-sized vertex indices plus a zero fourth byte.
+ * fldSdwDraw copies two packed triangles at a time before passing the u32 view. */
+#define FLD_SDW_FACE(a, b, c) ((u32)(a) | ((u32)(b) << 8) | ((u32)(c) << 16))
+volatile fldSdwIndices_t fldSdwQuadIndices = {
+    .indices = {
+        FLD_SDW_FACE(0, 1, 2), FLD_SDW_FACE(0, 2, 3),
+        FLD_SDW_FACE(4, 5, 6), FLD_SDW_FACE(4, 6, 7),
+        FLD_SDW_FACE(8, 9, 10), FLD_SDW_FACE(8, 10, 11),
+        FLD_SDW_FACE(12, 13, 14), FLD_SDW_FACE(12, 14, 15),
+        FLD_SDW_FACE(16, 17, 18), FLD_SDW_FACE(16, 18, 19),
+        FLD_SDW_FACE(20, 21, 22), FLD_SDW_FACE(20, 22, 23),
+        FLD_SDW_FACE(24, 25, 26), FLD_SDW_FACE(24, 26, 27),
+        FLD_SDW_FACE(28, 29, 30), FLD_SDW_FACE(28, 30, 31),
+    },
+};
+
+volatile fldSdwIndices_t fldSdwTriIndices = {
+    .indices = {
+        FLD_SDW_FACE(0, 1, 2), FLD_SDW_FACE(3, 4, 5),
+        FLD_SDW_FACE(6, 7, 8), FLD_SDW_FACE(9, 10, 11),
+        FLD_SDW_FACE(12, 13, 14), FLD_SDW_FACE(15, 16, 17),
+        FLD_SDW_FACE(18, 19, 20), FLD_SDW_FACE(21, 22, 23),
+        FLD_SDW_FACE(24, 25, 26), FLD_SDW_FACE(27, 28, 29),
+        FLD_SDW_FACE(30, 31, 32), FLD_SDW_FACE(33, 34, 35),
+        FLD_SDW_FACE(36, 37, 38), FLD_SDW_FACE(39, 40, 41),
+        FLD_SDW_FACE(42, 43, 44), FLD_SDW_FACE(45, 46, 47),
+    },
+};
+#undef FLD_SDW_FACE

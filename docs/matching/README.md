@@ -138,6 +138,7 @@ both native and emitted sizes when they differ.
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 |  | [fldSnow.md](fldSnow.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
+| 1 | field/fldTest | [field/fldTestShadowData.md](field/fldTestShadowData.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
