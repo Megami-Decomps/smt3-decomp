@@ -1523,8 +1523,6 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
 }
 
 
-/* NON_MATCHING: 11 of 97 words differ (first at +0x2C). */
-#ifdef NON_MATCHING
 void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 r, s32 hojiID,
                            s32 npcidx)
 {
@@ -1534,13 +1532,13 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     fldEveRngBox_t *box;
     dds3Basic_t *point;
     fldResourcePointUnaligned_t *sisei;
-    fldEveHitSourceTable[i].put.data.parameters = &fldEveHitSourceTable[i].ball;
-    fldEveHitSourceTable[i].ball.Type = 0;
-    fldEveHitSourceTable[i].hit.data = &fldEveHitSourceTable[i].put;
     fldEveHitSourceTable[i].ball.r = r;
-    fldEveHitSourceTable[i].put.eventIndex = eveidx;
+    fldEveHitSourceTable[i].ball.Type = 0;
     fldEveHitSourceTable[i].put.type = 1;
+    fldEveHitSourceTable[i].put.eventIndex = eveidx;
     fldEveHitSourceTable[i].put.visible = 1;
+    fldEveHitSourceTable[i].put.data.parameters = &fldEveHitSourceTable[i].ball;
+    fldEveHitSourceTable[i].hit.data = &fldEveHitSourceTable[i].put;
     sisei = &fldEveHitSourceTable[i].sisei;
     sisei->pos.x = x;
     sisei->pos.y = y;
@@ -1553,8 +1551,8 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     sisei->scl.x = 1.0f;
     sisei->scl.y = 1.0f;
     sisei->scl.z = 1.0f;
-    sisei->scl.w = 1.0f;
     fldEveHitSourceTable[i].hit.transform = sisei;
+    sisei->scl.w = 1.0f;
     id = dds3AllocObjectId();
     fldEveHitSourceTable[i].hit.id = id;
     fldEveHitSourceTable[i].hit.name = resname;
@@ -1566,9 +1564,6 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     box->hitKind = 1;
     box->npcIndex = npcidx;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_AddEveHitNpc);
-#endif
 
 s32 fldCheckEveRngN(s32 npcidx) {
     s32 idx;
