@@ -61,3 +61,18 @@ Retail's order needs either the allocation's value live past its store, which
 no reading of the function provides, or a memory dependence between the stores,
 which one base register forbids. A second base register would create one, but
 retail forms all three addresses off the single `addiu $3, $16, %lo(sdfSndMap)`.
+
+## sdfSndIopSizeMsg data (sdf/sdfSound, 18 bytes)
+
+`sdfSndIopSizeMsg` is the named read-only format string passed to
+`printf` by `sdfSndVoiceMapInit`. The C object at `0x00549A48` includes its
+terminator and is exactly 18 bytes. The six natural alignment bytes before
+`sdfSndSeqMapInitMsg` at `0x00549A60` are unchanged and are not part of
+the string object.
+
+All 70 compiled functions, the complete owner data, and the linked retail
+image match. In the retained draft, the consumer's address relocations still
+resolve to the same string. The production report's 2,616-byte read-only
+section fuzzy score rises from 11.020962% to 99.92349%. The remaining
+four zero tail bytes are supplied by link alignment, separate from the six
+bytes after the string. No aggregate matched-data, function, or code gain.

@@ -447,6 +447,7 @@ sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	sixty-three of 282 words match	docs/
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/matching/sdf/sdfMovie.md	3
 Provider declarations	sdf/sdfSound	byte-neutral		docs/matching/sdf/sdfSound-declarations.md	3
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
+sdfSndIopSizeMsg data	sdf/sdfSound	18 bytes		docs/matching/sdf/sdfSound.md	65
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
 corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
 The corePkt VU1 packet builders written in assembly				docs/matching/sdf/sdfVu1.md	26

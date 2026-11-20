@@ -79,6 +79,7 @@ both native and emitted sizes when they differ.
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
@@ -106,7 +107,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
-| 1 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound-declarations.md](sdf/sdfSound-declarations.md) |
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |

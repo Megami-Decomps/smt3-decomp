@@ -510,7 +510,7 @@ void sdfSndLoadIRXModules(void) {
     SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
-extern char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
+extern const char sdfSndIopSizeMsg[]; /* "SDF_SND_IOP_SIZE\n" */
 extern const char sdfSndSeqMapInitMsg[]; /* "sdfSndSeqMapInit\n" */
 
 void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount);
@@ -586,7 +586,7 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
 extern s32 sceSifInitIopHeap(void);
 extern s32 sdfSndIopWorkAddr;
 
-INCLUDE_RODATA(const s32, "sdf/sdfSound", sdfSndIopSizeMsg);
+const char sdfSndIopSizeMsg[18] = "SDF_SND_IOP_SIZE\n";
 
 const char sdfSndSeqMapInitMsg[18] = "sdfSndSeqMapInit\n";
 
