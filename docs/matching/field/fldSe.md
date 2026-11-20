@@ -181,3 +181,18 @@ layout assertions, frozen EE/IRX retained-draft sweeps, inline-asm policy and
 primary/audit game-scope reports pass. Complete recovery 391/0 and birth-mask
 196/0 owner checks remain intact. Source/header/config/tool inputs are pinned
 before and after the compiler and aggregate checks.
+
+## Field BGM parameter table (field/fldSe, 3036 bytes)
+
+`fldBgmParamTable` is a writable array of 46 area records at
+`0x003095E0`. Each 66-byte record contains a signed 16-bit event flag and
+two 32-entry signed-byte sequence maps indexed by floor plus one.
+Nine records contain nonzero data; the other records are zero-initialized.
+
+The address previously named `gFldAreaBgm` is the event flag in record
+`0x22`, not a separate object. Both checks now read that member at
+`0x00309EA4`. The four raw bytes starting at `0x0030A1BC` and the separate
+`gFldBgmTop` table at `0x0030A1C0` remain unchanged.
+
+All 27 owner functions and the linked retail executable match. Both game
+and full reports gain 3036 matched-data bytes and no function or code bytes.

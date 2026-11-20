@@ -91,7 +91,6 @@ extern void p2sdSetBgmTrack(s32 track);
 extern s32 evtBitCheck(s32 no);
 
 extern u32 gFldBgmBit;
-extern s16 gFldAreaBgm __attribute__((section(".data")));
 
 extern void fldBgmPlay(void);
 
@@ -279,7 +278,88 @@ typedef struct {
     s8 alternate[32];
 } fldBgmParam_t;
 
-extern fldBgmParam_t fldBgmParamTable[];
+/* Indexed by field area, then by floor + 1 in either sequence map. */
+fldBgmParam_t fldBgmParamTable[0x2E] = {
+    [0x20] = {
+        .normal = {
+            0, 1, 1, 1, 0, 1, 1, 0,
+            1, 1, 0, 1, 1, 0, 2, 2,
+            2, 2, 2, 2, 2, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+        },
+    },
+    [0x22] = {
+        .bit = 0x06A7,
+        .normal = {
+            0, 1, 4, 4, 2, 2, 2, 2,
+            2, 3, 2, 0, 2, 2, 2, 2,
+            2, 2, 2, 0, 0, 2, 2, 3,
+            3, 2, 0, 0, 0, 0, 0, 0,
+        },
+        .alternate = {
+            0, 1, 4, 4, 2, 2, 2, 2,
+            2, 3, 2, 0, 3, 3, 3, 3,
+            3, 3, 3, 0, 0, 2, 2, 3,
+            3, 2, 0, 0, 0, 0, 0, 0,
+        },
+    },
+    [0x24] = {
+        .normal = {
+            0, 3, 3, 3, 3, 3, 3, 3,
+            0, 0, 0, 0, 3, 3, 3, 3,
+            3, 3, 3, 3, 3, 3, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+        },
+    },
+    [0x25] = {
+        .normal = {
+            0, 1, 0, 0, 1, 1, 1, 4,
+            4, 4, 4, 4, 4, 4, 4, 4,
+            4, 4, 4, 4, 4, 4, 4, 4,
+            4, 4, 4, 5, 0, 0, 0, 0,
+        },
+    },
+    [0x29] = {
+        .normal = {
+            0, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 2, 1, 1, 2, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+        },
+    },
+    [0x2A] = {
+        .normal = {
+            0, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 2, 1, 1, 1,
+        },
+    },
+    [0x2B] = {
+        .normal = {
+            0, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+        },
+    },
+    [0x2C] = {
+        .normal = {
+            0, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 2, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1,
+        },
+    },
+    [0x2D] = {
+        .normal = {
+            0, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 2, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 2,
+            1, 1, 1, 1, 1, 1, 1, 1,
+        },
+    },
+};
 extern s32 gFldStart;
 extern void fldBgmStop(void);
 extern void p2sdResumeBgm(s32 track);
@@ -698,14 +778,14 @@ void fldBgmBitChk(void)
         return;
     }
     if (gFldBgmBit == 0) {
-        if (evtBitCheck(gFldAreaBgm) != 0) {
+        if (evtBitCheck(fldBgmParamTable[0x22].bit) != 0) {
             fldBgmFadeOut();
             fldBgmPlay();
         } else {
             return;
         }
     } else {
-        if (evtBitCheck(gFldAreaBgm) != 0) {
+        if (evtBitCheck(fldBgmParamTable[0x22].bit) != 0) {
             return;
         }
         fldBgmFadeOut();
