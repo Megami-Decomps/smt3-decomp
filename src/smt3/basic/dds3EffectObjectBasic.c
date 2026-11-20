@@ -1179,3 +1179,12 @@ const effMagaP4Point_t dds3EffectMagaP4PointDefault = {
      {0.0f, -600.0f, 0.0f, 0.0f}},
     {100.0f, 100.0f, 100.0f, 100.0f}};
 
+
+dds3BasicFunction_t dds3EffectObjectBasicTable = {
+    dds3EffectObjectBasicConstructor,
+    dds3EffectObjectBasicDestructor,
+    dds3EffectObjectBasicMainProcedure,
+    dds3EffectObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};

@@ -67,3 +67,12 @@ s32 dds3SearchSceneBasicWorkData(u32 id) {
     basic = dds3SearchSceneBasic(scene, id, BASIC_TYPE_MATTEROBJECT);
     return ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->pPlane;
 }
+
+dds3BasicFunction_t dds3ModelBasicTable = {
+    dds3AllocModelBasicWorkData,
+    dds3ModelBasicFreeModel,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};

@@ -20,7 +20,7 @@ extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
 
 
-u32 EventObjectBasicConstructor(dds3Basic_t *pBasic)
+s32 EventObjectBasicConstructor(dds3Basic_t *pBasic)
 {
     dds3EventObjectBasicWorkData_t *work;
     dds3ObjectBaseControlWorkData_t *control;
@@ -73,3 +73,12 @@ dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basi
 
     return work->pObjectBaseControlWorkData;
 }
+
+dds3BasicFunction_t EventObjectBasicTable = {
+    EventObjectBasicConstructor,
+    EventObjectBasicDestructor,
+    EventObjectBasicMainProcuder,
+    NULL,
+    NULL,
+    NULL,
+};

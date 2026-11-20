@@ -1,5 +1,6 @@
 function	unit	size	distance	page	line
 Scene, Area and Mover callback tables	basic	72 bytes		docs/matching/basic/dds3BasicTables.md	3
+Unit, Matter, Effect, Event, Light, Path and Model callback tables	basic	168 bytes		docs/matching/basic/dds3BasicTables.md	21
 worldBasicTable data	basic/dds3WorldBasic	24 bytes		docs/matching/basic/dds3WorldBasic.md	3
 fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153

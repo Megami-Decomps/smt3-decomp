@@ -295,3 +295,12 @@ s32 dds3AllocEventBasicWorkData(dds3Basic_t *basic)
     memset(work, 0, 28);
     return 1;
 }
+
+dds3BasicFunction_t lightBasicTable = {
+    lightconstructor,
+    lightdestructor,
+    lightmainprocedure,
+    lightdrawprocedure,
+    NULL,
+    NULL,
+};

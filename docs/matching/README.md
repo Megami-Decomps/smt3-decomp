@@ -103,6 +103,7 @@ both native and emitted sizes when they differ.
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
+| 2 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 |  | [sdk/libm.md](sdk/libm.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
@@ -151,4 +152,3 @@ both native and emitted sizes when they differ.
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
 | 1 | basic/dds3WorldBasic | [basic/dds3WorldBasic.md](basic/dds3WorldBasic.md) |
-| 1 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |

@@ -289,3 +289,12 @@ s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
     }
     return 1;
 }
+
+dds3BasicFunction_t dds3MatterObjectBasicTable = {
+    dds3MatterObjectBasicConstructor,
+    dds3MatterObjectBasicDestructor,
+    dds3MatterObjectBasicMainProcedure,
+    dds3MatterObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};

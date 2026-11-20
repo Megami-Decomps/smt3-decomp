@@ -381,3 +381,12 @@ const f32 dds3UnitAdditionalRotation[4] __attribute__((aligned(16))) = { 0.0f, 1
 
 const f32 dds3UnitWobbleAxis[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 
+
+dds3BasicFunction_t dds3UnitObjectBasicTable = {
+    dds3UnitObjectBasicConstructor,
+    dds3UnitObjectBasicDestructor,
+    dds3UnitObjectBasicMainProcedure,
+    dds3UnitObjectBasicDrawProcedure,
+    NULL,
+    NULL,
+};

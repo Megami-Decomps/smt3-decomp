@@ -1,4 +1,4 @@
-# Matching notes: Scene, Area and Mover Basic
+# Matching notes: Basic callback tables
 
 ## Scene, Area and Mover callback tables (basic, 72 bytes)
 
@@ -17,3 +17,20 @@ functions and the full linked retail image match.
 The game report now includes these 72 bytes in its data total. The full
 report transfers the same bytes out of the raw suffix. Neither report
 gains matched functions, code, or aggregate matched-data bytes.
+
+## Unit, Matter, Effect, Event, Light, Path and Model callback tables (basic, 168 bytes)
+
+Seven more writable six-slot `dds3BasicFunction_t` records occupy
+`0x002FA728` through `0x002FA7CF`. Their 23 callback pointers and
+19 null slots match retail. Event's constructor now declares the signed
+32-bit result required by the shared callback type; its native code is
+unchanged. The Path table references the existing allocator in the Light
+owner and the existing destructor in the Path owner. The Camera table
+and the earlier Basic tables remain unchanged.
+
+All 90 functions in the seven owners and the complete linked image match
+retail. The game report includes 168 more bytes of source-owned data;
+the full report takes the same bytes out of the raw data region. Both
+reports credit 24 additional matched-data bytes (the Path table). The
+other six tables match in the linked image, but the object report scores
+some relocation fields differently. Function and code totals are unchanged.
