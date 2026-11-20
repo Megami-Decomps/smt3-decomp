@@ -219,7 +219,6 @@ const char evtSceneDispNameEffect[16] = "EFFECT_O";
 
 const char evtSceneDispNameStatic[16] = "STATIC_M";
 
-#ifdef NON_MATCHING
 typedef struct {
     const char *name;
     s32 type;
@@ -231,6 +230,7 @@ typedef struct {
     evtSceneDispRow_t rows[17];
 } evtSceneDispRows_t;
 
+#ifdef NON_MATCHING
 extern const evtSceneDispRows_t evtSceneDispRows;
 extern s32 evtSceneDispTimer, evtSceneDispState;
 extern s8 dds3PadBitTable[];
@@ -387,10 +387,45 @@ saddr_t evtSceneDispProcess(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
+#endif
 
-INCLUDE_RODATA(const s32, "event/evtDebug", evtSceneDispRows);
+extern const char D_0054F7A8[8];
+extern const char D_0054F7B0[8];
+extern const char D_0054F7B8[8];
+extern const char D_0054F7C0[8];
+extern const char D_0054F7C8[8];
+extern const char D_0054F7D0[8];
+extern const char D_0054F7D8[8];
+extern const char D_0054F7E0[8];
+extern const char D_0054F7E8[8];
+extern const char D_0054F7F0[8];
+extern const char D_0054F7F8[8];
+extern const char D_0054F800[8];
+extern const char D_0054F808[8];
 
+const evtSceneDispRows_t evtSceneDispRows = {
+    {
+        { D_0054F7A8, 2, { 0 }, 0 },
+        { D_0054F7B0, 3, { 0 }, 0 },
+        { evtSceneDispNameCamera, 4, { 0 }, 0 },
+        { D_0054F7B8, 5, { 0 }, 0 },
+        { evtSceneDispNameMatter, 6, { 0 }, 0 },
+        { evtSceneDispNameEffect, 7, { 0 }, 0 },
+        { D_0054F7C0, 8, { 0 }, 0 },
+        { D_0054F7C8, 9, { 0 }, 0 },
+        { evtSceneDispNameStatic, 10, { 0 }, 0 },
+        { D_0054F7D0, 11, { 0 }, 0 },
+        { D_0054F7D8, 12, { 0 }, 0 },
+        { D_0054F7E0, 13, { 0 }, 0 },
+        { D_0054F7E8, 14, { 0 }, 0 },
+        { D_0054F7F0, 15, { 0 }, 0 },
+        { D_0054F7F8, 16, { 0 }, 0 },
+        { D_0054F800, 17, { 0 }, 0 },
+        { D_0054F808, 0, { 0 }, 0 },
+    },
+};
+
+#ifndef NON_MATCHING
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
 

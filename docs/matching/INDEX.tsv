@@ -97,6 +97,7 @@ effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/
 effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370		docs/matching/effect/effPCPBoss.md	454
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	512 of 512 words match	docs/matching/effect/parManager.md	33
+evtSceneDispRows data	event/evtDebug	0xCC		docs/matching/event/evtDebug.md	3
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
 RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/evtEventViewer.md	30
 evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/event/evtEventViewer.md	66
