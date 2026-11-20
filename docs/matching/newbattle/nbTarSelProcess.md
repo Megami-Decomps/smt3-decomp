@@ -54,6 +54,31 @@ build and deploy both passed.
 
 ## CursorSelect (newbattle/nbTarSelProcess, 0x294)
 
+165 of 165 words match at the native 660-byte extent. The initial
+state is captured before the optional sound callback and reused for
+the signed count selection; target type and current area are observed
+after the callback. The three native count paths separate the signed
+target count from the raw friend byte. The eligibility test reads the
+enemy count only for a positive friend count. Pad decisions retain
+the native signed and bit-test paths, directional cursor writes and
+area-switch store order. The final UpdateSelect, sound, and status
+timer reset retain their native sequence.
+
+The eligibility code uses a shared ordinary false label followed by
+the actual consumer. The same branch-and-delay-slot shape is present
+in the matched camp item-message selection. This preserves the
+native fast exit and the independent positive enemy branch, without
+an empty operand on the boolean result.
+
+The signed and raw friend observations are distinct, with a localized
+operand on their actual process pointer. The late area jump retains its
+real area and raw-friend inputs. Two local bindings carry the native
+movement result and area snapshot. The final signed test is ordinary C. No
+caller-clobbered binding crosses a call, and no unrelated memory fence
+or invented bound is involved.
+
+### Historical guarded draft
+
 40 of 165 words match in the native extent; 115 differ and 40 native bytes remain uncovered.
 The draft emits 620 bytes against the native 660-byte extent.
 The C remains `NON_MATCHING`. Unsupported volatile process and pad RAM views

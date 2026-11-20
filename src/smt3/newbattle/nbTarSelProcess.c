@@ -500,15 +500,15 @@ void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process)
 extern u8 dds3PadButtonState[64];
 extern void nbPlaySe(s32 no);
 
-#ifdef NON_MATCHING
 void CursorSelect(nbTarSelProcessData_t *process)
 {
     s32 count = 0;
     s32 state;
     s32 both;
-    s32 moved;
-    s32 area;
-    u8 friendCount;
+    /* Keep the result and post-callback area snapshot in their native homes. */
+    FAKEMATCH_ASM_REG(s32, moved, "$5");
+    FAKEMATCH_ASM_REG(s32, area, "$8");
+    u32 friendCount;
 
     if (process->data->stat & 0x200000) {
         return;
@@ -533,17 +533,33 @@ void CursorSelect(nbTarSelProcessData_t *process)
     }
     moved = 0;
     area = process->nowcarea;
-    if (area == state) {
-        count = process->friendcnt;
-    } else if (area == 2) {
-        count = process->enemycnt;
+    if (area != state) {
+        if (area == 2) {
+            count = process->enemycnt;
+            goto enemy_area;
+        }
+        friendCount = (u8)process->friendcnt;
+        goto both_areas;
     }
-    /* Preserve the raw byte snapshot; both later tests interpret it as s8. */
-    friendCount = process->friendcnt;
-    both = 0;
-    if ((s8)friendCount > 0 && process->enemycnt > 0) {
+    friendCount = (u8)process->friendcnt;
+    /* Keep the real process pointer between the raw and signed views. */
+    FAKEMATCH_ASM_LIVE(process);
+    count = process->friendcnt;
+    goto both_areas;
+enemy_area:
+    friendCount = (u8)process->friendcnt;
+both_areas:
+    /* Shared rejection path, as in cmpStartItemMsg split eligibility check. */
+    if ((s8)friendCount <= 0) {
+        goto not_both;
+    }
+    if (process->enemycnt > 0) {
         both = 1;
+        goto have_both;
     }
+not_both:
+    both = 0;
+have_both:
     if (count >= 2) {
         if (((s8)dds3PadButtonState[0x25] < 0 || ((s8)dds3PadButtonState[0x27] < 0 && !both)) &&
             process->nowno == count - 1) {
@@ -567,18 +583,26 @@ void CursorSelect(nbTarSelProcessData_t *process)
         }
     }
     if ((s8)dds3PadButtonState[0x26] < 0 || (s8)dds3PadButtonState[0x27] < 0) {
-        if (area == 1) {
+        /* Keep the two real area-selection inputs distinct through dispatch. */
+        FAKEMATCH_ASM_LIVE_PAIR(area, friendCount);
+        switch (area) {
+        case 1:
             if (process->enemycnt > 0) {
                 process->nowno = 0;
                 process->nowcarea = 2;
                 moved = 1;
             }
-        } else if (area == 2) {
-            if ((s8)friendCount > 0) {
+            break;
+        case 2: {
+            /* The raw snapshot is sign-tested only on this path. */
+            s32 friendSign = (s32)(friendCount << 24);
+            if (friendSign > 0) {
                 process->nowcarea = 1;
                 process->nowno = 0;
                 moved = 1;
             }
+            break;
+        }
         }
     }
     if (moved) {
@@ -587,9 +611,6 @@ void CursorSelect(nbTarSelProcessData_t *process)
         process->statusTime = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CursorSelect);
-#endif
 
 void CursorSelectAuto(nbTarSelProcessData_t *process)
 {
