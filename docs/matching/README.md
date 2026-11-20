@@ -132,6 +132,8 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3SequenceList | [kernel/dds3SequenceList.md](kernel/dds3SequenceList.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
+| 1 | kernel/dds3GlobalWork | [kernel/dds3GlobalWork.md](kernel/dds3GlobalWork.md) |
+| 1 | kernel/dds3DebugStuff | [kernel/dds3DebugStuff.md](kernel/dds3DebugStuff.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 |  | [fldSnow.md](fldSnow.md) |

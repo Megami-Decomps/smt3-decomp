@@ -236,6 +236,8 @@ fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4		docs/matching/kernel/dds3Ad
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8		docs/matching/kernel/dds3AdminiProcess.md	49
 fclEncycConfigureMode3, fclEncycAllocEntry and fclEncycConfigureMode2	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	29 of 42 words	docs/matching/kernel/dds3AdminiProcess.md	71
 dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMain.md	3
+Primitive debug text box tables	kernel/dds3DebugStuff	15 bytes		docs/matching/kernel/dds3DebugStuff.md	3
+PrimLine 3D geometry data	kernel/dds3GlobalWork	264 bytes		docs/matching/kernel/dds3GlobalWork.md	3
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 CallNewBattleTest	kernel/dds3SequenceList	0x4C		docs/matching/kernel/dds3SequenceList.md	3

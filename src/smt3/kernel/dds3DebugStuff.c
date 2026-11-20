@@ -440,3 +440,11 @@ f32 fldCamPitch = 0.0f;
 
 f32 fldCamLength = 0.0f;
 
+/* RGB debug row styles and labels. The byte array lives beside the pointer
+ * table in .data, not in the GP-relative small-data range. */
+u8 dds3PrimDebugTextBoxAttrs[3] __attribute__((section(".data"))) = { 2, 4, 5 };
+char *dds3PrimDebugTextBoxLabels[3] = {
+    dds3DebugLabelR,
+    dds3DebugLabelG,
+    dds3DebugLabelB,
+};

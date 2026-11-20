@@ -694,9 +694,9 @@ u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 
 
 extern f32 sdf3DUpVector[4];
 extern sdfMatrix4_t sdfViewMatrix;
-extern const f32 dds3PrimLineOutline[13][4];
-extern const f32 dds3PrimLineScale[4];
-extern const u8 dds3PrimLinePairs[20][2];
+extern f32 dds3PrimLineOutline[13][4];
+extern f32 dds3PrimLineScale[4];
+extern u8 dds3PrimLinePairs[20][2];
 extern void MultMatrixRev(const void *aMatrix);
 
 void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
@@ -708,8 +708,8 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted)
     u64 *packet;
     u64 *endColor;
     u64 *endXyz;
-    const f32 (*outline)[4];
-    const u8 (*pair)[2];
+    f32 (*outline)[4];
+    u8 (*pair)[2];
     s32 i;
     s32 shade;
 
@@ -811,3 +811,44 @@ dds3FontReqFunc_t dds3FontReqTable = { dds3FontReqDestroy, dds3FontReqDrawFont }
 
 dds3FontReqFunc_t dds3FontReqBoxTable = { dds3FontReqFree, dds3FontReqDrawBoxLine };
 
+/* The first vector is at the start of this .data contribution; the aligned scale follows the edge list. */
+f32 dds3PrimLineOutline[13][4] = {
+    {-64.0f, -64.0f, -256.0f, 0.0f},
+    {64.0f, -64.0f, -256.0f, 0.0f},
+    {64.0f, 64.0f, -256.0f, 0.0f},
+    {-64.0f, 64.0f, -256.0f, 0.0f},
+    {-64.0f, -64.0f, 64.0f, 0.0f},
+    {64.0f, -64.0f, 64.0f, 0.0f},
+    {64.0f, 64.0f, 64.0f, 0.0f},
+    {-64.0f, 64.0f, 64.0f, 0.0f},
+    {-128.0f, -128.0f, 64.0f, 0.0f},
+    {128.0f, -128.0f, 64.0f, 0.0f},
+    {128.0f, 128.0f, 64.0f, 0.0f},
+    {-128.0f, 128.0f, 64.0f, 0.0f},
+    {0.0f, 0.0f, 256.0f, 0.0f},
+};
+u8 dds3PrimLinePairs[20][2] = {
+    {0, 1},
+    {1, 2},
+    {2, 3},
+    {3, 0},
+    {0, 4},
+    {1, 5},
+    {2, 6},
+    {3, 7},
+    {4, 5},
+    {5, 6},
+    {6, 7},
+    {7, 4},
+    {8, 9},
+    {9, 10},
+    {10, 11},
+    {11, 8},
+    {8, 12},
+    {9, 12},
+    {10, 12},
+    {11, 12},
+};
+f32 dds3PrimLineScale[4] __attribute__((aligned(16))) = {
+    1.0f, 0.5f, -0.25f, 1.0f,
+};
