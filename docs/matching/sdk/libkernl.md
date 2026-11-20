@@ -548,34 +548,26 @@ register-specific high-address producers and unchanged function targets.
 The full retail image is byte-identical. Generated-source/stale controls,
 draft/IRX checks and regression gates are recorded with the qualification.
 
-## _sceFs_Rcv_Intr
+## _sceFs_Rcv_Intr (sdk/libkernl, 0x3C0)
 
-948 emitted bytes against 960 native bytes. Of the 237 overlapping native
-words, 212 match and 25 differ; twelve bytes remain uncovered. The first
-difference is at `+0x344`, in the final pending-semaphore search. All earlier
-copy paths and the command jump table match. Normal builds retain assembly.
+240 of 240 words match at the native 960-byte extent. The callback ignores
+both arguments and takes separate snapshots of the four uncached completion
+fields. Nonnegative semaphore IDs copy the result first. The command paths
+preserve the native fragment repairs, directory/status copies and bounded
+output copy. The callback's command dispatch and register ABI are unchanged.
 
-The callback ignores both arguments and snapshots four uncached completion
-fields separately. Nonnegative semaphore values copy the result first.
-Command 2 repairs signed-positive head/tail read fragments with byte loops
-that preserve length reloads. Command 11 copies the 324-byte directory entry;
-command 12 copies the 64-byte status record. Commands 23, 25 and 26 snapshot
-an output pointer/count and cap the unsigned count at 1024 before copying.
-Other commands use only the common completion path. Negative semaphore IDs
-are normalized and remove the first matching entry from the 32-slot pending
-table without signaling; nonnegative IDs call `iSignalSema`, including zero.
+For a negative ID, low-word negation updates the stack snapshot. The actual
+comparison key has a local native register binding. An interrupt callback
+and the request-side filesystem code share the actual 32-word pending table.
+The callback's localized volatile view preserves each native word read and
+the single -1 write to the first matching entry. It does not add
+synchronization or change the request-side protocol. This branch never
+signals a semaphore; the nonnegative path calls the unchanged signal
+provider with the actual ID, including zero.
 
-The shared output record gives the native scratch offsets and 48-byte frame
-without padding. Separately decoded output size and source pointers preserve
-the native bounded-copy setup. The remaining search keeps the normalized key
-in a different lifetime and shares the return epilogue more aggressively.
-Returning from inside the match instead of breaking emits 936 bytes and
-changes the scan into a pointer loop; dropping the separate search key emits
-944 bytes. An early return after the whole negative-ID branch is inert.
-The preferred 948-byte source is retained until a genuine SDK 2.9 allocation
-or loop-control premise explains this tail. No qualified allocator hook is
-available for this compiler; no register pins, volatile scratch or padding
-were introduced.
+The stock compiler emits the separate slot-zero entry and the indexed
+remainder of the scan without handwritten branches, a fake read or a
+changed table layout.
 
 ## sceDclose
 

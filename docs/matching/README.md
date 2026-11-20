@@ -46,6 +46,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
+| 4 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
@@ -66,7 +67,6 @@ both native and emitted sizes when they differ.
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
-| 3 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 3 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |

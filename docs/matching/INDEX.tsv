@@ -191,6 +191,7 @@ fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEv
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldHitChkUnitVWM	field/fldHit	0xCB8		docs/matching/field/fldHit.md	209
+fldHitChkUnit	field/fldHit	0xC10	772 of 772 words match	docs/matching/field/fldHit.md	288
 fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fldMain-vectors.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field/fldMain.md	56
@@ -507,15 +508,15 @@ sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	395
 supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	421
 sceSifInitRpc	sdk/libkernl	0x19C	103 of 103 words match	docs/matching/sdk/libkernl.md	459
 sceOpen				docs/matching/sdk/libkernl.md	484
-_sceFs_Rcv_Intr				docs/matching/sdk/libkernl.md	551
-sceDclose				docs/matching/sdk/libkernl.md	580
-kputchar				docs/matching/sdk/libkernl.md	603
-sceTtyInit				docs/matching/sdk/libkernl.md	630
-sceTtyWrite				docs/matching/sdk/libkernl.md	676
-iPutTLBEntry				docs/matching/sdk/libkernl.md	726
-iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	769
-LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	820
-_request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	937
+_sceFs_Rcv_Intr	sdk/libkernl	0x3C0	240 of 240 words match	docs/matching/sdk/libkernl.md	551
+sceDclose				docs/matching/sdk/libkernl.md	572
+kputchar				docs/matching/sdk/libkernl.md	595
+sceTtyInit				docs/matching/sdk/libkernl.md	622
+sceTtyWrite				docs/matching/sdk/libkernl.md	668
+iPutTLBEntry				docs/matching/sdk/libkernl.md	718
+iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	761
+LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	812
+_request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	929
 __ieee754_sqrtf				docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	29
 sceMcSync	sdk/libmc	0xE0	56 of 56 words (224 bytes) match	docs/matching/sdk/libmc.md	78

@@ -1964,9 +1964,6 @@ extern s32 fsRequestSemas[32];
 extern void *memcpy(void *destination, const void *source, size_t size);
 extern s32 iSignalSema(s32 sema);
 
-/* NON_MATCHING: 948/960 bytes; the final pending-semaphore search differs
- * in key lifetime and early-return scheduling. Copy paths and jump table match. */
-#ifdef NON_MATCHING
 void _sceFs_Rcv_Intr(void *packet, void *argument)
 {
     fsCompletion_t completion;
@@ -2033,13 +2030,16 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
     }
     }
     if (completion.sema < 0) {
-        s32 sema;
-
-        completion.sema = -completion.sema;
+        /* Keep the normalized lookup key in its native register while
+         * writing back the separate stack snapshot. */
+        FAKEMATCH_ASM_REG(s32, sema, "$6");
+        completion.sema = (s32)(0u - (u32)completion.sema);
         sema = completion.sema;
+        /* The request threads and this interrupt callback share the table.
+         * Keep each word access explicit; this is not synchronization. */
         for (index = 0; index < 32; index++) {
-            if (fsRequestSemas[index] == sema) {
-                fsRequestSemas[index] = -1;
+            if (((volatile s32 *)fsRequestSemas)[index] == sema) {
+                ((volatile s32 *)fsRequestSemas)[index] = -1;
                 break;
             }
         }
@@ -2047,9 +2047,6 @@ void _sceFs_Rcv_Intr(void *packet, void *argument)
     }
     iSignalSema(completion.sema);
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", _sceFs_Rcv_Intr);
-#endif
 
 extern s32 fsCommandSema __attribute__((section(".data")));
 

@@ -182,7 +182,7 @@ extern s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic);
 
 extern void fldPlayerCalc_Hit(void);
 
-extern void fldHitChkUnit(sdfVector4_t *phys_pos);
+extern void fldHitChkUnit(f32 *phys_pos);
 
 EXTERN_LATE_CONST sdfVector4_t fldCameraLookAt;
 
@@ -742,7 +742,7 @@ dds3Basic_t *fldGetUnitFollowCamera(void)
 
 void fldRegistUnitPad(void)
 {
-    sdfVector4_t pos;
+    f32 pos[4] __attribute__((aligned(16)));
     fldUnitControl_t *ctrl;
 
     ctrl = fldGetUnitControl();
@@ -761,13 +761,13 @@ void fldRegistUnitPad(void)
     fldGlobalBase.hitMatterIndex = -1;
     fldPlayerCalc_Hit();
     dds3GetPosPoseSet(ctrl->handle);
-    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    SDF_VU0_STOREVECTOR_NOMEM(pos);
     if (fldGlobalBase.area < 0xA) {
-        pos.y = pos.y + 20.0f;
+        pos[1] = pos[1] + 20.0f;
     } else {
-        pos.y = pos.y + 10.0f;
+        pos[1] = pos[1] + 10.0f;
     }
-    fldHitChkUnit(&pos);
+    fldHitChkUnit(pos);
 }
 
 void fldReleaseUnitPad(void)

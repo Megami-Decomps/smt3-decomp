@@ -284,3 +284,23 @@ Generated/stale controls, 34 tooling scripts, 240 guarded draft modes with their
 negative controls, 14 IRX host checks and inline-asm/static checks pass. Native
 semantics, the two constraint-group ablations and finite peer/data exceptions
 have independent review. Exact-commit CI is verified separately after publication.
+
+## fldHitChkUnit (field/fldHit, 0xC10)
+
+772 of 772 words match at the native 3,088-byte extent. One initialized
+sentinel supplies both the no-floor store and the actual automap reset
+argument. Its localized outgoing register operand preserves the ordering
+of the floor and movement-W writes without carrying a value across the
+call. The previous pose and input coordinates are captured in their actual
+phases, and the movement threshold uses the native binary32 value
+0x3dcccccc.
+
+On each relevant contact, the clearance returned by the provider remains
+separate from the clearance actually applied to the three displacement
+coordinates. The published coordinates and 16-bit contact flag retain the
+native store phases. No additional vector lane, callback or layout is
+assumed.
+
+The callers use real float arrays for the XYZ input/output contract while
+retaining their existing native alignment and VU transfer. Their emitted
+code and data are unchanged.

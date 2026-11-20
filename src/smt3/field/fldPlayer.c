@@ -479,7 +479,7 @@ void fldPlayerCalc_WarpRun(void)
     sdfVector4_t position __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     sdfVector4_t oldPosition __attribute__((aligned(16)));
-    sdfVector4_t collisionPosition;
+    f32 collisionPosition[4] __attribute__((aligned(16)));
     f32 pitch, warp, angle, step, distance, pi;
     dds3Basic_t *basic;
     dds3PoseSet_t *pose;
@@ -554,13 +554,13 @@ void fldPlayerCalc_WarpRun(void)
     position.z = SDF_FRAME_MOVE(2, fldGlobalBase.z - sdfCos((-fldPlayerWarpState * pi) / 180.0f) * distance);
     dds3SetPosPoseSet(control->handle, &position);
     if (l_UseCollision != 0) {
-        collisionPosition.x = position.x;
-        collisionPosition.y = position.y;
-        collisionPosition.z = position.z;
+        collisionPosition[0] = position.x;
+        collisionPosition[1] = position.y;
+        collisionPosition[2] = position.z;
         fldGlobalBase.x = position.x;
         fldGlobalBase.y = position.y;
         fldGlobalBase.z = position.z;
-        fldHitChkUnit(&collisionPosition.x);
+        fldHitChkUnit(collisionPosition);
         if (fldGlobalBase.hitValid != 0) {
             position.x = SDF_FRAME_MOVE_HIT(0, fldGlobalBase.hitX);
             position.y = SDF_FRAME_MOVE_HIT(1, fldGlobalBase.hitY + 44.0f);

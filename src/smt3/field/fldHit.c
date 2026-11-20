@@ -1089,19 +1089,6 @@ extern void rsetOtOfs(s32 offset);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void rsetAlpha(s32 mode);
 
-#ifdef NON_MATCHING
-/* 684 of 772 words match, first differing word at +0x70; 3088 of 3088 native
- * bytes, with the frame, every block and every branch in place. The 88 left
- * are one compiler property and its knock-ons: retail rematerialises the
- * HImode 1 stored into hitflag with its own `addiu $2,$0,1` in both push-out
- * blocks, while here cse1 substitutes the lowpart of the SImode 1 already
- * live in `inside` (tools/cc1probe.sh --cse, verify: OK: cse_insn uid3363
- * REWRITTEN, preferrable cse.c:1621 const cost=8 regcost=1 against subreg
- * cost=0 regcost=1) and loop.c's movable combination does the same in the
- * other block. The reference that gives the invariant 1 flips its allocation
- * order with the fldGlobalBase base pointer ($19/$20, ~20 words); the rest is
- * the float schedule of the position+movement block and the +0x70 store pair.
- * VWM formerly shared the hitflag blocker; its constraints are localized below. */
 void fldHitChkUnit(f32 *position)
 {
     sdfVector4_t current;
@@ -1123,26 +1110,33 @@ void fldHitChkUnit(f32 *position)
     s32 floorHit;
     s32 sky;
     s32 debug;
+    FAKEMATCH_ASM_REG(s32, reset, "$4");
     s32 moved;
     s32 inside;
     fldCollisionFace_t *data;
     u32 attributes;
+    dds3PoseSet_t *pose;
 
     memset(&movement, 0, 16);
     debug = fldRunDanteGunFlag.word18 != 0;
     movement.w = 1.0f;
     sky = -1;
     fldHitChkSlope = -1;
-    floorHit = -1;
+    /* Share the actual no-floor value and the map reset in the native
+     * outgoing register, preserving the ordering of both local stores. */
+    reset = -1;
+    FAKEMATCH_ASM_LIVE(reset);
+    floorHit = reset;
     fldHitChkMatter = -1;
-    fldAutoMapNameD(-1);
+    fldAutoMapNameD(reset);
     fldGlobalBase.word44 = 0;
     if (fldGlobalBase.hitMatterIndex != -1) {
         index = fldGlobalBase.hitMatterIndex;
         if (fldMatterTable[index].matter != NULL) {
-            movement.x = fldMatterTable[index].matter->poseset->pos.x - fldMatterTable[index].previousPosition[0];
-            movement.y = (fldMatterTable[index].matter->poseset->pos.y - fldMatterTable[index].previousPosition[1]) + 10.0f;
-            movement.z = fldMatterTable[index].matter->poseset->pos.z - fldMatterTable[index].previousPosition[2];
+            pose = fldMatterTable[index].matter->poseset;
+            movement.x = pose->pos.x - fldMatterTable[index].previousPosition[0];
+            movement.y = (pose->pos.y - fldMatterTable[index].previousPosition[1]) + 10.0f;
+            movement.z = pose->pos.z - fldMatterTable[index].previousPosition[2];
         }
         fldGlobalBase.hitMatterIndex = -1;
     }
@@ -1151,12 +1145,18 @@ void fldHitChkUnit(f32 *position)
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
         rsetAlpha(0);
     }
-    previous.x = fldHitChkWork[0];
-    previous.y = fldHitChkWork[1];
-    previous.z = fldHitChkWork[2];
-    current.x = position[0] + movement.x;
-    current.y = position[1] + movement.y;
-    current.z = position[2] + movement.z;
+    {
+        f32 inputX = position[0];
+        f32 inputY = position[1];
+        f32 inputZ = position[2];
+
+        previous.x = fldHitChkWork[0];
+        previous.y = fldHitChkWork[1];
+        previous.z = fldHitChkWork[2];
+        current.x = inputX + movement.x;
+        current.y = inputY + movement.y;
+        current.z = inputZ + movement.z;
+    }
     if (fldGlobalBase.area == 1) {
         radius = 25.0f;
         current.y = current.y - 35.0f;
@@ -1170,7 +1170,7 @@ void fldHitChkUnit(f32 *position)
     delta.x = current.x - previous.x;
     delta.y = current.y - previous.y;
     delta.z = current.z - previous.z;
-    if (MATH_VectorLength(&delta) < 0.1f) {
+    if (MATH_VectorLength(&delta) < 0.099999997f) {
         position[0] = previous.x;
         position[1] = previous.y;
         position[2] = previous.z;
@@ -1358,10 +1358,16 @@ void fldHitChkUnit(f32 *position)
                 }
             } else {
                 if (distance < radius) {
+                    /* Separate the returned clearance from the conditional push-out value.
+                     * The latter is consumed by all three displacement coordinates. */
+                    f32 initial;
+                    FAKEMATCH_ASM_REG(f32, effective, "$f5");
                     HitPositionInside2(&clearance, fldMatterTable[index].mode2D,
                                        fldMatterTable[index].numedges, &current.x,
                                        &fldMatterTable[index], radius);
-                    if (clearance < 0.0f) {
+                    effective = clearance;
+                    initial = effective;
+                    if (effective < 0.0f) {
                         inside = 0;
                     } else {
                         inside = 1;
@@ -1369,18 +1375,20 @@ void fldHitChkUnit(f32 *position)
                     if (inside == 1 &&
                         (fldRunDanteGunFlag.counter == 0 ||
                          dds3PadButtonState[0x2B] == 0)) {
-                        projected.x = current.x - fldMatterTable[index].normal[0] * signedDistance;
+                        f32 nX = fldMatterTable[index].normal[0];
+                        projected.x = current.x - nX * signedDistance;
                         projected.y = current.y - fldMatterTable[index].normal[1] * signedDistance;
                         projected.z = current.z - fldMatterTable[index].normal[2] * signedDistance;
                         if (fldMatterTable[index].normal[1] < -0.75f) {
                             fldHitChkMatter = index;
-                            if (floorHit >= 0 && clearance < distance) {
-                                clearance = distance;
+                            if (floorHit >= 0 && initial < distance) {
+                                effective = distance;
+                                clearance = effective;
                             }
-                            current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
-                            current.y = (projected.y + fldMatterTable[index].normal[1] * clearance) - 1.0f;
-                            current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
-                            if (clearance == radius) {
+                            current.x = projected.x + fldMatterTable[index].normal[0] * effective;
+                            current.y = (projected.y + fldMatterTable[index].normal[1] * effective) - 1.0f;
+                            current.z = projected.z + fldMatterTable[index].normal[2] * effective;
+                            if (effective == radius) {
                                 floorHit = index;
                             }
                             if (fldMatterTable[index].matter != NULL) {
@@ -1392,19 +1400,24 @@ void fldHitChkUnit(f32 *position)
                                 previous.y = previous.y + fldMatterTable[index].matter->poseset->pos.y;
                                 previous.z = previous.z + fldMatterTable[index].matter->poseset->pos.z;
                             }
-                            fldMatterTable[index].hitflag = 1;
+                            {
+                                FAKEMATCH_ASM_REG(u16, hitValue, "$2") = 1;
+
+                                fldMatterTable[index].hitflag = hitValue;
+                            }
                             fldGlobalBase.hitX = current.x;
                             fldGlobalBase.hitY = current.y;
                             fldGlobalBase.hitZ = current.z;
                             fldGlobalBase.hitValid = 1;
                             fldHitMatterIndex = index;
                         } else if (!(signedDistance < 0.0f)) {
-                            if (clearance < distance) {
-                                clearance = distance;
+                            if (initial < distance) {
+                                effective = distance;
+                                clearance = effective;
                             }
-                            current.x = projected.x + fldMatterTable[index].normal[0] * clearance;
-                            current.y = projected.y + fldMatterTable[index].normal[1] * clearance;
-                            current.z = projected.z + fldMatterTable[index].normal[2] * clearance;
+                            current.x = projected.x + fldMatterTable[index].normal[0] * effective;
+                            current.y = projected.y + fldMatterTable[index].normal[1] * effective;
+                            current.z = projected.z + fldMatterTable[index].normal[2] * effective;
                             if (fldMatterTable[index].matter != NULL) {
                                 moved = 0;
                                 current.x = current.x + fldMatterTable[index].matter->poseset->pos.x;
@@ -1414,12 +1427,20 @@ void fldHitChkUnit(f32 *position)
                                 previous.y = previous.y + fldMatterTable[index].matter->poseset->pos.y;
                                 previous.z = previous.z + fldMatterTable[index].matter->poseset->pos.z;
                             }
-                            fldMatterTable[index].hitflag = 1;
-                            fldGlobalBase.hitValid = 1;
-                            fldGlobalBase.hitX = current.x;
-                            fldGlobalBase.hitY = current.y;
-                            fldGlobalBase.hitZ = current.z;
-                            fldHitMatterIndex = index;
+                            {
+                                /* Capture the coordinates this contact will publish. */
+                                f32 publishedX = current.x;
+                                FAKEMATCH_ASM_REG(f32, publishedY, "$f1") = current.y;
+                                FAKEMATCH_ASM_REG(f32, publishedZ, "$f2") = current.z;
+                                FAKEMATCH_ASM_REG(u16, hitValue, "$2") = 1;
+                                FAKEMATCH_ASM_LIVE(hitValue);
+                                fldMatterTable[index].hitflag = hitValue;
+                                fldGlobalBase.hitValid = 1;
+                                fldGlobalBase.hitX = publishedX;
+                                fldGlobalBase.hitY = publishedY;
+                                fldGlobalBase.hitZ = publishedZ;
+                                fldHitMatterIndex = index;
+                            }
                         }
                     }
                 }
@@ -1450,9 +1471,6 @@ void fldHitChkUnit(f32 *position)
     fldHitChkWork[1] = current.y;
     fldHitChkWork[2] = current.z;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldHit", fldHitChkUnit);
-#endif
 
 extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
