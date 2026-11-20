@@ -173,45 +173,17 @@ extern f32 evtMoonGlowAngle;
 extern f32 evtMoonTimer, evtMoonPhase, evtMoonState;
 extern s32 evtMoonMove;
 
-#ifdef NON_MATCHING
 s32 evtMoonProcess2(dds3ProcessID_t *id) {
-    s32 glyphUW;
-    s32 glyphKind;
-    s32 drawPulse;
-    s32 drawOverlay;
-    s32 drawGlow;
-    s32 overlayUW;
-    s32 glowUW;
-    s32 glyphVH;
-    s32 overlayVH;
-    s32 glowVH;
-    s32 overlayX;
-    s32 overlayY;
-    s32 glyphW;
-    s32 overlayW;
-    s32 glyphH;
-    s32 overlayH;
-    s32 glyphU;
-    s32 splitU;
-    s32 overlayU;
-    s32 glowU;
-    s32 glyphV;
     f32 nextShown;
     f32 nextHidden;
     f32 zeroTerm;
     f32 oneMinusShown;
     f32 moveTimer;
-    f32 glowAngle;
-    f32 pulseAlpha0;
-    f32 glowAlpha0;
-    f32 pulseAlpha1;
-    f32 overlayAlpha;
-    f32 glowAlpha1;
-    f32 glowScale0;
-    f32 glowScale1;
     f32 moveStrength;
+    FAKEMATCH_ASM_REG(f32, duration, "$f2");
     f32 moveScale;
     f32 moveAlpha;
+    FAKEMATCH_ASM_REG(f32, glowBeforeTick, "$f2");
     u32 packedAlpha;
     s32 offsetX;
     s32 offsetY;
@@ -219,15 +191,7 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
     s32 iconY;
     s32 firstAlpha;
     s32 baseAlpha;
-    s32 secondAlpha;
-    u32 spriteRgb;
-    sdfTexHandle_t *glyphTexture;
-    sdfTexHandle_t *overlayTexture;
-    sdfTexHandle_t *glowTexture;
-    s32 glyphX;
-    s32 splitX;
-    s32 glyphY;
-    s32 splitY;
+    FAKEMATCH_ASM_REG(s32, secondAlpha, "$23");
     u8 glyphPhase;
     u8 pulsePhase;
     u8 alphaPhase;
@@ -237,6 +201,9 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
     u8 finalPhase;
     evtMoonProcessData_t *data;
     dds3GlobalWork_t *moonWork;
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, badgeWork, "$2");
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, initialWork, "$3");
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, incomingWork, "$4");
 
     moveScale = 0.0f;
     firstAlpha = 0;
@@ -247,9 +214,14 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
     if (fldChkVortex() == 0) return 0;
     if (dds3NullDrawProc() != 0) return 0;
     data = dds3GetProcessData(id);
-    if (DDS3_GBWK->moonFlags & 2) {
+    /* Separate the post-call acquisition from the two later member reads. */
+    incomingWork = DDS3_GBWK;
+    FAKEMATCH_ASM_LIVE(incomingWork);
+    initialWork = incomingWork;
+    FAKEMATCH_ASM_LIVE(initialWork);
+    if (initialWork->moonFlags & 2) {
         if (gMoonCnt < 1.0f) {
-            nextShown = gMoonCnt + evtMoonFadeInStep;
+            nextShown = gMoonCnt + 0.09999999404f;
             if (!(nextShown > 1.0f)) {
                 gMoonCnt = nextShown;
             } else {
@@ -257,135 +229,104 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
             }
         }
     } else if (gMoonCnt > 0.0f) {
-        nextHidden = gMoonCnt - evtMoonFadeOutStep;
-        if (!(nextHidden < 0.0f)) {
-            gMoonCnt = nextHidden;
-        } else {
+        nextHidden = gMoonCnt - 0.09999999404f;
+        if (nextHidden < 0.0f) {
             gMoonCnt = 0.0f;
+        } else {
+            gMoonCnt = nextHidden;
         }
     }
     if (DeadMoonTmx != 0) {
         evtDeadMoonDraw(data);
     } else {
+        f32 yBias;
+        f32 xBias;
         oneMinusShown = 1.0f - gMoonCnt;
         zeroTerm = gMoonCnt * 0.0f;
-        offsetY = (s32) (zeroTerm + (oneMinusShown * 0.0f));
-        offsetX = (s32) (zeroTerm + (oneMinusShown * -250.0f));
-        if (DDS3_GBWK->moonFlags & 2) {
+        xBias = oneMinusShown * -250.0f;
+        yBias = oneMinusShown * 0.0f;
+        offsetY = (s32)(zeroTerm + yBias);
+        offsetX = (s32)(zeroTerm + xBias);
+        if (initialWork->moonFlags & 2) {
             iconY = offsetY + 0x15;
             rsetOtOfs(0x47);
             rsetAlpha(0);
             rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
             DrwSprite2D(offsetX + 0x10, iconY, 0x61, 0x2B, 1, 1, 0x61, 0x2B, 0x80808080, data->MoonTmx1);
-            glyphKind = 0;
             glyphPhase = DDS3_GBWK->moonPhase;
             switch (glyphPhase) {
             case 0:
-                glyphX = offsetX + 0x3C;
-                glyphY = offsetY + 0x23;
-                glyphW = 0x40;
-                glyphH = 0x12;
-                glyphU = 0x32;
-                glyphTexture = data->MoonTmx4;
-                glyphV = 0x27;
-                glyphUW = 0x40;
-                glyphVH = 0x12;
-                glyphKind = 1;
+                DrwSprite2D(offsetX + 0x3C, offsetY + 0x23, 64, 0x12, 50, 39, 64, 0x12, 0x80808080, data->MoonTmx4);
                 break;
             case 1:
             case 15:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 1;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 1, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 2:
             case 14:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 0x10;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 16, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 3:
             case 13:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 0x1F;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 31, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 4:
             case 12:
-                glyphX = offsetX + 0x3C;
-                glyphY = offsetY + 0x23;
-                glyphW = 0x2F;
-                glyphH = 0x12;
-                glyphU = 2;
-                glyphTexture = data->MoonTmx5;
-                glyphV = 0x2D;
-                glyphUW = 0x2F;
-                glyphVH = 0x12;
-                glyphKind = 1;
+                DrwSprite2D(offsetX + 0x3C, offsetY + 0x23, 47, 0x12, 2, 45, 47, 0x12, 0x80808080, data->MoonTmx5);
                 break;
             case 5:
             case 11:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 0x3D;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 61, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 6:
             case 10:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 0x4C;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 76, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 7:
             case 9:
-                splitX = offsetX + 0x3D;
-                splitY = offsetY + 0x22;
-                splitU = 0x5B;
-                glyphKind = 2;
+                DrwSprite2D(offsetX + 0x3D, offsetY + 0x22, 0xE, 0x13, 91, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
+                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
                 break;
             case 8:
-                DrwSprite2D(offsetX + 0x3C, offsetY + 0x23, 0x2F, 0x12, 2, 0x27, 0x2F, 0x12, 0x80808080, data->MoonTmx4);
+                DrwSprite2D(offsetX + 0x3C, offsetY + 0x23, 47, 0x12, 2, 39, 47, 0x12, 0x80808080, data->MoonTmx4);
+                break;
+            default:
                 break;
             }
-            if (glyphKind == 2) {
-                DrwSprite2D(splitX, splitY, 0xE, 0x13, splitU, 1, 0xE, 0x13, 0x80808080, data->MoonTmx3);
-                DrwSprite2D(offsetX + 0x4A, offsetY + 0x27, 0x15, 0x13, 0x6A, 1, 0x15, 0x13, 0x80808080, data->MoonTmx3);
-            } else if (glyphKind == 1) {
-                DrwSprite2D(glyphX, glyphY, glyphW, glyphH, glyphU, glyphV, glyphUW, glyphVH, 0x80808080, glyphTexture);
-            }
             rsetAlpha(1);
-            drawPulse = 1;
             pulsePhase = DDS3_GBWK->moonPhase;
             switch (pulsePhase) {
             case 5:
             case 11:
-                pulseAlpha0 = 20.0f;
-                pulseAlpha1 = 10.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E,
+                                      0x808080, data->MoonTmx2, offsetX, offsetY,
+                                      evtMoonTimer, 20.0f, 10.0f, 100.0f, 100.0f);
                 break;
             case 6:
             case 10:
-                pulseAlpha0 = 40.0f;
-                pulseAlpha1 = 20.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E,
+                                      0x808080, data->MoonTmx2, offsetX, offsetY,
+                                      evtMoonTimer, 40.0f, 20.0f, 100.0f, 100.0f);
                 break;
             case 7:
             case 9:
-                pulseAlpha0 = 50.0f;
-                pulseAlpha1 = 20.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E,
+                                      0x808080, data->MoonTmx2, offsetX, offsetY,
+                                      evtMoonTimer, 50.0f, 20.0f, 100.0f, 100.0f);
                 break;
             case 8:
-                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, 30.0f, 100.0f, 100.0f, 100.0f);
-                drawPulse = 0;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E,
+                                      0x808080, data->MoonTmx2, offsetX, offsetY,
+                                      evtMoonTimer, 30.0f, 100.0f, 100.0f, 100.0f);
                 break;
-            default:
-                drawPulse = 0;
+            case 0: case 1: case 2: case 3: case 4:
+            case 12: case 13: case 14: case 15:
                 break;
-            }
-            if (drawPulse) {
-                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x3E, 1, 0x3A, 0x3E, 0x808080, data->MoonTmx2, offsetX, offsetY, evtMoonTimer, pulseAlpha0, pulseAlpha1, 100.0f, 100.0f);
             }
             rsetAlpha(0);
             alphaPhase = DDS3_GBWK->moonPhase;
@@ -441,11 +382,22 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
             }
             iconX = offsetX + 0x1E;
             DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x1E, 0x15, 0x1C, 0x1C, ((u32)firstAlpha << 0x18) | 0x808080, data->MoonTmx3);
-            DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x63, 0x1E, 0x1C, 0x1C, ((u32)secondAlpha << 0x18) | 0x808080, data->MoonTmx1);
+            {
+                FAKEMATCH_ASM_REG(u32, secondPacked, "$2");
+                FAKEMATCH_ASM_REG(u32, shiftedBits, "$2");
+                /* Form the second sprite payload only after the first draw. */
+                FAKEMATCH_ASM_LIVE(secondAlpha);
+                shiftedBits = (u32)secondAlpha << 0x18;
+                FAKEMATCH_ASM_LIVE(shiftedBits);
+                secondPacked = shiftedBits | 0x808080;
+
+                DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x63, 0x1E, 0x1C, 0x1C, secondPacked, data->MoonTmx1);
+            }
             rsetAlpha(1);
-            drawOverlay = 1;
             moonWork = DDS3_GBWK;
             overlayPhase = moonWork->moonPhase;
+            /* Only an invalid phase skips both dispatches. */
+            if (overlayPhase >= 16) goto afterGlow;
             switch (overlayPhase) {
             case 5:
             case 11:
@@ -453,15 +405,11 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                                       0x1F, 0x20, 0x808080, data->MoonTmx5,
                                       offsetX, offsetY, evtMoonState,
                                       35.0f, 100.0f, 100.0f, 100.0f);
-                overlayX = 0x1D;
-                overlayY = 0x14;
-                overlayW = 0x1F;
-                overlayH = 0x20;
-                overlayU = 0x52;
-                overlayUW = 0x1F;
-                overlayVH = 0x20;
-                overlayTexture = data->MoonTmx4;
-                overlayAlpha = 35.0f;
+                evtDrawDeadMoonSprite(0x1D, 0x14, 0x1F, 0x20, 0x52, 1,
+                                      0x1F, 0x20, 0x808080, data->MoonTmx4,
+                                      offsetX, offsetY, evtMoonState,
+                                      100.0f, 35.0f, 100.0f, 100.0f);
+                moonWork = DDS3_GBWK;
                 break;
             case 6:
             case 10:
@@ -469,15 +417,11 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                                       0x27, 0x24, 0x808080, data->MoonTmx4,
                                       offsetX, offsetY, evtMoonState,
                                       35.0f, 100.0f, 100.0f, 100.0f);
-                overlayX = 0x1A;
-                overlayY = 0x12;
-                overlayW = 0x27;
-                overlayH = 0x24;
-                overlayU = 1;
-                overlayUW = 0x27;
-                overlayVH = 0x24;
-                overlayTexture = data->MoonTmx4;
-                overlayAlpha = 35.0f;
+                evtDrawDeadMoonSprite(0x1A, 0x12, 0x27, 0x24, 1, 1,
+                                      0x27, 0x24, 0x808080, data->MoonTmx4,
+                                      offsetX, offsetY, evtMoonState,
+                                      100.0f, 35.0f, 100.0f, 100.0f);
+                moonWork = DDS3_GBWK;
                 break;
             case 7:
             case 9:
@@ -485,158 +429,100 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                                       0x2B, 0x2A, 0x808080, data->MoonTmx5,
                                       offsetX, offsetY, evtMoonState,
                                       40.0f, 100.0f, 100.0f, 100.0f);
-                overlayX = 0x18;
-                overlayY = 0xF;
-                overlayW = 0x2B;
-                overlayH = 0x2A;
-                overlayU = 1;
-                overlayUW = 0x2B;
-                overlayVH = 0x2A;
-                overlayTexture = data->MoonTmx5;
-                overlayAlpha = 40.0f;
+                evtDrawDeadMoonSprite(0x18, 0xF, 0x2B, 0x2A, 1, 1,
+                                      0x2B, 0x2A, 0x808080, data->MoonTmx5,
+                                      offsetX, offsetY, evtMoonState,
+                                      100.0f, 40.0f, 100.0f, 100.0f);
+                moonWork = DDS3_GBWK;
                 break;
             case 8:
                 evtDrawDeadMoonSprite(0x12, 0xA, 0x36, 0x33, 0x39, 1,
                                       0x36, 0x33, 0x808080, data->MoonTmx6,
                                       offsetX, offsetY, evtMoonState,
                                       35.0f, 100.0f, 100.0f, 100.0f);
-                overlayX = 0x12;
-                overlayY = 0xA;
-                overlayW = 0x36;
-                overlayH = 0x33;
-                overlayU = 1;
-                overlayUW = 0x36;
-                overlayVH = 0x33;
-                overlayTexture = data->MoonTmx6;
-                overlayAlpha = 35.0f;
-                break;
-            default:
-                drawOverlay = 0;
-                break;
-            }
-            if (drawOverlay) {
-                evtDrawDeadMoonSprite(overlayX, overlayY, overlayW, overlayH, overlayU, 1,
-                                      overlayUW, overlayVH, 0x808080, overlayTexture,
+                evtDrawDeadMoonSprite(0x12, 0xA, 0x36, 0x33, 1, 1,
+                                      0x36, 0x33, 0x808080, data->MoonTmx6,
                                       offsetX, offsetY, evtMoonState,
-                                      100.0f, overlayAlpha, 100.0f, 100.0f);
+                                      100.0f, 35.0f, 100.0f, 100.0f);
+                moonWork = DDS3_GBWK;
+                break;
+            case 0: case 1: case 2: case 3: case 4:
+            case 12: case 13: case 14: case 15:
+                break;
             }
-            drawGlow = 1;
-            glowPhase = moonWork->moonPhase;
+            {
+                /* The native glow stage rereads the byte, including on no-overlay paths. */
+                dds3GlobalWork_t *glowWork = moonWork;
+                FAKEMATCH_ASM_LIVE(glowWork);
+                glowPhase = glowWork->moonPhase;
+            }
             switch (glowPhase) {
             case 0:
-                spriteRgb = 0x4A40FF;
-                glowAlpha0 = 70.0f;
-                glowAngle = evtMoonPhase;
-                glowScale1 = 100.0f;
-                glowTexture = data->MoonTmx1;
-                glowU = 0x63;
-                glowUW = 0x1C;
-                glowVH = 0x1C;
-                glowAlpha1 = 70.0f;
-                glowScale0 = 70.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1,
+                                      0x1C, 0x1C, 0x4A40FF, data->MoonTmx1,
+                                      offsetX, offsetY, evtMoonPhase, 70.0f,
+                                      70.0f, 70.0f, 100.0f);
                 break;
             case 1:
             case 15:
-                spriteRgb = 0x6060B0;
-                glowAlpha0 = 75.0f;
-                glowAngle = evtMoonPhase;
-                glowScale0 = 60.0f;
-                glowTexture = data->MoonTmx1;
-                glowScale1 = 90.0f;
-                glowU = 0x63;
-                glowUW = 0x1C;
-                glowVH = 0x1C;
-                glowAlpha1 = 75.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1,
+                                      0x1C, 0x1C, 0x6060B0, data->MoonTmx1,
+                                      offsetX, offsetY, evtMoonPhase, 75.0f,
+                                      75.0f, 60.0f, 90.0f);
                 break;
             case 2:
             case 14:
-                spriteRgb = 0x7070A0;
-                glowAlpha0 = 75.0f;
-                glowAngle = evtMoonPhase;
-                glowScale0 = 60.0f;
-                glowTexture = data->MoonTmx1;
-                glowScale1 = 90.0f;
-                glowU = 0x63;
-                glowUW = 0x1C;
-                glowVH = 0x1C;
-                glowAlpha1 = 75.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1,
+                                      0x1C, 0x1C, 0x7070A0, data->MoonTmx1,
+                                      offsetX, offsetY, evtMoonPhase, 75.0f,
+                                      75.0f, 60.0f, 90.0f);
                 break;
             case 3:
             case 13:
-                spriteRgb = 0x808090;
-                glowAlpha0 = 75.0f;
-                glowAngle = evtMoonPhase;
-                glowScale0 = 70.0f;
-                glowTexture = data->MoonTmx1;
-                glowScale1 = 90.0f;
-                glowU = 0x63;
-                glowUW = 0x1C;
-                glowVH = 0x1C;
-                glowAlpha1 = 75.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1,
+                                      0x1C, 0x1C, 0x808090, data->MoonTmx1,
+                                      offsetX, offsetY, evtMoonPhase, 75.0f,
+                                      75.0f, 70.0f, 90.0f);
                 break;
             case 4:
             case 12:
-                spriteRgb = 0x808080;
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
                                       0x808080, data->MoonTmx1, offsetX, offsetY,
                                       evtMoonPhase, 70.0f, 70.0f, 70.0f, 90.0f);
-                glowAlpha0 = 20.0f;
-                glowTexture = data->MoonTmx2;
-                glowAngle = evtMoonGlowAngle;
-                glowScale0 = 60.0f;
-                glowU = 1;
-                glowScale1 = 75.0f;
-                glowUW = 0x3A;
-                glowVH = 0x3E;
-                glowAlpha1 = 20.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1,
+                                      0x3A, 0x3E, 0x808080, data->MoonTmx2,
+                                      offsetX, offsetY, evtMoonGlowAngle, 20.0f,
+                                      20.0f, 60.0f, 75.0f);
                 break;
             case 5:
             case 11:
-                spriteRgb = 0x808080;
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
                                       0x808080, data->MoonTmx1, offsetX, offsetY,
                                       evtMoonPhase, 55.0f, 65.0f, 75.0f, 100.0f);
-                glowScale1 = 65.0f;
-                glowAngle = evtMoonGlowAngle;
-                glowTexture = data->MoonTmx2;
-                glowAlpha0 = 40.0f;
-                glowAlpha1 = 60.0f;
-                glowScale0 = 50.0f;
-                glowU = 1;
-                glowUW = 0x3A;
-                glowVH = 0x3E;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1,
+                                      0x3A, 0x3E, 0x808080, data->MoonTmx2,
+                                      offsetX, offsetY, evtMoonGlowAngle, 40.0f,
+                                      60.0f, 50.0f, 65.0f);
                 break;
             case 6:
             case 10:
-                spriteRgb = 0x808080;
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
                                       0x808080, data->MoonTmx1, offsetX, offsetY,
                                       evtMoonPhase, 70.0f, 70.0f, 75.0f, 100.0f);
-                glowAngle = evtMoonGlowAngle;
-                glowTexture = data->MoonTmx2;
-                glowAlpha0 = 40.0f;
-                glowAlpha1 = 60.0f;
-                glowU = 1;
-                glowUW = 0x3A;
-                glowVH = 0x3E;
-                glowScale0 = 65.0f;
-                glowScale1 = 85.0f;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1,
+                                      0x3A, 0x3E, 0x808080, data->MoonTmx2,
+                                      offsetX, offsetY, evtMoonGlowAngle, 40.0f,
+                                      60.0f, 65.0f, 85.0f);
                 break;
             case 7:
             case 9:
-                spriteRgb = 0x808080;
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
                                       0x808080, data->MoonTmx1, offsetX, offsetY,
                                       evtMoonPhase, 80.0f, 80.0f, 110.0f, 80.0f);
-                glowScale0 = 80.0f;
-                glowScale1 = 100.0f;
-                glowAngle = evtMoonGlowAngle;
-                glowTexture = data->MoonTmx2;
-                glowAlpha0 = 50.0f;
-                glowAlpha1 = 70.0f;
-                glowU = 1;
-                glowUW = 0x3A;
-                glowVH = 0x3E;
+                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1,
+                                      0x3A, 0x3E, 0x808080, data->MoonTmx2,
+                                      offsetX, offsetY, evtMoonGlowAngle, 50.0f,
+                                      70.0f, 80.0f, 100.0f);
                 break;
             case 8:
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C,
@@ -648,18 +534,11 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 1, 1, 0x3A, 0x3E,
                                       0x808080, data->MoonTmx2, offsetX, offsetY,
                                       evtMoonGlowAngle, 60.0f, 80.0f, 100.0f, 130.0f);
-                drawGlow = 0;
                 break;
             default:
-                drawGlow = 0;
                 break;
             }
-            if (drawGlow) {
-                evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, glowU, 1,
-                                      glowUW, glowVH, spriteRgb, glowTexture,
-                                      offsetX, offsetY, glowAngle, glowAlpha0,
-                                      glowAlpha1, glowScale0, glowScale1);
-            }
+        afterGlow:
             rsetAlpha(0);
             if (evtMoonMove > 0) {
                 evtMoonMove -= 1;
@@ -669,88 +548,130 @@ s32 evtMoonProcess2(dds3ProcessID_t *id) {
                 case 0:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 1:
                 case 15:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 2:
                 case 14:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 3:
                 case 13:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 25.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 100.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 4:
                 case 12:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 35.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 110.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 5:
                 case 11:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 60.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 6:
                 case 10:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 7:
                 case 9:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 80.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 case 8:
                     moveTimer = (f32) evtMoonMove;
                     moveStrength = 100.0f;
+                    duration = SDF_FRAMES_F(30.0f);
                     moveScale = 120.0f;
-                    moveAlpha = (moveTimer * moveStrength) / SDF_FRAMES_F(30.0f);
+                    moveAlpha = (moveTimer * moveStrength) / duration;
                     break;
                 }
                 evtDrawDeadMoonSprite(0xF, 4, 0x3A, 0x3E, 0x63, 1, 0x1C, 0x1C, 0xFFFFFF, data->MoonTmx1, offsetX, offsetY, 0.0f, moveAlpha, moveAlpha, moveScale, moveScale);
                 rsetAlpha(0);
+                badgeWork = DDS3_GBWK;
+            } else {
+                badgeWork = DDS3_GBWK;
             }
-            packedAlpha = (u32)baseAlpha << 0x18;
-            if (DDS3_GBWK->moonPhase == 0) {
-                DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 1, 0x15, 0x1C, 0x1C, packedAlpha, data->MoonTmx3);
+            {
+                u32 markerHigh;
+                packedAlpha = (u32)baseAlpha << 0x18;
+                if (badgeWork->moonPhase == 0) {
+                    FAKEMATCH_ASM_REG(s32, badgeX, "$4") = iconX;
+                    FAKEMATCH_ASM_LIVE_PAIR(badgeX, packedAlpha);
+                    DrwSprite2D(badgeX, iconY, 0x1C, 0x1C, 1, 0x15, 0x1C, 0x1C, packedAlpha, data->MoonTmx3);
+                    markerHigh = 0x800000;
+                } else {
+                    markerHigh = 0x800000;
+                    FAKEMATCH_ASM_LIVE(markerHigh);
+                }
+                FAKEMATCH_ASM_LIVE(markerHigh);
+                markerHigh |= 0x8080;
+                DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 1, 0x15, 0x1C, 0x1C, packedAlpha | markerHigh, data->MoonTmx3);
             }
-            DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 1, 0x15, 0x1C, 0x1C, packedAlpha | 0x808080, data->MoonTmx3);
             finalPhase = DDS3_GBWK->moonPhase;
             if ((finalPhase == 1) || (finalPhase == 0xF)) {
                 DrwSprite2D(iconX, iconY, 0x1C, 0x1C, 0x63, 0x1E, 0x1C, 0x1C, 0x26808080, data->MoonTmx1);
+                glowBeforeTick = evtMoonGlowAngle;
+            } else {
+                glowBeforeTick = evtMoonGlowAngle;
             }
-            evtMoonGlowAngle += SDF_FRAME_STEP(evtMoonPhaseRate);
-            evtMoonPhase += SDF_FRAME_STEP(evtMoonPhaseRate);
-            evtMoonTimer += SDF_FRAME_STEP(evtMoonTimerRate);
-            evtMoonState += SDF_FRAME_STEP(evtMoonStateRate);
+            {
+                f32 phaseRate;
+                f32 phase;
+                f32 timer;
+                f32 timerRate;
+                f32 state;
+                f32 stateRate;
+                phaseRate = SDF_FRAME_STEP(0.09999999404f);
+                timer = evtMoonTimer;
+                phase = evtMoonPhase;
+                glowBeforeTick += phaseRate;
+                state = evtMoonState;
+                /* The stock EE compiler emits the original 0x3e999999 pool word. */
+                timerRate = SDF_FRAME_STEP(0.2999999822f);
+                phase += phaseRate;
+                stateRate = SDF_FRAME_STEP(0.1999999881f);
+                timer += timerRate;
+                evtMoonGlowAngle = glowBeforeTick;
+                state += stateRate;
+                evtMoonPhase = phase;
+                evtMoonTimer = timer;
+                evtMoonState = state;
+            }
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtMoon", evtMoonProcess2);
-#endif
 
 extern s32 dds3GetRandIntA(s32 minimum, s32 range);
 extern s32 evtBitCheck(s32 eventNo);
