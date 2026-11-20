@@ -14,5 +14,29 @@
     "section": ".data",
     "offset": 160,
     "owner_size": 25760
+  },
+  {
+    "name": "fldSceneBgmTrackTable",
+    "owner": "gFldBgmTop",
+    "unit": "field/fldBgmTop",
+    "section": ".data",
+    "offset": 280,
+    "owner_size": 1200
+  },
+  {
+    "name": "fldBgmTrackTable",
+    "owner": "gFldBgmTop",
+    "unit": "field/fldBgmTop",
+    "section": ".data",
+    "offset": 1000,
+    "owner_size": 1200
+  },
+  {
+    "name": "DNG_MAX",
+    "owner": "gFldBgmTop",
+    "unit": "field/fldBgmTop",
+    "section": ".data",
+    "offset": 1100,
+    "owner_size": 1200
   }
 ]

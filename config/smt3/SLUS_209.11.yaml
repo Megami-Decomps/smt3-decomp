@@ -418,6 +418,8 @@ segments:
       - [0x20A4F0, data, data_003094F0]
       - [0x20A5E0, .data, field/fldSe]
       - [0x20B1BC, data, data_0030A1BC]
+      - [0x20B1C0, .data, field/fldBgmTop]
+      - [0x20B670, data, data_0030A670]
       - [0x217EF0, .data, effect/effManager]
       - [0x217FE0, data, data_00316FE0]
       - [0x218380, .data, effect/polyManager]

@@ -196,3 +196,17 @@ The address previously named `gFldAreaBgm` is the event flag in record
 
 All 27 owner functions and the linked retail executable match. Both game
 and full reports gain 3036 matched-data bytes and no function or code bytes.
+
+## gFldBgmTop (field/fldBgmTop, 1200 data bytes)
+
+The writable block at `0x30A1C0..0x30A670` is a 60-row table:
+each 20-byte record holds a 32-bit integer SMG bank ID and the original
+16 zero-initialized transition bytes. This is separate from the BGM
+parameter table owned by `fldSe`.
+
+The table retains the native interior names `fldSceneBgmTrackTable`
+(offset 280), `fldBgmTrackTable` (1000), and `DNG_MAX` (1100) as
+non-owning aliases. None introduces another allocation or a pointer in
+the initializer. The canonical hand-maintained symbol entry reserves
+the owner without replacing the interior references. The linked image,
+its neighboring raw ranges and the existing consumers remain unchanged.

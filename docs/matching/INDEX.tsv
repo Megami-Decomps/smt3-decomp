@@ -209,6 +209,7 @@ fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md
 fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	84
 fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	132
 Field BGM parameter table	field/fldSe	3036 bytes		docs/matching/field/fldSe.md	185
+gFldBgmTop	field/fldBgmTop	1200 data bytes		docs/matching/field/fldSe.md	200
 fldSkyDrawFilter	field/fldSky	0xAD8		docs/matching/field/fldSky.md	3
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
