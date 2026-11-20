@@ -777,3 +777,20 @@ Current guarded-draft coverage, IRX syntax checks, 794 regression tests,
 generated-source controls, full retail byte equality, no-op rebuild and
 production report scope checks pass. Earlier lost diagnostic packets are
 historical attestations; the ablations and final qualification above are fresh.
+
+## cmbRotateModelPanel (facility/fclCombineInit, 0x27C)
+
+159 of 159 words match at 636 bytes. The mode switch keeps the original
+bottom and height rules, and the incoming radius is reused as its doubled
+diameter. Each of the 64 iterations emits six vertices and their colors in the original order; it leaves all W
+fields untouched.
+The second angle wraps from segment 63 to segment 0.
+
+The degree increment, pi multiply, and divide are separate binary32
+operations in the retail order. The first conversion and its genuine degree
+product use their native FP temporaries before the first trig call; no
+fixed temporary survives a call. The second degree product is prepared
+among the independent first-endpoint stores and consumed before the next
+trig call. These local compiler aids are not original source spelling.
+The native cosine and sine call order and each post-call center read are
+preserved. All existing C functions and owned data in the unit still match.

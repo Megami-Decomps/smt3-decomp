@@ -128,6 +128,7 @@ cmbDrawBirthDevilMaskBG	facility/fclCombineInit	0x160	88 of 88 words match	docs/
 cmbDrawUnitLevel	facility/fclCombineInit	0x1C0	112 of 112 words match	docs/matching/facility/fclCombineInit.md	566
 cmbUpdateCameraZoom	facility/fclCombineInit	0xE8	58 of 58 words match	docs/matching/facility/fclCombineInit.md	620
 cmbDrawSequence	facility/fclCombineInit	0x27C		docs/matching/facility/fclCombineInit.md	724
+cmbRotateModelPanel	facility/fclCombineInit	0x27C	159 of 159 words match	docs/matching/facility/fclCombineInit.md	781
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3
