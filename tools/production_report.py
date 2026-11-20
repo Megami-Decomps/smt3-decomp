@@ -210,6 +210,27 @@ class Elf:
                 if info & 15 == 2 and index not in (0, 0xFFF1) and size:
                     self.functions.append((self.string(strs, name), value, size, index))
 
+    def symbols(self):
+        """Yield each static symbol table separately (relocations index one table)."""
+        tables = {}
+        for index, (_, section) in enumerate(self.sections):
+            if section[1] != 2:  # SHT_SYMTAB
+                continue
+            strings = self.section_bytes(self.sections[section[6]][1])
+            raw = self.section_bytes(section)
+            if len(raw) % 16:
+                raise ValueError("truncated static symbol table")
+            tables[index] = [
+                (self.string(strings, name), value, size, info, shndx)
+                for name, value, size, info, _, shndx in struct.iter_unpack("<IIIBBH", raw)
+            ]
+        return tables
+
+    def section_bytes(self, section) -> bytes:
+        if section[1] == 8 or section[4] + section[5] > len(self.data):
+            raise ValueError("section is not fully file-backed")
+        return self.data[section[4]:section[4] + section[5]]
+
     @staticmethod
     def string(data: bytes, at: int) -> str:
         return data[at:data.index(b"\0", at)].decode()
@@ -280,6 +301,159 @@ def read_object_receipt(root: Path, obj: str) -> dict:
     return receipt
 
 
+def live_input_sections(map_text: str) -> dict[tuple[str, str], list[tuple[int, int]]]:
+    """Collect nonempty input contributions, never the discarded-input prelude."""
+    _, marker, body = map_text.partition("Linker script and memory map")
+    if not marker:
+        raise ValueError("missing live link map for .data aliases")
+    rows = {}
+    for section, address, size, path in re.findall(
+        r"^ ([.][^\s]+)[ \t]*(?:\n[ \t]+|[ \t]+)"
+        r"(0x[0-9a-fA-F]+)[ \t]+(0x[0-9a-fA-F]+)[ \t]+(\S+\.o)[ \t]*$",
+        body, re.M,
+    ):
+        if int(size, 16):
+            rows.setdefault((path, section), []).append((int(address, 16), int(size, 16)))
+    return rows
+
+
+def file_backed_alias_proof(root: Path, elf_path: Path, map_path: Path, objects: list[str]):
+    """Prove configured .data aliases are non-owning names used by the actual link."""
+    from symbol_aliases import load_symbol_aliases
+
+    if len(elf_path.parts) < 3 or elf_path.parts[1] not in VERSIONS:
+        return {}, set()
+    version = elf_path.parts[1]
+    aliases = [a for a in load_symbol_aliases(root, version) if a.section == ".data"]
+    if not aliases:
+        return {}, set()
+    spec = VERSIONS[version]
+    serial = spec["serial"]
+    if elf_path != Path(f"build/{version}/{serial}.elf") or map_path != elf_path.with_suffix(".map"):
+        raise ValueError("wrong link identity for .data aliases")
+    config = f"config/{version}"
+    retail_path = f"orig/{version}/{serial}"
+    inputs = {
+        f"{config}/symbol_aliases.json", f"{config}/{serial}.yaml", retail_path,
+        str(elf_path.with_suffix(".ld")), f"{config}/undefined_syms_auto.txt",
+        f"{config}/undefined_funcs_auto.txt",
+    }
+    retail = Elf(root / retail_path)
+    if (len(retail.data) != spec["elf_size"]
+            or hashlib.sha1(retail.data).hexdigest() != spec["elf_sha1"]):
+        raise ValueError("wrong pinned retail for .data aliases")
+    candidates = [s for name, s in retail.sections if name == ".data"]
+    if len(candidates) != 1 or candidates[0][1] != 1 or candidates[0][2] & 7 != 3:
+        raise ValueError("native .data is not unique writable PROGBITS")
+    native = candidates[0]
+    native_data = retail.section_bytes(native)
+    linked = Elf(root / elf_path)
+    final_symbols = [sym for syms in linked.symbols().values() for sym in syms]
+    map_text = (root / map_path).read_text()
+    live = live_input_sections(map_text)
+    script = (root / f"{config}/undefined_syms_auto.txt").read_text()
+    alias_names = {a.name for a in aliases}
+    owner_names = {a.owner for a in aliases}
+    definitions = {name: [] for name in owner_names}
+    references = {name: {} for name in alias_names}
+    for path in objects:
+        original = Elf(root / path)
+        tables = original.symbols()
+        for symbols in tables.values():
+            for symbol in symbols:
+                name, _, _, _, shndx = symbol
+                if not shndx:
+                    continue
+                if name in alias_names:
+                    raise ValueError(f"{name}: competing input definition in {path}")
+                if name in definitions:
+                    if shndx >= len(original.sections):
+                        raise ValueError(f"{name}: input owner is not section-defined")
+                    section_name, section = original.sections[shndx]
+                    definitions[name].append((path, symbol, section_name, section))
+        for _, reloc in original.sections:
+            kind, info, entry_size = reloc[1], reloc[7], reloc[9]
+            if kind not in (4, 9):  # SHT_RELA / SHT_REL
+                continue
+            if info >= len(original.sections) or reloc[6] not in tables:
+                raise ValueError(f"{path}: invalid relocation section")
+            section_name, section = original.sections[info]
+            if section[1] != 1 or not section[2] & 2:
+                continue
+            placements = live.get((path, section_name), [])
+            if len(placements) != 1 or placements[0][1] != section[5]:
+                continue
+            raw = original.section_bytes(reloc)
+            if entry_size != (12 if kind == 4 else 8) or len(raw) % entry_size:
+                raise ValueError(f"{path}: malformed relocations")
+            symbols = tables[reloc[6]]
+            for at in range(0, len(raw), entry_size):
+                offset, r_info = struct.unpack_from("<II", raw, at)
+                symbol_index, relocation_type = r_info >> 8, r_info & 255
+                if symbol_index >= len(symbols):
+                    raise ValueError(f"{path}: invalid relocation symbol")
+                name, _, _, _, shndx = symbols[symbol_index]
+                if name in alias_names and not shndx and relocation_type:
+                    if offset + 4 > section[5]:
+                        raise ValueError(f"{path}: alias relocation outside its input section")
+                    refs = references[name]
+                    refs[path] = refs.get(path, 0) + 1
+
+    from check_unit import owned_rom_range
+
+    yaml_text = (root / f"{config}/{serial}.yaml").read_text()
+    result = {}
+    for alias in aliases:
+        name, owner = alias.name, alias.owner
+        address = alias.address - alias.offset
+        size = alias.owner_size
+        expected_path = f"build/{version}/src/{version}/{alias.unit}.o"
+        native_offset = address - native[3]
+        if not 0 <= native_offset < native_offset + size <= len(native_data):
+            raise ValueError(f"{owner}: outside native .data")
+        file_offset = native[4] + native_offset
+        if owned_rom_range(yaml_text, alias.unit, ".data") != (file_offset, file_offset + size):
+            raise ValueError(f"{owner}: not the entire declared .data span")
+        candidates = definitions[owner]
+        if len(candidates) != 1:
+            raise ValueError(f"{owner}: expected one input definition")
+        path, (_, value, actual_size, info, _), section_name, section = candidates[0]
+        if ((path, value, actual_size, info, section_name) != (expected_path, 0, size, 0x11, ".data")
+                or section[1] != 1 or section[2] & 7 != 3 or section[5] != size
+                or live.get((path, ".data")) != [(address, size)]):
+            raise ValueError(f"{owner}: wrong live writable input owner/extent")
+        linked_owner = [sym for sym in final_symbols if sym[0] == owner]
+        if len(linked_owner) != 1 or linked_owner[0][1:4] != (address, size, 0x11):
+            raise ValueError(f"{owner}: wrong linked owner")
+        output_index = linked_owner[0][4]
+        if output_index >= len(linked.sections):
+            raise ValueError(f"{owner}: missing linked output section")
+        output = linked.sections[output_index][1]
+        delta = address - output[3]
+        if (output[1] != 1 or output[2] & 3 != 3 or not 0 <= delta <= output[5] - size
+                or linked.section_bytes(output)[delta:delta + size]
+                != native_data[native_offset:native_offset + size]):
+            raise ValueError(f"{owner}: linked file-backed owner bytes are not retail")
+        if [sym for sym in final_symbols if sym[0] == name] != [(name, alias.address, 0, 0x11, 0xFFF1)]:
+            raise ValueError(f"{name}: wrong linked non-owning symbol")
+        provision = f"PROVIDE({name} = {owner} + 0x{alias.offset:X});"
+        if script.splitlines().count(provision) != 1:
+            raise ValueError(f"{name}: missing unique generated owner-relative PROVIDE")
+        mapped = re.findall(
+            rf"^[ \t]*(0x[0-9a-fA-F]+)\s+PROVIDE \({re.escape(name)} = "
+            rf"\({re.escape(owner)} \+ (0x[0-9a-fA-F]+)\)\)[ \t]*$",
+            map_text, re.M,
+        )
+        if [(int(a, 16), int(o, 16)) for a, o in mapped] != [(alias.address, alias.offset)]:
+            raise ValueError(f"{name}: missing live owner-relative linker assignment")
+        if not references[name]:
+            raise ValueError(f"{name}: no live allocated relocation consumers")
+        result[name] = {"owner": owner, "input": path, "address": alias.address,
+                        "offset": alias.offset, "owner_size": size, "alias_size": alias.alias_size,
+                        "consumers": references[name]}
+    return result, inputs
+
+
 def record_link(root: Path, elf_path: Path, map_path: Path, objects: list[str]) -> None:
     """Run only in the successful link recipe, after ld has consumed its inputs."""
     paths = {str(elf_path), str(map_path), *objects}
@@ -291,8 +465,12 @@ def record_link(root: Path, elf_path: Path, map_path: Path, objects: list[str]) 
     paths.add("config/versions.json")
     for version in VERSIONS:
         paths.add(f"config/{version}/symbol_addrs.txt")
+    aliases, alias_inputs = file_backed_alias_proof(root, elf_path, map_path, objects)
+    paths.update(alias_inputs)
     receipt = {"schema": 1, "elf": str(elf_path), "map": str(map_path),
                "objects": objects, "files": {p: digest(root / p) for p in sorted(paths)}}
+    if aliases:
+        receipt["data_aliases"] = aliases
     write_json(root / (str(elf_path) + ".proof.json"), receipt)
 
 
@@ -310,6 +488,9 @@ def read_receipt(root: Path, elf_path: Path, map_path: Path, receipt_path: Path)
             compiled = read_object_receipt(root, obj)
             if not {obj + ".proof.json", *compiled["files"]} <= files.keys():
                 raise ValueError("missing compile proof in link receipt")
+    aliases, alias_inputs = file_backed_alias_proof(root, elf_path, map_path, receipt["objects"])
+    if not alias_inputs <= files.keys() or aliases != receipt.get("data_aliases", {}):
+        raise ValueError("missing or different .data alias link proof")
     return receipt
 
 

@@ -316,10 +316,51 @@ def align_bss(ld_script: Path) -> None:
     ld_script.write_text(text)
 
 
+def validate_file_backed_alias_spans(version: str, aliases) -> None:
+    """A file-backed primary must own its complete native .data subsection."""
+    from tools.check_unit import owned_rom_range
+    from tools.production_report import Elf
+
+    spec = VERSIONS[version]
+    serial = spec["serial"]
+    image = Elf(ROOT / "orig" / version / serial)
+    if len(image.data) != spec["elf_size"] or hashlib.sha1(image.data).hexdigest() != spec["elf_sha1"]:
+        raise ValueError(f"{version}: .data aliases require the pinned native image")
+    data = [s for name, s in image.sections if name == ".data"]
+    if len(data) != 1 or data[0][1] != 1 or data[0][2] & 7 != 3:
+        raise ValueError(f"{version}: retail .data is not unique writable PROGBITS")
+    _, _, _, address, offset, size, *_ = data[0]
+    if not size or offset + size > len(image.data):
+        raise ValueError(f"{version}: truncated retail .data")
+    yaml_text = (ROOT / "config" / version / f"{serial}.yaml").read_text()
+    for alias in aliases:
+        start = alias.address - alias.offset
+        end = start + alias.owner_size
+        owned = owned_rom_range(yaml_text, alias.unit, ".data")
+        if not address <= start < end <= address + size or \
+                owned != (offset + start - address, offset + end - address):
+            raise ValueError(f"{alias.name}: {alias.owner} must own the entire bounded native .data span")
+
+
 def provide_symbol_aliases(version: str) -> None:
     """Keep source-owned interior symbols relative to their real C owner."""
     aliases = load_symbol_aliases(ROOT, version)
     path = ROOT / "config" / version / "undefined_syms_auto.txt"
+    data_aliases = [alias for alias in aliases if alias.section == ".data"]
+    if data_aliases:
+        linker = ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld"
+        funcs = path.with_name("undefined_funcs_auto.txt")
+        if not all(item.is_file() for item in (linker, funcs, path)):
+            raise ValueError("file-backed aliases require the real generated linker inputs")
+        validate_file_backed_alias_spans(version, data_aliases)
+        script = linker.read_text()
+        other_scripts = script + "\n" + funcs.read_text()
+        for alias in data_aliases:
+            obj = f"build/{version}/src/{version}/{alias.unit}.o"
+            if len(re.findall(rf"(?m)^\s*{re.escape(obj)}\(\.data\);?[^\S\n]*$", script)) != 1:
+                raise ValueError(f"{alias.name}: expected exactly one .data linker input from {obj}")
+            if re.search(rf"(?<![\w.]){re.escape(alias.name)}\s*=", other_scripts):
+                raise ValueError(f"competing linker definition for .data alias {alias.name}")
     if path.exists():
         text = path.read_text()
         updated = linker_aliases(text, aliases)

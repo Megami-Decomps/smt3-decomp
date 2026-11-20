@@ -158,7 +158,7 @@ dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t
 
 s32 evtBitCheck(s32 no);
 
-extern fldWaypointBlock_t fldDoorParamTable;
+fldWaypointBlock_t fldDoorParamTable = {{{0}}};
 
 void fldPlayerOff(void);
 

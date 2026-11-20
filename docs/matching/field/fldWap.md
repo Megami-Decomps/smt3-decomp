@@ -87,3 +87,18 @@ its actual signed Param4 use; the code and floor are the real next
 arguments. No constraint emits an instruction or stands in for a callback
 or general memory barrier. The known loaded-data contracts are unchanged;
 no new handling for malformed resource indexes is implied.
+
+## fldDoorParamTable (25,760 data bytes)
+
+The native writable block at `0x303050..0x3094F0` belongs to `fldWap`.
+Its existing waypoint type now defines the zero-initialized block in
+file-backed data, preserving the separate raw ranges and the following
+BGM table. No Door function body changes.
+
+`gFld_ElvId` and `fldDoorTable` keep their native offsets of 4 and 160
+bytes into that block. They are non-owning names, not extra C objects.
+Configuration and owner checks bind both names to the same native
+bounded allocation, and the production proof verifies the owner and
+both linked alias addresses without counting them as additional data.
+The 34 existing references in `fldWap` and `fldInf` keep their resolved
+addresses. Existing NOBITS alias handling is unchanged.

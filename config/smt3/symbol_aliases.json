@@ -1,0 +1,18 @@
+[
+  {
+    "name": "gFld_ElvId",
+    "owner": "fldDoorParamTable",
+    "unit": "field/fldWap",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 25760
+  },
+  {
+    "name": "fldDoorTable",
+    "owner": "fldDoorParamTable",
+    "unit": "field/fldWap",
+    "section": ".data",
+    "offset": 160,
+    "owner_size": 25760
+  }
+]

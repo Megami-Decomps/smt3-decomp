@@ -981,6 +981,123 @@ def full_context_storage_problems(yaml_text, unit, sections, symbol_text,
     return problems
 
 
+def writable_file_data_section(elf, file_size):
+    """Find one actual writable allocated PROGBITS .data, not just a name."""
+    matches = [(index, section) for index, section in enumerate(elf.iter_sections())
+               if section.name == ".data"]
+    if len(matches) != 1:
+        return None
+    index, section = matches[0]
+    if (section["sh_type"] != "SHT_PROGBITS" or section["sh_flags"] != 3
+            or section["sh_size"] <= 0
+            or section["sh_offset"] + section["sh_size"] > file_size):
+        return None
+    return index, section
+
+
+def initialized_data_alias_problems(unit, section_range, aliases, syms, retail, segs,
+                                    standalone, full):
+    """Verify explicit file-backed aliases without treating them as storage.
+
+    Both object modes must define each declared primary exactly once at its
+    native offset and size. An alias must remain only a reference: even a
+    zero-size definition in another section (or ABS/COMMON) would compete
+    with the linker alias. No alias is added to the payload inventory.
+    """
+    data_aliases = [alias for alias in aliases if alias.section == ".data"]
+    if not data_aliases:
+        return []
+    # Keep ordinary and NOBITS-only checks independent of this ELF audit.
+    from io import BytesIO
+    from elftools.common.exceptions import ELFError
+    from elftools.elf.elffile import ELFFile
+
+    def read_elf(blob, kind):
+        elf = ELFFile(BytesIO(blob))
+        if elf.elfclass != 32 or not elf.little_endian or elf["e_type"] != kind:
+            raise ELFError(f"expected little-endian ELF32 {kind}")
+        return elf
+
+    local = [alias for alias in data_aliases if alias.unit == unit]
+    expected = {}
+    problems = []
+    if local:
+        if section_range is None:
+            return ["no unambiguous YAML-owned .data span for explicit aliases"]
+        start, end = section_range
+        origin = off_to_va(segs, start)
+        try:
+            native = writable_file_data_section(read_elf(retail, "ET_EXEC"), len(retail))
+        except ELFError as exc:
+            return [f"cannot verify native .data: {exc}"]
+        if native is None:
+            return ["retail has no unique writable file-backed .data section"]
+        _, section = native
+        base = section["sh_offset"]
+        if (not base <= start < end <= base + section["sh_size"]
+                or origin != section["sh_addr"] + start - base
+                or native_object_offset(segs, origin, end - start, len(retail)) != start):
+            return ["YAML-owned .data span is outside one mapped writable file-backed retail .data"]
+
+        for alias in local:
+            owner_address = syms.get(alias.owner)
+            size = alias.owner_size
+            if (owner_address is None or type(size) is not int or size <= 0
+                    or not origin <= owner_address < owner_address + size <= origin + end - start):
+                problems.append(f"{alias.name}: primary {alias.owner} lies outside its native .data span")
+                continue
+            if (type(alias.alias_size) is not int or alias.alias_size <= 0
+                    or not 0 < alias.offset <= size - alias.alias_size
+                    or owner_address + alias.offset != alias.address):
+                problems.append(f"{alias.name}: wrong native offset or extent in {alias.owner}")
+                continue
+            expected[alias.owner] = (owner_address - origin, size)
+
+    alias_names = {alias.name for alias in data_aliases}
+    primary_names = {alias.owner for alias in data_aliases}
+    foreign_primaries = primary_names - {alias.owner for alias in local}
+    checked_names = primary_names | alias_names
+    for label, blob in (("standalone", standalone), ("full-unit", full)):
+        try:
+            elf = read_elf(blob, "ET_REL")
+            tables = [t for t in elf.iter_sections() if t["sh_type"] == "SHT_SYMTAB"]
+            if len(tables) != 1:
+                problems.append(f"{label}: expected one ELF symbol table for .data aliases")
+                continue
+            definitions = {}
+            for symbol in tables[0].iter_symbols():
+                if symbol.name in checked_names and symbol["st_shndx"] != "SHN_UNDEF":
+                    definitions.setdefault(symbol.name, []).append(symbol)
+            owned_section = writable_file_data_section(elf, len(blob)) if local else None
+        except ELFError as exc:
+            problems.append(f"{label}: cannot read .data alias ownership: {exc}")
+            continue
+        for name in sorted(alias_names & definitions.keys()):
+            problems.append(f"{label}: competing emitted definition of .data alias {name}")
+        for name in sorted(foreign_primaries & definitions.keys()):
+            problems.append(f"{label}: primary {name} is emitted outside its declared .data owner")
+        if not local:
+            continue
+        if owned_section is None:
+            problems.append(f"{label}: no unique writable file-backed .data section")
+            continue
+        section_index, section = owned_section
+        for name, (offset, size) in expected.items():
+            matches = definitions.get(name, ())
+            if len(matches) != 1:
+                problems.append(f"{label}: expected one emitted definition of primary {name}")
+                continue
+            symbol = matches[0]
+            if (symbol["st_info"]["type"] != "STT_OBJECT"
+                    or symbol["st_info"]["bind"] != "STB_GLOBAL"
+                    or symbol["st_shndx"] != section_index):
+                problems.append(f"{label}: primary {name} is not a global .data STT_OBJECT")
+            elif (symbol["st_value"] != offset or symbol["st_size"] != size
+                    or offset + size > section["sh_size"]):
+                problems.append(f"{label}: primary {name} needs native offset +0x{offset:X} size 0x{size:X}")
+    return problems
+
+
 def initialized_data_problems(section_range, section_origin, retail_span,
                                data, definitions, relocs, funcs,
                                full_data, full_definitions, full_relocs,
@@ -1698,6 +1815,9 @@ def main():
             fdata, fsecs = sections(full)
             if problems := allocated_section_problems(fdata):
                 sys.exit("DATA CONTEXT " + "; ".join(problems))
+            if problems := initialized_data_alias_problems(
+                    unit_name, data_range, aliases, syms, retail, segs, data, fdata):
+                sys.exit("DATA ALIAS " + "; ".join(problems))
             # Even focused mode cannot validate a function in an object with
             # runtime payload outside any supported native owner. Extent/content
             # differences within known owners retain ordinary focused filtering.

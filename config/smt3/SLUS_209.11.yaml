@@ -414,6 +414,8 @@ segments:
       - [0x1FD3DC, data, data_002FC3DC]
       - [0x1FD7C0, .data, field/fldCamera]
       - [0x1FD9C0, data, data_002FC9C0]
+      - [0x204050, .data, field/fldWap]
+      - [0x20A4F0, data, data_003094F0]
       - [0x20A5E0, .data, field/fldSe]
       - [0x20B1BC, data, data_0030A1BC]
       - [0x217EF0, .data, effect/effManager]

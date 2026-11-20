@@ -85,6 +85,176 @@ def production_elf_bytes(functions, code, image):
     return bytes(data)
 
 
+def alias_elf(symbols=(), *, linked=False, text_reloc=False, debug_reloc=False,
+              data_flags=3, data_kind=1, data=b"abcdefgh"):
+    """Small independent ELF32 writer for data symbol and relocation cases."""
+    entries = [(None, b"", 0, 0, 0, 0, 0, 0, 0)]
+    entries += [
+        (".data", data, data_kind, data_flags, 0x2020 if linked else 0, 0, 0, 4, 0),
+        (".text", bytes(4), 1, 6, 0, 0, 0, 4, 0),
+        (".debug", bytes(4), 1, 0, 0, 0, 0, 4, 0),
+        (".rel.text", words(0, 0x105) if text_reloc else b"", 9, 0, 0, 6, 2, 4, 8),
+        (".rel.debug", words(0, 0x105) if debug_reloc else b"", 9, 0, 0, 6, 3, 4, 8),
+    ]
+    strings = bytearray(b"\0")
+    records = bytearray(16)
+    for name, value, size, info, index in symbols:
+        records += struct.pack("<IIIBBH", len(strings), value, size, info, 0, index)
+        strings += name.encode() + b"\0"
+    entries += [
+        (".symtab", records, 2, 0, 0, 7, 1, 4, 16),
+        (".strtab", strings, 3, 0, 0, 0, 0, 1, 0),
+        (".shstrtab", b"", 3, 0, 0, 0, 0, 1, 0),
+    ]
+    names = b"\0" + b"".join(name.encode() + b"\0" for name, *_ in entries[1:])
+    elf = bytearray(0x100)
+    headers = [(0,) * 10]
+    for name, payload, kind, flags, address, link, info, align, entsize in entries[1:]:
+        if name == ".shstrtab":
+            payload = names
+        start = len(elf)
+        elf += payload
+        headers.append((names.index(name.encode() + b"\0"), kind, flags, address,
+                        start, len(payload), link, info, align, entsize))
+    shoff = len(elf)
+    for row in headers:
+        elf += words(*row)
+    identity = b"\x7fELF\x01\x01\x01" + bytes(9)
+    struct.pack_into("<16sHHIIIIIHHHHHH", elf, 0, identity, 2 if linked else 1, 8, 1,
+                     0, 0, shoff, 0, 52, 0, 0, 40, len(headers), 8)
+    return bytes(elf)
+
+
+class DataAliasLinkTests(unittest.TestCase):
+    owner = "build/smt3/src/smt3/field/door.o"
+    peer = "build/smt3/asm/smt3/field/peer.o"
+    elf = Path("build/smt3/ALIAS_RETAIL.elf")
+    map = elf.with_suffix(".map")
+    manifest = "config/smt3/symbol_aliases.json"
+    script = "config/smt3/undefined_syms_auto.txt"
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        self.alias = type("Alias", (), dict(name="interior", owner="primary",
+            unit="field/door", section=".data", offset=4, address=0x2024,
+            owner_size=8, alias_size=2))()
+        feature = patch("symbol_aliases.load_symbol_aliases", return_value=[self.alias])
+        feature.start()
+        self.addCleanup(feature.stop)
+        self.write(self.owner, alias_elf([("primary", 0, 8, 0x11, 1)]))
+        self.write(self.peer, alias_elf([("interior", 0, 0, 0x10, 0)], text_reloc=True))
+        native = alias_elf(linked=True)
+        spec = {"serial": "ALIAS_RETAIL", "elf_size": len(native),
+                "elf_sha1": hashlib.sha1(native).hexdigest()}
+        cfg = patch.dict(production_report.VERSIONS, {"smt3": spec}, clear=True)
+        cfg.start()
+        self.addCleanup(cfg.stop)
+        self.write("config/versions.json", json.dumps(production_report.VERSIONS))
+        self.write("orig/smt3/ALIAS_RETAIL", native)
+        self.write("config/smt3/ALIAS_RETAIL.yaml",
+                   "  - [0x100, .data, field/door]\n  - [0x108, data, next]\n")
+        self.write("config/smt3/symbol_addrs.txt", "primary = 0x2020;\ninterior = 0x2024;\n")
+        self.write(self.manifest, "[]\n")
+        self.write(self.script, "PROVIDE(interior = primary + 0x4);\n")
+        self.write("config/smt3/undefined_funcs_auto.txt", "")
+        self.write(self.elf.with_suffix(".ld"), f" {self.owner}(.data);\n")
+        self.linked()
+        self.write(self.map, "Linker script and memory map\n"
+                   f" .data 0x2020 0x8 {self.owner}\n"
+                   f" .text\n   0x3000 0x4 {self.peer}\n"
+                   " 0x2024 PROVIDE (interior = (primary + 0x4))\n")
+        source = "src/smt3/field/door.c"
+        self.write(source, "unsigned char primary[8];\n")
+        self.write(self.owner + ".s", "")
+        self.write(self.owner + ".d", f"{self.owner}: {source}\n")
+        self.write("include/macro.inc", "")
+        self.write("config/smt3/cflags.txt", "")
+        production_report.record_object(self.root, Path(source), Path(self.owner))
+
+    def write(self, relative, content):
+        path = self.root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content.encode() if isinstance(content, str) else content)
+
+    def linked(self, alias=("interior", 0x2024, 0, 0x11, 0xfff1), **kwargs):
+        self.write(self.elf, alias_elf([("primary", 0x2020, 8, 0x11, 1), alias],
+                                       linked=True, **kwargs))
+
+    def verify(self):
+        return production_report.file_backed_alias_proof(
+            self.root, self.elf, self.map, [self.owner, self.peer])
+
+    def test_pinned_alias_replay_and_required_inputs(self):
+        proof, inputs = self.verify()
+        self.assertEqual(proof["interior"]["consumers"], {self.peer: 1})
+        self.assertIn(self.manifest, inputs)
+        production_report.record_link(self.root, self.elf, self.map, [self.owner, self.peer])
+        receipt = Path(str(self.elf) + ".proof.json")
+        observed = production_report.read_receipt(self.root, self.elf, self.map, receipt)
+        self.assertEqual(observed["data_aliases"], proof)
+        observed["data_aliases"]["interior"]["consumers"] = {}
+        self.write(receipt, json.dumps(observed))
+        with self.assertRaisesRegex(ValueError, "different .data alias"):
+            production_report.read_receipt(self.root, self.elf, self.map, receipt)
+        self.write(self.manifest, "[]  \n")
+        with self.assertRaisesRegex(ValueError, "stale provenance"):
+            production_report.read_receipt(self.root, self.elf, self.map, receipt)
+
+    def test_debug_only_and_discarded_relocations_fail(self):
+        self.write(self.peer, alias_elf([("interior", 0, 0, 0x10, 0)], debug_reloc=True))
+        with self.assertRaisesRegex(ValueError, "no live allocated"):
+            self.verify()
+        self.write(self.peer, alias_elf([("interior", 0, 0, 0x10, 0)], text_reloc=True))
+        body = (self.root / self.map).read_text()
+        body = body.replace(f" .text\n   0x3000 0x4 {self.peer}\n", "")
+        self.write(self.map, f"Discarded input sections\n .text 0x0 0x4 {self.peer}\n" + body)
+        with self.assertRaisesRegex(ValueError, "no live allocated"):
+            self.verify()
+
+    def test_input_definition_is_rejected_including_absolute(self):
+        for shndx in (1, 0xfff1, 0xfff2):
+            with self.subTest(shndx=shndx):
+                self.write(self.peer, alias_elf([("interior", 0, 0, 0x10, shndx)]))
+                with self.assertRaisesRegex(ValueError, "competing input definition"):
+                    self.verify()
+
+    def test_owner_section_flags_type_extent_and_native_bytes(self):
+        for opts in ({"data_flags": 2}, {"data_kind": 8}):
+            with self.subTest(opts=opts):
+                self.write(self.owner, alias_elf([("primary", 0, 8, 0x11, 1)], **opts))
+                with self.assertRaisesRegex(ValueError, "wrong live writable input"):
+                    self.verify()
+        self.write(self.owner, alias_elf([("primary", 0, 4, 0x11, 1)]))
+        with self.assertRaisesRegex(ValueError, "wrong live writable input"):
+            self.verify()
+        self.write(self.owner, alias_elf([("primary", 0, 8, 0x11, 1)]))
+        self.linked(data=b"12345678")
+        with self.assertRaisesRegex(ValueError, "bytes are not retail"):
+            self.verify()
+
+    def test_live_map_must_assign_alias_to_owner(self):
+        text = (self.root / self.map).read_text()
+        self.write(self.map, text.replace("0x2024 PROVIDE", "0x2025 PROVIDE"))
+        with self.assertRaisesRegex(ValueError, "missing live owner-relative"):
+            self.verify()
+        self.write(self.map, text.replace(".data 0x2020", ".data 0x2028"))
+        with self.assertRaisesRegex(ValueError, "wrong live writable input"):
+            self.verify()
+
+    def test_linked_alias_must_be_zero_sized_and_absolute(self):
+        for value, size, index in ((0x2025, 0, 0xfff1), (0x2024, 2, 0xfff1), (0x2024, 0, 1)):
+            with self.subTest(value=value, size=size, index=index):
+                self.linked(alias=("interior", value, size, 0x11, index))
+                with self.assertRaisesRegex(ValueError, "wrong linked non-owning"):
+                    self.verify()
+        self.linked()
+        self.write(self.script, "PROVIDE(interior = 0x2024);\n")
+        with self.assertRaisesRegex(ValueError, "missing unique generated"):
+            self.verify()
+
+
 class ProductionFixture(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
