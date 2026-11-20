@@ -1,4 +1,5 @@
 #include "fpu.h"
+#include "fldTerminalRoutes.h"
 #include "common.h"
 #include "fldWap.h"
 #include "libsdf.h"
@@ -555,7 +556,6 @@ s32 fldWap_SetBgm(doormovetbl_s *pWap) {
     return result;
 }
 
-extern s16 D_002FC1A2[][2];
 extern void fldSetNextField(s32 field, s32 parameter);
 extern void fldAutoMapOpenBlock2(s32 field, s32 floor, s32 block);
 extern void evtBitOn(s32 no);
@@ -661,7 +661,7 @@ void fldDoor_Warp(const char *name)
                 case 3:
                     block[0] = 0;
                     block[1] = entry->sequenceKind;
-                    if (D_002FC1A2[block[1]][0] != 0) evtBitOn(D_002FC1A2[block[1]][0]);
+                    if (fldTerminalEventBits[block[1]][0] != 0) evtBitOn(fldTerminalEventBits[block[1]][0]);
                     DDS3_GBWK->previewX = block[0];
                     DDS3_GBWK->previewY = block[1];
                     dds3AdminiCallSequence(0x1F, block, 8, 0);
@@ -787,7 +787,6 @@ void fldDoor_Warp(const char *name)
     } while (i < 256);
 }
 
-extern s16 D_002FC1A2[][2];
 extern void fldSetNextField(s32 field, s32 parameter);
 extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
 extern void evtBitOn(s32 no);
@@ -841,8 +840,8 @@ void fldDoor_WarpEx(s32 ex_no) {
             case 3:
                 block[0] = 0;
                 block[1] = entry->sequenceKind;
-                if (D_002FC1A2[block[1]][0] != 0) {
-                    evtBitOn(D_002FC1A2[block[1]][0]);
+                if (fldTerminalEventBits[block[1]][0] != 0) {
+                    evtBitOn(fldTerminalEventBits[block[1]][0]);
                 }
                 DDS3_GBWK->previewX = block[0];
                 DDS3_GBWK->previewY = block[1];
@@ -932,18 +931,16 @@ void fldDoor_WarpEx(s32 ex_no) {
     }
 }
 
-extern s16 fldTerminalTable[][2];
-extern s16 fldAllCnt[][2];
 
 void fldSetTerminalState(s32 type, s32 idx)
 {
     if (type == 0) {
         fldDoorSiseZone = 3;
-        fldDoorSiseArea = fldTerminalTable[idx][0];
+        fldDoorSiseArea = fldTerminalTable[idx].field;
         fldDoorSiseSub = idx;
     } else {
         fldDoorSiseSub = idx;
-        fldDoorSiseArea = fldAllCnt[idx][0];
+        fldDoorSiseArea = fldAllCnt[idx].field;
     }
 }
 
@@ -1033,11 +1030,11 @@ void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
     s32 nextKind;
 
     if (tmnltype == 0) {
-        field = fldTerminalTable[tmnlid][0];
+        field = fldTerminalTable[tmnlid].field;
         zone = 3;
     } else {
         zone = 4;
-        field = fldAllCnt[tmnlid][0];
+        field = fldAllCnt[tmnlid].field;
     }
     if (field == 0) return;
     fldDoorLoad(field);
@@ -1119,8 +1116,8 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
             case 3:
                 block[0] = 0;
                 block[1] = entry->sequenceKind;
-                if (D_002FC1A2[block[1]][0] != 0) {
-                    evtBitOn(D_002FC1A2[block[1]][0]);
+                if (fldTerminalEventBits[block[1]][0] != 0) {
+                    evtBitOn(fldTerminalEventBits[block[1]][0]);
                 }
                 DDS3_GBWK->previewX = block[0];
                 DDS3_GBWK->previewY = block[1];

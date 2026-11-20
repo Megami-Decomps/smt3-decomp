@@ -7,6 +7,8 @@
 #include "field.h"
 #include "fldLocationNames.h"
 #include "fldNpcOverride.h"
+#include "fldTerminalNames.h"
+#include "fldTerminalRoutes.h"
 
 /* The field table file populates these records for the chest and script code. */
 fldTakaraTbl_t fldTakaraTable[FLD_TAKARA_TABLE_COUNT] = {{0}};
@@ -28,9 +30,7 @@ extern void sdfFileClose(s32 aHandle);
 
 extern const char fldAllTblPath[];
 
-extern u8 fldAutoMapTitleTable[], D_00311450[], D_00311850[], fldTerminalTable[];
-
-extern u8 fldAllCnt[];
+extern u8 fldAutoMapTitleTable[];
 
 extern void fldFindTakaraSlot(s32 id);
 
@@ -52,12 +52,12 @@ void fldAllTblLoad(void)
     sdfFileRead(fd, fldAreaNameTable, sizeof(fldAreaNameTable));
     sdfFileRead(fd, fldPlaceNameTable, sizeof(fldPlaceNameTable));
     sdfFileRead(fd, fldFloorNameTable, sizeof(fldFloorNameTable));
-    sdfFileRead(fd, D_00311450, 0x400);
-    sdfFileRead(fd, D_00311850, 0x800);
+    sdfFileRead(fd, D_00311450, sizeof(D_00311450));
+    sdfFileRead(fd, D_00311850, sizeof(D_00311850));
     sdfFileRead(fd, fldNpcOverrides, sizeof(fldNpcOverrides));
     sdfFileRead(fd, fldTakaraTable, sizeof(fldTakaraTable));
-    sdfFileRead(fd, fldTerminalTable, 0x80);
-    sdfFileRead(fd, fldAllCnt, 0x100);
+    sdfFileRead(fd, fldTerminalTable, sizeof(fldTerminalTable));
+    sdfFileRead(fd, fldAllCnt, sizeof(fldAllCnt));
     sdfFileClose(fd);
 }
 

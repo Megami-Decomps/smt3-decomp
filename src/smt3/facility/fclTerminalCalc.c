@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fldTerminalNames.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -77,10 +78,6 @@ s32 trmCalc(dds3ProcessID_t *id)
     }
     return 0;
 }
-
-extern char D_00311450[][0x20];
-
-extern char D_00311850[][0x20];
 
 extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 

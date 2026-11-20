@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fldTerminalRoutes.h"
 #include "camp.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -67,7 +68,6 @@ extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
 
 s32 trmEndEvent(s32 BgmMode);
 
-extern s16 fldAllCnt[][2];
 
 extern u32 slGetExitMode(void);
 extern s32 evtLoadEventBgm(s32 eventId);
@@ -143,7 +143,7 @@ s32 trmGetJumpTerminalNo(void)
 {
     s32 terminal;
     if (trmUpdateWork->TerminalType != 0) {
-        terminal = fldAllCnt[trmUpdateWork->TerminalNo][1];
+        terminal = fldAllCnt[trmUpdateWork->TerminalNo].jumpTerminalNo;
     } else {
         terminal = trmUpdateWork->TerminalList[trmUpdateWork->unk_11D6 + trmUpdateWork->unk_11D8];
     }

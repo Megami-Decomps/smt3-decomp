@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fldTerminalRoutes.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -309,7 +310,6 @@ typedef trmTerminalWork_t trmUpdateWork_t;
 extern trmUpdateWork_t *trmUpdateWork;
 
 extern s32 trmTerminalNoList[32];
-extern s16 D_002FC1A2[][2];
 extern s32 evtBitCheck(s32 no);
 
 const char trmProcessNameMainFmt[16] = "e%d_main";
@@ -330,7 +330,7 @@ void fclTerminalScanCommands(trmTerminalWork_t *work)
             continue;
         }
 
-        eventNo = D_002FC1A2[terminalNo][0];
+        eventNo = fldTerminalEventBits[terminalNo][0];
         if (eventNo == 0 || evtBitCheck(eventNo) == 0) {
             continue;
         }
@@ -376,13 +376,6 @@ void fclTerminalInitMenu(s32 id, void *commands, void *work)
     *((s8 *)commands + 0x25) = 1;
 }
 
-typedef struct
-{
-    s16 field;
-    s16 jumpTerminalNo;
-} trmFieldEntry_t;
-
-extern trmFieldEntry_t fldAllCnt[];
 extern char trmHexLineFmt[]; /* "%x\n" */
 
 s32 fclTerminalDumpJump(trmTerminalWork_t *work)

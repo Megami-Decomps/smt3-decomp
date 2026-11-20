@@ -62,5 +62,13 @@
     "section": ".data",
     "offset": 4,
     "owner_size": 6272
+  },
+  {
+    "name": "fldTerminalEventBits",
+    "owner": "fldTerminalTable",
+    "unit": "field/fldTerminalTable",
+    "section": ".data",
+    "offset": 2,
+    "owner_size": 128
   }
 ]

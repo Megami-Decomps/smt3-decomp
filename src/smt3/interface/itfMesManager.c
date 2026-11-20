@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "fldTerminalNames.h"
 #include "newdata.h"
 #include "itfMesManager.h"
 #include "kernel.h"
@@ -1149,10 +1150,6 @@ extern char *pstr[];
 
 extern char *datExplainTable[];
 
-extern char D_00311450[];
-
-extern char D_00311850[];
-
 void itfMesMngGetVarLocalize(s32 id);
 
 /* Called above its definition, where ee-gcc assumed int. */
@@ -1201,10 +1198,10 @@ void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
         itfMesMngSetVarImmediate(id, index, text1[num]);
         break;
     case 6:
-        itfMesMngSetVarImmediate(id, index, &D_00311450[num * 32]);
+        itfMesMngSetVarImmediate(id, index, D_00311450[num]);
         break;
     case 7:
-        itfMesMngSetVarImmediate(id, index, &D_00311850[num * 32]);
+        itfMesMngSetVarImmediate(id, index, D_00311850[num]);
         break;
     case 9:
         itfMesMngSetVarImmediate(id, index, pstr[num]);

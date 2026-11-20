@@ -96,7 +96,6 @@ s32 trmDraw(dds3ProcessID_t *id)
     return 0;
 }
 
-extern s16 fldAllCnt[][2];
 
 s32 trmGetSaveResult(void)
 {
