@@ -1233,10 +1233,8 @@ extern void sceSifAddCmdHandler(s32 command, void (*handler)(void *, void *), vo
 extern void _request_end_0(void *packet, void *queue);
 extern void _request_bind(void *packet, void *queue);
 extern void _request_call(void *packet, void *queue);
-extern void _request_rdata(rpcPacket *packet, rpcQueue *queue);
+extern void _request_rdata(void *packet, void *queue);
 
-#ifdef NON_MATCHING
-/* Native-sized reconstruction; see docs/matching/sdk/libkernl.md. */
 void sceSifInitRpc(s32 mode)
 {
     rpcPacket *packets;
@@ -1254,18 +1252,18 @@ void sceSifInitRpc(s32 mode)
     DIntr();
     packets = rpcPackets;
     queue = &sifRpcQueue;
-    queue->indexedCount = queue->forwardCount = queue->count = 32;
-    queue->seq = 1;
     queue->base = EE_ADDR_AS(rpcPacket *, (EE_ADDR(packets) | 0x20000000));
-    queue->unk_C = 0;
-    queue->unk_10 = 0;
     queue->forwardBase = (rpcResponsePacket *)(EE_ADDR(rpcForwardPackets) | 0x20000000);
     queue->indexedBase = (rpcResponsePacket *)(EE_ADDR(rpcIndexedPackets) | 0x20000000);
+    /* Sequence the primary pool initialization before the shared capacity result. */
+    queue->indexedCount = queue->forwardCount =
+        (queue->count = 32, queue->unk_C = 0, queue->unk_10 = 0, 32);
+    queue->seq = 1;
     queue->forwardIndex = 0;
     sceSifAddCmdHandler(0x80000008, _request_end_0, queue);
     sceSifAddCmdHandler(0x80000009, _request_bind, queue);
     sceSifAddCmdHandler(0x8000000a, _request_call, queue);
-    sceSifAddCmdHandler(0x8000000c, (void (*)(void *, void *))_request_rdata, queue);
+    sceSifAddCmdHandler(0x8000000c, _request_rdata, queue);
     EIntr();
     if (sceSifGetReg(0x80000002) != 0)
         return;
@@ -1276,9 +1274,6 @@ void sceSifInitRpc(s32 mode)
     }
     sceSifSetReg(0x80000002, 1);
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifInitRpc);
-#endif
 
 extern s32 sifRpcInitialized;
 
@@ -1414,8 +1409,10 @@ void _request_end_0(void *packet, void *queue)
     transaction->packet = NULL;
 }
 
-void _request_rdata(rpcPacket *request, rpcQueue *queue)
+void _request_rdata(void *requestPacket, void *dispatchQueue)
 {
+    rpcPacket *request = requestPacket;
+    rpcQueue *queue = dispatchQueue;
     rpcResponsePacket *packet = _sceRpcGetFPacket(queue);
 
     void *packetAddress = request->header.packetAddress;

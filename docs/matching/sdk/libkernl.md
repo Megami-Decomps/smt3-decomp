@@ -456,36 +456,30 @@ retail-byte proof also pass. Full retail checksum, generated-source, regression,
 guard and report gates accompany the landing. Exactly one SDK function and
 72 bytes are newly supplied by verified C; game-code coverage is unchanged.
 
-## sceSifInitRpc
+## sceSifInitRpc (sdk/libkernl, 0x19C)
 
-412 emitted and native bytes, with 95 of 103 words matching and eight
-words differing, first at `+0xA0`. The remaining differences reorder queue
-field stores and argument setup before the first command-handler registration.
-No additional operation, padding, field volatility or callback ABI change
-is justified. Normal builds retain assembly.
+103 of 103 words match at the native 412-byte extent. As in the matched
+`sceSifMInitRpc`, ordinary C initializes the real uncached packet-pool
+bases before the shared count phase. The count expression initializes the
+primary count and both zero fields, then uses the same capacity for
+the other pools. All queue stores precede the first handler invocation.
+No register binding, fake dependency, extra write or volatile packet view
+is needed.
 
-The shared packet-pool header initializes its sequence to one, three
-32-packet pools to their uncached aliases, the corresponding counts to 32,
-and words `+0xC`, `+0x10` and `+0x24` to zero. The queue-list pointer at
-`+0x28` remains untouched. The 64-byte packet records and each 2048-byte
-pool are already established by the allocation and forwarding providers;
-initialization does not clear their packet contents.
+The packet-pool header initializes its sequence to one, the three 32-packet
+pools to their uncached aliases, their counts to 32, and words at +0xC, +0x10
+and +0x24 to zero. It leaves the queue-list pointer at +0x28 and every pool's
+packet contents untouched.
 
-Interrupt order is disable, flag check/set, enable, command initialization,
-then disable for queue setup and all four handler registrations, and enable.
-An existing SIF readiness register skips the handshake. Otherwise only word
-three of the cached second packet is set to one before its 16-byte send;
-software register zero is polled before setting the readiness register.
-The input mode is unused. The typed read-data callback is converted only
-at the generic two-pointer registration interface.
-
-Keeping the ready path as an early return restores the native tail call.
-A distinct selected-packet pointer preserves the native pool-base lifetime;
-mutating the pool cursor left register and packet-address differences.
-The three equal pool counts share an assignment. Separate field-order
-controls retained 20 or more differing words; the preferred source has the
-eight-word store/setup residual. The configured 2.9 compiler has no supported
-qualified allocator hook, so a pass-level explanation remains open.
+The native interrupt, initialization and four registration calls retain
+their ordering. The read-data handler implements the generic two-pointer
+callback interface with typed locals at entry; its machine code and
+linker identity are unchanged. An already-ready SIF register skips the
+handshake. Otherwise the routine sets word three of the cached second
+packet, sends 16 bytes, polls software register zero, and sets readiness.
+The input mode is unused. DDS1 and DDS2 retail disassemblies independently
+corroborate the entire sequence after relocation normalization; the
+ordinary C witness for the shared pool phase is SMT3's matching SDK sibling.
 
 ## sceOpen
 

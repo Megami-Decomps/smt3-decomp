@@ -70,3 +70,23 @@ The unchanged score alone is not evidence that visibility had no effect.
 The control is rejected and the original guarded source is retained. Do not
 repeat alias-name, declaration-placement or ordinary source-order variants
 without a different concrete premise.
+
+## DebugDisp2 (newbattle/nbMainProcess, 0x3DC)
+
+247 of 247 words match at the native 988-byte extent. The formation row
+advances through sixteen entries. The separate real offsets retain the
+native first-status, active-entry attribute and filter reads; each row
+starts from the current formation pointer. The fallback palette entry
+is initialized once before the countdown. Its input-only localized
+operand keeps the initializer in the native preheader. The value is
+used for the actual glyph attribute, not for a dummy dependency.
+
+The order row reads twelve signed entries in order. It reloads the
+selected index for each glyph, then reads the optional event process after
+both rows. The packet is linked in native call order and handed to the
+then-current registration callback. The reconstruction keeps the
+original EE address widths and real provider interfaces.
+
+Five diagnostic strings move from the retired assembly body into constant
+arrays at the original offsets and extents. Their bytes and padding, and
+the full native .rodata section, are unchanged.

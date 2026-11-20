@@ -794,3 +794,23 @@ among the independent first-endpoint stores and consumed before the next
 trig call. These local compiler aids are not original source spelling.
 The native cosine and sine call order and each post-call center read are
 preserved. All existing C functions and owned data in the unit still match.
+
+## cmbUpdateTimeTable (facility/fclCombineInit, 0x188)
+
+98 of 98 words match at the native 392-byte extent. The signed action mode
+selects one of the two tables (4 and 7 twelve-byte rows). The row index
+starts at zero and advances only if the next row exists and its frame is
+due under the native unsigned comparison. The increment uses the fresh
+work record after the transition diagnostic.
+
+The dispatch uses the resulting mode and index and calls only a non-null
+event of mode 1 or a due event of mode 0. The early current-row pointer
+and late event pointer use the native register at separate last-use
+boundaries. The mode byte and row index determine the same dispatch
+address; the localized operands retain their native scheduling. No
+arithmetic, bounds check, provider or handler is invented to force the
+match.
+
+The signed periodic diagnostic uses the live frame value for both the
+remainder and the printed argument. The increment uses the fresh work
+pointer after either callback and retains the native low 32 bits.

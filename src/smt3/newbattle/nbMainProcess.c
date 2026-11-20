@@ -613,19 +613,34 @@ void nbDebugMainProcess(nbMainProcessData_t *data)
 }
 
 
-extern char nbDebugCountFormat[], nbDebugSlotHeader[], nbDebugEventTimeFormat[], nbDebugEventSeqFormat[], nbDebugEventSeqTimeFormat[];
+/* These padded arrays occupy the five original diagnostic string slots. */
+const char nbDebugCountFormat[16] = "P:%d E:%d A:%d";
+const char nbDebugSlotHeader[24] = "  0123456789ABCDEFGH";
+const char nbDebugEventTimeFormat[24] = "EVENT TIME   : %d";
+const char nbDebugEventSeqFormat[24] = "EVENT SEQ    : %d";
+const char nbDebugEventSeqTimeFormat[24] = "EVENT SEQTIME: %d";
 extern char D_00551098[], nbDebugCharFmt[], D_005510A8[], D_005510B0[];
 
-#ifdef NON_MATCHING
 void DebugDisp2(nbMainProcessData_t *data)
 {
     sdfDrawTag_t *tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     nbParty_t *party;
-    volatile nbFormation_t *form;
+    nbFormation_t *form;
+    nbFormation_t *formAttr;
+    nbFormation_t *formFilter;
+    s32 formOffset;
+    FAKEMATCH_ASM_REG(s32, attrOffset, "$19");
+    FAKEMATCH_ASM_REG(s32, filterOffset, "$20");
+    s32 xForm;
     s32 i;
     s32 glyph;
-    u32 stat;
+    s8 *orderCursor;
+    s32 xOrder;
+    s32 nextY;
+    FAKEMATCH_ASM_REG(s32, yOrder, "$20");
+    FAKEMATCH_ASM_REG(s32, selectedAttr, "$22");
     s32 attr;
+    s32 fallbackShade;
     nbEventProcessData_t *event;
     dds3ProcessID_t *eventProcess;
 
@@ -659,9 +674,30 @@ void DebugDisp2(nbMainProcessData_t *data)
 
     sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x81C0, 0xFFFF80, 0xE,
                                             D_005510A8)));
-    for (i = 0; i < 16; i++) {
-        form = data->form + i;
+    xForm = 0x7280;
+    filterOffset = 0;
+    attrOffset = 0;
+    formOffset = 0;
+    {
+        /* Keep the real fallback shade in fp before the formation countdown.
+         * The input constraint preserves the retail initializer order. */
+        FAKEMATCH_ASM_REG(s32, initialShade, "$30") = 2;
+        FAKEMATCH_ASM_READ(initialShade);
+        fallbackShade = initialShade;
+    }
+    i = 15;
+    do {
+        /* This register carries the fresh base, then the first status read. */
+        FAKEMATCH_ASM_REG(nbFormation_t *, formBase, "$2") = data->form;
+        FAKEMATCH_ASM_REG(u32, stat, "$2");
+        form = EE_ADDR_AS(nbFormation_t *, (u32)formOffset + EE_ADDR(formBase));
+        formOffset += sizeof(nbFormation_t);
+        formAttr = EE_ADDR_AS(nbFormation_t *, (u32)attrOffset + EE_ADDR(formBase));
+        attrOffset += sizeof(nbFormation_t);
+        formFilter = EE_ADDR_AS(nbFormation_t *, (u32)filterOffset + EE_ADDR(formBase));
+        filterOffset += sizeof(nbFormation_t);
         stat = form->stat;
+        attr = 0;
         glyph = '.';
         if (stat & 1) {
             if (stat & 0x40) {
@@ -670,46 +706,56 @@ void DebugDisp2(nbMainProcessData_t *data)
             } else {
                 glyph = '-';
             }
+            attr = (formAttr->stat & 2) ? 4 : 0;
         }
-        attr = 0;
-        if (stat & 1) {
-            attr = (form->stat & 2) ? 4 : 0;
+        if ((formFilter->stat & 0x700) == 0) {
+            attr = fallbackShade;
         }
-        if ((form->stat & 0x700) == 0) {
-            attr = 2;
-        }
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x81C0,
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(xForm, 0x81C0,
                                                 0xFFFF80, attr, nbDebugCharFmt, glyph)));
-    }
+        xForm += 0xC0;
+    } while (--i >= 0);
 
-    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8220, 0xFFFF80, 0xE,
+    yOrder = 0x8220;
+    i = 0;
+    sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, yOrder, 0xFFFF80, 0xE,
                                             D_005510B0)));
-    for (i = 0; i < 12; i++) {
-        s32 order = data->order[i];
-        s32 selected = data->orderindex;
+    selectedAttr = 4;
+    xOrder = 0x7280;
+    orderCursor = data->order;
+    for (; i < 12; i++) {
+        FAKEMATCH_ASM_REG(s32, order, "$2") = *orderCursor++;
+        s32 selected;
 
-        glyph = order < 0 ? '.' : (order < 10 ? order + 0x30 : order + 0x37);
-        attr = i == selected ? 4 : 0;
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7280 + i * 0xC0, 0x8220,
+        glyph = '.';
+        if (order < 0)
+            goto renderOrder;
+        glyph = order < 10 ? order + '0' : order + ('A' - 10);
+    renderOrder:
+        ;
+        selected = data->orderindex;
+        attr = i == selected ? selectedAttr : 0;
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(xOrder, yOrder,
                                                 0xFFFF80, attr, nbDebugCharFmt, glyph)));
+        xOrder += 0xC0;
     }
 
     eventProcess = data->EventProcessID;
+    nextY = yOrder + 0xC0;
     if (eventProcess != NULL) {
         event = dds3GetProcessData(eventProcess);
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x82E0, 0xFFFF80, 0,
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, nextY, 0xFFFF80, 0,
                                                 nbDebugEventTimeFormat, event->time)));
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x8340, 0xFFFF80, 0,
+        nextY += 0x60;
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, nextY, 0xFFFF80, 0,
                                                 nbDebugEventSeqFormat, event->seq)));
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, 0x83A0, 0xFFFF80, 0,
+        nextY += 0x60;
+        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7100, nextY, 0xFFFF80, 0,
                                                 nbDebugEventSeqTimeFormat, event->seqtime)));
     }
 
     D_002F67F8.regFunc(&D_002F67F8, tag);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", DebugDisp2);
-#endif
 
 s32 CheckActionProcessEnd(nbMainProcessData_t *data)
 {

@@ -5309,52 +5309,69 @@ const cmbPanelScale_t cmbPanelScaleTable = { { 36.0f, 10.0f, 16.0f, 12.0f } };
 
 const char fclCombineTargetModelName[16] = "target.PB";
 
-#ifdef NON_MATCHING
 void cmbUpdateTimeTable(void)
 {
     s8 mode = cmbActionMode;
-    cmbGbWork_t *work = CMB_GBWK;
+    FAKEMATCH_ASM_REG(cmbGbWork_t *, work, "$7") = CMB_GBWK;
     cmbTimeTable_t *table = &cmbTimeTable[mode];
-    s32 index = work->actionTargetIndex;
+    s32 index;
+    s32 firstIndex = work->actionTargetIndex;
     cmbTimeTableEntry_t *entry;
     void (*action)(void);
+    u8 nextMode;
 
-    if (index < table->count - 1 &&
-        (u32)work->actionFrame >= SDF_FRAMES(table->entries[index + 1].frame)) {
-        printf("Updating time table : %d -> %d\n", index, index + 1);
-        work = CMB_GBWK;
-        work->actionTargetIndex = (s32)((u32)work->actionTargetIndex + 1);
+    nextMode = (u8)cmbActionMode;
+    if (firstIndex < table->count - 1) {
+        /* Keep the actual current-row address in the native scaled-index register. */
+        FAKEMATCH_ASM_REG(cmbTimeTableEntry_t *, row, "$2") = &table->entries[firstIndex];
+        if ((u32)work->actionFrame >= SDF_FRAMES(row[1].frame)) {
+            printf("Updating time table : %d -> %d\n", firstIndex, firstIndex + 1);
+
+            {
+                cmbGbWork_t *sameWork = CMB_GBWK;
+                s32 currentIndex;
+                nextMode = (u8)cmbActionMode;
+                currentIndex = sameWork->actionTargetIndex;
+                sameWork->actionTargetIndex = (s32)((u32)currentIndex + 1);
+                work = sameWork;
+            }
+        }
     }
-    mode = cmbActionMode;
+    FAKEMATCH_ASM_LIVE_WITH_MEM(work, work->actionTargetIndex);
     index = work->actionTargetIndex;
+    FAKEMATCH_ASM_LIVE_WITH_MEM(nextMode, work->actionTargetIndex);
+    mode = (s8)nextMode;
     entry = &cmbTimeTable[mode].entries[index];
     action = entry->action;
-    if (action != NULL &&
-        (entry->mode == 1 || (entry->mode == 0 && work->actionFrame == SDF_FRAMES(entry->frame)))) {
-        action();
-        work = CMB_GBWK;
+    if (action != NULL) {
+        /* Bind only the dispatch-phase pointer, after the callback has been loaded. */
+        FAKEMATCH_ASM_REG(cmbTimeTableEntry_t *, event, "$2") = entry;
+        switch (event->mode) {
+        case 0:
+            {
+                s32 want = (s32)SDF_FRAMES(event->frame);
+                s32 now = work->actionFrame;
+                if (now != want) break;
+            }
+            /* fall through */
+        case 1:
+            action();
+            work = CMB_GBWK;
+            break;
+        }
     }
-    if (work->actionFrame % 100 == 0) {
-        printf("ActCnt = %d\n", work->actionFrame);
-        work = CMB_GBWK;
+    {
+        /* The same frame goes to the division and the diagnostic argument. */
+        FAKEMATCH_ASM_REG(s32, frame, "$5") = work->actionFrame;
+        s32 interval = 100;
+
+        if (frame % interval == 0) {
+            printf("ActCnt = %d\n", frame);
+            work = CMB_GBWK;
+        }
     }
     work->actionFrame = (s32)((u32)work->actionFrame + 1);
 }
-#else
-
-
-
-
-
-
-
-
-
-
-
-
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
-#endif
 
 typedef struct effEVECombParSmokeParam_t {
     f32 position[4];
