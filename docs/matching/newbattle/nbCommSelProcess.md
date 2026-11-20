@@ -258,3 +258,26 @@ The complete owner has 37 matches and no differences. Extracted-body tests compa
 one million full-domain coordinate/alpha call traces against a native-operation
 oracle at O2 and under ASan/UBSan. Three complete-owner modes preserve plain versus
 dump-enabled assembly and object output.
+
+## DispSummonCursor (newbattle/nbCommSelProcess, 0x278)
+
+All 158 words match. The four gradient quads share their middle edges and
+draw in the native upper-left, upper-right, lower-left, lower-right order.
+The upper tint uses the full opacity conversion; the lower tint uses its
+separate half conversion. Input 0x80 retains the immediate pair 0x46/0x23.
+The packet still uses the fixed right-edge color and a null allocator. It
+looks up ordering-table entry 71 after all four calls and registers the tag
+through that entry's live callback.
+
+The saved X and Y homes carry the real initialized coordinates and their
+scaled values. X is recomputed for the lower-left edge, and Y evolves into
+the lower row's coordinate. The local two-value compiler operand before the
+lower quads preserves these native phases and their ordering relative to the
+existing packed-color spill. The coordinate arithmetic preserves the low
+32 bits; no empty operand carries a hidden memory effect. These are
+target-specific reconstruction aids, not evidence of original source spelling.
+
+The G4 declaration and all its calls in this owner now agree with
+the existing provider: signed EE addresses and colors, and a typed allocator
+callback. The other two callers retain their exact bytes. Complete owner
+verification gives 38 matches, zero differences.

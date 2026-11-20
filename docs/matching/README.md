@@ -28,9 +28,9 @@ both native and emitted sizes when they differ.
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
+| 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
-| 6 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |

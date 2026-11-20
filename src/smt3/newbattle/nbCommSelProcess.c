@@ -144,9 +144,9 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 
-extern void sdfPrimLinkG4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, u32 aColor0, s32 aX1,
-                          s32 aY1, u32 aColor1, s32 aX2, s32 aY2, u32 aColor2, s32 aX3, s32 aY3,
-                          u32 aColor3, s32 aZ, void *aAllocator);
+extern void sdfPrimLinkG4(s32 aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aColor0, s32 aX1,
+                          s32 aY1, s32 aColor1, s32 aX2, s32 aY2, s32 aColor2, s32 aX3, s32 aY3,
+                          s32 aColor3, s32 aZ, s32 (*aAllocator)(s32));
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -531,24 +531,26 @@ void DispCommCursor(s32 ox, s32 oy, s32 a)
     y1 = (u32)y1 + 0x7998;
     c0 = ((u32)alpha << 24) | 0x8CBE1B;
     c1 = ((u32)alpha << 24) | 0x9B4400;
-    sdfPrimLinkG4(list, 0x14C, ox, oy, c0, x1, oy, c1, ox, y1, c0, x1, y1, c1, -1, NULL);
+    sdfPrimLinkG4(EE_ADDR_S(list), 0x14C, ox, oy, c0, x1, oy, c1, ox, y1, c0, x1, y1, c1, -1, NULL);
     ox = x1;
-    sdfPrimLinkG4(list, 0x14C, ox, oy, c1, (u32)xb + 0x7C60, oy, 0xBF0013, ox, y1, c1, (u32)xb + 0x7C60, y1,
+    sdfPrimLinkG4(EE_ADDR_S(list), 0x14C, ox, oy, c1, (u32)xb + 0x7C60, oy, 0xBF0013, ox, y1, c1, (u32)xb + 0x7C60, y1,
                   0xBF0013, -1, NULL);
     ot = &sdfGrOtTable[71];
     ot->regFunc(ot, list);
 }
 
 
-#ifdef NON_MATCHING
 void DispSummonCursor(s32 ox, s32 oy, s32 a)
 {
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
+    /* Saved homes for the actual scaled X and lower Y across packet calls. */
+    FAKEMATCH_ASM_REG(s32, actualY, "s3") = oy;
+    FAKEMATCH_ASM_REG(s32, actualX, "s6") = ox;
     f32 rate;
     s32 alpha;
     s32 halfAlpha;
-    s32 x0, x1, x2, y0, y1, y2;
+    s32 x0, x1, x2, y0, y1;
     u32 left, middle, halfLeft, halfMiddle;
 
     if (a == 0x80) {
@@ -556,34 +558,37 @@ void DispSummonCursor(s32 ox, s32 oy, s32 a)
         halfAlpha = 0x23;
     } else {
         rate = (f32)a * 0.0078125f;
-        halfAlpha = (s32)(rate * 35.0f);
         alpha = (s32)(rate * 70.0f);
+        halfAlpha = (s32)(rate * 35.0f);
     }
     tag = dds3FontReqAllocDrawTag();
     left = ((u32)alpha << 24) | 0x8CBE1B;
     middle = ((u32)alpha << 24) | 0x9B4400;
-    x0 = (u32)ox * 16 + 0x7000;
-    x1 = (u32)ox * 16 + 0x7630;
-    x2 = (u32)ox * 16 + 0x7C60;
-    y0 = (u32)oy * 8 + 0x7900;
-    y1 = (u32)oy * 8 + 0x7998;
-    y2 = (u32)oy * 8 + 0x7A48;
-    sdfPrimLinkG4(tag, 0x14C, x0, y0, left, x1, y0, middle,
+    actualX = (u32)actualX << 4;
+    actualY = (u32)actualY << 3;
+    x1 = (u32)actualX + 0x7630u;
+    y0 = (u32)actualY + 0x7900u;
+    x0 = (u32)actualX + 0x7000u;
+    y1 = (u32)actualY + 0x7998u;
+    x2 = (u32)actualX + 0x7C60u;
+    actualY = (u32)actualY + 0x7A48u;
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x0, y0, left, x1, y0, middle,
                   x0, y1, left, x1, y1, middle, -1, NULL);
-    sdfPrimLinkG4(tag, 0x14C, x1, y0, middle, x2, y0, 0xBF0013,
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x1, y0, middle, x2, y0, 0xBF0013,
                   x1, y1, middle, x2, y1, 0xBF0013, -1, NULL);
+    /* Keep the lower phase on the native coordinate homes and form its
+     * left edge from scaled X again. Both coordinates feed these packets. */
+    FAKEMATCH_ASM_LIVE_PAIR(actualX, actualY);
+    x0 = (u32)actualX + 0x7000u;
     halfLeft = ((u32)halfAlpha << 24) | 0x8CBE1B;
     halfMiddle = ((u32)halfAlpha << 24) | 0x9B4400;
-    sdfPrimLinkG4(tag, 0x14C, x0, y1, halfLeft, x1, y1, halfMiddle,
-                  x0, y2, halfLeft, x1, y2, halfMiddle, -1, NULL);
-    sdfPrimLinkG4(tag, 0x14C, x1, y1, halfMiddle, x2, y1, 0xBF0013,
-                  x1, y2, halfMiddle, x2, y2, 0xBF0013, -1, NULL);
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x0, y1, halfLeft, x1, y1, halfMiddle,
+                  x0, actualY, halfLeft, x1, actualY, halfMiddle, -1, NULL);
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x1, y1, halfMiddle, x2, y1, 0xBF0013,
+                  x1, actualY, halfMiddle, x2, actualY, 0xBF0013, -1, NULL);
     ot = &sdfGrOtTable[71];
     ot->regFunc(ot, tag);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispSummonCursor);
-#endif
 
 void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 oz, u32 col)
 {
@@ -651,10 +656,10 @@ void DispHelpPanel(nbCommSelProcessData_t *s, u16 d, s32 x, s32 y, s32 oz,
     y0 = (u32)y * 8 + 0x7900;
     y1 = (u32)y * 8 + 0x79C8;
     background = ((u32)alpha << 24) | 0x221810;
-    sdfPrimLinkG4(tag, 0x14C, x0, y0, background, x1, y0, background,
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x0, y0, background, x1, y0, background,
                   x0, y1, background, x1, y1, background, -1, NULL);
     x2 = (u32)x * 16 + 0x8A00;
-    sdfPrimLinkG4(tag, 0x14C, x1, y0, background, x2, y0, 0x221810,
+    sdfPrimLinkG4(EE_ADDR_S(tag), 0x14C, x1, y0, background, x2, y0, 0x221810,
                   x1, y1, background, x2, y1, 0x221810, -1, NULL);
     ot = &sdfGrOtTable[71];
     ot->regFunc(ot, tag);
