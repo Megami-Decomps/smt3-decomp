@@ -193,3 +193,12 @@ const char dds3AreaBasicMsgNoList[40] = "\245\250\245\352\245\242\245\352\245\27
 
 const char dds3AreaBasicMsgNoArea[56] = "not exist a area  \245\250\245\352\245\242\244\254\270\253\244\304\244\253\244\352\244\336\244\273\244\363...\n";
 
+
+dds3BasicFunction_t AreaBasicTable = {
+    AreaBasicConstructor,
+    AreaBasicDestructor,
+    AreaBasicMainprocuder,
+    AreaBasicDrawprocuder,
+    NULL,
+    NULL,
+};

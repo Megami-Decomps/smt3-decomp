@@ -209,5 +209,15 @@ u32 BasicTypeToItemType(u32 type)
 
 s32 dds3MoverCount = 0;
 
+
+dds3BasicFunction_t MoverBasicTable = {
+    MoverBasicConstructor,
+    MoverBasicDestructor,
+    MoverBasicMainprocuder,
+    NULL,
+    NULL,
+    NULL,
+};
+
 SDATA_PAD(4);
 

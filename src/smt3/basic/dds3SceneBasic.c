@@ -91,7 +91,7 @@ void scenedestructor(dds3Basic_t *basic)
 }
 
 /* Preserve the next link across callbacks that can delete their own basic. */
-u32 scenemainprocuder(dds3Basic_t *scene)
+s32 scenemainprocuder(dds3Basic_t *scene)
 {
     dds3SceneBasic_t *work = scene->workdata;
     dds3Basic_t *basic;
@@ -116,7 +116,7 @@ u32 scenemainprocuder(dds3Basic_t *scene)
     return 1;
 }
 
-u32 scenedrawprocuder(dds3Basic_t *scene)
+s32 scenedrawprocuder(dds3Basic_t *scene)
 {
     dds3SceneBasic_t *work = scene->workdata;
     dds3Basic_t *basic;
@@ -510,3 +510,12 @@ dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name)
     return NULL;
 }
 
+
+dds3BasicFunction_t sceneBasicTable = {
+    sceneconstructor,
+    scenedestructor,
+    scenemainprocuder,
+    scenedrawprocuder,
+    NULL,
+    NULL,
+};
