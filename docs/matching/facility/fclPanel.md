@@ -74,7 +74,31 @@ mask preserves the native size and the six-word scheduling residual.
 
 ## fclDrawPanelType0 (facility/fclPanel, 0x394)
 
-### Current measured blockers (2026-11-06)
+229 of 229 words match at the native 916-byte size. The opening width uses
+the first unsigned height sample. The timer sampled in the elapsed-time
+calculation also supplies the opening opacity product. The curve keeps its
+native signed truncation, square root and square before complementing the
+converted animation amount. The wrapped word arithmetic preserves the
+native integer results.
+
+The upper coordinate snapshot and the lower coordinate phase are separate.
+The lower sequence reads the panel height and Y again after the last
+upper callback. Both blends read their own timer value, every box reads its
+current Z, and the four-word palette carries only the colors for that box.
+
+The target-specific bindings preserve the native live values: the initial
+divisor and later packed base, the initial duration and later opacity
+coefficient, the timer and its low-word product, the actual saved blend
+color and the later saved lower Y. Two empty operand constraints retain the
+real converted animation amount and the packed fill operands. Neither
+adds a memory access or synthetic consumer. The nonempty operation is the
+existing EE square-root helper. These shapes do not imply original source
+spelling.
+
+All 19 other owner functions and owned data remain exact. Independent
+native review and callback-mutation checks preserve both panel phases.
+
+### Historical measured blockers (2026-11-06, superseded)
 
 In a fresh current-owner measurement, 174 of 229 words match at 916 bytes
 for the unchanged ordinary body; the 172-word matching score below is
