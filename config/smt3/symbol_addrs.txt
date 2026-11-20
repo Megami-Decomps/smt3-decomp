@@ -71,6 +71,22 @@ _ctype_ = 0x0054B550; // type:u8 size:0x101
 // Both matrices end at the next race-entry table, cmbRaceResultTable.
 cmbRaceCombineTable = 0x0032D270; // type:u8 size:0x800
 
+// Keep the neighboring raw-data labels visible when the fusion matrices split
+// this large data segment. These are the pre-split assembler boundaries, not
+// claims of recovered object types or sizes.
+D_00323030 = 0x00323030;
+D_00323230 = 0x00323230;
+D_00323330 = 0x00323330;
+D_00323430 = 0x00323430;
+D_00323530 = 0x00323530;
+D_00323630 = 0x00323630;
+D_00323730 = 0x00323730;
+D_00323830 = 0x00323830;
+D_00323930 = 0x00323930;
+D_00326230 = 0x00326230;
+D_00326330 = 0x00326330;
+D_00326430 = 0x00326430;
+
 D_00551B54 = 0x00551B54; // type:u8 size:0x1
 
 // nbPanelAuto submits two 0x14-byte polygon rows, at 0x004F0614 then
