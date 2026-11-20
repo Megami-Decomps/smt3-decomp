@@ -2468,8 +2468,6 @@ void DrawWindow(instanceMes_tag *pinst) {
     }
 }
 
-/* NON_MATCHING: 128 of 191 words, exact size; the three stack arrays' store and constant order is scheduled differently. */
-#ifdef NON_MATCHING
 void DrawSelectCursor(instanceMes_tag *pinst) {
     itfColor_t uv;
     itfColor_t color;
@@ -2484,6 +2482,10 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     s32 d;
     s32 index;
     s32 rowOfs;
+    s32 lx, ly, rx, ry;
+    u32 red, alpha;
+    /* The first plane consumes blue in its native scratch register before the call. */
+    FAKEMATCH_ASM_REG(u32, blue, "$3");
 
     index = sel->select_imm;
     if (index == -1) {
@@ -2493,50 +2495,67 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     sdfDrawTagInit(list);
     x = sel->x;
     rowOfs = sel->lines * 160 - 0xC0;
-    y = sel->y - rowOfs;
-    y += index * 168;
-    color.components[0] = 0x57;
+    y = (s32)((u32)sel->y - (u32)rowOfs);
+    y = (s32)((u32)y + (u32)(index * 168));
+    lx = (s32)((u32)x - 0xF0u);
+    ly = (s32)((u32)y - 8u);
+    rx = itfMesSelectRectVerts[0];
+    ry = (s32)((u32)y + 0xA8u);
+    red = 0x57;
+    blue = 0x10;
+    alpha = 0x26;
+
+    color.components[2] = blue;
+    rect[1].x = rx;
+    color.components[0] = red;
+    color.components[3] = alpha;
+    rect[0].x = lx;
+    rect[0].y = ly;
+    rect[1].y = ry;
     color.components[1] = 0;
-    color.components[2] = 0x10;
-    color.components[3] = 0x26;
-    rect[0].y = y - 8;
-    rect[0].x = x - 0xF0;
-    rect[1].x = itfMesSelectRectVerts[0];
-    rect[1].y = y + 0xA8;
     itfMiscDrawSpritePlanePrim(rect, &color, pinst->z, 0, list);
-    itfMesSelectRectVerts[1] = y - 8;
-    itfMesSelectRectVerts[3] = y - 8;
-    itfMesSelectRectVerts[5] = y + 0xA8;
-    itfMesSelectRectVerts[7] = y + 0xA8;
+    itfMesSelectRectVerts[1] = (s32)((u32)y - 8u);
+    itfMesSelectRectVerts[3] = (s32)((u32)y - 8u);
+    itfMesSelectRectVerts[5] = (s32)((u32)y + 0xA8u);
+    itfMesSelectRectVerts[7] = (s32)((u32)y + 0xA8u);
     itfMiscDrawRectanglePrim((sdfIVector2_t *)itfMesSelectRectVerts, itfMesSelectRectColors, itfMesSelectRectIndex, itfMesSelectRectColorIndex, pinst->z, list);
-    uv.components[0] = 0x150;
-    uv.components[1] = 0x2F0;
-    uv.components[2] = 0x1B0;
-    uv.components[3] = 0x3F0;
-    color.components[0] = 0x80;
-    color.components[1] = 0x80;
-    color.components[2] = 0x80;
-    color.components[3] = 0x26;
-    rect[0].x = x - 0x150;
-    rect[1].x = x - 0xF0;
-    rect[1].y = y + 0x88;
-    rect[0].y = y + 8;
+    {
+        s32 py = (s32)((u32)y + 8u);
+        s32 px = (s32)((u32)x - 0x150u);
+
+        uv.components[0] = 0x150;
+        uv.components[1] = 0x2F0;
+        uv.components[2] = 0x1B0;
+        uv.components[3] = 0x3F0;
+        color.components[0] = 0x80;
+        color.components[1] = 0x80;
+        color.components[2] = 0x80;
+        color.components[3] = 0x26;
+        rect[0].x = px;
+        rect[1].x = (s32)((u32)x - 0xF0u);
+        rect[1].y = (s32)((u32)y + 0x88u);
+        rect[0].y = py;
+    }
     itfMiscDrawSpritePrim(rect, &uv, &color, pinst->z, itfMesMngManager.windowTexture, 0, list);
+    rect[1].x = (s32)((u32)rect[0].x + 0x100u);
+    rect[1].y = (s32)((u32)rect[0].y + 0x80u);
     uv.components[0] = 0x260;
+    uv.components[2] = 0x360;
     uv.components[1] = 0x2F0;
     uv.components[3] = 0x3F0;
-    uv.components[2] = 0x360;
     color.components[3] = fade->ctr0;
-    rect[1].x = rect[0].x + 0x100;
-    rect[1].y = rect[0].y + 0x80;
     itfMiscDrawSpritePrim2(rect, &uv, &color, pinst->z, 0, list);
     timer = fade->ctr1;
     if (timer > 0) {
+        s32 dy;
+        s32 dx;
         d = 0x80 - timer;
-        rect[0].x -= d;
-        rect[0].y -= d >> 1;
-        rect[1].x += d * 2;
-        rect[1].y += d >> 1;
+        dy = d >> 1;
+        dx = d * 2;
+        rect[0].x = (s32)((u32)rect[0].x - d);
+        rect[0].y = (s32)((u32)rect[0].y - dy);
+        rect[1].x = (s32)((u32)rect[1].x + dx);
+        rect[1].y = (s32)((u32)rect[1].y + dy);
         color.components[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
         itfMiscDrawSpritePrim2(rect, &uv, &color, pinst->z, 0, list);
@@ -2545,9 +2564,6 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     packetOwner = &sdfGrOtTable[pinst->otindex];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
 }
-#else
-INCLUDE_ASM(const s32, "interface/itfMesManager", DrawSelectCursor);
-#endif
 
 
 

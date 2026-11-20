@@ -2,58 +2,25 @@
 
 ## DrawSelectCursor (interface/itfMesManager, 0x2FC)
 
-One hundred twenty-eight of one hundred ninety-one words match at the exact
-764-byte size. The frame layout is retail's, including the `itfMesCursor_t *`
-spilled to `0x30($29)` and reloaded twice, and every saved-register
-assignment matches: `$16` reused for `&panel->selection` then
-`&D_00326728`, `$17` the row base, `$18`/`$19` the top and bottom, `$20`/`$21`
-the two left edges, `$22` the `0x80` constant, `$30` the draw tag.
+191 of 191 words match at 764 bytes. The selection index is captured
+once and the native -1 sentinel returns before allocating a draw tag.
+The row terms use the captured index and line count. The first plane
+uses two actual position records and four initialized color words.
+Making the first plane's actual blue value available in its native
+temporary reproduces the two color phases around its store. The binding
+ends at that store and does not cross a provider call.
 
-Three source facts were needed to get there and should not be re-searched:
+The first textured sprite uses the actual coordinate snapshots and
+typed UV/color buffers. The overlay consumes the positions after the
+preceding texture callback, with the native UV and alpha updates. Coordinate
+calculations preserve native modulo-32-bit arithmetic. On a positive timer
+the function adjusts both corners and emits the fade sprite between the two
+alpha calls. It finally registers the tag on the current ordering table;
+its index must name a real table entry.
 
-- `s32 index = sel->savedIndex;` read once for both the `== -1` guard and the
-  `* 168` row offset. Reading the field twice costs a load and rotates every
-  saved register.
-- `s32 rowOfs = sel->rowCount * 160 - 0xC0;` as a named local, with
-  `y = sel->y - rowOfs;` and `y += index * 168;` as two statements. That is
-  what puts the row term in `$2` and the item term in `$3`; six other
-  spellings of the same arithmetic (one expression either way round, the
-  terms as two locals, an `itemOfs` local alone) are 81 to 170 words out.
-- The `0x80` has to stay a literal. A named local for it is rematerialised
-  and does not reach `$22`; what puts `0x80` in a saved register is the
-  `index` local above freeing the pressure that spills the cursor pointer.
-
-The remaining 63 are the order the three stack arrays' elements are stored in
-and where the shared constants are materialised, in all three draw blocks.
-Retail's emitted order for the first block is `color[2]`, `rect[2]`,
-`color[0]`, `color[3]`, `rect[0]`, `rect[1]`, `rect[3]`, `color[1]`, which is
-not a rotation of any natural source order: all sixteen rotations of
-colour-then-rect and rect-then-colour, plus the rotation the store rule
-predicts, give 77 of 191 or worse, and an adjacent-swap hill climb over all
-five blocks' statement lists bottoms out at 63. The levers page lists pure
-instruction scheduling as not worth a second attempt and that is what this
-looks like; if it is steerable it is through something other than statement
-order.
-
-### Typed cursor storage and provider declarations (2026-11-07)
-
-The retained cursor now uses two `sdfIVector2_t` position records and genuine
-`itfColor_t` color/UV objects. These match the objects read by the canonical
-`itfMiscDrawSpritePlanePrim` and `itfMiscDrawSpritePrim2` providers; their local
-external declarations now also preserve the providers' typed parameters and
-unsigned depth word. The separate `itfMiscDrawSpritePrim` provider genuinely
-accepts `void *` buffers and a signed depth word, and remains unchanged.
-All position arithmetic, component bits, initialization and callback order are
-preserved. This corrects source type/alias contracts, not native behavior or
-matching progress: the target remains guarded and 128 of 191 words match at 764 bytes.
-
-Paired complete-owner production, SKIP_ASM and true NON_MATCHING/SKIP_ASM
-controls preserve emitted code, owned data, symbols and relocations.
-Independent fixed-filename controls also preserve literal complete assembly
-and raw ELF objects. The 119 already matched peers remain exact. Real right-edge, blue-channel and
-paired vertical-edge operand constraints reduce the target to 756 bytes and
-worsen its matching score; none is retained. The remaining store scheduling
-problem does not justify more statement permutations or fabricated consumers.
+Provider declarations, initialized storage, frame layout and native
+callback-visible reads are preserved. This is a matching reconstruction,
+not evidence of original source spelling.
 
 ## itfMesMngGetVarLocalize (interface/itfMesManager, 0xAC)
 
