@@ -206,6 +206,35 @@ inserted to hide a residual, and no translation-unit ownership changes.
 
 ## evtAddFrameInfo (event/evtEventViewer, 0x540)
 
+336 of 336 words match at 1,344 bytes, including all 24 jump-table
+destinations. The guard is removed only for this function. The other 58 C
+functions and the EnterFrameList assembly fallback remain in place.
+
+The case-3 initialization follows the corresponding DDS viewer's ordinary
+order for the same five existing byte and halfword writes. The writes touch
+distinct bytes, with no callback between them; the string-table call remains
+first. The 20/21 byte-7 initialization is last among their existing stores.
+Type 18 retains the low-byte zero also written by its initial halfword
+store: retail has the separate delay-slot byte write, and both
+[DDS](https://github.com/Megami-Decomps/dds-decomp/blob/ccdcc6c5efa010ea3ee0c5940c5cbe3c88227035/src/dds1/event/evtEventViewer.c)
+[twins](https://github.com/Megami-Decomps/dds-decomp/blob/ccdcc6c5efa010ea3ee0c5940c5cbe3c88227035/src/dds2/event/evtEventViewer.c)
+retain that same ordinary byte initialization from the neighboring case.
+No volatile member, invented consumer or register constraint is required.
+
+The existing ambient-vector name moves forward so case 10 can address the
+real light-state member at +0x10 without a retained parent address. Case 11
+reads the real fog maximum into an initialized scalar before publishing the
+work pointer, then stores that value. Neither change adds storage or a call.
+
+Independent source and relocation checks, complete compiler output parity
+in production and both SKIP_ASM modes, generated-source and draft checks,
+tool tests and literal retail image comparison qualify the completion. The
+standalone owner's four inherited diagnostic incidences are two actual
+camera-name pointers; the local .rodata addends, strings and all 184 linked
+.sdata bytes resolve to retail. EnterFrameList remains unmatched.
+
+### Historical guarded draft
+
 305 of 336 words match at the native 1344-byte size. The ordinary reconstruction
 remains guarded, with 55 exact peer functions and valid owned data and jump table.
 There is no matching credit or source promotion.

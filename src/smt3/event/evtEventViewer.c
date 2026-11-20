@@ -219,9 +219,10 @@ typedef struct __attribute__((packed)) { dds3Effect_Filter_t value; } evtFilterC
 typedef struct __attribute__((packed)) { dds3Effect_PartialMultiFilterParam_t value; } evtMultiFilterCopy_t;
 
 extern dds3LightState_t dds3LightParam;
+/* The ambient vector is a separate address within the light state. */
+SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 
-#ifdef NON_MATCHING
 extern s32 evtAddNameTable(const char *name);
 extern void *memcpy(void *destination, const void *source, u32 size);
 extern effBlurTemplate_t *Eve_PartialMultiBlurGetParams(void);
@@ -239,6 +240,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     sdf3DLight_t *light;
     void *work;
     s32 nameIndex;
+    f32 fogMaximum;
 
     memset(frame, 0, 0x20);
     frame->frame = frameNumber;
@@ -258,28 +260,30 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         break;
     case 3:
         frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
-        frame->param.sb[5] = -1;
-        frame->param.sh[3] = -1;
         frame->param.sb[0] = -1;
         frame->param.sh[1] = 0;
         frame->param.sb[4] = 0;
+        frame->param.sb[5] = -1;
+        frame->param.sh[3] = -1;
         break;
     case 18:
         nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
         frame->param.sh[0] = 0;
         frame->nameIndex = nameIndex;
         frame->param.sh[1] = -1;
+        /* The DDS viewer twins keep the case-1 byte initialization here too. */
+        frame->param.sb[0] = 0;
         break;
     case 20:
     case 21:
         frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
-        frame->param.sb[7] = -1;
         frame->param.sb[0] = -1;
         frame->param.sb[1] = 0;
         frame->param.sh[1] = 0;
         frame->param.sb[4] = -1;
         frame->param.sb[5] = -1;
         frame->param.sb[6] = -1;
+        frame->param.sb[7] = -1;
         break;
     case 9:
         frame->nameIndex = evtAddNameTable(viewerinfo->nametable[track->entryHeader]);
@@ -299,7 +303,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         light = dds3LightParam.parallel[0];
         SDF_VU0_COPYVECTOR(sceneLight->color, &light->color);
         SDF_VU0_COPYVECTOR(sceneLight->direction, &light->v);
-        SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3LightParam.ambient);
+        SDF_VU0_COPYVECTOR(sceneLight->ambient, &dds3AmbientColor);
         frame->work = sceneLight;
         frame->param.sf[0] = sdfFaceDivSoften;
         frame->param.sf[1] = sdfFaceDivBias;
@@ -310,8 +314,9 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
         sourceFog = &dds3LightParam.fog;
         sceneFog->fog.vec[0] = sourceFog->fogMin;
         sceneFog->fog.color = sourceFog->color;
+        fogMaximum = sourceFog->fogMax;
         frame->work = sceneFog;
-        sceneFog->fog.vec[1] = sourceFog->fogMax;
+        sceneFog->fog.vec[1] = fogMaximum;
         sceneFog->fog.vec[2] = sourceFog->fogNear;
         sceneFog->fog.vec[3] = sourceFog->fogFar;
         frame->param.sh[0] = 1;
@@ -355,9 +360,6 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     }
     return frame;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
-#endif
 
 evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
 {
@@ -2483,9 +2485,6 @@ extern dds3Effect_DistortionBlurParam_t *dblurGetParam(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_Filter_t *dblurGetParam2(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
-
-/* The ambient vector is a separate address within the light state. */
-SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
 
 s32 EnterData(s32 action, s32 previousMenu)
 {
