@@ -432,6 +432,8 @@ segments:
       - [0x215100, .data, field/fld_Npc]
       - [0x217B00, .data, mc/slMain]
       - [0x217EC4, data, data_00316EC4]
+      - [0x217EC8, .data, field/fldItemBoxRndTable]
+      - [0x217EEC, data, data_00316EEC]
       - [0x217EF0, .data, effect/effManager]
       - [0x217FE0, data, data_00316FE0]
       - [0x218380, .data, effect/polyManager]
