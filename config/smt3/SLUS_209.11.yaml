@@ -406,6 +406,8 @@ segments:
       - [0x1FB820, .data, kernel/dds3GlobalWork]
       - [0x1FB930, .data, kernel/dds3DebugStuff]
       - [0x1FB944, data, data_002FA944]
+      - [0x1FB950, .data, field/fldShadowMeshes]
+      - [0x1FCD40, data, data_002FBD40]
       - [0x1FCD80, .data, field/fldTest]
       - [0x1FCE00, data, data_002FBE00]
       - [0x20A5E0, .data, field/fldSe]

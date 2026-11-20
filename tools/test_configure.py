@@ -114,12 +114,70 @@ class ConfigureTests(unittest.TestCase):
                 f"    build/{VERSION}/hand/crt0.o(.text)\n"
             )
             self.assertEqual(
-                configure.linker_objects(script),
+                list(configure.linker_object_sections(script)),
                 [
                     Path(f"build/{VERSION}/main/code_00100000.o"),
                     Path(f"build/{VERSION}/hand/crt0.o"),
                 ],
             )
+
+    def test_objdiff_reference_only_selects_data_for_a_data_only_linker_input(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            script = root / f"{SERIAL}.ld"
+            mesh = Path(f"build/{VERSION}/src/{VERSION}/field/mesh.o")
+            normal = Path(f"build/{VERSION}/src/{VERSION}/field/draw.o")
+            mixed = Path(f"build/{VERSION}/src/{VERSION}/field/mixed.o")
+            repeated = Path(f"build/{VERSION}/src/{VERSION}/field/repeated.o")
+            wildcard = Path(f"build/{VERSION}/src/{VERSION}/field/wildcard.o")
+            noncanonical = Path(f"build/{VERSION}/src/{VERSION}/field/noncanonical.o")
+            guarded = Path(f"build/{VERSION}/src/{VERSION}/field/guarded.o")
+            space = Path(f"build/{VERSION}/src/{VERSION}/field/space.o")
+            split = Path(f"build/{VERSION}/src/{VERSION}/field/split.o")
+            quoted = Path(f"build/{VERSION}/src/{VERSION}/field/quoted.o")
+            script.write_text(
+                f"    {mesh}(.data);\n"
+                f"    {normal}(.text);\n"
+                f"    {normal}(.data);\n"
+                f"    {mixed}(.data .sdata);\n"
+                f"    {repeated}(.data);\n"
+                f"    {repeated}(.data);\n"
+                f"    {wildcard}(.data*);\n"
+                f"    {noncanonical}(.data); {normal}(.text);\n"
+                f"    {guarded}(.data);\n"
+                f"    KEEP({guarded}(.text))\n"
+                f"    {space}(.data);\n    {space} (.text)\n"
+                f"    {split}(.data);\n    {split}\n      (.text)\n"
+                f'    {quoted}(.data);\n    "{quoted}"(.text)\n'
+            )
+            sections = configure.linker_object_sections(script)
+            self.assertEqual(list(sections), [mesh, normal, mixed, repeated, wildcard,
+                                              noncanonical, guarded, space, split, quoted])
+            self.assertIsNone(sections[normal])
+            self.assertIsNone(sections[noncanonical])
+            self.assertIsNone(sections[guarded])
+            self.assertIsNone(sections[space])
+            self.assertIsNone(sections[split])
+            self.assertIsNone(sections[quoted])
+            self.assertEqual(sections[repeated], [".data", ".data"])
+            with patch.object(configure, "ROOT", root):
+                source = Path(f"src/{VERSION}/field/mesh.c")
+                with self.assertRaisesRegex(SystemExit, "missing native data reference"):
+                    configure.objdiff_reference(VERSION, source, sections[mesh])
+                native = root / f"asm/{VERSION}/data/field/mesh.data.s"
+                native.parent.mkdir(parents=True)
+                native.touch()
+                self.assertEqual(configure.objdiff_reference(VERSION, source, sections[mesh]),
+                                 native.relative_to(root))
+                for obj, unit in ((normal, "draw"), (mixed, "mixed"),
+                                  (repeated, "repeated"), (wildcard, "wildcard"),
+                                  (noncanonical, "noncanonical"), (guarded, "guarded"),
+                                  (space, "space"), (split, "split"), (quoted, "quoted")):
+                    source = Path(f"src/{VERSION}/field/{unit}.c")
+                    alternate = native.with_name(f"{unit}.data.s")
+                    alternate.touch()
+                    self.assertEqual(configure.objdiff_reference(VERSION, source, sections[obj]),
+                                     Path(f"asm/{VERSION}/field/{unit}.s"))
 
     def test_unit_cflags_drop_comments_and_keep_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
