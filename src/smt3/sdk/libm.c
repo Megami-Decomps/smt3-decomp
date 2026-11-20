@@ -333,53 +333,86 @@ s32 __ieee754_rem_pio2f(f32 x, f32 *y)
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
  * capture_006, covering only the paths those calls took.
  * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 f32 __ieee754_sqrtf(f32 x)
 {
-    union { f32 f; s32 i; } input;
-    union { f32 f; s32 i; } output;
-    s32 mantissa;
-    s32 exponent;
+    f32 result;
+    FAKEMATCH_ASM_REG(s32, mantissa, "$5");
+    FAKEMATCH_ASM_REG(s32, exponent, "$7");
     s32 partial;
     s32 root;
-    s32 trial;
     u32 bit;
-
-    input.f = x;
-    mantissa = input.i;
-    if ((u32)(mantissa & 0x7FFFFFFF) <= 0x007FFFFF) {
-        return x;
+    FAKEMATCH_ASM_REG(u32, fractionMask, "$3");
+    FAKEMATCH_ASM_REG(u32, magnitudeMask, "$2");
+    {
+        FAKEMATCH_ASM_REG(s32, inputWord, "$3");
+        GET_FLOAT_WORD(inputWord, x);
+        FAKEMATCH_ASM_LIVE(inputWord);
+        mantissa = inputWord;
+        FAKEMATCH_ASM_LIVE(mantissa);
     }
+    /* Keep the high and low halves of the native magnitude/fraction masks
+     * distinct through integer scheduling, after saving the input word. */
+    magnitudeMask = 0x7FFF0000U;
+    FAKEMATCH_ASM_LIVE(magnitudeMask);
+    fractionMask = 0x007F0000U;
+    magnitudeMask |= 0xFFFFU;
+    fractionMask |= 0xFFFFU;
+    FAKEMATCH_ASM_LIVE_PAIR(magnitudeMask, fractionMask);
+    {
+        FAKEMATCH_ASM_REG(s32, test, "$2") = fractionMask < ((u32)mantissa & magnitudeMask);
+        if (!test) return x;
+    }
+    exponent = mantissa >> 23;
     if (mantissa < 0) {
-        return (x - x) / (x - x);
+        f32 delta = x - x;
+        return delta / delta;
     }
-    exponent = (mantissa >> 23) - 127;
-    mantissa = (mantissa & 0x007FFFFF) | 0x00800000;
-    mantissa <<= exponent & 1;
+    exponent -= 127;
+    FAKEMATCH_ASM_LIVE(exponent);
+    {
+        s32 implicit;
+        s32 fraction;
+        s32 odd;
+        implicit = 0x800000;
+        /* Schedule the restored leading bit before masking the fraction. */
+        FAKEMATCH_ASM_READ(implicit);
+        fraction = (s32)((u32)mantissa & fractionMask);
+        odd = exponent & 1;
+        mantissa = fraction | implicit;
+        FAKEMATCH_ASM_LIVE_PAIR(mantissa, odd);
+        partial = 0;
+        FAKEMATCH_ASM_READ_PAIR(partial, odd);
+        mantissa = (s32)((u32)mantissa << odd);
+    }
+    bit = 0x01000000U;
     exponent >>= 1;
-    mantissa <<= 1;
-    partial = 0;
+    mantissa = (s32)((u32)mantissa << 1);
     root = 0;
-    bit = 0x01000000;
     do {
-        trial = partial + bit;
-        if (trial <= mantissa) {
-            mantissa -= trial;
-            partial = trial + bit;
-            root += bit;
+        s32 trial = partial + (s32)bit;
+        if (mantissa < trial) {
+            bit >>= 1;
+            mantissa = (s32)((u32)mantissa << 1);
+            continue;
         }
+        mantissa -= trial;
+        partial = trial + (s32)bit;
+        root += (s32)bit;
         bit >>= 1;
-        mantissa <<= 1;
-    } while (bit != 0);
-    if (mantissa != 0) {
-        root += root & 1;
+        mantissa = (s32)((u32)mantissa << 1);
+    } while (bit);
+    if (mantissa) root += root & 1;
+    {
+        FAKEMATCH_ASM_REG(s32, half, "$2") = root >> 1;
+        FAKEMATCH_ASM_REG(u32, scale, "$3") = (u32)exponent << 23;
+        FAKEMATCH_ASM_REG(u32, bias, "$5") = 0x3F000000U;
+        FAKEMATCH_ASM_LIVE_PAIR(half, scale);
+        bias += (u32)half;
+        bias += scale;
+        SET_FLOAT_WORD(result, bias);
     }
-    output.i = (root >> 1) + 0x3F000000U + ((u32)exponent << 23);
-    return output.f;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libm", __ieee754_sqrtf);
-#endif
 
 f32 __kernel_cosf(f32 x, f32 tail)
 {

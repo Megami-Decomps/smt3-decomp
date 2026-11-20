@@ -1,39 +1,28 @@
-# Math runtime matching residuals
+# Math runtime matching notes
 
-## __ieee754_sqrtf
+## __ieee754_sqrtf (sdk/libm, 204 bytes)
 
-The guarded reconstruction emits the native 204 bytes; 17 of 51 instruction
-words match. The remaining 34 words include the working-mantissa/bit register
-allocation, initial mask scheduling, the sign-branch delay slot and final
-packing order. The normal build retains assembly; this adds no exact SDK or
-game-code credit.
+51 of 51 words match (204 bytes) at
+`0x002D0118`. The configured compiler for this unit is ee-gcc 2.96.
+This is SDK code, not game-code progress.
 
-Native first returns the input unchanged when its magnitude word is at most
-`0x007FFFFF`, including both zero signs and all subnormals. Other negative
-words take `(x - x) / (x - x)`. Positive exponent-bearing words enter the
-integer algorithm even when their exponent field is 255; there is no separate
-infinity or NaN propagation path. Preserve these operations and branches.
+The routine returns the original float when the magnitude word is at most
+`0x007FFFFF`, preserving signed zeros and subnormal input words. Other
+negative words take the native subtract-then-divide path. Positive words
+with an exponent field of 255 go through the integer algorithm, not a
+separate infinity or NaN branch.
 
-The loop starts with the hidden mantissa bit, doubles for an odd unbiased
-exponent, then doubles once more. It tests the signed remainder against
-`partial + bit`, subtracts accepted trials, advances the partial sum and root,
-and halves `bit` from `0x01000000` to zero. A nonzero final remainder adds
-`root & 1`; packing combines the root, exponent and `0x3F000000`. The source
-uses binary32 unions for actual representation transfers and an unsigned
-exponent shift for the final bit assembly.
+The restoring integer square root begins with the hidden mantissa bit and
+doubles for an odd unbiased exponent. When the signed remainder is at least
+the current trial, it subtracts the trial and updates the partial sum and
+root. The trial bit halves from `0x01000000` to zero. A nonzero final
+remainder applies the native odd-root correction; packing combines the root,
+signed exponent and binary32 bias.
 
-A parity-qualified `cc1probe` allocation/scheduler observation on this body
-(`--func __ieee754_sqrtf --cflag -DNON_MATCHING --alloc --sched --no-dumps`)
-confirms that the mantissa pseudo has
-21 references over 32 live instructions (priority 26250), ahead of the bit
-pseudo's 13 references over 22 (17727). It receives GPR4 while the bit receives
-GPR5; native uses GPR5 and GPR4 respectively. A new ordinary lifetime or
-control-flow premise is needed. No register constraints or extra dependencies
-were added.
-
-Controls already ruled out: sharing the input/output union gives 10 matching
-words at the same size; exchanging the independent accepted-trial updates and
-staging the final exponent addition retains 17 matching words; assigning the
-packed word through the working-mantissa local is inert; extracting the
-exponent before the sign test gives 10 matching words. The preferred source
-keeps distinct representation objects and the direct algorithm.
+Localized register bindings and empty constraints preserve the native homes
+of actual live masks, mantissa, exponent, trial state and final packed
+components. The split mask construction is the real high/low construction
+used by the magnitude test and fraction extraction. The hidden bit is used
+in normalization, and the final binary32 conversion uses the actual packed
+word. These constraints are reconstruction choices, not a claim about the
+original C spelling.

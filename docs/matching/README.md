@@ -106,7 +106,7 @@ both native and emitted sizes when they differ.
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 2 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
-| 1 |  | [sdk/libm.md](sdk/libm.md) |
+| 1 | sdk/libm | [sdk/libm.md](sdk/libm.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdfTex | [sdf/sdfTex.md](sdf/sdfTex.md) |
 | 1 | sdf/sdfSound | [sdf/sdfSound-declarations.md](sdf/sdfSound-declarations.md) |
