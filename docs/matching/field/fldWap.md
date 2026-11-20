@@ -61,3 +61,29 @@ passed for source commit `10238297501c18b5320709478fa951516d7120c3`.
 Exact-source CI
 [41040154047](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41040154047)
 completed successfully, including every build/deploy step and retail checksum.
+
+## fldDoor_Warp (field/fldWap, 0x5B8)
+
+366 of 366 words match at 1464 bytes, including the generated six-entry
+sequence jump table and the three original padded strings. The same owner
+check preserves all 25 peers, including `fldDoor_WarpEx` and
+`fldSetupDoorScenes`.
+
+The routine selects the pending or named door, checks the signed floor and
+acceptance result, then builds the scene record for the selected warp mode.
+A zero destination field falls back to the corresponding full-width world
+value, not a truncated halfword. Native callback boundaries are kept:
+the selected row's kind can change during acceptance, and the signed link
+and code are read after the fade callback. Ordinary record and argument
+snapshots retain the actual mode-dependent BGM, elevator, and sequence
+setup. The mode-zero paths share one Param4 call but keep the separate
+Param3 path for doors without that link.
+
+Localized compiler aids keep the real pending-name, accepted result,
+destination operands, and resume index in their native phases. The black
+fade's red and green arguments are actual initialized zero inputs in their
+outgoing registers. The link conversion uses the original link byte and
+its actual signed Param4 use; the code and floor are the real next
+arguments. No constraint emits an instruction or stands in for a callback
+or general memory barrier. The known loaded-data contracts are unchanged;
+no new handling for malformed resource indexes is implied.

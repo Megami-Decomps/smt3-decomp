@@ -91,6 +91,7 @@ both native and emitted sizes when they differ.
 | 2 |  | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
+| 2 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -133,7 +134,6 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 |  | [fldSnow.md](fldSnow.md) |
-| 1 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
 | 1 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
