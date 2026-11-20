@@ -1,4 +1,5 @@
 function	unit	size	distance	page	line
+worldBasicTable data	basic/dds3WorldBasic	24 bytes		docs/matching/basic/dds3WorldBasic.md	3
 fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153
 fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	170

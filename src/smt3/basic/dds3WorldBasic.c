@@ -517,3 +517,12 @@ s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *handle, s32 (*func)(dds3Basic_
     }
     return 1;
 }
+
+dds3BasicFunction_t worldBasicTable = {
+    worldconstructor,
+    worlddestructor,
+    worldmainprocuder,
+    worlddrawprocuder,
+    NULL,
+    NULL,
+};
