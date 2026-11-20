@@ -184,6 +184,7 @@ fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/match
 fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	215
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
+fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
 fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	10
 fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	42
 fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	84

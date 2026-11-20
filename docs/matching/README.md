@@ -68,6 +68,7 @@ both native and emitted sizes when they differ.
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 3 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
+| 3 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 3 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
@@ -96,7 +97,6 @@ both native and emitted sizes when they differ.
 | 2 | field/fldTest | [field/fldTestShadowData.md](field/fldTestShadowData.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
-| 2 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 2 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 2 | facility/fclRibbon | [facility/fclRibbon.md](facility/fclRibbon.md) |

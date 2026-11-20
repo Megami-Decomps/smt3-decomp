@@ -217,7 +217,7 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern fldUnitControl_t fldUnitControl;
 
-extern fldFollowCameraControl_t fldFollowCameraControl;
+fldFollowCameraControl_t fldFollowCameraControl = {{0.0f}};
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 
@@ -228,8 +228,6 @@ extern s32 gFldAnahoriAkumaIdx;
 extern s32 gFldAnahoriAkumaIdxMax;
 
 extern sdfMemHandle_t *fldPlayerAnimData;
-
-extern s32 D_002FC3D8 __attribute__((section(".data")));
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
@@ -722,7 +720,7 @@ void fldAllShutDown(void)
     fldShutoff();
     evtFreeStage();
     fldProcShutDown();
-    D_002FC3D8 = 0;
+    fldFollowCameraControl.handle = NULL;
 }
 
 fldUnitControl_t *fldGetUnitControl(void)

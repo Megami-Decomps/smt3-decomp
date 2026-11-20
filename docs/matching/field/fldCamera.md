@@ -38,3 +38,17 @@ statement group lighter: it writes only `camAngle`, carries no
 `fldCamDirLock` by `0.0625f` instead of adding it. It fails for the reason
 above, with one `3.14f` where retail has `0x0054C2C8` and `0x0054C2CC`.
 Matching `resetCamNormal` should close this one unchanged.
+
+## fldCamParamTable and fldFollowCameraControl (636 data bytes)
+
+`fldCamera` owns the 32 four-float presets at `0x2FC7C0` (512 bytes).
+The established row type is retained, with distance, eye height, target
+height, and field of view in their original order. The independent Eye
+and Target records remain separate.
+
+`fldMain` owns the 124-byte writable Follow camera record at
+`0x2FC360`. Its shutdown path clears the existing typed handle at
+offset `0x78`; the resolved store address is unchanged. The next four
+raw bytes at `0x2FC3DC` and the Unit and Scene records stay outside
+this owner. Neither change alters a callback or claims a code match.
+The separate Basic Camera table is unchanged.
