@@ -394,7 +394,7 @@ segments:
       - [0x1FB628, .data, basic/dds3SceneBasic]
       - [0x1FB640, .data, basic/dds3AreaBasic]
       - [0x1FB658, .data, basic/dds3MoverBasic]
-      - [0x1FB670, data, data_002FA670]
+      - [0x1FB710, data, data_002FA710]
       - [0x1FB728, .data, basic/dds3UnitObjectBasic]
       - [0x1FB740, .data, basic/dds3MatterObjectBasic]
       - [0x1FB758, .data, basic/dds3EffectObjectBasic]

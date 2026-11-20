@@ -219,5 +219,10 @@ dds3BasicFunction_t MoverBasicTable = {
     NULL,
 };
 
+char dds3MoverNameTable[10][16] = {
+    "MOVER00", "MOVER01", "MOVER02", "MOVER03", "MOVER04",
+    "MOVER05", "MOVER06", "MOVER07", "MOVER08", "MOVER09",
+};
+
 SDATA_PAD(4);
 
