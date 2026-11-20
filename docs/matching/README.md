@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 50 |  | [code_0022C578.md](code_0022C578.md) |
+| 51 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 19 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |

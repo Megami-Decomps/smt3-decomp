@@ -7350,11 +7350,9 @@ void cmpDrawSetup3DView(void)
 }
 
 
-#ifdef NON_MATCHING
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *aPacketPtr);
-#endif
 
 void cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
 {
@@ -7539,51 +7537,50 @@ void cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     cmpDrawBoxSolid(a, b, c, d, e, f, 0, g);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void cmpDrawBoxG(s32 x, s32 y, s32 z, s32 width, s32 height,
                  s32 *colors, s32 mode, s32 ot)
 {
+
     sdfGrPacketHeader_t *packet;
     sdfDrawTag_t *tag;
-    sdfGrOt_t *surface = &sdfGrOtTable[ot];
-    u64 *prim;
-    volatile u64 *livePrim;
-    volatile s32 *liveColors = colors;
-    u32 left = x + 0x7000;
-    u32 top = y + 0x7900;
-    u32 right = left + width * 16;
-    u32 bottom = top + height * 8;
+    sdfGrOt_t *surface;
+    struct { u64 colorChannels[2]; u64 packedXY; u64 depth; } *prim;
+    u32 left = (u32)x + 0x7000;
+    u32 top = (u32)y + 0x7900;
+    u32 dx = (u32)width << 4;
+    u32 dy = (u32)height << 3;
+    u32 right;
+    u32 bottom;
     u32 color;
+    /* The signed input is saved across callbacks, then extended as u32
+     * for the actual depth lane of each vertex. */
+    FAKEMATCH_ASM_REG(s32, savedZ, "$19") = z;
 
     packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1)));
-    sdf2DMakePrimPacketHeader(packet, (mode << 9) | 0x14C, 8, 0x51515151, 1);
+    sdf2DMakePrimPacketHeader(packet, ((u32)mode << 9) | 0x14C, 8, 0x51515151, 1);
     prim = sdf2DGetPrimPtr(packet);
-    livePrim = prim;
-    cmpExpandColor(prim, liveColors[0]);
-    livePrim[2] = left | ((u64)top << 32);
-    livePrim[3] = (u32)z;
-    cmpExpandColor(prim + 4, liveColors[1]);
-    color = liveColors[2];
-    livePrim[7] = (u32)z;
-    livePrim[6] = right | ((u64)top << 32);
-    cmpExpandColor(prim + 8, color);
-    color = liveColors[3];
-    livePrim[11] = (u32)z;
-    livePrim[10] = left | ((u64)bottom << 32);
-    cmpExpandColor(prim + 12, color);
-    livePrim[15] = (u32)z;
-    livePrim[14] = right | ((u64)bottom << 32);
+    cmpExpandColor(prim[0].colorChannels, colors[0]);
+    prim[0].packedXY = left | ((u64)top << 32);
+    prim[0].depth = (u32)savedZ;
+    cmpExpandColor(prim[1].colorChannels, colors[1]);
+    color = colors[2];
+    right = left + dx;
+    prim[1].depth = (u32)savedZ;
+    prim[1].packedXY = right | ((u64)top << 32);
+    cmpExpandColor(prim[2].colorChannels, color);
+    color = colors[3];
+    bottom = top + dy;
+    prim[2].depth = (u32)savedZ;
+    prim[2].packedXY = left | ((u64)bottom << 32);
+    cmpExpandColor(prim[3].colorChannels, color);
+    prim[3].depth = (u32)savedZ;
+    prim[3].packedXY = right | ((u64)bottom << 32);
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     sdfDrawTagLink(tag, EE_ADDR(packet));
+    surface = &sdfGrOtTable[ot];
     surface->regFunc(surface, tag);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxG);
-#endif
 
 void cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
 {
