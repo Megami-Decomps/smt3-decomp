@@ -4954,44 +4954,82 @@ void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, u32 color
 extern const char *cmbModelMarkNames[3];
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 id);
 
-#ifdef NON_MATCHING
 void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
 {
-    s32 i;
+    s32 i = 0;
+    FAKEMATCH_ASM_REG(s32, actionOffset, "$21") = 0;
+    FAKEMATCH_ASM_REG(s32, markOffset, "$22") = 0;
+    f32 (*cursor)[4] = positions;
     volatile f32 mark[4] __attribute__((aligned(16)));
 
-    for (i = 0; i < 3; i++) {
-        found[i] = 0;
-        if (CMB_GBWK->actionData[i].model != NULL &&
-            cmbFindCameraPoint(cmbModelMarkNames[i], CMB_GBWK->modelMark[i]) != 0) {
-            found[i] = 1;
-            sizes[i] = datModelParamTable[CMB_GBWK->stockSlot[i].id].formsize;
-            if (cmbGetSmokeType((u16)CMB_GBWK->actionData[i].id) != 0) {
-                volatile f32 *out = positions[i];
+    do {
+        s32 *status = (s32 *)((__SIZE_TYPE__)(i * sizeof(*found)) + (__SIZE_TYPE__)found);
+        cmbGbWork_t *work;
+        FAKEMATCH_ASM_REG(u32, idOffset, "$19") =
+            (u32)actionOffset + (u32)&((cmbGbWork_t *)0)->actionData[0].id;
+        FAKEMATCH_ASM_REG(u8 *, actionBytes, "$2");
+        mdlObj_t *model;
+        datUnitVisual_t *modelParams;
+        FAKEMATCH_ASM_REG(u8 *, initialMarkBytes, "$5");
+        f32 *scale;
+        s32 sceneFound;
+
+        /* Keep the actual action and mark strides independent across callbacks. */
+        FAKEMATCH_ASM_LIVE_PAIR(actionOffset, markOffset);
+        *status = 0;
+        FAKEMATCH_ASM_LIVE(idOffset);
+        work = CMB_GBWK;
+        /* Start the camera-mark argument from the same work lookup as the model test. */
+        initialMarkBytes = (u8 *)work + markOffset;
+        FAKEMATCH_ASM_LIVE_PAIR(work, initialMarkBytes);
+        actionBytes = (u8 *)work + idOffset;
+        FAKEMATCH_ASM_LIVE(actionBytes);
+        model = ((cmbActionData_t *)(actionBytes - (u32)&((cmbActionData_t *)0)->id))->model;
+        initialMarkBytes += (u32)&((cmbGbWork_t *)0)->modelMark;
+        if (model == NULL) goto advance;
+        sceneFound = cmbFindCameraPoint(cmbModelMarkNames[i], (f32 *)initialMarkBytes);
+
+        scale = (f32 *)((__SIZE_TYPE__)(i * sizeof(*sizes)) + (__SIZE_TYPE__)sizes);
+        modelParams = datModelParamTable;
+        if (sceneFound == 0) goto advance;
+        /* Only the successful camera lookup uses the model table and publishes output. */
+        FAKEMATCH_ASM_LIVE(modelParams);
+        *status = 1;
+        *scale = modelParams[CMB_GBWK->stockSlot[i].id].formsize;
+        {
+            /* Smoke tests a fresh action, not the saved pre-camera work. */
+            FAKEMATCH_ASM_REG(__SIZE_TYPE__, smokeAddr, "$2") =
+                (__SIZE_TYPE__)actionOffset + (__SIZE_TYPE__)CMB_GBWK;
+            if (cmbGetSmokeType((u16)*(s16 *)(smokeAddr + (__SIZE_TYPE__)&((cmbGbWork_t *)0)->actionData[0].id)) != 0) {
                 f32 x, y, z;
-
-                SDF_VU0_COPYVECTOR(positions[i], CMB_GBWK->modelMark[i]);
-                x = out[0];
-                y = out[1];
-                z = out[2];
-                out[0] = x + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.x;
-                out[1] = y + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.y;
-                out[2] = z + datModelParamTable[CMB_GBWK->stockSlot[i].id].center.z;
+                cmbGbWork_t *fresh = CMB_GBWK;
+                f32 *marks = (f32 *)((u8 *)&fresh->modelMark + markOffset);
+                /* Copy the entire native mark, including W; then adjust only XYZ. */
+                SDF_VU0_COPYVECTOR_F32(*cursor, marks);
+                x = (*cursor)[0];
+                y = (*cursor)[1];
+                z = (*cursor)[2];
+                (*cursor)[0] = x + modelParams[fresh->stockSlot[i].id].center.x;
+                (*cursor)[1] = y + modelParams[CMB_GBWK->stockSlot[i].id].center.y;
+                (*cursor)[2] = z + modelParams[CMB_GBWK->stockSlot[i].id].center.z;
             } else {
-                volatile f32 *out = positions[i];
-
-                sdfModelGetMarkPos(CMB_GBWK->actionData[i].model->inner, 0);
-                SDF_VU0_STOREVECTOR(mark);
-                out[0] = mark[0];
-                out[1] = mark[1];
-                out[2] = mark[2];
+                actionBytes = (u8 *)CMB_GBWK + idOffset;
+                sdfModelGetMarkPos((((cmbActionData_t *)(actionBytes - (u32)&((cmbActionData_t *)0)->id))->model)->inner, 0);
+                /* Retail samples vf10 even when the provider reports no mark. */
+                SDF_VU0_STOREVECTOR_MEMOPS(mark);
+                (*cursor)[0] = mark[0];
+                (*cursor)[1] = mark[1];
+                (*cursor)[2] = mark[2];
             }
         }
-    }
+    advance:
+        ++i;
+        ++cursor;
+        markOffset += sizeof(CMB_GBWK->modelMark[0]);
+        actionOffset += sizeof(cmbActionData_t);
+    } while (i < 3);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetModelMarkPos);
-#endif
+
 
 /* These localized constraints reconstruct the native argument scheduling:
  * complete each real sprite ID before its call, and bind the box's real X/OT

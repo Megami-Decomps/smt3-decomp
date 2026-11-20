@@ -814,3 +814,23 @@ match.
 The signed periodic diagnostic uses the live frame value for both the
 remainder and the printed argument. The increment uses the fresh work
 pointer after either callback and retains the native low 32 bits.
+
+## cmbGetModelMarkPos (facility/fclCombineInit, 0x238)
+
+142 of 142 words match at the native 568-byte extent. The three action
+slots advance independently through the action records, camera marks and
+output vectors. The function clears each found flag before the lookup;
+it only fills the size and positions after the slot has a model and
+the camera-point lookup succeeds. The provider-supplied work record is
+observed again where the native code reloads it across callbacks.
+
+The smoke branch copies the full aligned camera vector, then offsets its
+three spatial components by the current model center. The other branch
+uses the real VU model-mark provider and stores only XYZ, leaving W
+untouched. The existing VU macros implement those native 16-byte
+handoffs. The narrow empty operands preserve actual live action offsets,
+source pointers and model-table setup. They do not impose a general
+memory barrier or synthesize a new callback dependency.
+
+All 205 other functions and owned data in the complete translation unit
+remain exact.
