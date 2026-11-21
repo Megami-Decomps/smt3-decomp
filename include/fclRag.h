@@ -79,6 +79,8 @@ typedef struct {
     u8 reserved89C[4];
 } ragOfferTable_t;
 
+extern ragOfferTable_t ragHeartsTable;
+
 extern char *ragMenuText[6];
 extern char *ragExchangeTitle[4];
 

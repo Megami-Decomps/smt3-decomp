@@ -459,6 +459,8 @@ segments:
       - [0x22EC18, data, data_0032DC18]
       - [0x22ECC0, .data, facility/fclCombineUnlockTable]
       - [0x22EDD0, data, data_0032DDD0]
+      - [0x230D28, .data, facility/fclRagOfferTable]
+      - [0x2315C8, data, data_003305C8]
       - [0x244018, .data, staff/stfMain]
       - [0x244B68, data, data_00343B68]
       - [0x24A3A0, .data, newbattle/nbPlayerMotionMap]

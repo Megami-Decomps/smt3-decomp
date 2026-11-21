@@ -72,7 +72,6 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern u8 ragHeartsTable[];
 
 extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, saddr_t layout);
 
@@ -97,7 +96,7 @@ void fclRagEventEnd(void)
 
 s32 func_00209D88(u16 id)
 {
-    u16 *entry = (u16 *)(ragHeartsTable + 0x160);
+    u16 *entry = (u16 *)((u8 *)&ragHeartsTable + 0x160);
     u32 i;
 
     for (i = 0; i < 0x15; i++) {
@@ -111,7 +110,7 @@ s32 func_00209D88(u16 id)
 
 s32 func_00209DD0(u16 id)
 {
-    u16 *entry = (u16 *)(ragHeartsTable + 0x500);
+    u16 *entry = (u16 *)((u8 *)&ragHeartsTable + 0x500);
     u32 i;
 
     for (i = 0; i < 0x15; i++) {
@@ -125,7 +124,7 @@ s32 func_00209DD0(u16 id)
 
 s32 func_00209E18(u16 id)
 {
-    u16 *entry = (u16 *)ragHeartsTable;
+    u16 *entry = (u16 *)&ragHeartsTable;
     u32 i;
 
     for (i = 0; i < 0x19; i++) {
@@ -210,7 +209,6 @@ void ragInitList3(s32 count, lstWork_t *work)
     cmpInitCursorRange(&work->listCursor, count, 7, 0);
 }
 
-extern ragHeartsEntry_t ragHeartEntries[] FAKEMATCH_ASM_NAME("ragHeartsTable");
 extern u8 ragHeartsIndexTable[][32];
 extern s32 datGetItemSlotIndex(u16 item);
 extern s32 cmbChkGetHearts(s32 id);
@@ -225,7 +223,7 @@ s32 ragBuildHeartsList(u8 type, ragListWork_t *work)
     work->hasUnregistered = 0;
     for (i = 0; i < 32; i++) {
         u8 index = ragHeartsIndexTable[type][i];
-        u16 item = ragHeartEntries[index].item;
+        u16 item = ragHeartsTable.hearts[index].item;
         s32 slot = datGetItemSlotIndex(item);
 
         if (slot != 0) {
@@ -655,11 +653,11 @@ ragItemReq_t *ragGetConfirmEntry(s8 kind, u8 index)
 {
     switch (kind) {
     case 0:
-        return ((ragOfferTable_t *)ragHeartsTable)->hearts[index].requirements;
+        return ragHeartsTable.hearts[index].requirements;
     case 1:
-        return ((ragOfferTable_t *)ragHeartsTable)->offers2[index].requirements;
+        return ragHeartsTable.offers2[index].requirements;
     case 2:
-        return ((ragOfferTable_t *)ragHeartsTable)->offers3[index].requirements;
+        return ragHeartsTable.offers3[index].requirements;
     default:
         return NULL;
     }

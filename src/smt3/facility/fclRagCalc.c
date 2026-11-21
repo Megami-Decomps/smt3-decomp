@@ -23,7 +23,6 @@ extern char ragDrawProcName[];
 
 extern char ragUpdateProcName[];
 
-extern u8 ragHeartsTable[];
 
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
@@ -262,7 +261,7 @@ void ragDrawHeartsRows(lstWork_t *list, u8 kind, s8 *rows, s8 mode, s32 ot)
     for (i = 0; i < cursor->unk_26; i++) {
         s8 index = rows[i];
         u8 flag = (u8)rows[i];
-        u16 item = ((ragHeartsEntry_t *)ragHeartsTable)[index].item;
+        u16 item = ragHeartsTable.hearts[index].item;
         ragItemReq_t *requirements = ragGetConfirmEntry((s8)kind, flag);
         s32 disabled = ragFindItemSlot(requirements) == 0;
         s32 slot = datGetItemSlotIndex(item);
@@ -308,7 +307,7 @@ void ragDrawListRows(lstWork_t *list, u8 kind, u8 *rows, s8 mode, s32 ot)
     lstDrawListWindow(list, mode, ot);
     for (i = 0; i < cursor->unk_26; i++) {
         s8 index = (s8)rows[i];
-        ragOfferTable_t *table = (ragOfferTable_t *)ragHeartsTable;
+        ragOfferTable_t *table = &ragHeartsTable;
         ragOffer_t *offers = kind == 1 ? table->offers2 : table->offers3;
         s8 level = (s8)offers[index].unit.level;
         u16 devil = offers[index].devilId;
@@ -344,7 +343,6 @@ INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawListRows);
 extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);
 extern void fclDrawPriceText(fclPanelPos_t *pos, u16 price, s32 ot);
-extern ragOfferTable_t ragOffers FAKEMATCH_ASM_NAME("ragHeartsTable");
 
 void ragDrawHeartsList(s8 mode)
 {
@@ -352,7 +350,7 @@ void ragDrawHeartsList(s8 mode)
     s32 top = work->list.heartWindow.listCursor.unk_22;
     s8 *rows = &work->list.heartItems[top];
     s8 index = work->list.heartItems[top + (u8)work->list.heartWindow.listCursor.unk_24];
-    u16 price = ragOffers.hearts[index].item;
+    u16 price = ragHeartsTable.hearts[index].item;
     fclPanelPos_t pos;
 
     fclDrawPanel(&work->panel[2], 0x47);

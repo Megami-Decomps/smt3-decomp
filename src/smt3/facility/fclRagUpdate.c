@@ -111,7 +111,6 @@ extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
-extern u8 ragHeartsTable[];
 
 extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
@@ -207,13 +206,13 @@ void ragSetSeqPhase(s8 phase)
     case 2:
         index = (u8)ragUpdateWork->itemList2Window.listCursor.unk_22 +
                 (u8)ragUpdateWork->itemList2Window.listCursor.unk_24;
-        ragSetSeqPhase2(&((ragOfferTable_t *)ragHeartsTable)->offers2[
+        ragSetSeqPhase2(&ragHeartsTable.offers2[
             (u8)ragUpdateWork->itemList2[index]], &ragUpdateWork->previewUnit);
         return;
     case 3:
         index = (u8)ragUpdateWork->itemList3Window.listCursor.unk_22 +
                 (u8)ragUpdateWork->itemList3Window.listCursor.unk_24;
-        ragSetSeqPhase2(&((ragOfferTable_t *)ragHeartsTable)->offers3[
+        ragSetSeqPhase2(&ragHeartsTable.offers3[
             (u8)ragUpdateWork->itemList3[index]], &ragUpdateWork->previewUnit);
         break;
     }
@@ -259,7 +258,7 @@ u16 ragCheckHeartsChoice(s8 index)
             }
         }
     } else {
-        return *(u16 *)(ragHeartsTable + flag * 14);
+        return *(u16 *)((u8 *)&ragHeartsTable + flag * 14);
     }
     return 0;
 }
@@ -327,7 +326,7 @@ void ragUpdateSeqItem(void)
 
     switch (button) {
     case 1: {
-        const u8 *heartTable = ragHeartsTable;
+        const u8 *heartTable = (const u8 *)&ragHeartsTable;
         s32 blocked = ragFindItemSlot(entry) == 0;
         s32 heartFlag = ragGetHeartsFlag(1);
         u16 item = *(u16 *)(heartTable + heartFlag * 14);
