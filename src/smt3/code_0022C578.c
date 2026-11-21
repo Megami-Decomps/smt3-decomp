@@ -2,6 +2,7 @@
 #include "facility.h"
 #include "result2.h"
 #include "camp.h"
+#include "cmp_status_model_vectors.h"
 #include "kernel.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -525,18 +526,6 @@ typedef struct
     /* 0x10 */ s32 unk_10;
 } cmpDHWindow_t;
 
-typedef struct
-{
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-    /* 0xC */ f32 w;
-} cmpVec4_t;
-
-extern cmpVec4_t cmpStatusModelPos;
-
-extern cmpVec4_t cmpStatusModelBasePos;
-
 extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
 
 extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
@@ -849,10 +838,10 @@ void cmpInitStockTable(void)
 }
 
 extern u8 itfMesEmbedded_345160[];
-extern char *cmpCursorCells[];
-extern char *cmpPage0Cells[];
-extern char *cmpPage1Cells[];
-extern char *cmpPage2Cells[];
+extern const char *cmpCursorCells[];
+extern const char *cmpPage0Cells[];
+extern const char *cmpPage1Cells[];
+extern const char *cmpPage2Cells[];
 /* Four-byte cursor-flag storage in small BSS. */
 extern u8 cmpPage2CursorFlags[4];
 extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);

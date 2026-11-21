@@ -48,7 +48,7 @@ typedef struct
     /* 0x27 */ u8 unk_27;
     /* 0x28 */ union {
         s32 flag;
-        char **text;
+        const char **text;
     } listData;
     /* 0x2C */ union {
         s32 value;

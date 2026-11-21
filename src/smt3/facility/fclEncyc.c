@@ -2,6 +2,7 @@
 #include "sdk_libgcc.h"
 #include "interface.h"
 #include "camp.h"
+#include "cmp_status_model_vectors.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -132,10 +133,6 @@ extern s32 cmpLoadStatusModel(void);
 extern void cmpModelFreeResource(void);
 extern s32 fclEncycFreeEntries(const char *name);
 extern const char fclEncycBookName[];
-
-extern sdfVector4_t cmpStatusModelPos;
-
-extern sdfVector4_t cmpStatusModelBasePos;
 
 extern void itfMesMngRelease(s32 id);
 
