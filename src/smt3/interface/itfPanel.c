@@ -86,17 +86,17 @@ void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
-extern void itfMiscSetRatioRGB(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
+#include "itf_color_vector.h"
 
-extern s32 itfPanelMesWinColorRatio[];
+extern itfColorVector_t itfPanelMesWinColorRatio[];
 
-extern s32 itfPanelSelWinColorRatio[];
+extern itfColorVector_t itfPanelSelWinColorRatio[];
 
-extern s32 itfPanelPlainColorRatio[];
+extern itfColorVector_t itfPanelPlainColorRatio[];
 
 #define ITF_PANEL_FULL_COLOR_SCALE 0x80
 
-extern s32 itfPanelPlainFullColorRatio[];
+extern itfColorVector_t itfPanelPlainFullColorRatio[];
 
 void CreateColorFacility(itfPanelFacilityData_t *base);
 
@@ -496,7 +496,7 @@ void CreateColorMesWin(itfPanelMesWinData_t *pwork, u32 red, u32 green, u32 blue
     SetVec4(colorRow, red, green, blue, 1);
     colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, itfPanelMesWinColorRatio, 6);
+    itfMiscSetRatioRGB((itfColorVector_t *)pwork->colors[2].components, red, green, blue, alpha, itfPanelMesWinColorRatio, 6);
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
@@ -506,7 +506,7 @@ void CreateColorSelWin(itfPanelSelWinData_t *pwork, u32 red, u32 green, u32 blue
     SetVec4(colorRow, red, green, blue, 1);
     colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, itfPanelSelWinColorRatio, 4);
+    itfMiscSetRatioRGB((itfColorVector_t *)pwork->colors[2].components, red, green, blue, alpha, itfPanelSelWinColorRatio, 4);
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
@@ -514,8 +514,8 @@ void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, 
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[1].components, red, green, blue, alpha, itfPanelPlainColorRatio, 1);
-    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelPlainFullColorRatio, 2);
+    itfMiscSetRatioRGB((itfColorVector_t *)pwork->colors[1].components, red, green, blue, alpha, itfPanelPlainColorRatio, 1);
+    itfMiscSetRatioRGB((itfColorVector_t *)pwork->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelPlainFullColorRatio, 2);
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */

@@ -11,6 +11,7 @@
 #include "fldNpc_tag.h"
 #include "fldTakaraWork_tag.h"
 #include "ps2asm.h"
+#include "sdf_screen_state.h"
 
 typedef struct
 {
@@ -89,7 +90,6 @@ extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b,
                       u32 a);
 
-struct sdf3DScreenParam_t;
 extern void sdf3DSetCamera(struct sdf3DScreenParam_t *aParam, void *aCamera);
 
 extern struct sdf3DScreenParam_t dds3ScreenParam;
@@ -310,7 +310,7 @@ extern sdfVector4_t fldAutoMapRect;
 
 extern u8 dds3LightParam2[];
 
-extern f32 dds3ScreenParam2[];
+extern sdf3DScreenParam_t dds3ScreenParam2;
 
 typedef struct
 {
@@ -1511,8 +1511,8 @@ void fldAutoMapSeqStart(void) {
     light->far = 255.0f;
     light->bias = 20000.0f;
     light->mode = 0x108010;
-    dds3ScreenParam2[4] = 2048.0f;
-    dds3ScreenParam2[5] = 2048.0f;
+    dds3ScreenParam2.ox = 2048.0f;
+    dds3ScreenParam2.oy = 2048.0f;
 }
 #else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapSeqStart);

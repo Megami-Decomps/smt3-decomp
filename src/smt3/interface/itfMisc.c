@@ -1,5 +1,6 @@
 #include "common.h"
 #include "interface.h"
+#include "itf_color_vector.h"
 #include "libsdf.h"
 #include "kernel.h"
 
@@ -38,8 +39,6 @@ typedef struct
 {
     itfLink_t *puse_top, *puse_tail, *pdisuse_top, *pdisuse_tail;
 } itfmisclinkstack_t;
-
-typedef struct { s32 x, y, z, w; } itfColorVector_t;
 
 typedef struct { u8 unk00[0x20]; u64 value, registerCode; } itfGsState_t;
 

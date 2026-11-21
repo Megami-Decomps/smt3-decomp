@@ -283,34 +283,7 @@ typedef struct _reent _reent;
 
 typedef __builtin_va_list va_list;
 
-typedef struct __sbuf {
-    u8 *_base;
-    s32 _size;
-} __sbuf;
-
-typedef struct __sFILE {
-    u8 *_p;
-    s32 _r;
-    s32 _w;
-    s16 _flags;
-    s16 _file;
-    __sbuf _bf;
-    s32 _lbfsize;
-    void *_cookie;
-    s32 (*_read)(void *cookie, char *buf, s32 n);
-    s32 (*_write)(void *cookie, const char *buf, s32 n);
-    long (*_seek)(void *cookie, s32 offset, s32 whence);
-    s32 (*_close)(void *cookie);
-    __sbuf _ub;
-    u8 *_up;
-    s32 _ur;
-    u8 _ubuf[3];
-    u8 _nbuf[1];
-    __sbuf _lb;
-    s32 _blksize;
-    s32 _offset;
-    _reent *_data;
-} FILE;
+#include "sdk_stdio_record.h"
 
 typedef struct __siov {
     void *iov_base;
@@ -323,20 +296,7 @@ typedef struct __suio {
     s32 uio_resid;
 } __suio;
 
-typedef struct _Bigint {
-    struct _Bigint *next;
-    s32 k;
-    s32 maxwds;
-    s32 sign;
-    s32 wds;
-    u32 x[1];
-} _Bigint;
-
-typedef struct _glue {
-    struct _glue *next;
-    s32 niobs;
-    FILE *iobs;
-} _glue;
+#include "sdk_reent_aux.h"
 
 /* libgcc frame-dwarf2.c's object list node. __register_frame_info stores the
  * FDE base and clears the rest; __register_frame allocates one of these. */
@@ -355,36 +315,8 @@ typedef struct fde_vector {
     s32 count;
 } fde_vector;
 
-typedef struct _atexit {
-    struct _atexit *_next;
-    s32 _ind;
-    void (*_fns[32])(void);
-} _atexit;
+#include "sdk_reent.h"
 
-struct _reent {
-    s32 _errno;
-    FILE *_stdin;
-    FILE *_stdout;
-    FILE *_stderr;
-    s32 _inc;
-    char _emergency[25];
-    s32 _current_category;
-    const char *_current_locale;
-    s32 __sdidinit;
-    void (*__cleanup)(struct _reent *r);
-    _Bigint *_result;
-    s32 _result_k;
-    _Bigint *_p5s;
-    _Bigint **_freelist;
-    u8 _unused[0xF8];
-    _atexit *_atexit;
-    _atexit _atexit0;
-    void (**_sig_func)(s32 sig);
-    struct _glue __sglue;
-    FILE __sf[3];
-};
-
-extern _reent *_impure_ptr __attribute__((section(".data")));
 
 extern s32 _puts_r(_reent *r, const char *s);
 
