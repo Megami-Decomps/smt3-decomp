@@ -1,5 +1,6 @@
 #include "sdk_libc.h"
 #include "common.h"
+#include "sdk_libc_alloc.h"
 #include "sdk_libgcc.h"
 #include "newlib_stat.h"
 #include "ps2asm.h"
@@ -451,32 +452,11 @@ void free(void *ptr) {
     __malloc_unlock(_impure_ptr);
 }
 
-typedef struct mallocChunkPrefix_t {
-    u32 previousSize;
-    u32 size;
-    struct mallocChunkPrefix_t *forward;
-    struct mallocChunkPrefix_t *backward;
-} mallocChunkPrefix_t;
-
-typedef struct mallocBinLinks_t {
-    mallocChunkPrefix_t *forward;
-    mallocChunkPrefix_t *backward;
-} mallocBinLinks_t;
-
-typedef struct mallocArenaPrefix_t {
-    u32 opaque00;
-    u32 bitmap;
-    mallocChunkPrefix_t *top;
-    mallocChunkPrefix_t *topBackward; /* bin 0's backward link; its forward link is top */
-    mallocBinLinks_t bins[127];
-} mallocArenaPrefix_t;
-
 typedef struct mallocInfo_t {
     s32 arena;
     u8 opaque04[0x24];
 } mallocInfo_t;
 
-extern mallocArenaPrefix_t __malloc_av_;
 extern mallocInfo_t __malloc_current_mallinfo;
 extern void *__malloc_sbrk_base __attribute__((section(".data")));
 
