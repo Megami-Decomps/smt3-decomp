@@ -1,6 +1,7 @@
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
+#include "sdf_math_state.h"
 #include "ps2asm.h"
 
 u32 dds3GetRandA(void *name);
@@ -32,10 +33,6 @@ enum SdfFileIOCmd {
     SDF_FILE_CMD_WRITEFILE = 9
 };
 
-typedef struct sdfRandCB_t {
-    u32 v[4];
-} sdfRandCB_t;
-
 enum sdf_tex_resource {
     SDF_TEX_RESOURCE_FREE = 0,
     SDF_TEX_RESOURCE_FRAME = 1,
@@ -55,8 +52,6 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
-
-extern sdfRandCB_t sdfDefaultRandCB;
 
 /* Four-word shift-register PRNG; NULL selects the shared effect RNG state. */
 u32 dds3GetRandA(void *name)

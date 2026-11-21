@@ -1,6 +1,7 @@
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
+#include "sdf_math_state.h"
 #include "ps2asm.h"
 
 extern s32 sdfCdTrayMode;
@@ -72,10 +73,6 @@ enum SdfFileIOCmd {
     SDF_FILE_CMD_WRITEFILE = 9
 };
 
-typedef struct sdfRandCB_t {
-    u32 v[4];
-} sdfRandCB_t;
-
 typedef struct sdfClock_t {
     u8 pad00;
     u8 sec;
@@ -117,10 +114,6 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
-
-extern sdfMathConstants_t sdfMathConstants;
-
 extern s8 sdfPrintIopFlag;
 
 extern char sdfPrintStrFmt[];
@@ -156,8 +149,6 @@ extern u16 sdfFileCmdDefaultCreateMode;
 extern s32 sdfFileCmdThreadPrio;
 
 extern u8 sdfDev9Ready;
-
-extern sdfRandCB_t sdfDefaultRandCB;
 
 extern s32 sceCdReadClock(sdfCdClock_t *);
 

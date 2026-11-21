@@ -1,6 +1,7 @@
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
+#include "sdf_math_state.h"
 #include "ps2asm.h"
 
 f32 sdfSin(f32 aRadius);
@@ -53,10 +54,6 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
-
-typedef union { f32 quaternion[4]; u16 monthDays[20]; } sdfMathConstants_t;
-
-extern sdfMathConstants_t sdfMathConstants;
 
 extern f32 sdfQuatPoleDown[4];
 
