@@ -619,7 +619,7 @@ extern sdf3DLight_t fldFixedLight;
 extern f32 fldSkyLight[];
 extern f32 fldSdwLightNearDist, fldSdwLightNearDir, fldSdwSkyNearDist, fldSdwSkyNearX, fldSdwSkyNearZ, fldSdwSkyBias;
 extern s32 fldShadowWork, fldSdwBoxAlpha, fldSdwLightTracking;
-extern sdfMat_t *fldDrawEnv;
+extern addr_t fldDrawEnv;
 extern sdfGrOt_t sdfGrOtTable[];
 extern s32 rsetFrameMaskOtOffset;
 extern void *memset(void *destination, int value, size_t size);
@@ -1070,7 +1070,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             sdfGrOt_t *ot;
             sdfDrawTagInit(quadTag);
             sdf3DPrimLinkResetTm(quadTag, NULL);
-            sdf3DPrimLinkMat(quadTag, fldDrawEnv, NULL);
+            sdf3DPrimLinkMat(quadTag, EE_ADDR_AS(sdfMat_t *, fldDrawEnv), NULL);
             memset(&quadParams, 0, sizeof(quadParams));
             quadParams.vertex = quadVertices;
             quadParams.faceIndex = quadIndices.indices;
@@ -1080,7 +1080,7 @@ void fldSdwDraw(dds3Basic_t *basic)
             triTag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
             sdfDrawTagInit(triTag);
             sdf3DPrimLinkResetTm(triTag, NULL);
-            sdf3DPrimLinkMat(triTag, fldDrawEnv, NULL);
+            sdf3DPrimLinkMat(triTag, EE_ADDR_AS(sdfMat_t *, fldDrawEnv), NULL);
             memset(&triParams, 0, sizeof(triParams));
             triParams.vertex = triVertices;
             triParams.faceIndex = triIndices.indices;

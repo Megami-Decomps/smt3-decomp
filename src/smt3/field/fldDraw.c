@@ -1615,13 +1615,16 @@ u32 fldDrawInitDone = 0;
 
 void *fldDrwZBuf = 0;
 
+SDATA_RESUME();
+
 SDATA_PAD(4);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtDec);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtHex);
+SDATA_RESUME();
 
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawEnv);
+addr_t fldDrawEnv = 0;
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawSpriteTex);
 SDATA_RESUME();
