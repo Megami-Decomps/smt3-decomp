@@ -681,6 +681,7 @@ segments:
       - [0x221294, data, data_00320294]
       - [0x221298, .data, effect/effRippleBlurDefault]
       - [0x2212C4, data, data_003202C4]
+      - [0x2212C8, .data, effect/effRectangleBlurSource]
       - [0x2212F0, .data, effect/effRectangleBlurItems]
       - [0x2213E0, .data, effect/effRectangleBlurSetupData]
       - [0x221420, .data, effect/effEventMultiBlurParam]

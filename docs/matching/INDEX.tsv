@@ -90,6 +90,7 @@ Shock, Bind, and Paralyze sphere parameters				docs/matching/effect/effBattleSys
 Status and negotiation effect part records				docs/matching/effect/effBattleSystem.md	115
 Battle position provider table				docs/matching/effect/effBattleSystem.md	131
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/matching/effect/effBlur_Filter.md	3
+Rectangle blur source parameters				docs/matching/effect/effBlur_Filter.md	38
 effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effect/effEvent.md	3
 Rectangle blur editor descriptor				docs/matching/effect/effEvent.md	109
 effDebugDrawRectLine	effect/effMagatuhi	0x154	85 of 85 words match	docs/matching/effect/effMagatuhi.md	3

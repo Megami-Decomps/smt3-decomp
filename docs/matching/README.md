@@ -112,6 +112,7 @@ both native and emitted sizes when they differ.
 | 2 |  | [event/evtViewerMenuTables.md](event/evtViewerMenuTables.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
+| 2 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 | sdk/libm | [sdk/libm.md](sdk/libm.md) |
@@ -164,7 +165,6 @@ both native and emitted sizes when they differ.
 | 1 |  | [effect/polyManager.md](effect/polyManager.md) |
 | 1 |  | [effect/effPacket.md](effect/effPacket.md) |
 | 1 |  | [effect/effPCPMisc.md](effect/effPCPMisc.md) |
-| 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 |  | [effect/effBattleFilterAndHelper.md](effect/effBattleFilterAndHelper.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |

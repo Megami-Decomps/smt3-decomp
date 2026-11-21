@@ -454,5 +454,37 @@
       "record_bytes": 16,
       "prefix_bytes": 0
     }
+  },
+  {
+    "name": "D_003202CC",
+    "owner": "evtUnityCalcArea",
+    "unit": "effect/effRectangleBlurSource",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 40
+  },
+  {
+    "name": "D_003202D0",
+    "owner": "evtUnityCalcArea",
+    "unit": "effect/effRectangleBlurSource",
+    "section": ".data",
+    "offset": 8,
+    "owner_size": 40
+  },
+  {
+    "name": "D_003202D4",
+    "owner": "evtUnityCalcArea",
+    "unit": "effect/effRectangleBlurSource",
+    "section": ".data",
+    "offset": 12,
+    "owner_size": 40
+  },
+  {
+    "name": "D_003202D8",
+    "owner": "evtUnityCalcArea",
+    "unit": "effect/effRectangleBlurSource",
+    "section": ".data",
+    "offset": 16,
+    "owner_size": 40
   }
 ]

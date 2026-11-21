@@ -34,3 +34,14 @@ order is 35 and the worst is 44. Writing the whole block out in retail's own
 emission order, which is what the alias model says the source must have been
 if the read really is `char`-typed, gives 31 and an implausible source, which
 is itself evidence against that model.
+
+## Rectangle blur source parameters
+
+The rectangle editor copies the complete 40-byte writable source record
+at `0x003202C8`. Its blend, rotation, scale, and center/XY initializers
+retain the original values; the neighboring editor's four existing
+field labels are non-owning views at offsets 4, 8, 12, and 16.
+The rotating default is exactly `0.02f`; the scale rounds one float
+step below `0.986f`.
+Stock EE GCC emits the next lower float for the shorter
+`0.98599994f` spelling, so the initializer keeps the extra digit.
