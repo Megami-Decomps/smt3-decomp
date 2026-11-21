@@ -188,3 +188,16 @@ to the IRX's unaligned-copy helper when needed), while the draft's plain
 `*destination = *(nmeNameGlyphImage_t *)source;` lets the compiler choose its
 own copy strategy for the same bytes. Confirmed as a codegen-shape difference,
 not a wrong value, lane or layout; the assembly fallback remains production.
+
+## Printable name encodings
+
+The decoder reads two unsigned bytes per printable ASCII code and combines
+them as lead and trail. The 95 nonzero pairs occupy 190 bytes. The terminal
+zero pair remains in the original image, outside the compiled table,
+because it is not proven to be a meaningful encoding. The decoder and
+its native index calculation are unchanged.
+
+Splat's reference reader drops the last two bytes of the 190-byte object.
+The existing native-data-tail ledger restores that final printable pair
+from the pinned retail ELF for comparison only. The distinct following
+zero pair is still outside the C object.

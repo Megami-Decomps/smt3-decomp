@@ -87,3 +87,11 @@ confirming that value identity blocks reuse of the earlier scaled coordinates.
 It still carries pre-scaled values through the sprites alongside originals and
 does not recover native stride/priority phases. This is another negative
 control, not a retained constraint or improvement over the original baseline.
+
+## Name glyph offsets
+
+The glyph builder uses adjacent signed bytes as the X and Y offsets for
+each grid cell. The 96 pairs end at the first independent card message;
+the previously attached card text is not part of the offset table.
+Both name-entry tables retain their retail writable section despite the
+read-only C views.

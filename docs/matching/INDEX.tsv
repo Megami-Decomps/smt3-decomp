@@ -186,6 +186,7 @@ Area title table				docs/matching/field/fldAutoMap.md	393
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
+Camera focus eye position				docs/matching/field/fldCamera.md	56
 fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/matching/field/fldDraw.md	10
 fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/matching/field/fldDraw.md	42
 fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/matching/field/fldDraw.md	84
@@ -393,10 +394,12 @@ datSetAutoKaifukuSkill	newdata/datCalc	0x140		docs/matching/newdata/datCalc.md	2
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
+Name glyph offsets				docs/matching/nme/Nme_Calc.md	91
 nmeMoveCursorBy	nme/Nme_Draw	0x10C	2 of 67 words match	docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	175
+Printable name encodings				docs/matching/nme/Nme_Init.md	192
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	35 of 35 words match	docs/matching/pb/pbGame.md	48

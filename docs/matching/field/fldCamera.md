@@ -52,3 +52,10 @@ offset `0x78`; the resolved store address is unchanged. The next four
 raw bytes at `0x2FC3DC` and the Unit and Scene records stay outside
 this owner. Neither change alters a callback or claims a code match.
 The separate Basic Camera table is unchanged.
+
+## Camera focus eye position
+
+Despite the recovered `fldCamPhokanRot` name, the camera-selection command
+stores the eye XYZ returned in the second output of
+`dds3CameraObjectBasicGetTgtCam`. The three native stores support a
+12-byte writable float array. The zero word after it is retained separately.
