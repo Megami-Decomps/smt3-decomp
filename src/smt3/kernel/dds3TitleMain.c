@@ -195,7 +195,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         }
         break;
     case 9:
-        if (movieDecodeWork.frameIndex >= 2700) {
+        if (movieCb.decodeCb.frame >= 2700) {
             dds3TitleClearFade();
             titleWork->unk_20 = 0;
             titleWork->mode = (s32)((u32)titleWork->mode + 1);
@@ -207,8 +207,8 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         break;
     case 10:
         dds3TitleUpdateFade();
-        endFrame = (s32)((u32)movieDecodeWork.frameCount - 20U);
-        if (dds3WaitMovieEnd() != 0 || movieDecodeWork.frameIndex >= endFrame) {
+        endFrame = (s32)((u32)movieCb.decodeCb.frameCount - 20U);
+        if (dds3WaitMovieEnd() != 0 || movieCb.decodeCb.frame >= endFrame) {
             dds3FadeOut(0, 0, 0, 15);
             titleWork->mode = 13;
             titleWork->unk_20 = 0;
@@ -267,11 +267,11 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
         break;
     case 16:
         dds3TitleUpdateFade();
-        if (movieDecodeWork.frameCount == 0) {
+        if (movieCb.decodeCb.frameCount == 0) {
             printf(D_0053DDA8);
         } else {
-            endFrame = (s32)((u32)movieDecodeWork.frameCount - 20U);
-            if (dds3WaitMovieEnd() != 0 || movieDecodeWork.frameIndex >= endFrame) {
+            endFrame = (s32)((u32)movieCb.decodeCb.frameCount - 20U);
+            if (dds3WaitMovieEnd() != 0 || movieCb.decodeCb.frame >= endFrame) {
                 dds3FadeOut(0, 0, 0, 15);
                 titleWork->mode = 13;
                 titleWork->unk_20 = 0;
@@ -396,7 +396,7 @@ s32 dds3Titlemain(dds3ProcessID_t *id)
     case 26:
         counter = titleWork->unk_20;
         if (counter > 0) titleWork->unk_20 = (s32)((u32)counter + SDF_FRAME_DUE());
-        else if (dds3WaitMovieEnd() != 0 || (movieDecodeWork.frameIndex >= 31 && TITLE_BUTTON_PRESSED())) {
+        else if (dds3WaitMovieEnd() != 0 || (movieCb.decodeCb.frame >= 31 && TITLE_BUTTON_PRESSED())) {
             dds3FadeOut(255, 255, 255, 60);
             titleWork->unk_20 = 1;
         }

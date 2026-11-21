@@ -6,7 +6,7 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 #include "event.h"
-#include "sdf_movie_types.h"
+#include "mviManager.h"
 
 extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
                               void *drawExit, void *deleteExit, void *p);
@@ -27,7 +27,8 @@ extern rcvWork_t *shutdownfunc;
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-extern sdfMovieCb_t movieCb;
+/* Shared playback state, cleared when its stream opens. */
+sdfMovieCb_t movieCb = {0};
 
 extern s32 sdfMovieIsFinished(sdfMovieCb_t *movie);
 
