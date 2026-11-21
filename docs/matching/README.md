@@ -30,6 +30,7 @@ both native and emitted sizes when they differ.
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
+| 6 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
@@ -50,7 +51,6 @@ both native and emitted sizes when they differ.
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
-| 4 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 4 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 4 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |

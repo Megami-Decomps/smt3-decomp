@@ -1,6 +1,7 @@
 """Validate and partition explicit native mixed-owner report references, never link inputs."""
 from dataclasses import dataclass
 import hashlib
+from contextlib import ExitStack
 import io
 from importlib.metadata import version as package_version
 import json
@@ -14,7 +15,7 @@ import tempfile
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
 
-from .linker_inputs import linker_object_sections
+from .linker_inputs import parse_object_sections
 from .native_data_tail import name_records, verify_reloc_overrides, yaml_inputs
 from .native_rodata_incoming import verify_live_no_incoming
 from .production_report import (live_input_sections, read_object_receipt,
@@ -84,7 +85,22 @@ CASES={
     'interface/frTestFont': Case('interface/frTestFont', 'interface/itfMisc',
                       0x436A10, 0x436A68, 0x436A38, 'D_00535A38',
                       'host0:../../../dds3data/facility/test.bf', 8),
+    'script/scrCommonCommand': Case('script/scrCommonCommand','basic/dds3DbgBasic',
+        0x430588,0x4306B8,0x430698,'D_0052F698','error: MFILTER_PARA blend\n',8,
+        'error: MFILTER_PARA blend\\n'),
+    'code_001C55F8': Case('code_001C55F8','interface/frFont',
+        0x436830,0x4368F0,0x4368E0,'D_005358E0','FRAME: %d/%d',16),
+    'field/fldTitle': Case('field/fldTitle','mc/slMain',
+        0x4337B0,0x433860,0x433848,'D_00532848','/fld/f/pnl/dun_04.tmx',16),
 }
+# These exact objects have a selector but emit no readonly section at all.
+# Never infer or skip empty objects for owners not explicitly named here.
+INTERVENING_SELECTORS = {
+    'script/scrCommonCommand': 'script/scrParameterCommand',
+    'code_001C55F8': 'interface/fmGslCont',
+    'field/fldTitle': 'field/fldSnow',
+}
+
 def must(ok, why):
     if not ok:
         raise ValueError(why)
@@ -120,6 +136,29 @@ def mapped(e,begin,end):
     s=p[0]; at=s['p_offset']+begin-s['p_vaddr']
     e.stream.seek(at)
     return at,e.stream.read(end-begin)
+def prove_intervening(pins, obj, objects, files, map_body):
+    name = str(obj)
+    proof = name + '.proof.json'
+    must(name in objects and name in files and proof in files,
+         'missing live intervening selector receipt')
+    # Both are explicit batch dependencies and must still match the live-link receipt.
+    for path in (name, proof):
+        pins.bind(path, files[path])
+    raw = pins.read(obj)
+    pins.read(proof)
+    readonly = re.compile(r'(?:\.rel(?:a)?)?\.rodata(?:\..*)?\Z')
+    must(not any(readonly.fullmatch(sec.name) for sec in elf(raw).iter_sections()),
+         'intervening selector has readonly section or relocation section')
+    # The normal map parser ignores zero-sized rows. For this exception even
+    # a zero-sized readonly input row contradicts the empty-selector proof.
+    contributions = re.findall(
+        r'^ ([.][^\s]+)[ \t]*(?:\n[ \t]+|[ \t]+)'
+        r'0x[0-9a-fA-F]+[ \t]+0x[0-9a-fA-F]+[ \t]+(\S+\.o)[ \t]*$',
+        map_body, re.M)
+    must(not any(path == name and readonly.fullmatch(sec) for sec, path in contributions),
+         'intervening selector has live readonly contribution')
+
+
 def adjacency(c,plan,ld,linkmap,start,psize,ns):
     main=[i for i in plan['segments'] if isinstance(i,dict) and i.get('name')=='main']
     must(len(main)==1,'unique native main')
@@ -130,10 +169,21 @@ def adjacency(c,plan,ld,linkmap,start,psize,ns):
     a,b=map(path,(c.unit,c.next))
     lds=[i.strip() for i in ld.splitlines()]
     pri,foll=f'{a}(.rodata);',f'{b}(.rodata);'
-    must(lds.count(pri)==lds.count(foll)==1 and lds.index(foll)==lds.index(pri)+1,'exact linker selectors')
+    interposer = INTERVENING_SELECTORS.get(c.unit)
+    middle = path(interposer) if interposer else None
+    expected = [pri, f'{middle}(.rodata);', foll] if middle else [pri, foll]
+    must(all(lds.count(i) == 1 for i in expected) and
+         lds[lds.index(pri):lds.index(pri)+len(expected)] == expected,
+         'exact linker selectors')
+    selector_only = f' {middle}(.rodata)\n' if middle else ''
+    if middle:
+        must(len(re.findall(rf'^\s*{re.escape(middle)}\(\.rodata\)[ \t]*$', linkmap, re.M)) == 1,
+             'unique live intervening selector')
+
     startv,endv,gap=start+BASE,c.end+BASE,c.end-start
     pat=(rf'^ {re.escape(a)}\(\.rodata\)\n(?: \*fill\* +0x[0-9a-f]+ +0x[0-9a-f]+ 00000000\n)? \.rodata +0x0*{c.begin+BASE:x} +0x0*{psize:x} {re.escape(a)}\n'
          rf'(?: +0x[0-9a-f]+ +{IDENT}\n)*'
+         + re.escape(selector_only) +
          rf' {re.escape(b)}\(\.rodata\)\n \*fill\* +0x0*{startv:x} +0x0*{gap:x} 00000000\n'
          rf' \.rodata +0x0*{endv:x} +0x0*{ns:x} {re.escape(b)}$')
     must(len(re.findall(pat,linkmap,re.M))==1,'exact live map fill and successor')
@@ -220,7 +270,7 @@ def render(stock,c,ret,have):
     rest=stock[m.end():].lstrip()
     # These are exact generated seams for the named cases, not accepted
     # alternatives for other owners. All peer sections are still compared.
-    if c.unit in (MODE_SELECT, 'pb/pbGameDraw', 'pb/pbRecord', 'effect/billManager', 'basic/dds3SceneBasic', 'interface/frTestFont'):
+    if c.unit in (MODE_SELECT, 'pb/pbGameDraw', 'pb/pbRecord', 'effect/billManager', 'basic/dds3SceneBasic', 'interface/frTestFont', 'field/fldTitle'):
         correctly_terminal=not rest
     elif c.unit in ('sdf/sdfHdd', 'kernel/dds3KernelCore', 'kernel/dds3CreateData', 'facility/fclRagInit', 'pipe/pipeEffect'):
         correctly_terminal=rest.startswith('.section .sdata, "wa"\n')
@@ -386,67 +436,173 @@ def strict_selectors(selectors,primary,following):
              all(n in ('.text','.data','.rodata','.lit4','.lit8','.sdata','.sbss','.bss') for n in matched),
              f'expected exactly one unambiguous .rodata selector for {obj}')
 
-def write_reference_edge(n,root,version,serial,unit,selectors,opts):
+def unit_inputs(version,unit):
     c=CASES[unit]
-    obj=Path(f'build/{version}/src/{version}/{unit}.o')
-    base=Path(f'build/{version}/base/src/{version}/{unit}.o')
-    nxt=Path(f'build/{version}/src/{version}/{c.next}.o')
-    strict_selectors(selectors,obj,nxt)
+    return (Path(f'build/{version}/src/{version}/{unit}.o'),
+            Path(f'build/{version}/base/src/{version}/{unit}.o'),
+            Path(f'build/{version}/src/{version}/{c.next}.o'))
+
+
+def intervening_object(version,unit):
+    name = INTERVENING_SELECTORS.get(unit)
+    return Path(f'build/{version}/src/{version}/{name}.o') if name else None
+
+
+def reference_dependencies(root,version,serial,opts):
+    from configure import AS
     binary=Path(f'build/{version}/{serial}')
-    reference=full_asm(version,unit)
-    backup=stock_obj(version,unit)
-    target=target_obj(version,unit)
-    n.build(str(backup),"as",str(reference),implicit=["include/macro.inc"])
-    deps={str(obj),str(base),str(nxt),str(obj)+'.proof.json',str(base)+'.proof.json',
-          str(binary),str(binary)+'.elf',str(binary)+'.map',str(binary)+'.elf.proof.json',
-          str(binary)+'.ok',str(split_stamp(version)),str(reference),
+    deps={str(AS), str(binary), *(str(binary)+suffix for suffix in
+          ('.elf','.map','.elf.proof.json','.ok')),str(split_stamp(version)),
           *(str(p) for p in generated_link_inputs(version,serial)),*RUNTIME_INPUTS,
           *current_splat_inputs(root,version,serial,opts)}
-    n.build(str(target),'native_rodata_fill',str(backup),implicit=sorted(deps),
-            variables={'version':version,'unit':unit})
+    for unit in opts:
+        obj,base,nxt=unit_inputs(version,unit)
+        deps.update((str(obj),str(base),str(nxt),str(obj)+'.proof.json',
+                     str(base)+'.proof.json',str(full_asm(version,unit))))
+        if (middle := intervening_object(version,unit)) is not None:
+            deps.update((str(middle), str(middle)+'.proof.json'))
+    return deps
 
-def validate_live(root,version,unit,production,base,neighbor,stock):
+
+ASM_FILE_DIRECTIVE = re.compile(r'\.inc(?:lude|bin)\b', re.IGNORECASE)
+ASM_MACRO_INCLUDE = '.include "macro.inc"'
+ASM_MACRO_PATH = 'include/macro.inc'
+
+
+def validate_asm_text(text):
+    # Deliberately accept only Splat's exact single macro include. Treat
+    # directive-looking strings/comments as suspicious rather than parsing GAS.
+    lines = [line.strip() for line in text.splitlines() if ASM_FILE_DIRECTIVE.search(line)]
+    must(lines == [ASM_MACRO_INCLUDE], 'unsupported native readonly assembler file directive')
+
+
+def validate_asm_inputs(root,version,opts,read_text):
+    shadow = root / 'macro.inc'
+    must(not (shadow.exists() or shadow.is_symlink()), 'shadowed native readonly macro.inc')
+    must(not ASM_FILE_DIRECTIVE.search(read_text(ASM_MACRO_PATH)),
+         'recursive native readonly assembler file directive')
+    for unit in opts:
+        validate_asm_text(read_text(full_asm(version,unit)))
+
+
+def completion_marker(version):
+    return Path(f'build/{version}/native-rodata-fill.complete')
+
+
+def write_reference_batch(n,root,version,serial,selectors,opts):
+    if not opts:
+        return
+    from configure import AS
+    validate_asm_inputs(root,version,opts,lambda path:(root/path).read_text())
+    for unit in opts:
+        obj,_,nxt=unit_inputs(version,unit)
+        strict_selectors(selectors,obj,nxt)
+        if (middle := intervening_object(version,unit)) is not None:
+            strict_selectors(selectors,obj,middle)
+        n.build(str(stock_obj(version,unit)),"as",str(full_asm(version,unit)),
+                implicit=[ASM_MACRO_PATH,str(AS)])
+    n.build([str(target_obj(version,u)) for u in opts],'native_rodata_fill',
+            [str(stock_obj(version,u)) for u in opts],
+            implicit=sorted(reference_dependencies(root,version,serial,opts)),
+            implicit_outputs=[str(completion_marker(version))],
+            variables={'version':version})
+
+
+class InputPins:
+    """Command-local SHA bindings; no reusable proof or stat shortcut."""
+    def __init__(self,root):
+        self.root=root
+        self.digests={}
+
+    def name(self,path):
+        path=Path(path)
+        if path.is_absolute():
+            path=path.relative_to(self.root)
+        must('..' not in path.parts and path.parts,'invalid native readonly input path')
+        return path.as_posix()
+
+    def bind(self,path,expected):
+        name=self.name(path)
+        must(self.digests.setdefault(name,expected)==expected,
+             'conflicting native readonly input digest: '+name)
+
+    def read(self,path):
+        name=self.name(path)
+        data=(self.root/name).read_bytes()
+        self.bind(name,sha(data))
+        return data
+
+    def text(self,path):
+        # Same universal newline + locale decoding as Path.read_text().
+        with io.TextIOWrapper(io.BytesIO(self.read(path))) as f:
+            return f.read()
+
+    def recheck(self):
+        for name,expected in sorted(self.digests.items()):
+            must(sha((self.root/name).read_bytes())==expected,
+                 'changed native readonly batch input: '+name)
+
+
+def prepare_live(root,version,opts,pins):
     from configure import VERSIONS
-    c=CASES[unit]
     spec=VERSIONS[version]; serial=spec['serial']
-    opts=options(root,version)
-    must(unit in opts,'missing explicit native readonly fill opt-in')
-    check_split(root,version,serial,opts)
-    conf,plan,override_paths=yaml_inputs(root,version,serial)
+    pins.read(split_stamp(version))
+    split=check_split(root,version,serial,opts)
+    must(json.loads(pins.text(split_stamp(version)))==split,'changed split receipt')
+    for name,expected in split['files'].items():
+        pins.bind(name,expected)
+    conf,plan,override_paths=yaml_inputs(root,version,serial,read_text=pins.text)
     ld,yml,undef,udfn,symbols=generated_link_inputs(version,serial)
     must(conf==root/yml,'link YAML identity')
     image=Path(f'build/{version}/{serial}')
-    # Keep the serial spelling intact; it already contains a suffix (SLUS_209.11).
     lfile,mfile=Path(str(image)+'.elf'),Path(str(image)+'.map')
     pfile=Path(str(lfile)+'.proof.json')
-    obj=Path(f'build/{version}/src/{version}/{unit}.o')
-    nxt=Path(f'build/{version}/src/{version}/{c.next}.o')
-    strict_selectors(linker_object_sections(root/ld),obj,nxt)
+    pins.read(pfile)
     receipt=read_receipt(root,lfile,mfile,pfile)
-    required=(ld,yml,undef,udfn,symbols)
-    entries=receipt['files']
-    must({str(p) for p in required}<=entries.keys(),'missing exact linker/YAML/undef/symbol receipt pins')
-    must({str(obj),str(nxt)}<=set(receipt['objects']),'missing live owner/neighbor')
-    # These terminal bytes are linker placement fill, not C or native objects.
-    # Prove every configured gap against the complete current link inventory.
+    for name,expected in receipt['files'].items():
+        pins.bind(name,expected)
+    must(json.loads(pins.text(pfile))==receipt,'changed link receipt')
+    for p in ld,yml,undef,udfn,symbols:
+        must(str(p) in receipt['files'],'missing exact linker/YAML/undef/symbol receipt pins')
     spans = [(case.final + len(case.value.encode()) + 1 + BASE, case.end + BASE)
              for key, case in CASES.items() if key in opts]
-    verify_live_no_incoming(root, receipt, spans)
-    for filename,payload in ((obj,production),(nxt,neighbor)):
-        must(sha(payload)==entries[str(filename)],'changed physical link input '+str(filename))
-    skip=Path(f'build/{version}/base/src/{version}/{unit}.o')
-    base_receipt=read_object_receipt(root,str(skip))
-    must(sha(base)==base_receipt['files'][str(skip)],'changed SKIP object')
-    retail=(root/f'orig/{version}/{serial}').read_bytes()
-    live_image=(root/image).read_bytes()
+    verify_live_no_incoming(root,receipt,spans)
+    retail=pins.read(f'orig/{version}/{serial}')
+    live_image=pins.read(image)
     must(len(retail)==spec['elf_size'] and hashlib.sha1(retail).hexdigest()==spec['elf_sha1']==RETAIL_SHA1
          and live_image==retail and (root/(str(image)+'.ok')).is_file(),'no exact linked retail image')
-    linked=(root/lfile).read_bytes()
-    must(sha(linked)==entries[str(lfile)],'changed physical linked image')
+    linked=pins.read(lfile)
     verify_linked_image(linked,live_image)
     r=elf(retail,'ET_EXEC')
     l=elf(linked,'ET_EXEC')
     _,rs=ro(r); li,ls=section(l,'.main')
+    real_map=pins.read(mfile).decode()
+    maps=live_input_sections(real_map)
+    _,mark,body=real_map.partition('Linker script and memory map')
+    must(bool(mark),'malformed map')
+    ld_text=pins.text(ld)
+    return (retail,r,l,rs,li,ls,plan,ld_text,parse_object_sections(ld_text),
+            maps,body,pins.text(symbols),[pins.text(p) for p in override_paths],
+            set(receipt['objects']),receipt['files'])
+
+
+def validate_unit(root,version,unit,live,pins,stock):
+    retail,r,l,rs,li,ls,plan,ld_text,selectors,maps,body,symbols,overrides,objects,files=live
+    c=CASES[unit]
+    obj,skip,nxt=unit_inputs(version,unit)
+    strict_selectors(selectors,obj,nxt)
+    must({str(obj),str(nxt)}<=objects,'missing live owner/neighbor')
+    if (middle := intervening_object(version,unit)) is not None:
+        strict_selectors(selectors,obj,middle)
+        prove_intervening(pins,middle,objects,files,body)
+    production,neighbor=pins.read(obj),pins.read(nxt)
+    skip_proof=str(skip)+'.proof.json'
+    pins.read(skip_proof)
+    base_receipt=read_object_receipt(root,str(skip))
+    must(json.loads(pins.text(skip_proof))==base_receipt,'changed SKIP receipt')
+    for name,expected in base_receipt['files'].items():
+        pins.bind(name,expected)
+    base=pins.read(skip)
     startv,endv=c.begin+BASE,c.end+BASE
     must(rs['sh_addr']<=startv<endv<=rs['sh_addr']+rs['sh_size'] and
          ls['sh_addr']<=startv<endv<=ls['sh_addr']+ls['sh_size'],'mapped native readonly span')
@@ -462,17 +618,12 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
          nsec['sh_addralign']==bsec['sh_addralign'],'stock/SKIP/native prefix mismatch')
     must(retail[have:c.end]==bytes(c.end-have),'nonzero actual fill')
     actual_alignment(c,have,following['sh_addralign'])
-    real_map=(root/mfile).read_bytes()
-    must(sha(real_map)==entries[str(mfile)],'changed physical link map')
-    maps=live_input_sections(real_map.decode())
     must(maps.get((str(obj),'.rodata'))==[(startv,nsec['sh_size'])] and
          maps.get((str(nxt),'.rodata'))==[(endv,following['sh_size'])],'ambiguous live rodata ownership')
     if c.unit==MODE_SELECT:
         must(maps.get((str(obj),'.text'))==[MODE_TEXT],'wrong mapped ModeSelect text extent')
-    _,mark,body=real_map.decode().partition('Linker script and memory map')
-    must(bool(mark),'malformed map')
-    adjacency(c,plan,(root/ld).read_text(),body,have,nsec['sh_size'],following['sh_size'])
-    verify_metadata((root/symbols).read_text(),[p.read_text() for p in override_paths],have,c.end)
+    adjacency(c,plan,ld_text,body,have,nsec['sh_size'],following['sh_size'])
+    verify_metadata(symbols,overrides,have,c.end)
     inspect_symbols(l,have+BASE,endv,li)
     for e,i in ((normal,nr),(skip_obj,br),(original,rr)):
         allow=(c.label,c.final-c.begin,c.end-c.final) if e is original else None
@@ -480,31 +631,72 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
         local_incoming(e,i,have-c.begin,c.end-c.begin)
     return c,retail,have
 
-def run_target(root,version,unit,inp,out):
-    from configure import AS,AS_FLAGS
-    must(unit in options(root,version) and inp==stock_obj(version,unit) and
-         out==target_obj(version,unit),'invalid native readonly fill target paths')
-    c=CASES[unit]
-    prod=lambda n:(root/f'build/{version}/src/{version}/{n}.o').read_bytes()
-    before=(root/inp).read_bytes()
-    c,retail,have=validate_live(root,version,unit,prod(unit),
-        (root/f'build/{version}/base/src/{version}/{unit}.o').read_bytes(),prod(c.next),before)
-    asm=(root/full_asm(version,unit)).read_text()
-    corrected=render(asm,c,retail,have)
-    target=root/out
-    target.parent.mkdir(parents=True,exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='native-rodata-fill-',dir=target.parent) as dirname:
-        tmp=Path(dirname)
-        a,b=tmp/'reference.s',tmp/'reference.o'
-        a.write_text(corrected)
-        subprocess.run([str(AS),*shlex.split(AS_FLAGS),'-o',str(b),str(a)],cwd=root,check=True)
-        verify_output(before,b.read_bytes(),c,retail,have)
-        b.replace(target)
+def publish(staged,marker):
+    # Ninja uses this only as an output-presence sentinel. Leave old valid
+    # output bytes untouched until all new outputs verify; once publication
+    # starts, any interrupted/incomplete set is missing the marker.
+    marker.parent.mkdir(parents=True,exist_ok=True)
+    marker.unlink(missing_ok=True)
+    try:
+        for obj,target in staged:
+            obj.replace(target)
+        marker.touch(exist_ok=False)
+    except BaseException as error:
+        for _,target in staged:
+            try:
+                target.unlink(missing_ok=True)
+            except OSError as exc:
+                error.add_note(f"could not invalidate {target}: {exc}")
+        raise
+
+
+def run_batch(root,version,outputs):
+    from configure import AS,AS_FLAGS,VERSIONS
+    must(version in VERSIONS,'invalid native readonly fill version')
+    opts=options(root,version)
+    must(opts and outputs==[target_obj(version,u) for u in opts],
+         'invalid native readonly fill output list')
+    serial=VERSIONS[version]['serial']
+    pins=InputPins(root)
+    for name in sorted(reference_dependencies(root,version,serial,opts)):
+        pins.read(name)
+    for unit in opts:
+        pins.read(stock_obj(version,unit))
+    must(json.loads(pins.text("config/versions.json"))==VERSIONS,
+         "changed native readonly version config")
+    must(json.loads(pins.text(opt_path(version)))==list(opts),'changed native readonly options')
+    validate_asm_inputs(root,version,opts,pins.text)
+    live=prepare_live(root,version,opts,pins)
+    with ExitStack() as stack:
+        staged=[]
+        for unit,out in zip(opts,outputs):
+            before=pins.read(stock_obj(version,unit))
+            c,retail,have=validate_unit(root,version,unit,live,pins,before)
+            corrected=render(pins.text(full_asm(version,unit)),c,retail,have)
+            validate_asm_text(corrected)
+            target=root/out
+            target.parent.mkdir(parents=True,exist_ok=True)
+            tmp=Path(stack.enter_context(tempfile.TemporaryDirectory(
+                prefix='native-rodata-fill-',dir=target.parent)))
+            a,b=tmp/'reference.s',tmp/'reference.o'
+            a.write_text(corrected)
+            subprocess.run([str(AS),*shlex.split(AS_FLAGS),'-o',str(b),str(a)],
+                           cwd=root,check=True)
+            verify_output(before,b.read_bytes(),c,retail,have)
+            staged.append((b,target))
+        # This build requires stable inputs and a single workspace writer.
+        # Re-prove dynamic split ownership/pin set, then rehash the complete
+        # command-local dependency set, including validated receipt SHA pins.
+        check_split(root,version,serial,opts)
+        validate_asm_inputs(root,version,opts,pins.text)
+        pins.recheck()
+        publish(staged,root/completion_marker(version))
+
 
 if __name__=='__main__':
     root=Path(__file__).resolve().parent.parent
     try:
-        version,unit,inp,out=sys.argv[1:]
-        run_target(root,version,unit,Path(inp),Path(out))
+        version,*outputs=sys.argv[1:]
+        run_batch(root,version,[Path(o) for o in outputs])
     except (OSError,ValueError) as exc:
         sys.exit(str(exc))

@@ -248,9 +248,9 @@ def complete_warning_reference(assembly, payload, file_offset, address, names):
     return "".join(lines)
 
 
-def yaml_inputs(root, version, serial):
+def yaml_inputs(root, version, serial, *, read_text=Path.read_text):
     conf = root / "config" / version / f"{serial}.yaml"
-    plan = yaml.safe_load(conf.read_text())
+    plan = yaml.safe_load(read_text(conf))
     options = plan["options"]
     base = (conf.parent / options["base_path"]).resolve()
     if base != root.resolve():

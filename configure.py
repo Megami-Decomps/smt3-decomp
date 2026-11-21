@@ -636,13 +636,13 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                f"{sys.executable} tools/native_data_tail.py $version $unit $in $out",
                description="native data tail $unit")
     from tools.native_rodata_fill import (current_splat_inputs, opt_path, options,
-                                          write_reference_edge)
+                                          write_reference_batch)
 
     fill_options = {v: options(ROOT, v) for v in versions}
     if any(fill_options.values()):
         n.rule("native_rodata_fill",
-               f"{sys.executable} -m tools.native_rodata_fill $version $unit $in $out",
-               description="verify native readonly linker fill $unit")
+               f"{sys.executable} -m tools.native_rodata_fill $version $out",
+               description="verify native readonly linker fill batch $version")
     units: dict[str, list[dict]] = {}
     defaults = []
     for version in versions:
@@ -720,7 +720,6 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     if unit in unseen_tails:
                         raise SystemExit(f"{src}: cannot have writable tail and readonly fill opt-ins")
                     unseen_fills.remove(unit)
-                    write_reference_edge(n, ROOT, version, serial, unit, object_sections, fill_options[version])
                 elif unit in unseen_tails:
                     if object_sections[obj] != [".data"]:
                         raise SystemExit(f"{src}: native tail needs a data-only C owner")
@@ -738,6 +737,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 units[version].append({"name": str(src.with_suffix("")), "target": str(target), "base": str(base)})
         if unseen_fills:
             raise SystemExit(f"{version}: missing native readonly fill owners")
+        write_reference_batch(n, ROOT, version, serial, object_sections, fill_options[version])
         if unseen_tails or tail_pads:
             raise SystemExit(f"{version}: missing native tail owners or raw pad edges")
         elf = Path("build") / version / f"{serial}.elf"

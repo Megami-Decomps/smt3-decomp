@@ -13,7 +13,10 @@ LD_OBJECT_LINE = re.compile(r"\s*(build/[^\s()]+\.o)\(([^()]+)\)\s*;?\s*")
 
 def linker_object_sections(ld_script: Path) -> dict[Path, list[str] | None]:
     """Read generated input selectors in link order; None means ambiguous."""
-    text = ld_script.read_text()
+    return parse_object_sections(ld_script.read_text())
+
+
+def parse_object_sections(text: str) -> dict[Path, list[str] | None]:
     # Count exact paths conservatively even on unrecognized lines. A
     # spaced, multiline, quoted or commented repeat cannot establish
     # that the object has just one .data selector.

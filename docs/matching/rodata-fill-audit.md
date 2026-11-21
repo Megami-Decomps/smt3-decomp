@@ -67,3 +67,28 @@ exact C bytes. Their successors add two, one, and seven unmatched zero
 bytes. The Scene and font test cases require EOF after the terminal
 label; Pipe Effect requires its original .sdata section. The Scene
 diagnostic uses the exact stock newline escape.
+
+
+## Shared reference verification
+
+The comparison references now share one complete linked-input receipt and
+incoming-reference scan. Each owner still has its own assembly, native
+window, and byte/relocation checks. The batch publishes its completion
+marker last so that Ninja reruns an interrupted publication. Original
+production commands and artifacts do not depend on this batch.
+
+With the same 16 existing reference outputs removed and all production
+inputs already built, the old and batched outputs are byte-identical.
+In a warm-build measurement on the same checkout, reference verification
+went from 46.0s to 28.1s with four Ninja workers and from 191.7s to
+29.8s with one. These are reference-step timings, not full build times.
+
+## Three named non-contributing linker selectors
+
+The common command, interface, and field title cases contain 299, 189
+and 174 byte-exact bytes of existing C. Their successor alignments add
+five, three and two bytes respectively, all left unmatched. Each case
+names its sole intervening linked object and requires a current receipt,
+no read-only section or relocation section in that object, and exactly
+one unchanged selector-only map line with no contribution, even zero.
+All other owners keep the same strict adjacency checks.
