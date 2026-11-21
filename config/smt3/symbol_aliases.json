@@ -78,5 +78,13 @@
     "section": ".data",
     "offset": 8,
     "owner_size": 256
+  },
+  {
+    "name": "cmbSlotParamTable",
+    "owner": "cmbSmokeParamTable",
+    "unit": "facility/fclCombineSmokeParams",
+    "section": ".data",
+    "offset": 8,
+    "owner_size": 6000
   }
 ]
