@@ -139,7 +139,18 @@ typedef struct nbCamera_AllTable_t {
     f32 radius;
 } nbCamera_AllTable_t;
 
-extern nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[];
+/* The table has one optional override for each native roster ID. */
+nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[384] = {
+    [0] = {400.0f, 0.0f, 0.0f},
+    [15] = {457.0f, 56.0f, 0.0f},
+    [34] = {350.0f, 30.0f, 0.0f},
+    [85] = {400.0f, 30.0f, 0.0f},
+    [92] = {350.0f, 25.0f, 0.0f},
+    [118] = {291.0f, 20.0f, 0.0f},
+    [126] = {230.0f, 30.0f, 0.0f},
+    [135] = {0.0f, 10.0f, 0.0f},
+    [256] = {300.0f, 0.0f, 50.0f},
+};
 
 extern nbCamera_AllTable_t nbCameraModelAllDefault;
 

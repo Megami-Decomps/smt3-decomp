@@ -448,6 +448,8 @@ segments:
       - [0x220020, data, data_0031F020]
       - [0x221C50, .data, newbattle/nbCameraProcess]
       - [0x221E30, data, data_00320E30]
+      - [0x225750, .data, newbattle/nbCameraCommand]
+      - [0x226950, data, data_00325950]
       - [0x22E270, .data, facility/fclCombineRaceTable]
       - [0x22EA70, .data, facility/fclCombineRaceResults]
       - [0x22EB78, data, data_0032DB78]
