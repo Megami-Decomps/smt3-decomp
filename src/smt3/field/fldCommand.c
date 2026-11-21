@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datSagasi.h"
 #include "basic.h"
 #include "model.h"
 #include "newdata.h"
@@ -1655,22 +1656,6 @@ s32 fldCommand_FLD_MODEL_LIGHT(void) {
     return 1;
 }
 
-typedef struct {
-    u16 item;
-    u16 par;
-} datTakaraSagasiItem_t;
-
-typedef struct {
-    u32 flag;
-    datTakaraSagasiItem_t itemtbl[8];
-} datTakaraSagasiTable_t;
-
-typedef struct {
-    u32 flag;
-    datTakaraSagasiTable_t tbl[4];
-} datTakaraSagasi_t;
-
-extern datTakaraSagasi_t datSagasiSkillTable;
 extern u32 fldEncountSagasiFlag;
 
 #ifdef NON_MATCHING

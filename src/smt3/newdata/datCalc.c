@@ -1,26 +1,11 @@
 #include "common.h"
+#include "datSagasi.h"
 #include "sdk_libgcc.h"
 #include "datCalc.h"
 #include "ps2asm.h"
 #include "dds3Difficulty.h"
 
 extern s32 evtBitCheck(s32 no);
-typedef struct datTakaraSagasiItem_t {
-    u16 item;
-    u16 par;
-} datTakaraSagasiItem_t;
-
-typedef struct datTakaraSagasiTable_t {
-    u32 flag;
-    datTakaraSagasiItem_t itemtbl[8];
-} datTakaraSagasiTable_t;
-
-/* FLD_SAGASI_AKUMA reads four inline 0x24-byte groups and their weights. */
-typedef struct datTakaraSagasi_t {
-    u32 flag;
-    datTakaraSagasiTable_t tbl[4];
-} datTakaraSagasi_t;
-extern datTakaraSagasi_t datSagasiSkillTable;
 extern void datDebugPrintf(const char *format, ...);
 extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);

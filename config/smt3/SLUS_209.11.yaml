@@ -503,6 +503,8 @@ segments:
       - [0x2D7998, .data, newdata/datSkillAttr]
       - [0x2D8998, .data, newdata/datSkillTable]
       - [0x2DD4A0, data, data_003DC4A0]
+      - [0x2DD920, .data, newdata/datSagasiSkillTable]
+      - [0x2DD9B4, data, data_003DC9B4]
       - [0x2DDB38, .data, newbattle/nbNegoDevilProfiles]
       - [0x2E2338, .data, newbattle/nbNegoSkillData]
       - [0x2E32A8, data, data_003E22A8]
