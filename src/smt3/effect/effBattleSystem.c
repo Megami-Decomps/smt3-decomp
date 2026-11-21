@@ -10,16 +10,11 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "effBattleSystemCut1Data.h"
+#include "effBattleSystemPartData.h"
 #include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
 #include "sdfFrame.h"
-
-typedef struct
-{
-    u16 type;
-    void *pHandle;
-} effPartHandle_t;
 
 typedef struct
 {
@@ -104,18 +99,6 @@ typedef struct
     u8 unknown00[0x20];
     f32 unknown20;
 } effPCPThunderSpherePolyLowParam_t;
-
-/* One entry of an effBTLSystem_*_PartList table. */
-typedef struct
-{
-    u16 type;
-    char *fileName;
-    void *pData;
-    u16 refCount;
-    effPartHandle_t *hPart;
-    effBTL_t *hBTLEffect;
-    sdfMemHandle_t *hMem;
-} effBattleSystem_effBTLSystem_Part_tag;
 
 extern effBattleSystem_effBTLSystem_Part_tag effBTLSystem_Freeze_PartList[];
 

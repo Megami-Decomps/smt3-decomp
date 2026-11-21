@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fldNpcLightData.h"
 #include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "basic.h"
@@ -24,11 +25,6 @@ struct effResourceHeader_t;
 
 extern struct effNode_t *dds3EffectLoad(struct effResourceHeader_t *data);
 extern struct effNode_t *dds3EffectCopy(struct effNode_t *effect);
-
-typedef struct
-{
-    u8 data[0x100];
-} fldNpcPalette_t;
 
 typedef struct fldUnit_t fldUnit_t;
 
@@ -64,7 +60,6 @@ extern s32 fldGbChkNpc(s32 fld, u32 area, s32 hojiID);
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *object, s32 flags);
 
-extern u8 fldNpcLightTable[0x100];
 
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
@@ -236,7 +231,7 @@ void fldNpcLightSet(evtUnit_t *hEveUnit) {
     object = hEveUnit->effObj;
     model = dds3ObjectBaseGetModelHandle(object);
     SDF_VU0_LOADVECTOR(&object->poseset->rot);
-    row = &fldNpcLightTable[(fldGlobalBase.floor + 1) * 8];
+    row = (u8 *)&fldNpcLightTable[fldGlobalBase.floor + 1];
     dir = -EulerAngleAxisY();
     if (row[7] == 0) {
         dir = dir * 180.0f / 3.14f;
@@ -480,7 +475,6 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 #endif
 
-extern u8 fldNpcLightTbl[];
 
 
 extern struct effNode_t *fldTakaraSlotCount;
@@ -647,7 +641,7 @@ void fldItemBoxAdd(s32 id, const sdfVector4_t *rot, f32 x, f32 y, f32 z)
     fldTakaraSlotTable[fldTakaraCount].tableIndex = id;
     fldTakaraCount = fldTakaraCount + 1;
     fldAddItemBoxObject(-1, x, y, z, 20.0f, 100.0f);
-    row = &fldNpcLightTbl[fldGlobalBase.floor * 8];
+    row = (u8 *)&fldNpcLightTbl[fldGlobalBase.floor];
     SDF_VU0_LOADVECTOR(&rotation);
     dir = EulerAngleAxisY() * 180.0f / 3.14f + 80.0f;
     unit = evtGetUnitHandle2(object);
@@ -862,8 +856,6 @@ void fldSibukiStart(f32 x, f32 y, f32 z)
     fldNpcBlurHandle = 1;
 }
 
-/* NON_MATCHING: 65 of 208 words differ (first at +0x30). */
-#ifdef NON_MATCHING
 void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
                       f32 angle) {
     sdfVector4_t pos[4];
@@ -873,40 +865,46 @@ void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, 
     s32 top;
     s32 su;
     s32 sv;
-    s32 eu;
-    s32 ev;
+    FAKEMATCH_ASM_REG(s32, eu, "$20");
+    FAKEMATCH_ASM_REG(s32, ev, "$21");
     f32 lf;
     f32 tf;
     f32 rf;
     f32 bf;
     f32 xf;
     f32 yf;
+    f32 z0;
+    s32 packetX1;
+    f32 z1Scaled;
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
     sdf2DLinkTexPacket(tag, fldUiTexture, 0);
-    left = -(ax * 16);
-    top = -(ay * 16);
-    su = u * 16;
-    sv = v * 16;
-    eu = su + uw * 16;
-    ev = sv + vh * 16;
+    left = (s32)(0u - ((u32)ax * 16));
+    top = (s32)(0u - ((u32)ay * 16));
+    su = (s32)((u32)u * 16);
+    sv = (s32)((u32)v * 16);
+    eu = (s32)((u32)su + (u32)uw * 16);
+    ev = (s32)((u32)sv + (u32)vh * 16);
+    /* Keep the two live texture endpoints in their native saved registers;
+     * the base U/V coordinates then keep their own carriers across the calls. */
+    FAKEMATCH_ASM_LIVE_PAIR(eu, ev);
     lf = (f32)left;
     tf = (f32)top;
-    rf = lf + (f32)(w * 16);
-    bf = tf + (f32)(h * 16);
+    rf = lf + (f32)(s32)((u32)w * 16);
+    bf = tf + (f32)(s32)((u32)h * 16);
     pos[0].x = lf;
     pos[0].y = 0.0f;
     pos[0].z = tf;
-    pos[1].x = rf;
-    pos[1].y = 0.0f;
-    pos[1].z = tf;
-    pos[2].x = lf;
-    pos[2].y = 0.0f;
-    pos[2].z = bf;
     pos[3].x = rf;
     pos[3].y = 0.0f;
+    pos[1].z = tf;
+    pos[2].x = lf;
+    pos[1].y = 0.0f;
     pos[3].z = bf;
+    pos[1].x = rf;
+    pos[2].y = 0.0f;
+    pos[2].z = bf;
     SetRotateMatrixY((angle + 180.0f) * 3.14f / 180.0f);
     SDF_VU0_LOADVECTOR(&pos[0]);
     SDF_VU0_APPLYMATRIX_XYZ();
@@ -923,25 +921,21 @@ void fldDrawEATexQuad(s32 x, s32 y, s32 ax, s32 ay, s32 w, s32 h, s32 u, s32 v, 
     xf = (f32)x * 16.0f;
     yf = (f32)y * 8.0f;
     pos[0].x = pos[0].x + xf + 28672.0f;
-    pos[0].z = pos[0].z * 0.5f + yf + 30976.0f;
-    pos[1].x = pos[1].x + xf + 28672.0f;
-    pos[1].z = pos[1].z * 0.5f + yf + 30976.0f;
+    z0 = pos[0].z * 0.5f + yf + 30976.0f;
+    z1Scaled = pos[1].z * 0.5f + yf;
     pos[2].x = pos[2].x + xf + 28672.0f;
-    pos[2].z = pos[2].z * 0.5f + yf + 30976.0f;
-    pos[3].x = pos[3].x + xf + 28672.0f;
-    pos[3].z = pos[3].z * 0.5f + yf + 30976.0f;
+    pos[1].z = z1Scaled + 30976.0f;
+    packetX1 = (s32)(pos[1].x = pos[1].x + xf + 28672.0f);
+    /* Write each remaining adjusted field when forming its packet coordinate. */
     sdfPrimLinkFt4(tag, 0x80808080, 0x44,
-                   (s32)pos[0].x, (s32)pos[0].z, su, sv,
-                   (s32)pos[1].x, (s32)pos[1].z, eu, sv,
-                   (s32)pos[2].x, (s32)pos[2].z, su, ev,
-                   (s32)pos[3].x, (s32)pos[3].z, eu, ev,
+                   (s32)pos[0].x, (s32)(pos[0].z = z0), su, sv,
+                   packetX1, (s32)pos[1].z, eu, sv,
+                   (s32)pos[2].x, (s32)(pos[2].z = pos[2].z * 0.5f + yf + 30976.0f), su, ev,
+                   (s32)(pos[3].x = pos[3].x + xf + 28672.0f), (s32)(pos[3].z = pos[3].z * 0.5f + yf + 30976.0f), eu, ev,
                    -1, NULL);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, tag);
 }
-#else
-INCLUDE_ASM(const s32, "field/fld_Npc", fldDrawEATexQuad);
-#endif
 
 void fldDrawAddressPanel(s32 width, s32 x, s32 y) {
     s32 ofs;

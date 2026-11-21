@@ -70,5 +70,13 @@
     "section": ".data",
     "offset": 2,
     "owner_size": 128
+  },
+  {
+    "name": "fldNpcLightTbl",
+    "owner": "fldNpcLightTable",
+    "unit": "field/fldNpcLightData",
+    "section": ".data",
+    "offset": 8,
+    "owner_size": 256
   }
 ]

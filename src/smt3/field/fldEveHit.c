@@ -9,6 +9,7 @@
 #include "scr.h"
 #include "draw3d.h"
 #include "field.h"
+#include "fldEveHitSwitchData.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -248,16 +249,6 @@ s32 evtBitCheck(s32 no);
 
 extern s32 gFldKyouseiTalk;
 
-/* gFldEveHitOnOffTbl stride, 20 bytes. */
-typedef struct {
-    s16 area;
-    s16 floor;
-    s16 flag;
-    char name[14];
-} fldEveHitSwitch_t;
-
-extern fldEveHitSwitch_t gFldEveHitOnOffTbl[32];
-
 void fldDrawPos(const f32 *pos);
 
 extern void fldStatusSet(void);
@@ -416,28 +407,7 @@ void fldEveHit_End(void) {
     }
 }
 
-/* The event-hit source records at fldEveHitSourceTable: a sphere, the put record that
-   names it, the transform dds3AddPointBasic consumes, and the two resource
-   headers the hit and the event are registered under. */
-typedef struct {
-    u32 Type;
-    f32 r;
-} fldResPutEveBall_t;
-
-typedef struct {
-    fldResPutEveBall_t ball;           /* 0x00 */
-    fldResPut_t put;                   /* 0x08 */
-    fldResourcePointUnaligned_t sisei; /* 0x18 */
-    fldResHead_t hit;                  /* 0x48 */
-    fldResHead_t event;                /* 0x6C */
-} fldEveHitSource_t;
-
-typedef char fldEveHitSource_put[((u32)&((fldEveHitSource_t *)0)->put == 0x08) ? 1 : -1];
-typedef char fldEveHitSource_sisei[((u32)&((fldEveHitSource_t *)0)->sisei == 0x18) ? 1 : -1];
-typedef char fldEveHitSource_hit[((u32)&((fldEveHitSource_t *)0)->hit == 0x48) ? 1 : -1];
-typedef char fldEveHitSource_event[((u32)&((fldEveHitSource_t *)0)->event == 0x6C) ? 1 : -1];
-
-extern fldEveHitSource_t fldEveHitSourceTable[];
+#include "fldEveHitSourceTable.h"
 
 extern char fldEveHitEventName[];
 
