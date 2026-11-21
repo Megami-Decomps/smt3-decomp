@@ -1,4 +1,5 @@
 #include "sdk_libcdvd.h"
+#include "sdk_cdvd_ncmd_state.h"
 #include "sdk_cdvd_stream_request.h"
 #include "common.h"
 #include "ps2asm.h"
@@ -12,7 +13,6 @@ extern s32 cdvdDebugLevel __attribute__((section(".data")));
 #include "sdk_cdvd_rpc_client.h"
 extern cdvdRpcClient_t cdvdScmdClient __attribute__((section(".data")));
 
-extern s32 cdvdNcmdState __attribute__((section(".data")));
 extern s32 cdvdScmdLockSema __attribute__((section(".data")));
 extern cdvdRpcClient_t cdvdNcmdClient __attribute__((section(".data")));
 extern s32 cdvdMmodeArg __attribute__((section(".data")));
@@ -150,14 +150,14 @@ void _sceCd_cd_callback(s32 *reason)
     cdvdCallbackSavedReason = (*(volatile s32 *)&cdvdCallbackReason);
     if ((*(volatile s32 *)&cdvdCallbackReason) == 11) {
         (*(volatile s32 *)&cdvdCallbackReason) = 0;
-        (*(volatile s32 *)&cdvdNcmdState) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
         return;
     }
     iSignalSema((*(volatile s32 *)&cdvdNcmdSema));
     if (cdvdCallbackThreadId != 0 && cdvdCallback != NULL) {
         iSignalSema((*(volatile s32 *)&cdvdScmdSema));
     } else {
-        (*(volatile s32 *)&cdvdNcmdState) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
     }
     (*(volatile s32 *)&cdvdCallbackReason) = 0;
 }
@@ -178,7 +178,7 @@ void _Cdvd_cbLoop(void)
              * and leave the ordinary cleanup word in ExitDeleteThread's delay
              * slot. This is not a new volatile contract or original spelling. */
             do {
-                (*(volatile s32 *)&cdvdNcmdState) = 0;
+                (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
             } while (0);
             (*(volatile s32 *)&cdvdCallbackReason) = 0;
             (*(volatile s32 *)&cdvdCallbackThreadId) = 0;
@@ -192,7 +192,7 @@ void _Cdvd_cbLoop(void)
         if (cdvdCallback != NULL && cdvdCallbackSavedReason != 0) {
             cdvdCallback(cdvdCallbackSavedReason);
         }
-        (*(volatile s32 *)&cdvdNcmdState) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
     }
 }
 
@@ -268,7 +268,7 @@ void cmd_sem_init(void)
          * clear-address setup. This empty read-only operand emits no access
          * and is not a memory barrier or an original-source claim. */
         FAKEMATCH_ASM_READ_MEM(cdvdScmdSema);
-        cdvdNcmdState = 0;
+        cdvdNcmdState.busy = 0;
     }
 }
 
@@ -529,12 +529,12 @@ s32 sceCdSync(s32 mode)
         if (cdvdDebugLevel > 0) {
             scePrintf("N cmd wait\n");
         }
-        while (cdvdNcmdState != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
+        while (cdvdNcmdState.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
             sceCdDelayThread(60);
         }
         return 0;
     }
-    if (cdvdNcmdState != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
+    if (cdvdNcmdState.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
         return 1;
     }
     return 0;
