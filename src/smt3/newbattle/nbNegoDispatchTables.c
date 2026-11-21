@@ -1,0 +1,503 @@
+#include "common.h"
+
+typedef struct nbNegoProcessData_t nbNegoProcessData_t;
+typedef s32 (*NegoFlowHandler)(nbNegoProcessData_t *n);
+
+extern s32 nbNegoFlowOne(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowFullMoon(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowStock(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowDouchara(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowInnen(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowTwo(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowQuestion(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowFight(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowOk(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowNg(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowDrain(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowMukan(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowSensei(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowBinjo(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowInoti(nbNegoProcessData_t *n);
+extern s32 nbNegoFlowKoketa(nbNegoProcessData_t *n);
+extern s32 Flow1_3(nbNegoProcessData_t *n);
+extern s32 Flow1_4(nbNegoProcessData_t *n);
+extern s32 Flow1_5(nbNegoProcessData_t *n);
+extern s32 Flow1_6(nbNegoProcessData_t *n);
+extern s32 Flow1_7(nbNegoProcessData_t *n);
+extern s32 Flow1_8(nbNegoProcessData_t *n);
+extern s32 Flow1_9(nbNegoProcessData_t *n);
+extern s32 Flow1_10(nbNegoProcessData_t *n);
+extern s32 Flow1_11(nbNegoProcessData_t *n);
+extern s32 Flow1_12(nbNegoProcessData_t *n);
+extern s32 Flow1_13(nbNegoProcessData_t *n);
+extern s32 Flow1_14(nbNegoProcessData_t *n);
+extern s32 Flow1_15(nbNegoProcessData_t *n);
+extern s32 Flow1_16(nbNegoProcessData_t *n);
+extern s32 Flow1_17(nbNegoProcessData_t *n);
+extern s32 Flow1_18(nbNegoProcessData_t *n);
+extern s32 Flow1_19(nbNegoProcessData_t *n);
+extern s32 Flow1_20(nbNegoProcessData_t *n);
+extern s32 Flow1_21(nbNegoProcessData_t *n);
+extern s32 Flow1_22(nbNegoProcessData_t *n);
+extern s32 Flow1_23(nbNegoProcessData_t *n);
+extern s32 Flow1_24(nbNegoProcessData_t *n);
+extern s32 Flow1_25(nbNegoProcessData_t *n);
+extern s32 Flow1_26(nbNegoProcessData_t *n);
+extern s32 Flow1_27(nbNegoProcessData_t *n);
+extern s32 Flow1_28(nbNegoProcessData_t *n);
+extern s32 Flow1_29(nbNegoProcessData_t *n);
+extern s32 Flow1_30(nbNegoProcessData_t *n);
+extern s32 Flow1_31(nbNegoProcessData_t *n);
+extern s32 Flow1_32(nbNegoProcessData_t *n);
+extern s32 Flow1_33(nbNegoProcessData_t *n);
+extern s32 Flow1_34(nbNegoProcessData_t *n);
+extern s32 Flow1_35(nbNegoProcessData_t *n);
+extern s32 Flow1_36(nbNegoProcessData_t *n);
+extern s32 Flow1_37(nbNegoProcessData_t *n);
+extern s32 Flow1_38(nbNegoProcessData_t *n);
+extern s32 Flow1_39(nbNegoProcessData_t *n);
+extern s32 Flow6_1(nbNegoProcessData_t *n);
+extern s32 Flow6_2(nbNegoProcessData_t *n);
+extern s32 Flow6_3(nbNegoProcessData_t *n);
+extern s32 Flow6_4(nbNegoProcessData_t *n);
+extern s32 Flow6_5(nbNegoProcessData_t *n);
+extern s32 Flow6_6(nbNegoProcessData_t *n);
+extern s32 Flow6_7(nbNegoProcessData_t *n);
+extern s32 Flow6_8(nbNegoProcessData_t *n);
+extern s32 Flow6_9(nbNegoProcessData_t *n);
+extern s32 Flow6_10(nbNegoProcessData_t *n);
+extern s32 Flow6_11(nbNegoProcessData_t *n);
+extern s32 Flow6_12(nbNegoProcessData_t *n);
+extern s32 Flow6_13(nbNegoProcessData_t *n);
+extern s32 Flow6_14(nbNegoProcessData_t *n);
+extern s32 Flow6_15(nbNegoProcessData_t *n);
+extern s32 Flow6_16(nbNegoProcessData_t *n);
+extern s32 Flow6_17(nbNegoProcessData_t *n);
+extern s32 Flow6_18(nbNegoProcessData_t *n);
+extern s32 Flow6_19(nbNegoProcessData_t *n);
+extern s32 Flow6_20(nbNegoProcessData_t *n);
+extern s32 Flow6_21(nbNegoProcessData_t *n);
+extern s32 Flow6_22(nbNegoProcessData_t *n);
+extern s32 Flow6_23(nbNegoProcessData_t *n);
+extern s32 Flow6_24(nbNegoProcessData_t *n);
+extern s32 Flow6_25(nbNegoProcessData_t *n);
+extern s32 Flow6_26(nbNegoProcessData_t *n);
+extern s32 Flow6_27(nbNegoProcessData_t *n);
+extern s32 Flow6_28(nbNegoProcessData_t *n);
+extern s32 Flow6_29(nbNegoProcessData_t *n);
+extern s32 Flow6_30(nbNegoProcessData_t *n);
+extern s32 Flow6_31(nbNegoProcessData_t *n);
+extern s32 Flow6_32(nbNegoProcessData_t *n);
+extern s32 Flow6_33(nbNegoProcessData_t *n);
+extern s32 Flow6_34(nbNegoProcessData_t *n);
+extern s32 Flow6_35(nbNegoProcessData_t *n);
+extern s32 Flow6_36(nbNegoProcessData_t *n);
+extern s32 Flow6_37(nbNegoProcessData_t *n);
+extern s32 Flow6_38(nbNegoProcessData_t *n);
+extern s32 Flow6_39(nbNegoProcessData_t *n);
+extern s32 Flow6_40(nbNegoProcessData_t *n);
+extern s32 Flow6_41(nbNegoProcessData_t *n);
+extern s32 Flow6_42(nbNegoProcessData_t *n);
+extern s32 Flow6_43(nbNegoProcessData_t *n);
+extern s32 Flow6_44(nbNegoProcessData_t *n);
+extern s32 Flow6_45(nbNegoProcessData_t *n);
+extern s32 Flow6_46(nbNegoProcessData_t *n);
+extern s32 Flow6_47(nbNegoProcessData_t *n);
+extern s32 Flow6_48(nbNegoProcessData_t *n);
+extern s32 Flow6_49(nbNegoProcessData_t *n);
+extern s32 Flow6_50(nbNegoProcessData_t *n);
+extern s32 Flow6_51(nbNegoProcessData_t *n);
+extern s32 Flow6_52(nbNegoProcessData_t *n);
+extern s32 Flow6_53(nbNegoProcessData_t *n);
+extern s32 Flow6_54(nbNegoProcessData_t *n);
+extern s32 Flow6_55(nbNegoProcessData_t *n);
+extern s32 Flow6_56(nbNegoProcessData_t *n);
+extern s32 Flow6_57(nbNegoProcessData_t *n);
+extern s32 Flow6_58(nbNegoProcessData_t *n);
+extern s32 Flow6_59(nbNegoProcessData_t *n);
+extern s32 Flow6_60(nbNegoProcessData_t *n);
+extern s32 Flow6_61(nbNegoProcessData_t *n);
+extern s32 Flow6_62(nbNegoProcessData_t *n);
+extern s32 Flow6_63(nbNegoProcessData_t *n);
+extern s32 Flow6_64(nbNegoProcessData_t *n);
+extern s32 Flow6_65(nbNegoProcessData_t *n);
+extern s32 Flow6_66(nbNegoProcessData_t *n);
+extern s32 Flow6_67(nbNegoProcessData_t *n);
+extern s32 Flow6_69(nbNegoProcessData_t *n);
+extern s32 Flow6_70(nbNegoProcessData_t *n);
+extern s32 Flow6_71(nbNegoProcessData_t *n);
+extern s32 Flow6_72(nbNegoProcessData_t *n);
+extern s32 Flow6_73(nbNegoProcessData_t *n);
+extern s32 Flow6_74(nbNegoProcessData_t *n);
+extern s32 Flow6_80(nbNegoProcessData_t *n);
+extern s32 Flow6_81(nbNegoProcessData_t *n);
+extern s32 Flow9_1(nbNegoProcessData_t *n);
+extern s32 Flow9_2(nbNegoProcessData_t *n);
+extern s32 Flow9_3(nbNegoProcessData_t *n);
+extern s32 Flow9_4(nbNegoProcessData_t *n);
+extern s32 Flow9_5(nbNegoProcessData_t *n);
+extern s32 Flow9_6(nbNegoProcessData_t *n);
+extern s32 Flow9_7(nbNegoProcessData_t *n);
+extern s32 Flow9_9(nbNegoProcessData_t *n);
+extern s32 Flow9_10(nbNegoProcessData_t *n);
+extern s32 Flow9_11(nbNegoProcessData_t *n);
+extern s32 Flow9_13(nbNegoProcessData_t *n);
+extern s32 Flow9_14(nbNegoProcessData_t *n);
+extern s32 Flow9_15(nbNegoProcessData_t *n);
+extern s32 Flow9_16(nbNegoProcessData_t *n);
+extern s32 Flow9_17(nbNegoProcessData_t *n);
+extern s32 Flow9_18(nbNegoProcessData_t *n);
+extern s32 Flow9_19(nbNegoProcessData_t *n);
+extern s32 Flow9_20(nbNegoProcessData_t *n);
+extern s32 Flow9_21(nbNegoProcessData_t *n);
+extern s32 Flow9_22(nbNegoProcessData_t *n);
+extern s32 Flow10_1(nbNegoProcessData_t *n);
+extern s32 Flow10_2(nbNegoProcessData_t *n);
+extern s32 Flow10_3(nbNegoProcessData_t *n);
+extern s32 Flow10_4(nbNegoProcessData_t *n);
+extern s32 Flow10_5(nbNegoProcessData_t *n);
+extern s32 Flow10_6(nbNegoProcessData_t *n);
+extern s32 Flow10_7(nbNegoProcessData_t *n);
+extern s32 Flow10_8(nbNegoProcessData_t *n);
+extern s32 Flow10_9(nbNegoProcessData_t *n);
+extern s32 Flow10_10(nbNegoProcessData_t *n);
+extern s32 Flow10_11(nbNegoProcessData_t *n);
+extern s32 Flow10_12(nbNegoProcessData_t *n);
+extern s32 Flow10_13(nbNegoProcessData_t *n);
+extern s32 Flow10_15(nbNegoProcessData_t *n);
+extern s32 Flow10_16(nbNegoProcessData_t *n);
+extern s32 Flow10_17(nbNegoProcessData_t *n);
+extern s32 Flow10_18(nbNegoProcessData_t *n);
+extern s32 Flow10_19(nbNegoProcessData_t *n);
+extern s32 Flow10_20(nbNegoProcessData_t *n);
+extern s32 Flow10_21(nbNegoProcessData_t *n);
+extern s32 Flow10_22(nbNegoProcessData_t *n);
+extern s32 Flow10_23(nbNegoProcessData_t *n);
+extern s32 Flow10_24(nbNegoProcessData_t *n);
+extern s32 Flow10_25(nbNegoProcessData_t *n);
+extern s32 Flow10_26(nbNegoProcessData_t *n);
+extern s32 Flow10_27(nbNegoProcessData_t *n);
+extern s32 Flow10_28(nbNegoProcessData_t *n);
+extern s32 Flow10_29(nbNegoProcessData_t *n);
+extern s32 Flow10_30(nbNegoProcessData_t *n);
+extern s32 Flow10_31(nbNegoProcessData_t *n);
+extern s32 Flow10_32(nbNegoProcessData_t *n);
+extern s32 Flow10_33(nbNegoProcessData_t *n);
+extern s32 Flow2_1(nbNegoProcessData_t *n);
+extern s32 Flow2_2(nbNegoProcessData_t *n);
+extern s32 Flow2_3(nbNegoProcessData_t *n);
+extern s32 Flow2_4(nbNegoProcessData_t *n);
+extern s32 Flow2_5(nbNegoProcessData_t *n);
+extern s32 Flow2_6(nbNegoProcessData_t *n);
+extern s32 Flow2_7(nbNegoProcessData_t *n);
+extern s32 Flow2_8(nbNegoProcessData_t *n);
+extern s32 Flow2_9(nbNegoProcessData_t *n);
+extern s32 Flow2_10(nbNegoProcessData_t *n);
+extern s32 Flow2_11(nbNegoProcessData_t *n);
+extern s32 Flow2_12(nbNegoProcessData_t *n);
+extern s32 Flow2_13(nbNegoProcessData_t *n);
+extern s32 Flow2_14(nbNegoProcessData_t *n);
+extern s32 Flow2_15(nbNegoProcessData_t *n);
+extern s32 Flow2_16(nbNegoProcessData_t *n);
+extern s32 Flow3_1(nbNegoProcessData_t *n);
+extern s32 Flow3_2(nbNegoProcessData_t *n);
+extern s32 Flow4_1(nbNegoProcessData_t *n);
+extern s32 Flow4_2(nbNegoProcessData_t *n);
+extern s32 Flow4_3(nbNegoProcessData_t *n);
+extern s32 Flow4_4(nbNegoProcessData_t *n);
+extern s32 Flow4_5(nbNegoProcessData_t *n);
+extern s32 Flow4_6(nbNegoProcessData_t *n);
+extern s32 Flow4_7(nbNegoProcessData_t *n);
+extern s32 Flow4_8(nbNegoProcessData_t *n);
+extern s32 Flow4_9(nbNegoProcessData_t *n);
+extern s32 Flow4_10(nbNegoProcessData_t *n);
+extern s32 Flow4_11(nbNegoProcessData_t *n);
+extern s32 Flow4_12(nbNegoProcessData_t *n);
+extern s32 Flow4_13(nbNegoProcessData_t *n);
+extern s32 Flow5_1(nbNegoProcessData_t *n);
+extern s32 Flow5_2(nbNegoProcessData_t *n);
+extern s32 Flow5_3(nbNegoProcessData_t *n);
+extern s32 Flow5_4(nbNegoProcessData_t *n);
+extern s32 Flow5_5(nbNegoProcessData_t *n);
+extern s32 Flow5_6(nbNegoProcessData_t *n);
+extern s32 Flow5_7(nbNegoProcessData_t *n);
+extern s32 Flow5_8(nbNegoProcessData_t *n);
+extern s32 Flow5_9(nbNegoProcessData_t *n);
+extern s32 Flow5_10(nbNegoProcessData_t *n);
+extern s32 Flow5_11(nbNegoProcessData_t *n);
+extern s32 Flow5_12(nbNegoProcessData_t *n);
+extern s32 Flow5_13(nbNegoProcessData_t *n);
+extern s32 Flow5_14(nbNegoProcessData_t *n);
+extern s32 Flow5_15(nbNegoProcessData_t *n);
+extern s32 Flow5_16(nbNegoProcessData_t *n);
+extern s32 Flow5_17(nbNegoProcessData_t *n);
+extern s32 Flow5_18(nbNegoProcessData_t *n);
+extern s32 Flow5_19(nbNegoProcessData_t *n);
+extern s32 Flow5_20(nbNegoProcessData_t *n);
+extern s32 Flow5_21(nbNegoProcessData_t *n);
+extern s32 Flow7_1(nbNegoProcessData_t *n);
+extern s32 Flow7_3(nbNegoProcessData_t *n);
+extern s32 Flow7_11(nbNegoProcessData_t *n);
+extern s32 Flow7_15(nbNegoProcessData_t *n);
+extern s32 Flow7_20(nbNegoProcessData_t *n);
+extern s32 Flow7_22(nbNegoProcessData_t *n);
+extern s32 Flow7_23(nbNegoProcessData_t *n);
+extern s32 Flow7_24(nbNegoProcessData_t *n);
+extern s32 Flow7_25(nbNegoProcessData_t *n);
+extern s32 Flow7_26(nbNegoProcessData_t *n);
+extern s32 Flow8_1(nbNegoProcessData_t *n);
+extern s32 Flow8_2(nbNegoProcessData_t *n);
+extern s32 Flow8_3(nbNegoProcessData_t *n);
+extern s32 Flow8_4(nbNegoProcessData_t *n);
+extern s32 Flow8_5(nbNegoProcessData_t *n);
+extern s32 Flow8_6(nbNegoProcessData_t *n);
+extern s32 Flow8_7(nbNegoProcessData_t *n);
+extern s32 Flow8_8(nbNegoProcessData_t *n);
+extern s32 Flow8_9(nbNegoProcessData_t *n);
+extern s32 Flow8_10(nbNegoProcessData_t *n);
+extern s32 Flow8_11(nbNegoProcessData_t *n);
+extern s32 Flow8_12(nbNegoProcessData_t *n);
+extern s32 Flow8_13(nbNegoProcessData_t *n);
+extern s32 Flow8_14(nbNegoProcessData_t *n);
+extern s32 Flow8_15(nbNegoProcessData_t *n);
+extern s32 Flow8_16(nbNegoProcessData_t *n);
+extern s32 Flow8_17(nbNegoProcessData_t *n);
+extern s32 Flow8_18(nbNegoProcessData_t *n);
+extern s32 Flow8_19(nbNegoProcessData_t *n);
+extern s32 Flow11_1(nbNegoProcessData_t *n);
+extern s32 Flow11_2(nbNegoProcessData_t *n);
+extern s32 Flow11_3(nbNegoProcessData_t *n);
+extern s32 Flow11_4(nbNegoProcessData_t *n);
+extern s32 Flow11_5(nbNegoProcessData_t *n);
+extern s32 Flow11_6(nbNegoProcessData_t *n);
+extern s32 Flow11_7(nbNegoProcessData_t *n);
+extern s32 Flow11_8(nbNegoProcessData_t *n);
+extern s32 Flow11_9(nbNegoProcessData_t *n);
+extern s32 Flow14_1(nbNegoProcessData_t *n);
+extern s32 Flow14_2(nbNegoProcessData_t *n);
+extern s32 Flow12_1(nbNegoProcessData_t *n);
+extern s32 Flow12_2(nbNegoProcessData_t *n);
+extern s32 Flow12_3(nbNegoProcessData_t *n);
+extern s32 Flow12_4(nbNegoProcessData_t *n);
+extern s32 Flow12_16(nbNegoProcessData_t *n);
+extern s32 Flow12_17(nbNegoProcessData_t *n);
+extern s32 Flow12_18(nbNegoProcessData_t *n);
+extern s32 Flow12_19(nbNegoProcessData_t *n);
+extern s32 Flow12_20(nbNegoProcessData_t *n);
+extern s32 Flow12_21(nbNegoProcessData_t *n);
+extern s32 Flow12_22(nbNegoProcessData_t *n);
+extern s32 Flow12_23(nbNegoProcessData_t *n);
+extern s32 Flow12_24(nbNegoProcessData_t *n);
+extern s32 Flow12_25(nbNegoProcessData_t *n);
+extern s32 Flow12_26(nbNegoProcessData_t *n);
+extern s32 Flow12_27(nbNegoProcessData_t *n);
+extern s32 Flow12_28(nbNegoProcessData_t *n);
+extern s32 Flow12_29(nbNegoProcessData_t *n);
+extern s32 Flow12_30(nbNegoProcessData_t *n);
+extern s32 Flow12_31(nbNegoProcessData_t *n);
+extern s32 Flow12_35(nbNegoProcessData_t *n);
+extern s32 Flow12_36(nbNegoProcessData_t *n);
+extern s32 Flow12_37(nbNegoProcessData_t *n);
+extern s32 Flow12_38(nbNegoProcessData_t *n);
+extern s32 Flow12_39(nbNegoProcessData_t *n);
+extern s32 Flow12_40(nbNegoProcessData_t *n);
+extern s32 Flow12_41(nbNegoProcessData_t *n);
+extern s32 Flow12_42(nbNegoProcessData_t *n);
+extern s32 Flow12_43(nbNegoProcessData_t *n);
+extern s32 Flow12_44(nbNegoProcessData_t *n);
+extern s32 Flow12_45(nbNegoProcessData_t *n);
+extern s32 Flow12_46(nbNegoProcessData_t *n);
+extern s32 Flow12_47(nbNegoProcessData_t *n);
+extern s32 Flow12_48(nbNegoProcessData_t *n);
+extern s32 Flow12_49(nbNegoProcessData_t *n);
+extern s32 Flow13_1(nbNegoProcessData_t *n);
+extern s32 Flow13_2(nbNegoProcessData_t *n);
+extern s32 Flow13_3(nbNegoProcessData_t *n);
+extern s32 Flow13_4(nbNegoProcessData_t *n);
+extern s32 Flow13_5(nbNegoProcessData_t *n);
+extern s32 Flow13_6(nbNegoProcessData_t *n);
+extern s32 Flow13_7(nbNegoProcessData_t *n);
+extern s32 Flow13_8(nbNegoProcessData_t *n);
+extern s32 Flow13_9(nbNegoProcessData_t *n);
+extern s32 Flow13_10(nbNegoProcessData_t *n);
+extern s32 Flow13_11(nbNegoProcessData_t *n);
+extern s32 Flow13_12(nbNegoProcessData_t *n);
+extern s32 Flow15_1(nbNegoProcessData_t *n);
+extern s32 Flow15_5(nbNegoProcessData_t *n);
+extern s32 Flow15_6(nbNegoProcessData_t *n);
+extern s32 Flow15_7(nbNegoProcessData_t *n);
+extern s32 Flow15_8(nbNegoProcessData_t *n);
+extern s32 Flow15_10(nbNegoProcessData_t *n);
+extern s32 Flow15_11(nbNegoProcessData_t *n);
+extern s32 Flow15_12(nbNegoProcessData_t *n);
+extern s32 Flow15_13(nbNegoProcessData_t *n);
+extern s32 Flow15_14(nbNegoProcessData_t *n);
+extern s32 Flow15_17(nbNegoProcessData_t *n);
+extern s32 Flow15_18(nbNegoProcessData_t *n);
+extern s32 Flow15_19(nbNegoProcessData_t *n);
+extern s32 Flow15_20(nbNegoProcessData_t *n);
+extern s32 Flow15_22(nbNegoProcessData_t *n);
+extern s32 Flow15_23(nbNegoProcessData_t *n);
+extern s32 Flow16_1(nbNegoProcessData_t *n);
+extern s32 Flow16_2(nbNegoProcessData_t *n);
+extern s32 Flow16_3(nbNegoProcessData_t *n);
+
+/* Callback selection uses the upper half of the packed negotiation ID.
+   Each phase dispatcher then uses the lower half, including the empty slots. */
+NegoFlowHandler nbNegoFlowTable[18] = {
+    0, nbNegoFlowOne, nbNegoFlowFullMoon, nbNegoFlowStock,
+    nbNegoFlowDouchara, nbNegoFlowInnen, nbNegoFlowTwo, nbNegoFlowQuestion,
+    nbNegoFlowFight, nbNegoFlowOk, nbNegoFlowNg, nbNegoFlowDrain,
+    nbNegoFlowMukan, nbNegoFlowSensei, nbNegoFlowBinjo, nbNegoFlowInoti,
+    nbNegoFlowKoketa, 0,
+};
+
+NegoFlowHandler D_004EF4B0[40] = {
+    0, 0, 0, Flow1_3,
+    Flow1_4, Flow1_5, Flow1_6, Flow1_7,
+    Flow1_8, Flow1_9, Flow1_10, Flow1_11,
+    Flow1_12, Flow1_13, Flow1_14, Flow1_15,
+    Flow1_16, Flow1_17, Flow1_18, Flow1_19,
+    Flow1_20, Flow1_21, Flow1_22, Flow1_23,
+    Flow1_24, Flow1_25, Flow1_26, Flow1_27,
+    Flow1_28, Flow1_29, Flow1_30, Flow1_31,
+    Flow1_32, Flow1_33, Flow1_34, Flow1_35,
+    Flow1_36, Flow1_37, Flow1_38, Flow1_39,
+};
+
+NegoFlowHandler D_004EF550[82] = {
+    0, Flow6_1, Flow6_2, Flow6_3,
+    Flow6_4, Flow6_5, Flow6_6, Flow6_7,
+    Flow6_8, Flow6_9, Flow6_10, Flow6_11,
+    Flow6_12, Flow6_13, Flow6_14, Flow6_15,
+    Flow6_16, Flow6_17, Flow6_18, Flow6_19,
+    Flow6_20, Flow6_21, Flow6_22, Flow6_23,
+    Flow6_24, Flow6_25, Flow6_26, Flow6_27,
+    Flow6_28, Flow6_29, Flow6_30, Flow6_31,
+    Flow6_32, Flow6_33, Flow6_34, Flow6_35,
+    Flow6_36, Flow6_37, Flow6_38, Flow6_39,
+    Flow6_40, Flow6_41, Flow6_42, Flow6_43,
+    Flow6_44, Flow6_45, Flow6_46, Flow6_47,
+    Flow6_48, Flow6_49, Flow6_50, Flow6_51,
+    Flow6_52, Flow6_53, Flow6_54, Flow6_55,
+    Flow6_56, Flow6_57, Flow6_58, Flow6_59,
+    Flow6_60, Flow6_61, Flow6_62, Flow6_63,
+    Flow6_64, Flow6_65, Flow6_66, Flow6_67,
+    0, Flow6_69, Flow6_70, Flow6_71,
+    Flow6_72, Flow6_73, Flow6_74, 0,
+    0, 0, 0, 0,
+    Flow6_80, Flow6_81,
+};
+
+NegoFlowHandler D_004EF698[24] = {
+    0, Flow9_1, Flow9_2, Flow9_3,
+    Flow9_4, Flow9_5, Flow9_6, Flow9_7,
+    0, Flow9_9, Flow9_10, Flow9_11,
+    0, Flow9_13, Flow9_14, Flow9_15,
+    Flow9_16, Flow9_17, Flow9_18, Flow9_19,
+    Flow9_20, Flow9_21, Flow9_22, 0,
+};
+
+NegoFlowHandler D_004EF6F8[34] = {
+    0, Flow10_1, Flow10_2, Flow10_3,
+    Flow10_4, Flow10_5, Flow10_6, Flow10_7,
+    Flow10_8, Flow10_9, Flow10_10, Flow10_11,
+    Flow10_12, Flow10_13, 0, Flow10_15,
+    Flow10_16, Flow10_17, Flow10_18, Flow10_19,
+    Flow10_20, Flow10_21, Flow10_22, Flow10_23,
+    Flow10_24, Flow10_25, Flow10_26, Flow10_27,
+    Flow10_28, Flow10_29, Flow10_30, Flow10_31,
+    Flow10_32, Flow10_33,
+};
+
+NegoFlowHandler D_004EF780[18] = {
+    0, Flow2_1, Flow2_2, Flow2_3,
+    Flow2_4, Flow2_5, Flow2_6, Flow2_7,
+    Flow2_8, Flow2_9, Flow2_10, Flow2_11,
+    Flow2_12, Flow2_13, Flow2_14, Flow2_15,
+    Flow2_16, 0,
+};
+
+NegoFlowHandler D_004EF7C8[4] = {
+    0, Flow3_1, Flow3_2, 0,
+};
+
+NegoFlowHandler D_004EF7D8[14] = {
+    0, Flow4_1, Flow4_2, Flow4_3,
+    Flow4_4, Flow4_5, Flow4_6, Flow4_7,
+    Flow4_8, Flow4_9, Flow4_10, Flow4_11,
+    Flow4_12, Flow4_13,
+};
+
+NegoFlowHandler D_004EF810[22] = {
+    0, Flow5_1, Flow5_2, Flow5_3,
+    Flow5_4, Flow5_5, Flow5_6, Flow5_7,
+    Flow5_8, Flow5_9, Flow5_10, Flow5_11,
+    Flow5_12, Flow5_13, Flow5_14, Flow5_15,
+    Flow5_16, Flow5_17, Flow5_18, Flow5_19,
+    Flow5_20, Flow5_21,
+};
+
+NegoFlowHandler D_004EF868[28] = {
+    0, Flow7_1, 0, Flow7_3,
+    0, 0, 0, 0,
+    0, 0, 0, Flow7_11,
+    0, 0, 0, Flow7_15,
+    0, 0, 0, 0,
+    Flow7_20, 0, Flow7_22, Flow7_23,
+    Flow7_24, Flow7_25, Flow7_26, 0,
+};
+
+NegoFlowHandler D_004EF8D8[20] = {
+    0, Flow8_1, Flow8_2, Flow8_3,
+    Flow8_4, Flow8_5, Flow8_6, Flow8_7,
+    Flow8_8, Flow8_9, Flow8_10, Flow8_11,
+    Flow8_12, Flow8_13, Flow8_14, Flow8_15,
+    Flow8_16, Flow8_17, Flow8_18, Flow8_19,
+};
+
+NegoFlowHandler D_004EF928[10] = {
+    0, Flow11_1, Flow11_2, Flow11_3,
+    Flow11_4, Flow11_5, Flow11_6, Flow11_7,
+    Flow11_8, Flow11_9,
+};
+
+NegoFlowHandler D_004EF950[4] = {
+    0, Flow14_1, Flow14_2, 0,
+};
+
+NegoFlowHandler D_004EF960[50] = {
+    0, Flow12_1, Flow12_2, Flow12_3,
+    Flow12_4, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    Flow12_16, Flow12_17, Flow12_18, Flow12_19,
+    Flow12_20, Flow12_21, Flow12_22, Flow12_23,
+    Flow12_24, Flow12_25, Flow12_26, Flow12_27,
+    Flow12_28, Flow12_29, Flow12_30, Flow12_31,
+    0, 0, 0, Flow12_35,
+    Flow12_36, Flow12_37, Flow12_38, Flow12_39,
+    Flow12_40, Flow12_41, Flow12_42, Flow12_43,
+    Flow12_44, Flow12_45, Flow12_46, Flow12_47,
+    Flow12_48, Flow12_49,
+};
+
+NegoFlowHandler D_004EFA28[14] = {
+    0, Flow13_1, Flow13_2, Flow13_3,
+    Flow13_4, Flow13_5, Flow13_6, Flow13_7,
+    Flow13_8, Flow13_9, Flow13_10, Flow13_11,
+    Flow13_12, 0,
+};
+
+NegoFlowHandler D_004EFA60[24] = {
+    0, Flow15_1, 0, 0,
+    0, Flow15_5, Flow15_6, Flow15_7,
+    Flow15_8, 0, Flow15_10, Flow15_11,
+    Flow15_12, Flow15_13, Flow15_14, 0,
+    0, Flow15_17, Flow15_18, Flow15_19,
+    Flow15_20, 0, Flow15_22, Flow15_23,
+};
+
+NegoFlowHandler D_004EFAC0[4] = {
+    0, Flow16_1, Flow16_2, Flow16_3,
+};

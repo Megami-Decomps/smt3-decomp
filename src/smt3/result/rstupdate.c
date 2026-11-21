@@ -150,10 +150,6 @@ void rstAddAsignParam(void)
     func_00224230(startPos->pCurrentStock);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern s32 cmpGetPressedButton(s32 mask);
 extern s8 cmpGetParamGaugeColor(s8 index);
 extern s32 cmbGetParamBase(datUnitWork_t *unit, s32 index);
@@ -174,7 +170,7 @@ void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit)
     s32 parameter = cmpGetParamGaugeColor(cursor);
     rstData_t *work;
 
-    values[1] = 0; /* Retail leaves this unset; the cursor table never selects it. */
+    /* The five-row parameter cursor excludes compatibility parameter slot 1. */
     for (i = 0; i < 6; i++) {
         if (i != 1) {
             values[i] = cmbGetParamBase(unit, i) + (s8)startPos->unk_129F[i];
@@ -197,16 +193,23 @@ void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit)
     switch (button) {
     case 1:
     case 0x80:
-        if (values[parameter] >= 40) {
+        if (values[parameter] < 40) {
+            if ((s8)startPos->AsignParam > 0) {
+                startPos->unk_129F[parameter]++;
+                {
+                    s32 next = (s32)startPos->AsignParam - 1;
+                    /* Keep the actual subtraction at word width before the native byte store. */
+                    FAKEMATCH_ASM_LIVE(next);
+                    startPos->AsignParam = next;
+                }
+            }
+        } else {
             button = 0x8000;
-        } else if ((s8)startPos->AsignParam > 0) {
-            startPos->unk_129F[parameter]++;
-            startPos->AsignParam--;
         }
         break;
     case 0x40:
         if ((s8)startPos->unk_129F[parameter] > 0) {
-            startPos->unk_129F[parameter]--;
+            startPos->unk_129F[parameter] = (s8)startPos->unk_129F[parameter] - 1;
             startPos->AsignParam++;
         }
         break;
@@ -217,21 +220,46 @@ void rstUpdateSeqAsignPlayerParam(datUnitWork_t *unit)
         cmpMoveCursor(&startPos->paramCursor.cursor, -1);
         break;
     case 0x20:
-        cmpMoveCursor(&startPos->paramCursor.cursor, 1);
+        /* Keep this cursor pointer load in the right-move arm. */
+        work = startPos;
+        FAKEMATCH_ASM_LIVE(work);
+        {
+            s8 dir = 1;
+            /* The real direction operand stays live before address setup. */
+            FAKEMATCH_ASM_READ(dir);
+            cmpMoveCursor(&work->paramCursor.cursor, dir);
+        }
         break;
     }
-    rstSetMaxHpMp(0, unit);
+    {
+        /* Local operand placement preserves the shared HP/MP call and its
+         * path-specific setup. These constraints emit no instructions. */
+        FAKEMATCH_ASM_REG(s8, mode, "$4");
+        datUnitWork_t *arg;
+        arg = unit;
+        mode = 0;
+        FAKEMATCH_ASM_READ(arg);
+        rstSetMaxHpMp(mode, arg);
+    }
     i = cmpChkPadPressUpDown();
     work = startPos;
     if (i == 0) {
+        /* The idle cursor uses the saved work pointer; reacquire it after the call. */
+        FAKEMATCH_ASM_LIVE(work);
         cmpMoveCursor(&work->paramCursor.cursor, 0);
         work = startPos;
     }
-    cmpPlayCursorSE((u16)cmpDisablePadBitStop(&work->paramCursor, button, 0x30));
+    {
+        s32 selected;
+
+        /* Keep the actual pad mask before the final cursor address setup. */
+        selected = button;
+        FAKEMATCH_ASM_READ(selected);
+
+        FAKEMATCH_ASM_LIVE(work);
+        cmpPlayCursorSE((u16)cmpDisablePadBitStop(&work->paramCursor, selected, 0x30));
+    }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqAsignPlayerParam);
-#endif
 
 void rstUpdateSeqPlayerLevelUpOnly(void)
 {

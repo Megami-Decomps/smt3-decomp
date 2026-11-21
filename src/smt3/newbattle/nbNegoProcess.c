@@ -319,10 +319,6 @@ extern s32 nbGetQuestionType(datUnitWork_t *w);
 
 extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-extern u8 datNegoReqItemListA[];
-
-extern u8 datNegoReqItemListB[];
-
 extern u8 nbKureItemTableA[];
 
 extern u8 nbKureItemTableB[];
@@ -582,13 +578,13 @@ s32 nbSelectKureItemA(s32 lv_idx)
     s32 i;
 
     r = dds3GetRandIntA(0, 0x64);
-    p = &datNegoReqItemListA[lv_idx * 8];
+    p = &nbKureItemTableA[lv_idx * 8];
     sum = 0;
-    for (i = 0; i < 4; i++, p += 2) {
-        if (r < sum + *p) {
+    for (i = 0; i < 4; i++) {
+        if (r < sum + p[i * 2 + 1]) {
             return i;
         }
-        sum += *p;
+        sum += p[i * 2 + 1];
     }
     return 0;
 }
@@ -615,13 +611,13 @@ s32 nbSelectKureItemB(s32 lv_idx)
     s32 i;
 
     r = dds3GetRandIntA(0, 0x64);
-    p = &datNegoReqItemListB[lv_idx * 6];
+    p = &nbKureItemTableB[lv_idx * 6];
     sum = 0;
-    for (i = 0; i < 3; i++, p += 2) {
-        if (r < sum + *p) {
+    for (i = 0; i < 3; i++) {
+        if (r < sum + p[i * 2 + 1]) {
             return i;
         }
-        sum += *p;
+        sum += p[i * 2 + 1];
     }
     return 0;
 }

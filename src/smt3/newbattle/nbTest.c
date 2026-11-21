@@ -1,4 +1,5 @@
 #include "common.h"
+#include "nbBattleTestRoster.h"
 
 #ifdef NON_MATCHING
 extern void evtBitOff(s32 no);
@@ -220,17 +221,17 @@ extern u8 nbTest8DevilSkills[];
 
 extern u8 nbTest8PassiveSkills[];
 
-extern u8 test_devilIds[];
+extern s32 test_devilIds[4];
 
-extern u8 test_devilSkills[];
+extern nbTestSkillId_t test_devilSkills[90];
 
-extern u8 test2_devilIds[];
+extern s32 test2_devilIds[4];
 
-extern u8 test2_devilSkills[];
+extern nbTestSkillId_t test2_devilSkills[120];
 
 extern datUnitWork_t test2_pdummy;
 
-extern u16 test2_dvllist[];
+extern nbTestSkillId_t test2_dvllist[4];
 
 extern s32 test_phearts;
 
@@ -248,7 +249,7 @@ extern void effBTLSetFieldColor(u32 color);
 
 extern datUnitWork_t test_skilllist;
 
-extern u16 test_pskill[];
+extern nbTestSkillId_t test_pskill[14];
 
 extern void SetBossDummy(void);
 
@@ -372,11 +373,6 @@ void SetBossDummy(void)
         }
     }
 }
-
-typedef union {
-    s32 value;
-    struct { u16 low; u16 high; };
-} nbTestSkillId_t;
 
 extern void datSetDevilWork(s32 id, datUnitWork_t *work);
 extern void *memset(void *dest, s32 value, size_t size);

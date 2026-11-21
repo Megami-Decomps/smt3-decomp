@@ -138,7 +138,7 @@ extern void p2sdFadeOutBgm(u32 arg);
 
 extern void p2sdStopBGM(u32 arg);
 
-extern char fldElvFloorLabels[];
+extern char fldElvFloorLabels[13][4];
 
 extern void FromRotation(f32 aAngle);
 
@@ -370,9 +370,10 @@ void fldElvGetFloorDigits(s32 x, s32 y, s32 floor)
 
     frSetFontDrawOT(0x48);
     if (floor > 1000) {
-        char *roof = fldElvFloorLabels;
+        /* Retain the native base address followed by the roof slot offset. */
+        char *roof = (char *)&fldElvFloorLabels;
 
-        fldKanjiDraw(x, y / 2, -0x80, roof + 0x30);
+        fldKanjiDraw(x, y / 2, -0x80, roof + 12 * sizeof(fldElvFloorLabels[0]));
         return;
     }
     i = 0;

@@ -9,6 +9,7 @@
 #include "kernel.h"
 #include "interface.h"
 #include "dds3Difficulty.h"
+#include "fclShopPriceData.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
@@ -127,7 +128,7 @@ void fclShopInitItemList(void *list)
 
 extern const char shpTexLoadMsg[];
 
-extern char *shpTmxPathTable[];
+extern const char *shpTmxPathTable[];
 extern s32 fclLoadTexture(char *pFileName);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
 
@@ -137,7 +138,7 @@ void fclShopTexLoad(void *workp)
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {
-        work->texHandle[i] = fclLoadTexture(shpTmxPathTable[i]);
+        work->texHandle[i] = fclLoadTexture((char *)shpTmxPathTable[i]);
     }
     fclSetPanelTex((u8 *)work + 0x23DC, 0, 0, 0x100, 0x80, work->texHandle[1]);
     printf(shpTexLoadMsg);
@@ -200,7 +201,7 @@ extern void fclInitPanel(void *panel, s32 x, s32 y, s32 z, s32 width,
 extern void evtDisableMoonCalc(void);
 extern void p2sdPlayBGM(s32 id);
 extern s32 fclSetWorkValue(s8 index, s32 value);
-extern char shpCommandTable[];
+extern char *shpCommandTable[4];
 
 cmbWork_t *fclAllocShopWork(s8 type, void *parent)
 {
@@ -355,21 +356,19 @@ s32 id;
     return shpUnlockTable[id].state[on];
 }
 
-extern u16 D_0032F682[];
-
 s32 shpCountUnlockedItems(s32 itemType)
 {
     s32 count = 0;
-    u16 *row = &D_0032F682[(u8)shpItemIsUnlocked(itemType) * 65];
+    shpPriceItem_t *row = shpPriceTable[(u8)shpItemIsUnlocked(itemType)].items;
     s32 i;
 
     for (i = 0; i < 32; i++)
     {
-        if (*row != 0)
+        if (row->id != 0)
         {
             count++;
         }
-        row += 2;
+        row++;
     }
     return count;
 }
@@ -380,16 +379,16 @@ extern s32 fclSetWorkValue(s8 index, s32 value);
 
 void shpFindItemSlot(shpUpdateWork_t *work)
 {
-    u16 *row = &D_0032F682[(u8)shpItemIsUnlocked(work->itemType) * 65];
+    shpPriceItem_t *row = shpPriceTable[(u8)shpItemIsUnlocked(work->itemType)].items;
     s32 i;
 
     work->itemCount = 0;
     work->hasMissingHeart = 0;
     for (i = 0; i < shpCountUnlockedItems(work->itemType); i++) {
-        u16 item = *row;
+        u16 item = row->id;
         s32 slot;
 
-        row += 2;
+        row++;
         slot = datGetItemSlotIndex(item);
         if (slot != 0) {
             if (cmbChkGetHearts((s8)slot) != 0) {
@@ -410,18 +409,6 @@ typedef struct
 } shpItemTableEntry_t;
 
 extern shpItemTableEntry_t datItemTable[];
-
-typedef struct
-{
-    /* 0x00 */ u16 base;
-    /* 0x02 */ struct
-    {
-        u16 id;
-        u16 price;
-    } items[32];
-} shpPriceRow_t;
-
-extern shpPriceRow_t shpPriceTable[];
 
 s32 shpGetSellPrice(s32 index, s8 sell)
 {
