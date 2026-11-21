@@ -119,6 +119,11 @@ datBossPress = 0x003FA430; // size:0x280
 // the word there is 0x00010000, i.e. (port 0, slot 0) and (port 1, slot 0).
 sdfPadPortSlotPairs = 0x005518D0; // type:u8 size:0x4
 
+// Test-message preview: signed vertices, unsigned UV and RGBA records.
+D_00326BD8 = 0x00326BD8; // type:u32 size:0x10
+D_00326BE8 = 0x00326BE8; // type:u32 size:0x10
+D_00326BF8 = 0x00326BF8; // type:u32 size:0x10
+
 // The battle camera object the nbCamera* entry points operate on;
 // nbCameraClearState zeroes +0x48..+0x54 of it. Named in the IDB.
 pNbCamera = 0x00320E40; // size:0x5C
@@ -1356,6 +1361,7 @@ itfMesMngVarText = 0x0056C880; // type:u8 size:0x40
 pbDebugFovWork = 0x0056C8C0; // size:0x10
 pbDebugPanel2Pos = 0x0056C8D0; // type:u16 size:0x8
 pbDebugPanel3X = 0x0056C8E0; // type:u16 size:0x8
+D_00326C50 = 0x00326C50; // type:u32 size:0x10
 mdlDebugScaleWork = 0x0056CE08; // type:u32 size:0xC
 softenBiasWork = 0x0056CE18; // type:u32 size:0x38
 cmbActionTargetModel = 0x00574990; // type:u32 size:0xC
@@ -12519,7 +12525,7 @@ slFormattingMsg = 0x005285B8;
 slDoNotRemoveMsg0 = 0x005285F8;
 slDoNotRemoveMsg1 = 0x00528608;
 slSaveDoneMsg = 0x00528738;
-slFormatDoneMsg = 0x00528748;
+slFormatDoneMsg = 0x00528748; // size:0x12
 slLoadDoneMsg = 0x00528728;
 slSelectSaveMsg = 0x005287D8;
 slSelectLoadMsg = 0x005287C0;

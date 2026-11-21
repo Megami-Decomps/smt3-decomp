@@ -27,5 +27,6 @@
   "interface/itfGaugeHighlightVertexData": "itfGaugeHighlightVertexIndex",
   "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex",
   "effect/effBTLCutCameraStateData": "effBTLCutCameraState",
-  "mc/slWarningStartPrompts": "slNoSpaceStartMsg6"
+  "mc/slWarningStartPrompts": "slNoSpaceStartMsg6",
+  "mc/slFormatDoneMessage": "slFormatDoneMsg"
 }

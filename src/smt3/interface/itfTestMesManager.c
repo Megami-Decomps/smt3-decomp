@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itfTestMsgSpriteData.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -6,6 +7,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 #include "pbDebugColorRows.h"
+#include "pbDebugColorState.h"
 
 
 typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
@@ -21,18 +23,7 @@ typedef struct
     u8 unk08[8];
 } pbPanelEditor_t;
 
-typedef struct { u8 value; u8 unk01[3]; } pbColorByte_t;
-
-typedef union
-{
-    struct { s32 red, green, blue, alpha; };
-    s32 channels[4];
-    pbColorByte_t channelBytes[4];
-} pbColor_t;
-
 extern pbPanelEditor_t pbDebugPanel2Pos, pbDebugPanel3X;
-
-extern pbColor_t D_00326C50;
 
 extern sdf3DScreenParam_t dds3ScreenParam;
 
@@ -100,12 +91,6 @@ typedef struct
 
 extern char *D_00326BC8[];
 
-extern s32 D_00326BD8[4];
-
-extern s32 D_00326BE8[4];
-
-extern s32 D_00326BF8[4];
-
 extern u8 scrEmbedded_3267A8[];
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -141,7 +126,7 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
-extern void itfMiscDrawSpritePrim(s32 *pos, s32 *uv, s32 *color, s32 z, void *texhandle, s32 context,
+extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 z, sdfTexHandle_t *texhandle, s32 context,
                                   sdfDrawTag_t *pdrawtag);
 extern sdfVector4_t aViewEye, aViewTarget;
 
@@ -193,7 +178,7 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *id)
         tag = sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tag);
         itfMiscDrawAlphaPrim(tag, 0, 0);
-        itfMiscDrawSpritePrim(D_00326BD8, D_00326BE8, D_00326BF8, 0xFFF, testMsgTexture, 0, tag);
+        itfMiscDrawSpritePrim(D_00326BD8, &D_00326BE8, &D_00326BF8, 0xFFF, testMsgTexture, 0, tag);
         ot = &sdfGrOtTable[71];
         ((sdfGrOtRegFunc_t)ot->regFunc)(ot, tag);
         return 0;
