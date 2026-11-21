@@ -1269,6 +1269,7 @@ segments:
       - [0x42D250, .data, sdk/libcMallocMetrics]
       - [0x42D288, .data, sdk/libcMallocLockState]
       - [0x42D290, data, data_0052C290]
+      - [0x42D2A0, .data, sdk/libkernlPlatformState]
       - [0x42D2B8, .data, sdk/libkernlSifStartupState]
       - [0x42D2C0, .data, sdk/libkernlFsRequestSemas]
       - [0x42D340, .data, sdk/libkernlIoStartup]
