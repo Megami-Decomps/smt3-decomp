@@ -37,3 +37,4 @@ rom:0x1F6D14 reloc:MIPS_32 symbol:D_002F5C90 // Off-screen slot 1 targets the se
 rom:0x1F6D18 reloc:MIPS_32 symbol:D_002F5CD0 // Off-screen slot 2 targets the third writable render light.
 rom:0x21DDB8 reloc:MIPS_32 symbol:D_00533B20 // Battle effects submenu title.
 rom:0x220900 reloc:MIPS_NONE symbol:none // ShockWave02 poly packed edge color, not a pointer.
+rom:0x21DC80 reloc:MIPS_32 symbol:D_00533A40

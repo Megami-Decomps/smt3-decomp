@@ -20,3 +20,12 @@ the original sixteen-byte vector alignment. The spawner writes the
 endpoints and the constructor copies the complete record. Its last word
 is a packed edge color, not a data-bank pointer. The neighboring raw
 words are not part of the record.
+
+## EFFECT editor items
+
+The existing EFFECT submenu uses 13 native `effDebugMenuItem_t` rows at
+`0x0031CC80`: four submenu links, six byte toggles, and three separators.
+The first row's label points to `BED SELECT`. Its pointer bytes resemble
+text to the reference splitter, so that one word uses a named relocation.
+The submenu descriptor, its title, and the preceding raw descriptor stay
+with their existing owners.
