@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pbMenuDispatch.h"
 #include "pbRecord.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -6,8 +7,6 @@
 #include "model.h"
 #include "draw3d.h"
 #include "ps2asm.h"
-
-typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -165,10 +164,10 @@ void pbMakeMapPath(pbProcHandle_t *parent)
     }
 }
 
-void func_001D4E08(void) {
+void func_001D4E08(pbProcHandle_t *panel) {
 }
 
-void func_001D4E10(void) {
+void func_001D4E10(pbProcHandle_t *panel) {
 }
 
 void exitPB(pbProcHandle_t *p) {
@@ -195,7 +194,7 @@ void func_001D4EB0(pbProcHandle_t *panel) {
 }
 
 
-void func_001D4F08(void) {
+void func_001D4F08(pbProcHandle_t *panel) {
     pbPreviousRecord();
 }
 
@@ -226,8 +225,6 @@ extern void DrwSprite2D(s32 x, s32 y, s32 width, s32 height,
 extern u8 pbMenuItemCount[2];
 extern s32 D_0054F5D4;
 extern u8 D_00551EC1;
-extern s32 (*pbMenuCheckTable[][8])(pbProcHandle_t *panel);
-extern void (*pbMenuActionTable[][8])(pbProcHandle_t *panel);
 
 const char pbMapPathPb1Format[40] = "/pb/mapdata/data/pb1/pbMap%02d.map";
 

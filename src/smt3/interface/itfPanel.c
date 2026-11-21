@@ -1,5 +1,6 @@
 #include "interface.h"
 #include "itf_panel_draw_color.h"
+#include "itf_panel_meswin_data.h"
 
 typedef sdfIVector2_t itfDrawVertex_t;
 typedef struct
@@ -70,8 +71,6 @@ void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
-extern s32 itfPanelMesWinRowOffset[4];
-
 void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_ROW_COUNT 2
@@ -85,10 +84,6 @@ void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 #define ITF_PANEL_CORNER_STRIP_WIDTH 0x5A0
 
 void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
-
-#include "itf_color_vector.h"
-
-extern itfColorVector_t itfPanelMesWinColorRatio[];
 
 extern itfColorVector_t itfPanelSelWinColorRatio[];
 
@@ -204,8 +199,6 @@ static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
-extern s32 itfPanelPayloadSize[];
-
 /* Allocate the common record and the kind's payload; kinds 6 to 8 take the
  * caller's value as the first payload word. */
 itfpanel_t *itfPnlRegist2(s32 type, saddr_t texhandle) {

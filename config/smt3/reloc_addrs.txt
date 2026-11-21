@@ -11,3 +11,7 @@ rom:0x21E660 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge
 rom:0x21E6C0 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
 rom:0x21E720 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
 rom:0x21E780 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x2208A0 reloc:MIPS_NONE symbol:none // ShockWave01 sphere: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x227518 reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].red: fixed-point 0x000FFFFF, not a pointer
+rom:0x22751C reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].green: fixed-point 0x000FFFFF, not a pointer
+rom:0x227520 reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].blue: fixed-point 0x000FFFFF, not a pointer

@@ -182,5 +182,53 @@
     "section": ".data",
     "offset": 26,
     "owner_size": 1848
+  },
+  {
+    "name": "D_004EFF6C",
+    "owner": "nbPanelPartXYZ",
+    "unit": "newbattle/nbPanelPartRectangles",
+    "section": ".data",
+    "offset": 220,
+    "owner_size": 360
+  },
+  {
+    "name": "D_004F01B4",
+    "owner": "D_004F01A0",
+    "unit": "newbattle/nbPanelHighlightRectangles",
+    "section": ".data",
+    "offset": 20,
+    "owner_size": 40
+  },
+  {
+    "name": "nbPanelPTSpriteXYZ",
+    "owner": "nbPressGaugeTable2",
+    "unit": "newbattle/nbPanelPressCounterRectangles",
+    "section": ".data",
+    "offset": 20,
+    "owner_size": 40
+  },
+  {
+    "name": "D_004F0034",
+    "owner": "nbPressGaugeTable",
+    "unit": "newbattle/nbPanelPressGaugeRectangles",
+    "section": ".data",
+    "offset": 20,
+    "owner_size": 80
+  },
+  {
+    "name": "D_004F0048",
+    "owner": "nbPressGaugeTable",
+    "unit": "newbattle/nbPanelPressGaugeRectangles",
+    "section": ".data",
+    "offset": 40,
+    "owner_size": 80
+  },
+  {
+    "name": "D_004F0240",
+    "owner": "nbStockSelectTable",
+    "unit": "newbattle/nbPanelStockRectangles",
+    "section": ".data",
+    "offset": 120,
+    "owner_size": 160
   }
 ]

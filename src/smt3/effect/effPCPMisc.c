@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effPCPEyeThunderData.h"
+#include "effThunderSphereData.h"
 #include "effPCPData.h"
 #include "fpu.h"
 #include "ps2asm.h"
@@ -174,7 +175,6 @@ typedef struct effBTL_t effBTL_t;
 typedef struct effPCPRadiateBED_tag effPCPRadiateBED_tag;
 typedef struct effPCPHelperBEDParam_t effPCPHelperBEDParam_t;
 typedef struct effEveBEDParams_t effEveBEDParams_t;
-typedef struct effPCPThunderSpherePolyParam_t effPCPThunderSpherePolyParam_t;
 typedef struct effPCPThunderSpherePolyPart_t effPCPThunderSpherePolyPart_t;
 typedef struct parCell_t parCell_t;
 typedef struct parSystem_t parSystem_t;
@@ -423,7 +423,6 @@ struct sdfGrOt_t {
 
 extern struct sdfGrOt_t *sdfModelOtTable[4];
 
-extern u8 effPCPZiodin01Vec[];
 
 extern s32 BlinkMultiBlurCount;
 
@@ -1134,31 +1133,6 @@ struct effEveBEDParams_t {
 };
 
 /* Alpha-system parameters supply three packed words to the particle system. */
-/* The sphere-poly parameters, 0x4C bytes the constructors copy whole. The tail
- * is the thunder family's six fields: a width and a colour for the centre, the
- * border and the edge. The decomp read it twice, once for the widths and once
- * for the colours, which is why the two views agreed on everything before. */
-struct effPCPThunderSpherePolyParam_t {
-    f32 origin[4];
-    u16 systemParam;
-    u8 pad12[2];
-    u32 cellCount;
-    u8 pad18[4];
-    f32 width;
-    f32 height;
-    f32 rotationScale;
-    u32 startDelayRange;
-    u32 activeFrameRange;
-    u16 perCell;
-    u8 pad32[2];
-    f32 width_center; /* 0x34: nothing reads it */
-    u32 color_center;
-    f32 width_border;
-    u32 color_border;
-    f32 width_edge;
-    u32 color_edge;
-};
-
 /* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
 struct effPCPThunderSpherePolyPart_t {
     u32 wait;
@@ -2214,11 +2188,11 @@ void effEveBEDCutDelete(effEveBEDCutHandle_t *hEveBEDCut);
 
 void effEveBEDDelete(struct effBTL_t *hEveBED);
 
-extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
+extern effPCPThunderSpherePolyParam_t effPCP_ShockWave01_ThunderSpherePoly_Param;
 
 extern effPCP_ThunderPolyParam_t effPCPMZiodin01ThunderParam[];
 
-extern u8 effPCP_Houden01_ThunderSpherePoly_Param[];
+extern effPCPThunderSpherePolyParam_t effPCP_Houden01_ThunderSpherePoly_Param;
 
 extern s32 effPCPBlurScreenOffset(f32 value);
 
@@ -2297,13 +2271,13 @@ effPCPBreath_tag *effPCPBreathCreate(void *params, effPCPAgiraoFirePartList_t *h
 
 void dds3EffectPartialMultiBlurDelete(dds3Effect_PartialMultiBlur_t *hPartialMultiBlur);
 
-extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
+extern effPCPThunderSpherePolyParam_t effPCP_Megidoraon01_ThunderSpherePoly_Param;
 
 void dds3EffectSetRGBA(effHandle_t *pData, u32 abgr);
 
 extern effPCP_ThunderPolyParam_t effPCPZiodin01ThunderParam[];
 
-extern u8 effPCP_Megidora01_ThunderSpherePoly_Param[];
+extern effPCPThunderSpherePolyParam_t effPCP_Megidora01_ThunderSpherePoly_Param;
 
 extern effPCP_ThunderPolyParam_t effPCPMZiodin02ThunderParam[];
 
@@ -3247,7 +3221,7 @@ void effPCPZiodin01Init(effPCPZiodin01_tag *pPCPZiodin01) {
         SDF_VU0_LOADVECTOR(&dir);
         SDF_VU0_LOADVECTOR_B(&scale);
         SDF_VU0_MULVECTOR();
-        SDF_VU0_LOADVECTOR_B(effPCPZiodin01Vec);
+        SDF_VU0_LOADVECTOR_B(effPCPZiodin01ThunderParam[0].end);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR(effPCPZiodin01ThunderParam);
         if (scale.x < 250.0f) {
@@ -3729,7 +3703,7 @@ void effPCPMZiodin02SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
 void effPCPShockWave01Init(effPCPShockWave01_tag *pPCPShockWave01) {
     effPCPThunderSpherePoly_t *handle;
 
-    handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_ShockWave01_ThunderSpherePoly_Param);
+    handle = effPCPThunderSpherePolyCreate(&effPCP_ShockWave01_ThunderSpherePoly_Param);
     pPCPShockWave01->frame = 0;
     pPCPShockWave01->pThunderPoly = handle;
 }
@@ -3889,7 +3863,7 @@ void effPCPShockWave02SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
 void effPCPHouden01Init(effPCPShockWave01_tag *pPCPHouden01) {
     effPCPThunderSpherePoly_t *handle;
 
-    handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Houden01_ThunderSpherePoly_Param);
+    handle = effPCPThunderSpherePolyCreate(&effPCP_Houden01_ThunderSpherePoly_Param);
     pPCPHouden01->frame = 0;
     pPCPHouden01->pThunderPoly = handle;
 }
@@ -4593,7 +4567,7 @@ void effPCPRippleBlurExpSetColor(effPCPDistortionBlurExp_tag *hData, u32 abgr) {
 void effPCPMegidora01Init(effPCPShockWave01_tag *pPCPMegidora01) {
     effPCPThunderSpherePoly_t *handle;
 
-    handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Megidora01_ThunderSpherePoly_Param);
+    handle = effPCPThunderSpherePolyCreate(&effPCP_Megidora01_ThunderSpherePoly_Param);
     pPCPMegidora01->frame = 0;
     pPCPMegidora01->pThunderPoly = handle;
 }
@@ -4669,7 +4643,7 @@ void effPCPMegidora01SetColor(effPCPShockWave01_tag *hData, u32 abgr) {
 void effPCPMegidoraon01Init(effPCPShockWave01_tag *pPCPMegidoraon01) {
     effPCPThunderSpherePoly_t *handle;
 
-    handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Megidoraon01_ThunderSpherePoly_Param);
+    handle = effPCPThunderSpherePolyCreate(&effPCP_Megidoraon01_ThunderSpherePoly_Param);
     pPCPMegidoraon01->frame = 0;
     pPCPMegidoraon01->pThunderPoly = handle;
 }

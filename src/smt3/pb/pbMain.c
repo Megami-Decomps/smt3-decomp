@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pbMenuDispatch.h"
 #include "pbRecord.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -7,7 +8,6 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -432,15 +432,16 @@ s32 pbLoadSystemDataDone(s32 handle, s32 status) {
     return 0;
 }
 
-s32 func_001D4BC0(void) {
+s32 func_001D4BC0(pbProcHandle_t *panel) {
     return 1;
 }
 
-s32 func_001D4BC8(void) {
+s32 func_001D4BC8(pbProcHandle_t *panel) {
     return pbMapIsValid() == 0;
 }
 
-s8 func_001D4BE8(void) {
+/* The menu consumes a full-width result; the record check returns 0 or 1. */
+s32 func_001D4BE8(pbProcHandle_t *panel) {
     s8 ret = pbCheckPreviousRecord();
     return ret;
 }
