@@ -1020,15 +1020,12 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
     return 0;
 }
 
-/* NON_MATCHING: 32 of 153 words differ (first at +0x8). */
-#ifdef NON_MATCHING
 s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
 {
     sdfVector4_t dir;
     sdfVector4_t pos;
     s32 i;
     fldResPut_t *info;
-    f32 *probe;
     f32 length;
     f32 dot;
 
@@ -1041,8 +1038,8 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
         info = (fldResPut_t *)gEvnRng[i]->data;
         switch (info->data.shape->kind) {
         case 0:
-            probe = &pos.x;
-            *(u128 *)&pos = *(u128 *)put->workdata;
+            /* Copy all four lanes, including W, from the field hit work data. */
+            SDF_VU0_COPYVECTOR(&pos, put->workdata);
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
             SDF_VU0_STORE_ROW2(&dir);
@@ -1051,7 +1048,7 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
             SDF_VU0_NORMALIZE();
             SDF_VU0_SCALEVECTOR(-1.0f);
             SDF_VU0_COPYVECTOR_A_TO_C();
-            SDF_VU0_LOADVECTOR_RWADDR(probe);
+            SDF_VU0_LOADVECTOR(&pos);
             SDF_VU0_LOADVECTOR_B(&unit->poseset->pos);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_STOREVECTOR(&dir);
@@ -1083,9 +1080,6 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkDir2);
-#endif
 
 s32 fldEveHitTestRect(f32 *pos, s32 idx) {
     f32 probe[3] QWORD_ALIGNED;
