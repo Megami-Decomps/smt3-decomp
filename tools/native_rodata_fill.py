@@ -34,7 +34,7 @@ class Case:
     end: int
     final: int
     label: str
-    value: str
+    value: str | None
     align: int
     asm_literal: str | None = None
 
@@ -99,7 +99,32 @@ CASES={
                       0x43D5A8,'D_0053C5A8','%s_MOTION',8),
     'effect/effBattle': Case('effect/effBattle','effect/effBattleMisc',0x433E20,0x434080,
                       0x434068,'D_00533068','nb_effect_draw',16),
+    'sdf/sdfGsMemory': Case('sdf/sdfGsMemory','sdf/sdfImageSet',0x44A050,0x44A320,
+                      0x44A230,'jtbl_00549230',None,16),
+    'newbattle/nbKoukaProcess': Case('newbattle/nbKoukaProcess','newbattle/nbMakePacket',0x445350,0x445890,
+                      0x4457A0,'jtbl_005447A0',None,16),
 }
+
+
+@dataclass(frozen=True)
+class TerminalTable:
+    words: int
+    next_section: str
+
+
+TERMINAL_TABLES = {
+    'sdf/sdfGsMemory': TerminalTable(59,'.sdata'),
+    'newbattle/nbKoukaProcess': TerminalTable(59,'.lit4'),
+}
+
+
+def native_end(c):
+    if (table := TERMINAL_TABLES.get(c.unit)) is not None:
+        return c.final + 4*table.words
+    must(c.value is not None,'missing pinned native literal')
+    return c.final + len(c.value.encode()) + 1
+
+
 # These exact objects have a selector but emit no readonly section at all.
 # Never infer or skip empty objects for owners not explicitly named here.
 INTERVENING_SELECTORS = {
@@ -248,6 +273,10 @@ LOCAL_TEXT_READONLY = {
         'cec7986b36b371ba4213d09bb9ca9a8cc53f67f12b0428d0706a655a168fdbe9'),
     'effect/effBattle': LocalTextReadOnly((0x16A9C0,0x1C24),0x1C28,12,
         '887f3834b092b3f0eed3f81f52415d0211e8e0e537602b42705c0903f7018b52'),
+    'sdf/sdfGsMemory': LocalTextReadOnly((0x2AA350,0x630),0x630,177,
+        'e7153ab804ffab62b5d19ae1433fa27497d8ae898224aebb553048d827aea412'),
+    'newbattle/nbKoukaProcess': LocalTextReadOnly((0x25E8E0,0x2C1C),0x2C20,248,
+        '10c8f20f5f9656cf7673764ac1758841391485fb475b74d8652b1498ffe4a18a'),
 }
 
 
@@ -279,7 +308,8 @@ def project_local_text(e,index,outgoing,raw,c,layout,reference):
     out=bytearray(raw)
     pairs=bytearray()
     last=-1
-    payload_end=c.final+len(c.value.encode())+1-c.begin
+    payload_end=native_end(c)-c.begin
+    terminal_offsets=[]
     for r in rs.iter_relocations():
         t=st.get_symbol(r['r_info_sym'])
         must(r['r_info_type']==2 and t['st_shndx']==ti and
@@ -290,10 +320,15 @@ def project_local_text(e,index,outgoing,raw,c,layout,reference):
         must(last<off and off%4==0 and off+4<=min(len(raw),payload_end),
              'pinned readonly relocation site outside payload or order')
         last=off
+        if off>=c.final-c.begin:
+            terminal_offsets.append(off)
         dest=struct.unpack_from('<I',raw,off)[0]
         must(dest<extent and dest%4==0,'pinned readonly relocation destination outside text')
         pairs.extend(struct.pack('<II',off,start+dest))
         struct.pack_into('<I',out,off,start+dest)
+    if c.unit in TERMINAL_TABLES:
+        must(terminal_offsets==list(range(c.final-c.begin,payload_end,4)),
+             'terminal table does not have one relocation per native word')
     must(sha(pairs)==layout.sites_and_targets,'pinned readonly exact relocation sites and destinations')
     return bytes(out)
 
@@ -342,6 +377,27 @@ def readonly_projection(e,index,data,c,*,reference=False):
         struct.pack_into('<I',out,off,dest)
     return bytes(out)
 
+def render_terminal_table(stock,c,ret,have,m,table):
+    # Keep each verified native table line verbatim; move only the final
+    # non-relocated stock zero word outside the table and .rodata.
+    must(have==native_end(c) and c.end==have+4 and c.final%4==0 and
+         ret[have:c.end]==bytes(4),'terminal table fill is not exactly one zero word')
+    lines=m[1].splitlines(keepends=True)
+    must(len(lines)==table.words+1,'terminal table record count')
+    start,extent=LOCAL_TEXT_READONLY[c.unit].text
+    for at,line in zip(range(c.final,have,4),lines[:-1]):
+        native=ret[at:at+4]
+        dest=struct.unpack('<I',native)[0]
+        expected=f'    /* {at:06X} {at+BASE:08X} {native.hex().upper()} */ .word .L{dest:08X}\n'
+        must(start<=dest<start+extent and dest%4==0 and line==expected,
+             'terminal table word differs from native address or target')
+    expected=f'    /* {have:06X} {have+BASE:08X} 00000000 */ .word 0x00000000\n'
+    must(lines[-1]==expected,'terminal table fill is not the stock zero-word directive')
+    zero=m.end(1)-len(lines[-1])
+    return (stock[:zero]+stock[m.end(1):m.end()]+
+            f'\n.section {FILL}, "a"\n    .zero 4\n'+stock[m.end():])
+
+
 def render(stock,c,ret,have):
     """Preserve the full native listing outside the verified terminal label body."""
     lab=re.escape(c.label)
@@ -351,7 +407,10 @@ def render(stock,c,ret,have):
     rest=stock[m.end():].lstrip()
     # These are exact generated seams for the named cases, not accepted
     # alternatives for other owners. All peer sections are still compared.
-    if c.unit in (MODE_SELECT, 'pb/pbGameDraw', 'pb/pbRecord', 'effect/billManager', 'basic/dds3SceneBasic', 'interface/frTestFont', 'field/fldTitle'):
+    table=TERMINAL_TABLES.get(c.unit)
+    if table is not None:
+        correctly_terminal=rest.startswith(f'.section {table.next_section}, "wa"\n')
+    elif c.unit in (MODE_SELECT, 'pb/pbGameDraw', 'pb/pbRecord', 'effect/billManager', 'basic/dds3SceneBasic', 'interface/frTestFont', 'field/fldTitle'):
         correctly_terminal=not rest
     elif c.unit in ('sdf/sdfHdd', 'kernel/dds3KernelCore', 'kernel/dds3CreateData', 'facility/fclRagInit', 'pipe/pipeEffect'):
         correctly_terminal=rest.startswith('.section .sdata, "wa"\n')
@@ -360,6 +419,8 @@ def render(stock,c,ret,have):
     must(len(re.findall(r'^\.section \.rodata, "a"$',stock,re.M))==1 and
          stock[:m.start()].rfind('\n.section ')==stock[:m.start()].rfind('\n.section .rodata, "a"') and
          correctly_terminal,'not terminal native rodata label')
+    if table is not None:
+        return render_terminal_table(stock,c,ret,have,m,table)
     lines=m[1].splitlines()
     # Only the named cases above supply pinned escaped assembler spellings.
     # Real native bytes still use the independently specified literal value.
@@ -645,7 +706,7 @@ def prepare_live(root,version,opts,pins):
     must(json.loads(pins.text(pfile))==receipt,'changed link receipt')
     for p in ld,yml,undef,udfn,symbols:
         must(str(p) in receipt['files'],'missing exact linker/YAML/undef/symbol receipt pins')
-    spans = [(case.final + len(case.value.encode()) + 1 + BASE, case.end + BASE)
+    spans = [(native_end(case) + BASE, case.end + BASE)
              for key, case in CASES.items() if key in opts]
     verify_live_no_incoming(root,receipt,spans)
     retail=pins.read(f'orig/{version}/{serial}')
@@ -700,7 +761,11 @@ def validate_unit(root,version,unit,live,pins,stock):
     normal,skip_obj,next_obj,original=map(elf,(production,base,neighbor,stock))
     nr,nsec=ro(normal); br,bsec=ro(skip_obj); rr,rsec=ro(original); _,following=ro(next_obj)
     have=c.begin+nsec['sh_size']
-    must(c.final+len(c.value)+1==have<c.end and retail[c.final:have]==c.value.encode()+b'\0','actual literal extent')
+    must(native_end(c)==have<c.end,'actual terminal native extent')
+    if c.unit in TERMINAL_TABLES:
+        must(have+4==c.end,'actual terminal table fill extent')
+    else:
+        must(retail[c.final:have]==c.value.encode()+b'\0','actual literal extent')
     verify_native_prefix(c,(normal,nr,nsec),(skip_obj,br,bsec),(original,rr,rsec),
                          retail[c.begin:have],rb)
     must(retail[have:c.end]==bytes(c.end-have),'nonzero actual fill')

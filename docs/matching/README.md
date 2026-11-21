@@ -24,10 +24,10 @@ both native and emitted sizes when they differ.
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 10 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
+| 8 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
-| 7 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |

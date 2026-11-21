@@ -362,6 +362,50 @@ class NativeReadonlyFill(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'stock/SKIP/native prefix mismatch'):
                     fill.verify_native_prefix(case, one, two, three, expect, live)
 
+    def test_named_terminal_table_keeps_native_words_and_rejects_malformed_stock(self):
+        for unit, table in fill.TERMINAL_TABLES.items():
+            with self.subTest(unit=unit):
+                case = fill.CASES[unit]
+                target = fill.LOCAL_TEXT_READONLY[unit].text[0]
+                have = fill.native_end(case)
+                words = struct.pack('<I', target) * table.words
+                retail = bytes(case.final) + words + bytes(4)
+                rows = [
+                    f'    /* {at:06X} {at+fill.BASE:08X} {words[:4].hex().upper()} */'
+                    f' .word .L{target:08X}\n'
+                    for at in range(case.final, have, 4)
+                ]
+                fill_word = (f'    /* {have:06X} {have+fill.BASE:08X} 00000000 */'
+                             ' .word 0x00000000\n')
+                suffix = f'.section {table.next_section}, "wa"\n'
+                sample = lambda body: ('.section .text, "ax"\n\n.section .rodata, "a"\n'
+                                       f'dlabel {case.label}\n{body}'
+                                       f'enddlabel {case.label}\n{suffix}')
+                body = ''.join(rows) + fill_word
+                stock = sample(body)
+                rendered = fill.render(stock, case, retail, have)
+                self.assertEqual(rendered,
+                    sample(''.join(rows)).replace(suffix,
+                        f'\n.section {fill.FILL}, "a"\n    .zero 4\n'+suffix))
+                for malformed in (
+                    ''.join(rows[1:]) + fill_word,
+                    rows[0] + body,
+                    rows[1] + rows[0] + ''.join(rows[2:]) + fill_word,
+                    body.replace(f'.L{target:08X}', 'imported_symbol', 1),
+                    body.replace(f'.L{target:08X}', f'.L{target+4:08X}', 1),
+                    body.replace(words[:4].hex().upper(), '00000000', 1),
+                    body.replace(fill_word, fill_word.replace('0x00000000', f'.L{target:08X}')),
+                    body.replace(fill_word, '\t.align 4\n'),
+                ):
+                    with self.assertRaisesRegex(ValueError, 'terminal table'):
+                        fill.render(sample(malformed), case, retail, have)
+                with self.assertRaisesRegex(ValueError, 'terminal native rodata'):
+                    fill.render(stock.replace(suffix, '.section .data, "wa"\n'), case, retail, have)
+                with self.assertRaisesRegex(ValueError, 'zero word'):
+                    fill.render(stock, case, retail[:-1] + b'\1', have)
+                with self.assertRaisesRegex(ValueError, 'zero word'):
+                    fill.render(stock, case, retail, have-4)
+
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'
         b = fill.full_asm(VERSION, PB)

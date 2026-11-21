@@ -110,3 +110,19 @@ destination in stock-only text padding is allowed. Reassembly preserves peer byt
 and the existing terminal literal and whole-link incoming-target checks
 still apply. Only 5501 existing C bytes gain comparison credit; the 19
 alignment bytes remain unmatched.
+
+## Graphics memory and battle sound terminal jump tables
+
+| Existing owner | C bytes | Unmatched link fill | Pinned owner text relocations |
+| --- | ---: | ---: | ---: |
+| sdf/sdfGsMemory | 716 | 4 | 177 |
+| newbattle/nbKoukaProcess | 1340 | 4 | 248 |
+
+Both named stock references end in a 59-word jump table plus one
+non-relocated alignment word. Every native table source address,
+linked target, literal annotation, and directed local text relocation
+must match exactly. Only the single stock zero directive is split
+out of the table, leaving all real table words and relocation
+records untouched. The stock label extent shrinks from 240 to
+236 bytes; .sdata for GsMemory and .lit4 for KoukaProcess remain
+untouched, and the eight link alignment bytes stay unmatched.
