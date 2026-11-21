@@ -210,6 +210,7 @@ shpUpdateSeqPay	facility/fclShopUpdate	0x218	134 of 134 words match	docs/matchin
 fclTerminalLoadTextures	fclTerminalInit	0x70	28 of 28 words match	docs/matching/facility/fclTerminalInit.md	3
 trmStartSaveAct	fclTerminalUpdate	0x140	80 of 80 words match	docs/matching/facility/fclTerminalUpdate.md	3
 trmUpdateSeqRoot	facility/fclTerminalUpdate	0x290	164 of 164 words match	docs/matching/facility/fclTerminalUpdate.md	37
+Page-zero sprite resources				docs/matching/facility/fclTerminalUpdate.md	65
 ragBuildList2 and ragBuildList3 (372 bytes each)				docs/matching/fclRagInit.md	3
 fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	42 of 42 words match	docs/matching/field/fldAutoMap.md	3
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244		docs/matching/field/fldAutoMap.md	83

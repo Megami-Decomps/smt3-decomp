@@ -61,3 +61,12 @@ Final-source retail, all 149 guarded owners / 592 drafts, seven IRX owners,
 Source commit `37864b3caa4c8a7e818154ba8c20a0b419f5eec2` passed exact-source
 hosted CI [40988377004](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40988377004),
 including build and deploy.
+
+## Page-zero sprite resources
+
+The Terminal layout uses seven native 14-byte resources immediately
+before the existing nine placement entries. All seven select texture
+zero, and the placement resource indices range from 0 to 6.
+The compiler emits six alignment bytes before the actual placement
+array; those bytes are not part of the 98-byte resource object.
+The separate page descriptor keeps both original references.
