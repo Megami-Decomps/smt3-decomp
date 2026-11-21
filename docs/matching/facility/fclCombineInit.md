@@ -834,3 +834,11 @@ memory barrier or synthesize a new callback dependency.
 
 All 205 other functions and owned data in the complete translation unit
 remain exact.
+
+## Sacrifice fusion timeline
+
+The sacrifice route selects seven 12-byte entries. The initial row has no
+callback; the remaining six retain their original frame values, dispatch
+modes and callback addresses. The four bytes before the separate timeline
+group descriptor stay raw. The ordinary timeline and both group pointers
+are unchanged.

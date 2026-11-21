@@ -13,7 +13,7 @@ both native and emitted sizes when they differ.
 |---|---|---|
 | 53 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
-| 21 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 22 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 19 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
