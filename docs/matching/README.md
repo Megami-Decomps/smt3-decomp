@@ -79,6 +79,7 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
+| 3 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 3 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
@@ -101,7 +102,6 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/nbCameraProcess | [newbattle/nbCameraProcess.md](newbattle/nbCameraProcess.md) |
 | 2 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 2 |  | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
-| 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 2 | field/fldTest | [field/fldTestShadowData.md](field/fldTestShadowData.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldSky | [field/fldSky.md](field/fldSky.md) |

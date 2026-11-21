@@ -69,6 +69,37 @@ class NativeReadonlyFill(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'invalid native'):
                     fill.options(self.root, VERSION)
 
+    def test_terminal_eof_is_mode_select_only(self):
+        for unit in (PB, 'event/evtCommand', fill.MODE_SELECT):
+            case=fill.CASES[unit]
+            have=case.final+len(case.value)+1
+            # Use actual native terminal widths, with a fake peer text line.
+            if unit==PB:
+                tail='.align 3'
+            elif unit=='event/evtCommand':
+                tail=('.align 2\n'+
+                      f'    /* {case.end-8:06X} {case.end+fill.BASE-8:08X} */ .asciz ""\n.align 2\n'+
+                      f'    /* {case.end-4:06X} {case.end+fill.BASE-4:08X} */ .asciz ""\n.align 2')
+            else:
+                tail='.align 2'
+            end4=(have+3)&~3
+            payload=case.value.encode()+bytes(end4-have+1)
+            ret=bytes(case.final)+payload+bytes(case.end-end4)
+            native=(f'.section .text, "ax"\n\n.section .rodata, "a"\n'
+                    f'dlabel {case.label}\n'
+                    f'    /* {case.final:06X} {case.final+fill.BASE:08X} */ .asciz "{case.value}"\n'
+                    f'    /* {payload.hex().upper()} */\n'
+                    f'{tail}\nenddlabel {case.label}\n')
+            follower='.section .lit4, "wa"\n'
+            if unit==fill.MODE_SELECT:
+                fill.render(native,case,ret,have)
+                with self.assertRaisesRegex(ValueError, 'not terminal'):
+                    fill.render(native+follower,case,ret,have)
+            else:
+                fill.render(native+follower,case,ret,have)
+                with self.assertRaisesRegex(ValueError, 'not terminal'):
+                    fill.render(native,case,ret,have)
+
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'
         b = fill.full_asm(VERSION, PB)

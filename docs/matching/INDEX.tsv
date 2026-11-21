@@ -286,6 +286,7 @@ Selected, plain and facility outline indices	interface	62 bytes		docs/matching/i
 lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55
+Read-only data and native alignment				docs/matching/kernel/ModeSelect.md	120
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4		docs/matching/kernel/dds3AdminiProcess.md	14
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8		docs/matching/kernel/dds3AdminiProcess.md	49
 fclEncycConfigureMode3, fclEncycAllocEntry and fclEncycConfigureMode2	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	29 of 42 words	docs/matching/kernel/dds3AdminiProcess.md	71

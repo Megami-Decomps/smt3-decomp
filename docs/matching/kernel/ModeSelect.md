@@ -116,3 +116,11 @@ report and fresh full guarded-source checks passed for source commit
 `b95a2a093bfc656c5c55eb50af46a0d0987f1412`. Exact-source CI
 [41042604248](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41042604248)
 completed successfully, including every build/deploy step and retail checksum.
+
+## Read-only data and native alignment
+
+The Mode Select owner provides 4,342 retail read-only bytes, including the
+23-entry `mselMain` switch table. The comparison reference checks every
+table relocation against its retail code address and retains the following
+two real alignment bytes as unmatched fill. The production object and
+linked executable are unchanged.

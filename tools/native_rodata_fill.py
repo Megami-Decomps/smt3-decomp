@@ -1,4 +1,4 @@
-"""Validate and partition two native mixed-owner report references, never link inputs."""
+"""Validate and partition explicit native mixed-owner report references, never link inputs."""
 from dataclasses import dataclass
 import hashlib
 import io
@@ -36,11 +36,18 @@ class Case:
     value: str
     align: int
 
+MODE_SELECT='kernel/ModeSelect'
+MODE_TEXT=(0x229030,0x1530)
+MODE_SWITCH=(0x2296B8,0x22A434)
+MODE_R32_OFFSETS=tuple(range(0x70,0xcc,4))
+
 CASES={
     'pb/pbDebugMode': Case('pb/pbDebugMode','model/mdlManager',0x437638,0x43B648,
                          0x43B630,'pbFileMiscColorbarTB','misc/colorbar.TB',8),
     'event/evtCommand': Case('event/evtCommand','event/evtMoon',0x43B8A8,0x43C060,
                          0x43C040,'D_0053B040','/fld/f/bin/moon_07.tmx',16),
+    MODE_SELECT: Case(MODE_SELECT,'kernel/dds3CreateData',0x43EEC0,0x43FFB8,
+                      0x43FFA0,'D_0053EFA0','/staff/stf_mpic01.tmx',8),
 }
 def must(ok, why):
     if not ok:
@@ -129,15 +136,56 @@ def local_incoming(e,rid,have,span):
             dest=[v+w for w in words]+[v+((h&0xffff)<<16)+signed(l) for h in hi for l in lo]
             must(not any(have<=a<span for a in dest),'incoming relocation targets fill')
     return found
+def readonly_projection(e,index,data,c):
+    outgoing=[r for r in e.iter_sections() if isinstance(r,RelocationSection)
+              and r['sh_info']==index and r.num_relocations()]
+    raw=data.data()
+    if c.unit!=MODE_SELECT:
+        must(not outgoing,'owner .rodata has outgoing relocations')
+        return raw
+
+    # Only ModeSelect's known 23-case mselMain switch is admitted. Both
+    # assemblers emit REL to the local .text section symbol; GNU spells its
+    # name .text, while the stock EE assembler leaves it blank.
+    must(len(outgoing)==1 and outgoing[0].name=='.rel.rodata' and
+         outgoing[0]['sh_type']=='SHT_REL','ModeSelect jump table relocation section')
+    ti,ts=section(e,'.text')
+    start,extent=MODE_TEXT
+    must(ts['sh_type']=='SHT_PROGBITS' and ts['sh_flags']==6 and
+         ts['sh_addr']==0 and ts['sh_size']==extent,'ModeSelect original text section')
+    sid,st=section(e,'.symtab')
+    rs=outgoing[0]
+    must(rs['sh_link']==sid and rs['sh_entsize']==8 and
+         rs['sh_size']==8*len(MODE_R32_OFFSETS),'ModeSelect jump table symbol table or extent')
+    entries=list(rs.iter_relocations())
+    must(tuple(r['r_offset'] for r in entries)==MODE_R32_OFFSETS,
+         'ModeSelect exact 23 native jump table slots')
+    out=bytearray(raw)
+    for r in entries:
+        t=st.get_symbol(r['r_info_sym'])
+        must(r['r_info_type']==2 and t['st_shndx']==ti and
+             t['st_info']['type']=='STT_SECTION' and t['st_info']['bind']=='STB_LOCAL' and
+             t['st_other']['visibility']=='STV_DEFAULT' and t.name in ('','.text') and
+             t['st_value']==t['st_size']==0,'ModeSelect jump table requires local text R_MIPS_32')
+        off=r['r_offset']
+        must(off+4<=len(raw),'ModeSelect jump table points outside read-only payload')
+        dest=start+struct.unpack_from('<I',raw,off)[0]
+        must(MODE_SWITCH[0]<=dest<MODE_SWITCH[1] and dest%4==0,
+             'ModeSelect jump destination outside mselMain')
+        struct.pack_into('<I',out,off,dest)
+    return bytes(out)
+
 def render(stock,c,ret,have):
     """Preserve the full native listing outside the verified terminal label body."""
     lab=re.escape(c.label)
     m=list(re.finditer(rf'(?ms)^dlabel {lab}\n(.*?)^enddlabel {lab}\n',stock))
     must(len(m)==1,'missing/ambiguous terminal label')
     m=m[0]
+    rest=stock[m.end():].lstrip()
+    correctly_terminal=(not rest if c.unit==MODE_SELECT else rest.startswith('.section .lit4, "wa"\n'))
     must(len(re.findall(r'^\.section \.rodata, "a"$',stock,re.M))==1 and
          stock[:m.start()].rfind('\n.section ')==stock[:m.start()].rfind('\n.section .rodata, "a"') and
-         stock[m.end():].lstrip().startswith('.section .lit4, "wa"\n'),'not terminal native rodata label')
+         correctly_terminal,'not terminal native rodata label')
     lines=m[1].splitlines()
     primary=f'    /* {c.final:06X} {c.final+BASE:08X} */ .asciz "{c.value}"'
     must(len(lines)>=2 and lines[0]==primary,'terminal real literal differs')
@@ -167,7 +215,9 @@ def verify_output(stock,built,c,ret,have):
     _,fill=section(b,FILL)
     must(fill['sh_flags']==2 and fill['sh_type']=='SHT_PROGBITS' and fill['sh_addralign']==1 and
          fill.data()==ret[have:c.end] and not any(fill.data()),'new audit section not exact fill')
-    must(ar.data()==br.data()+fill.data() and br.data()==ret[c.begin:have] and
+    must(ar.data()==br.data()+fill.data() and
+         readonly_projection(a,ai,ar,c)==ret[c.begin:c.end] and
+         readonly_projection(b,bi,br,c)==ret[c.begin:have] and
          ar['sh_addralign']==br['sh_addralign'],'reassembled prefix bytes/alignment')
     sig=lambda s:(s.name,s['sh_type'],s['sh_flags'],s['sh_size'],s['sh_addralign'],s['sh_entsize'],s.data())
     excluded={'','.rodata',FILL,'.symtab','.strtab','.shstrtab'}
@@ -198,7 +248,10 @@ def verify_output(stock,built,c,ret,have):
                 must(t[1]!=FILL,'unexpected incoming audit relocation')
                 if t[0]==c.label: t=t[:3]+(0,)+t[4:]
                 ent.append((r['r_offset'],r['r_info_type'],t,r.entry.get('r_addend')))
-            must(rs.name not in out and src!='.rodata','unexpected target rodata relocation section')
+            # readonly_projection has already strictly admitted the only
+            # outgoing read-only section that may be present in this case.
+            must(rs.name not in out and (src!='.rodata' or c.unit==MODE_SELECT),
+                 'unexpected target rodata relocation section')
             out[rs.name]=(src,ent)
         return out
     must(relocations(a)==relocations(b),'altered native code or data relocations')
@@ -329,7 +382,7 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
     must({str(p) for p in required}<=entries.keys(),'missing exact linker/YAML/undef/symbol receipt pins')
     must({str(obj),str(nxt)}<=set(receipt['objects']),'missing live owner/neighbor')
     # These terminal bytes are linker placement fill, not C or native objects.
-    # Prove both configured gaps against the complete current link inventory.
+    # Prove every configured gap against the complete current link inventory.
     spans = [(case.final + len(case.value.encode()) + 1 + BASE, case.end + BASE)
              for key, case in CASES.items() if key in opts]
     verify_live_no_incoming(root, receipt, spans)
@@ -357,7 +410,9 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
     nr,nsec=ro(normal); br,bsec=ro(skip_obj); rr,rsec=ro(original); _,following=ro(next_obj)
     have=c.begin+nsec['sh_size']
     must(c.final+len(c.value)+1==have<c.end and retail[c.final:have]==c.value.encode()+b'\0','actual literal extent')
-    must(nsec.data()==bsec.data()==retail[c.begin:have] and rsec.data()==rb and
+    must(nsec.data()==bsec.data() and
+         readonly_projection(normal,nr,nsec,c)==readonly_projection(skip_obj,br,bsec,c)==retail[c.begin:have]
+         and readonly_projection(original,rr,rsec,c)==rb and
          nsec['sh_addralign']==bsec['sh_addralign'],'stock/SKIP/native prefix mismatch')
     must(retail[have:c.end]==bytes(c.end-have),'nonzero actual fill')
     actual_alignment(c,have,following['sh_addralign'])
@@ -366,6 +421,8 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
     maps=live_input_sections(real_map.decode())
     must(maps.get((str(obj),'.rodata'))==[(startv,nsec['sh_size'])] and
          maps.get((str(nxt),'.rodata'))==[(endv,following['sh_size'])],'ambiguous live rodata ownership')
+    if c.unit==MODE_SELECT:
+        must(maps.get((str(obj),'.text'))==[MODE_TEXT],'wrong mapped ModeSelect text extent')
     _,mark,body=real_map.decode().partition('Linker script and memory map')
     must(bool(mark),'malformed map')
     adjacency(c,plan,(root/ld).read_text(),body,have,nsec['sh_size'],following['sh_size'])
@@ -374,8 +431,6 @@ def validate_live(root,version,unit,production,base,neighbor,stock):
     for e,i in ((normal,nr),(skip_obj,br),(original,rr)):
         allow=(c.label,c.final-c.begin,c.end-c.final) if e is original else None
         inspect_symbols(e,have-c.begin,c.end-c.begin,i,allow)
-        must(not any(isinstance(s,RelocationSection) and s['sh_info']==i and s.num_relocations()
-                     for s in e.iter_sections()),'owner .rodata has outgoing relocations')
         local_incoming(e,i,have-c.begin,c.end-c.begin)
     return c,retail,have
 
