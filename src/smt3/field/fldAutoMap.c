@@ -12,6 +12,7 @@
 #include "fldTakaraWork_tag.h"
 #include "ps2asm.h"
 #include "sdf_screen_state.h"
+#include "kernel_draw.h"
 
 typedef struct
 {
@@ -308,19 +309,9 @@ extern sdfVector4_t fldAutoMapUp;
 
 extern sdfVector4_t fldAutoMapRect;
 
-extern u8 dds3LightParam2[];
+extern dds3LightState_t dds3LightParam2;
 
 extern sdf3DScreenParam_t dds3ScreenParam2;
-
-typedef struct
-{
-    f32 near;
-    f32 far;
-    f32 scale;
-    f32 bias;
-    u32 mode;
-} fldAmLightParam_t;
-
 
 extern fileRequest_t *pacLoad(const char *filename);
 
@@ -1430,7 +1421,7 @@ void fldAutoMapSeqStart(void) {
     sdfVector4_t *eye;
     f32 px;
     f32 pz;
-    fldAmLightParam_t *light;
+    sdf3DFogParam_t *light;
     fldAmAreaData_t *rec;
     s32 i;
     sdfVector4_t *fieldId;
@@ -1505,12 +1496,12 @@ void fldAutoMapSeqStart(void) {
     SDF_VU0_COPYVECTOR(eye, &camera);
     SDF_VU0_COPYVECTOR(&fldAutoMapRect, &target);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
-    light->near = 255.0f;
-    light->scale = 1000.0f;
-    light->far = 255.0f;
-    light->bias = 20000.0f;
-    light->mode = 0x108010;
+    light = &dds3LightParam2.fog;
+    light->fogMax = 255.0f;
+    light->fogNear = 1000.0f;
+    light->fogMin = 255.0f;
+    light->fogFar = 20000.0f;
+    light->color = 0x108010;
     dds3ScreenParam2.ox = 2048.0f;
     dds3ScreenParam2.oy = 2048.0f;
 }
@@ -1590,7 +1581,7 @@ void fldAutoMapCalc(void) {
     sdfVector4_t focus;
     sdfVector4_t eye;
     sdfVector4_t up = fldAutoMapCalcUp;
-    fldAmLightParam_t *light;
+    sdf3DFogParam_t *light;
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
 
@@ -1740,12 +1731,12 @@ void fldAutoMapCalc(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, &eye);
     SDF_VU0_COPYVECTOR(&fldAutoMapRect, &focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
-    light->near = 255.0f;
-    light->scale = 1000.0f;
-    light->far = 255.0f;
-    light->bias = 20000.0f;
-    light->mode = 0x808080;
+    light = &dds3LightParam2.fog;
+    light->fogMax = 255.0f;
+    light->fogNear = 1000.0f;
+    light->fogMin = 255.0f;
+    light->fogFar = 20000.0f;
+    light->color = 0x808080;
     SDF_VU0_COPYVECTOR(&aViewEye, &eye);
     SDF_VU0_COPYVECTOR(&aViewTarget, &focus);
     SDF_VU0_COPYVECTOR(&aViewDown, &up);

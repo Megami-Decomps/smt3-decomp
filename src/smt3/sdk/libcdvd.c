@@ -1,4 +1,5 @@
 #include "sdk_libcdvd.h"
+#include "sdk_cdvd_stream_request.h"
 #include "common.h"
 #include "ps2asm.h"
 
@@ -994,14 +995,6 @@ s32 sceCdStStat(void)
     return sceCdStream(0, 0, 0, 6, cdvdDefaultStreamMode);
 }
 
-typedef struct cdvdStreamRequest_t {
-    u32 lsn;
-    u32 sectors;
-    void *buffer;
-    s32 command;
-    u8 mode[3];
-    u8 opaque13;
-} cdvdStreamRequest_t;
 extern cdvdStreamRequest_t cdvdStreamRequest __attribute__((section(".data")));
 extern s32 _sceCd_ncmd_prechk(s32 command);
 
