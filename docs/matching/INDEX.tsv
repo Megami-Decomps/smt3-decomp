@@ -204,6 +204,7 @@ fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	1
 fldPlayerCalc	field/fldPlayer	0x2A4		docs/matching/field/fldPlayer.md	102
 fldPlayerCalcHasigo	field/fldPlayer	0xE8		docs/matching/field/fldPlayer.md	149
+World-map position data				docs/matching/field/fldPlayer.md	165
 fldBgmBitChk	field/fldSe	0x7C	31 of 31 words match	docs/matching/field/fldSe.md	3
 fldBgmPlay	field/fldSe	0x2D0	180 of 180 words match	docs/matching/field/fldSe.md	34
 fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	84
@@ -406,6 +407,7 @@ moveBlock	pb/pbGame	0x8C	31 of 35 words match	docs/matching/pb/pbGame.md	273
 deleteMoveBlock (0x144)				docs/matching/pb/pbGame.md	389
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
+Memory card messages and move directions				docs/matching/pb/pbMCard.md	32
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
 pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	30
 pb_draw_mapbase_Process	pb/pbModel	0x214	133 of 133 words match	docs/matching/pb/pbModel.md	3

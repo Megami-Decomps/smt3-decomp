@@ -47,6 +47,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
+| 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
@@ -67,7 +68,6 @@ both native and emitted sizes when they differ.
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
-| 3 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 3 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 3 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
@@ -85,6 +85,7 @@ both native and emitted sizes when they differ.
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
+| 2 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 2 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
 | 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
@@ -116,7 +117,6 @@ both native and emitted sizes when they differ.
 | 1 | sdf/sdfCoreDraw | [sdf/sdfCoreDraw.md](sdf/sdfCoreDraw.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
-| 1 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
