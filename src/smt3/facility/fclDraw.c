@@ -15,8 +15,8 @@ extern datDevilTableEntry_t datDevilTable[];
 extern void cmpDrawBoxF(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s32 ot);
 extern frFontHandle_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                               const char *text, frFontHandle_t *previous);
-extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color,
-                                            char *text, frFontHandle_t *previous);
+extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
+                                            const char *text, frFontHandle_t *previous);
 extern frFontHandle_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                                   const char *text, frFontHandle_t *previous);
 extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
@@ -49,7 +49,7 @@ typedef struct
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
+extern s32 trmDrawListText(fclPanelPos_t *panel, const char *text, s32 *texList,
                             fclSpriteTbl_t *table, s32 ot);
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
@@ -233,7 +233,7 @@ s32 fclDrawCaption(fclPanelPos_t *panel, const char *text, s32 ot)
     return frDestroyFontRequestAfter(request);
 }
 
-s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
+s32 trmDrawListText(fclPanelPos_t *panel, const char *text, s32 *texList,
                     fclSpriteTbl_t *table, s32 ot)
 {
     frFontHandle_t *request;

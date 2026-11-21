@@ -181,8 +181,8 @@ void trmDrawListRow(trmPanelPos_t *panel, s32 ot)
     frDestroyFontRequestAfter(font);
 }
 
-extern char *trmMenuTextTable[];
-extern s32 trmDrawListText(trmPanelPos_t *panel, char *text, s32 *textures,
+extern const char *trmMenuTextTable[];
+extern s32 trmDrawListText(trmPanelPos_t *panel, const char *text, s32 *textures,
                           fclSpriteTbl_t *table, s32 ot);
 extern void lstDrawListWindow(trmListWork_t *list, s8 noCursor, s32 ot);
 extern void lstDrawListWindowCursor(trmListWork_t *list, s32 ot);

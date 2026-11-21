@@ -177,7 +177,7 @@ flags:
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
+extern s32 trmDrawListText(fclPanelPos_t *panel, const char *text, s32 *tex,
                            fclSpriteTbl_t *table, s32 ot);
 
 typedef struct {

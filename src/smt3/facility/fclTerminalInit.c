@@ -357,13 +357,13 @@ void fclTerminalInitList(void *list, s8 count, s32 handle)
     cmpInitCursorLayout(cursor, 0x2E, 7, 0x98, 0x19, 0x1D);
 }
 
-extern u32 trmMenuTextTable[];
+extern const char *trmMenuTextTable[];
 extern void fclInitCursorWindow(void *cursor, void *data, u8 count);
 extern void fclSetCursorList(void *cursor, s32 count);
 
 void fclTerminalInitMenu(s32 id, void *commands, void *work)
 {
-    u32 *table;
+    const char **table;
 
     if (trmGetEventNo(1, work) == 0x296) {
         table = &trmMenuTextTable[4];
