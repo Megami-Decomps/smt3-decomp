@@ -1,5 +1,6 @@
 #include "common.h"
 #include "newbattle.h"
+#include "nbFormationVectors.h"
 #include "libsdf.h"
 #include "basic.h"
 #include "dds3obj.h"
@@ -269,9 +270,7 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 
 extern datUnitVisual_t datModelParamTable[];
 
-extern u128 nbFormDefaultPos;
 
-extern u128 nbFormDefaultRot;
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -618,8 +617,6 @@ extern f32 sdfCos(f32 value);
 extern s32 effBTLModelGetID(nbFormation_t *form);
 #include "sdk_libc.h"
 
-extern sdfVector4_t nbFormPartyRot;
-extern sdfVector4_t nbFormEnemyRot;
 
 void nbSetPartyFormation(nbMainProcessData_t *data, s32 group)
 {

@@ -65,7 +65,7 @@ extern s16 D_00551F94;
 
 extern char sndVcInfo[];
 
-extern char sndSqInfo[];
+extern u32 sndSqInfo[4];
 
 extern void *D_0033A540[];
 
@@ -80,7 +80,7 @@ void sndInit(void)
         return;
     }
     sndInitDone = 1;
-    sdfSndInit(sndVcInfo, 4, sndSqInfo, 4);
+    sdfSndInit(sndVcInfo, 4, (char *)sndSqInfo, 4);
     p2sdLoadSMGFile(D_0033A540[0]);
     D_0054FD20 = 4;
     D_00551F94 = -1;
