@@ -37,3 +37,12 @@ address. The real second-row names remain validated owner-relative aliases
 for SetBossDummy's existing reads. Neither record is padded, the previous
 initializers are preserved, and the unreferenced metadata labels at the
 ends of individual records stay in the native reference.
+
+## TestProcess8 roster boundaries
+
+The battle setup reads three signed devil IDs, then the negative
+terminator. The separate passive-skill list ends at its first entry.
+The zero word after that terminator and the intervening devil-skill
+region remain raw. The roster and passive list use the same signed IDs
+and skill-record type as the other battle tests; the consumer only
+receives corrected declarations, and its native output is unchanged.

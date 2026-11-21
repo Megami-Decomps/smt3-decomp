@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_camp_bad_params.h"
 #include "facility.h"
 #include "result2.h"
 #include "camp.h"
@@ -10161,7 +10162,6 @@ extern const f32 cmpDefaultLightColor[];
 extern const u32 cmpDefaultLightDir[];
 extern const u32 cmpDefaultAmbientColor[];
 extern const u32 cmpDefaultFogColor[];
-extern f32 D_00345F60[];
 extern void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias);
 extern void dds3SetLightColor(s32 frame, s32 number, f32 *color);
 extern void dds3SetLightDir(s32 frame, s32 number, f32 *direction);
@@ -10190,7 +10190,7 @@ void func_0023FCC0(void)
     dds3ScreenParam[3] = 0.7551904917f;
     SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
     SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
-    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    SDF_VU0_COPYVECTOR(aViewDown, &D_00345F60);
     SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
 }
@@ -10234,25 +10234,13 @@ s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
     return cmpStatusModelResult = mdlPrepare(group, id, blocking);
 }
 
-typedef struct
-{
-    sdfVector4_t pos;
-    sdfVector4_t rot;
-    sdfVector4_t center;
-    f32 r;
-    f32 h;
-    f32 scl;
-    void *hModel;
-} cmpBadEffectParams_t;
-
 extern datUnitVisual_t datModelParamTable[];
 
-void cmpCreateBadEffect(u16 id, void *model, u8 *buffer)
+void cmpCreateBadEffect(u16 id, mdlObj_t *model, effCAMPBadParams_t *params)
 {
     sdfVector4_t pos __attribute__((aligned(16)));
     sdfVector4_t rot __attribute__((aligned(16)));
     sdfVector4_t center __attribute__((aligned(16)));
-    cmpBadEffectParams_t *params = (cmpBadEffectParams_t *)buffer;
 
     memset(&pos, 0, sizeof(pos));
     memset(&rot, 0, sizeof(rot));
@@ -10268,11 +10256,7 @@ void cmpCreateBadEffect(u16 id, void *model, u8 *buffer)
 
 extern void *hCAMPBadEffect;
 
-extern u8 D_00349300[];
-
 extern const char cmpBadEffReadyMsg[];
-
-extern void *effCAMPBadCreate(u8 *work, s32 kind);
 
 s32 cmpBadEffSetup(u16 id, u32 flag)
 {
@@ -10299,8 +10283,8 @@ s32 cmpBadEffSetup(u16 id, u32 flag)
     default:
         return 0;
     }
-    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
-    hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
+    cmpCreateBadEffect(id, cmpEncycWork, &D_00349300);
+    hCAMPBadEffect = effCAMPBadCreate(&D_00349300, kind);
     printf(cmpBadEffReadyMsg);
     return 1;
 }
@@ -10481,7 +10465,7 @@ void cmpSetStatusModelParam(void)
 
     SDF_VU0_COPYVECTOR(aViewEye, &cmpStatusModelBasePos);
     SDF_VU0_COPYVECTOR(aViewTarget, &cmpStatusModelPos);
-    SDF_VU0_COPYVECTOR(aViewDown, D_00345F60);
+    SDF_VU0_COPYVECTOR(aViewDown, &D_00345F60);
     sdf3DMakeScreenParam((sdf3DScreenParam_t *)dds3ScreenParam);
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);

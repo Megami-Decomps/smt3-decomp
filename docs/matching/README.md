@@ -50,8 +50,10 @@ both native and emitted sizes when they differ.
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
+| 4 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 4 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
+| 4 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
@@ -71,9 +73,7 @@ both native and emitted sizes when they differ.
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
-| 3 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
-| 3 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 3 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
@@ -111,8 +111,10 @@ both native and emitted sizes when they differ.
 | 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 |  | [event/evtViewerMenuTables.md](event/evtViewerMenuTables.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
+| 2 |  | [effect/effPCPMisc.md](effect/effPCPMisc.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
+| 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 | sdk/libm | [sdk/libm.md](sdk/libm.md) |
@@ -165,9 +167,7 @@ both native and emitted sizes when they differ.
 | 1 | event/evtDebug | [event/evtDebug.md](event/evtDebug.md) |
 | 1 |  | [effect/polyManager.md](effect/polyManager.md) |
 | 1 |  | [effect/effPacket.md](effect/effPacket.md) |
-| 1 |  | [effect/effPCPMisc.md](effect/effPCPMisc.md) |
 | 1 |  | [effect/effBattleFilterAndHelper.md](effect/effBattleFilterAndHelper.md) |
-| 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
 | 1 | basic/dds3WorldBasic | [basic/dds3WorldBasic.md](basic/dds3WorldBasic.md) |

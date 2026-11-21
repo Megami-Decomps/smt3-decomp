@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_camp_bad_params.h"
 #include "kernel_draw.h"
 #include "sdf_resource.h"
 #include "sdk_libgcc.h"
@@ -2999,17 +3000,6 @@ void effBTLSystemPartHandleDelete(void)
     }
     printf("effBTLSys:PartHandleDelete\n");
 }
-
-typedef struct
-{
-    sdfVector4_t pos;
-    sdfVector4_t rot;
-    sdfVector4_t center;
-    f32 r;
-    f32 h;
-    f32 scl;
-    mdlObj_t *hModel;
-} effCAMPBadParams_t;
 
 typedef struct
 {

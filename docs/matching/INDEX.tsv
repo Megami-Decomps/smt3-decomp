@@ -79,6 +79,7 @@ dds3DrawConfigCursor	code_0029B780	0x2CC	179 of 179 words match	docs/matching/co
 dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_0029B780.md	188
 dds3BillboardManagerInit	effect/billManager	0xB8	46 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
+Cut-camera state mapping	effect	6 bytes		docs/matching/effect/effBattle.md	51
 EFFECT editor items				docs/matching/effect/effBattleFilterAndHelper.md	24
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270		docs/matching/effect/effBattleMisc.md	3
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	40
@@ -112,6 +113,7 @@ dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/ma
 effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	417
 effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370		docs/matching/effect/effPCPBoss.md	454
 Effect face indices and Radiate axis				docs/matching/effect/effPCPMisc.md	3
+Sparkle sphere preset pointer	effect	4 bytes		docs/matching/effect/effPCPMisc.md	17
 Default packet triangle indices				docs/matching/effect/effPacket.md	3
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/parManager.md	3
 dds3Particle_SparkBuffInit	effect/parManager	0x800	512 of 512 words match	docs/matching/effect/parManager.md	33
@@ -443,6 +445,7 @@ AnimeTargetCursor	newbattle/nbTarSelProcess	540 bytes	135 of 135 words match	doc
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 Debug boss AI 288				docs/matching/newbattle/nbTest.md	21
 Consecutive debug AI presets				docs/matching/newbattle/nbTest.md	30
+TestProcess8 roster boundaries				docs/matching/newbattle/nbTest.md	41
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
 RunSake	newbattle/nbUnitProcess	0x104	65 of 65 words match	docs/matching/newbattle/nbUnitProcess.md	88
@@ -480,6 +483,7 @@ pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMai
 pb_draw_mapbase_Process	pb/pbModel	0x214	133 of 133 words match	docs/matching/pb/pbModel.md	3
 pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	38
 pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	66
+Exit model rotation				docs/matching/pb/pbModel.md	104
 pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
 pipeMakeNodeLink	pipe/mnMyLink	128 bytes	32 of 32 words match	docs/matching/pipe/mnMyLink.md	3

@@ -3,6 +3,7 @@
 #include "effPCPEyeThunderData.h"
 #include "effThunderSphereData.h"
 #include "effPCPData.h"
+#include "effPCPSparkleSphereData.h"
 #include "fpu.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
@@ -445,11 +446,6 @@ enum EffParamWorkKind {
     EFF_PARAM_WORK_KIND_BILLBOARD_UNIT_OBJECT = 5,
     EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK = 6,
     EFF_PARAM_WORK_KIND_FILE_QUEUE = 7
-};
-
-/* Creation reads the requested mode from this parameter record. */
-struct effPCPSparkleSphereParam_t {
-    s32 abgr;
 };
 
 /* The first sixteen bytes of this allocated billboard set remain opaque. */

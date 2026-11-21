@@ -47,3 +47,9 @@ The three quaternion quadwords and diagnostic string remain explicitly owned
 rodata at their current committed locations. Promotion does not move them,
 replace the padded diagnostic string with a new literal, or change unrelated
 owner functions.
+
+## Cut-camera state mapping (effect, 6 bytes)
+
+The cut-camera path checks the unsigned kind against three and loads
+one halfword for each admitted kind. Values 7, 8 and 9 remain in their
+native order. The following two bytes are not used and remain raw.

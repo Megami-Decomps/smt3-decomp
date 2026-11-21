@@ -4,7 +4,7 @@
 #include "libsdf.h"
 #include "scr.h"
 #include "model.h"
-#include "draw3d.h"
+#include "kernel_draw.h"
 #include "ps2asm.h"
 
 typedef struct pbProcHandle_t pbProcHandle_t;
@@ -192,8 +192,7 @@ extern void dds3SetLightColor(s32 frame, s32 no, f32 *color);
 extern void dds3SetLightDir(s32 frame, s32 no, f32 *direction);
 extern void dds3SetAmbientColor(s32 frame, f32 *color);
 extern sdf3DScreenParam_t dds3ScreenParam;
-extern s32 pbFogParam[];
-extern void dds3SetFog(s32 *fog);
+extern sdf3DFogParam_t pbFogParam;
 extern u32 dds3DrawFlag;
 extern void pbResetKeyState(void);
 extern void p2sdPlayBGM(s32 track);
@@ -294,7 +293,7 @@ void pbLoadTextures(s32 mode, s32 stage)
     light.w = 1.0f;
     dds3SetAmbientColor(0, &light.x);
     dds3ScreenParam.fovy = 0.6283185f;
-    dds3SetFog(pbFogParam);
+    dds3SetFog(&pbFogParam);
     dds3DrawFlag &= ~0x400;
     pbResetKeyState();
     p2sdPlayBGM(0x340000);

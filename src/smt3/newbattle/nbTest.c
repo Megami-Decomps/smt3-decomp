@@ -215,11 +215,11 @@ extern u32 f;
 
 extern datUnitWork_t nbTest8Dummy;
 
-extern u8 nbTest8DevilIds[];
+extern s32 nbTest8DevilIds[];
 
 extern u8 nbTest8DevilSkills[];
 
-extern u8 nbTest8PassiveSkills[];
+extern nbTestSkillId_t nbTest8PassiveSkills[];
 
 extern s32 test_devilIds[4];
 

@@ -820,7 +820,7 @@ void dds3SetAmbient(sdfVector4_t *ambient)
     SDF_VU0_COPYVECTOR(&dds3LightParam.ambient, ambient);
 }
 
-void dds3SetFog(s32 *fog)
+void dds3SetFog(const sdf3DFogParam_t *fog)
 {
     memcpy(&dds3LightParam.fog, fog, 0x14);
 }

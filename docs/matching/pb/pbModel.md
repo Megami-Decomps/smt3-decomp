@@ -100,3 +100,11 @@ and final Ninja no-op checks. Source commit
 [41003758538](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41003758538):
 build and deploy both completed successfully.
 
+
+## Exit model rotation
+
+The exit model updates the Y angle in a shared writable four-float vector
+and passes its address to the matrix builder. Its native address is only
+eight-byte aligned; the same unaligned vector type as the consumer keeps
+the four floats together. The zero alignment before and after this object
+stays outside the C owner.

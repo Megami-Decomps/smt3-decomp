@@ -25,5 +25,6 @@
   "model/mdlDebugLightCursorRows": "mdlDebugLightCursorY",
   "model/mdlDebugSoftenCursorRows": "softenBiasCursorY",
   "interface/itfGaugeHighlightVertexData": "itfGaugeHighlightVertexIndex",
-  "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex"
+  "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex",
+  "effect/effBTLCutCameraStateData": "effBTLCutCameraState"
 }

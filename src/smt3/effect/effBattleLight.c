@@ -4,6 +4,7 @@
 #include "event.h"
 #include "nb.h"
 #include "effBattle.h"
+#include "effPCPSparkleSphereData.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
@@ -438,7 +439,7 @@ char D_0054F1D0[8] = "EFFECT";
 
 char D_0054F1D8[8] = "SYSTEM";
 
-u32 D_0054F1E0 = 0x10602000;
+struct effPCPSparkleSphereParam_t D_0054F1E0 = { 0x10602000 };
 
 s32 effPartModelSerial = 0;
 

@@ -2,7 +2,7 @@
 #include "scr.h"
 #include "event.h"
 #include "kernel.h"
-#include "draw3d.h"
+#include "kernel_draw.h"
 #include "libsdf.h"
 #include "ps2asm.h"
 
@@ -89,7 +89,6 @@ extern void dds3SetScreenFovy(f32 fovy);
 
 extern void dds3SetLight(void *light, s32 no);
 
-extern void dds3SetFog(void *fog);
 
 extern void dds3SetAmbient(sdfVector4_t *ambient);
 

@@ -5,5 +5,6 @@
 
 extern sdfVector4_t cmpStatusModelPos;
 extern sdfVector4_t cmpStatusModelBasePos;
+extern sdfVector4_t D_00345F60;
 
 #endif
