@@ -2173,3 +2173,10 @@ void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
 
 const s32 pbMapCursorOffsetTable[4][4] = { { 0, -1, 0, -1 }, { -1, 0, -1, 0 }, { 0, 1, 0, 1 }, { 1, 0, 1, 0 } };
 
+/* Signed x/y offsets for the four move directions. */
+s16 pbKeyTable[4][2] = {
+    { 0, 1 },
+    { 1, 0 },
+    { 0, -1 },
+    { -1, 0 },
+};

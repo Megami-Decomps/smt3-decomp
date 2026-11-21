@@ -161,3 +161,13 @@ loads, writes or calls. The old position and new X use their distinct
 existing floating-point lanes. Complete owner: 26 matches, zero
 differences. Callback mutation checks cover replacements of the control
 handle and old position across the pose-provider call.
+
+## World-map position data
+
+The 48 bytes at `0x002FCA20` hold three consecutive, 16-byte position
+vectors. Each starts with XYZ `(0, -1, 0)` and ends in `1.0f`. The
+world-map interpolation code updates and reads XYZ only. The fourth lane
+is inferred from the repeated layout and existing vector declarations,
+not from a separate native read. The fourth vector-shaped record starting
+at `0x002FCA50` stays in the raw data because it lacks the same consumer
+evidence.

@@ -28,3 +28,25 @@ somewhere other than the expression's spelling.
 Also ruled out: an `if`/`else if` chain for the state test, which puts the
 `case 1` arm inline and is five words further out, and a fourth empty case,
 which adds a word.
+
+## Memory card messages and move directions
+
+The writable table begins at `0x003278D0`, not at the old text symbol
+`0x003278D4`. The renderer's native 0x84-byte stride, word load four bytes
+before the string, and the string passed to `strlen` and the print provider
+identify ten records of a signed attribute and a 128-byte text field.
+Compiling the old interior-only shape would raise the alignment of the
+misaligned start. Owning the whole record array directly preserves all
+1,320 bytes, including the first attribute and each string's zero fill.
+
+The preceding `pbKeyTable` ends at the message table base. Its four signed
+16-bit X/Y pairs account for 16 bytes, not the old 20-byte estimate that
+included the first message attribute. The key table consumers still see
+the same signed halfword values and addresses. The next dispatch table is
+untouched. The existing error renderer remains C; this change recovers data,
+not a new instruction match.
+
+The split marks the message table as containing no address references.
+The final bytes of `DIRECTORY` plus the string terminator happen to look
+like address `0x0059524F` as a little-endian word; that is text, not a
+retail relocation.

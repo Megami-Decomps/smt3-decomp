@@ -233,13 +233,20 @@ s32 pbWriteMCard(s32 port, s32 slot, char *fileName, s32 flags,
     return writeSync;
 }
 
-/* Ten 0x84-byte records start at 0x003278D0. The recovered symbol names
- * the first text byte, not the table base. Declare the complete table at its
- * real address so code 0 reads its own attribute without a negative index.
- * This alias emits no data and leaves the existing data owner unchanged. */
 typedef struct { s32 attr; char text[0x80]; } pbErrorRow_t;
-typedef pbErrorRow_t pbErrorTable_t[10];
-SYMBOL_AT(pbErrorTable_t, pbErrorTable, pbMCardErrorRows, -4);
+
+pbErrorRow_t pbErrorTable[10] = {
+    { 6, "ERROR" },
+    { 6, "SORRY, I SUPPORT ONLY PS2 MEMORY" },
+    { 6, "NOT ENOUGH MEMORY" },
+    { 6, "UNFORMAT MEMORY" },
+    { 6, "CLEAR!!!" },
+    { 4, "COMPLETE TO LOAD" },
+    { 4, "COMPLETE TO SAVE" },
+    { 6, "NOT DETECT A PUZZLEBOY DIRECTORY" },
+    { 6, "NOT EXIST DATA!" },
+    { 6, "UNDO!!" },
+};
 
 typedef struct
 {
