@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itfTestMsgSpriteData.h"
+#include "itfTestMsgTextData.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -26,8 +27,6 @@ typedef struct
 extern pbPanelEditor_t pbDebugPanel2Pos, pbDebugPanel3X;
 
 extern sdf3DScreenParam_t dds3ScreenParam;
-
-extern const char *D_00326C08[6];
 
 extern u8 dds3ScreenBlurFlag;
 
@@ -89,8 +88,6 @@ typedef struct
 
 
 
-extern char *D_00326BC8[];
-
 extern u8 scrEmbedded_3267A8[];
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -116,7 +113,7 @@ extern void itfDebugPrintMark(void);
 
 extern void sdfTexFreeDelayed(void *aHandle);
 
-extern void *itfMiscLoadTexture(char *filename);
+extern sdfTexHandle_t *itfMiscLoadTexture(const char *filename);
 
 extern void *sdfGrAllocPacketBuff(u32 aSize);
 
