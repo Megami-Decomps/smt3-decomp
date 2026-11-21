@@ -792,7 +792,7 @@ segments:
       - [0x228244, pad, pbExitRotation_prefix_padding]
       - [0x228248, .data, pb/pbExitRotationData]
       - [0x228258, pad, pbExitRotation_tail_padding]
-      - [0x228260, data, data_00327260]
+      - [0x228260, .data, pb/pbEditorCreateData]
       - [0x228270, .data, pb/pbFogData]
       - [0x228284, pad, pbFog_tail_padding]
       - [0x228290, .data, pb/pbCameraState]
