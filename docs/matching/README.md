@@ -151,6 +151,7 @@ both native and emitted sizes when they differ.
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 | event/evtDebug | [event/evtDebug.md](event/evtDebug.md) |
+| 1 |  | [effect/effPCPMisc.md](effect/effPCPMisc.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 1 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |

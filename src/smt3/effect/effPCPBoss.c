@@ -482,7 +482,7 @@ extern void sdfMatSetConstant(void *aMat, f32 aRatio);
 extern void *dds3BillboardCreate(s32 count, void *params);
 extern void *dds3BillboardCopy(void *hBillboard);
 extern effPCPBossWork_t effPCPBossWork;
-extern u8 D_0031FF20[];
+extern u32 D_0031FF20[];
 extern void *sdfTexSet(const void *aTex);
 extern void effEveBEDCutDelete(void *hEveBEDCut);
 extern void effEveBEDDelete(effPCPBossBED_t *hEveBED);

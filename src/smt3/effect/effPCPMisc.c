@@ -2121,7 +2121,7 @@ extern effDebugPolyParams_t dds3RingPolyExpListPolyParam;
 
 extern sdfGrOt_t *dds3RingPolyExpListBlendOt[];
 
-extern u8 dds3RingPolyExpListParameters[];
+extern u32 dds3RingPolyExpListParameters[];
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
@@ -2454,7 +2454,7 @@ typedef struct {
 } effPCPBlockSetInputs_t;
 extern u16 effPCPMudoSampleStep[8];
 extern f32 effPCPMudoSampleScale[8];
-extern const f32 effPCPRadiateTBParam[4] __attribute__((aligned(16)));
+extern f32 effPCPRadiateTBParam[4] __attribute__((aligned(16)));
 void ReverseMatrix(void);
 void effScreenOffset(void);
 effHandle_t *dds3EffectLoad(effPCPAgiraoFirePartList_t *pD3P);
@@ -6128,7 +6128,7 @@ void dds3RingPolyExpListDraw(dds3RingPolyExpList_tag *hData) {
     dds3RingPolyExpListPolyParam.positions = (u128 *)hData->pVertex;
     dds3RingPolyExpListPolyParam.color = hData->color;
     dds3RingPolyExpListPolyParam.vertexCount = dds3RingPolyExpListPolyParam.parameterCount = 12;
-    dds3RingPolyExpListPolyParam.parameters = (u32 *)dds3RingPolyExpListParameters;
+    dds3RingPolyExpListPolyParam.parameters = dds3RingPolyExpListParameters;
     while (count >= 12) {
         count -= 8;
         sdfDrawTagLink(list, EE_ADDR(effPkt3DPrimMakePoly(&dds3RingPolyExpListPolyParam)));
