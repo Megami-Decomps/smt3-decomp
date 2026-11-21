@@ -476,12 +476,12 @@ void rstUpdateSeqSkillPowerUp(void)
     }
 }
 
-extern s32 datExplainTable[];
+extern const char *datExplainTable[];
 
 void rstStartIntroduce(u16 DevilID)
 {
     fclSetMessageVar_20743088(0, EE_ADDR_S(text2[DevilID]));
-    fclSetMessageVar_20743088(4, datExplainTable[datDevilTable[DevilID].race]);
+    fclSetMessageVar_20743088(4, EE_ADDR_S(datExplainTable[datDevilTable[DevilID].race]));
     if (DevilID == 0xCF) {
         fclStartMessage(0xC6);
         return;
@@ -1316,4 +1316,3 @@ const char dds3TitleTexPath[24] = "/title/titletex.LB";
 char rstParamValueFormat[8] = "%d";
 
 char D_0054FD08[8] = "1";
-

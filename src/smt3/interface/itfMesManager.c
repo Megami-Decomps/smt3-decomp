@@ -1148,7 +1148,7 @@ extern char *pStr[];
 
 extern char *pstr[];
 
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 
 void itfMesMngGetVarLocalize(s32 id);
 
@@ -1167,9 +1167,14 @@ void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
     case 1:
         itfMesMngSetVarImmediate(id, index, text2[num]);
         break;
-    case 8:
-        itfMesMngSetVarImmediate(id, index, datExplainTable[num]);
+    case 8: {
+        /* Script selectors are unchecked. Preserve the EE indexed load,
+         * not an assumed C array bound or a safe-memory guarantee. */
+        u32 addr = EE_ADDR(datExplainTable) + (u32)num * sizeof(datExplainTable[0]);
+
+        itfMesMngSetVarImmediate(id, index, *EE_ADDR_AS(const char **, addr));
         break;
+    }
     case 3:
         itfMesMngSetVarImmediate(id, index, pStr[num]);
         break;
@@ -2769,4 +2774,3 @@ char itfMesDebugFadeFormat[8] = "( %3d )";
 u8 itfMesDebugLineVertIndex[5] = {0, 1, 2, 3, 0};
 
 u8 itfMesDebugLineColorIndex[5] = {0, 0, 0, 0, 0};
-

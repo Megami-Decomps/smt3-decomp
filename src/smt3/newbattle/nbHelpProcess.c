@@ -256,7 +256,7 @@ extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 extern s32 datGetPlayerLNDLevel(void *work);
 
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 
 extern char *text1[];
 
@@ -415,15 +415,15 @@ void nb_2891A8(s32 no)
 
 void nbDispDevilName(s32 id)
 {
-    char **lndtext;
+    const char **lndtext;
 
     nbGetMainProcessData();
     if (id == 0) {
         lndtext = &datExplainTable[0x40];
-        nbDispText(lndtext[datGetPlayerLNDLevel((u8 *)DDS3_GBWK + 0xA54)], NULL, 2, 2,
+        nbDispText((char *)lndtext[datGetPlayerLNDLevel((u8 *)DDS3_GBWK + 0xA54)], NULL, 2, 2,
                    0xA09DC380);
     } else {
-        nbDispText(datExplainTable[datDevilTable[id].race], text2[id],
+        nbDispText((char *)datExplainTable[datDevilTable[id].race], text2[id],
                    0, 2, 0xA09DC380);
     }}
 
@@ -626,4 +626,3 @@ void nbInitHelpProcess(nbMainProcessData_t *data)
 }
 
 char nbHelpProcessName[8] = "nb_help";
-

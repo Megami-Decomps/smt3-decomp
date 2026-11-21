@@ -5998,7 +5998,7 @@ void cmpDrawStatusName(s32 x, s32 y, u8 *alpha, datUnitWork_t *unit)
 }
 
 
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern u32 strlen(const char *text);
 
 /* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
@@ -6042,7 +6042,7 @@ extern u16 datGetLevelForDraw(datUnitWork_t *unit);
 extern s32 datAdvanceDevilLevel(datUnitWork_t *unit);
 extern frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 extern datDevilTableEntry_t datDevilTable[];
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern char cmpFmtExpNext[];
 extern s16 cmpHeartsMasterPhase FAKEMATCH_ASM_NAME("rstHeartsMasterPhase");
 extern datUnitWork_t *volatile cmpStatusBirthLive FAKEMATCH_ASM_NAME("cmbBirthPanel");
@@ -6376,13 +6376,14 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawParamPanel);
 #endif
 
 extern datDevilTableEntry_t datDevilTable[];
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern s16 datGetDevilParam(u8 devilId);
 
 void cmpDrawStatusValue(s32 x, s32 y, s32 *colors, s32 mode, datUnitWork_t *unit)
 {
     s32 color;
     s32 affinity;
+    u32 explainAddr;
     frFontHandle_t *font;
 
     if (mode == 4) {
@@ -6398,9 +6399,11 @@ color_ready:
     } else {
         affinity = datDevilTable[unit->id].aisyoid;
     }
+    /* Preserve the saved-heart and affinity lookup as an EE address. */
+    explainAddr = EE_ADDR(datExplainTable) + ((u32)affinity + 0x50U) * sizeof(datExplainTable[0]);
     font = frwGetSmallFontFRQ2((s32)(((u32)x + 0x18u) << 4),
                                (s32)(((u32)y + 0x115u) << 3),
-                               0xFFFFF, color, datExplainTable[affinity + 0x50], 0);
+                               0xFFFFF, color, *EE_ADDR_AS(const char **, explainAddr), 0);
     frDrawFontOt(font, 1, 0x47);
     frDestroyFontRequestAfter(font);
 }

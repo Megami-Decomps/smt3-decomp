@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadHoldCounters.h"
 #include "sdfDevCons.h"
 #include "libsdf.h"
 #include "ps2asm.h"
@@ -451,10 +452,6 @@ extern f32 effMagaSavedViewTarget[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 effMagaSavedViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern f32 effMagaSavedViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-
-extern s32 dds3PadButtonHoldCounters[2][2][16];
-
-extern s32 dds3PadStickHoldCounters[2][2];
 
 extern u8 dds3PadButtonPrev[2][2][16];
 
@@ -2990,13 +2987,13 @@ s32 effDebugClearPad(void) {
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             for (k = 0; k < 16; k++) {
-                dds3PadButtonHoldCounters[j][i][k] = 0;
+                dds3PadButtonHoldCounters[j * 32 + i * 16 + k] = 0;
                 dds3PadButtonPrev[j][i][k] = 0;
                 dds3PadButtonState[j][i][k] = 0;
             }
         }
         for (k = 0; k < 2; k++) {
-            dds3PadStickHoldCounters[i][k] = 0;
+            dds3PadStickHoldCounters[i * 2 + k] = 0;
             dds3PadStickPrev[i][k][0] = -0x80;
             dds3PadStickPrev[i][k][1] = -0x80;
             dds3PadStickStatusPrev[i][k] = 0;

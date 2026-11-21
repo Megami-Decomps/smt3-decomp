@@ -127,7 +127,7 @@ extern u32 abgr;
 extern u32 effBTLFieldColorId;
 extern u32 effBTLLightColor;
 extern u32 D_0054F190;
-extern u32 effBTLFieldFilter[];
+extern dds3Effect_Filter_t effBTLFieldFilter;
 extern s32 effBTLFieldColorIsOn(void);
 extern void effBTLFieldColorGetBaseColor(void);
 extern void effBTLFieldColorStart(void);
@@ -822,7 +822,7 @@ void effBTLFieldColorON(u32 id) {
         effBTLFieldColor[1] = work.r;
         effBTLFieldColor[2] = work.g;
         effBTLFieldColor[3] = work.b;
-        abgr = effBTLFieldFilter[0];
+        abgr = effBTLFieldFilter.abgr;
         effBTLFieldColorStart();
     }
     effBTLFieldLightAnimFrame = 0;

@@ -2226,7 +2226,7 @@ void ExecSummon(s32 recindex)
     SetRecordToUnitCore(&DDS3_GBWK->party[slot].unit, record);
 }
 
-extern u8 *datExplainTable[];
+extern const char *datExplainTable[];
 extern u8 *text2[];
 extern char fclEncycNum3Fmt[];
 
@@ -2252,7 +2252,7 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
         u16 id = unit->id;
         frFontHandle_t *font;
         font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
-            (char *)datExplainTable[datDevilTable[id].race], NULL);
+            datExplainTable[datDevilTable[id].race], NULL);
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
             (char *)text2[id], font);
         sprintf(text, fclEncycNum3Fmt, unit->maxhp);
@@ -2265,7 +2265,7 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
     }
 }
 
-extern u8 *datExplainTable[];
+extern const char *datExplainTable[];
 extern char fclEncycNum3Fmt[];
 extern char fclEncycBlank[];
 extern char fclEncycNum6Fmt[];
@@ -2319,7 +2319,7 @@ void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
             previous = race;
         }
         font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
-                                    (char *)datExplainTable[race], NULL);
+                                    datExplainTable[race], NULL);
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
                                     (char *)text2[id], font);
         level = record->level;
@@ -2381,7 +2381,7 @@ extern frFontHandle_t *frLinkFontString(u8 *text, s8 style, s8 color, s8 type,
 extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *font, u32 priority);
 extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);
-extern u8 *datExplainTable[];
+extern const char *datExplainTable[];
 extern u8 *text2[];
 
 void CreateFontExplain(fclEncyc_instance_tag *pinst)
@@ -2399,7 +2399,7 @@ void CreateFontExplain(fclEncyc_instance_tag *pinst)
     itfMesMngSetDefaultSpeed(work->phase.msgid, 0xD);
     itfMesMngRequestMessage(work->phase.msgid, id, 0);
     frEnableMode(1);
-    font = frLinkFontString(datExplainTable[datDevilTable[id].race], 0, 3, 0, NULL);
+    font = frLinkFontString((u8 *)datExplainTable[datDevilTable[id].race], 0, 3, 0, NULL);
     frSetDrawPosition(font, 0xC0, 0x2E0);
     frSetPriority(font, 0xFFFFF0);
     frSetFontSpace(font, 3);
@@ -4224,4 +4224,3 @@ char fclEncycNum6Fmt[4] = "%6d";
 char fclEncycNum7Fmt[4] = "%7d";
 
 char fclEncycMarkerOn[2] = ">";
-

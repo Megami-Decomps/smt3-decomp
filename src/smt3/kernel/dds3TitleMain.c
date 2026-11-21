@@ -32,7 +32,7 @@ extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
 extern char mselLevelLabel[];
 extern char mselLevelFormat[];
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern char *text2[];
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
@@ -660,4 +660,3 @@ char D_0054FD78[8] = "Artwork";
 char D_0054FD80[6] = "Staff";
 
 char D_0054FD88[2] = " ";
-

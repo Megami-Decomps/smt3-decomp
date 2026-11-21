@@ -3102,7 +3102,8 @@ void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFDD0[], D_004EFDE0[], D_004EFE00[];
 extern nbPanelProcess_nbPanelTMXuv_t D_004EFE10[], D_004EFE20[], D_004EFE30[], D_004EFE40[];
 extern datDevilFormat_t datDevilTable[];
-extern char *datExplainTable[], *text1[], *text2[];
+extern const char *datExplainTable[];
+extern char *text1[], *text2[];
 extern u8 nbPanelAnalyzeHidden[];
 extern char nbPanelLevelFormat[];
 extern f32 nbPanelAnalyzeRate;
@@ -4324,4 +4325,3 @@ char D_005512C0[8] = "\x86\xd1\x8f\xf6";
 char D_005512C8[8] = "\x83\xc7\x84\xce";
 
 char D_005512D0[8] = "\x84\xe6\x84\xe7";
-

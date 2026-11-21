@@ -2720,7 +2720,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 
 
 extern char fclCombineNum2dFmt[];
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern char *text2[];
 
 extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color,
@@ -3033,7 +3033,7 @@ void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
 
 extern char fclCombineStrFmt[];
 extern char fclCombineNum2dFmt[];
-extern char *datExplainTable[];
+extern const char *datExplainTable[];
 extern char *text2[];
 
 extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, u32 color, const char *text, void *previous);
