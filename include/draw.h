@@ -24,7 +24,7 @@ typedef struct
     s16 buffH;
     u16 pixelFormat;
     u16 zbuffFormat;
-    u16 fieldFrameMode; /* unconfirmed; nothing in sdfGraph.c reads it */
+    u16 fieldFrameMode; /* Interlace/frame selection read by sdfGrGsReset. */
 } sdfGrScreenDef_t;
 
 /* The two frame buffers and the depth buffer they share. sdfGrMakeFrameSet
