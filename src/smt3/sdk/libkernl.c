@@ -4271,7 +4271,7 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
-extern kernelEntryPair_t alarmEntryPairs[8];
+#include "sdk_kernel_alarm_entries.h"
 extern kernelEntryPair_t tlbEntryPairs[8];
 extern void *execArgumentBlock;
 extern const u8 alarmPayload[0x740];
@@ -4293,12 +4293,13 @@ void InitAlarm(void)
     if ((*(volatile u32 *)0x10001810 & 0x100) != 0) {
         return;
     }
-    gcc2_compiled__17(alarmEntryPairs[0].index, alarmEntryPairs[0].entry);
+    /* Pass the 32-bit EE code address to syscall 0x74, not a C call. */
+    gcc2_compiled__17(alarmEntryPairs[0].index, EE_ADDR_PTR(EE_ADDR(alarmEntryPairs[0].entry.copy)));
     Copy_1((void *)0x80076000, alarmPayload, 0x740);
     Copy_1((void *)0x82000, alarmSmallPayload, 0x28);
     FlushCache(0);
     FlushCache(2);
-    gcc2_compiled__17(alarmEntryPairs[1].index, alarmEntryPairs[1].entry);
+    gcc2_compiled__17(alarmEntryPairs[1].index, alarmEntryPairs[1].entry.resident);
     for (i = 2; i < 8; i++) {
         index = alarmEntryPairs[i].index;
         entry = GetEntryAddress_0(index);

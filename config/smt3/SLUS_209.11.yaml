@@ -1263,6 +1263,8 @@ segments:
       - [0x42D2C0, .data, sdk/libkernlFsRequestSemas]
       - [0x42D340, .data, sdk/libkernlIoStartup]
       - [0x42D360, data, data_0052C360]
+      - [0x42E2B0, .data, sdk/libkernlAlarmEntryPairs]
+      - [0x42E2F0, data, data_0052D2F0]
       - [0x42E6B0, .data, sdk/libkernlTlbBootEntries]
       - [0x42E8A0, .data, sdk/libkernlTlbExtendedEntries]
       - [0x42E920, .data, sdk/libkernlTlbTable]
