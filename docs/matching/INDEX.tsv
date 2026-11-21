@@ -503,6 +503,7 @@ rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstc
 Race and heart data				docs/matching/result/rstcalc.md	722
 Evolution eligibility list				docs/matching/result/rstcalc.md	731
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
+Script command table				docs/matching/script/scrTraceCode.md	3
 Default triangle indices				docs/matching/sdf/sdf3DPrim.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3

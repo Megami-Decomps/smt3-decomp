@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from retail_elf import RETAIL, ROOT, VERSIONS, load_segments, off_to_va, va_to_off  # noqa: E402
+from linker_inputs import linker_object_sections  # noqa: E402
 from symbol_aliases import load_symbol_aliases  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
@@ -981,18 +982,22 @@ def full_context_storage_problems(yaml_text, unit, sections, symbol_text,
     return problems
 
 
-def writable_file_data_section(elf, file_size):
-    """Find one actual writable allocated PROGBITS .data, not just a name."""
+def file_data_section(elf, file_size, name, flags):
+    """Find one allocated, file-backed data section with the expected flags."""
     matches = [(index, section) for index, section in enumerate(elf.iter_sections())
-               if section.name == ".data"]
+               if section.name == name]
     if len(matches) != 1:
         return None
     index, section = matches[0]
-    if (section["sh_type"] != "SHT_PROGBITS" or section["sh_flags"] != 3
+    if (section["sh_type"] != "SHT_PROGBITS" or section["sh_flags"] != flags
             or section["sh_size"] <= 0
             or section["sh_offset"] + section["sh_size"] > file_size):
         return None
     return index, section
+
+
+def writable_file_data_section(elf, file_size):
+    return file_data_section(elf, file_size, ".data", 3)
 
 
 def initialized_data_alias_problems(unit, section_range, aliases, syms, retail, segs,
@@ -1098,11 +1103,37 @@ def initialized_data_alias_problems(unit, section_range, aliases, syms, retail, 
     return problems
 
 
+def readonly_data_only_owner(selectors, sections, full_sections):
+    """Recognize only one explicit .rodata input, with no other runtime storage."""
+    if any(size for name in (".text", *DATA_SECTIONS) if name != ".rodata"
+           for size in (sections.get(name, (0, 0))[1],
+                        full_sections.get(name, (0, 0))[1])):
+        return False
+    return selectors == [".rodata"]
+
+
+def readonly_data_files_cover_span(retail, standalone, full, start, end):
+    """Verify the file span lies in native .rodata and both objects emit .rodata."""
+    from io import BytesIO
+    from elftools.common.exceptions import ELFError
+    from elftools.elf.elffile import ELFFile
+
+    try:
+        sections = [file_data_section(ELFFile(BytesIO(b)), len(b), ".rodata", 2)
+                    for b in (retail, standalone, full)]
+    except ELFError:
+        return False
+    if not all(sections):
+        return False
+    native = sections[0][1]
+    return native["sh_offset"] <= start < end <= native["sh_offset"] + native["sh_size"]
+
+
 def initialized_data_problems(section_range, section_origin, retail_span,
                                data, definitions, relocs, funcs,
                                full_data, full_definitions, full_relocs,
-                               full_funcs, syms, section_bases):
-    """Validate one explicitly owned, initialized .data section in both builds.
+                               full_funcs, syms, section_bases, *, section=".data", explicit_sizes=None):
+    """Validate one explicitly owned, initialized data section in both builds.
 
     The YAML range owns the section's possible extent. Every emitted object
     must have an unambiguous native symbol, exact STT_OBJECT placement/size in
@@ -1111,29 +1142,29 @@ def initialized_data_problems(section_range, section_origin, retail_span,
     """
     problems = []
     if section_range is None:
-        return ["unit has no unambiguous YAML-owned .data range"]
+        return [f"unit has no unambiguous YAML-owned {section} range"]
     if section_origin is None:
-        return ["YAML-owned .data range has no retail section address"]
+        return [f"YAML-owned {section} range has no retail section address"]
     start, end = section_range
     span = end - start
     if len(retail_span) != span:
-        return ["retail .data span is unavailable or truncated"]
+        return [f"retail {section} span is unavailable or truncated"]
     if len(data) > span or len(full_data) > span:
         problems.append(
             f"emitted extent exceeds its 0x{span:X}-byte YAML-owned span")
     if len(data) != len(full_data):
         problems.append(
-            f"standalone/full .data extents differ (0x{len(data):X} vs 0x{len(full_data):X})")
+            f"standalone/full {section} extents differ (0x{len(data):X} vs 0x{len(full_data):X})")
     if not definitions or not full_definitions:
-        problems.append(".data has no STT_OBJECT definitions in both contexts")
+        problems.append(f"{section} has no STT_OBJECT definitions in both contexts")
         return problems
 
     standalone = {(name): (off, size) for off, size, name in definitions}
     full = {(name): (off, size) for off, size, name in full_definitions}
     if len(standalone) != len(definitions) or len(full) != len(full_definitions):
-        problems.append(".data has duplicate STT_OBJECT names")
+        problems.append(f"{section} has duplicate STT_OBJECT names")
     if standalone != full:
-        problems.append("standalone/full .data STT_OBJECT inventories differ")
+        problems.append(f"standalone/full {section} STT_OBJECT inventories differ")
 
     def check_inventory(blob, inventory, blob_relocs, label):
         covered = bytearray(len(blob))
@@ -1141,6 +1172,8 @@ def initialized_data_problems(section_range, section_origin, retail_span,
             if size <= 0 or off < 0 or off + size > len(blob):
                 problems.append(f"{label} {name}: invalid STT_OBJECT extent +0x{off:X}/0x{size:X}")
                 continue
+            if explicit_sizes is not None and name in explicit_sizes and explicit_sizes[name] != size:
+                problems.append(f"{label} {name}: STT_OBJECT size differs from native symbol size")
             if any(covered[off:off + size]):
                 problems.append(f"{label} {name}: overlapping STT_OBJECT extent")
             covered[off:off + size] = b"\1" * size
@@ -1152,7 +1185,7 @@ def initialized_data_problems(section_range, section_origin, retail_span,
                     f"{label} {name}: object offset +0x{off:X} does not match native address 0x{addr:08X}")
         for reloc_off in blob_relocs:
             if reloc_off < 0 or reloc_off + 4 > len(blob):
-                problems.append(f"{label} relocation outside emitted .data at +0x{reloc_off:X}")
+                problems.append(f"{label} relocation outside emitted {section} at +0x{reloc_off:X}")
             elif not any(off <= reloc_off and reloc_off + 4 <= off + size
                          for off, size, _ in inventory):
                 problems.append(f"{label} relocation is outside an STT_OBJECT at +0x{reloc_off:X}")
@@ -1171,9 +1204,9 @@ def initialized_data_problems(section_range, section_origin, retail_span,
         if relocation_problems:
             problems.extend(f"{label} {problem}" for problem in relocation_problems)
         elif linked != retail_span[:len(blob)]:
-            problems.append(f"{label} .data bytes/relocations differ from retail")
+            problems.append(f"{label} {section} bytes/relocations differ from retail")
         if len(blob) <= span and any(retail_span[len(blob):]):
-            problems.append(f"{label} omits nonzero bytes at the end of its YAML-owned .data span")
+            problems.append(f"{label} omits nonzero bytes at the end of its YAML-owned {section} span")
     return problems
 
 
@@ -1756,6 +1789,7 @@ def main():
         full_rodata_size = 0
         shared_rodata = set()
         owned_data_checked = False
+        readonly_data_checked = False
         as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
         ro_diff = None    # first retail address where the full unit's .rodata differs
         full_function_names = None
@@ -1908,6 +1942,36 @@ def main():
                     [(off, size, name) for name, (off, size) in fsyms.items()],
                     syms, section_bases)
                 data_context.extend(f".data {problem}" for problem in initialized_problems)
+            if not args.func and rodata_range is not None and text_range is None:
+                has_code = bool(text or ftext or funcs or fsyms)
+                script = ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld"
+                obj_path = Path("build") / version / "src" / version / f"{unit_name}.o"
+                selectors = linker_object_sections(script).get(obj_path) if script.is_file() else None
+                # Mixed owners still follow the existing code path, including
+                # fixtures without a generated linker script. An explicitly
+                # .rodata-only linker input must not emit any other payload.
+                if selectors == [".rodata"] or not has_code:
+                    if has_code:
+                        data_context.append(".rodata-only unit unexpectedly emits code")
+                    elif not readonly_data_only_owner(selectors, secs, fsecs):
+                        data_context.append(".rodata-only unit needs one generated .rodata linker input")
+                    else:
+                        readonly_data_checked = True
+                        start, end = rodata_range
+                        fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+                        span = end - start
+                        origin = full_section_bases.get(".rodata")
+                        if (native_object_offset(segs, origin, span, len(retail)) != start
+                                or not readonly_data_files_cover_span(retail, data, fdata, start, end)):
+                            data_context.append(".rodata is not one mapped native span")
+                        if ro_size != span or fro_size != span:
+                            data_context.append(f".rodata requires the complete 0x{span:X}-byte native span")
+                        data_context.extend(initialized_data_problems(
+                            rodata_range, origin, retail[start:end],
+                            rodata, rodata_symbols, rodata_relocs, [],
+                            fdata[fro_off:fro_off + fro_size], section_symbols(full_objdump, ".rodata"),
+                            full_relocs[".rodata"], [], syms, full_section_bases,
+                            section=".rodata", explicit_sizes=symbol_sizes(version)))
             if sdata_range:
                 full_sdata = {
                     name: (off, size) for off, size, name in section_symbols(
@@ -2475,6 +2539,8 @@ def main():
         # Its bounded source/full-unit payload was either validated above or
         # reported with a specific DATA CONTEXT diagnostic.
         emitted.pop(".data", None)
+    if readonly_data_checked:
+        emitted.pop(".rodata", None)
     # --func compares one function: the rest of the unit's data is not its business.
     if not args.func:
         for name, size in common:

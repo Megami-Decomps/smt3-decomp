@@ -17,10 +17,10 @@ import shutil
 import stat
 import subprocess
 import sys
-from collections import Counter
 from pathlib import Path
 
 from tools.ee_gcc_aslr import marker_is_valid
+from tools.linker_inputs import linker_object_sections
 from tools.symbol_aliases import load_symbol_aliases, linker_aliases
 
 ROOT = Path(__file__).resolve().parent
@@ -376,42 +376,13 @@ def provide_symbol_aliases(version: str) -> None:
             path.write_text(updated)
 
 
-# Preserve the existing linker object order, but only treat a complete
-# one-input line as evidence that an object has exactly one selector.
-LD_OBJECT_REFERENCE = re.compile(r"(build/[^\s()]+\.o)\(")
-LD_OBJECT_LINE = re.compile(r"\s*(build/[^\s()]+\.o)\(([^()]+)\)\s*;?\s*")
-
-
-def linker_object_sections(ld_script: Path) -> dict[Path, list[str] | None]:
-    """Read generated input selectors in link order; None means ambiguous."""
-    text = ld_script.read_text()
-    # Count exact paths conservatively even on unrecognized lines. A
-    # spaced, multiline, quoted or commented repeat cannot establish
-    # that the object has just one .data selector.
-    canonical: Counter[Path] = Counter()
-    objects: dict[Path, list[str]] = {}
-    for line in text.splitlines():
-        match = LD_OBJECT_LINE.fullmatch(line)
-        if match:
-            obj = Path(match.group(1))
-            objects.setdefault(obj, []).extend(match.group(2).split())
-            canonical[obj] += 1
-        else:
-            # Preserve the historical object discovery on other lines.
-            first = LD_OBJECT_REFERENCE.match(line.lstrip())
-            if first:
-                objects.setdefault(Path(first.group(1)), [])
-    return {obj: sections if canonical[obj] == text.count(obj.as_posix()) else None
-            for obj, sections in objects.items()}
-
-
 def objdiff_reference(version: str, src: Path, sections: list[str] | None) -> Path:
     unit = src.relative_to(Path("src") / version)
     asm = Path("asm") / version
     # An explicit data-only linker input has no .text sibling for Splat
     # to disassemble. Its generated native data assembly is the reference.
-    if sections == [".data"]:
-        reference = asm / "data" / unit.with_suffix(".data.s")
+    if sections in ([".data"], [".rodata"]):
+        reference = asm / "data" / unit.with_suffix(f"{sections[0]}.s")
         if not (ROOT / reference).is_file():
             raise SystemExit(f"{src}: missing native data reference {reference}; re-run splat")
         return reference
@@ -764,7 +735,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     write_objdiff_reports(n, units)
 
-    configure_inputs = ["configure.py", "tools/symbol_aliases.py", "config/versions.json"] + [
+    configure_inputs = ["configure.py", "tools/linker_inputs.py", "tools/symbol_aliases.py", "config/versions.json"] + [
         f"config/{v}/{VERSIONS[v]['serial']}.yaml" for v in versions
     ] + [
         f"config/{v}/{name}" for v in versions

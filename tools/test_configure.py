@@ -179,6 +179,23 @@ class ConfigureTests(unittest.TestCase):
                     self.assertEqual(configure.objdiff_reference(VERSION, source, sections[obj]),
                                      Path(f"asm/{VERSION}/field/{unit}.s"))
 
+    def test_objdiff_reference_uses_native_readonly_data_only_for_a_single_selector(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = Path(f"src/{VERSION}/script/opcodes.c")
+            native = Path(f"asm/{VERSION}/data/script/opcodes.rodata.s")
+            with patch.object(configure, "ROOT", root):
+                with self.assertRaisesRegex(SystemExit, "missing native data reference"):
+                    configure.objdiff_reference(VERSION, source, [".rodata"])
+                (root / native).parent.mkdir(parents=True)
+                (root / native).touch()
+                self.assertEqual(configure.objdiff_reference(VERSION, source, [".rodata"]), native)
+                for selectors in (None, [".rodata*"], [".text", ".rodata"],
+                                  [".rodata", ".rodata"], [".rodata", ".sdata"]):
+                    with self.subTest(selectors=selectors):
+                        self.assertEqual(configure.objdiff_reference(VERSION, source, selectors),
+                                         Path(f"asm/{VERSION}/script/opcodes.s"))
+
     def test_unit_cflags_drop_comments_and_keep_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

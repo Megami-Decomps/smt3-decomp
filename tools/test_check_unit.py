@@ -1612,7 +1612,7 @@ class InitializedDataTests(unittest.TestCase):
                  data=b"\x01\x02\x03\x04\x05\x06\x07\x08",
                  definitions=((0, 8, "consoleUv"),), relocs=None,
                  full_data=None, full_definitions=None, full_relocs=None,
-                 syms=None, section_bases=None):
+                 syms=None, section_bases=None, section=".data", explicit_sizes=None):
         if full_data is None:
             full_data = data
         if full_definitions is None:
@@ -1627,7 +1627,40 @@ class InitializedDataTests(unittest.TestCase):
             section_range, section_origin, retail,
             data, list(definitions), relocs, [],
             full_data, list(full_definitions), full_relocs, [], syms,
-            section_bases or {})
+            section_bases or {}, section=section, explicit_sizes=explicit_sizes)
+
+    def test_readonly_standalone_rejects_wrong_declared_extent_even_with_zero_tail(self):
+        data = b"row!" + b"\0" * 4
+        opts = dict(section=".rodata", retail=data, data=data,
+                    definitions=((0, 4, "consoleUv"),))
+        self.assertEqual(self.problems(**opts, explicit_sizes={"consoleUv": 4}), [])
+        self.assertIn("standalone consoleUv: STT_OBJECT size differs from native symbol size",
+                      self.problems(**opts, explicit_sizes={"consoleUv": 8}))
+
+    def test_readonly_standalone_requires_one_exact_only_linker_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            script = Path(tmp) / "main.ld"
+            obj = Path("build/smt3/src/smt3/script/data.o")
+            secs = {".text": (52, 0), ".rodata": (52, 8)}
+            def owner(standalone=secs, full=secs):
+                selectors = check_unit.linker_object_sections(script).get(obj) if script.is_file() else None
+                return check_unit.readonly_data_only_owner(selectors, standalone, full)
+            self.assertFalse(owner())
+            script.write_text(f"    {obj}(.rodata);\n")
+            self.assertTrue(owner())
+            for extra in (".text", ".data", ".sdata", ".bss", ".lit4"):
+                leaked = dict(secs)
+                leaked[extra] = (8, 4)
+                self.assertFalse(owner(full=leaked))
+                self.assertFalse(owner(standalone=leaked))
+            for script_text in (f"/*\n    {obj}(.rodata);\n*/\n",
+                                f"    {obj}(.rodata*);\n",
+                                f"    {obj}(.rodata .sdata);\n",
+                                f"    {obj}(.rodata);\n    {obj}(.rodata);\n",
+                                f"    {obj}(.rodata);\n    KEEP({obj}(.text))\n"):
+                with self.subTest(script=script_text):
+                    script.write_text(script_text)
+                    self.assertFalse(owner())
 
     def test_accepts_exact_object_and_native_payload(self):
         self.assertEqual(self.problems(), [])

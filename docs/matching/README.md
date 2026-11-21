@@ -123,6 +123,7 @@ both native and emitted sizes when they differ.
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfCoreDraw | [sdf/sdfCoreDraw.md](sdf/sdfCoreDraw.md) |
 | 1 |  | [sdf/sdf3DPrim.md](sdf/sdf3DPrim.md) |
+| 1 |  | [script/scrTraceCode.md](script/scrTraceCode.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
