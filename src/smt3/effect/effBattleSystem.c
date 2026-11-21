@@ -11,6 +11,7 @@
 #include "effBattle.h"
 #include "effBattleSystemCut1Data.h"
 #include "effBattleSystemPartData.h"
+#include "effThunderSphereData.h"
 #include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
@@ -136,12 +137,6 @@ extern effBattleSystem_effBTLSystem_Part_tag effBTLSystem_Nego_Kyusyu_PartList[]
 
 extern effBattleSystem_effBTLSystem_Part_tag effBTLSystem_Nego_Stone_PartList[];
 
-extern u8 effBTLSystem_Shock_ThunderSpherePolyLowParam[];
-
-extern u8 effBTLSystem_Bind_ThunderSpherePolyLowParam[];
-
-extern u8 effBTLSystem_Paralyze_ThunderSpherePolyLowParam[];
-
 /* One effect family of the effBTLSystem table, indexed by the family id. */
 typedef struct
 {
@@ -252,8 +247,6 @@ void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark);
 
 
-
-void *effBTLBindCreateTrack(void *pParam);
 
 void effPCPThunderSpherePolyLowDelete(void *hData);
 
@@ -521,7 +514,7 @@ effBTLSysTrack_t *effBTLSys_Shock_Create(nbFormation_t *pFormation)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
     hEffect->pFormation = pFormation;
     hEffect->frame = 0;
-    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Shock_ThunderSpherePolyLowParam);
+    hEffect->hTrack = effBTLBindCreateTrack(&effBTLSystem_Shock_ThunderSpherePolyLowParam);
     effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
     pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
     pParam->unknown20 = hEffect->pFormation->h * hEffect->pFormation->scl * 0.85f;
@@ -803,7 +796,7 @@ effBTLSysTrack_t *effBTLSys_Bind_Create(nbFormation_t *pFormation)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
     hEffect->pFormation = pFormation;
     hEffect->frame = 0;
-    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Bind_ThunderSpherePolyLowParam);
+    hEffect->hTrack = effBTLBindCreateTrack(&effBTLSystem_Bind_ThunderSpherePolyLowParam);
     effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
     return hEffect;
 }
@@ -1110,7 +1103,7 @@ effBTLSysTrack_t *effBTLSys_Paralyze_Create(nbFormation_t *pFormation)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
     hEffect->pFormation = pFormation;
     hEffect->frame = 0;
-    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Paralyze_ThunderSpherePolyLowParam);
+    hEffect->hTrack = effBTLBindCreateTrack(&effBTLSystem_Paralyze_ThunderSpherePolyLowParam);
     effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
     pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
     pParam->unknown20 = hEffect->pFormation->h * hEffect->pFormation->scl * 0.85f;

@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 52 |  | [code_0022C578.md](code_0022C578.md) |
+| 53 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 21 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 19 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -79,6 +79,7 @@ both native and emitted sizes when they differ.
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
+| 3 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
@@ -108,7 +109,6 @@ both native and emitted sizes when they differ.
 | 2 |  | [event/evtViewerMenuTables.md](event/evtViewerMenuTables.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
-| 2 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 2 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |

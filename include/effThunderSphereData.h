@@ -4,6 +4,7 @@
 #include "common.h"
 
 typedef struct effPCPThunderSpherePolyParam_t effPCPThunderSpherePolyParam_t;
+struct effPCPThunderSpherePoly_t;
 
 /* The sphere-poly parameters, 0x4C bytes the constructors copy whole. The tail
  * is the thunder family's six fields: a width and a colour for the centre, the
@@ -14,7 +15,7 @@ struct effPCPThunderSpherePolyParam_t {
     u16 systemParam;
     u8 pad12[2];
     u32 cellCount;
-    u8 pad18[4];
+    u8 pad18[4]; /* Opaque preset bytes copied with the header, not alignment padding. */
     f32 width;
     f32 height;
     f32 rotationScale;
@@ -29,6 +30,12 @@ struct effPCPThunderSpherePolyParam_t {
     f32 width_edge;
     u32 color_edge;
 };
+
+struct effPCPThunderSpherePoly_t *effBTLBindCreateTrack(effPCPThunderSpherePolyParam_t *parameters);
+
+extern effPCPThunderSpherePolyParam_t effBTLSystem_Shock_ThunderSpherePolyLowParam;
+extern effPCPThunderSpherePolyParam_t effBTLSystem_Bind_ThunderSpherePolyLowParam;
+extern effPCPThunderSpherePolyParam_t effBTLSystem_Paralyze_ThunderSpherePolyLowParam;
 
 extern effPCPThunderSpherePolyParam_t D_0031D040;
 extern effPCPThunderSpherePolyParam_t D_0031D090;

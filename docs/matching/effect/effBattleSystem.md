@@ -94,3 +94,20 @@ and zero differences in the affected owner. Independent host fixtures
 exercise replaced units, party/formation snapshots, both light branches,
 selector-byte canaries, and VU handoff values. The narrow constraints
 reconstruct compiler behavior, not original source spelling.
+
+## Shock, Bind, and Paralyze sphere parameters
+
+The status-effect constructors pass their original parameter records to
+`effBTLBindCreateTrack`, which copies the full 0x4C-byte header before
+reading the width, height, cell count, per-cell count, border color and
+system mode. At offset 0x18 the native aligned and unaligned copy paths
+both preserve four opaque bytes; the observed value is
+`{1, 0, 0, 0}` in all three presets, as in the already-matched sphere
+families. No separate interpretation for those bytes is recovered.
+The four bytes after each header remain outside its C owner.
+
+The call sites and constructor use the same sphere-header type. Direct
+compilation preserves allocated bytes, symbols, and relocations of all
+nine affected existing owners in production, SKIP_ASM, retained C,
+and retained C with fixes enabled. Each new 76-byte record matches
+its native data exactly and contains no relocations.

@@ -11,5 +11,6 @@
   "camp/cmpSkillMsgTable": "cmpSkillMsgTable",
   "camp/cmpItemMsgTable": "cmpItemMsgTable",
   "sdf/sdfIpuRgbModeBits": "sdfIpuRgbModeBits",
-  "newbattle/nbNegoMukanWeights": "nbMukanRateTable"
+  "newbattle/nbNegoMukanWeights": "nbMukanRateTable",
+  "camp/cmpParamGaugeColors": "cmpParamGaugeColors"
 }
