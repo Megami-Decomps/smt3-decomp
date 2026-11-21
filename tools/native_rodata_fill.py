@@ -92,6 +92,13 @@ CASES={
         0x436830,0x4368F0,0x4368E0,'D_005358E0','FRAME: %d/%d',16),
     'field/fldTitle': Case('field/fldTitle','mc/slMain',
         0x4337B0,0x433860,0x433848,'D_00532848','/fld/f/pnl/dun_04.tmx',16),
+    'sdf/sdfSound': Case('sdf/sdfSound','sdf/sdfDevFile',0x44A8A0,0x44B2D8,
+                      0x44B2B8,'D_0054A2B8','       for %3d .. %4d : %d\n',8,
+                      r'       for %3d .. %4d : %d\n'),
+    'event/evtEventViewerMenu': Case('event/evtEventViewerMenu','event/evtSound',0x43CCC0,0x43D5B8,
+                      0x43D5A8,'D_0053C5A8','%s_MOTION',8),
+    'effect/effBattle': Case('effect/effBattle','effect/effBattleMisc',0x433E20,0x434080,
+                      0x434068,'D_00533068','nb_effect_draw',16),
 }
 # These exact objects have a selector but emit no readonly section at all.
 # Never infer or skip empty objects for owners not explicitly named here.
@@ -222,10 +229,84 @@ def local_incoming(e,rid,have,span):
             dest=[v+w for w in words]+[v+((h&0xffff)<<16)+signed(l) for h in hi for l in lo]
             must(not any(have<=a<span for a in dest),'incoming relocation targets fill')
     return found
-def readonly_projection(e,index,data,c):
+@dataclass(frozen=True)
+class LocalTextReadOnly:
+    text: tuple[int,int]
+    stock_text_size: int
+    slots: int
+    sites_and_targets: str
+
+
+# Only these three existing jump-table owners use this data. Hash the ordered
+# (rodata-relative site, linked text virtual address) LE u32 pairs, independently
+# identical in production, SKIP and stock. The linked text window is stricter
+# than the complete stock .text for two owners (four terminal zero bytes).
+LOCAL_TEXT_READONLY = {
+    'sdf/sdfSound': LocalTextReadOnly((0x2C0E90,0x27D0),0x27D0,137,
+        'df86c98550f2bb970e908cdaffc16914f4101fce81a83a7c226fe019a3665248'),
+    'event/evtEventViewerMenu': LocalTextReadOnly((0x1F4B28,0x53BC),0x53C0,132,
+        'cec7986b36b371ba4213d09bb9ca9a8cc53f67f12b0428d0706a655a168fdbe9'),
+    'effect/effBattle': LocalTextReadOnly((0x16A9C0,0x1C24),0x1C28,12,
+        '887f3834b092b3f0eed3f81f52415d0211e8e0e537602b42705c0903f7018b52'),
+}
+
+
+def project_local_text(e,index,outgoing,raw,c,layout,reference):
+    must(len(outgoing)==(1 if reference else 2) and outgoing[0].name=='.rel.rodata' and
+         outgoing[0]['sh_type']=='SHT_REL' and outgoing[0]['sh_info']==index,
+         'pinned readonly relocation section')
+    ti,ts=section(e,'.text')
+    start,extent=layout.text
+    size=layout.stock_text_size if reference else extent
+    must(ts['sh_type']=='SHT_PROGBITS' and ts['sh_flags']==6 and
+         ts['sh_addr']==0 and ts['sh_size']==size and
+         not any(ts.data()[extent:]),'pinned readonly relocation text extent')
+    sid,st=section(e,'.symtab')
+    # The pinned EE assembler emits this one empty RELA companion in
+    # production/SKIP, while the GNU comparison assembler emits none.
+    if not reference:
+        empty=outgoing[1]
+        must(empty.name=='.rela.rodata' and empty['sh_type']=='SHT_RELA' and
+             empty['sh_info']==index and empty['sh_link']==sid and
+             empty['sh_size']==0 and empty['sh_entsize']==12 and
+             empty['sh_flags']==empty['sh_addr']==0 and empty['sh_addralign']==4 and
+             empty.num_relocations()==0 and empty.data()==b'',
+             'pinned readonly empty EE relocation companion')
+    rs=outgoing[0]
+    must(rs['sh_link']==sid and rs['sh_entsize']==8 and
+         rs['sh_size']==8*layout.slots and rs.num_relocations()==layout.slots,
+         'pinned readonly relocation symbol table or count')
+    out=bytearray(raw)
+    pairs=bytearray()
+    last=-1
+    payload_end=c.final+len(c.value.encode())+1-c.begin
+    for r in rs.iter_relocations():
+        t=st.get_symbol(r['r_info_sym'])
+        must(r['r_info_type']==2 and t['st_shndx']==ti and
+             t['st_info']['type']=='STT_SECTION' and t['st_info']['bind']=='STB_LOCAL' and
+             t['st_other']['visibility']=='STV_DEFAULT' and t.name in ('','.text') and
+             t['st_value']==t['st_size']==0,'pinned readonly jump requires local text R_MIPS_32')
+        off=r['r_offset']
+        must(last<off and off%4==0 and off+4<=min(len(raw),payload_end),
+             'pinned readonly relocation site outside payload or order')
+        last=off
+        dest=struct.unpack_from('<I',raw,off)[0]
+        must(dest<extent and dest%4==0,'pinned readonly relocation destination outside text')
+        pairs.extend(struct.pack('<II',off,start+dest))
+        struct.pack_into('<I',out,off,start+dest)
+    must(sha(pairs)==layout.sites_and_targets,'pinned readonly exact relocation sites and destinations')
+    return bytes(out)
+
+
+def readonly_projection(e,index,data,c,*,reference=False):
     outgoing=[r for r in e.iter_sections() if isinstance(r,RelocationSection)
               and r['sh_info']==index and r.num_relocations()]
     raw=data.data()
+    if (layout := LOCAL_TEXT_READONLY.get(c.unit)) is not None:
+        # Inspect all sections, including the exactly pinned EE empty companion.
+        related=[r for r in e.iter_sections() if isinstance(r,RelocationSection) and
+                 (r['sh_info']==index or r.name in ('.rel.rodata','.rela.rodata'))]
+        return project_local_text(e,index,related,raw,c,layout,reference)
     if c.unit!=MODE_SELECT:
         must(not outgoing,'owner .rodata has outgoing relocations')
         return raw
@@ -312,8 +393,8 @@ def verify_output(stock,built,c,ret,have):
     must(fill['sh_flags']==2 and fill['sh_type']=='SHT_PROGBITS' and fill['sh_addralign']==1 and
          fill.data()==ret[have:c.end] and not any(fill.data()),'new audit section not exact fill')
     must(ar.data()==br.data()+fill.data() and
-         readonly_projection(a,ai,ar,c)==ret[c.begin:c.end] and
-         readonly_projection(b,bi,br,c)==ret[c.begin:have] and
+         readonly_projection(a,ai,ar,c,reference=True)==ret[c.begin:c.end] and
+         readonly_projection(b,bi,br,c,reference=True)==ret[c.begin:have] and
          ar['sh_addralign']==br['sh_addralign'],'reassembled prefix bytes/alignment')
     sig=lambda s:(s.name,s['sh_type'],s['sh_flags'],s['sh_size'],s['sh_addralign'],s['sh_entsize'],s.data())
     excluded={'','.rodata',FILL,'.symtab','.strtab','.shstrtab'}
@@ -346,7 +427,7 @@ def verify_output(stock,built,c,ret,have):
                 ent.append((r['r_offset'],r['r_info_type'],t,r.entry.get('r_addend')))
             # readonly_projection has already strictly admitted the only
             # outgoing read-only section that may be present in this case.
-            must(rs.name not in out and (src!='.rodata' or c.unit==MODE_SELECT),
+            must(rs.name not in out and (src!='.rodata' or c.unit==MODE_SELECT or c.unit in LOCAL_TEXT_READONLY),
                  'unexpected target rodata relocation section')
             out[rs.name]=(src,ent)
         return out
@@ -586,6 +667,14 @@ def prepare_live(root,version,opts,pins):
             set(receipt['objects']),receipt['files'])
 
 
+def verify_native_prefix(c,normal,skip,stock,native_prefix,linked_span):
+    nsec,bsec=normal[2],skip[2]
+    must(nsec.data()==bsec.data() and
+         readonly_projection(*normal,c)==readonly_projection(*skip,c)==native_prefix and
+         readonly_projection(*stock,c,reference=True)==linked_span and
+         nsec['sh_addralign']==bsec['sh_addralign'],'stock/SKIP/native prefix mismatch')
+
+
 def validate_unit(root,version,unit,live,pins,stock):
     retail,r,l,rs,li,ls,plan,ld_text,selectors,maps,body,symbols,overrides,objects,files=live
     c=CASES[unit]
@@ -612,16 +701,16 @@ def validate_unit(root,version,unit,live,pins,stock):
     nr,nsec=ro(normal); br,bsec=ro(skip_obj); rr,rsec=ro(original); _,following=ro(next_obj)
     have=c.begin+nsec['sh_size']
     must(c.final+len(c.value)+1==have<c.end and retail[c.final:have]==c.value.encode()+b'\0','actual literal extent')
-    must(nsec.data()==bsec.data() and
-         readonly_projection(normal,nr,nsec,c)==readonly_projection(skip_obj,br,bsec,c)==retail[c.begin:have]
-         and readonly_projection(original,rr,rsec,c)==rb and
-         nsec['sh_addralign']==bsec['sh_addralign'],'stock/SKIP/native prefix mismatch')
+    verify_native_prefix(c,(normal,nr,nsec),(skip_obj,br,bsec),(original,rr,rsec),
+                         retail[c.begin:have],rb)
     must(retail[have:c.end]==bytes(c.end-have),'nonzero actual fill')
     actual_alignment(c,have,following['sh_addralign'])
     must(maps.get((str(obj),'.rodata'))==[(startv,nsec['sh_size'])] and
          maps.get((str(nxt),'.rodata'))==[(endv,following['sh_size'])],'ambiguous live rodata ownership')
     if c.unit==MODE_SELECT:
         must(maps.get((str(obj),'.text'))==[MODE_TEXT],'wrong mapped ModeSelect text extent')
+    if (layout := LOCAL_TEXT_READONLY.get(c.unit)) is not None:
+        must(maps.get((str(obj),'.text'))==[layout.text],'wrong mapped readonly relocation text extent')
     adjacency(c,plan,ld_text,body,have,nsec['sh_size'],following['sh_size'])
     verify_metadata(symbols,overrides,have,c.end)
     inspect_symbols(l,have+BASE,endv,li)

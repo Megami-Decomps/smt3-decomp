@@ -3,6 +3,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -31,6 +32,15 @@ def write(root, rel, payload):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(payload)
     return out
+
+
+def elf_part(fields, raw, name):
+    class Part(dict):
+        def data(self):
+            return raw
+    obj = Part(fields)
+    obj.name = name
+    return obj
 
 
 class NativeReadonlyFill(unittest.TestCase):
@@ -261,6 +271,96 @@ class NativeReadonlyFill(unittest.TestCase):
                     prove(ld, body.replace(row, row * 2))
                 with self.assertRaisesRegex(ValueError, 'exact live map'):
                     prove(ld, body.replace(row, row + f' .rodata 0x100 0x0 {m}\n'))
+
+    def test_finite_local_text_relocation_shape_and_destinations(self):
+        case = fill.CASES['effect/effBattle']
+        normal = fill.LOCAL_TEXT_READONLY[case.unit]
+        start, size = normal.text
+        good = fill.LocalTextReadOnly(normal.text, size, 1,
+                                      fill.sha(struct.pack('<II', 4, start+0x20)))
+        text = {'sh_type': 'SHT_PROGBITS', 'sh_flags': 6, 'sh_addr': 0,
+                'sh_size': size}
+        text = elf_part(text, bytes(size), '.text')
+        target = elf_part({'st_shndx': 2, 'st_info': {'type': 'STT_SECTION', 'bind': 'STB_LOCAL'},
+                           'st_other': {'visibility': 'STV_DEFAULT'}, 'st_value': 0,
+                           'st_size': 0}, b'', '.text')
+        symtab = unittest.mock.Mock()
+        symtab.get_symbol.return_value = target
+        rel = unittest.mock.MagicMock(spec=fill.RelocationSection)
+        rel.name = '.rel.rodata'
+        hdr = {'sh_type': 'SHT_REL', 'sh_link': 8, 'sh_entsize': 8, 'sh_size': 8, 'sh_info': 4}
+        rel.__getitem__.side_effect = hdr.__getitem__
+        rel.num_relocations.return_value = 1
+        r = {'r_info_type': 2, 'r_info_sym': 1, 'r_offset': 4}
+        rel.iter_relocations.side_effect = lambda: iter([r])
+        raw = struct.pack('<III', 0, 0x20, 0x20)
+        e = unittest.mock.Mock()
+        e.iter_sections.return_value = [rel]
+        with patch.dict(fill.LOCAL_TEXT_READONLY, {case.unit: good}), \
+                patch.object(fill, 'section', side_effect=lambda e, name: {
+                    '.text': (2, text), '.symtab': (8, symtab)}[name]):
+            project = lambda sample=raw, reference=True: fill.readonly_projection(
+                e, 4, elf_part({}, sample, '.rodata'), case, reference=reference)
+            self.assertEqual(project(), struct.pack('<III', 0, start+0x20, 0x20))
+            empty = unittest.mock.MagicMock(spec=fill.RelocationSection)
+            empty.name = '.rela.rodata'
+            companion = {**hdr, 'sh_type': 'SHT_RELA', 'sh_size': 0, 'sh_entsize': 12,
+                         'sh_flags': 0, 'sh_addr': 0, 'sh_addralign': 4}
+            empty.__getitem__.side_effect = companion.__getitem__
+            empty.num_relocations.return_value = 0
+            empty.data.return_value = b''
+            e.iter_sections.return_value = [rel, empty]
+            with self.assertRaisesRegex(ValueError, 'pinned readonly relocation section'):
+                project()
+            self.assertEqual(project(reference=False), struct.pack('<III', 0, start+0x20, 0x20))
+            for key, bad in (('sh_size', 12), ('sh_info', 5), ('sh_link', 7)):
+                with self.subTest(companion=key):
+                    old = companion[key]
+                    companion[key] = bad
+                    with self.assertRaisesRegex(ValueError, 'empty EE relocation companion'):
+                        project(reference=False)
+                    companion[key] = old
+            e.iter_sections.return_value = [rel, empty, empty]
+            with self.assertRaisesRegex(ValueError, 'pinned readonly relocation section'):
+                project(reference=False)
+            e.iter_sections.return_value = [rel]
+            with self.assertRaisesRegex(ValueError, 'pinned readonly relocation section'):
+                project(reference=False)
+            r['r_offset'] = 8
+            with self.assertRaisesRegex(ValueError, 'exact relocation sites and destinations'):
+                project()
+            r['r_offset'] = 4
+            with self.assertRaisesRegex(ValueError, 'exact relocation sites and destinations'):
+                project(struct.pack('<III', 0, 0x24, 0x20))
+            with self.assertRaisesRegex(ValueError, 'destination outside text'):
+                project(struct.pack('<III', 0, size, 0x20))
+            r['r_info_type'] = 5
+            with self.assertRaisesRegex(ValueError, 'local text R_MIPS_32'):
+                project()
+            r['r_info_type'] = 2
+            target['st_shndx'] = 'SHN_UNDEF'
+            target['st_info']['bind'] = 'STB_GLOBAL'
+            with self.assertRaisesRegex(ValueError, 'local text R_MIPS_32'):
+                project()
+            with self.assertRaisesRegex(ValueError, 'owner .rodata has outgoing relocations'):
+                fill.readonly_projection(e, 4, elf_part({}, raw, '.rodata'), fill.CASES[PB])
+
+    def test_native_stock_skip_and_live_prefix_disagreement_fails(self):
+        case = fill.CASES['effect/effBattle']
+        group = lambda raw: (None, 0, elf_part({'sh_addralign': 16}, raw, '.rodata'))
+        expect = b'base'
+        stock = group(expect + b'\0')
+        normal, skip = group(expect), group(expect)
+        with patch.object(fill, 'readonly_projection',
+                          side_effect=lambda e,i,sec,c,reference=False: sec.data()):
+            fill.verify_native_prefix(case, normal, skip, stock, expect, expect + b'\0')
+            for one, two, three, live in (
+                (normal, group(b'kick'), stock, expect + b'\0'),
+                (normal, skip, group(expect + b'\1'), expect + b'\0'),
+                (normal, skip, stock, expect + b'\1'),
+            ):
+                with self.assertRaisesRegex(ValueError, 'stock/SKIP/native prefix mismatch'):
+                    fill.verify_native_prefix(case, one, two, three, expect, live)
 
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'

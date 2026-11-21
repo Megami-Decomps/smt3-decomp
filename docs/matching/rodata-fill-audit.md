@@ -92,3 +92,21 @@ names its sole intervening linked object and requires a current receipt,
 no read-only section or relocation section in that object, and exactly
 one unchanged selector-only map line with no contribution, even zero.
 All other owners keep the same strict adjacency checks.
+
+## Sound, Viewer menu and battle effect jump tables
+
+| Existing owner | C bytes | Unmatched link fill | Pinned local text relocations |
+| --- | ---: | ---: | ---: |
+| sdf/sdfSound | 2612 | 4 | 137 |
+| event/evtEventViewerMenu | 2290 | 6 | 132 |
+| effect/effBattle | 599 | 9 | 12 |
+
+Each owner permits only its audited ordered R_MIPS_32 sites and targets
+in its exact, receipt-pinned live text window. Production, SKIP and
+stock must all project to their corresponding exact linked bytes.
+The EE objects must have their exact empty RELA companion; the GNU
+references must not. No imported symbol, other relocation payload, or
+destination in stock-only text padding is allowed. Reassembly preserves peer bytes and relocations,
+and the existing terminal literal and whole-link incoming-target checks
+still apply. Only 5501 existing C bytes gain comparison credit; the 19
+alignment bytes remain unmatched.

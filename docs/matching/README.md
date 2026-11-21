@@ -27,10 +27,10 @@ both native and emitted sizes when they differ.
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
+| 7 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
-| 6 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
