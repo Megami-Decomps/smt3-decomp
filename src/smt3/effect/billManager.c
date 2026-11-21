@@ -9,6 +9,8 @@
 #include "ps2asm.h"
 
 #include "billboard.h"
+#include "billboardDispatch.h"
+#include "billboardGeneralData.h"
 #include "draw.h"
 #include "sdfFrame.h"
 
@@ -19,31 +21,10 @@ typedef struct dds3P2APolygon_tag {
     sdfMat_t *pMat;
 } dds3P2APolygon_tag;
 
-typedef struct dds3EffectFunc3_t {
-    struct billHandle_t *(*create)(void *);
-    void (*draw)(struct billHandle_t *);
-    void (*destroy)(struct billHandle_t *);
-} dds3EffectFunc3_t;
-
-extern dds3EffectFunc3_t dds3BillboardFuncTable[];
 extern struct billHandle_t *hGeneralBillboard[];
 
 #include "sdk_libc.h"
 
-typedef struct billGeneralEntry_t {
-    s16 kind;
-    u8 pad02[6];
-} billGeneralEntry_t;
-
-typedef struct billGeneralRow_t {
-    u8 pad00[4];
-    s16 kind;
-    u8 pad06[2];
-} billGeneralRow_t;
-
-
-extern billGeneralEntry_t BillboardTable[];
-extern billGeneralRow_t dds3BillboardGeneralRows[];
 extern struct dds3BillResource_tag *dds3BillboardTag;
 
 extern void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
@@ -1161,7 +1142,7 @@ billHandle_t *dds3BillboardGeneral(s32 number) {
     dds3BillResource_tag *child;
     s32 refCount;
 
-    obj = dds3BillboardCreate(BillboardTable[number].kind, 0);
+    obj = dds3BillboardCreate(dds3BillboardGeneralRows[number].kind, 0);
     child = hGeneralBillboard[number]->u.child;
     refCount = child->count;
     obj->u.child = child;
