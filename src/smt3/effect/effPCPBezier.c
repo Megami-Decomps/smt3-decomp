@@ -107,8 +107,8 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *aParm);
 
 extern effBezierDrawParam_t dds3BezierVertexCount, dds3BezierTrackPolyVertex;
-extern const f32 dds3BezierTrackPolyInitVertex[8][4];
-extern const u32 dds3BezierVertexCountIndices[28], dds3BezierTrackPolyVertexIndices[8];
+extern f32 dds3BezierTrackPolyInitVertex[8][4];
+extern u32 dds3BezierVertexCountIndices[28], dds3BezierTrackPolyVertexIndices[6];
 extern sdfGrOt_t *dds3BezierTrackPolyParam[];
 
 dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex);
@@ -892,3 +892,21 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 
+
+/* Eight vertices of the ribbon cap; the packet uses the same XYZW layout. */
+f32 dds3BezierTrackPolyInitVertex[8][4] = {
+    { 0.0f, -50.0f, 0.0f, 0.0f },
+    { -50.0f, -50.0f, 0.0f, 0.0f },
+    { -43.0f, -75.0f, 0.0f, 0.0f },
+    { -25.0f, -93.0f, 0.0f, 0.0f },
+    { 0.0f, -100.0f, 0.0f, 0.0f },
+    { 25.0f, -93.0f, 0.0f, 0.0f },
+    { 43.0f, -75.0f, 0.0f, 0.0f },
+    { 50.0f, -50.0f, 0.0f, 0.0f },
+};
+
+extern sdfGrOt_t sdfGrOtTable[85];
+
+sdfGrOt_t *dds3BezierTrackPolyParam[4] = {
+    &sdfGrOtTable[43], &sdfGrOtTable[43], &sdfGrOtTable[44], &sdfGrOtTable[45],
+};
