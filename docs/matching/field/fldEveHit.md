@@ -160,3 +160,10 @@ This draft proved `fldAnahoriAkuma_t.badstatus` at `+0x12`: retail tests that
 `&akuma[0].flag` to `datCheckDying`. That native address makes the record
 `datUnitWork_t` shifted by four, placing `badstatus` at `0x0E + 4`. The final
 code uses the canonical `unitwork[0]` union view of the same address.
+
+## Field script labels
+
+The NPC talk and Tobi-warp lookups use two initialized 16-byte slots.
+Ordinary writable arrays retain each original token and slot extent, with
+no explicit alignment or section attribute. The other nearby, duplicate
+labels stay raw; the consumers are unchanged.

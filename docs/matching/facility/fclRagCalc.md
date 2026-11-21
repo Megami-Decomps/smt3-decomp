@@ -88,3 +88,13 @@ mocks and documentation checks. Actual published-checkout checks confirm all
 Source commit `1dd32aaa03b376c388af52c4dbbeba557d3d1423` passed exact-source hosted CI
 [40997533214](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40997533214),
 including build and deploy.
+
+## Rag sprite resource page
+
+Nine resource records have a 14-byte stride. Stock alignment before the
+nine existing sprite entries accounts for the next two bytes. The
+separate native page descriptor still holds the same two symbolic array
+addresses. Keeping it as its own C object preserves the named relocations,
+rather than turning the in-unit references into section addends. Without
+the descriptor's existing section placement, the stock compiler selects
+`.sdata` instead of native `.data`. The preceding string pointer tables remain raw.

@@ -26,3 +26,14 @@ belongs to that record. Its old inferred interior label is retained in the
 reference symbols, but no linked input references that name. The C object
 keeps the original death fields and requires neither a fake reference nor a
 linker alias. The neighboring 164-byte raw regions stay separate.
+
+## Consecutive debug AI presets
+
+Five neighboring pairs are consecutive complete 164-byte records. One
+typed array per pair puts the second record at its native offset of 164,
+four bytes off an eight-byte boundary. Compiling the second record by itself
+had rounded its input section to eight-byte alignment and shifted its
+address. The real second-row names remain validated owner-relative aliases
+for SetBossDummy's existing reads. Neither record is padded, the previous
+initializers are preserved, and the unreferenced metadata labels at the
+ends of individual records stay in the native reference.

@@ -230,5 +230,45 @@
     "section": ".data",
     "offset": 120,
     "owner_size": 160
+  },
+  {
+    "name": "D_00526BF4",
+    "owner": "D_00526B50",
+    "unit": "newbattle/nbTestBossAI257",
+    "section": ".data",
+    "offset": 164,
+    "owner_size": 328
+  },
+  {
+    "name": "D_00526D3C",
+    "owner": "D_00526C98",
+    "unit": "newbattle/nbTestBossAI278",
+    "section": ".data",
+    "offset": 164,
+    "owner_size": 328
+  },
+  {
+    "name": "D_00526E84",
+    "owner": "D_00526DE0",
+    "unit": "newbattle/nbTestBossAI288",
+    "section": ".data",
+    "offset": 164,
+    "owner_size": 328
+  },
+  {
+    "name": "D_00526FCC",
+    "owner": "D_00526F28",
+    "unit": "newbattle/nbTestBossAI259",
+    "section": ".data",
+    "offset": 164,
+    "owner_size": 328
+  },
+  {
+    "name": "D_00527114",
+    "owner": "D_00527070",
+    "unit": "newbattle/nbTestBossAI258",
+    "section": ".data",
+    "offset": 164,
+    "owner_size": 328
   }
 ]

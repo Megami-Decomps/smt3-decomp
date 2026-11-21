@@ -118,7 +118,7 @@ fldInfTable_t fldInfTable = {{{0}}};
 
 extern s32 gFldInfIdx;
 
-extern const char fldNpcTalkLabel[];
+extern char fldNpcTalkLabel[];
 
 void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 

@@ -243,7 +243,7 @@ extern fldInfTable_t fldInfTable;
 
 extern s32 gFldInfIdx;
 
-extern const char fldNpcTalkLabel[];
+extern char fldNpcTalkLabel[];
 
 s32 evtBitCheck(s32 no);
 

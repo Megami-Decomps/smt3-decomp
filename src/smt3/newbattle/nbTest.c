@@ -327,15 +327,15 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-extern datDevilAIData_t D_00526B50;
+extern datDevilAIData_t D_00526B50[2];
 extern datDevilAIData_t D_00526BF4;
-extern datDevilAIData_t D_00526C98;
+extern datDevilAIData_t D_00526C98[2];
 extern datDevilAIData_t D_00526D3C;
-extern datDevilAIData_t D_00526DE0;
+extern datDevilAIData_t D_00526DE0[2];
 extern datDevilAIData_t D_00526E84;
-extern datDevilAIData_t D_00526F28;
+extern datDevilAIData_t D_00526F28[2];
 extern datDevilAIData_t D_00526FCC;
-extern datDevilAIData_t D_00527070;
+extern datDevilAIData_t D_00527070[2];
 extern datDevilAIData_t D_00527114;
 extern datDevilAIData_t D_005271B8;
 
@@ -343,18 +343,18 @@ extern void *memcpy(void *dest, const void *src, size_t size);
 
 void SetBossDummy(void)
 {
-    memcpy(&datDevilAIDataTable[257], &D_00526B50, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[257], &D_00526B50[0], sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[269], &D_00526BF4, sizeof(datDevilAIData_t));
-    memcpy(&datDevilAIDataTable[278], &D_00526C98, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[278], &D_00526C98[0], sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[279], &D_00526D3C, sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[280], &D_00526D3C, sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[281], &D_00526D3C, sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[282], &D_00526D3C, sizeof(datDevilAIData_t));
-    memcpy(&datDevilAIDataTable[288], &D_00526DE0, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[288], &D_00526DE0[0], sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[292], &D_00526E84, sizeof(datDevilAIData_t));
-    memcpy(&datDevilAIDataTable[259], &D_00526F28, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[259], &D_00526F28[0], sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[291], &D_00526FCC, sizeof(datDevilAIData_t));
-    memcpy(&datDevilAIDataTable[258], &D_00527070, sizeof(datDevilAIData_t));
+    memcpy(&datDevilAIDataTable[258], &D_00527070[0], sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[293], &D_00527114, sizeof(datDevilAIData_t));
     memcpy(&datDevilAIDataTable[264], &D_005271B8, sizeof(datDevilAIData_t));
     evtBitOn(0xC0B);

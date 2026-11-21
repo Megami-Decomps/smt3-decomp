@@ -1,9 +1,18 @@
 #include "common.h"
 #include "facility.h"
 
-/* One page, selected by the Rag drawing calls. The resource bank remains raw.
- * Each sprite entry selects the corresponding graphic in that nine-row bank. */
-extern fclSpriteRes_t D_003305F0[9];
+/* Native page zero: nine resource rows, followed by its sprite entries. */
+fclSpriteRes_t D_003305F0[9] = {
+    { 0, { 0, 0, 2, 1, 185, 33 } },
+    { 0, { 0, 0, 239, 1, 11, 11 } },
+    { 0, { 0, 0, 143, 36, 20, 20 } },
+    { 0, { 0, 0, 189, 1, 49, 15 } },
+    { 0, { 0, 0, 189, 19, 49, 15 } },
+    { 0, { 0, 0, 1, 36, 85, 22 } },
+    { 0, { 0, 0, 87, 36, 55, 22 } },
+    { 0, { 0, 0, 164, 36, 55, 15 } },
+    { 0, { 0, 0, 220, 36, 26, 15 } },
+};
 
 fclSpriteEntry_t D_00330670[9] = {
     { 0, 15, 0, 0 },
@@ -16,6 +25,3 @@ fclSpriteEntry_t D_00330670[9] = {
     { 99, 61, 0, 7 },
     { 190, 61, 0, 8 },
 };
-
-/* Keep the page descriptor beside the entries in the native .data bank. */
-fclSpriteTbl_t ragSpriteTable[1] __attribute__((section(".data"))) = { { D_003305F0, D_00330670 } };

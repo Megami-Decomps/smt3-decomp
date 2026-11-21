@@ -157,6 +157,7 @@ fclDrawPanelType1	facility/fclPanel	0x1B4	109 of 109 words match	docs/matching/f
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each		docs/matching/facility/fclRagCalc.md	3
 ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility/fclRagCalc.md	21
 ragDrawHeartsRows	fclRagCalc	0x21C	135 of 135 words match	docs/matching/facility/fclRagCalc.md	41
+Rag sprite resource page				docs/matching/facility/fclRagCalc.md	92
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
 ragGetListItem2, ragGetListItem3	fclRagInit	0xCC each	51 of 51 words matching	docs/matching/facility/fclRagInit.md	47
 ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	78
@@ -198,6 +199,7 @@ fldPlayerCalc	field/fldDraw	0x2A4		docs/matching/field/fldDraw.md	198
 fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
+Field script labels				docs/matching/field/fldEveHit.md	164
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldHitChkUnitVWM	field/fldHit	0xCB8		docs/matching/field/fldHit.md	209
@@ -389,6 +391,7 @@ CheckFormCursor	newbattle/nbTarSelProcess	388 bytes		docs/matching/newbattle/nbT
 AnimeTargetCursor	newbattle/nbTarSelProcess	540 bytes	135 of 135 words match	docs/matching/newbattle/nbTarSelProcess.md	205
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
 Debug boss AI 288				docs/matching/newbattle/nbTest.md	21
+Consecutive debug AI presets				docs/matching/newbattle/nbTest.md	30
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
 RunSake	newbattle/nbUnitProcess	0x104	65 of 65 words match	docs/matching/newbattle/nbUnitProcess.md	88
