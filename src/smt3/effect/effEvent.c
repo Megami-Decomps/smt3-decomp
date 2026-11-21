@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "effDistortionBlur.h"
 #include "effRippleBlur.h"
 #include "effRectangleBlur.h"
@@ -234,12 +235,11 @@ extern addr_t hEffEveCPSmokeBill01Tex;
 extern addr_t hEffEveCPSmokeBill02Tex;
 void dds3BillboardDelete(struct dds3Billboard_t *hData);
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
-extern effRandState_t dds3EffectBase[];
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(effRandState_t *name);
+u32 dds3GetRandA(void *name);
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(effRandState_t *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 extern f32 aViewTarget[4];
 void dds3BillboardSetMode(struct dds3Billboard_t *hBillboard, s32 mode);
 f32 sdfSin(f32 aRadius);

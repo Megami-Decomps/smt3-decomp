@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "kernel.h"
 #include "libsdf.h"
 
@@ -71,10 +72,9 @@ extern void Eve_EffectDraw(void);
 effNode_t *dds3EffectCreate(u16 type, u16 arg, saddr_t param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
-extern u8 dds3EffectBase[];
 extern char dds3EffectProcessName[];
 extern sdfGrOt_t sdfGrOtTable[];
-extern void sdfRandomizeByTime(void *aCB);
+extern void sdfRandomizeByTime(sdfRandCB_t *aCB);
 extern void dds3BillboardManagerInit(void);
 extern void dds3PolygonManagerInit(void);
 extern void dds3ParticleManagerInit(void);

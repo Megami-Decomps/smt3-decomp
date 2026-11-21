@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "libsdf.h"
 #include "ps2asm.h"
 #include "effect.h"
@@ -260,14 +261,13 @@ void effPCPBezierBillDelete(effPCPBezierBill_tag *hData) {
     sdfMemFreeDirect(hData->hMem);
 }
 
-extern effRandState_t dds3EffectBase[];
 extern sdfVector4_t aViewEye, aViewTarget;
 extern u32 effBTLSkillCheckRun(void);
 extern s32 effBTLSkillGetTargetFormation(s32 number);
 extern s32 effBTLSkillGetInvokeFormation(void);
 extern void effBTLModelGetSphereCenter(s32 pFormation);
-extern f32 dds3GetRandFloatA(effRandState_t *name);
-extern u32 dds3GetRandA(effRandState_t *name);
+extern f32 dds3GetRandFloatA(sdfRandCB_t *name);
+extern u32 dds3GetRandA(void *name);
 extern void SetRotateMatrixAxis(f32 aAngle, const f32 *aAxis);
 extern s32 effPCPBezierEval(effBezierCurve_t *curve, f32 *out);
 extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);

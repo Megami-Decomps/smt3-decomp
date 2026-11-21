@@ -19,5 +19,6 @@ typedef struct sdfRandCB_t {
 
 extern sdfMathConstants_t sdfMathConstants;
 extern sdfRandCB_t sdfDefaultRandCB;
+extern sdfRandCB_t dds3EffectBase[1];
 
 #endif

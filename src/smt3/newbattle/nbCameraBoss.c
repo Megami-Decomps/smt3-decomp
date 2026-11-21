@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -31,7 +32,6 @@ typedef struct nbCamera_t {
     nbCameraAnim_t anim;
 } nbCamera_t;
 
-extern u8 dds3EffectBase[];
 
 extern u32 dds3GetRandA(void *name);
 

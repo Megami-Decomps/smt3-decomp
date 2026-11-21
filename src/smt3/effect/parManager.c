@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "libsdf.h"
 #include "ps2asm.h"
 #include "effect.h"
@@ -601,7 +602,6 @@ enum {
 extern f32 parTrack_w[];
 extern f32 parLook[];
 extern u8 aViewTarget[], aViewEye[];
-extern effRandState_t dds3EffectBase[];
 extern s32 ParRand[];
 extern f32 dds3ParticleSparkDirTable[][4];
 extern f32 dds3ParticleSparkOffsetDirTable[][4];
@@ -734,7 +734,7 @@ void dds3Particle_TrackSet(parSystem_t *hTrackPoly, s32 i, u32 abgr);
 void dds3Particle_Track2Set(parSystem_t *hTrackPoly, s32 i, u32 abgr);
 void dds3Particle_Track3Set(effTrackPolyList_t *hTrackPoly, s32 i, u32 abgr);
 u32 dds3Particle_TrackPolyGetRecTiming();
-void sdfRandomizeByTime(effRandState_t *aCB);
+void sdfRandomizeByTime(sdfRandCB_t *aCB);
 sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 void *sdfMemLock(sdfMemHandle_t *aHandle);
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
@@ -750,11 +750,7 @@ void Eff_ModelTrackPolyListDelete(effTrackPolyList_t *list);
 void dds3BillboardDelete(struct billHandle_t *hData);
 void *sdfChipAllocDirect(s32 aSize);
 void sdfChipFreeDirect(void *aPtr);
-typedef struct sdfRandCB_t sdfRandCB_t;
 f32 dds3GetRandFloatA(sdfRandCB_t *name);
-/* Particle code names the storage via its layout-compatible effect view.
- * Pass the same storage address through the RNG provider's declared type. */
-#define dds3GetRandFloatA(state) (dds3GetRandFloatA)((sdfRandCB_t *)(state))
 f32 sdfCos(f32 aRadius);
 f32 sdfSin(f32 aRadius);
 u32 dds3ParticleColorAnim(dds3ParticleColorAnim_t *pColAnim, u32 color_now, s32 frame);
@@ -801,7 +797,7 @@ static __inline__ void SubmitKindDrawing(dds3Particle_Effect_t *kind) {
 
 /* Seed the generator used for per-particle launch delays. */
 void dds3ParticleManagerInit(void) {
-    sdfRandomizeByTime((effRandState_t *)&ParRand);
+    sdfRandomizeByTime((sdfRandCB_t *)ParRand);
 }
 
 void dds3ParticleManagerExit(void) {
@@ -1363,10 +1359,10 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
             packet->pos[0] += pSpark->head.origin[0];
             packet->pos[1] += pSpark->head.origin[1];
             packet->pos[2] += pSpark->head.origin[2];
-            direction.x = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            direction.x = (dds3GetRandFloatA((sdfRandCB_t *)ParRand) - 0.5f) * 2.0f * cone;
             direction.y = -(1.0f - cone);
             {
-                f32 draw = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+                f32 draw = (dds3GetRandFloatA((sdfRandCB_t *)ParRand) - 0.5f) * 2.0f * cone;
                 FAKEMATCH_ASM_LIVE_F32(draw);
                 direction.z = draw;
             }
@@ -1488,8 +1484,8 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
         effRandState_t *state = (effRandState_t *)ParRand;
         u32 sample;
         u32 spread;
-        effRandState_t *effectState = dds3EffectBase;
-        effRandState_t *first;
+        sdfRandCB_t *effectState = dds3EffectBase;
+        sdfRandCB_t *first;
         /* Keep the particle RNG argument in its native local lifetime. */
         FAKEMATCH_ASM_LIVE(state);
         sample = dds3GetRandA(state);
@@ -2862,9 +2858,9 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
             SDF_VU0_LOADVECTOR(&packet->offsetX);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&packet->offsetX);
-            direction.x = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            direction.x = (dds3GetRandFloatA((sdfRandCB_t *)ParRand) - 0.5f) * 2.0f * cone;
             direction.y = -(1.0f - cone);
-            direction.z = (dds3GetRandFloatA((effRandState_t *)ParRand) - 0.5f) * 2.0f * cone;
+            direction.z = (dds3GetRandFloatA((sdfRandCB_t *)ParRand) - 0.5f) * 2.0f * cone;
             SDF_VU0_LOADVECTOR(&direction);
             SDF_VU0_NORMALIZE();
             SDF_VU0_STOREVECTOR(&direction);
@@ -2961,8 +2957,8 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
         effRandState_t *state = (effRandState_t *)ParRand;
         u32 sample;
         u32 spread;
-        effRandState_t *effectState = dds3EffectBase;
-        effRandState_t *first;
+        sdfRandCB_t *effectState = dds3EffectBase;
+        sdfRandCB_t *first;
         /* Keep the particle RNG argument in its native local lifetime. */
         FAKEMATCH_ASM_LIVE(state);
         sample = dds3GetRandA(state);

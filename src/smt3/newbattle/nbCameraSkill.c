@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "sdk_libgcc.h"
 #include "sdk_libc.h"
 #include "newbattle.h"
@@ -141,7 +142,6 @@ extern nbCameraSkillInfo_t nbCameraSkillNBSInfo;
 extern void nbCamera_SkillInfo_Set(nbCameraSkillInfo_t *pInfo, nbCameraSkillPtr_t *pPtr);
 extern s32 effBTLSkillGetID(void);
 extern void nbCameraSetState(u16 state);
-extern u8 dds3EffectBase[];
 extern u32 dds3GetRandA(void *name);
 extern void effBTLModelAllHide(void);
 extern void effBTLModelTargetPartyShow(void);

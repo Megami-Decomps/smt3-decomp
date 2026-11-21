@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
@@ -742,7 +743,6 @@ struct effBezierDrawParam_t {
 
 extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *);
 
-extern effRandState_t dds3EffectBase[];
 
 extern u32 effPCPFlashFanIndices[];
 
@@ -752,10 +752,10 @@ extern f32 effPCPFlashPolyRingExpVertex[];
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(effRandState_t *name);
+u32 dds3GetRandA(void *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(effRandState_t *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 extern u32 effMagaCylinderCalcColor(u32 color, u32 colorB);
 

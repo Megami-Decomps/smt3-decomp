@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "libsdf.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
@@ -112,15 +113,14 @@ typedef struct effPCPNeedleSpiral_tag {
 
 #define PAR_CELL_TOPOLOGY_PAIR 0
 #define EFFECT_RING_FULL_TURN 6.2831853f
-extern effRandState_t dds3EffectBase[];
 extern f32 aViewTarget[4], aViewEye[4], dds3NeedleModelUpVector[4];
 extern void *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
 extern void *memset(void *a, s32 b, size_t c);
-extern u32 dds3GetRandA(effRandState_t *name);
-extern f32 dds3GetRandFloatA(effRandState_t *name);
+extern u32 dds3GetRandA(void *name);
+extern f32 dds3GetRandFloatA(sdfRandCB_t *name);
 extern u32 effBTLSkillCheckRun(void);
 extern u32 effBTLSkillGetInvokeFormation(void);
 extern void effBTLModelGetSphereCenter(struct BtlUnit *pFormation);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "effPCPData.h"
 #include "effThunder.h"
 #include "effThunderSphereData.h"
@@ -378,14 +379,13 @@ struct effPCPThunderSpherePoly_t {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 
-extern effRandState_t dds3EffectBase[];
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(effRandState_t *name);
+u32 dds3GetRandA(void *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(effRandState_t *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
 

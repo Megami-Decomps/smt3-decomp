@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
@@ -309,9 +310,8 @@ extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formind
 
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
 
-extern u32 dds3GetRandA(u8 *name);
+extern u32 dds3GetRandA(void *name);
 
-extern u8 dds3EffectBase[];
 
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);

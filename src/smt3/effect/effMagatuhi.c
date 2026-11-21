@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3PadButtonState.h"
+#include "sdf_math_state.h"
 #include "dds3PadButtonPrev.h"
 #include "dds3PadHoldCounters.h"
 #include "sdfDevCons.h"
@@ -387,7 +388,6 @@ u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 
 extern u32 dds3EffectBuiltinNameIndex;
 
-extern u8 dds3EffectBase[];
 
 sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
@@ -399,10 +399,10 @@ s32 dds3Bezier4PPartRun(struct effArrHdr_t *table, s32 slotIndex, f32 *out);
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(u8 *name);
+u32 dds3GetRandA(void *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(u8 *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 /* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.
    Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */

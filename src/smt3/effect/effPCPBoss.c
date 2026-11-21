@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "kernel.h"
 #include "ps2asm.h"
 #include "fpu.h"
@@ -471,7 +472,6 @@ typedef struct effPCP_HBED2_tag
     void *pHelperBED;
 } effPCP_HBED2_tag;
 
-extern u8 dds3EffectBase[];
 
 extern void *memcpy(void *a, const void *b, size_t c);
 extern void *sdfChipAllocDirect(u32 aSize);
@@ -531,8 +531,8 @@ extern void sdfChipFreeDirect(void *aPtr);
 extern void *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void sdfMemFreeDirect(void *aHandle);
-extern u32 dds3GetRandA(u8 *name);
-extern f32 dds3GetRandFloatA(u8 *name);
+extern u32 dds3GetRandA(void *name);
+extern f32 dds3GetRandFloatA(sdfRandCB_t *name);
 extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
 extern effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc);
 extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);

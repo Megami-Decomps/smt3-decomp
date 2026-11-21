@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "sdf_types.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
@@ -647,14 +648,13 @@ struct effRandState_t {
     u32 words[4];
 };
 
-extern effRandState_t dds3EffectBase[];
 
 void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
 extern u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *hPoly, s32 index);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(effRandState_t *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 effPCPWhirlwindPoly_tag *effPCPWhirlwindPolyCreate(
@@ -752,7 +752,7 @@ extern effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc);
 extern void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, f32 *pPos);
 extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
-extern u32 dds3GetRandA(effRandState_t *name);
+extern u32 dds3GetRandA(void *name);
 extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern s32 effMagaCylinderCalcColor(s32 color, s32 tint);
 extern f32 sdfAtan(f32 aX);

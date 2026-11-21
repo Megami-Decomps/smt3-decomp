@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "draw3d.h"
 #include "polyManagerData.h"
 #include "ps2asm.h"
@@ -288,8 +289,7 @@ extern void (*dds3SpPolySetScaleTable[])(void *work, f32 scale);
 extern f32 dds3SpPolyColorTo[4];
 extern f32 dds3SpPolyColorFrom[4];
 extern f32 dds3PolygonTriangleParam[4];
-extern u8 dds3EffectBase[];
-extern f32 dds3GetRandFloatA(void *name);
+extern f32 dds3GetRandFloatA(sdfRandCB_t *name);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern f32 sdfCos(f32 aRadius);
@@ -347,10 +347,10 @@ void dds3PolygonSetColor(dds3Polygon_t *hPolygon, u32 color);
 void dds3PolygonTriangleSet(dds3Polygon_t *hPolygon, const f32 *center);
 void dds3TrackPolyColorSet(dds3TrackPoly_t *hTrackPoly, s32 number, u32 color);
 extern dds3Polygon_t *hDrawListTop;
-extern u8 dds3PolygonRandState[];
+extern sdfRandCB_t dds3PolygonRandState;
 extern sdf3DPrimPolyParm_t dds3PolygonPrimParm;
 
-extern void sdfRandomizeByTime(void *aCB);
+extern void sdfRandomizeByTime(sdfRandCB_t *aCB);
 
 void dds3TrackPolyInit(void);
 
@@ -358,7 +358,7 @@ void dds3PolygonManagerInit(void)
 {
     hDrawListTop = 0;
     dds3TrackPolyInit();
-    sdfRandomizeByTime(dds3PolygonRandState);
+    sdfRandomizeByTime(&dds3PolygonRandState);
 }
 
 void dds3PolygonManagerExit(void) {

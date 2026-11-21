@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "effDistortionBlur.h"
 #include "effRippleBlur.h"
 #include "effRectangleBlur.h"
@@ -14,17 +15,16 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern u64 *effPkt2DAllocF4(u32 prim);
 
-extern u8 dds3EffectBase[];
 
 
 sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(u8 *name);
+u32 dds3GetRandA(void *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(u8 *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 extern void *memcpy(void *a, const void *b, size_t c);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_math_state.h"
 #include "effDistortionBlur.h"
 #include "effRippleBlur.h"
 #include "effRectangleBlur.h"
@@ -2101,7 +2102,6 @@ extern void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
 
 
-extern effRandState_t dds3EffectBase[];
 
 void dds3EffectDelete(effHandle_t *pData);
 
@@ -2129,10 +2129,10 @@ extern s32 effPCPBlurScreenOffset(f32 value);
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(effRandState_t *name);
+u32 dds3GetRandA(void *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(effRandState_t *name);
+f32 dds3GetRandFloatA(sdfRandCB_t *name);
 
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
