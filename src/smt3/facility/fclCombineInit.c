@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fclCombineTimeline.h"
 #include "camp.h"
 #include "facility.h"
 #include "kernel.h"
@@ -5306,22 +5307,7 @@ datUnitWork_t *cmbGetBirthDevilPanel(void)
     return panel;
 }
 
-typedef struct
-{
-    u32 frame;
-    s8 mode;
-    u8 reserved05[3];
-    void (*action)(void);
-} cmbTimeTableEntry_t;
 
-typedef struct
-{
-    cmbTimeTableEntry_t *entries;
-    s8 count;
-    u8 reserved05[3];
-} cmbTimeTable_t;
-
-extern cmbTimeTable_t cmbTimeTable[];
 
 const char cmbAkumaposName04[16] = "akumapos_04";
 
