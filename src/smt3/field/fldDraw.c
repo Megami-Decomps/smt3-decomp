@@ -10,6 +10,7 @@
 #include "scr.h"
 #include "draw3d.h"
 #include "field.h"
+#include "fldDrawPoly4.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -960,10 +961,9 @@ void fldDrawPoly3(s32 x0, s32 y0, s32 z0,
 
 extern u64 fldQuadFaceIndex[];
 
-void fldDrawPoly4(s32 x0, f32 y0, f32 z0, f32 x1,
-                  s32 y1, f32 z1, f32 x2, f32 y2,
-                  s32 z2, f32 x3, f32 y3, f32 z3,
-                  s32 col0, f32 col1, f32 col2, f32 col3) {
+void fldDrawPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1,
+                  f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3,
+                  u32 color0, u32 color1, u32 color2, u32 color3) {
     sdf3DPrimPolyParm_t desc;
     sdfVector4_t vertices[4];
     u32 colors[4];
@@ -983,22 +983,22 @@ void fldDrawPoly4(s32 x0, f32 y0, f32 z0, f32 x1,
     desc.vertexColor = colors;
     desc.faceIndex = (u32 *)strip;
     memcpy(strip, fldQuadFaceIndex, sizeof(strip));
-    vertices[0].x = y0;
-    vertices[0].y = z0;
-    vertices[0].z = x1;
-    vertices[1].x = z1;
-    vertices[1].y = x2;
-    vertices[1].z = y2;
-    vertices[2].x = x3;
-    vertices[2].y = y3;
-    vertices[2].z = z3;
-    vertices[3].x = col1;
-    vertices[3].y = col2;
-    vertices[3].z = col3;
-    colors[0] = x0;
-    colors[1] = y1;
-    colors[2] = z2;
-    colors[3] = col0;
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[0].z = z0;
+    vertices[1].x = x1;
+    vertices[1].y = y1;
+    vertices[1].z = z1;
+    vertices[2].x = x2;
+    vertices[2].y = y2;
+    vertices[2].z = z2;
+    vertices[3].x = x3;
+    vertices[3].y = y3;
+    vertices[3].z = z3;
+    colors[0] = color0;
+    colors[1] = color1;
+    colors[2] = color2;
+    colors[3] = color3;
     sdfDrawTagLink(command, EE_ADDR(sdf3DPrimMakePoly(&desc)));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);

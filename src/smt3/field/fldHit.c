@@ -10,6 +10,7 @@
 #include "scr.h"
 #include "draw3d.h"
 #include "field.h"
+#include "fldDrawPoly4.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -1914,10 +1915,6 @@ extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 z, u32 r, u32 g, u32 b, u
 extern void fldDrawPoly3(s32 c0, s32 c1, s32 c2,
                          f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1,
                          f32 x2, f32 y2, f32 z2);
-extern void fldDrawPoly4(s32 c0, f32 x0, f32 y0, f32 z0,
-                         s32 c1, f32 x1, f32 y1, f32 z1,
-                         s32 c2, f32 x2, f32 y2, f32 z2,
-                         s32 c3, f32 x3, f32 y3, f32 z3);
 
 void fldHitWM_Mask(void)
 {
@@ -1969,10 +1966,11 @@ void fldHitWM_Mask(void)
                     /* Real second-color argument, local to this call. The
                      * binding preserves its native preparation order. */
                     FAKEMATCH_ASM_REG(s32, color1, "$5") = (s32)0x80000000U;
-                    fldDrawPoly4(0x80000000, face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
-                                 color1, face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
-                                 0x80000000, face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z,
-                                 0x80000000, face->point[3][0] + pos.x, face->point[3][1] + pos.y, face->point[3][2] + pos.z);
+                    fldDrawPoly4(face->point[0][0] + pos.x, face->point[0][1] + pos.y, face->point[0][2] + pos.z,
+                                 face->point[1][0] + pos.x, face->point[1][1] + pos.y, face->point[1][2] + pos.z,
+                                 face->point[2][0] + pos.x, face->point[2][1] + pos.y, face->point[2][2] + pos.z,
+                                 face->point[3][0] + pos.x, face->point[3][1] + pos.y, face->point[3][2] + pos.z,
+                                 0x80000000, color1, 0x80000000, 0x80000000);
                 }
                 count = fldValueRecordCount;
             }
