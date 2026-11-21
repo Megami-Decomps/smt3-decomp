@@ -1,3 +1,4 @@
+#include "sdfFileDevice.h"
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
@@ -32,8 +33,6 @@ extern u8 sdfFileDefaultSrcType;
 extern u8 sdfFileCmdDefaultDevice;
 
 s32 sdfFileCmdRead(void *aHandle, void *aBuffer, s32 aLength);
-
-extern char sdfFileHostRootPath[];
 
 s32 sceClose(s32 a);
 
@@ -76,13 +75,14 @@ typedef struct sdfDevicePrefix_t {
     u16 tail;
 } sdfDevicePrefix_t;
 
-typedef struct sdfFileDeviceCB_t {
-    s32 thId;
-    s32 semaId;
-    struct sdfFileCmdHandle_t *first;
-    struct sdfFileCmdHandle_t *last;
-    u8 opaque10[8];
-} sdfFileDeviceCB_t;
+/* The setter updates the six-byte drive prefix as a word and a halfword. */
+typedef union sdfFileHostRoot_t {
+    char text[64];
+    sdfDevicePrefix_t prefix;
+} sdfFileHostRoot_t;
+
+SIZE_CHECK(sdfFileHostRootSize, sdfFileHostRoot_t, 64);
+sdfFileHostRoot_t sdfFileHostRootPath = { "host0:" };
 
 enum SdfFileIOCmdStat {
     SDF_FILE_CMD_STAT_INIT = 0,
@@ -153,8 +153,6 @@ extern char sdfFileCdromName[];
 
 extern s32 strncmp(const char *, const char *, size_t);
 
-extern sdfFileDeviceCB_t sdfFileDeviceCB[];
-
 extern void EIntr(void);
 
 extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
@@ -197,7 +195,7 @@ void sdfFileSetCdFilename(char *aDst, char *aSrc) {
 
 char *sdfFileSetHostFilename(char *aDst, char *aSrc) {
     if (*aSrc == 0x2F) {
-        strcpy(aDst, sdfFileHostRootPath);
+        strcpy(aDst, sdfFileHostRootPath.text);
         return strcat(aDst, aSrc);
     }
     *(sdfHostPrefix_t *)aDst = *(sdfHostPrefix_t *)sdfFileHostPrefix;
@@ -330,20 +328,20 @@ u32 sdfFileSeek(void *aHandle, s32 aPos, s32 aWhence)
 /* Set the current device directory, ending in a slash; path is assumed nonempty. */
 void sdfFileSetHostRoot(char *aRootPath) {
     s32 length = strlen(aRootPath);
-    ((sdfDevicePrefix_t *)sdfFileHostRootPath)->head = ((sdfDevicePrefix_t *)sdfFileHostPrefix)->head;
-    ((sdfDevicePrefix_t *)sdfFileHostRootPath)->tail = ((sdfDevicePrefix_t *)sdfFileHostPrefix)->tail;
-    memcpy(sdfFileHostRootPath + 6, aRootPath, length);
+    sdfFileHostRootPath.prefix.head = ((sdfDevicePrefix_t *)sdfFileHostPrefix)->head;
+    sdfFileHostRootPath.prefix.tail = ((sdfDevicePrefix_t *)sdfFileHostPrefix)->tail;
+    memcpy(sdfFileHostRootPath.text + 6, aRootPath, length);
     if (aRootPath[length - 1] != '/') {
-        sdfFileHostRootPath[length + 6] = '/';
-        sdfFileHostRootPath[length + 7] = 0;
+        sdfFileHostRootPath.text[length + 6] = '/';
+        sdfFileHostRootPath.text[length + 7] = 0;
     } else {
-        sdfFileHostRootPath[length + 6] = 0;
+        sdfFileHostRootPath.text[length + 6] = 0;
     }
 }
 
 char *sdfFileGetHostRoot(void)
 {
-    return sdfFileHostRootPath;
+    return sdfFileHostRootPath.text;
 }
 
 static void sdfFileCmdSetDefaultDevice(s32 aDevice);

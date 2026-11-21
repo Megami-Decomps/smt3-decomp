@@ -1,3 +1,4 @@
+#include "sdfFileDevice.h"
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
@@ -59,14 +60,6 @@ typedef struct sdfFileCmdHandle_t {
     void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
-
-typedef struct sdfFileDeviceCB_t {
-    s32 thId;
-    s32 semaId;
-    struct sdfFileCmdHandle_t *first;
-    struct sdfFileCmdHandle_t *last;
-    u8 opaque10[8];
-} sdfFileDeviceCB_t;
 
 enum SdfFileIOCmdStat {
     SDF_FILE_CMD_STAT_INIT = 0,
@@ -131,7 +124,13 @@ extern char * strcpy(char *, const char *);
 
 void *sdfChipAllocDirect(s32 aSize);
 
-extern sdfFileDeviceCB_t sdfFileDeviceCB[];
+/* CD, host, HDD and CD-image workers start with no thread or queued requests. */
+sdfFileDeviceCB_t sdfFileDeviceCB[4] = {
+    { -1, 0, NULL, NULL, 0, 0x8000 },
+    { -1, 0, NULL, NULL, 0, 0x10000 },
+    { -1, 0, NULL, NULL, 0, 0x20000 },
+    { -1, 0, NULL, NULL, 0, 0x8000 },
+};
 
 extern s32 DIntr(void);
 

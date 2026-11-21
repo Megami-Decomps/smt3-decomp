@@ -522,6 +522,9 @@ segments:
       - [0x42A8A0, .data, sdf/sdfPadInitData]
       - [0x42A900, .data, sdf/sdfDevConsData]
       - [0x42AABC, data, data_00529ABC]
+      - [0x42AAC0, .data, sdf/sdfFile]
+      - [0x42AB00, .data, sdf/sdfFileIO]
+      - [0x42AB60, data, data_00529B60]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
