@@ -394,7 +394,7 @@ def objdiff_reference(version: str, src: Path, sections: list[str] | None) -> Pa
     asm = Path("asm") / version
     # An explicit data-only linker input has no .text sibling for Splat
     # to disassemble. Its generated native data assembly is the reference.
-    if sections in ([".data"], [".rodata"]):
+    if sections in ([".data"], [".rodata"], [".sdata"]):
         reference = asm / "data" / unit.with_suffix(f"{sections[0]}.s")
         if not (ROOT / reference).is_file():
             raise SystemExit(f"{src}: missing native data reference {reference}; re-run splat")

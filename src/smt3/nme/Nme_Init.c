@@ -195,7 +195,7 @@ void nmeInitNameBuffer(s8 mode, nmeWork_t *work) {
 }
 
 
-extern const char *nmeNameListRows __attribute__((section(".data")));
+extern const u8 *nmeNameListRows __attribute__((section(".data")));
 extern u32 strlen(const char *string);
 extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, saddr_t layout);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
@@ -216,7 +216,7 @@ void nmeInitNameCursor(s8 mode, nmeWork_t *work)
         inputCount = 6;
         break;
     case 3: {
-        u32 length = strlen(nmeNameListRows);
+        u32 length = strlen((const char *)nmeNameListRows);
         work->alternateCursorActive = 0;
         inputCount = length / 32;
         break;

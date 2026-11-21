@@ -326,10 +326,3 @@ const char movieManProcName[16] = "movieMan";
 const char movieDirPath[16] = "pfs0:/movie";
 
 saddr_t PlayingNo = 0;
-
-INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIpu);
-
-INCLUDE_SDATA(const s32, "movie/mviManager", movieExtIps);
-
-INCLUDE_SDATA(const s32, "movie/mviManager", movieDebugRowFmt);
-

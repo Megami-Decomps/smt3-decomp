@@ -44,6 +44,32 @@ from check_unit import (
 )
 
 
+class SharedReadonlyOriginTests(unittest.TestCase):
+    def test_base_requires_exact_native_span_and_two_equal_contexts(self):
+        same = (b"tag\0", {0: ("R_MIPS_32", "label")})
+        args = (*same, *same, 4, 0x1234, True)
+        self.assertEqual(check_unit.paired_owned_section_base(*args), 0x1234)
+        for index, replacement in ((0, b"abc\0"), (1, {}), (4, 8), (5, None), (6, False)):
+            with self.subTest(index=index):
+                different = list(args)
+                different[index] = replacement
+                self.assertIsNone(check_unit.paired_owned_section_base(*different))
+
+
+    def test_rodata_pointer_addend_stays_inside_mapped_span(self):
+        reloc = {0: ("R_MIPS_32", ".rodata")}
+        for addend in (0, 7, 8, 0xFFFFFFFF):
+            with self.subTest(addend=addend):
+                value, problems = relocate_sdata_item(
+                    struct.pack("<I", addend), 0, reloc, [], {},
+                    {".rodata": 0x2000}, {".rodata": 8})
+                if addend < 8:
+                    self.assertEqual(value, struct.pack("<I", 0x2000 + addend))
+                    self.assertFalse(problems)
+                else:
+                    self.assertRegex(problems[0], "addend outside its span")
+
+
 class LiteralPoolBoundsTests(unittest.TestCase):
     def compare(self, pool, offset, retail, address=0x1000, segs=None):
         return check_unit.literal_pool_difference(pool, offset, retail,

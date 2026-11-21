@@ -196,6 +196,24 @@ class ConfigureTests(unittest.TestCase):
                         self.assertEqual(configure.objdiff_reference(VERSION, source, selectors),
                                          Path(f"asm/{VERSION}/script/opcodes.s"))
 
+    def test_objdiff_reference_uses_native_small_data_for_a_data_only_unit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = Path(f"src/{VERSION}/event/sceneText.c")
+            native = Path(f"asm/{VERSION}/data/event/sceneText.sdata.s")
+            with patch.object(configure, "ROOT", root):
+                with self.assertRaisesRegex(SystemExit, "missing native data reference"):
+                    configure.objdiff_reference(VERSION, source, [".sdata"])
+                (root / native).parent.mkdir(parents=True)
+                (root / native).touch()
+                self.assertEqual(configure.objdiff_reference(VERSION, source, [".sdata"]),
+                                 native)
+                for selectors in (None, [".sdata*"], [".text", ".sdata"],
+                                  [".sdata", ".sdata"]):
+                    with self.subTest(selectors=selectors):
+                        self.assertEqual(configure.objdiff_reference(VERSION, source, selectors),
+                                         Path(f"asm/{VERSION}/event/sceneText.s"))
+
     def test_unit_cflags_drop_comments_and_keep_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

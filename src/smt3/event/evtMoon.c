@@ -873,33 +873,3 @@ s32 evtSceneDispState = 0;
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7A8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7B0);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7B8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7C0);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7C8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7D0);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7D8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7E0);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7E8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7F0);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F7F8);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F800);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", D_0054F808);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispCountFmt);
-
-INCLUDE_SDATA(const s32, "event/evtMoon", evtSceneDispSerialFmt);
-

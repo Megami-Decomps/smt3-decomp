@@ -305,7 +305,7 @@ void nmeBackspace(void)
 
 #ifdef NON_MATCHING
 extern const s8 nmeMoveTextTemplate[3];
-extern const u8 *volatile nmeNameListRows;
+extern const u8 *nmeNameListRows __attribute__((section(".data")));
 
 void nmeMoveCursorBy(s8 delta)
 {

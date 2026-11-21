@@ -883,7 +883,7 @@ def full_context_literal_diffs(text, offset, size, retail_code, relocs,
 
 
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
-                        section_bases=None):
+                        section_bases=None, section_lengths=None):
     """Apply resolvable R_MIPS_32 relocations to one emitted data item.
 
     Object files store section-relative addends for pointers into their own
@@ -912,6 +912,10 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
         elif section_bases and base in section_bases:
             # Relocatable local-section references carry a section-relative
             # addend.  Resolve them from the exact owner subsegment origin.
+            if section_lengths is not None and base in section_lengths:
+                if addend >= section_lengths[base]:
+                    problems.append(f"{rtype} {base} addend outside its span at +0x{at:X}")
+                    continue
             target = section_bases[base] + addend
         else:
             base_addr = address(base, syms)
@@ -1234,6 +1238,17 @@ def full_rodata_relocation_problems(data, relocs, funcs, syms, section_bases,
         elif linked != retail_span[off:off + 4]:
             problems.append(f"{kind} {symbol} at +0x{off:X} differs from retail")
     return problems
+
+
+def paired_owned_section_base(skip_bytes, skip_relocs, full_bytes,
+                              full_relocs, native_size, native_base,
+                              full_retail_match):
+    """Reuse a bounded native origin only for identical compile contexts."""
+    if (native_base is not None and native_size > 0 and full_retail_match
+            and len(skip_bytes) == len(full_bytes) == native_size
+            and skip_bytes == full_bytes and skip_relocs == full_relocs):
+        return native_base
+    return None
 
 
 def trim_sdata_item(item, item_offset, relocs):
@@ -1791,6 +1806,7 @@ def main():
         owned_rodata_native = []
         full_rodata_relocations = None
         full_rodata_size = 0
+        shared_rodata_base = None
         shared_rodata = set()
         owned_data_checked = False
         readonly_data_checked = False
@@ -2082,11 +2098,23 @@ def main():
             full_rodata_size = len(fdata[fro_off:fro_off + fro_size])
             if rodata_range is not None:
                 start, end = rodata_range
-                data_context.extend("full unit's .rodata " + problem for problem in
-                    full_rodata_relocation_problems(
-                        fdata[fro_off:fro_off + fro_size], full_rodata_relocations,
-                        [(off, size, name) for name, (off, size) in fsyms.items()],
-                        syms, full_section_bases, retail[start:end]))
+                full_rodata = fdata[fro_off:fro_off + fro_size]
+                rodata_problems = full_rodata_relocation_problems(
+                    full_rodata, full_rodata_relocations,
+                    [(off, size, name) for name, (off, size) in fsyms.items()],
+                    syms, full_section_bases, retail[start:end])
+                data_context.extend("full unit's .rodata " + p for p in rodata_problems)
+                # The standalone object may omit assembly-backed contents.
+                # Do not borrow the full-unit base unless the pool is identical
+                # and the full bytes and relocations prove its native span.
+                full_literals_match = (
+                    len(full_rodata) == end - start and not rodata_problems
+                    and all(full_rodata[i] == retail[start + i]
+                            for i in range(len(full_rodata))
+                            if not any(i - k in full_rodata_relocations for k in range(4))))
+                shared_rodata_base = paired_owned_section_base(
+                    rodata, rodata_relocs, full_rodata, full_rodata_relocations,
+                    end - start, full_section_bases.get(".rodata"), full_literals_match)
             elif full_rodata_relocations:
                 data_context.append("full unit's relocated .rodata has no unambiguous YAML-owned range")
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
@@ -2487,6 +2515,13 @@ def main():
             retail_off = va_to_off(segs, addr) if addr is not None else None
             if retail_off is not None and start <= retail_off and retail_off + size <= end:
                 small.append((off, addr, name))
+    small_section_bases = {}
+    small_section_lengths = {}
+    if sdata_range and (base := off_to_va(segs, sdata_range[0])) is not None:
+        small_section_bases[".sdata"] = base
+    if shared_rodata_base is not None:
+        small_section_bases[".rodata"] = shared_rodata_base
+        small_section_lengths[".rodata"] = len(rodata)
     sd_starts = sorted({o for o, _, _ in small} | {len(sdata)})
     sd_covered = set()
     for off, retail_addr, name in dict.fromkeys(small):
@@ -2499,9 +2534,7 @@ def main():
             else trim_sdata_item(item, off, sdata_relocs)
         theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
         linked_item, relocation_problems = relocate_sdata_item(
-            item, off, sdata_relocs, funcs, syms,
-            {".sdata": off_to_va(segs, sdata_range[0])}
-            if sdata_range and off_to_va(segs, sdata_range[0]) is not None else None)
+            item, off, sdata_relocs, funcs, syms, small_section_bases, small_section_lengths)
         if relocation_problems:
             bad += 1
             print(f"RELOC sdata of {name} (retail 0x{retail_addr:08X}): "
