@@ -6,6 +6,7 @@
 #include "dds3obj.h"
 #include "motion.h"
 #include "pipe.h"
+#include "pipe_enemy_data.h"
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
@@ -20,13 +21,6 @@ extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);
 extern void *memset(void *a, s32 b, size_t c);
 
 
-
-typedef struct tagPipeEnemyInfo {
-    u8 chID;
-    f32 w;
-    u8 resv;
-    u16 resv2;
-} tagPipeEnemyInfo;
 
 typedef struct tagpipeParts {
     s32 offset;
@@ -77,8 +71,6 @@ extern s32 PipeTexRelease(void);
 extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng, f32 aSmoothLeng);
 
 extern void DEBUG_PRINT(const char *str, ...);
-
-extern tagPipeEnemyInfo pipeEnemyInfoTable[];
 
 extern tagPipeObject *ObjWork;
 

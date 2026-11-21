@@ -488,8 +488,8 @@ void mselUpdateCursor(void)
 }
 
 extern f32 sdfSin(f32 angle);
-extern char *mselTitleCursor0Lines[];
-extern char *mselTitleCursor1Lines[];
+extern const char *mselTitleCursor0Lines[];
+extern const char *mselTitleCursor1Lines[];
 
 void mselDrawTitleAnim(void)
 {
