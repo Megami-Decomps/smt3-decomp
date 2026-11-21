@@ -1,0 +1,26 @@
+#include "pbLevelTable.h"
+
+pbLevelSlot_t D_003273B0[22] = {
+    { .header = { 0x05c5, 0 } },
+    { .stage = { 2, 0 } },
+    { .stage = { 4, -1 } },
+    { .stage = { 32, -1 } },
+    { .stage = { 8, -1 } },
+    { .stage = { 38, -1 } },
+    { .stage = { 36, 1 } },
+    { .stage = { 37, -1 } },
+    { .stage = { 48, -1 } },
+    { .stage = { 42, -1 } },
+    { .stage = { 49, -1 } },
+    { .stage = { 40, 2 } },
+    { .stage = { 20, -1 } },
+    { .stage = { 22, -1 } },
+    { .stage = { 13, -1 } },
+    { .stage = { 21, -1 } },
+    { .stage = { 24, 3 } },
+    { .stage = { 14, -1 } },
+    { .stage = { 10, -1 } },
+    { .stage = { 25, -1 } },
+    { .stage = { 26, 4 } },
+    { .stage = { -1, -1 } },
+};

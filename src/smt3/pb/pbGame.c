@@ -30,8 +30,6 @@ typedef struct
     union { s32 field; mdlObj_t *model; };
 } pbMyChar_t;
 
-typedef struct { s16 number, label; } pbStageEntry_t;
-
 #include "pbBoardData.h"
 
 typedef struct { u8 unk00[0x10]; pbMapBlock_t map; } pbMapArea_t;
@@ -117,13 +115,6 @@ typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBloc
 typedef struct { s16 x, y; } pbGoalPos_t;
 
 typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
-
-struct pbLevel_t
-{
-    s16 clearBit;
-    s16 unk02;
-    pbStageEntry_t stage[1];
-};
 
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
@@ -1395,15 +1386,15 @@ void CalcDegreeMode(void) {
 }
 
 s16 GetStageNumber(void) {
-    return (pbLevelTable[pbMapWork->level]->stage + pbMapWork->stage)->number;
+    return (pbLevelTable[pbMapWork->level] + 1 + pbMapWork->stage)->stage.number;
 }
 
 s16 GetStageScriptLabel(void) {
-    return (pbLevelTable[pbMapWork->level]->stage + pbMapWork->stage)->label;
+    return (pbLevelTable[pbMapWork->level] + 1 + pbMapWork->stage)->stage.label;
 }
 
 s16 GetAllStageClearBit(void) {
-    return pbLevelTable[pbMapWork->level]->clearBit;
+    return pbLevelTable[pbMapWork->level]->header.clearBit;
 }
 
 pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
@@ -1835,9 +1826,9 @@ void pbGotoNewStage(void)
 }
 
 void pbRoundStageNext(s16 *plevel, s16 *pstage) {
-    pbLevel_t *lv = pbLevelTable[*plevel];
+    pbLevelSlot_t *lv = pbLevelTable[*plevel];
     *pstage = (u16)*pstage + 1;
-    if ((lv->stage + *pstage)->number < 0) {
+    if ((lv + 1 + *pstage)->stage.number < 0) {
         *pstage = 0;
         *plevel = (u16)*plevel + 1;
         if (*plevel >= 3) {
@@ -1847,7 +1838,7 @@ void pbRoundStageNext(s16 *plevel, s16 *pstage) {
 }
 
 void pbRoundStagePrev(s16 *plevel, s16 *pstage) {
-    pbLevel_t *lv;
+    pbLevelSlot_t *lv;
     s32 s = (u16)*pstage - 1;
     *pstage = s;
     if ((s16)s < 0) {
@@ -1858,7 +1849,7 @@ void pbRoundStagePrev(s16 *plevel, s16 *pstage) {
         }
         lv = pbLevelTable[*plevel];
         *pstage = 0;
-        while ((lv->stage + *pstage + 1)->number >= 0) {
+        while ((lv + 1 + *pstage + 1)->stage.number >= 0) {
             *pstage = (u16)*pstage + 1;
         }
     }

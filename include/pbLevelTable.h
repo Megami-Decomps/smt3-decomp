@@ -1,8 +1,16 @@
 #ifndef PB_LEVEL_TABLE_H
 #define PB_LEVEL_TABLE_H
 
-typedef struct pbLevel_t pbLevel_t;
+#include "common.h"
 
-extern pbLevel_t *pbLevelTable[3];
+typedef union
+{
+    struct { s16 clearBit, unk02; } header;
+    struct { s16 number, label; } stage;
+} pbLevelSlot_t;
+
+SIZE_CHECK(pbLevelSlotSize, pbLevelSlot_t, 4);
+
+extern pbLevelSlot_t *pbLevelTable[3];
 
 #endif
