@@ -9,5 +9,6 @@
   "facility/fclRagMitamaOfferWeights": "ragListItemTable3",
   "result/cmbEvoDevilList": "cmbEvoDevilList",
   "camp/cmpSkillMsgTable": "cmpSkillMsgTable",
-  "camp/cmpItemMsgTable": "cmpItemMsgTable"
+  "camp/cmpItemMsgTable": "cmpItemMsgTable",
+  "sdf/sdfIpuRgbModeBits": "sdfIpuRgbModeBits"
 }

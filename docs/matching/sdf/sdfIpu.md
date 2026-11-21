@@ -9,7 +9,7 @@ The draft has retail's instruction mix almost exactly: the DMAC-enable save and
 restore around `SDF_TO_IPU_CHCR = 1`, the two `sceIpuSync(0, 0)` calls, the
 `cb->dma.output*` block with the `movn` rounding for `cb->buffSize / 16`, the
 `cb->unk65` branch, and the final `SDF_IPU_CMD` word built from
-`D_00529CE8[cb->rgbMode * 2]` shifted to bit 27 and `[... + 1]` to bit 26. What
+`sdfIpuRgbModeBits[cb->rgbMode][0]` shifted to bit 27 and the second byte to bit 26. What
 does not reproduce is where `addiu $18, $17, 0x68` lands. Retail schedules
 `&cb->dma` into the prologue, between `sd $18` and `sd $16`, and fills the
 `bnez` delay slot with the `daddu $4, $0, $0` that the first `sceIpuSync` needs;
@@ -63,3 +63,12 @@ cprop folds the local back into the argument move at the call, and the output
 is byte-identical to the plain spelling. A zero in `$4` that survives into the
 entry block therefore needs a value that is not a propagable constant, which
 this call does not have.
+
+## IPU output-mode data
+
+The decoder reads two adjacent bytes for each of the three output modes
+assigned by stream setup. These are the two mode bits used in the IPU
+command. Without the explicit placement, the stock compiler puts the
+six-byte table in small data; the native table is in writable `.data`.
+The reference tail recovers only the final two bytes. The unrelated
+neighboring data remains raw.

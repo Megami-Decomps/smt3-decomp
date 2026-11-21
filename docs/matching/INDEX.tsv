@@ -463,6 +463,7 @@ rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3
+IPU output-mode data				docs/matching/sdf/sdfIpu.md	67
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	82 of 96 words match	docs/matching/sdf/sdfModel.md	3
 sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/matching/sdf/sdfModel.md	72
 sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Sixty-three of 150 words match	docs/matching/sdf/sdfModel.md	107
@@ -472,6 +473,7 @@ Provider declarations	sdf/sdfSound	byte-neutral		docs/matching/sdf/sdfSound-decl
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
 sdfSndIopSizeMsg data	sdf/sdfSound	18 bytes		docs/matching/sdf/sdfSound.md	65
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
+Memory-card module names				docs/matching/sdf/sdfTmx.md	3
 corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
 The corePkt VU1 packet builders written in assembly				docs/matching/sdf/sdfVu1.md	26
 corePktLoadVertsNorms	sdfVu1	0x44		docs/matching/sdf/sdfVu1.md	46

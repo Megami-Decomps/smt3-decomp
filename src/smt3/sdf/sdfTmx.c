@@ -56,7 +56,7 @@ extern u8 sdfFileRpcReadBuf[];
 
 extern void SleepThread(void);
 
-extern char *mcModuleNames[];
+extern const char *mcModuleNames[][SDF_IOP_MODULES_PER_GROUP];
 
 extern s32 sceSifLoadModule(const char *, s32, const char *);
 
@@ -548,7 +548,7 @@ void sdfStartFileRpcServer(void) {
 
 void LoadMcModules(const char *prefix, s32 moduleGroup) {
     char path[0x100];
-    char **moduleNames = &mcModuleNames[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
+    const char **moduleNames = mcModuleNames[moduleGroup];
     s32 moduleIndex;
 
     for (moduleIndex = 0; moduleIndex != SDF_IOP_MODULES_PER_GROUP; moduleIndex++) {
