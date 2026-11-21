@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eeregs.h"
+#include "draw.h"
 #include "libsdf.h"
 #include "ps2asm.h"
 
@@ -106,7 +107,7 @@ extern void SleepThread(void);
 
 extern sdfImageSetCb_t sdfImageSetCb;
 
-extern u64 sdfImageSetTexFlushPacket[];
+extern sdfPrimTexflushPacket_t sdfImageSetTexFlushPacket;
 
 s32 sdfImageDataSize(u32 format, s32 width, s32 height);
 
@@ -321,7 +322,7 @@ void sdfImageSetTrans(void)
     if (dmaAddr != 0) {
         s32 threadId = GetThreadId();
         s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, EE_ADDR_AS(void *, threadId));
-        u64 tag = SDF_DMA_TAG(EE_ADDR(sdfImageSetTexFlushPacket), 0x20000000);
+        u64 tag = SDF_DMA_TAG(EE_ADDR(&sdfImageSetTexFlushPacket), 0x20000000);
         u32 *chan;
 
         tagTail->vifCodes = 0;
