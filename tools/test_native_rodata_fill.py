@@ -100,6 +100,49 @@ class NativeReadonlyFill(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'not terminal'):
                     fill.render(native,case,ret,have)
 
+    def test_additional_cases_only_accept_their_pinned_terminal_seams(self):
+        lit4 = '.section .lit4, "wa"\n'
+        sdata = '.section .sdata, "wa"\n'
+        cases = {
+            'pb/pbDraw': lit4,
+            'newbattle/nbCameraProcess': lit4,
+            'pb/pbGameDraw': '',
+            'sdf/sdfHdd': sdata,
+        }
+        for unit, suffix in cases.items():
+            with self.subTest(unit=unit):
+                case = fill.CASES[unit]
+                have = case.final + len(case.value) + 1
+                end4 = (have + 3) & ~3
+                payload = case.value.encode() + bytes(end4 - have + 1)
+                tail = '.align 2\n'
+                for at in range(end4, case.end, 4):
+                    tail += (f'    /* {at:06X} {at+fill.BASE:08X} */ .asciz ""\n'
+                             '    /* 00000000 */\n.align 2\n')
+                ret = bytes(case.final) + payload + bytes(case.end - end4)
+                native = (f'.section .text, "ax"\n\n.section .rodata, "a"\n'
+                          f'dlabel {case.label}\n'
+                          f'    /* {case.final:06X} {case.final+fill.BASE:08X} */ .asciz "{case.value}"\n'
+                          f'    /* {payload.hex().upper()} */\n'
+                          f'{tail}enddlabel {case.label}\n')
+                rendered = fill.render(native + suffix, case, ret, have)
+                self.assertIn(f'.section {fill.FILL}, "a"\n    .zero {case.end-have}\n', rendered)
+                for bad in ('', lit4, sdata):
+                    if bad != suffix:
+                        with self.assertRaisesRegex(ValueError, 'not terminal'):
+                            fill.render(native + bad, case, ret, have)
+                first = f'dlabel {case.label}\n'
+                for early in (lit4, sdata):
+                    with self.assertRaisesRegex(ValueError, 'not terminal'):
+                        fill.render(native.replace(first, early + first, 1) + suffix,
+                                    case, ret, have)
+                wrong_order = next(bad for bad in (lit4, sdata) if bad != suffix)
+                with self.assertRaisesRegex(ValueError, 'not terminal'):
+                    fill.render(native + wrong_order + suffix, case, ret, have)
+                write(self.root, fill.opt_path(VERSION), json.dumps([case.next]))
+                with self.assertRaisesRegex(ValueError, 'invalid native'):
+                    fill.options(self.root, VERSION)
+
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'
         b = fill.full_asm(VERSION, PB)

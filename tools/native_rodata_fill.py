@@ -48,6 +48,14 @@ CASES={
                          0x43C040,'D_0053B040','/fld/f/bin/moon_07.tmx',16),
     MODE_SELECT: Case(MODE_SELECT,'kernel/dds3CreateData',0x43EEC0,0x43FFB8,
                       0x43FFA0,'D_0053EFA0','/staff/stf_mpic01.tmx',8),
+    'pb/pbDraw': Case('pb/pbDraw','pb/pbMain',0x436CD8,0x436D50,
+                      0x436D40,'D_00535D40','/pb/pbmsg.bf',16),
+    'newbattle/nbCameraProcess': Case('newbattle/nbCameraProcess','newbattle/nbCameraStartEnd',
+                      0x4355A8,0x4355F0,0x4355D8,'D_005345D8','nb_camera_draw',16),
+    'pb/pbGameDraw': Case('pb/pbGameDraw','pb/pbRecord',0x437040,0x4371C8,
+                      0x4371B0,'pbDrawMapCursorProcName','pb-draw-map cursor',8),
+    'sdf/sdfHdd': Case('sdf/sdfHdd','sdf/sdfDev9',0x44A6C8,0x44A838,
+                      0x44A828,'D_00549828','hdd0:dds3,',8),
 }
 def must(ok, why):
     if not ok:
@@ -182,7 +190,14 @@ def render(stock,c,ret,have):
     must(len(m)==1,'missing/ambiguous terminal label')
     m=m[0]
     rest=stock[m.end():].lstrip()
-    correctly_terminal=(not rest if c.unit==MODE_SELECT else rest.startswith('.section .lit4, "wa"\n'))
+    # These are exact generated seams for the named cases, not accepted
+    # alternatives for other owners. All peer sections are still compared.
+    if c.unit in (MODE_SELECT, 'pb/pbGameDraw'):
+        correctly_terminal=not rest
+    elif c.unit=='sdf/sdfHdd':
+        correctly_terminal=rest.startswith('.section .sdata, "wa"\n')
+    else:
+        correctly_terminal=rest.startswith('.section .lit4, "wa"\n')
     must(len(re.findall(r'^\.section \.rodata, "a"$',stock,re.M))==1 and
          stock[:m.start()].rfind('\n.section ')==stock[:m.start()].rfind('\n.section .rodata, "a"') and
          correctly_terminal,'not terminal native rodata label')
