@@ -452,7 +452,9 @@ segments:
       - [0x220020, .data, effect/effPCPBezierFaces]
       - [0x2200A8, data, data_0031F0A8]
       - [0x2200B0, .data, effect/effPCPBezier]
-      - [0x220140, data, data_0031F140]
+      - [0x220140, .data, effect/effPCPFlashData]
+      - [0x2202B8, data, data_0031F2B8] # Native alignment between owners
+      - [0x2202C0, .data, effect/effPCPScatterData]
       - [0x220450, .data, effect/effPCPNeedleGeometry]
       - [0x220550, data, data_0031F550]
       - [0x221C50, .data, newbattle/nbCameraProcess]
@@ -503,6 +505,9 @@ segments:
       - [0x42A448, .data, sdf/sdfMotion]
       - [0x42A620, .data, sdf/sdfUnitXVector]
       - [0x42A630, data, data_00529630]
+      - [0x42A8A0, .data, sdf/sdfPadInitData]
+      - [0x42A900, .data, sdf/sdfDevConsData]
+      - [0x42AABC, data, data_00529ABC]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]

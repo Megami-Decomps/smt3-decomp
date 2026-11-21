@@ -10,7 +10,7 @@ typedef void (*mdlOtRegFunc_t)(sdfGrOt_t *, sdfDrawTag_t *);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern u8 dds3PadBitTable[];
+extern s8 dds3PadBitTable[];
 
 extern s32 dds3BitEditorRowBase, dds3BitEditorTable, dds3BitEditorTable2;
 

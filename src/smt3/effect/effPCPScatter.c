@@ -679,11 +679,11 @@ extern effDebugPolyParams_t effPCPScatterDrawParams[];
 
 extern sdfGrOt_t *effPCPScatterSurfaceByPool[];
 
-extern u32 effPCPScatterTexcoords[];
+extern f32 effPCPScatterTexcoords[];
 
 extern u32 effPCPScatterParams[];
 
-extern u8 effScatterTriangleIndices[];
+extern u32 effScatterTriangleIndices[];
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -1791,7 +1791,7 @@ void dds3ScatterPolyListDraw(dds3ScatterPolyList_tag *hPoly) {
     sdf3DPrimLinkTm(packet, 0);
     if (hPoly->sharedResource != NULL) {
         sdfMatSetTex(hPoly->drawAsset, hPoly->sharedResource->textureHandle);
-        effPCPScatterDrawParams->texcoords = (f32 *)effPCPScatterTexcoords;
+        effPCPScatterDrawParams->texcoords = effPCPScatterTexcoords;
     } else {
         effPCPScatterDrawParams->texcoords = NULL;
     }
@@ -2980,7 +2980,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     }
     sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
-    effDebugPoly.parameters = (const u32 *)effScatterTriangleIndices;
+    effDebugPoly.parameters = effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effDebugPoly;
         remaining = object->vectorsPerParticle;
