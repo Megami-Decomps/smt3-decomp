@@ -5,4 +5,12 @@
 
 extern sdfMovieCb_t movieCb;
 
+typedef struct
+{
+    /* 0x00 */ const char *path;
+    /* 0x04 */ sdfMovieInitParm_t descriptor;
+} dds3MovieEntry_t;
+
+extern dds3MovieEntry_t movieEntryTable[25];
+
 #endif

@@ -46,14 +46,6 @@ extern sdfGrOt_t sdfGrOtTable[85];
 
 extern void release_movieobj2(sdfMovieCb_t *movie, sdfGrOt_t *ot);
 
-typedef struct
-{
-    /* 0x00 */ const char *path;
-    /* 0x04 */ sdfMovieInitParm_t descriptor;
-} dds3MovieEntry_t;
-
-extern dds3MovieEntry_t movieEntryTable[];
-
 extern void moviePlayFile_27041744(const char *path, sdfMovieInitParm_t *descriptor);
 
 extern u16 dds3VblanksPerFrame;

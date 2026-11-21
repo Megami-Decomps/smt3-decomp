@@ -91,7 +91,7 @@ extern void dds3SetLight(void *light, s32 no);
 
 extern void dds3SetFog(void *fog);
 
-extern void dds3SetAmbient(u128 *ambient);
+extern void dds3SetAmbient(sdfVector4_t *ambient);
 
 /* Three parallel lights, 0x40 each, which is what the IDB types here and what
  * the +0x40 steps below were spelling as byte arithmetic. */
@@ -99,7 +99,7 @@ extern sdf3DLight_t evtStageLights[3];
 
 extern sdf3DFogParam_t evtStageFog;
 
-extern u128 evtStageAmbient;
+extern sdfVector4_t evtStageAmbient;
 
 #include "sdk_libc.h"
 

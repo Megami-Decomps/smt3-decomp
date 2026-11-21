@@ -275,18 +275,7 @@ extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-typedef struct { u16 item; u16 cnt; } nbInnenPhase_t;
-
-/* 60-byte entries; only the fields this unit reads are named. */
-typedef struct {
-    s16 id;
-    u16 pid;
-    u16 eid;
-    u16 unk_06;
-    nbInnenPhase_t phase[13];
-} nbInnenRec_t;
-
-extern nbInnenRec_t nbInnenTable[];
+#include "nbInnenTable.h"
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
@@ -1064,7 +1053,7 @@ s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
 
     p = nbInnenTable;
     for (i = 0; i < 64; i++) {
-        if (p->id != 0 && n->pwork->id == p->pid && n->ework->id == p->eid) {
+        if (p->phase_record.id != 0 && n->pwork->id == p->phase_record.pid && n->ework->id == p->phase_record.eid) {
             return i;
         }
         p++;

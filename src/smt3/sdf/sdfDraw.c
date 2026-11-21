@@ -3,6 +3,7 @@
 #include "libdma.h"
 #include "sdfGsMemIO.h"
 #include "sdf_types.h"
+#include "sdfPreDrawChain.h"
 #include "sdf_resource.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
@@ -290,12 +291,6 @@ typedef struct sdfPreDrawTag_t {
     sdfPreDrawHook_t *tail;
     u32 pad;
 } sdfPreDrawTag_t;
-
-/* Frame submission joins these 0x10-byte linked owners through head/tail. */
-typedef struct sdfPreDrawChain_t {
-    sdfPreDrawTag_t *tagHead;
-    sdfPreDrawTag_t *tail;
-} sdfPreDrawChain_t;
 
 typedef struct sdfTexPacket_t {
     sdfGifTag_t giftag;

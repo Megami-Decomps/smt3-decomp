@@ -67,8 +67,8 @@ void dds3CreateGameData(s32 no)
 }
 
 extern s32 evtBitCheck(s32 eventNo);
-extern char *stfMpicFileTable[];
-extern char *stfPicFileTable[];
+extern const char *stfMpicFileTable[15];
+extern const char *stfPicFileTable[15];
 /* Padded shared asset-path pool remains in its native data owner. */
 extern const char stfMlinePath01[], stfMlinePath02[], stfMlinePath03[], stfMlinePath04[];
 extern const char stfLinePath01[], stfLinePath02[], stfLinePath03[], stfLinePath04[];
