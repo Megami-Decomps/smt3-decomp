@@ -264,7 +264,7 @@ extern char *text2[];
 
 extern char *pStr[];
 
-extern char *nbHelpTextTable[];
+extern const char *nbHelpTextTable[];
 
 extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
 
@@ -385,7 +385,8 @@ void nbDispTextById(s32 no)
 
 void nb_289078(s32 no, s32 type)
 {
-    nbDispText(nbHelpTextTable[no], NULL, type, 30, 0x89FEFF80);
+    /* The legacy font API only reads the encoded message. */
+    nbDispText((char *)nbHelpTextTable[no], NULL, type, 30, 0x89FEFF80);
 }
 
 void nbDispActionText(u32 command)
