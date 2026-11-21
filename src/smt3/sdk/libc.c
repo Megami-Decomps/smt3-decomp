@@ -383,10 +383,7 @@ void free(void *ptr) {
     __malloc_unlock(_impure_ptr);
 }
 
-typedef struct mallocInfo_t {
-    s32 arena;
-    u8 opaque04[0x24];
-} mallocInfo_t;
+#include "sdk_malloc_info.h"
 
 extern mallocInfo_t __malloc_current_mallinfo;
 extern void *__malloc_sbrk_base __attribute__((section(".data")));
