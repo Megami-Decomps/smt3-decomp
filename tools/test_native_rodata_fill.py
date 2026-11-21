@@ -108,6 +108,12 @@ class NativeReadonlyFill(unittest.TestCase):
             'newbattle/nbCameraProcess': lit4,
             'pb/pbGameDraw': '',
             'sdf/sdfHdd': sdata,
+            'kernel/dds3KernelCore': sdata,
+            'kernel/dds3CreateData': sdata,
+            'facility/fclRagInit': sdata,
+            'basic/dds3SceneBasic': '',
+            'pipe/pipeEffect': sdata,
+            'interface/frTestFont': '',
         }
         for unit, suffix in cases.items():
             with self.subTest(unit=unit):
@@ -122,7 +128,7 @@ class NativeReadonlyFill(unittest.TestCase):
                 ret = bytes(case.final) + payload + bytes(case.end - end4)
                 native = (f'.section .text, "ax"\n\n.section .rodata, "a"\n'
                           f'dlabel {case.label}\n'
-                          f'    /* {case.final:06X} {case.final+fill.BASE:08X} */ .asciz "{case.value}"\n'
+                          f'    /* {case.final:06X} {case.final+fill.BASE:08X} */ .asciz "{case.asm_literal or case.value}"\n'
                           f'    /* {payload.hex().upper()} */\n'
                           f'{tail}enddlabel {case.label}\n')
                 rendered = fill.render(native + suffix, case, ret, have)
@@ -139,9 +145,41 @@ class NativeReadonlyFill(unittest.TestCase):
                 wrong_order = next(bad for bad in (lit4, sdata) if bad != suffix)
                 with self.assertRaisesRegex(ValueError, 'not terminal'):
                     fill.render(native + wrong_order + suffix, case, ret, have)
-                write(self.root, fill.opt_path(VERSION), json.dumps([case.next]))
+                write(self.root, fill.opt_path(VERSION), json.dumps([unit + ".invalid"]))
                 with self.assertRaisesRegex(ValueError, 'invalid native'):
                     fill.options(self.root, VERSION)
+
+    def test_escaped_terminal_literals_are_exact_and_case_specific(self):
+        for unit in ('pb/pbRecord', 'effect/billManager', 'effect/effPCPNeedle'):
+            with self.subTest(unit=unit):
+                case = fill.CASES[unit]
+                have = case.final + len(case.value) + 1
+                end4 = (have + 3) & ~3
+                payload = case.value.encode() + bytes(end4 - have + 1)
+                tail = '.align 2\n'
+                for at in range(end4, case.end, 4):
+                    tail += (f'    /* {at:06X} {at+fill.BASE:08X} */ .asciz ""\n'
+                             '    /* 00000000 */\n.align 2\n')
+                ret = bytes(case.final) + payload + bytes(case.end - end4)
+                native = (f'.section .text, "ax"\n\n.section .rodata, "a"\n'
+                          f'dlabel {case.label}\n'
+                          f'    /* {case.final:06X} {case.final+fill.BASE:08X} */ '
+                          f'.asciz "{case.asm_literal}"\n'
+                          f'    /* {payload.hex().upper()} */\n'
+                          f'{tail}enddlabel {case.label}\n')
+                suffix = '.section .lit4, "wa"\n' if unit == 'effect/effPCPNeedle' else ''
+                native += suffix
+                rendered = fill.render(native,case,ret,have)
+                with self.assertRaisesRegex(ValueError, 'literal differs'):
+                    fill.render(native.replace(case.asm_literal, case.asm_literal.replace(r'\n', r'\012')),
+                                case,ret,have)
+                self.assertIn(f'.section {fill.FILL}, "a"\n    .zero {case.end-have}\n', rendered)
+                with self.assertRaisesRegex(ValueError, 'literal differs'):
+                    fill.render(native.replace(case.asm_literal,case.value),case,ret,have)
+                with self.assertRaisesRegex(ValueError, 'annotation differs'):
+                    fill.render(native,case,ret[:case.final]+b'X'+ret[case.final+1:],have)
+                with self.assertRaisesRegex(ValueError, 'not terminal'):
+                    fill.render(native.removesuffix(suffix) if suffix else native+'.section .lit4, "wa"\n',case,ret,have)
 
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'

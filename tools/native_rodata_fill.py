@@ -35,6 +35,7 @@ class Case:
     label: str
     value: str
     align: int
+    asm_literal: str | None = None
 
 MODE_SELECT='kernel/ModeSelect'
 MODE_TEXT=(0x229030,0x1530)
@@ -56,6 +57,33 @@ CASES={
                       0x4371B0,'pbDrawMapCursorProcName','pb-draw-map cursor',8),
     'sdf/sdfHdd': Case('sdf/sdfHdd','sdf/sdfDev9',0x44A6C8,0x44A838,
                       0x44A828,'D_00549828','hdd0:dds3,',8),
+    'pb/pbRecord': Case('pb/pbRecord','pb/pbHelp',0x4371C8,0x437398,0x437388,
+                      'D_00536388','\t<floor = %d>\n',8,r'\t<floor = %d>\n'),
+    'effect/billManager': Case('effect/billManager','effect/parManager',0x433C28,
+                      0x433D50,0x433D30,'D_00532D30','BillManager Load...[%s]\n',
+                      16,r'BillManager Load...[%s]\n'),
+    'effect/effPCPNeedle': Case('effect/effPCPNeedle','effect/effPCPMisc',
+                          0x434C68,0x434CC0,0x434C90,'D_00533C90',
+                          'dds3NeedleModelVNCListDelete[%p] ****\n',16,
+                          r'dds3NeedleModelVNCListDelete[%p] ****\n'),
+    'kernel/dds3KernelCore': Case('kernel/dds3KernelCore', 'sdf/sdfDefaultMain',
+                      0x42ED18, 0x42EE60, 0x42EE48, 'D_0052DE48',
+                      'now process [%s]\n', 8, 'now process [%s]\\n'),
+    'kernel/dds3CreateData': Case('kernel/dds3CreateData', 'staff/stfMain',
+                      0x43FFB8, 0x4400F0, 0x4400D8, 'D_0053F0D8',
+                      '/staff/capcom_logo.tmx', 8),
+    'facility/fclRagInit': Case('facility/fclRagInit', 'facility/fclRagCalc',
+                      0x43E140, 0x43E210, 0x43E200, 'ragUpdateProcName',
+                      'rag_update', 16),
+    'basic/dds3SceneBasic': Case('basic/dds3SceneBasic', 'basic/dds3AreaBasic',
+                      0x430730, 0x4307C0, 0x4307A0, 'D_0052F7A0',
+                      'script procname invalid [%s]\n', 8, 'script procname invalid [%s]\\n'),
+    'pipe/pipeEffect': Case('pipe/pipeEffect', 'pipe/pipeMakaAnim',
+                      0x449F58, 0x449FD8, 0x449FC8, 'D_00548FC8',
+                      '/pipe/FPS3.D3P', 8),
+    'interface/frTestFont': Case('interface/frTestFont', 'interface/itfMisc',
+                      0x436A10, 0x436A68, 0x436A38, 'D_00535A38',
+                      'host0:../../../dds3data/facility/test.bf', 8),
 }
 def must(ok, why):
     if not ok:
@@ -192,9 +220,9 @@ def render(stock,c,ret,have):
     rest=stock[m.end():].lstrip()
     # These are exact generated seams for the named cases, not accepted
     # alternatives for other owners. All peer sections are still compared.
-    if c.unit in (MODE_SELECT, 'pb/pbGameDraw'):
+    if c.unit in (MODE_SELECT, 'pb/pbGameDraw', 'pb/pbRecord', 'effect/billManager', 'basic/dds3SceneBasic', 'interface/frTestFont'):
         correctly_terminal=not rest
-    elif c.unit=='sdf/sdfHdd':
+    elif c.unit in ('sdf/sdfHdd', 'kernel/dds3KernelCore', 'kernel/dds3CreateData', 'facility/fclRagInit', 'pipe/pipeEffect'):
         correctly_terminal=rest.startswith('.section .sdata, "wa"\n')
     else:
         correctly_terminal=rest.startswith('.section .lit4, "wa"\n')
@@ -202,7 +230,10 @@ def render(stock,c,ret,have):
          stock[:m.start()].rfind('\n.section ')==stock[:m.start()].rfind('\n.section .rodata, "a"') and
          correctly_terminal,'not terminal native rodata label')
     lines=m[1].splitlines()
-    primary=f'    /* {c.final:06X} {c.final+BASE:08X} */ .asciz "{c.value}"'
+    # Only the named cases above supply pinned escaped assembler spellings.
+    # Real native bytes still use the independently specified literal value.
+    display=c.value if c.asm_literal is None else c.asm_literal
+    primary=f'    /* {c.final:06X} {c.final+BASE:08X} */ .asciz "{display}"'
     must(len(lines)>=2 and lines[0]==primary,'terminal real literal differs')
     prefix=re.fullmatch(r'    /\* ([0-9A-F]+) \*/',lines[1])
     must(prefix is not None,'terminal literal byte annotation')

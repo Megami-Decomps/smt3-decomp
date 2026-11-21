@@ -524,6 +524,10 @@ rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstc
 Race and heart data				docs/matching/result/rstcalc.md	722
 Evolution eligibility list				docs/matching/result/rstcalc.md	731
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
+Puzzle Boy records and billboard manager				docs/matching/rodata-fill-audit.md	30
+Needle model renderer				docs/matching/rodata-fill-audit.md	46
+Kernel startup and Rag initialization				docs/matching/rodata-fill-audit.md	54
+Scene, Pipe effect, and font test				docs/matching/rodata-fill-audit.md	63
 Script command table				docs/matching/script/scrTraceCode.md	3
 Default triangle indices				docs/matching/sdf/sdf3DPrim.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
