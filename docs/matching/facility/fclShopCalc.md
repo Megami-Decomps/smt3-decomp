@@ -67,5 +67,11 @@ entries; two placements share resource 11. Stock C reproduces the two
 alignment bytes before the existing entries. The eight-byte page
 descriptor keeps the original two named pointers. Without the explicit
 section placement the stock compiler moves both pointers into
-`.sdata`, not the native writable `.data`. The preceding two title
-pointers remain raw.
+`.sdata`, not the native writable `.data`. The preceding title pointers are a separate owner.
+
+## Shop panel title pointers
+
+Buy and Sell each load one writable pointer for their panel label. Their
+pointers occupy one consecutive eight-byte allocation in native order, with
+the existing Sell symbol referring to the second slot. The selected text
+buffers are the existing mutable eight-byte arrays in Shop initialization.

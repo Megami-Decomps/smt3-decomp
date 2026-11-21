@@ -200,7 +200,7 @@ extern s32 effBTLPartyIndex;
 
 extern u8 effBTLUnitLightOn;
 
-extern u8 effBTLHelperViewerInit[];
+extern effDebugMenu_t effBTLHelperViewerInit;
 
 extern void *effBedFileList;
 
@@ -3703,7 +3703,7 @@ const char D_00533C00[16] = "PRESS       ";
 
 const char D_00533C10[16] = "SYSTEM MENU";
 
-void effBTLDebugPrintDistance(void)
+void effBTLDebugPrintDistance(void *unused)
 {
     sprintf(effBTLPlayerSphereLabel, "PLAYER:%-4.3f", effBTLModelGroupGetSphereOld(0x100) * 0.02f);
     sprintf(effBTLEnemySphereLabel, " ENEMY:%-4.3f", effBTLModelGroupGetSphereOld(0x200) * 0.02f);
@@ -3718,7 +3718,7 @@ void eff_175768(void)
         effBTLSkillActive = FALSE;
         effBTLDebugMenuOn = 0;
         effBTLPartyIndex = 0;
-        nbHelperViewer = effBTLHelperViewerInit;
+        nbHelperViewer = &effBTLHelperViewerInit;
         effBTLUnitLightOn = 0;
     }
 }

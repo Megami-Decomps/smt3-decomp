@@ -30,3 +30,8 @@ rom:0x227520 reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].blue: fi
 rom:0x21CA64 reloc:MIPS_32 symbol:D_00533338 // Sleep part fileName; numerical pointer bytes can resemble ASCII
 rom:0x21CA84 reloc:MIPS_32 symbol:D_00533350 // Panic part fileName; numerical pointer bytes can resemble ASCII
 rom:0x21CD14 reloc:MIPS_32 symbol:D_00533520 // Return part fileName; numerical pointer bytes can resemble ASCII
+rom:0x42A7E0 reloc:MIPS_NONE symbol:none // Packed consecutive triangle indices 48, 49, 50.
+rom:0x42A7F0 reloc:MIPS_NONE symbol:none // Packed consecutive triangle indices 60, 61, 62.
+rom:0x21E000 reloc:MIPS_32 symbol:D_00533C40 // Battle debug helper menu title.
+rom:0x1F6D14 reloc:MIPS_32 symbol:D_002F5C90 // Off-screen slot 1 targets the second writable render light.
+rom:0x1F6D18 reloc:MIPS_32 symbol:D_002F5CD0 // Off-screen slot 2 targets the third writable render light.

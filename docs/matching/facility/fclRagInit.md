@@ -107,3 +107,10 @@ owners / 596 drafts, seven IRX owners, 26 tooling test files / 427 cases, shell
 mocks and documentation checks. Source commit `30a7de849aff13665770c5f9bf987f4592b0025a` passed exact-source
 hosted CI [40985106175](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40985106175),
 including build and deploy.
+
+## Rag list command rows
+
+The list builder uses ten-byte rows: a signed event bit and a pair of
+selectors each for the heart, elemental and Mitama lists. Both native rows
+have no event gate and choose selector 1 for all three lists. The four
+zero bytes before the following offer lists are separate alignment.

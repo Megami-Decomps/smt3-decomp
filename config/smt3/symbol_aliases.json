@@ -270,5 +270,21 @@
     "section": ".data",
     "offset": 164,
     "owner_size": 328
+  },
+  {
+    "name": "shopSellTitle",
+    "owner": "shopBuyTitle",
+    "unit": "facility/fclShopTitlePointers",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 8
+  },
+  {
+    "name": "D_00527664",
+    "owner": "nbE912CutPacket",
+    "unit": "newbattle/nbEvent912CutPackets",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 8
   }
 ]

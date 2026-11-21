@@ -177,6 +177,7 @@ Rag menu labels and exchange headings				docs/matching/facility/fclRagCalc.md	10
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
 ragGetListItem2, ragGetListItem3	fclRagInit	0xCC each	51 of 51 words matching	docs/matching/facility/fclRagInit.md	47
 ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	78
+Rag list command rows				docs/matching/facility/fclRagInit.md	111
 ragCheckHeartsChoice	fclRagUpdate	0x80	32 of 32 words match	docs/matching/facility/fclRagUpdate.md	3
 ragUpdateSeqConfirm	facility/fclRagUpdate	0x208	130 of 130 words match	docs/matching/facility/fclRagUpdate.md	32
 rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/matching/facility/fclRecoverCalc.md	3
@@ -191,6 +192,8 @@ fclDrawPhaseValue	facility/fclShare	380 bytes	95 of 95 words match	docs/matching
 shop_Process	facility/fclShopCalc	0x100	64 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	18
 Shop sprite page				docs/matching/facility/fclShopCalc.md	63
+Shop panel title pointers				docs/matching/facility/fclShopCalc.md	72
+Shop item unlock rows				docs/matching/facility/fclShopInit.md	3
 shpUpdateSeqConfirm	facility/fclShopUpdate	0xFC	63 of 63 words match	docs/matching/facility/fclShopUpdate.md	3
 shpGetItemFromItemBox	facility/fclShopUpdate	0x148	82 of 82 words match	docs/matching/facility/fclShopUpdate.md	47
 shpUpdateSeqPay	facility/fclShopUpdate	0x218	134 of 134 words match	docs/matching/facility/fclShopUpdate.md	84
@@ -272,6 +275,8 @@ dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMai
 Primitive debug text box tables	kernel/dds3DebugStuff	15 bytes		docs/matching/kernel/dds3DebugStuff.md	3
 PrimLine 3D geometry data	kernel/dds3GlobalWork	264 bytes		docs/matching/kernel/dds3GlobalWork.md	3
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
+Quad triangle index word				docs/matching/kernel/dds3KernelDraw.md	81
+Off-screen parallel light pointers				docs/matching/kernel/dds3KernelDraw.md	88
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 CallNewBattleTest	kernel/dds3SequenceList	0x4C		docs/matching/kernel/dds3SequenceList.md	3
 dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/kernel/dds3TitleMain.md	3
@@ -387,6 +392,7 @@ nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76
 nbGetQuestionType	newbattle/nbNegoProcess	0x25C	100 of 151 words match	docs/matching/newbattle/nbNegoProcess.md	122
 Mukan negotiation weights				docs/matching/newbattle/nbNegoProcess.md	157
+Initial and additional negotiation request weights				docs/matching/newbattle/nbNegoProcess.md	167
 nbPanelDrawPP (0xA84)			673 of 673 words	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	73
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	135
@@ -433,6 +439,7 @@ nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	175
 Printable name encodings				docs/matching/nme/Nme_Init.md	192
+The first two texture-rectangle banks				docs/matching/nme/nmeSpriteResources.md	3
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/matching/pb/pbGame.md	3
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/matching/pb/pbGame.md	28
 roundBlock	pb/pbGame	0x8C	35 of 35 words match	docs/matching/pb/pbGame.md	48
@@ -490,6 +497,7 @@ rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstc
 Race and heart data				docs/matching/result/rstcalc.md	722
 Evolution eligibility list				docs/matching/result/rstcalc.md	731
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
+Default triangle indices				docs/matching/sdf/sdf3DPrim.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3

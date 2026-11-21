@@ -31,6 +31,7 @@ both native and emitted sizes when they differ.
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 6 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 6 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
@@ -39,7 +40,6 @@ both native and emitted sizes when they differ.
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
-| 5 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
@@ -57,7 +57,9 @@ both native and emitted sizes when they differ.
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
+| 4 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 4 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
+| 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 4 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -73,13 +75,12 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
+| 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
-| 3 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
@@ -120,9 +121,11 @@ both native and emitted sizes when they differ.
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfCoreDraw | [sdf/sdfCoreDraw.md](sdf/sdfCoreDraw.md) |
+| 1 |  | [sdf/sdf3DPrim.md](sdf/sdf3DPrim.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
+| 1 |  | [nme/nmeSpriteResources.md](nme/nmeSpriteResources.md) |
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbSound | [newbattle/nbSound.md](newbattle/nbSound.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
@@ -137,7 +140,6 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3SequenceList | [kernel/dds3SequenceList.md](kernel/dds3SequenceList.md) |
 | 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
-| 1 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 1 | kernel/dds3GlobalWork | [kernel/dds3GlobalWork.md](kernel/dds3GlobalWork.md) |
 | 1 | kernel/dds3DebugStuff | [kernel/dds3DebugStuff.md](kernel/dds3DebugStuff.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
@@ -148,6 +150,7 @@ both native and emitted sizes when they differ.
 | 1 | field/fldMain | [field/fldMain-vectors.md](field/fldMain-vectors.md) |
 | 1 |  | [fclRagInit.md](fclRagInit.md) |
 | 1 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
+| 1 |  | [facility/fclShopInit.md](facility/fclShopInit.md) |
 | 1 | facility/fclEncyc | [facility/fclEncyc-destroy.md](facility/fclEncyc-destroy.md) |
 | 1 | facility/fclDraw | [facility/fclDraw.md](facility/fclDraw.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |

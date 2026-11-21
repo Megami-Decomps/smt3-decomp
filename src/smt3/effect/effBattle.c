@@ -2,6 +2,7 @@
 #include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "effBattle.h"
+#include "effBattleFieldFilter.h"
 #include "nb.h"
 #include "basic.h"
 #include "ps2asm.h"
@@ -86,16 +87,6 @@ typedef struct effBTLSkillInfo_t {
 } effBTLSkillInfo_t;
 
 extern effBTLSkillInfo_t D_005698E0;
-
-typedef struct effBTLFieldFilter_t {
-    dds3Effect_Filter_t rect;
-    u32 baseColor;
-    u32 targetColor;
-    u16 frame;
-    u16 frameMax;
-} effBTLFieldFilter_t;
-
-extern effBTLFieldFilter_t effBTLFieldColorFilter;
 
 typedef struct fldResourceLight_t {
     u32 resv;

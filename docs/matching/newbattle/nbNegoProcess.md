@@ -163,3 +163,16 @@ negotiation descriptors select profile zero. The two bytes to the first
 word boundary and the following raw material remain distinct; in
 particular the repeated four-byte records at 0x2E34B0 are not this
 three-choice table.
+
+## Initial and additional negotiation request weights
+
+`nbGetNegoRequestType` samples one five-choice row from
+`datNegoReqTable` at ROM 0x2E32A8; `nbGetNegoTuikaRequestType` samples
+one three-choice row from `datNegoTuikaReqtype` at ROM 0x2E33B8.
+Their native loops read unsigned bytes and add each weight before
+comparing the roll. The tables contain seven and eleven identifiable
+rows, respectively, with each row summing to 100. The 384 initialized
+`master_text` profiles use initial indices 0–2 and additional indices
+0–1. The tables do not include the following 77 and 31 zero bytes, which
+remain separate raw ranges before the two existing reward item banks.
+The consumers and their original table references are unchanged.

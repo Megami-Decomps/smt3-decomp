@@ -77,3 +77,17 @@ A bounded alpha binding changes instruction placement, and a colour binding
 with a real live operand gives 117/170 words at 680 bytes. Neither is retained.
 The ordinary colour-dependency and allocation residual remains; no new match
 credit or changed compiler flags are claimed.
+
+## Quad triangle index word
+
+The textured and untextured four-vertex paths both fetch one eight-byte
+word, composing triangles (0, 1, 2) and (0, 2, 3). They pass it to
+the SDF polygon builder as two packed 32-bit face words. The following
+eight zero bytes have no references and remain raw.
+
+## Off-screen parallel light pointers
+
+The light-packet setup reads positions 0 through 2 of the list passed
+by the off-screen draw environment. Its three targets are the existing
+writable 64-byte render-light objects, in native order. The unconsumed
+zero word before the aligned ambient vector remains raw.
