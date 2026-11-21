@@ -204,8 +204,7 @@ extern void fldEncountSetFlag(u32 flag);
 
 extern void fldReleaseUnitPad(void);
 
-extern u8 sdfModelOtTable[];
-#define D_002F6A18 ((sdfGrOt_t **)(sdfModelOtTable + 0x60))
+extern sdfModelOt_t sdfModelOtTable[];
 
 extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1,
                            sdfGrOt_t *aOt2, sdfGrOt_t *aOt3);
@@ -1453,16 +1452,16 @@ s32 fldOtInit(void)
         (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0x8) ||
         (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0x9) ||
         (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0xA)) {
-        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+        sdfModelOtInit(&sdfModelOtTable[6], &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
                        &sdfGrOtTable[41]);
-        D_002F6A18[1] = &sdfGrOtTable[46];
+        sdfModelOtTable[6].ot[1] = &sdfGrOtTable[46];
     } else if (fldGlobalBase.area == 0x20 || fldGlobalBase.area == 0x24 ||
                fldGlobalBase.area == 0x25) {
-        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+        sdfModelOtInit(&sdfModelOtTable[6], &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
                        &sdfGrOtTable[41]);
-        D_002F6A18[1] = &sdfGrOtTable[35];
+        sdfModelOtTable[6].ot[1] = &sdfGrOtTable[35];
     } else {
-        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+        sdfModelOtInit(&sdfModelOtTable[6], &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
                        &sdfGrOtTable[41]);
     }
 }
