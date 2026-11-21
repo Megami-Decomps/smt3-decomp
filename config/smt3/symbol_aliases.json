@@ -86,5 +86,21 @@
     "section": ".data",
     "offset": 8,
     "owner_size": 6000
+  },
+  {
+    "name": "effPCPBossONGYFovy",
+    "owner": "dds3RenderScreenParam",
+    "unit": "kernel/dds3RenderScreenState",
+    "section": ".data",
+    "offset": 12,
+    "owner_size": 160
+  },
+  {
+    "name": "nbNegoRateTable",
+    "owner": "nbNormalQuestionTable",
+    "unit": "newbattle/nbNegoRateProfiles",
+    "section": ".data",
+    "offset": 8,
+    "owner_size": 868
   }
 ]

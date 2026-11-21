@@ -5,6 +5,7 @@
 #include "sdf_types.h"
 #include "sdfPreDrawChain.h"
 #include "sdf_resource.h"
+#include "sdfDrawQueue.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
@@ -274,16 +275,6 @@ void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, addr_t aHeadPacket,
 void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
-typedef struct sdfDrawReqRec_t {
-    struct sdfDrawTag_t *drawTag;
-    sdfPreDrawHook_t *preDraw;
-    u8 drawCount;
-    u8 queuedBufferIndex;
-    u8 bufferIndex;
-    u8 bufferSlotIndex;
-    u8 pad0C[4];
-} sdfDrawReqRec_t;
-
 /* Complete linked-packet list, distinct from the 0x20-byte DMA list head. */
 typedef struct sdfPreDrawTag_t {
     u32 next;
@@ -330,7 +321,6 @@ extern s32 DIntr(void);
 
 extern s32 sdfDrawReqQueueIndex;
 
-extern sdfDrawReqRec_t sdfGrDrawState[];
 
 typedef struct effDebugPolyParams_t {
     s16 parameterCount;
