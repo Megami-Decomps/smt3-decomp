@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datCommentTable.h"
 #include "datCalc.h"
 #include "facility.h"
 #include "camp.h"
@@ -42,15 +43,6 @@ extern void rstSetDestroySkillMaxHpMp(void);
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
 extern rstData_t *rstDrawWork;
-
-typedef struct
-{
-    /* 0x00 */ u16 id;
-    /* 0x02 */ s8 comment;
-    /* 0x03 */ u8 unk_03;
-} datCommentEntry_t;
-
-extern datCommentEntry_t datCommentTable[];
 
 extern const char rstDrawProcName[];
 

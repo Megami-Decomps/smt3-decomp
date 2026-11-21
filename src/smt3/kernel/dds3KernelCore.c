@@ -1,9 +1,9 @@
 #include "common.h"
+#include "dds3PadButtonPrev.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
 /* Two ports, two sticks per port, and two axes per stick. */
-extern s8 dds3PadButtonPrev[2][2][16];
 extern u8 dds3PadButtonState[2][2][16];
 extern u8 dds3PadStickPrev[2][2][2];
 extern s8 dds3PadStickStatusPrev[2][2];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonPrev.h"
 #include "dds3PadHoldCounters.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -31,7 +32,6 @@ extern void sdfPadSetAct1(s32 pad, u8 value);
 extern void sdfPadSetAct(s32 pad, s32 value0, s32 value1);
 
 extern u8 dds3PadButtonState[64];
-extern u8 dds3PadButtonPrev[64];
 extern u8 dds3PadStickPrev[8];
 extern s8 dds3PadStickStatusPrev[4];
 extern u8 dds3PadStickState[8];
@@ -56,7 +56,7 @@ void dds3PadInitialize(void) {
         for (half = 0; half < 2; half++) {
             for (key = 0; key < 16; key++) {
                 dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] = 0;
-                dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
+                dds3PadButtonPrev[half][pad][key] = 0;
                 dds3PadButtonState[pad * 16 + half * 32 + key] = 0;
             }
         }
@@ -174,18 +174,18 @@ void dds3RunProcessList(void)
         for (half = 0; half < 2; half++) {
             for (key = 0; key < 16; key++) {
                 if (button[half][key] != 0) {
-                    dds3PadButtonPrev[pad * 16 + half * 32 + key] = 1;
+                    dds3PadButtonPrev[half][pad][key] = 1;
                     dds3PadButtonHoldCounters[pad * 16 + half * 32 + key]++;
                     if (dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] == 1) {
-                        dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0x83;
+                        dds3PadButtonPrev[half][pad][key] = 0x83;
                     }
                 } else {
-                    dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
+                    dds3PadButtonPrev[half][pad][key] = 0;
                     dds3PadButtonHoldCounters[pad * 16 + half * 32 + key] = 0;
                 }
                 count = dds3PadButtonHoldCounters[pad * 16 + half * 32 + key];
                 if (count >= SDF_FRAMES(8) && (SDF_FRAME_TICK(count) & 1) == 0 && SDF_FRAME_DUE_AGE(count)) {
-                    dds3PadButtonPrev[pad * 16 + half * 32 + key] |= 2;
+                    dds3PadButtonPrev[half][pad][key] |= 2;
                 }
             }
         }

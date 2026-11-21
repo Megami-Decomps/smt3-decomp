@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonPrev.h"
 #include "dds3PadHoldCounters.h"
 #include "sdfDevCons.h"
 #include "libsdf.h"
@@ -419,8 +420,6 @@ extern f32 effMagaSavedViewTarget[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 effMagaSavedViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern f32 effMagaSavedViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-
-extern u8 dds3PadButtonPrev[2][2][16];
 
 extern u8 dds3PadButtonState[2][2][16];
 

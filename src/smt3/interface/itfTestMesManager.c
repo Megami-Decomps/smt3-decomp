@@ -5,6 +5,7 @@
 #include "model.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "pbDebugColorRows.h"
 
 
 typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
@@ -20,8 +21,6 @@ typedef struct
     u8 unk08[8];
 } pbPanelEditor_t;
 
-typedef struct { const char *title; s32 highlight; } pbColorRow_t;
-
 typedef struct { u8 value; u8 unk01[3]; } pbColorByte_t;
 
 typedef union
@@ -32,8 +31,6 @@ typedef union
 } pbColor_t;
 
 extern pbPanelEditor_t pbDebugPanel2Pos, pbDebugPanel3X;
-
-extern pbColorRow_t D_00326C20[6];
 
 extern pbColor_t D_00326C50;
 
