@@ -105,3 +105,12 @@ frees the register but addresses the frame directly, so the four `sqc2` and the
 whole tail shift by one word (46 of 118). A `sdfMatrix4_t *mp = &marked;` local
 with either existing macro does not reach it: cse folds the local back into the
 shared pseudo.
+
+## Rectangle blur editor descriptor
+
+The writable 64-byte menu record names ten existing editor items. Its
+source and separate reset buffer cover exactly 40 bytes each; the source
+wrapper has no tail into the following item table. Mode one uses the
+existing update callback through its object-pointer entry point, retaining
+the concrete blur type in the drawing body. All six native addresses and
+the null optional callbacks are unchanged.

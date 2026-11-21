@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "effEventSmoke.h"
 #include "libsdf.h"
 #include "effBattle.h"
@@ -75,7 +76,6 @@ extern s8 Eve_FilterShow;
 extern dds3Effect_Filter_t Eve_Filter;
 extern s8 Eve_PartialMultiFilterShow;
 extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
-extern void dds3EffectBlur(const dds3Effect_Blur_t *source);
 extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work);
 extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);

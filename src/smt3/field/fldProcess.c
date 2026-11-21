@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "basic.h"
 #include "kernel.h"
 #include "libsdf.h"
@@ -966,7 +967,6 @@ extern void fldWaveTask(void);
 extern void fldAutoMapDraw(void);
 extern void fldSnowTask(void);
 extern void fldElvDrawFloorNum(void);
-extern void dds3EffectBlur(const dds3Effect_Blur_t *source);
 extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 
 /* A plain block, not do/while(0): the loop notes a do/while leaves behind make gcc

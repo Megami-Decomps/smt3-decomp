@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "effPCPEyeThunderData.h"
 #include "effThunderSphereData.h"
 #include "effPCPData.h"
@@ -2142,7 +2143,6 @@ void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur);
 
 void dds3EffectFilter(effResourceRectDrawParams_t *params);
 
-void dds3EffectBlur(dds3Effect_Blur_t *quad);
 
 u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 

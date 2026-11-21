@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "basic.h"
 #include "event.h"
 #include "evtPolygonMovie.h"
@@ -83,7 +84,6 @@ extern void DelEffectTable_evtEventViewer(s32 index);
 extern void DelBED(evtFrameInfo_t *frame);
 extern s8 dds3PadButtonState[];
 extern effScreenDrawParams_t *evtGetUnityCalcArea(void);
-extern void dds3EffectBlur(void *area);
 extern void Eve_PartialMultiBlurON(void);
 extern void Eve_PartialMultiBlurOFF(void);
 extern void Eve_PartialMultiFilterON(void);

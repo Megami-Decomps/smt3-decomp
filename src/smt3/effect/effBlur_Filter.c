@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "libsdf.h"
@@ -13,7 +14,6 @@ extern u64 *effPkt2DAllocF4(u32 prim);
 
 extern u8 dds3EffectBase[];
 
-void dds3EffectBlur(const dds3Effect_Blur_t *source);
 
 sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
@@ -124,7 +124,8 @@ void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPri
 
 /* Borrow the display frame as a texture, set the two blend states and the
    sampling window, then draw the source quad through it. */
-void dds3EffectBlur(const dds3Effect_Blur_t *source) {
+void dds3EffectBlur(void *params) {
+    const dds3Effect_Blur_t *source = params;
     sdfDrawTag_t *list;
     void *reference;
     u32 frame;

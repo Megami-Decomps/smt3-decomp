@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "kernel.h"
 #include "nb.h"
 #include "ps2asm.h"
@@ -387,7 +388,6 @@ typedef struct nbBlurParam_t {
     s32 unk2C;
 } nbBlurParam_t;
 
-extern void dds3EffectBlur(nbBlurParam_t *param);
 
 void nbStageSp(void)
 {

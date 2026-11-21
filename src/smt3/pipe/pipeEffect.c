@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "effRectangleBlur.h"
 #include "sdf_resource.h"
 #include "pipe.h"
 #include "ps2asm.h"
@@ -26,7 +27,6 @@ typedef struct pipeBlurParam_t {
     s32 unk2C;
 } pipeBlurParam_t;
 
-extern void dds3EffectBlur(pipeBlurParam_t *param);
 
 typedef struct PIPE_EFF_t {
     sdfMemHandle_t *mhFile;
