@@ -38,3 +38,27 @@ rom:0x1F6D18 reloc:MIPS_32 symbol:D_002F5CD0 // Off-screen slot 2 targets the th
 rom:0x21DDB8 reloc:MIPS_32 symbol:D_00533B20 // Battle effects submenu title.
 rom:0x220900 reloc:MIPS_NONE symbol:none // ShockWave02 poly packed edge color, not a pointer.
 rom:0x21DC80 reloc:MIPS_32 symbol:D_00533A40
+
+// InitTLB32MB passes these words to _SetTLBEntry; none are pointers.
+rom:0x42E6D8 reloc:MIPS_NONE symbol:none // tlbKernelEntries[2].entryLo0: numeric PS2 TLB value.
+rom:0x42E6DC reloc:MIPS_NONE symbol:none // tlbKernelEntries[2].entryLo1: numeric PS2 TLB value.
+rom:0x42E6E8 reloc:MIPS_NONE symbol:none // tlbKernelEntries[3].entryLo0: numeric PS2 TLB value.
+rom:0x42E6EC reloc:MIPS_NONE symbol:none // tlbKernelEntries[3].entryLo1: numeric PS2 TLB value.
+rom:0x42E6F8 reloc:MIPS_NONE symbol:none // tlbKernelEntries[4].entryLo0: numeric PS2 TLB value.
+rom:0x42E6FC reloc:MIPS_NONE symbol:none // tlbKernelEntries[4].entryLo1: numeric PS2 TLB value.
+rom:0x42E708 reloc:MIPS_NONE symbol:none // tlbKernelEntries[5].entryLo0: numeric PS2 TLB value.
+rom:0x42E70C reloc:MIPS_NONE symbol:none // tlbKernelEntries[5].entryLo1: numeric PS2 TLB value.
+rom:0x42E718 reloc:MIPS_NONE symbol:none // tlbKernelEntries[6].entryLo0: numeric PS2 TLB value.
+rom:0x42E71C reloc:MIPS_NONE symbol:none // tlbKernelEntries[6].entryLo1: numeric PS2 TLB value.
+rom:0x42E728 reloc:MIPS_NONE symbol:none // tlbKernelEntries[7].entryLo0: numeric PS2 TLB value.
+rom:0x42E72C reloc:MIPS_NONE symbol:none // tlbKernelEntries[7].entryLo1: numeric PS2 TLB value.
+rom:0x42E738 reloc:MIPS_NONE symbol:none // tlbKernelEntries[8].entryLo0: numeric PS2 TLB value.
+rom:0x42E73C reloc:MIPS_NONE symbol:none // tlbKernelEntries[8].entryLo1: numeric PS2 TLB value.
+rom:0x42E748 reloc:MIPS_NONE symbol:none // tlbKernelEntries[9].entryLo0: numeric PS2 TLB value.
+rom:0x42E74C reloc:MIPS_NONE symbol:none // tlbKernelEntries[9].entryLo1: numeric PS2 TLB value.
+rom:0x42E758 reloc:MIPS_NONE symbol:none // tlbKernelEntries[10].entryLo0: numeric PS2 TLB value.
+rom:0x42E75C reloc:MIPS_NONE symbol:none // tlbKernelEntries[10].entryLo1: numeric PS2 TLB value.
+rom:0x42E768 reloc:MIPS_NONE symbol:none // tlbKernelEntries[11].entryLo0: numeric PS2 TLB value.
+rom:0x42E76C reloc:MIPS_NONE symbol:none // tlbKernelEntries[11].entryLo1: numeric PS2 TLB value.
+rom:0x42E794 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[1].entryHi: numeric PS2 TLB value.
+rom:0x42E7C4 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[4].entryHi: numeric PS2 TLB value.
