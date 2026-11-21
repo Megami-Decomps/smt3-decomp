@@ -518,5 +518,13 @@
     "section": ".data",
     "offset": 12,
     "owner_size": 16
+  },
+  {
+    "name": "D_00330914",
+    "owner": "D_00330900",
+    "unit": "facility/fclGenericLabelData",
+    "section": ".data",
+    "offset": 20,
+    "owner_size": 40
   }
 ]

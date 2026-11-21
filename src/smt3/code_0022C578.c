@@ -1958,7 +1958,7 @@ void cmpCalcSkill(void)
     }
 }
 
-extern char *D_00330914[];
+extern const char *D_00330914[5];
 
 extern char cmpFmtNameCount[];
 
