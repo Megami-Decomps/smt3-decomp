@@ -941,5 +941,4 @@ char dds3DebugFieldClose[8] = ") ";
 
 char dds3DebugBlockEnd[8] = "\n\n";
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", dds3DebugTreeLineFmt);
-
+char dds3DebugTreeLineFmt[8] = "%s+-%s\n";

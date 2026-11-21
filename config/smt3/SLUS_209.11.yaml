@@ -1610,6 +1610,7 @@ segments:
       - [0x44F7D4, lit4, lit4_pad]
       - [0x44F800, .sdata, kernel/dds3KernelMain]
       - [0x44F850, .sdata, kernel/dds3KernelCore]
+      - [0x44F8B8, pad, dds3DebugTreeLineFmtTail]
       - [0x44F8BC, .sdata, sdf/sdfDefaultMain]
       - [0x44F8C8, .sdata, kernel/dds3AdminiProcess]
       - [0x44F8F8, .sdata, kernel/dds3DebugMenu]
