@@ -3,7 +3,9 @@ import unittest
 from pathlib import Path
 
 from native_data_tail import (HEADER, check_primary, complete_reference, name_records,
-                              opt_ins, pad_assets, verify_reloc_overrides, yaml_inputs)
+                              opt_ins, pad_assets, verify_reloc_overrides, yaml_inputs,
+                              complete_warning_reference, WARN_ADDR, WARN_END, WARN_NAMES,
+                              WARN_OFFSETS, WARN_ROM)
 
 NAME = "table"
 START = 0x100
@@ -154,6 +156,43 @@ segments:
             a.unlink()
             with self.assertRaisesRegex(ValueError, "missing"):
                 yaml_inputs(root, "v", "demo")
+
+    def test_warning_prompts_retain_exact_slots_and_reject_extra_symbols(self):
+        payload = bytes(WARN_OFFSETS[-1]) + b"Start the game anyway?\0"
+        starts = dict(zip(WARN_NAMES, ((WARN_ADDR + i, None) for i in WARN_OFFSETS)))
+        word_end = len(payload) & ~3
+        rows = [HEAD]
+        for name, begin, end in zip(WARN_NAMES, WARN_OFFSETS, WARN_OFFSETS[1:] + (word_end,)):
+            rows += [f"nonmatching {name}\ndlabel {name}\n"]
+            for off in range(begin, end, 4):
+                word = int.from_bytes(payload[off:off + 4], "little")
+                rows += [f"/* {WARN_ROM+off:06X} {WARN_ADDR+off:08X} */ .word {word}\n"]
+            rows += [f"enddlabel {name}\n"]
+        original = "".join(rows)
+        run = lambda text, names: complete_warning_reference(text, payload, WARN_ROM, WARN_ADDR, names)
+        out = run(original, starts)
+        self.assertEqual(out, original.replace(f"enddlabel {WARN_NAMES[-1]}", "".join(
+            f"    /* {WARN_ROM+i:06X} {WARN_ADDR+i:08X} */ .byte 0x{payload[i]:02X}\n"
+            for i in range(word_end, WARN_END-WARN_ROM)) + f"enddlabel {WARN_NAMES[-1]}"))
+        for bad in (original.replace(".word 0", ".word 1", 1),
+                    original.replace(".word 0", ".word D_bad", 1),
+                    original.replace(f"dlabel {WARN_NAMES[0]}", "dlabel wrong", 1),
+                    original + ".align 2\n"):
+            with self.assertRaises(ValueError):
+                run(bad, starts)
+        first_end = WARN_OFFSETS[1] - 4
+        word = f"/* {WARN_ROM+first_end:06X} {WARN_ADDR+first_end:08X} */ .word 0"
+        short = word.replace(".word", ".byte")
+        end_label = f"enddlabel {WARN_NAMES[0]}"
+        # Same bytes and starts, but only the first spelling owns its alignment.
+        padded = original.replace(f"{word}\n{end_label}", f"{short}\n.align 3\n{end_label}", 1)
+        self.assertNotEqual(original, padded)
+        run(padded, starts)
+        moved = padded.replace(f".align 3\n{end_label}", f"{end_label}\n.align 3", 1)
+        with self.assertRaisesRegex(ValueError, "symbol extent changed"):
+            run(moved, starts)
+        with self.assertRaisesRegex(ValueError, "unexpected warning prompt symbol"):
+            run(original, dict(starts, unwanted=(WARN_ADDR + 1, None)))
 
     def test_ledger_rejects_duplicate_and_unsafe(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -26,5 +26,6 @@
   "model/mdlDebugSoftenCursorRows": "softenBiasCursorY",
   "interface/itfGaugeHighlightVertexData": "itfGaugeHighlightVertexIndex",
   "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex",
-  "effect/effBTLCutCameraStateData": "effBTLCutCameraState"
+  "effect/effBTLCutCameraStateData": "effBTLCutCameraState",
+  "mc/slWarningStartPrompts": "slNoSpaceStartMsg6"
 }

@@ -2,7 +2,7 @@
 
 Splat's word-oriented data reader drops the final 1–3 bytes. Keep its
 already-correct symbolic prefix, but recover the final byte cells from the
-pinned retail ELF. Only named primaries in the opt-in ledger are eligible.
+pinned retail ELF. Only explicit named units in the opt-in ledger are eligible.
 """
 from __future__ import annotations
 
@@ -152,6 +152,102 @@ def complete_reference(assembly, name, payload, file_offset, address, names):
     return "".join(lines[:insert] + extension + lines[insert:])
 
 
+# The one multi-object exception comprises the sixteen live save UI strings.
+# The .data prefix is literal; only the final string loses three bytes in Splat.
+WARN_UNIT = "mc/slWarningStartPrompts"
+WARN_ROM = 0x429960
+WARN_ADDR = 0x528960
+WARN_END = 0x429B97
+WARN_OFFSETS = (0, 24, 64, 80, 136, 176, 200, 256, 296, 320, 352, 400, 424, 448, 504, 544)
+WARN_NAMES = tuple(f"{prefix}{i}" for prefix, count in
+                   (("slOverwriteWarnMsg", 3), ("slNoCardStartMsg", 6),
+                    ("slNoSpaceStartMsg", 7)) for i in range(count))
+WARN_STRING = re.compile(
+    r'^/\* ([0-9A-F]{6}) ([0-9A-F]{8}) \*/ \.asciz "([ -!#-\[\]-~]*)"$')
+WARN_HEX = re.compile(r"^/\* ([0-9A-F]+) \*/$")
+
+
+def check_warning_names(names, address, size):
+    expected = dict(zip(WARN_NAMES, (address + at for at in WARN_OFFSETS)))
+    actual = {n: va for n, (va, extent) in names.items() if address <= va < address + size
+              or extent and va < address < va + extent}
+    if address != WARN_ADDR or size != WARN_END - WARN_ROM or actual != expected:
+        raise ValueError("unexpected warning prompt symbol inventory")
+    if any(names[n][1] is not None for n in expected):
+        raise ValueError("unexpected warning prompt extent override")
+
+
+def complete_warning_reference(assembly, payload, file_offset, address, names):
+    check_warning_names(names, address, len(payload))
+    if file_offset != WARN_ROM or payload[WARN_OFFSETS[-1]:] != b"Start the game anyway?\0":
+        raise ValueError("unexpected native warning prompt terminal string")
+    lines = assembly.splitlines(keepends=True)
+    records = [(i, line.strip()) for i, line in enumerate(lines) if line.strip()]
+    if tuple(t for _, t in records[:3]) != HEADER:
+        raise ValueError("unexpected generated warning data header")
+    prefix = len(payload) & ~3
+    off = 0
+    limit = WARN_OFFSETS[0]
+    sym = None
+    idx = 0
+    i = 3
+    insert = None
+
+    def emit(b):
+        nonlocal off
+        if off + len(b) > min(prefix, limit) or payload[off:off + len(b)] != b:
+            raise ValueError("generated warning prefix differs from native")
+        off += len(b)
+
+    while i < len(records):
+        line_no, line = records[i]
+        if match := re.fullmatch(r"\.align ([23])", line):
+            emit(bytes((-off) % (1 << int(match[1]))))
+        elif sym is None and idx < len(WARN_NAMES) and line == f"nonmatching {WARN_NAMES[idx]}":
+            sym = WARN_NAMES[idx]
+            if off != WARN_OFFSETS[idx] or i + 1 >= len(records) or records[i + 1][1] != f"dlabel {sym}":
+                raise ValueError("warning prompt symbol boundary changed")
+            idx += 1
+            limit = WARN_OFFSETS[idx] if idx < len(WARN_OFFSETS) else prefix
+            i += 1
+        elif sym is not None and line == f"enddlabel {sym}":
+            if idx == len(WARN_NAMES):
+                if off != prefix or i != len(records) - 1:
+                    raise ValueError("warning prompt tail is not the unique terminal object")
+                insert = line_no
+            elif off != limit:
+                raise ValueError("warning prompt symbol extent changed")
+            sym = None
+        elif sym is not None and (m := WARN_STRING.fullmatch(line)):
+            if (int(m[1], 16), int(m[2], 16)) != (file_offset + off, address + off):
+                raise ValueError("warning prompt literal annotation moved")
+            literal = m[3].encode("ascii") + b"\0"
+            annotation = WARN_HEX.fullmatch(records[i + 1][1]) if i + 1 < len(records) else None
+            if (not annotation or len(annotation[1]) != 2 * ((len(literal) + 3) & ~3)
+                    or bytes.fromhex(annotation[1]) != payload[off:off + len(annotation[1]) // 2]):
+                raise ValueError("warning prompt literal annotation changed")
+            emit(literal)
+            i += 1
+        elif sym is not None and (m := DATA.fullmatch(line)):
+            rom, vram, native, directive, value = m.groups()
+            if ((int(rom, 16), int(vram, 16)) != (file_offset + off, address + off)
+                    or not re.fullmatch(rf"-?{NUM}", value)):
+                raise ValueError("unexpected warning data address or relocation")
+            b = verify_word(value, {"byte": 1, "short": 2, "word": 4}[directive], {})
+            if native is not None and bytes.fromhex(native) != b:
+                raise ValueError("warning data annotation changed")
+            emit(b)
+        else:
+            raise ValueError("unsupported directive within warning prompt bank")
+        i += 1
+    if insert is None:
+        raise ValueError("missing generated terminal warning prompt")
+    for j in range(prefix, len(payload)):
+        j_line = f"    /* {file_offset+j:06X} {address+j:08X} */ .byte 0x{payload[j]:02X}\n"
+        lines.insert(insert + j - prefix, j_line)
+    return "".join(lines)
+
+
 def yaml_inputs(root, version, serial):
     conf = root / "config" / version / f"{serial}.yaml"
     plan = yaml.safe_load(conf.read_text())
@@ -263,7 +359,7 @@ def exact_span(root, version, unit, name):
     cfg = root / "config" / version
     version_info = json.loads((root / "config/versions.json").read_text())[version]
     serial = version_info["serial"]
-    conf, _, all_relocations = yaml_inputs(root, version, serial)
+    conf, plan, all_relocations = yaml_inputs(root, version, serial)
     rng = owned_rom_range(conf.read_text(), unit, ".data")
     if rng is None:
         raise ValueError("native tail requires one exact .data-owned YAML span")
@@ -288,7 +384,21 @@ def exact_span(root, version, unit, name):
         raise ValueError("native data tail does not support file relocation sections")
     verify_reloc_overrides((p.read_text() for p in all_relocations), start, end)
     names = name_records((cfg / "symbol_addrs.txt").read_text())
-    check_primary(names, name, addr, size)
+    if unit == WARN_UNIT:
+        check_warning_names(names, addr, size)
+        if name != WARN_NAMES[-1] or (start, end) != (WARN_ROM, WARN_END):
+            raise ValueError("unexpected warning prompt tail opt-in")
+        expected = [
+            [WARN_ROM, ".data", WARN_UNIT],
+            [WARN_END, "databin", "slWarningStartAlign"],
+            [WARN_END + 1, ".data", "interface/dds3ConfigSpriteResources"],
+        ]
+        row_lists = [s.get("subsegments", []) for s in plan["segments"] if isinstance(s, dict)]
+        if (sum(rows[i:i + 3] == expected for rows in row_lists for i in range(len(rows))) != 1
+                or retail[end:end + 1] != b"\0"):
+            raise ValueError("warning prompt alignment is not the exact raw successor")
+    else:
+        check_primary(names, name, addr, size)
     return start, addr, retail[start:end], names
 
 
@@ -304,7 +414,11 @@ def main(version, unit, input_path, output_path):
     file_offset, address, payload, symbols = exact_span(root, version, unit, name)
     if not len(payload) % 4:
         raise ValueError("word-aligned owner does not need native data tail recovery")
-    result = complete_reference(normal_ref.read_text(), name, payload, file_offset, address, symbols)
+    assembly = normal_ref.read_text()
+    if unit == WARN_UNIT:
+        result = complete_warning_reference(assembly, payload, file_offset, address, symbols)
+    else:
+        result = complete_reference(assembly, name, payload, file_offset, address, symbols)
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_suffix(out.suffix + ".tmp")
