@@ -528,8 +528,6 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
 }
 
 
-/* NON_MATCHING: emitted C shares one result-call site; native has three. */
-#ifdef NON_MATCHING
 s32 fldCommand_DIR_HIT_CNTR(void) {
     dds3Basic_t *scene;
     dds3Basic_t *unit;
@@ -543,25 +541,19 @@ s32 fldCommand_DIR_HIT_CNTR(void) {
     unit = dds3GetActiveUnitSceneBasic(scene);
     if (unit == NULL) {
         scrSetIntReturnValue(0);
-        return 1;
+    } else {
+        hit = dds3SearchSceneBasic(
+            scene, fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID)), 0x11);
+        if (hit == NULL) {
+            scrSetIntReturnValue(0);
+        } else if (fldEveHit_ChkDir(unit, hit) == 0) {
+            scrSetIntReturnValue(0);
+        } else {
+            scrSetIntReturnValue(1);
+        }
     }
-    hit = dds3SearchSceneBasic(
-        scene, fldEveHitResID_Find(EE_ADDR(scrGetScriptHandle()->ProcessID)), 0x11);
-    if (hit == NULL) {
-        scrSetIntReturnValue(0);
-        return 1;
-    }
-    if (fldEveHit_ChkDir(unit, hit) == 0) {
-        scrSetIntReturnValue(0);
-        return 1;
-    }
-    scrSetIntReturnValue(1);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_DIR_HIT_CNTR);
-#endif
-
 
 s32 fldCommand_PAD_DISABLE(void) {
     dds3Basic_t *object;
