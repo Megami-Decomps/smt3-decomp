@@ -1619,16 +1619,3 @@ SDATA_RESUME();
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtDec);
-
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtHex);
-SDATA_RESUME();
-
-addr_t fldDrawEnv = 0;
-
-INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawSpriteTex);
-SDATA_RESUME();
-
-effBlurTemplate_t *hPartialMultiBlur = NULL;
-
-s32 gencMode = 0;
