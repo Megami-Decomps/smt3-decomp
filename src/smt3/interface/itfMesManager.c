@@ -324,7 +324,7 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr,
                                   const char *aStr, ...);
 
-extern char *itfMesDebugMenuLabels[];
+extern const char *itfMesDebugMenuLabels[];
 
 extern char itfMesDebugFadeFormat[];
 
@@ -414,7 +414,7 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
-extern s32 itfMesSelectRectVerts[8];
+extern sdfIVector2_t itfMesSelectRectVerts[4];
 
 extern itfColor_t itfMesSelectRectColors[2];
 
@@ -429,15 +429,15 @@ extern void itfMiscDrawRectanglePrim(sdfIVector2_t *vertices, itfColor_t *colors
 
 extern void itfMiscDrawSpritePrim2(sdfIVector2_t *pos, itfColor_t *uv, itfColor_t *color, u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
-extern s32 itfMesRetPageUv[4];
+extern itfColor_t itfMesRetPageUv;
 
-extern s32 itfMesRetPageColor[4];
+extern itfColor_t itfMesRetPageColor;
 
 extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 z, sdfTexHandle_t *texhandle, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
-extern s32 D_00326798[];
+extern itfColor_t D_00326798[];
 
 extern u8 itfMesDebugLineVertIndex[5];
 
@@ -2496,7 +2496,7 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     y = (s32)((u32)y + (u32)(index * 168));
     lx = (s32)((u32)x - 0xF0u);
     ly = (s32)((u32)y - 8u);
-    rx = itfMesSelectRectVerts[0];
+    rx = itfMesSelectRectVerts[0].x;
     ry = (s32)((u32)y + 0xA8u);
     red = 0x57;
     blue = 0x10;
@@ -2511,11 +2511,11 @@ void DrawSelectCursor(instanceMes_tag *pinst) {
     rect[1].y = ry;
     color.components[1] = 0;
     itfMiscDrawSpritePlanePrim(rect, &color, pinst->z, 0, list);
-    itfMesSelectRectVerts[1] = (s32)((u32)y - 8u);
-    itfMesSelectRectVerts[3] = (s32)((u32)y - 8u);
-    itfMesSelectRectVerts[5] = (s32)((u32)y + 0xA8u);
-    itfMesSelectRectVerts[7] = (s32)((u32)y + 0xA8u);
-    itfMiscDrawRectanglePrim((sdfIVector2_t *)itfMesSelectRectVerts, itfMesSelectRectColors, itfMesSelectRectIndex, itfMesSelectRectColorIndex, pinst->z, list);
+    itfMesSelectRectVerts[0].y = (s32)((u32)y - 8u);
+    itfMesSelectRectVerts[1].y = (s32)((u32)y - 8u);
+    itfMesSelectRectVerts[2].y = (s32)((u32)y + 0xA8u);
+    itfMesSelectRectVerts[3].y = (s32)((u32)y + 0xA8u);
+    itfMiscDrawRectanglePrim(itfMesSelectRectVerts, itfMesSelectRectColors, itfMesSelectRectIndex, itfMesSelectRectColorIndex, pinst->z, list);
     {
         s32 py = (s32)((u32)y + 8u);
         s32 px = (s32)((u32)x - 0x150u);
@@ -2576,10 +2576,10 @@ void DrawRetPageCursor(instanceMes_tag *pinst) {
     rect[1] = 0xCA0;
     rect[2] = 0x1B60;
     rect[3] = 0xD28;
-    itfMesRetPageColor[3] = fade->ctr0;
+    itfMesRetPageColor.components[3] = fade->ctr0;
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
-    itfMiscDrawSpritePrim(rect, itfMesRetPageUv, itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
+    itfMiscDrawSpritePrim(rect, &itfMesRetPageUv, &itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
     timer = fade->ctr1;
     if (timer > 0) {
         d = 0x80 - timer;
@@ -2587,9 +2587,9 @@ void DrawRetPageCursor(instanceMes_tag *pinst) {
         rect[1] -= d;
         rect[2] += d * 2;
         rect[3] += d;
-        itfMesRetPageColor[3] = timer;
+        itfMesRetPageColor.components[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
-        itfMiscDrawSpritePrim(rect, itfMesRetPageUv, itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
+        itfMiscDrawSpritePrim(rect, &itfMesRetPageUv, &itfMesRetPageColor, pinst->z, itfMesMngManager.windowTexture, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
     packetOwner = &sdfGrOtTable[pinst->otindex];

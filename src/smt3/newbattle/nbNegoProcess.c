@@ -9,6 +9,7 @@ extern u32 dds3GetKernelCount(void);
 #include "ps2asm.h"
 #include "newdata.h"
 #include "dds3Difficulty.h"
+#include "nbNegoMessageData.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -1356,8 +1357,6 @@ void nbNegoShutdown(dds3ProcessID_t *id)
 
 /* Negotiation skills have a 0x68-byte record; the first word selects request mode. */
 extern nbNegoSkillEntry_t nbNegoSkillTable[];
-typedef struct { void *flow; void *aisyo; void *question; void *info; } nbNegoMsgEntry_t;
-extern nbNegoMsgEntry_t negoMsgTable[];
 extern u8 itfMesEmbedded_4EB810[], itfMesEmbedded_4EE8B0[];
 extern u8 itfMesEmbedded_4EF0C8[], itfMesEmbedded_4E3DD8[];
 extern void *sdfChipAllocDirect(s32 size);
