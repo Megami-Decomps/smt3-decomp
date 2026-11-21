@@ -492,7 +492,8 @@ segments:
       - [0x2FB880, .data, newbattle/nbMisc]
       - [0x2FC2E0, data, data_003FB2E0]
       - [0x42A448, .data, sdf/sdfMotion]
-      - [0x42A620, data, data_00529620]
+      - [0x42A620, .data, sdf/sdfUnitXVector]
+      - [0x42A630, data, data_00529630]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
