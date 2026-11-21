@@ -134,7 +134,6 @@ extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 r
 
 extern void fldSetNextField(s32 field, s32 parameter);
 
-extern fldSceneParam_t fldSceneParam;
 
 extern s32 gFldNowDZone;
 

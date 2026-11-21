@@ -1,17 +1,6 @@
 #include "interface.h"
+#include "itf_panel_draw_color.h"
 
-/* A color row is also a four-component vector for the template scaler. */
-typedef union
-{
-    u32 components[4];
-    struct
-    {
-        s32 red;
-        s32 green;
-        s32 blue;
-        s32 alpha;
-    } rgba;
-} itfDrawColor_t;
 typedef sdfIVector2_t itfDrawVertex_t;
 typedef struct
 {

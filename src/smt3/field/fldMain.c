@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "sdf_math_state.h"
 #include "sdfFrame.h"
 
 extern dds3Basic_t *dds3GetControlScene(void);
@@ -134,9 +135,8 @@ void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
 
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
-extern fldSceneParam_t fldSceneParam;
 
-extern u8 fldRandomBuf[];
+extern sdfRandCB_t fldRandomBuf;
 
 extern s32 gFldNowDZone;
 
@@ -162,7 +162,7 @@ extern void fldInitAllValue(void);
 
 extern void fldSe_Init(void);
 
-extern void sdfRandomize(void *aCB, u32 aSeed);
+extern void sdfRandomize(sdfRandCB_t *aCB, u32 aSeed);
 
 extern void fldInitPacLoader(void);
 
@@ -296,7 +296,7 @@ void fldFirstInit(void)
     fldDrawInit();
     fldInitAllValue();
     fldSe_Init();
-    sdfRandomize(fldRandomBuf, 0x1E240);
+    sdfRandomize(&fldRandomBuf, 0x1E240);
     fldInitPacLoader();
     fldSkyDefaultLoad();
     fldAutoMapLoad();

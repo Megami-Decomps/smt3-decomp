@@ -39,14 +39,7 @@ typedef struct QWORD_ALIGNED
     u32 pad[2];
 } sdf3DViewportPacket_t;
 
-/* One object's transform for VU1: the world matrix, then the three rows
- * sdf3DPrimSetTmPacket derives for normals, then the VIF codes that run the
- * transform. sdfModelNode_t.tmPacket is two of these, one per frame buffer. */
-typedef struct QWORD_ALIGNED
-{
-    sdfVector4_t tm[7];
-    u32 cmd[4];
-} sdf3DTmPacketData_t;
+#include "sdf_tm_packet.h"
 
 /* What sdf3DMakeFogPacket is handed: the two fog densities and the two
  * distances they span, plus the colour. */

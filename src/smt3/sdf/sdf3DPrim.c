@@ -3,6 +3,7 @@
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 #include "eeregs.h"
+#include "sdf_tm_packet.h"
 
 /* Declared here because no header carries these. */
 extern sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 aId);
@@ -14,8 +15,6 @@ union sdfMatUvwParm_t;
 
 
 struct SdfDmaTagHeader;
-
-struct sdf3DTmPacketData_t;
 
 struct sdfMatPacket_t;
 
@@ -76,18 +75,9 @@ typedef struct SdfDmaTagHeader {
     u32 secondVifCode;
 } QWORD_ALIGNED SdfDmaTagHeader;
 
-/* One frame of transformed matrix rows, normalized lighting rows and VIF codes. */
-typedef struct sdf3DTmPacketData_t {
-    u128 matrix[4];
-    u128 scaledRows[3];
-    u32 tag[4];
-} sdf3DTmPacketData_t;
-
 #define SDF_VIF_ITOP_LIGHTING 0x04000010
 
 #define SDF_VIF_MSCAL_COMMAND 0x14000000
-
-extern u8 sdf3DPrimIdentityTm[];
 
 extern vu8 sdfFrameId;
 
@@ -194,7 +184,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
         aAllocator = sdfGrAllocPacketBuff;
     }
     referencePacket = EE_ADDR_AS(u64 *, aAllocator(0x20));
-    referencePacket[0] = SDF_DMA_TAG(EE_ADDR(sdf3DPrimIdentityTm), 0x30000008);
+    referencePacket[0] = SDF_DMA_TAG(EE_ADDR(&sdf3DPrimIdentityTm), 0x30000008);
     referencePacket[1] = 0x6C07C000ULL << 32;
     QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(aTag, EE_ADDR(referencePacket));
@@ -203,10 +193,10 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
 void sdf3DPrimSetTmPacket(sdf3DTmPacketData_t *aPacket) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(aPacket);
-    aPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
-    aPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
-    aPacket->tag[2] = 0;
-    aPacket->tag[3] = 0;
+    aPacket->cmd[0] = SDF_VIF_ITOP_LIGHTING;
+    aPacket->cmd[1] = SDF_VIF_MSCAL_COMMAND;
+    aPacket->cmd[2] = 0;
+    aPacket->cmd[3] = 0;
 }
 
 void sdf3DPrimLinkTm(sdfDrawTag_t *aTag,

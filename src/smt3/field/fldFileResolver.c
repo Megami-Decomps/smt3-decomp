@@ -249,8 +249,6 @@ extern void fldSetupDoorScenes(void);
 
 extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, void *mem);
 
-extern volatile s32 fldSceneParam[];
-
 extern char fldFmtTbPath[]; /* "%s.TB" */
 
 extern char fldFmtF2Path[]; /* "%s.f2" */
@@ -1417,6 +1415,7 @@ void fldFreePac0(void) {
 }
 
 u32 fldLoadFile(const char *name) {
+    const volatile fldSceneParam_t *sceneParam;
     char path[128];
     char directory[64];
     void *textureData;
@@ -1541,7 +1540,9 @@ u32 fldLoadFile(const char *name) {
     }
     fldMakeObjectBasic2();
     fldMakeObjectBasic3();
-    if (fldSceneParam[22] != 0 && field < 200 && fldFieldPackData != NULL) {
+    /* Read the script flag through the same volatile scene-base view as retail. */
+    sceneParam = &fldSceneParam;
+    if (sceneParam->loadScript != 0 && field < 200 && fldFieldPackData != NULL) {
         u8 *destination;
         u8 *source;
 

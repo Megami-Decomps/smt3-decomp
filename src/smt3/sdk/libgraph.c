@@ -1,3 +1,4 @@
+#include "sdk_gs_reset_defaults.h"
 #include "common.h"
 #include "ps2asm.h"
 
@@ -33,15 +34,6 @@ typedef union {
         u64 REGS15 : 4;
     } f;
 } sceGifTag;
-
-typedef struct {
-    s16 interlace;
-    u16 mode;
-    s16 fieldMode;
-    s16 version;
-    s32 intcHandlerEnabled;
-    s32 intcHandlerId;
-} GParam;
 
 typedef struct {
     u64 pmode;
@@ -86,7 +78,6 @@ typedef struct {
 #define D2_MADR (*(volatile u32 *)0x1000A010)
 #define D2_QWC (*(volatile u32 *)0x1000A020)
 
-extern GParam sceGsGParam;
 extern void scePrintf(const char *fmt, ...);
 
 #include "sdk_libkernl.h"
@@ -151,8 +142,6 @@ GParam *sceGsGetGParam(void)
 #define putVIF1_FIFO(x)  (*VIF1_FIFO = (x))
 #define putGIF_CTRL(x)   (*GIF_CTRL = (x))
 
-extern const u32 sceGsResetPathPackets[8];
-
 #ifdef NON_MATCHING
 /* The truthful output-only FBRST scratch omits retail's dead zero setup. */
 void sceGsResetPath(void)
@@ -163,8 +152,8 @@ void sceGsResetPath(void)
     putVIF1_ERR(2);
     EE_SYNC_L();
     EE_FBRST_SET(vu1, 0x200);
-    putVIF1_FIFO(*(u128 *)&sceGsResetPathPackets[0]);
-    putVIF1_FIFO(*(u128 *)&sceGsResetPathPackets[4]);
+    putVIF1_FIFO(sceGsResetPathPackets[0].quadword);
+    putVIF1_FIFO(sceGsResetPathPackets[1].quadword);
     putGIF_CTRL(1);
 }
 #else
