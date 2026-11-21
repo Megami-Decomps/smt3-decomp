@@ -546,3 +546,19 @@ of the strings. The read-only string providers still live in their
 original sections; their pointers use the existing table interface.
 The encyclopedia now declares the same pointer type as the other readers,
 converting only when passing it to the byte-oriented font function.
+
+## Encyclopedia title pointer pair
+
+The registration and view panels each load their title pointer from slot
+zero of a named view. These consecutive writable pointer slots refer to
+the existing text in List Window and Encyclopedia respectively. The view
+label retains its native offset four; readers have the same const text
+view of both underlying buffers.
+
+## Encyclopedia compare and rectangle index data
+
+The record comparison iterates five signed byte indices and skips parameter
+slot 1. Encyclopedia rectangle drawing uses four vertex indices and four
+color indices; the two middle corners share one color and the first and
+last share the other. Retain the zero alignment after all three arrays
+outside the C owners.

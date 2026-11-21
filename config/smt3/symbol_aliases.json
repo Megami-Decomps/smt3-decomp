@@ -286,5 +286,45 @@
     "section": ".data",
     "offset": 4,
     "owner_size": 8
+  },
+  {
+    "name": "rcvHealHpMpLabel",
+    "owner": "rcvHealLabel",
+    "unit": "facility/fclRecoverTitlePointers",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 20
+  },
+  {
+    "name": "rcvCureStatusLabel",
+    "owner": "rcvHealLabel",
+    "unit": "facility/fclRecoverTitlePointers",
+    "section": ".data",
+    "offset": 8,
+    "owner_size": 20
+  },
+  {
+    "name": "rcvReviveLabel",
+    "owner": "rcvHealLabel",
+    "unit": "facility/fclRecoverTitlePointers",
+    "section": ".data",
+    "offset": 12,
+    "owner_size": 20
+  },
+  {
+    "name": "rcvRemoveCurseLabel",
+    "owner": "rcvHealLabel",
+    "unit": "facility/fclRecoverTitlePointers",
+    "section": ".data",
+    "offset": 16,
+    "owner_size": 20
+  },
+  {
+    "name": "fclEncycReadTitleText",
+    "owner": "fclEncycRegistTitleText",
+    "unit": "facility/fclEncycTitlePointers",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 8
   }
 ]

@@ -1,6 +1,7 @@
 function	unit	size	distance	page	line
 Scene, Area and Mover callback tables	basic	72 bytes		docs/matching/basic/dds3BasicTables.md	3
 Unit, Matter, Effect, Event, Light, Path and Model callback tables	basic	168 bytes		docs/matching/basic/dds3BasicTables.md	21
+Type registry and camera callbacks	basic	96 bytes		docs/matching/basic/dds3BasicTables.md	38
 worldBasicTable data	basic/dds3WorldBasic	24 bytes		docs/matching/basic/dds3WorldBasic.md	3
 fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153
@@ -165,6 +166,8 @@ InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching
 DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	372
 DrawReadMainHelp	facility/fclEncyc	0x540	336 of 336 words	docs/matching/facility/fclEncyc.md	469
 Shared name pointer table				docs/matching/facility/fclEncyc.md	540
+Encyclopedia title pointer pair				docs/matching/facility/fclEncyc.md	550
+Encyclopedia compare and rectangle index data				docs/matching/facility/fclEncyc.md	558
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	229 of 229 words match	docs/matching/facility/fclPanel.md	75
@@ -184,6 +187,7 @@ rcvCreateLocalStock	facility/fclRecoverCalc	0x25C	151 of 151 words match	docs/ma
 rcvDrawPanelAt	facility/fclRecoverCalc	0x1AC	107 of 107 words match	docs/matching/facility/fclRecoverCalc.md	42
 rcvFullHeal	facility/fclRecoverCalc	160 bytes	40 of 40 words match	docs/matching/facility/fclRecoverCalc.md	65
 Recovery sprite resources				docs/matching/facility/fclRecoverCalc.md	110
+Recovery panel title pointers				docs/matching/facility/fclRecoverCalc.md	118
 DrawElem	facility/fclRibbon	0x368	218 of 218 words match	docs/matching/facility/fclRibbon.md	3
 Qualified allocation evidence (2026-10-30)				docs/matching/facility/fclRibbon.md	33
 fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facility/fclShare.md	3
@@ -265,6 +269,8 @@ frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interf
 frCreateNameHandle	interface/frName	0xC0	48 of 48 words match	docs/matching/interface/frName.md	154
 DrawSelectCursor	interface/itfMesManager	0x2FC	191 of 191 words match	docs/matching/interface/itfMesManager.md	3
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	25
+Plain full-color and normal quad index rows	interface	56 bytes		docs/matching/interface/itfPanel.md	3
+Panel draw callbacks	interface	36 bytes		docs/matching/interface/itfPanel.md	11
 lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55

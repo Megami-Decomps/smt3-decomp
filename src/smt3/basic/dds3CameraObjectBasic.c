@@ -81,8 +81,9 @@ s32 dds3CameraObjectBasicMainProcedure(dds3Basic_t *basic)
     return 1;
 }
 
-s32 dds3CameraObjectBasicDrawProcedure(void)
+s32 dds3CameraObjectBasicDrawProcedure(dds3Basic_t *basic)
 {
+    (void)basic;
     return 1;
 }
 

@@ -114,3 +114,10 @@ object aligns the eleven existing placement entries after the resources,
 producing the original six internal zero bytes. The page descriptor still
 has its two original named pointers. The five preceding string pointers
 and the following Terminal data remain separate.
+
+## Recovery panel title pointers
+
+Each of the five service panels uses the first slot of its existing title
+symbol. The five pointers are consecutive and preserve the mutable and
+read-only text providers. The drawing interface only reads the title text.
+Zero alignment words on either side remain outside the table.

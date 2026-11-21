@@ -17,5 +17,6 @@
   "newbattle/nbNegoRequestWeights": "datNegoReqTable",
   "newbattle/nbNegoExtraRequestWeights": "datNegoTuikaReqtype",
   "nme/nmeSpriteResources0": "D_005277B8",
-  "nme/nmeSpriteResources1": "D_00527C80"
+  "nme/nmeSpriteResources1": "D_00527C80",
+  "facility/fclEncycCompareIndex": "fclEncycCompareIndex"
 }

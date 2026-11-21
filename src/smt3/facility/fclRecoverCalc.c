@@ -309,13 +309,13 @@ extern rcvDrawWork_t *rcvDrawWork;
 
 extern void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 arg);
 
-extern char *rcvHealLabel[];
+extern const char *rcvHealLabel[];
 
-extern char *rcvHealHpMpLabel[];
+extern const char *rcvHealHpMpLabel[];
 
-extern char *rcvCureStatusLabel[];
+extern const char *rcvCureStatusLabel[];
 
-extern char *rcvReviveLabel[];
+extern const char *rcvReviveLabel[];
 
 extern fclSpriteTbl_t rcvSpriteTable[];
 
@@ -508,7 +508,7 @@ void rcvDrawSeq4(void)
     trmDrawListText(&panel, rcvReviveLabel[0], rcvDrawWork->texHandle, rcvSpriteTable, 0x47);
 }
 
-extern char *rcvRemoveCurseLabel[];
+extern const char *rcvRemoveCurseLabel[];
 
 void rcvDrawItemList(void)
 {

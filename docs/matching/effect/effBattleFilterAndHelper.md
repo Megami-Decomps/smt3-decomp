@@ -10,3 +10,13 @@ title, and distance-update callback are the original three pointer slots.
 The callback formally accepts the editor's parameter but does not use it:
 both real call branches provide one argument, and the compiled callback and
 all existing battle-effect owner code remain byte-identical.
+
+The effects submenu is a separate 64-byte editor record. Its unchanged
+raw item bank contains thirteen 24-byte rows. Generic submenu dispatch
+reads its native title and item pointers; it has no update callback.
+
+ShockWave02 uses one writable 84-byte thunder-poly parameter record, with
+the original sixteen-byte vector alignment. The spawner writes the
+endpoints and the constructor copies the complete record. Its last word
+is a packed edge color, not a data-bank pointer. The neighboring raw
+words are not part of the record.

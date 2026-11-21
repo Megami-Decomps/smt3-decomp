@@ -34,3 +34,17 @@ the full report takes the same bytes out of the raw data region. Both
 reports credit 24 additional matched-data bytes (the Path table). The
 other six tables match in the linked image, but the object report scores
 some relocation fields differently. Function and code totals are unchanged.
+
+## Type registry and camera callbacks (basic, 96 bytes)
+
+The constructor path in dds3AllocBasic accepts type values 0 through 17
+and indexes the table directly. That proves the final null pointer is
+entry 17, not padding. The four earlier null entries stay null; type 16
+points to the separate raw vtable at D_002FA7E8. The 16 preceding data
+bytes and that raw vtable are not part of this migration.
+
+The camera vtable uses the same typed constructor, destructor, main
+and draw ABI as the existing basic vtables. The generic draw dispatcher
+passes the basic object. The camera draw callback ignores that actual
+argument and still returns one; naming the argument makes the declaration
+agree with the native dispatch without changing a machine instruction.

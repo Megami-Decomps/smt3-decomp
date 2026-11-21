@@ -18,8 +18,8 @@ both native and emitted sizes when they differ.
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 13 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
-| 11 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 10 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
@@ -43,6 +43,7 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
+| 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
@@ -58,7 +59,6 @@ both native and emitted sizes when they differ.
 | 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 4 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
-| 4 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
@@ -84,6 +84,7 @@ both native and emitted sizes when they differ.
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
+| 3 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
 | 2 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 2 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |
@@ -99,6 +100,7 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 2 |  | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
+| 2 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldTest | [field/fldTestShadowData.md](field/fldTestShadowData.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
@@ -111,7 +113,6 @@ both native and emitted sizes when they differ.
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
-| 2 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 | sdk/libm | [sdk/libm.md](sdk/libm.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
