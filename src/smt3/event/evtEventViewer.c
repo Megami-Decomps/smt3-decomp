@@ -102,7 +102,7 @@ extern void evtViewerStopFrame(void);
 #include "sdk_libc.h"
 
 extern void mdlUnRegist(s32 aMajor, s32 aMinor);
-extern s32 evtViewerFrameSetMenuTable[];
+extern char *evtViewerFrameSetMenuTable[];
 extern s32 capwait;
 extern void DrawEffect(void);
 extern void FrameSelect(void);
@@ -1813,7 +1813,7 @@ u32 evtEventViewerProcess5_0(void)
 
 const char D_0053B620[32] = "FREE CAMERA\0\0\0\0\0GAME CAMERA\0\0\0\0\0";
 
-s32 EnterMain(void)
+s32 EnterMain(s32 unusedAction, s32 unusedPreviousMenu)
 {
     evtViewerInfo_t *viewer = viewerinfo;
 
@@ -1836,7 +1836,7 @@ s32 EnterMain(void)
         viewer->select_y = 0;
         viewer->menuItemCount = 2;
         viewer->select_header = "FRAME SET.OK? ";
-        viewer->menuTable = evtViewerFrameSetMenuTable;
+        viewer->itemNames = evtViewerFrameSetMenuTable;
         PushMenu(2, 0xE4, 0x3C);
         break;
     case EVT_VIEWER_MENU_FRAMECHANGE:
@@ -1941,7 +1941,7 @@ s32 EnterSelect(s32 unused, s32 menuMode)
     return completed ? -1 : 0;
 }
 
-s32 EnterObjList(void)
+s32 EnterObjList(s32 unusedAction, s32 unusedPreviousMenu)
 {
     PushMenu(5, 0x90, 0x48);
     return 0;
@@ -1978,7 +1978,7 @@ extern void rblurSetParam(dds3Effect_RippleBlurParam_t *params);
 extern void dblurSetParam2(dds3Effect_Filter_t *params);
 extern void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *params);
 
-s32 EnterFrameList(s32 action)
+s32 EnterFrameList(s32 action, s32 unusedPreviousMenu)
 {
     evtViewerObject_s *track = viewerinfo->framelist_target;
     evtFrameInfo_t *frame;
@@ -2248,7 +2248,7 @@ s32 EnterFrameList(s32 action)
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 #endif
 
-s32 EnterFrameChange(void)
+s32 EnterFrameChange(s32 unusedAction, s32 unusedPreviousMenu)
 {
     evtFrameInfo_t *node = evtGetSelectFrameInfo();
     evtViewerInfo_t *viewer;
@@ -2286,7 +2286,7 @@ s32 EnterFrameChange(void)
     return 0;
 }
 
-s32 EnterIntFloatChange(void)
+s32 EnterIntFloatChange(s32 unusedAction, s32 unusedPreviousMenu)
 {
     evtViewerInfo_t *viewer = viewerinfo;
     s32 value = viewer->value;
@@ -2355,7 +2355,7 @@ s32 EnterIntFloatChange(void)
     return 0;
 }
 
-s32 EnterFilename2(void)
+s32 EnterFilename2(s32 unusedAction, s32 unusedPreviousMenu)
 {
     s32 mode = viewerinfo->fileMode;
     s32 done = 0;
@@ -2469,7 +2469,7 @@ s32 EnterBasicList(s32 action, s32 previousMenu)
     return 0;
 }
 
-s32 EnterEventPos(void)
+s32 EnterEventPos(s32 unusedAction, s32 unusedPreviousMenu)
 {
     if (evtGetSelectFrameInfo() == NULL) {
         return 0;

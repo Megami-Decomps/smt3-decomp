@@ -1174,7 +1174,7 @@ s32 evtViewerExit(void)
 /* The reconstructed HD control flow supplies the signed conditional update;
  * the shared success exit retains the native return-one block. This is a
  * matching reconstruction, not a claim of original PS2 source spelling. */
-s32 evtPollEffectFrameControl(void)
+s32 evtPollEffectFrameControl(s32 unusedX, s32 unusedY)
 {
     s32 busy = 1;
 

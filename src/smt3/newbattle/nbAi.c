@@ -991,7 +991,7 @@ s32 Chk_ENDARK(nbActionProcessData_t *a, s32 n)
     return a->aiselect != 0;
 }
 
-s32 Chk_SENSEI_286530(nbActionProcessData_t *a)
+s32 Chk_SENSEI_286530(nbActionProcessData_t *a, s32 conditionArg)
 {
     if (ChkAiHojo(a->form->formindex, 0x11) != 0) {
         a->aiselect = 1 << a->form->formindex;

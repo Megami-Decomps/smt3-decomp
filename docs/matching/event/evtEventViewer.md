@@ -382,3 +382,15 @@ compiler. All 31 direct calls retain their native locations and targets.
 The complete owner includes this function and the previously matched
 EnterData. The inherited SKIP_ASM camera-name lookup diagnostics are
 unchanged; the linked image verifies the actual pointers and strings.
+
+## Viewer menu dispatch data
+
+The native table at file offset `0x22D750` has 13 writable function-pointer
+slots, matching the viewer's menu modes 0 through 12. Modes 0 and 3 have no
+handler; modes 7 and 8 share one handler. The following 12 bytes stay outside
+the C owner as native padding before the movie's frame dispatch.
+
+The viewer passes the action and previous menu to each handler and uses the
+signed result. Handlers that ignore either argument declare the same callback
+type without changing their bodies. All eleven non-null entries retain the
+original function relocations, including the assembly-backed frame-list handler.

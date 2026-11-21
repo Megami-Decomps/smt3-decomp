@@ -114,11 +114,14 @@ EnterData	event/evtEventViewer	0x378		docs/matching/event/evtEventViewer.md	182
 evtAddFrameInfo	event/evtEventViewer	0x540	336 of 336 words match	docs/matching/event/evtEventViewer.md	207
 EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	308
 RunFrame2	event/evtEventViewer	0x850		docs/matching/event/evtEventViewer.md	369
+Viewer menu dispatch data				docs/matching/event/evtEventViewer.md	386
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 evtPollEffectFrameControl	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	78 of 78 words match	docs/matching/event/evtEventViewerMenu.md	58
 evtSaveViewerHeader	event/evtEventViewerMenu	0x400	256 of 256 words match	docs/matching/event/evtEventViewerMenu.md	93
 evtMoonProcess2	event/evtMoon	0x119C		docs/matching/event/evtMoon.md	3
+Viewer action dispatch data				docs/matching/event/evtViewerMenuTables.md	3
+Viewer frame-set menu labels				docs/matching/event/evtViewerMenuTables.md	12
 func_00206308, func_002065C8	fclCombineInit	0x2C0 each		docs/matching/facility/fclCombineInit.md	3
 cmbDrawFullScreenPanel	fclCombineInit	0x68	26 of 26 words match	docs/matching/facility/fclCombineInit.md	27
 cmbDrawResultPanel	fclCombineInit	0x228	138 of 138 words match	docs/matching/facility/fclCombineInit.md	98
@@ -161,6 +164,7 @@ ragDrawList2, ragDrawList3	fclRagCalc	0x150 each		docs/matching/facility/fclRagC
 ragDrawHeartsList	fclRagCalc	0x1D0	116 of 116 words match	docs/matching/facility/fclRagCalc.md	21
 ragDrawHeartsRows	fclRagCalc	0x21C	135 of 135 words match	docs/matching/facility/fclRagCalc.md	41
 Rag sprite resource page				docs/matching/facility/fclRagCalc.md	92
+Rag menu labels and exchange headings				docs/matching/facility/fclRagCalc.md	102
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/matching/facility/fclRagInit.md	3
 ragGetListItem2, ragGetListItem3	fclRagInit	0xCC each	51 of 51 words matching	docs/matching/facility/fclRagInit.md	47
 ragBuildHeartsList	fclRagInit	0x124	73 of 73 words match	docs/matching/facility/fclRagInit.md	78
@@ -209,6 +213,7 @@ fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/fiel
 fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldHitChkUnitVWM	field/fldHit	0xCB8		docs/matching/field/fldHit.md	209
 fldHitChkUnit	field/fldHit	0xC10	772 of 772 words match	docs/matching/field/fldHit.md	288
+Shared previous collision position				docs/matching/field/fldHit.md	308
 fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fldMain-vectors.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field/fldMain.md	56
@@ -223,6 +228,7 @@ fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md
 Field BGM parameter table	field/fldSe	3036 bytes		docs/matching/field/fldSe.md	185
 gFldBgmTop	field/fldBgmTop	1200 data bytes		docs/matching/field/fldSe.md	200
 fldSkyDrawFilter	field/fldSky	0xAD8		docs/matching/field/fldSky.md	3
+Field light and display initialization				docs/matching/field/fldSky.md	65
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
 fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75
@@ -294,6 +300,7 @@ CheckInotiNego	newbattle/nbActionProcess	0x2B0	172 of 172 words match	docs/match
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/matching/newbattle/nbAi.md	3
 SetSingleTarget2	newbattle/nbAi	0x26C	155 of 155 words match	docs/matching/newbattle/nbAi.md	29
 Sel_AI	newbattle/nbAi	0x358	214 of 214 words match	docs/matching/newbattle/nbAi.md	50
+AI condition predicates				docs/matching/newbattle/nbAi.md	89
 nbGetVirtualAisyo	newbattle/nbCalc	0xAC	43 of 43 words match	docs/matching/newbattle/nbCalc.md	3
 nbCheckBackAttack	newbattle/nbCalc	0x178	94 of 94 words match	docs/matching/newbattle/nbCalc.md	28
 nbGetKoukaType	newbattle/nbCalc	0x774	477 of 477 words match	docs/matching/newbattle/nbCalc.md	61
@@ -321,6 +328,7 @@ nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	30 of 30 words match	
 nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/matching/newbattle/nbCameraSkill.md	100
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	137 of 137 words match	docs/matching/newbattle/nbCameraSkill.md	190
 bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	194 of 194 words match	docs/matching/newbattle/nbCameraSkill.md	251
+Skill camera minimum-distance tables				docs/matching/newbattle/nbCameraSkill.md	290
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58
@@ -369,6 +377,7 @@ nbSetAllHojoSkillWork	newbattle/nbNegoProcess	0x184	97 of 97 words match	docs/ma
 nbSearchHojoSkillWork	newbattle/nbNegoProcess	0x3CC	243 of 243 words match	docs/matching/newbattle/nbNegoProcess.md	46
 nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matching/newbattle/nbNegoProcess.md	76
 nbGetQuestionType	newbattle/nbNegoProcess	0x25C	100 of 151 words match	docs/matching/newbattle/nbNegoProcess.md	122
+Mukan negotiation weights				docs/matching/newbattle/nbNegoProcess.md	157
 nbPanelDrawPP (0xA84)			673 of 673 words	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	73
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	135
@@ -424,6 +433,7 @@ pb_draw_map_cursor_Process	pb/pbGame	0x268	154 of 154 words match	docs/matching/
 viewModeCamera	pb/pbGame	0x114	69 of 69 words match	docs/matching/pb/pbGame.md	216
 moveBlock	pb/pbGame	0x8C	31 of 35 words match	docs/matching/pb/pbGame.md	273
 deleteMoveBlock (0x144)				docs/matching/pb/pbGame.md	389
+Level selection pointer table				docs/matching/pb/pbGame.md	405
 pbRebuildOutline	pb/pbGameDraw	392 bytes	98 of 98 words match	docs/matching/pb/pbGameDraw.md	3
 pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/matching/pb/pbMCard.md	3
 Memory card messages and move directions				docs/matching/pb/pbMCard.md	32

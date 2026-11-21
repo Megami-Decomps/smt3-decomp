@@ -10,5 +10,6 @@
   "result/cmbEvoDevilList": "cmbEvoDevilList",
   "camp/cmpSkillMsgTable": "cmpSkillMsgTable",
   "camp/cmpItemMsgTable": "cmpItemMsgTable",
-  "sdf/sdfIpuRgbModeBits": "sdfIpuRgbModeBits"
+  "sdf/sdfIpuRgbModeBits": "sdfIpuRgbModeBits",
+  "newbattle/nbNegoMukanWeights": "nbMukanRateTable"
 }

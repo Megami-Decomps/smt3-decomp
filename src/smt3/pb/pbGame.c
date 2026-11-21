@@ -2,6 +2,7 @@
 #include "sdfFrame.h"
 #include "sdk_libgcc.h"
 #include "pbRecord.h"
+#include "pbLevelTable.h"
 #include "kernel.h"
 #include "libsdf.h"
 #include "scr.h"
@@ -117,12 +118,12 @@ typedef struct { s16 x, y; } pbGoalPos_t;
 
 typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
 
-typedef struct
+struct pbLevel_t
 {
     s16 clearBit;
     s16 unk02;
     pbStageEntry_t stage[1];
-} pbLevel_t;
+};
 
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
@@ -144,8 +145,6 @@ extern dds3ProcessID_t *scr_msg;
 extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
-
-extern pbLevel_t *pbLevelTable[];
 
 extern pbMapWork_t *pbMapWork;
 

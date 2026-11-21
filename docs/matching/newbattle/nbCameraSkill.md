@@ -286,3 +286,16 @@ Separate ordinary angle locals, including separate lexical scopes, give
 both gives 194/194 but is unnecessary and was removed. This records a measured
 source/output dependency, not an internal-pass attribution or original-source
 claim. See [the geometry-span trace](../../levers/cross-block-locals.md#snapshot-the-camera-span-before-the-angle-call).
+
+## Skill camera minimum-distance tables
+
+The native skill-info routine loads the descriptor's height and width indices
+from offsets 0x10 and 0x14 and scales each by four before loading a float.
+The 512 initialized skill descriptors reach height indices 0–3 and width
+indices up to 6. The attack initialization independently loads element zero
+from each table. These reads identify four height floors and seven width
+floors, rather than a single array or a padded eight-element width table.
+
+The definitions occupy 44 bytes at ROM 0x225710–0x22573B. The trailing four
+zero bytes remain raw before the following aligned negotiation-camera vector.
+No camera code or angle-table ownership changes.

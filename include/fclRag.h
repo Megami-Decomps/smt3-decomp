@@ -81,8 +81,8 @@ typedef struct {
 
 extern ragOfferTable_t ragHeartsTable;
 
-extern char *ragMenuText[6];
-extern char *ragExchangeTitle[4];
+extern const char *ragMenuText[5];
+extern const char *ragExchangeTitle[3];
 
 SIZE_CHECK(ragCustomUnitSizeCheck, ragCustomUnit_t, 0x1C);
 SIZE_CHECK(ragOfferSizeCheck, ragOffer_t, 0x2C);

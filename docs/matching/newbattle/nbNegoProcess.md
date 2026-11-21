@@ -153,3 +153,13 @@ replay is justified. Strict SKIP_ASM checking encounters the inherited
 nbPlayMotionSe block-scope declaration issue in both target-active and
 unchanged owners. A separate true NON_MATCHING plus SKIP_ASM check of the
 canonical owner passes; do not conflate those compilation contexts.
+
+## Mukan negotiation weights
+
+`Flow12_2` selects one of three dialogue branches with cumulative byte
+weights at `3 * master_text[id].mukanindex`. The 18-byte ROM table at
+0x2E3470 has six consecutive 33/33/34 profiles. All 384 initialized
+negotiation descriptors select profile zero. The two bytes to the first
+word boundary and the following raw material remain distinct; in
+particular the repeated four-byte records at 0x2E34B0 are not this
+three-choice table.

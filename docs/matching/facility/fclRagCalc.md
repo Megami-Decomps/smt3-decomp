@@ -98,3 +98,14 @@ addresses. Keeping it as its own C object preserves the named relocations,
 rather than turning the in-unit references into section addends. Without
 the descriptor's existing section placement, the stock compiler selects
 `.sdata` instead of native `.data`. The preceding string pointer tables remain raw.
+
+## Rag menu labels and exchange headings
+
+The five trade/talk/leave labels at ROM `0x2315C8` are the five entries
+passed by `fclRagUpdateInit` to `fclInitCursorWindow`. The item,
+elemental, and Mitama draw routines separately load the three exchange
+headings at `0x2315E0` using fixed offsets `0`, `4`, and `8`.
+Both tables point to their existing text objects; none of the text is
+copied or moved. Each trailing zero word is left as a separate
+alignment span, not reconstructed as a sentinel: neither consumer
+walks to the zero word.

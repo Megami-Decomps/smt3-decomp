@@ -61,3 +61,12 @@ global accesses. A per-cell table local leaves the same twelve differences.
 Swapping row/column declaration order changes their own stack locations and
 adds twelve differences without fixing the temporary slots. No frame padding,
 false aggregate or compiler constraint is used.
+
+## Field light and display initialization
+
+The writable light record contains two four-float lanes: RGB and XYZ.
+The player RGB starts one representable float below 0.1. Field
+initialization clears five address words before publishing two of them:
+a pointer to the single light-address entry and a pointer to the
+player RGB. The standalone light-address entry retains its native
+relocation. Neighboring raw spans stay outside these C owners.

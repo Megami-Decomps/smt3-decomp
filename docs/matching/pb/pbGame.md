@@ -401,3 +401,10 @@ count, and advances by the native 0x90-byte descriptor size. The actual
 Y offset, X origin and carried entry offset use local operands to retain
 that read order, without volatile memory, new reads, or ABI changes.
 Complete owner: 70 matches, zero differences.
+
+## Level selection pointer table
+
+The stage navigator wraps across exactly three level indices. The table
+contains one pointer per level; the stage number, label and clear-bit
+readers follow those pointers. The three original level records and the
+four bytes after the table stay raw.

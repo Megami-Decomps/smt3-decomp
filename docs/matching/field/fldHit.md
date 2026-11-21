@@ -304,3 +304,10 @@ assumed.
 The callers use real float arrays for the XYZ input/output contract while
 retaining their existing native alignment and VU transfer. Their emitted
 code and data are unchanged.
+
+## Shared previous collision position
+
+The collision checks read and write three floats at offsets 0, 4, and 8
+of the shared previous-position work area. The initial XYZ position is
+zero in writable data. The following four raw bytes are not part of the
+position.

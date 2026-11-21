@@ -1,4 +1,5 @@
 #include "common.h"
+#include "nbCameraModelAllData.h"
 #include "sdk_libgcc.h"
 #include "newbattle.h"
 #include "kernel.h"
@@ -132,13 +133,6 @@ extern s32 nbCameraState_CommandRoot_OrderIndex;
 
 void nbCameraState_CommandRoot_Init(void);
 
-/* 12-byte rows; nbCameraGetModelAllTable indexes them by unit work slot. */
-typedef struct nbCamera_AllTable_t {
-    f32 distance;
-    f32 up;
-    f32 radius;
-} nbCamera_AllTable_t;
-
 /* The table has one optional override for each native roster ID. */
 nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[384] = {
     [0] = {400.0f, 0.0f, 0.0f},
@@ -151,8 +145,6 @@ nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[384] = {
     [135] = {0.0f, 10.0f, 0.0f},
     [256] = {300.0f, 0.0f, 50.0f},
 };
-
-extern nbCamera_AllTable_t nbCameraModelAllDefault;
 
 extern nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation);
 

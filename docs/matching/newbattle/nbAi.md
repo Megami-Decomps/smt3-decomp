@@ -85,3 +85,20 @@ all 46 peers, layouts and owned data. Full local gates passed for source
 `b953764bb48d99d9e97febabe7b3950b3984221e`. Exact-source CI
 [41053166184](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41053166184)
 completed successfully, including every build/deploy step and retail checksum.
+
+## AI condition predicates
+
+The native dispatch at `0x004F0788` contains 29 initialized pointer slots.
+`nbAiChkJoken` indexes it with the condition's upper halfword, passing the
+action context and the zero-extended lower halfword. Condition 0 succeeds
+without calling a predicate; conditions 1 through 28 resolve to their original
+functions. The adjacent zero word at `0x004F07FC` stays in the assembly data
+region instead of being counted as an initialized predicate.
+
+Condition 18's `Chk_SENSEI_286530` ignores the already-passed second argument;
+its C signature now reflects the shared dispatch convention without a cast.
+The callback signature change preserves the full consumer object in
+production, SKIP_ASM and retained modes, including every allocated section,
+relocation and non-debug symbol. The provider's 28 native address relocations
+match the original pointer order and linked retail values, adding 116 C-owned
+data bytes without changing machine instructions.
