@@ -3253,7 +3253,7 @@ void func_00174C50(u32 color)
 
 const char D_00533A40[16] = "BED SELECT";
 
-char *effMakeBedPath(char *path)
+void *effMakeBedPath(void *path)
 {
     effBedFileList = dds3EffectFileListCreate("/efftool/bed/", 8);
     effBedFileListWindow = dds3EffectFileListWindowCreate(effBedFileList);
@@ -3271,7 +3271,7 @@ extern void *effDebugResetMenu(void *viewer);
 extern char effBedSelectBuf[];
 extern char *effBTLSelectedName;
 
-void eff_174D38(void)
+void eff_174D38(void *unused)
 {
     dds3EffectFileListWindowDraw(effBedFileListWindow);
     if (dds3EffectFileListWindowGetState(effBedFileListWindow) == 1) {
@@ -3281,7 +3281,7 @@ void eff_174D38(void)
     }
 }
 
-void eff_174D98(void)
+void eff_174D98(void *unused)
 {
     dds3EffectFileListWindowDelete(effBedFileListWindow);
     dds3EffectFileListDelete(effBedFileList);

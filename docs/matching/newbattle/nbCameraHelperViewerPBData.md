@@ -1,0 +1,3 @@
+# Camera Helper PB file selector
+The native writable selector at 0x325A30 shares the editor's 64-byte menu layout. Type-22 entry assigns its parent at runtime. The descriptor has no item rows: the identical native self pointer is never indexed, while mode 1 still runs the file browser's update callback. The final word is the null recreate slot of the shared layout.
+The factory returns its input context without interpreting it. Both stock compiler modes reproduce the five pointer relocations, including the section-relative self relocation; all 64 bytes after relocation match retail. Correcting the provider and consumer declarations preserves all their allocated bytes and relocations.

@@ -263,7 +263,7 @@ void nbCameraHelperModelSet(mdlObj_t *hModel)
     nbCameraHelperModelSetSub(hModel, 0, 1);
 }
 
-s32 nbCameraHelperViewer_PB_Init(s32 pData)
+void *nbCameraHelperViewer_PB_Init(void *pData)
 {
     void *hFileList = dds3EffectFileListCreate(nbCameraHelperViewerPBDir, 0x10);
     void *pWork;
@@ -279,19 +279,7 @@ s32 nbCameraHelperViewer_PB_Init(s32 pData)
     return pData;
 }
 
-/* Callback slots follow the viewer record used by effDebugResetMenu. */
-typedef struct effDebugViewer_t {
-    u8 reserved00[0x18];
-    effDebugMenu_t *replacement;
-    void *createParam;
-    u8 reserved20[0xC];
-    s32 (*create)(void *);
-    u8 reserved30[4];
-    void (*destroy)(void *);
-    s32 *handle;
-} effDebugViewer_t;
-
-extern effDebugViewer_t nbCameraHelperViewerPBParam;
+extern effDebugMenu_t nbCameraHelperViewerPBParam;
 extern char nbCameraHelperViewerModeBuf[];
 extern void dds3EffectFileListWindowDraw(void *window);
 extern u32 dds3EffectFileListWindowGetState(void *window);
@@ -311,14 +299,14 @@ void nbCameraHelperViewer_PB_Draw(void *pData)
         nbCameraHelperViewerMode = nbCameraHelperViewerModeBuf;
         destroy = nbCameraHelperViewerPBParam.destroy;
         if (destroy != NULL) {
-            if (nbCameraHelperViewerPBParam.handle != NULL) {
-                destroy(EE_ADDR_AS(void *, *nbCameraHelperViewerPBParam.handle));
+            if (nbCameraHelperViewerPBParam.param != NULL) {
+                destroy(*nbCameraHelperViewerPBParam.param);
             } else {
                 destroy(NULL);
             }
         }
-        if (nbCameraHelperViewerPBParam.replacement != NULL) {
-            viewer = nbCameraHelperViewerPBParam.replacement;
+        if (nbCameraHelperViewerPBParam.parent != NULL) {
+            viewer = nbCameraHelperViewerPBParam.parent;
         }
         /* BUG: with no replacement viewer is still NULL here and retail reads through it. */
 #ifdef FIX_BUGS
