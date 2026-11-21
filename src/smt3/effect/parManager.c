@@ -4,6 +4,7 @@
 #include "effect.h"
 #include "billboard.h"
 #include "sdfFrame.h"
+#include "particleDispatch.h"
 
 /* Particle emitters, history ribbons and billboard dispatch, reconstructed from
  * the shared DDS engine and checked against SLUS_209.11. All emitter views
@@ -12,7 +13,6 @@
 typedef struct dds3Particle_BlurBuffList_t dds3Particle_BlurBuffList_t;
 typedef struct dds3Particle_BlurBuff_t dds3Particle_BlurBuff_t;
 typedef struct dds3Particle_Effect_t dds3Particle_Effect_t;
-typedef struct parDispatch_t parDispatch_t;
 typedef struct effectBufferRecord_t effectBufferRecord_t;
 typedef struct dds3Particle_Physics_t dds3Particle_Physics_t;
 typedef struct effEmitterHead_t effEmitterHead_t;
@@ -115,12 +115,6 @@ typedef struct dds3Particle_Effect_t {
     u32 : 16;
     parKindPayload_t payload; /* +8: tag-specific pointer/scalar view */
 } dds3Particle_Effect_t;
-
-typedef struct parDispatch_t {
-    void *(*func)(void *);
-    void (*update)(struct dds3Particle_Basic_t *);
-    void (*destroy)(void *);
-} parDispatch_t;
 
 typedef struct effectBufferRecord_t {
     f32 position[4];
@@ -607,7 +601,6 @@ enum {
 extern f32 parTrack_w[];
 extern f32 parLook[];
 extern u8 aViewTarget[], aViewEye[];
-extern parDispatch_t dds3ParticleFuncTable[];
 extern effRandState_t dds3EffectBase[];
 extern s32 ParRand[];
 extern f32 dds3ParticleSparkDirTable[][4];
@@ -627,77 +620,77 @@ void dds3Particle_BasicCreate(void *effect);
 void dds3Particle_BasicDelete(void *pParBasic);
 void dds3Particle_SpiralAllBuffInit(void *data);
 void dds3Particle_SpiralSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SpiralCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SpiralCreate(void *data);
 void dds3Particle_SpiralDelete(void *hData);
 void dds3Particle_SpiralBuffInit(dds3Particle_Spiral_t3 *pSpiral, u32 number);
-void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData);
+void dds3Particle_SpiralDraw(void *data);
 void dds3Particle_SmokeAllBuffInit(void *data);
 void dds3Particle_SmokeSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SmokeCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SmokeCreate(void *data);
 void dds3Particle_SmokeDelete(void *hData);
 void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number);
-void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData);
+void dds3Particle_SmokeDraw(void *data);
 void dds3Particle_SparkAllBuffInit(void *data);
 void dds3Particle_SparkSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SparkCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SparkCreate(void *data);
 void dds3Particle_SparkDelete(void *hData);
 void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number);
-void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData);
+void dds3Particle_SparkDraw(void *data);
 void dds3Particle_RadiateAllBuffInit(void *data);
 void dds3Particle_RadiateSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_RadiateCreate(effTemplatePacketList_t *source);
+void *dds3Particle_RadiateCreate(void *data);
 void dds3Particle_RadiateDelete(void *hData);
 void dds3Particle_RadiateBuffInit(dds3Particle_Radiate_t3 *pRadiate, u32 number);
-void dds3Particle_RadiateDraw(dds3Particle_Radiate_t3 *hData);
+void dds3Particle_RadiateDraw(void *data);
 void dds3Particle_SphereSpiralAllBuffInit(void *data);
 void dds3Particle_SphereSpiralSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SphereSpiralCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SphereSpiralCreate(void *data);
 void dds3Particle_SphereSpiralDelete(void *hData);
 void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpiral, u32 number);
-void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData);
+void dds3Particle_SphereSpiralDraw(void *data);
 void dds3Particle_SphereSmokeAllBuffInit(void *data);
 void dds3Particle_SphereSmokeSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SphereSmokeCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SphereSmokeCreate(void *data);
 void dds3Particle_SphereSmokeDelete(void *hData);
 void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke, u32 number);
-void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData);
+void dds3Particle_SphereSmokeDraw(void *data);
 void dds3Particle_SphereRingAllBuffInit(void *data);
 void dds3Particle_SphereRingSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SphereRingCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SphereRingCreate(void *data);
 void dds3Particle_SphereRingDelete(void *hData);
 void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u32 number);
-void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData);
+void dds3Particle_SphereRingDraw(void *data);
 void dds3Particle_Spark2AllBuffInit(void *data);
 void dds3Particle_Spark2SetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_Spark2Create(effTemplatePacketList_t *source);
+void *dds3Particle_Spark2Create(void *data);
 void dds3Particle_Spark2Delete(void *hData);
 void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number);
-void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData);
+void dds3Particle_Spark2Draw(void *data);
 void dds3Particle_SphereAtomAllBuffInit(void *data);
 void dds3Particle_SphereAtomSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SphereAtomCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SphereAtomCreate(void *data);
 void dds3Particle_SphereAtomDelete(void *hData);
 void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 number);
-void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData);
-void dds3Particle_SpiralBlendColor(effParticleOverlay_t *effect);
+void dds3Particle_SphereAtomDraw(void *data);
+void dds3Particle_SpiralBlendColor(void *data);
 void dds3Particle_SparkOffsetAllBuffInit(void *data);
 void dds3Particle_SparkOffsetSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SparkOffsetCreate(effTemplatePacketList_t *source);
+void *dds3Particle_SparkOffsetCreate(void *data);
 void dds3Particle_SparkOffsetDelete(void *hData);
 void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset, s32 number);
-void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData);
+void dds3Particle_SparkOffsetDraw(void *data);
 void dds3Particle_SmokeOffsetAllBuffInit(void *data);
 void dds3Particle_SmokeOffsetSetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SmokeOffsetCreate(effTemplatePacketList_t *source);
-void dds3Particle_SmokeOffsetDelete(effTemplatePacketList_t *hData);
+void *dds3Particle_SmokeOffsetCreate(void *data);
+void dds3Particle_SmokeOffsetDelete(void *data);
 void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset, u32 number);
-void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData);
+void dds3Particle_SmokeOffsetDraw(void *data);
 void dds3Particle_SphereSpiral2AllBuffInit(void *data);
 void dds3Particle_SphereSpiral2SetScale(void *data, float scale);
-effTemplatePacketList_t *dds3Particle_SphereSpiral2Create(effTemplatePacketList_t *source);
-void dds3Particle_SphereSpiral2Delete(dds3Particle_SphereSpiral2_t3 *hData);
+void *dds3Particle_SphereSpiral2Create(void *data);
+void dds3Particle_SphereSpiral2Delete(void *data);
 void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSpiral2, u32 number);
-void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData);
+void dds3Particle_SphereSpiral2Draw(void *data);
 void dds3ParticleSetColorTable(dds3ParticleColorAnim_t *pColAnim, s32 frame);
 dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32 number, u16 length, billHandle_t **pBill_Handle);
 void dds3Particle_BlurDelete(dds3Particle_BlurBuff_t *hBlur);
@@ -956,7 +949,8 @@ void dds3Particle_SpiralSetScale(void *data, float scale) {
 }
 
 /* Clone the template prefix and appended tail, then allocate its packet records. */
-effTemplatePacketList_t *dds3Particle_SpiralCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SpiralCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
@@ -1020,7 +1014,8 @@ void dds3Particle_SpiralBuffInit(dds3Particle_Spiral_t3 *pSpiral, u32 number) {
  * completedCount counts expired nonrepeating packets in this update only. */
 /* vf12 keeps the packet's previous position and vf10 the new one for
  * dds3Particle_EffectSet, which reads them as implicit arguments. */
-void dds3Particle_SpiralDraw(dds3Particle_Spiral_t3 *hData) {
+void dds3Particle_SpiralDraw(void *data) {
+    dds3Particle_Spiral_t3 *hData = data;
     parSpiralPacket_t *packet = (parSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     sdfVector4_t origin;
@@ -1127,7 +1122,8 @@ void dds3Particle_SmokeSetScale(void *data, float scale) {
 }
 
 /* Clone the disc prefix/tail, allocate packet records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_SmokeCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SmokeCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
@@ -1193,7 +1189,8 @@ void dds3Particle_SmokeBuffInit(dds3Particle_Smoke_t3 *pSmoke, u32 number) {
 }
 
 /* Advance sinusoidal planar displacement and scaled vertical steps, then ages. */
-void dds3Particle_SmokeDraw(dds3Particle_Smoke_t3 *hData) {
+void dds3Particle_SmokeDraw(void *data) {
+    dds3Particle_Smoke_t3 *hData = data;
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     sdfVector4_t positionDelta;
@@ -1299,7 +1296,8 @@ void dds3Particle_SparkSetScale(void *data, float scale) {
 }
 
 /* Clone the ballistic prefix/tail, allocate packet records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_SparkCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SparkCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
@@ -1521,7 +1519,8 @@ void dds3Particle_SparkBuffInit(dds3Particle_Spark_t3 *pSpark, s32 number) {
 
 /* Scale velocity, add its stored vertical acceleration, and advance position.
  * Only mode zero transforms the displacement through the emitter matrix. */
-void dds3Particle_SparkDraw(dds3Particle_Spark_t3 *hData) {
+void dds3Particle_SparkDraw(void *data) {
+    dds3Particle_Spark_t3 *hData = data;
     parSparkPacket_t *packet = (parSparkPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     u32 mode;
@@ -1625,7 +1624,8 @@ void dds3Particle_RadiateSetScale(void *data, float scale) {
 }
 
 /* Clone the look-at ring prefix/tail and spawn its staggered packet schedule. */
-effTemplatePacketList_t *dds3Particle_RadiateCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_RadiateCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
@@ -1700,7 +1700,8 @@ void dds3Particle_RadiateBuffInit(dds3Particle_Radiate_t3 *pRadiate, u32 number)
 }
 
 /* Advance view-oriented motion and ages; repeated packets respawn immediately. */
-void dds3Particle_RadiateDraw(dds3Particle_Radiate_t3 *hData) {
+void dds3Particle_RadiateDraw(void *data) {
+    dds3Particle_Radiate_t3 *hData = data;
     parRadiatePacket_t *packet = (parRadiatePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     f32 phaseStep;
@@ -1790,7 +1791,8 @@ void dds3Particle_SphereSpiralSetScale(void *data, float scale) {
 }
 
 /* Clone the burst prefix/tail, allocate packet records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_SphereSpiralCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SphereSpiralCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
@@ -1867,7 +1869,8 @@ void dds3Particle_SphereSpiralBuffInit(dds3Particle_SphereSpiral_t3 *pSphereSpir
 }
 
 /* Adjust velocity length, rotate around the packet axis, and rebuild position. */
-void dds3Particle_SphereSpiralDraw(dds3Particle_SphereSpiral_t3 *hData) {
+void dds3Particle_SphereSpiralDraw(void *data) {
+    dds3Particle_SphereSpiral_t3 *hData = data;
     parSphereSpiralPacket_t *packet = (parSphereSpiralPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     sdfVector4_t origin;
@@ -1977,7 +1980,8 @@ void dds3Particle_SphereSmokeSetScale(void *data, float scale) {
 }
 
 /* Clone the sphere prefix/tail, allocate packet records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_SphereSmokeCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SphereSmokeCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
@@ -2045,7 +2049,8 @@ void dds3Particle_SphereSmokeBuffInit(dds3Particle_SphereSmoke_t3 *pSphereSmoke,
 }
 
 /* Advance sinusoidal planar displacement and scaled vertical steps, then ages. */
-void dds3Particle_SphereSmokeDraw(dds3Particle_SphereSmoke_t3 *hData) {
+void dds3Particle_SphereSmokeDraw(void *data) {
+    dds3Particle_SphereSmoke_t3 *hData = data;
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     sdfVector4_t positionDelta;
@@ -2156,7 +2161,8 @@ void dds3Particle_SphereRingSetScale(void *data, float scale) {
 }
 
 /* Clone the expanding-ring prefix/tail and initialize its period-grouped packet tags. */
-effTemplatePacketList_t *dds3Particle_SphereRingCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SphereRingCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
@@ -2213,7 +2219,8 @@ void dds3Particle_SphereRingBuffInit(dds3Particle_SphereRing_t3 *pSphereRing, u3
 
 /* Build age-phase ring positions and rotate the stored X/Z directions.
  * vector is reused for the position offset and old direction components. */
-void dds3Particle_SphereRingDraw(dds3Particle_SphereRing_t3 *hData) {
+void dds3Particle_SphereRingDraw(void *data) {
+    dds3Particle_SphereRing_t3 *hData = data;
     parSphereRingPacket_t *packet = (parSphereRingPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     sdfVector4_t origin;
@@ -2321,7 +2328,8 @@ void dds3Particle_Spark2SetScale(void *data, float scale) {
 }
 
 /* Clone the cone prefix/tail, allocate packet records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_Spark2Create(effTemplatePacketList_t *source) {
+void *dds3Particle_Spark2Create(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x180);
     s32 tailBytes = 0x30;
 
@@ -2390,7 +2398,8 @@ void dds3Particle_Spark2BuffInit(dds3Particle_Spark2_t3 *pSpark2, s32 number) {
 }
 
 /* Scale velocity, apply stored gravity, and transform each motion step before aging. */
-void dds3Particle_Spark2Draw(dds3Particle_Spark2_t3 *hData) {
+void dds3Particle_Spark2Draw(void *data) {
+    dds3Particle_Spark2_t3 *hData = data;
     parSparkPacket_t *packet = (parSparkPacket_t *)hData->basic.buffer->pPhysics;
     u32 subeffectKind = hData->basic.sub.type;
     sdfVector4_t positionDelta;
@@ -2480,7 +2489,8 @@ void dds3Particle_SphereAtomSetScale(void *data, float scale) {
 }
 
 /* Clone the prefix/tail and initialize each packet record with the template's uniform scale. */
-effTemplatePacketList_t *dds3Particle_SphereAtomCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SphereAtomCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x170);
     s32 tailBytes = 0x20;
 
@@ -2556,7 +2566,8 @@ void dds3Particle_SphereAtomBuffInit(effTemplatePacketList_t *pSphereAtom, s32 n
 
 /* Reflect moving packets at the frame's entry radius. The first record's
  * updated radius becomes the boundary on the following frame. */
-void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
+void dds3Particle_SphereAtomDraw(void *data) {
+    effTemplatePacketList_t *hData = data;
     sdfVector4_t origin;
     sdfVector4_t previousPosition;
     /* Retail leaves the fourth broadcast components uninitialized. The
@@ -2700,7 +2711,8 @@ void effScaleSingleParticleTemplate(void *data, f32 factor) {
     head->scale[2] *= factor;
 }
 
-effEmitterHead_t *effCloneSingleParticleTemplate(effEmitterHead_t *source) {
+void *effCloneSingleParticleTemplate(void *data) {
+    effEmitterHead_t *source = data;
     effEmitterHead_t *clone = sdfChipAllocDirect(0x150);
     /* This variant has no appended tail; retail retains the template-tail copy. */
     s32 tailBytes = 0;
@@ -2714,7 +2726,8 @@ effEmitterHead_t *effCloneSingleParticleTemplate(effEmitterHead_t *source) {
     return clone;
 }
 
-void effFreeSingleParticleTemplate(effEmitterHead_t *object) {
+void effFreeSingleParticleTemplate(void *data) {
+    effEmitterHead_t *object = data;
     dds3Particle_BasicDelete(object);
     sdfChipFreeDirect(object);
 }
@@ -2742,7 +2755,8 @@ void effInitParticleRecord(effParticleOverlay_t *effect) {
 }
 
 /* Frame zero reinitializes to -1 before incrementing; refresh position and modulated packed color. */
-void dds3Particle_SpiralBlendColor(effParticleOverlay_t *effect) {
+void dds3Particle_SpiralBlendColor(void *data) {
+    effParticleOverlay_t *effect = data;
     effParticleRecord_t *record = (effParticleRecord_t *)effect->buffer->pPhysics;
     s32 frame = record->frame;
     u32 baseColor;
@@ -2790,7 +2804,8 @@ void dds3Particle_SparkOffsetSetScale(void *data, float scale) {
 }
 
 /* Clone the offset-gravity prefix/tail, allocate records, and initialize their native age tags. */
-effTemplatePacketList_t *dds3Particle_SparkOffsetCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SparkOffsetCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x190);
     s32 tailBytes = 0x40;
 
@@ -2973,7 +2988,8 @@ void dds3Particle_SparkOffsetBuffInit(dds3Particle_SparkOffset_t3 *pSparkOffset,
 
 /* Accumulate motion in the stored offset, then add the emitter origin.
  * Only mode zero transforms the per-frame displacement through the matrix. */
-void dds3Particle_SparkOffsetDraw(dds3Particle_SparkOffset_t3 *hData) {
+void dds3Particle_SparkOffsetDraw(void *data) {
+    dds3Particle_SparkOffset_t3 *hData = data;
     parSparkOffsetPacket_t *packet = (parSparkOffsetPacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     u32 mode;
@@ -3077,7 +3093,8 @@ void dds3Particle_SmokeOffsetSetScale(void *data, float scale) {
 }
 
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
-effTemplatePacketList_t *dds3Particle_SmokeOffsetCreate(effTemplatePacketList_t *source) {
+void *dds3Particle_SmokeOffsetCreate(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x200);
     sdfMemHandle_t *auxAllocationHandle;
     s32 tailBytes = 0xB0;
@@ -3093,7 +3110,8 @@ effTemplatePacketList_t *dds3Particle_SmokeOffsetCreate(effTemplatePacketList_t 
     return clone;
 }
 
-void dds3Particle_SmokeOffsetDelete(effTemplatePacketList_t *hData) {
+void dds3Particle_SmokeOffsetDelete(void *data) {
+    effTemplatePacketList_t *hData = data;
     sdfMemFreeDirect(hData->auxiliaryAllocation);
     dds3Particle_BasicDelete(hData);
     sdfChipFreeDirect(hData);
@@ -3149,7 +3167,8 @@ void dds3Particle_SmokeOffsetBuffInit(dds3Particle_SmokeOffset_t3 *pSmokeOffset,
 
 /* Advance auxiliary positions, then transform/store packet positions with origin.
  * Auxiliary accumulation remains separate from the transformed packet position. */
-void dds3Particle_SmokeOffsetDraw(dds3Particle_SmokeOffset_t3 *hData) {
+void dds3Particle_SmokeOffsetDraw(void *data) {
+    dds3Particle_SmokeOffset_t3 *hData = data;
     parSmokePacket_t *packet = (parSmokePacket_t *)hData->head.buffer->pPhysics;
     u32 subeffectKind = hData->head.sub.type;
     f32 (*auxiliaryCursor)[4] = hData->aux;
@@ -3257,7 +3276,8 @@ void dds3Particle_SphereSpiral2SetScale(void *data, float scale) {
 }
 
 /* Allocate one 12-byte descriptor per packet and its attached 16-byte records. */
-effTemplatePacketList_t *dds3Particle_SphereSpiral2Create(effTemplatePacketList_t *source) {
+void *dds3Particle_SphereSpiral2Create(void *data) {
+    effTemplatePacketList_t *source = data;
     effTemplatePacketList_t *clone = sdfChipAllocDirect(0x190);
     s32 tailLen = 0x40;
     s32 count;
@@ -3319,7 +3339,8 @@ effTemplatePacketList_t *dds3Particle_SphereSpiral2Create(effTemplatePacketList_
 }
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
-void dds3Particle_SphereSpiral2Delete(dds3Particle_SphereSpiral2_t3 *hData) {
+void dds3Particle_SphereSpiral2Delete(void *data) {
+    dds3Particle_SphereSpiral2_t3 *hData = data;
     if (hData->childHandle != 0) {
         sdfMemFreeDirect(hData->childHandle);
     }
@@ -3396,7 +3417,8 @@ void dds3Particle_SphereSpiral2BuffInit(dds3Particle_SphereSpiral2_t3 *pSphereSp
 
 /* Grow each radial offset toward its target radius, spin it about the particle axis,
  * rebuild position from the origin, and feed the kind's point history. */
-void dds3Particle_SphereSpiral2Draw(dds3Particle_SphereSpiral2_t3 *hData) {
+void dds3Particle_SphereSpiral2Draw(void *data) {
+    dds3Particle_SphereSpiral2_t3 *hData = data;
     parBurstPacket_t *packet = (parBurstPacket_t *)hData->head.buffer->pPhysics;
     u32 kind;
     dds3ParOffsetBuffParts_t *history = hData->history.pParts;
