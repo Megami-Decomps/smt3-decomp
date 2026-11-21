@@ -389,3 +389,13 @@ change is the field-address low instruction's `REG_EQUAL` note becoming
 register binding in this source context. These are parity-qualified dependency
 dumps, not a fresh runtime priority/rank observation. Direct global field writes
 instead of the pointer score 186/195 and are not adopted.
+
+## Area title table
+
+The area-title loader writes exactly 1,248 bytes, and the two rendering
+consumers use a 26-byte stride. The writable C table preserves all 48
+retail rows, including the spaces before some string terminators. It does
+not add an index guard or change the native routines' supported area
+assumptions. The previous interior labels were splitter boundaries, not
+separately addressed objects. Text bytes that resemble addresses remain
+literal, not relocations.

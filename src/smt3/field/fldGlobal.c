@@ -30,7 +30,7 @@ extern void sdfFileClose(s32 aHandle);
 
 extern const char fldAllTblPath[];
 
-extern u8 fldAutoMapTitleTable[];
+extern char fldAutoMapTitleTable[][26];
 
 extern void fldFindTakaraSlot(s32 id);
 

@@ -491,7 +491,7 @@ segments:
       - [0x20A5E0, .data, field/fldSe]
       - [0x20B1BC, data, data_0030A1BC]
       - [0x20B1C0, .data, field/fldBgmTop]
-      - [0x20B670, data, data_0030A670]
+      - [0x20B670, .data, field/fldAutoMapTitleTable]
       - [0x20BB50, .data, field/fldAreaNames]
       - [0x20E710, .data, field/fldPlaceNames]
       - [0x210BD0, .data, field/fldFloorNames]
