@@ -465,7 +465,7 @@ extern s8 dds3PadStickStatusPrev[2][2];
 
 extern s8 dds3PadStickStatusState[2][2];
 
-extern u8 D_003200B8[];
+extern effDebugMenu_t D_003200B8;
 extern effDebugMenu_t *effDebugMenu;
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -3295,7 +3295,7 @@ s8 effDebugActive = 1;
 
 s8 effDebugCameraAllowed = 1;
 
-effDebugMenu_t *effDebugMenu = (effDebugMenu_t *)&D_003200B8;
+effDebugMenu_t *effDebugMenu = &D_003200B8;
 
 u32 effDebugStopTimer = 0;
 

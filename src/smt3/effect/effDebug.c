@@ -52,7 +52,7 @@ typedef struct
 extern sdfMat_t *effDebugSelectCursorMat;
 extern f32 effDebugSelectCursorAngle;
 extern f32 effDebugTriPositions[4][4];
-extern u32 effDebugTriColors[4];
+extern u32 effDebugTriColors[3];
 f32 sdfCos(f32 aRadius);
 f32 sdfSin(f32 aRadius);
 void SetRotateMatrixX(f32 aAngle);

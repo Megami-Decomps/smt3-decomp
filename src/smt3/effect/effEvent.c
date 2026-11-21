@@ -82,13 +82,13 @@ extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 extern void dds3EffectFilter(dds3Effect_Filter_t *params);
 extern void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
 effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
-extern u8 mblurDefaultParam[];
-extern u8 dblurDefaultParam[];
+extern dds3Effect_PartialMultiBlurParam_t mblurDefaultParam;
+extern dds3Effect_DistortionBlurParam_t dblurDefaultParam;
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
-extern u8 mfilterDefaultParam[];
+extern dds3Effect_PartialMultiFilterParam_t mfilterDefaultParam;
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
-extern u8 rblurDefaultParam[];
+extern dds3Effect_RippleBlurParam_t rblurDefaultParam;
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 effRectangleBlurSetupReady;
 /* The result slot must be valid whenever the create callback is present. */
@@ -426,10 +426,10 @@ void Eve_PartialMultiFilterSetDefTex(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
-    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)mblurDefaultParam);
-    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)dblurDefaultParam);
-    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)mfilterDefaultParam);
-    hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)rblurDefaultParam);
+    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate(&mblurDefaultParam);
+    hEve_DistortionBlur = dds3EffectDistortionBlurCreate(&dblurDefaultParam);
+    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate(&mfilterDefaultParam);
+    hEve_RippleBlur = dds3EffectRippleBlurCreate(&rblurDefaultParam);
     Eve_RippleBlurGetParams()->params.number = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 

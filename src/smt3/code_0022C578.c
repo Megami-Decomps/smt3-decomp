@@ -3,6 +3,7 @@
 #include "result2.h"
 #include "camp.h"
 #include "cmp_status_model_vectors.h"
+#include "cmp_hearts_icon_data.h"
 #include "kernel.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -153,14 +154,6 @@ extern s32 gSelMsgNo;
 
 typedef struct
 {
-    /* 0x00 */ s8 id;
-    /* 0x01 */ s8 type;
-    /* 0x02 */ u8 unk_02[2];
-    /* 0x04 */ s32 color;
-} cmpHeartsIconTableEntry_t;
-
-typedef struct
-{
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 unk_01[3];
     /* 0x04 */ s8 unk_04;
@@ -195,8 +188,6 @@ typedef struct
     /* 0x0038 */ s32 unk_38;
     /* 0x003C */ u8 unk_3C[0x2A8];
 } cmpPanelEff_t;
-
-extern cmpHeartsIconTableEntry_t cmpHeartsIconTable[];
 
 extern campStatusPanel_t *campStatusPanel;
 
@@ -364,7 +355,7 @@ extern s32 cmpStatusModelResult;
 
 extern s8 cmpParamGaugeColors[];
 
-extern char *cmpParamNames[];
+extern const char *cmpParamNames[];
 
 extern s8 dds3PadButtonState[];
 
@@ -10859,7 +10850,8 @@ void cmpRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
 
 char *cmpGetParamName(s8 index)
 {
-    return cmpParamNames[index];
+    /* This legacy accessor exposes both writable and read-only name strings. */
+    return (char *)cmpParamNames[index];
 }
 
 s32 cmpGetPressedButton(s32 mask)

@@ -226,7 +226,8 @@ extern s32 fclRunPanelAnim(void *work);
 
 #include "sdk_libc.h"
 
-extern u8 cmbDataTable[];
+struct effEVECombParSmokeParam_t;
+extern struct effEVECombParSmokeParam_t cmbDataTable;
 
 extern void sdfTexFree(s32 aHandle);
 
@@ -464,7 +465,7 @@ void fclCombineTexFree(void)
 
 void fclCombineSetTable(void)
 {
-    CMB_GBWK->table = cmbDataTable;
+    CMB_GBWK->table = (u8 *)&cmbDataTable;
 }
 
 s32 cmbChkGeneralStat(void)
