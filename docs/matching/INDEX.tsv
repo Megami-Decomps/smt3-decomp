@@ -149,6 +149,7 @@ cmbRotateModelPanel	facility/fclCombineInit	0x27C	159 of 159 words match	docs/ma
 cmbUpdateTimeTable	facility/fclCombineInit	0x188	98 of 98 words match	docs/matching/facility/fclCombineInit.md	798
 cmbGetModelMarkPos	facility/fclCombineInit	0x238	142 of 142 words match	docs/matching/facility/fclCombineInit.md	818
 Sacrifice fusion timeline				docs/matching/facility/fclCombineInit.md	838
+Fusion labels and model marks				docs/matching/facility/fclCombineInit.md	846
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3

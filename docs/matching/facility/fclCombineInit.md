@@ -842,3 +842,11 @@ callback; the remaining six retain their original frame values, dispatch
 modes and callback addresses. The four bytes before the separate timeline
 group descriptor stay raw. The ordinary timeline and both group pointers
 are unchanged.
+
+## Fusion labels and model marks
+
+The three header captions keep their original pointers and the separate
+null slot. The model-mark loop reads three existing name pointers. The
+next camera-point pointer is not part of that array; its native four-byte
+boundary stays raw because the stock standalone source object aligns it
+to eight bytes.
