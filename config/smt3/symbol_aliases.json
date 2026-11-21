@@ -102,5 +102,45 @@
     "section": ".data",
     "offset": 8,
     "owner_size": 868
+  },
+  {
+    "name": "nbNegoKotowariQ3Table",
+    "owner": "nbKotowariQuestionTable",
+    "unit": "newbattle/nbKotowariQuestions",
+    "section": ".data",
+    "offset": 18,
+    "owner_size": 2232
+  },
+  {
+    "name": "nbNegoKotowariQ1Table",
+    "owner": "nbKotowariQuestionTable",
+    "unit": "newbattle/nbKotowariQuestions",
+    "section": ".data",
+    "offset": 30,
+    "owner_size": 2232
+  },
+  {
+    "name": "nbNegoKotowariQ2Table",
+    "owner": "nbKotowariQuestionTable",
+    "unit": "newbattle/nbKotowariQuestions",
+    "section": ".data",
+    "offset": 42,
+    "owner_size": 2232
+  },
+  {
+    "name": "evtFrameListFieldTable",
+    "owner": "evtFrameList",
+    "unit": "event/evtViewerTrackColumns",
+    "section": ".data",
+    "offset": 2,
+    "owner_size": 240
+  },
+  {
+    "name": "dds3ZBuffHandles",
+    "owner": "sdfGrFrameSet",
+    "unit": "sdf/sdfFrameSetState",
+    "section": ".data",
+    "offset": 16,
+    "owner_size": 20
   }
 ]
