@@ -9,6 +9,7 @@
 #include "event.h"
 #include "nb.h"
 #include "effBattle.h"
+#include "effBattleSystemCut1Data.h"
 #include "effThunder.h"
 #include "ps2asm.h"
 #include "draw3d.h"
@@ -192,18 +193,6 @@ void effBTLSystemCut1DataFree(void);
 void effBTLSystemCut1PartHandleCreate(void);
 
 void effBTLSystemCut1PartHandleDelete(void);
-
-/* One shared cut effect of the effBTLSystemCut1 table. */
-typedef struct
-{
-    char *fileName;
-    effBTL_t *hBTLEffect;
-    s32 use;
-    void *pData;
-    sdfMemHandle_t *hMem;
-} effBattleSystem_effBTLSystem_Cut1_tag;
-
-extern effBattleSystem_effBTLSystem_Cut1_tag effBTLSystemCut1Data[];
 
 void *effBTLCutGetUserData(void *hBTLCutEffect);
 
