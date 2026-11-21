@@ -174,8 +174,6 @@ extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
 
 extern datUnitVisual_t datModelParamTable[];
 
-extern datUnitVisual_t nbDefaultUnitVisual;
-
 extern datDevilAIData_t datDevilAIDataTable[];
 
 extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);

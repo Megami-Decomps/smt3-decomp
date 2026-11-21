@@ -3,13 +3,12 @@
 
 #include "common.h"
 
-struct mdlDebugPad_t;
 struct sdfDrawTag_t;
 
 typedef struct mdlDebugLight_t {
     f32 (**lights)[4];
     f32 *ambient;
-    struct mdlDebugPad_t *pad;
+    s8 *pad;
     u8 editing;
     u8 blinkTick;
     s16 selection;

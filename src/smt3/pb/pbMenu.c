@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "pbMenuDispatch.h"
 #include "pbRecord.h"
 #include "kernel.h"
@@ -213,7 +214,6 @@ void pbSetDebugOwner(pbProcHandle_t *panel) {
     }
 }
 
-extern u8 dds3PadButtonState[];
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 extern void rsetOtOfs(u32 offset);
 extern void rsetAlpha(s32 mode);
@@ -247,21 +247,21 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
         return -1;
     }
 
-    if ((s8)dds3PadButtonState[0x23] < 0 || (s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x23]) < 0 || (s8)((u8)dds3PadButtonState[0x20]) < 0) {
         p2sdPlaySE(0x340006, 0x7F, 0x3F);
         return -1;
     }
 
     switch (pbMapPathIdx) {
     case 0:
-        if (dds3PadButtonState[0x26] & 2) {
+        if (((u8)dds3PadButtonState[0x26]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             if (pbMenuState == 0) {
                 pbMenuState = pbMenuItemCount[work->value] - 1;
             } else {
                 pbMenuState = pbMenuState - 1;
             }
-        } else if (dds3PadButtonState[0x27] & 2) {
+        } else if (((u8)dds3PadButtonState[0x27]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             if (pbMenuState < pbMenuItemCount[work->value] - 1) {
                 pbMenuState = pbMenuState + 1;
@@ -271,37 +271,37 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
         }
         break;
     case 1:
-        if (dds3PadButtonState[0x24] & 2) {
+        if (((u8)dds3PadButtonState[0x24]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMenuIndex = (pbMenuIndex + 0x1D) % 0x1E;
-        } else if (dds3PadButtonState[0x25] & 2) {
+        } else if (((u8)dds3PadButtonState[0x25]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMenuIndex = (pbMenuIndex + 0x1F) % 0x1E;
-        } else if (dds3PadButtonState[0x26] & 2) {
+        } else if (((u8)dds3PadButtonState[0x26]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMenuIndex = (pbMenuIndex + 0x28) % 0x1E;
-        } else if (dds3PadButtonState[0x27] & 2) {
+        } else if (((u8)dds3PadButtonState[0x27]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMenuIndex = (pbMenuIndex + 0x14) % 0x1E;
         }
         break;
     case 3:
-        if (dds3PadButtonState[0x24] & 2) {
+        if (((u8)dds3PadButtonState[0x24]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMapNo = (pbMapNo + 0x31) % 0x32;
-        } else if (dds3PadButtonState[0x25] & 2) {
+        } else if (((u8)dds3PadButtonState[0x25]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMapNo = (pbMapNo + 0x33) % 0x32;
-        } else if (dds3PadButtonState[0x26] & 2) {
+        } else if (((u8)dds3PadButtonState[0x26]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMapNo = (pbMapNo + 0x3C) % 0x32;
-        } else if (dds3PadButtonState[0x27] & 2) {
+        } else if (((u8)dds3PadButtonState[0x27]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             pbMapNo = (pbMapNo + 0x28) % 0x32;
         }
         break;
     case 4:
-        if ((dds3PadButtonState[0x24] & 2) || (dds3PadButtonState[0x25] & 2)) {
+        if ((((u8)dds3PadButtonState[0x24]) & 2) || (((u8)dds3PadButtonState[0x25]) & 2)) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             if (D_0054F5D4 != 0) {
                 D_0054F5D4 = 0;
@@ -311,24 +311,24 @@ s32 pb_proc_menu_Process(dds3ProcessID_t *id)
         }
         break;
     case 5:
-        if (dds3PadButtonState[0x24] & 2) {
+        if (((u8)dds3PadButtonState[0x24]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             D_00551EC1 = (D_00551EC1 + 0xC) % 0xD;
-        } else if (dds3PadButtonState[0x25] & 2) {
+        } else if (((u8)dds3PadButtonState[0x25]) & 2) {
             p2sdPlaySE(0x340007, 0x7F, 0x3F);
             D_00551EC1 = (D_00551EC1 + 0xE) % 0xD;
         }
         break;
     }
 
-    if ((s8)dds3PadButtonState[0x21] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x21]) < 0) {
         if (pbMenuCheckTable[work->value][pbMenuState](panel) == 1) {
             p2sdPlaySE(0x340005, 0x7F, 0x3F);
             pbMenuActionTable[work->value][pbMenuState](panel);
         } else {
             p2sdPlaySE(0x340008, 0x7F, 0x3F);
         }
-    } else if ((s8)dds3PadButtonState[0x23] < 0) {
+    } else if ((s8)((u8)dds3PadButtonState[0x23]) < 0) {
         p2sdPlaySE(0x340006, 0x7F, 0x3F);
         if (pbMapPathIdx != 0) {
             pbMapPathIdx = 0;

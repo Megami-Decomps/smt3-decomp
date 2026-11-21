@@ -1,10 +1,10 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "dds3PadButtonPrev.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
 /* Two ports, two sticks per port, and two axes per stick. */
-extern u8 dds3PadButtonState[2][2][16];
 extern u8 dds3PadStickPrev[2][2][2];
 extern s8 dds3PadStickStatusPrev[2][2];
 extern u8 dds3PadStickState[2][2][2];
@@ -249,8 +249,8 @@ s32 RunProcess(dds3ProcessID_t *pro)
     if (pro->flag & 0x10) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                dds3PadButtonState[0][port][inputIndex] = 0;
-                dds3PadButtonState[1][port][inputIndex] = 0;
+                dds3PadButtonState[(0) * 32 + (port) * 16 + (inputIndex)] = 0;
+                dds3PadButtonState[(1) * 32 + (port) * 16 + (inputIndex)] = 0;
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 dds3PadStickState[port][inputIndex][0] = 0;
@@ -261,8 +261,8 @@ s32 RunProcess(dds3ProcessID_t *pro)
     } else {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
-                dds3PadButtonState[0][port][inputIndex] = dds3PadButtonPrev[0][port][inputIndex];
-                dds3PadButtonState[1][port][inputIndex] = dds3PadButtonPrev[1][port][inputIndex];
+                dds3PadButtonState[(0) * 32 + (port) * 16 + (inputIndex)] = dds3PadButtonPrev[0][port][inputIndex];
+                dds3PadButtonState[(1) * 32 + (port) * 16 + (inputIndex)] = dds3PadButtonPrev[1][port][inputIndex];
             }
             for (inputIndex = 0; inputIndex < 2; inputIndex++) {
                 dds3PadStickState[port][inputIndex][0] = dds3PadStickPrev[port][inputIndex][0];

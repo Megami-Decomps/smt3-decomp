@@ -2032,8 +2032,6 @@ void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pNbCamera)
 extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera);
 extern void nbCameraState_InvokeTarget_SearchSet(void);
 
-extern f32 nbCameraAngleHTable[];
-extern f32 nbCameraAngleWTable[];
 extern f32 nbCameraHeightMinTable[];
 extern f32 nbCameraWidthMinTable[];
 
@@ -2071,8 +2069,10 @@ void nbCameraState_SkillAttack_Init(void)
              * copied field and the second RNG advance, rather than inventing
              * a consumer or correcting the native index reuse. */
             ptr.ptr_angleW = dds3GetRandA(dds3EffectBase) % 14;
-            work.angleH = nbCameraAngleHTable[ptr.ptr_angleH];
-            work.angleW = nbCameraAngleWTable[ptr.ptr_angleH];
+            /* Unlike the preset selector, this native path can step past an
+             * eight-entry bank into the following angle or distance words. */
+            work.angleH = *EE_ADDR_AS(f32 *, EE_ADDR(nbCameraAngleHTable) + (u32)ptr.ptr_angleH * sizeof(f32));
+            work.angleW = *EE_ADDR_AS(f32 *, EE_ADDR(nbCameraAngleWTable) + (u32)ptr.ptr_angleH * sizeof(f32));
             ptr.ptr_H = 0;
             ptr.ptr_W = 0;
             work.HeightMin = nbCameraHeightMinTable[ptr.ptr_H];

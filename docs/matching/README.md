@@ -30,11 +30,11 @@ both native and emitted sizes when they differ.
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
-| 6 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 6 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |

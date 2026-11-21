@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "newbattle.h"
 #include "kernel.h"
 #include "nb.h"
@@ -497,7 +498,6 @@ void MemoryCommand_nbTarSelProcess(nbTarSelProcessData_t *process)
     work->nowtform = process->nowform;
 }
 
-extern u8 dds3PadButtonState[64];
 extern void nbPlaySe(s32 no);
 
 void CursorSelect(nbTarSelProcessData_t *process)
@@ -519,12 +519,12 @@ void CursorSelect(nbTarSelProcessData_t *process)
     if (state != 1) {
         return;
     }
-    if (dds3PadButtonState[0x21] & 2) {
+    if (((u8)dds3PadButtonState[0x21]) & 2) {
         MemoryCommand_nbTarSelProcess(process);
         process->stat = 0;
         return;
     }
-    if ((s8)dds3PadButtonState[0x23] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x23]) < 0) {
         process->stat = 2;
         nbPlaySe(10);
     }
@@ -561,28 +561,28 @@ not_both:
     both = 0;
 have_both:
     if (count >= 2) {
-        if (((s8)dds3PadButtonState[0x25] < 0 || ((s8)dds3PadButtonState[0x27] < 0 && !both)) &&
+        if (((s8)((u8)dds3PadButtonState[0x25]) < 0 || ((s8)((u8)dds3PadButtonState[0x27]) < 0 && !both)) &&
             process->nowno == count - 1) {
             process->nowno = 0;
             moved = 1;
-        } else if ((dds3PadButtonState[0x25] & 2) || ((dds3PadButtonState[0x27] & 2) && !both)) {
+        } else if ((((u8)dds3PadButtonState[0x25]) & 2) || ((((u8)dds3PadButtonState[0x27]) & 2) && !both)) {
             if (process->nowno < count - 1) {
                 process->nowno++;
                 moved = 1;
             }
         }
-        if (((s8)dds3PadButtonState[0x24] < 0 || ((s8)dds3PadButtonState[0x26] < 0 && !both)) &&
+        if (((s8)((u8)dds3PadButtonState[0x24]) < 0 || ((s8)((u8)dds3PadButtonState[0x26]) < 0 && !both)) &&
             process->nowno == 0) {
             process->nowno = count - 1;
             moved = 1;
-        } else if ((dds3PadButtonState[0x24] & 2) || ((dds3PadButtonState[0x26] & 2) && !both)) {
+        } else if ((((u8)dds3PadButtonState[0x24]) & 2) || ((((u8)dds3PadButtonState[0x26]) & 2) && !both)) {
             if (process->nowno > 0) {
                 process->nowno--;
                 moved = 1;
             }
         }
     }
-    if ((s8)dds3PadButtonState[0x26] < 0 || (s8)dds3PadButtonState[0x27] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x26]) < 0 || (s8)((u8)dds3PadButtonState[0x27]) < 0) {
         /* Keep the two real area-selection inputs distinct through dispatch. */
         FAKEMATCH_ASM_LIVE_PAIR(area, friendCount);
         switch (area) {

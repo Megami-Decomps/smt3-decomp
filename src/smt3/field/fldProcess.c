@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "effDistortionBlur.h"
 #include "effRectangleBlur.h"
 #include "basic.h"
@@ -230,7 +231,6 @@ extern dds3FontReqFunc_t dds3FontReqTable;
 
 extern dds3FontReqFunc_t dds3FontReqBoxTable;
 
-extern u8 dds3PadButtonState[];
 
 extern const char fldKiretaLabel[];
 
@@ -881,7 +881,7 @@ s32 ProcSequence(dds3ProcessID_t *id)
         if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return 0;
         if (fldEncountTestFlag(0x40) != 0 && fldGlobalBase.wordCC != 0) goto check_hit;
         if ((evtBitCheck(0x8A0) != 0 || evtBitCheck(0x8B1) != 0) &&
-            fldEncountTestFlag(0x40) != 0 && (s8)dds3PadButtonState[0x2D] < 0) {
+            fldEncountTestFlag(0x40) != 0 && (s8)((u8)dds3PadButtonState[0x2D]) < 0) {
             if (evtBitCheck(0xAF0) != 0) evtBitOff(0xAF0);
             else evtBitOn(0xAF0);
         }

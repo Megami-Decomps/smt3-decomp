@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "sdk_libgcc.h"
 #include "basic.h"
 #include "dds3obj.h"
@@ -474,7 +475,6 @@ s32 fldElvCheckEnd(void)
 const char fldTestDrawName[16] = "fldTestDraw";
 
 #ifdef NON_MATCHING
-extern volatile s8 dds3PadButtonState[];
 
 void fldElvDrawFloorNum(void)
 {
@@ -492,6 +492,7 @@ void fldElvDrawFloorNum(void)
     s32 distance;
     s32 display;
     s8 button;
+    volatile s8 *buttonBank;
 
     if (floor == -999) {
         return;
@@ -529,7 +530,11 @@ void fldElvDrawFloorNum(void)
             }
         }
     }
-    button = dds3PadButtonState[0x23];
+    buttonBank = dds3PadButtonState;
+    /* Keep the volatile byte load at its native displacement; ee-gcc
+     * otherwise folds 0x23 into the relocated bank address. */
+    FAKEMATCH_ASM_LIVE(buttonBank);
+    button = buttonBank[0x23];
     display = *displayFloor;
     if (button < 0) {
         *state = 1;

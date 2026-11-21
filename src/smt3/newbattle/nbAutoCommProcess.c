@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -217,7 +218,6 @@ extern void nbPlaySe(s32 no);
 
 extern u32 dds3DebugSign;
 
-extern u8 dds3PadButtonState[];
 
 
 
@@ -275,11 +275,11 @@ s32 nbAutoCommProcess1(dds3ProcessID_t *id)
     }
     if (dds3DebugSign != 1 || (data->stat & 0x20000000) == 0) {
         if (data->stat & 0x40) {
-            if ((s8)dds3PadButtonState[0x23] < 0 || (s8)dds3PadButtonState[0x22] < 0) {
+            if ((s8)((u8)dds3PadButtonState[0x23]) < 0 || (s8)((u8)dds3PadButtonState[0x22]) < 0) {
                 data->stat &= ~0x40;
                 nbPlaySe(11);
             }
-        } else if ((s8)dds3PadButtonState[0x22] < 0) {
+        } else if ((s8)((u8)dds3PadButtonState[0x22]) < 0) {
             data->stat |= 0x40;
             nbPlaySe(14);
         }

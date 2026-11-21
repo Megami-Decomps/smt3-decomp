@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "sdk_libgcc.h"
 #include "basic.h"
 #include "kernel.h"
@@ -19,7 +20,6 @@ extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, .
 
 extern void dds3MenuStepValue(char *text, f32 value);
 
-extern u8 dds3PadButtonState[];
 
 extern void dds3DebugFloatEditEx(f32 *value, u8 *pad, f32 step, f32 min, f32 max, f32 scale);
 
@@ -92,7 +92,7 @@ void dds3DebugFloatEditEx(f32 *controlledValue, u8 *padState, f32 minimum, f32 m
 
 void dds3DebugFloatEdit(f32 *value, f32 step, f32 min, f32 max, f32 scale)
 {
-    dds3DebugFloatEditEx(value, &dds3PadButtonState[0x20], step, min, max, scale);
+    dds3DebugFloatEditEx(value, (u8 *)&dds3PadButtonState[0x20], step, min, max, scale);
 }
 
 void dds3DebugIntEditEx(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aSmall, s64 aLarge, s8 *aPadMap) {
@@ -181,7 +181,7 @@ void dds3DebugIntEditEx(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aS
 
 void dds3DebugIntEdit(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aSmall, s64 aLarge)
 {
-    dds3DebugIntEditEx(aValue, aValueSize, aMin, aMax, aSmall, aLarge, (s8 *)&dds3PadButtonState[0x20]);
+    dds3DebugIntEditEx(aValue, aValueSize, aMin, aMax, aSmall, aLarge, &dds3PadButtonState[0x20]);
 }
 
 s32 dds3DebugColorEditEx(u32 *aValue, s32 aColumn, s8 *aPadMap) {
@@ -249,7 +249,7 @@ s32 dds3DebugColorEditEx(u32 *aValue, s32 aColumn, s8 *aPadMap) {
 
 void dds3DebugColorEdit(u32 *aValue, s32 aColumn)
 {
-    dds3DebugColorEditEx(aValue, aColumn, (s8 *)&dds3PadButtonState[0x20]);
+    dds3DebugColorEditEx(aValue, aColumn, &dds3PadButtonState[0x20]);
 }
 
 void dds3MenuStepValue(char *out, f32 value)

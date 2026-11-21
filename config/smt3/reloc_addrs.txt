@@ -63,3 +63,5 @@ rom:0x42E768 reloc:MIPS_NONE symbol:none // tlbKernelEntries[11].entryLo0: numer
 rom:0x42E76C reloc:MIPS_NONE symbol:none // tlbKernelEntries[11].entryLo1: numeric PS2 TLB value.
 rom:0x42E794 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[1].entryHi: numeric PS2 TLB value.
 rom:0x42E7C4 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[4].entryHi: numeric PS2 TLB value.
+
+rom:0x24A77C reloc:MIPS_NONE symbol:none // nbDefaultUnitVisual motion 24: (type=1, actframe=58), not an AI table pointer.

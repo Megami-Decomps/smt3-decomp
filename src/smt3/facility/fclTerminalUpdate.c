@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "fldTerminalRoutes.h"
 #include "camp.h"
 #include "fpu.h"
@@ -324,7 +325,6 @@ extern void movieStop(void);
 extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
 extern void evtSetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag);
 extern void evtResetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag);
-extern u8 dds3PadButtonState[2][2][16];
 
 void trmUpdateActLearge(void)
 {
@@ -353,10 +353,10 @@ void trmUpdateActLearge(void)
         switch (phase) {
         case 1:
             done = dds3WaitMovieEnd() != 0;
-            if ((s8)dds3PadButtonState[1][0][1] < 0) {
+            if ((s8)((u8)dds3PadButtonState[(1) * 32 + (0) * 16 + (1)]) < 0) {
                 done = 1;
             }
-            if ((s8)dds3PadButtonState[1][0][3] < 0) {
+            if ((s8)((u8)dds3PadButtonState[(1) * 32 + (0) * 16 + (3)]) < 0) {
                 done = 1;
             }
             break;
@@ -417,10 +417,10 @@ void trmUpdateActSmall(void)
             if (dds3GetProcessStat(trmUpdateWork->saveProcess) == 0) {
                 done = 1;
             }
-            if ((s8)dds3PadButtonState[1][0][1] < 0) {
+            if ((s8)((u8)dds3PadButtonState[(1) * 32 + (0) * 16 + (1)]) < 0) {
                 done = 1;
             }
-            if ((s8)dds3PadButtonState[1][0][3] < 0) {
+            if ((s8)((u8)dds3PadButtonState[(1) * 32 + (0) * 16 + (3)]) < 0) {
                 done = 1;
             }
             if (trmUpdateWork->movieState == 2) {

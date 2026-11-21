@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "facility.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -413,15 +414,14 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteAngleCore);
 #endif
 
-extern u8 dds3PadButtonState[0x40];
 
 /* Both native mode paths test the same signed pad-state byte. */
 s32 func_00214FD8(s32 mode)
 {
     if (mode == 0) {
-        if ((s8)dds3PadButtonState[0x22] < 0) return 1;
+        if ((s8)((u8)dds3PadButtonState[0x22]) < 0) return 1;
     } else {
-        if ((s8)dds3PadButtonState[0x22] < 0) return 1;
+        if ((s8)((u8)dds3PadButtonState[0x22]) < 0) return 1;
     }
     return 0;
 }

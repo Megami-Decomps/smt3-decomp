@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "mdlDebugData.h"
 #include "kernel_draw.h"
 #include "libsdf.h"
@@ -109,19 +110,17 @@ typedef struct mdlMarkPos_t {
     u128 direction;  /* 0x30 */
 } mdlMarkPos_t;
 
-typedef struct mdlDebugPad_t {
-    u8 pad00;
-    s8 confirm;
-    u8 pad02;
-    s8 cancel;
-    s8 stepDownA;  /* 0x04 */
-    s8 stepUpA;    /* 0x05 */
-    s8 stepDownB;  /* 0x06 */
-    s8 stepUpB;    /* 0x07 */
-} mdlDebugPad_t;
+enum {
+    MDL_PAD_CONFIRM = 1,
+    MDL_PAD_CANCEL = 3,
+    MDL_PAD_STEP_DOWN_A = 4,
+    MDL_PAD_STEP_UP_A = 5,
+    MDL_PAD_STEP_DOWN_B = 6,
+    MDL_PAD_STEP_UP_B = 7,
+};
 
 typedef struct mdlDebugScale_t {
-    mdlDebugPad_t *pad;
+    s8 *pad;
     u8 editing;
     u8 blinkTick;
     s16 selection;
@@ -185,7 +184,6 @@ typedef void (*mdlOtRegFunc_t)(sdfGrOt_t *, sdfDrawTag_t *);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern s8 dds3PadButtonState[];
 
 extern s8 dds3PadBitTable[];
 
@@ -921,7 +919,7 @@ void mdlSetEffectScaleSub(mdlObj_t *aHandle, dds3ModelEffectCtrlr_t *aEffect, fl
 /* vu0 routine: rotate the edited light direction about the view's X/Y axes. */
 void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
 {
-    if (context->pad->stepUpA != 0) {
+    if (context->pad[MDL_PAD_STEP_UP_A] != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         ToMatrix();
@@ -929,7 +927,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR( position);
-    } else if (context->pad->stepDownA != 0) {
+    } else if (context->pad[MDL_PAD_STEP_DOWN_A] != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         ToMatrix();
@@ -938,7 +936,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR( position);
     }
-    if (context->pad->stepUpB != 0) {
+    if (context->pad[MDL_PAD_STEP_UP_B] != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
         ToMatrix();
@@ -946,7 +944,7 @@ void mdlSetDebugMatrix(mdlDebugLight_t *context, f32 *position)
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR( position);
-    } else if (context->pad->stepDownB != 0) {
+    } else if (context->pad[MDL_PAD_STEP_DOWN_B] != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
         ToMatrix();
@@ -974,13 +972,13 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
 
     if (EE_ADDR(state) == 0) {
         state = &mdlDebugLightWork;
-        state->pad = (mdlDebugPad_t *)(dds3PadButtonState + 0x10);
+        state->pad = (dds3PadButtonState + 0x10);
     } else if (EE_ADDR(state) == 1) {
         state = &mdlDebugLightWork;
-        state->pad = (mdlDebugPad_t *)dds3PadButtonState;
+        state->pad = dds3PadButtonState;
     }
     if (state->pad == NULL) {
-        state->pad = (mdlDebugPad_t *)(dds3PadButtonState + 0x10);
+        state->pad = (dds3PadButtonState + 0x10);
     }
     if (state->lights == NULL) {
         state->lights = (f32 (**)[4])dds3LightParam.parallel;
@@ -991,27 +989,27 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     state->packetList = dds3FontReqAllocDrawTag();
     if (state->editing == 0) {
         changed = 1;
-        if (state->pad->stepUpB & 0x80) {
+        if (state->pad[MDL_PAD_STEP_UP_B] & 0x80) {
             if (state->selection >= 14) {
                 state->selection = 0;
             } else {
                 state->selection++;
             }
-        } else if (state->pad->stepUpB & 2) {
+        } else if (state->pad[MDL_PAD_STEP_UP_B] & 2) {
             if (state->selection < 14) {
                 state->selection++;
             }
-        } else if (state->pad->stepDownB & 0x80) {
+        } else if (state->pad[MDL_PAD_STEP_DOWN_B] & 0x80) {
             if (state->selection > 0) {
                 state->selection--;
             } else {
                 state->selection = 14;
             }
-        } else if (state->pad->stepDownB & 2) {
+        } else if (state->pad[MDL_PAD_STEP_DOWN_B] & 2) {
             if (state->selection > 0) {
                 state->selection--;
             }
-        } else if (state->pad->confirm & 0x80) {
+        } else if (state->pad[MDL_PAD_CONFIRM] & 0x80) {
             state->editing = 1;
         } else {
             changed = 0;
@@ -1020,9 +1018,9 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
             state->blinkTick = 0;
         }
     } else {
-        if (state->pad->confirm & 0x80) {
+        if (state->pad[MDL_PAD_CONFIRM] & 0x80) {
             state->editing = 0;
-        } else if (state->pad->cancel & 0x80) {
+        } else if (state->pad[MDL_PAD_CANCEL] & 0x80) {
             state->editing = 0;
         } else if (state->selection < 12) {
             light = state->lights[state->selection >> 2];
@@ -1104,7 +1102,7 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
     s32 value = (s32)(*target + 0.5f);
     s32 stepA;
     s32 stepB;
-    mdlDebugPad_t *pad;
+    s8 *pad;
     s32 min;
     s32 max;
 
@@ -1121,7 +1119,7 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
     min = edit->min;
     pad = mdlDebugScaleWork.pad;
     max = edit->max;
-    if (pad->stepUpA & 0x80) {
+    if (pad[MDL_PAD_STEP_UP_A] & 0x80) {
         if (value < max) {
             value += stepA;
             if (value > max) {
@@ -1130,12 +1128,12 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
         } else {
             value = min;
         }
-    } else if (pad->stepUpA & 2) {
+    } else if (pad[MDL_PAD_STEP_UP_A] & 2) {
         value += stepA;
         if (value > max) {
             value = max;
         }
-    } else if (pad->stepDownA & 0x80) {
+    } else if (pad[MDL_PAD_STEP_DOWN_A] & 0x80) {
         if (min < value) {
             value -= stepA;
             if (value < min) {
@@ -1144,12 +1142,12 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
         } else {
             value = max;
         }
-    } else if (pad->stepDownA & 2) {
+    } else if (pad[MDL_PAD_STEP_DOWN_A] & 2) {
         value -= stepA;
         if (value < min) {
             value = min;
         }
-    } else if (pad->stepUpB & 0x80) {
+    } else if (pad[MDL_PAD_STEP_UP_B] & 0x80) {
         if (value < max) {
             value += stepB;
             if (value > max) {
@@ -1158,12 +1156,12 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
         } else {
             value = min;
         }
-    } else if (pad->stepUpB & 2) {
+    } else if (pad[MDL_PAD_STEP_UP_B] & 2) {
         value += stepB;
         if (value > max) {
             value = max;
         }
-    } else if (pad->stepDownB & 0x80) {
+    } else if (pad[MDL_PAD_STEP_DOWN_B] & 0x80) {
         if (min < value) {
             value -= stepB;
             if (value < min) {
@@ -1172,7 +1170,7 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
         } else {
             value = max;
         }
-    } else if (pad->stepDownB & 2) {
+    } else if (pad[MDL_PAD_STEP_DOWN_B] & 2) {
         value -= stepB;
         if (value < min) {
             value = min;
@@ -1196,34 +1194,34 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     } else {
         pad = dds3PadButtonState;
     }
-    state->pad = (mdlDebugPad_t *)pad;
+    state->pad = pad;
     mdlDebugScaleWork.packetList = dds3FontReqAllocDrawTag();
     if ((mdlDebugScaleWork.blinkTick += SDF_FRAME_DUE()) == 30) {
         mdlDebugScaleWork.blinkTick = 0;
     }
     if (mdlDebugScaleWork.editing == 0) {
         changed = 1;
-        if (mdlDebugScaleWork.pad->stepUpB & 0x80) {
+        if (mdlDebugScaleWork.pad[MDL_PAD_STEP_UP_B] & 0x80) {
             if (mdlDebugScaleWork.selection >= 6) {
                 mdlDebugScaleWork.selection = 0;
             } else {
                 mdlDebugScaleWork.selection++;
             }
-        } else if (mdlDebugScaleWork.pad->stepUpB & 2) {
+        } else if (mdlDebugScaleWork.pad[MDL_PAD_STEP_UP_B] & 2) {
             if (mdlDebugScaleWork.selection < 6) {
                 mdlDebugScaleWork.selection++;
             }
-        } else if (mdlDebugScaleWork.pad->stepDownB & 0x80) {
+        } else if (mdlDebugScaleWork.pad[MDL_PAD_STEP_DOWN_B] & 0x80) {
             if (mdlDebugScaleWork.selection > 0) {
                 mdlDebugScaleWork.selection--;
             } else {
                 mdlDebugScaleWork.selection = 6;
             }
-        } else if (mdlDebugScaleWork.pad->stepDownB & 2) {
+        } else if (mdlDebugScaleWork.pad[MDL_PAD_STEP_DOWN_B] & 2) {
             if (mdlDebugScaleWork.selection > 0) {
                 mdlDebugScaleWork.selection--;
             }
-        } else if (mdlDebugScaleWork.pad->confirm & 0x80) {
+        } else if (mdlDebugScaleWork.pad[MDL_PAD_CONFIRM] & 0x80) {
             mdlDebugScaleWork.editing = 1;
         } else {
             changed = 0;
@@ -1232,14 +1230,14 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
             mdlDebugScaleWork.blinkTick = 0;
         }
     } else {
-        if (mdlDebugScaleWork.pad->confirm & 0x80) {
+        if (mdlDebugScaleWork.pad[MDL_PAD_CONFIRM] & 0x80) {
             mdlDebugScaleWork.editing = 0;
-        } else if (mdlDebugScaleWork.pad->cancel & 0x80) {
+        } else if (mdlDebugScaleWork.pad[MDL_PAD_CANCEL] & 0x80) {
             mdlDebugScaleWork.editing = 0;
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            dds3DebugColorEditEx(&dds3LightParam.fog.color, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&dds3LightParam.fog.color, mdlDebugScaleWork.selection - 4, mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,

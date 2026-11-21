@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "dds3PadButtonState.h"
 #include "fldTerminalNames.h"
 #include "newdata.h"
 #include "itfMesManager.h"
@@ -11,7 +12,6 @@ typedef struct itfMesLink_t itfMesLink_t;
 typedef struct itfMesLinkControl_t itfMesLinkControl_t;
 typedef struct itfMesManager_t itfMesManager_t;
 typedef struct debug_tag debug_tag;
-typedef struct itfPadState_t itfPadState_t;
 
 /* Message tables contain relocated encoded-text addresses. */
 struct itfMesBinMesHeader_t {
@@ -66,33 +66,18 @@ struct itfMesManager_t {
 };
 
 /* Named primary/secondary buttons are ports 0/1 of input bank 1. */
-struct itfPadState_t {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            s8 primaryTriangle;
-            s8 primaryCancel;
-            s8 alternatePrev; /* +0x24: battle panels use as an alternate previous input. */
-            s8 alternateNext; /* +0x25: battle panels use as an alternate next input. */
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 secondaryCross;
-            s8 secondaryTriangle;
-            s8 secondaryCancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 secondaryUp;
-            s8 secondaryDown;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5];
-        };
-    };
+enum {
+    ITF_PAD_CONFIRM = 0x21,
+    ITF_PAD_PRIMARY_TRIANGLE = 0x22,
+    ITF_PAD_PRIMARY_CANCEL = 0x23,
+    ITF_PAD_PREV = 0x26,
+    ITF_PAD_NEXT = 0x27,
+    ITF_PAD_SECONDARY_CROSS = 0x31,
+    ITF_PAD_SECONDARY_CANCEL = 0x33,
+    ITF_PAD_COARSE_DOWN = 0x34,
+    ITF_PAD_COARSE_UP = 0x35,
+    ITF_PAD_SECONDARY_UP = 0x36,
+    ITF_PAD_SECONDARY_DOWN = 0x37,
 };
 
 typedef void (*itfProcessShutdown_t)(dds3ProcessID_t *task);
@@ -296,7 +281,6 @@ extern debug_tag itfMesDebug;
 
 itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow);
 
-extern itfPadState_t dds3PadButtonState;
 
 void DebugMoveWinVert(window_tag *pwin, s32 flag);
 
@@ -1402,16 +1386,16 @@ s32 itfMesMngDebugProc(void) {
         panel = &debug->pmesflow->state->window;
         switch (debug->mode) {
         case 0:
-            if (dds3PadButtonState.secondaryUp & 2) {
+            if (dds3PadButtonState[ITF_PAD_SECONDARY_UP] & 2) {
                 if (--debug->cursor < 0) {
                     debug->cursor = 2;
                 }
-            } else if (dds3PadButtonState.secondaryDown & 2) {
+            } else if (dds3PadButtonState[ITF_PAD_SECONDARY_DOWN] & 2) {
                 if (++debug->cursor >= 5) {
                     debug->cursor = 0;
                 }
             }
-            if (dds3PadButtonState.secondaryCross < 0) {
+            if (dds3PadButtonState[ITF_PAD_SECONDARY_CROSS] < 0) {
                 debug_tag *confirmDebug = &itfMesDebug;
 
                 switch (confirmDebug->cursor) {
@@ -1427,19 +1411,19 @@ s32 itfMesMngDebugProc(void) {
                     confirmDebug->pmesflow = DebugChangeInstance(confirmDebug->pmesflow);
                     break;
                 }
-            } else if (dds3PadButtonState.secondaryCancel < 0) {
+            } else if (dds3PadButtonState[ITF_PAD_SECONDARY_CANCEL] < 0) {
                 return -1;
             }
             break;
         case 1:
             DebugMoveWinVert(panel, debug->cursor);
-            if (dds3PadButtonState.secondaryCancel < 0) {
+            if (dds3PadButtonState[ITF_PAD_SECONDARY_CANCEL] < 0) {
                 debug->mode = 0;
             }
             break;
         case 2:
             DebugMoveWinAlpha((window_tag *)panel);
-            if (dds3PadButtonState.secondaryCancel < 0) {
+            if (dds3PadButtonState[ITF_PAD_SECONDARY_CANCEL] < 0) {
                 itfMesDebug.mode = 0;
             }
             break;
@@ -2154,8 +2138,8 @@ void CalcMessage(instanceMes_tag *pinst) {
         if ((flags & 0x100000) == 0) {
             pinst->curctr.isdraw = 1;
         }
-        if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0 &&
-            (dds3PadButtonState.primaryTriangle == 0 || pinst->curctr.ctr_key < SDF_FRAMES(5))) {
+        if (dds3PadButtonState[ITF_PAD_CONFIRM] >= 0 && dds3PadButtonState[ITF_PAD_PRIMARY_CANCEL] >= 0 &&
+            (dds3PadButtonState[ITF_PAD_PRIMARY_TRIANGLE] == 0 || pinst->curctr.ctr_key < SDF_FRAMES(5))) {
             if (mes->textInterfaceMask != 0) {
                 return;
             }
@@ -2176,8 +2160,8 @@ void CalcMessage(instanceMes_tag *pinst) {
         ReadytoMessage(pinst);
         OpenCheckSpeakerWindow(pinst);
         pinst->stat = (pinst->stat & ~7) | 3;
-    } else if (dds3PadButtonState.confirm < 0 || dds3PadButtonState.primaryCancel < 0 ||
-               dds3PadButtonState.primaryTriangle != 0) {
+    } else if (dds3PadButtonState[ITF_PAD_CONFIRM] < 0 || dds3PadButtonState[ITF_PAD_PRIMARY_CANCEL] < 0 ||
+               dds3PadButtonState[ITF_PAD_PRIMARY_TRIANGLE] != 0) {
         if (!(flags & 0x400000)) {
             RaiseMessageSpeedMaxAll(mes->pfont);
             if (pinst->speaker.pfont != NULL) {
@@ -2276,14 +2260,14 @@ s32 SelectItem(instanceMes_tag *pinst) {
     select_tag *sel = &pinst->select;
     s32 dir = 0;
     s32 index;
-    if (dds3PadButtonState.prev & 2) {
+    if (dds3PadButtonState[ITF_PAD_PREV] & 2) {
         if (sel->select != 0) {
             dir = -1;
-        } else if (dds3PadButtonState.prev < 0) {
+        } else if (dds3PadButtonState[ITF_PAD_PREV] < 0) {
             dir = -1;
         }
-    } else if (dds3PadButtonState.next & 2) {
-        if (sel->select != sel->lines - 1 || dds3PadButtonState.next < 0) {
+    } else if (dds3PadButtonState[ITF_PAD_NEXT] & 2) {
+        if (sel->select != sel->lines - 1 || dds3PadButtonState[ITF_PAD_NEXT] < 0) {
             dir = 1;
         }
     }
@@ -2291,7 +2275,7 @@ s32 SelectItem(instanceMes_tag *pinst) {
         SelectItemMove(sel, dir);
         InitializeCurCtr(&pinst->curctr, 1);
     }
-    if (dds3PadButtonState.confirm < 0) {
+    if (dds3PadButtonState[ITF_PAD_CONFIRM] < 0) {
         p2sdPlaySE(8, 0x7F, 0x3F);
         return 1;
     }
@@ -2337,7 +2321,7 @@ s32 SelectItemDefKey(select_tag *psel) {
     for (i = 0; i < psel->numdef; i++) {
         defkey_tag *option = &psel->defkey[i];
 
-        if (dds3PadButtonState.buttons[option->key] < 0) {
+        if (dds3PadButtonState[0x20 + option->key] < 0) {
             s32 prefixLength = option->index;
             s32 rank = 0;
             u32 mask = psel->mask;
@@ -2656,17 +2640,17 @@ void DebugMoveWinVert(window_tag *pwin, s32 flag) {
 
     if (sprite != NULL) {
         bounds = pwin->mes_offset;
-        if (dds3PadButtonState.coarseDown & 2) {
+        if (dds3PadButtonState[ITF_PAD_COARSE_DOWN] & 2) {
             dx = -16;
         } else {
-            dx = ((u8)dds3PadButtonState.coarseUp << 3) & 0x10;
+            dx = ((u8)dds3PadButtonState[ITF_PAD_COARSE_UP] << 3) & 0x10;
         }
-        if (dds3PadButtonState.secondaryUp & 2) {
+        if (dds3PadButtonState[ITF_PAD_SECONDARY_UP] & 2) {
             dy = -8;
         } else {
-            dy = ((u8)dds3PadButtonState.secondaryDown << 2) & 8;
+            dy = ((u8)dds3PadButtonState[ITF_PAD_SECONDARY_DOWN] << 2) & 8;
         }
-        if (dds3PadButtonState.secondaryCross != 0) {
+        if (dds3PadButtonState[ITF_PAD_SECONDARY_CROSS] != 0) {
             dx *= 8;
             dy *= 8;
         }
@@ -2698,17 +2682,17 @@ void DebugMoveWinVert(window_tag *pwin, s32 flag) {
 void DebugMoveWinAlpha(window_tag *pwin) {
     s32 step;
 
-    if (dds3PadButtonState.coarseDown & 2) {
+    if (dds3PadButtonState[ITF_PAD_COARSE_DOWN] & 2) {
         step = -1;
     } else {
-        step = (dds3PadButtonState.coarseUp & 2) > 0;
+        step = (dds3PadButtonState[ITF_PAD_COARSE_UP] & 2) > 0;
     }
-    if (dds3PadButtonState.secondaryUp & 2) {
+    if (dds3PadButtonState[ITF_PAD_SECONDARY_UP] & 2) {
         step = -1;
-    } else if (dds3PadButtonState.secondaryDown & 2) {
+    } else if (dds3PadButtonState[ITF_PAD_SECONDARY_DOWN] & 2) {
         step = 1;
     }
-    if (dds3PadButtonState.secondaryCross != 0) {
+    if (dds3PadButtonState[ITF_PAD_SECONDARY_CROSS] != 0) {
         step *= 10;
     }
     if (step != 0) {

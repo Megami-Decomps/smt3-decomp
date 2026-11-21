@@ -278,7 +278,7 @@ void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate)
     unit = form->hunit;
     work = nbGetUnitWorkPointer(data, &data->party[form->partyindex]);
     if ((form->anime & 0x80) == 0) {
-        visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
+        visual = nbGetUnitVisual(work);
         /* Requested and adjusted categories share one scalar; qualified cc1
          * allocation keeps both in $16. See docs/levers/addressing-and-types.md. */
         motion = GetDyingBadWaitMotion(form, motion, work);
@@ -389,14 +389,14 @@ s32 nbCalcUnitVisual(nbFormation_t *form, s32 part)
 {
     datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
 
-    return visual->part[part].unk00;
+    return visual->motions[part].type;
 }
 
 s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part)
 {
     datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
 
-    return visual->part[part].unk01;
+    return visual->motions[part].data;
 }
 
 s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 ritu)
@@ -411,7 +411,7 @@ s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 ritu)
 f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu)
 {
     datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
-    f32 motspeed = *(f32 *)visual->part[motion].unk02;
+    f32 motspeed = visual->motions[motion].motionsp;
 
     if (ritu != 1.0f) {
         motspeed *= ritu;
@@ -423,7 +423,7 @@ s32 nbGetMotionNo(nbFormation_t *form, s32 motion)
 {
     datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
     s32 id = nbGetUnitID(work);
-    nbUnitVisualMotions_t *visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
+    nbUnitVisualMotions_t *visual = nbGetUnitVisual(work);
 
     form->cr = visual->motions[motion].atarisize * form->scl;
     form->movey = visual->motions[motion].movey;

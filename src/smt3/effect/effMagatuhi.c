@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "dds3PadButtonPrev.h"
 #include "dds3PadHoldCounters.h"
 #include "sdfDevCons.h"
@@ -421,7 +422,6 @@ extern f32 effMagaSavedViewEye[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
 extern f32 effMagaSavedViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 
-extern u8 dds3PadButtonState[2][2][16];
 
 extern s8 dds3PadStickPrev[2][2][2];
 
@@ -2979,7 +2979,7 @@ s32 effDebugClearPad(void) {
             for (k = 0; k < 16; k++) {
                 dds3PadButtonHoldCounters[j * 32 + i * 16 + k] = 0;
                 dds3PadButtonPrev[j][i][k] = 0;
-                dds3PadButtonState[j][i][k] = 0;
+                dds3PadButtonState[(j) * 32 + (i) * 16 + (k)] = 0;
             }
         }
         for (k = 0; k < 2; k++) {

@@ -299,3 +299,20 @@ floors, rather than a single array or a padded eight-element width table.
 The definitions occupy 44 bytes at ROM 0x225710–0x22573B. The trailing four
 zero bytes remain raw before the following aligned negotiation-camera vector.
 No camera code or angle-table ownership changes.
+
+## Skill camera angle presets
+
+The direct selector uses entries 1–7 from the separate eight-word height and
+width banks; zero in the descriptor requests a random preset. Each bank
+contains a neutral value and mirrored positive and negative radians. Their
+native starts are ROM 0x2256D0 and 0x2256F0. The preceding 32 zero bytes stay
+outside these C owners.
+
+The separate attack initialization deliberately reproduces the native shared
+height roll (0–17) for both angle loads; the independent width roll still
+advances the generator but does not feed either load. These loads can read
+past the nominal angle presets: the height base reaches through height floor
+entry 1, and the width base reaches through width floor entry 5. The exact
+native EE addresses are computed before loading each real float, rather than
+using an out-of-bounds C array subscript. Both angle anchors keep their
+original relocations, and the prior minimum-distance tables are unchanged.

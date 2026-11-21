@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
@@ -263,7 +264,6 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
-extern u8 dds3PadButtonState[];
 
 extern s32 nbGetInfoMsg(s32 infotype);
 
@@ -1155,7 +1155,7 @@ s32 NegoDebug(nbNegoProcessData_t *n)
     s32 sel;
 
     if (n->nextkouhocnt == 0) {
-        if ((s8)dds3PadButtonState[0x21] >= 0) {
+        if ((s8)((u8)dds3PadButtonState[0x21]) >= 0) {
             return 0;
         }
         return 1;
@@ -1165,7 +1165,7 @@ s32 NegoDebug(nbNegoProcessData_t *n)
         n->nextnegoid = *(u32 *)(EE_ADDR_AS(u8 *, (n->selectcur * 4)) + EE_ADDR(n) + 0x24);
         return 1;
     }
-    if ((s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
         sel = dds3GetRandIntA(0, n->nextkouhocnt);
         n->nextnegoid = *(u32 *)(EE_ADDR_AS(u8 *, (sel * 4)) + EE_ADDR(n) + 0x24);
         return 1;

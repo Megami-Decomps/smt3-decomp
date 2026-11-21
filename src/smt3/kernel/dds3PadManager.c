@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "dds3PadButtonPrev.h"
 #include "dds3PadHoldCounters.h"
 #include "kernel.h"
@@ -31,7 +32,6 @@ extern void sdfPadSetAct1(s32 pad, u8 value);
 
 extern void sdfPadSetAct(s32 pad, s32 value0, s32 value1);
 
-extern u8 dds3PadButtonState[64];
 extern u8 dds3PadStickPrev[8];
 extern s8 dds3PadStickStatusPrev[4];
 extern u8 dds3PadStickState[8];

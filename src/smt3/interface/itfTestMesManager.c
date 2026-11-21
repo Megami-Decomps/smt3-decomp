@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "itfTestMsgSpriteData.h"
 #include "itfTestMsgTextData.h"
 #include "kernel.h"
@@ -92,7 +93,6 @@ extern u8 scrEmbedded_3267A8[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern u8 dds3PadButtonState[];
 
 extern u32 dds3BackColor;
 
@@ -160,7 +160,7 @@ void TestMsgReloadTexture(void)
 
 s32 TestMsgMngC_Process(dds3ProcessID_t *id)
 {
-    if ((s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
         TestMsgReloadTexture();
     }
     return 0;
@@ -207,7 +207,7 @@ s32 pbDebugPrintPanel(void) {
                     EE_ADDR(sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         dds3ScreenParam.fovy * radiansToDegrees)));
     { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
-    if (((s8)dds3PadButtonState[0x33]) < 0) {
+    if (((s8)((u8)dds3PadButtonState[0x33])) < 0) {
         return -1;
     }
     pbDebugFovWork.degrees = dds3ScreenParam.fovy * radiansToDegrees;
@@ -222,32 +222,32 @@ s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 f
     f32 current = *value;
     s32 changed = 0;
 
-    if ((s8)dds3PadButtonState[0x35] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x35]) < 0) {
         if (current < maximum) {
             current += coarseStep;
         } else {
             current = minimum;
         }
         changed = 1;
-    } else if (dds3PadButtonState[0x35] & 2) {
+    } else if (((u8)dds3PadButtonState[0x35]) & 2) {
         if (current < maximum) {
             current += coarseStep;
             changed = 1;
         }
-    } else if ((s8)dds3PadButtonState[0x34] < 0) {
+    } else if ((s8)((u8)dds3PadButtonState[0x34]) < 0) {
         if (minimum < current) {
             current -= coarseStep;
         } else {
             current = maximum;
         }
         changed = 1;
-    } else if (dds3PadButtonState[0x34] & 2) {
+    } else if (((u8)dds3PadButtonState[0x34]) & 2) {
         if (minimum < current) {
             current -= coarseStep;
             changed = 1;
         }
     } else if (fineStep != 0.0f) {
-        if ((s8)dds3PadButtonState[0x3A] < 0) {
+        if ((s8)((u8)dds3PadButtonState[0x3A]) < 0) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -257,7 +257,7 @@ s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 f
                 current = minimum;
             }
             changed = 1;
-        } else if (dds3PadButtonState[0x3A] & 2) {
+        } else if (((u8)dds3PadButtonState[0x3A]) & 2) {
             if (current < maximum) {
                 current += fineStep;
                 if (maximum < current) {
@@ -265,7 +265,7 @@ s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 f
                 }
                 changed = 1;
             }
-        } else if ((s8)dds3PadButtonState[0x38] < 0) {
+        } else if ((s8)((u8)dds3PadButtonState[0x38]) < 0) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -275,7 +275,7 @@ s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 f
                 current = maximum;
             }
             changed = 1;
-        } else if (dds3PadButtonState[0x38] & 2) {
+        } else if (((u8)dds3PadButtonState[0x38]) & 2) {
             if (minimum < current) {
                 current -= fineStep;
                 if (current < minimum) {
@@ -347,18 +347,18 @@ s32 pbDebugPrintPanel2(void) {
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000)));
     { sdfGrOt_t *ot = &sdfGrOtTable[83]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
 
-    if ((s8)((s8)dds3PadButtonState[0x32]) < 0) {
+    if ((s8)((s8)((u8)dds3PadButtonState[0x32])) < 0) {
         dds3ScreenBlurFlag ^= 1;
     }
     if (pbDebugPanel2Pos.editing == 0) {
         previous = pbDebugPanel2Pos.selection;
-        if ((u8)((s8)dds3PadButtonState[0x36]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x36])) & 2) {
             pbDebugPanel2Pos.selection--;
             if (pbDebugPanel2Pos.selection < 0) {
                 pbDebugPanel2Pos.selection = 2;
             }
         }
-        if ((u8)((s8)dds3PadButtonState[0x37]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x37])) & 2) {
             pbDebugPanel2Pos.selection++;
             if (pbDebugPanel2Pos.selection >= 3) {
                 pbDebugPanel2Pos.selection = 0;
@@ -367,67 +367,67 @@ s32 pbDebugPrintPanel2(void) {
         if (previous != pbDebugPanel2Pos.selection) {
             pbDebugPanel2Pos.blink = 0;
         }
-        if (((s8)dds3PadButtonState[0x31]) < 0) {
+        if (((s8)((u8)dds3PadButtonState[0x31])) < 0) {
             pbDebugPanel2Pos.editing ^= 1;
             pbDebugPanel2Pos.blink = 0;
         }
-        if ((u8)((s8)dds3PadButtonState[0x33]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x33])) & 2) {
             return -1;
         }
     } else {
         if (pbDebugPanel2Pos.selection == 2) {
-            if (((s8)dds3PadButtonState[0x36]) != 0) {
+            if (((s8)((u8)dds3PadButtonState[0x36])) != 0) {
                 dds3ScreenBlurOfsX[1] -= 16;
                 if (dds3ScreenBlurOfsX[1] < -224) {
                     dds3ScreenBlurOfsX[1] = -224;
                 }
             }
-            if (((s8)dds3PadButtonState[0x37]) != 0) {
+            if (((s8)((u8)dds3PadButtonState[0x37])) != 0) {
                 dds3ScreenBlurOfsX[1] += 16;
                 if (dds3ScreenBlurOfsX[1] > 224) {
                     dds3ScreenBlurOfsX[1] = 224;
                 }
             }
-            if (((s8)dds3PadButtonState[0x34]) != 0) {
+            if (((s8)((u8)dds3PadButtonState[0x34])) != 0) {
                 dds3ScreenBlurOfsX[0] -= 16;
                 if (dds3ScreenBlurOfsX[0] < -256) {
                     dds3ScreenBlurOfsX[0] = -256;
                 }
             }
-            if (((s8)dds3PadButtonState[0x35]) != 0) {
+            if (((s8)((u8)dds3PadButtonState[0x35])) != 0) {
                 dds3ScreenBlurOfsX[0] += 16;
                 if (dds3ScreenBlurOfsX[0] > 256) {
                     dds3ScreenBlurOfsX[0] = 256;
                 }
             }
         } else if (pbDebugPanel2Pos.selection == 0) {
-            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x34])) & 2) {
                 dds3ScreenBlurAlpha -= 10;
                 if (dds3ScreenBlurAlpha < 0) {
                     dds3ScreenBlurAlpha = 0;
                 }
             }
-            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x35])) & 2) {
                 dds3ScreenBlurAlpha += 10;
                 if (dds3ScreenBlurAlpha > 255) {
                     dds3ScreenBlurAlpha = 255;
                 }
             }
         } else {
-            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x34])) & 2) {
                 dds3ScreenBlurScale -= 10;
                 if (dds3ScreenBlurScale < -255) {
                     dds3ScreenBlurScale = -255;
                 }
             }
-            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x35])) & 2) {
                 dds3ScreenBlurScale += 10;
                 if (dds3ScreenBlurScale > 255) {
                     dds3ScreenBlurScale = 255;
                 }
             }
         }
-        if (((s8)dds3PadButtonState[0x33]) < 0) {
+        if (((s8)((u8)dds3PadButtonState[0x33])) < 0) {
             pbDebugPanel2Pos.editing ^= 1;
             pbDebugPanel2Pos.blink = 0;
         }
@@ -478,18 +478,18 @@ s32 pbDebugPrintPanel3(void) {
     { sdfGrOt_t *ot = &sdfGrOtTable[83]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
     pbDebugPanel3State += D_00551EA8;
     pbDrawRotatedPrim(0x46);
-    if ((s8)((s8)dds3PadButtonState[0x32]) < 0) {
+    if ((s8)((s8)((u8)dds3PadButtonState[0x32])) < 0) {
         D_0054F584 ^= 1;
     }
     if (pbDebugPanel3X.editing == 0) {
         previousSelection = pbDebugPanel3X.selection;
-        if ((u8)((s8)dds3PadButtonState[0x36]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x36])) & 2) {
             pbDebugPanel3X.selection--;
             if (pbDebugPanel3X.selection < 0) {
                 pbDebugPanel3X.selection = 3;
             }
         }
-        if ((u8)((s8)dds3PadButtonState[0x37]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x37])) & 2) {
             pbDebugPanel3X.selection++;
             if (pbDebugPanel3X.selection >= 4) {
                 pbDebugPanel3X.selection = 0;
@@ -498,22 +498,22 @@ s32 pbDebugPrintPanel3(void) {
         if (previousSelection != pbDebugPanel3X.selection) {
             pbDebugPanel3X.blink = 0;
         }
-        if (((s8)dds3PadButtonState[0x31]) < 0) {
+        if (((s8)((u8)dds3PadButtonState[0x31])) < 0) {
             pbDebugPanel3X.editing ^= 1;
             pbDebugPanel3X.blink = 0;
         }
-        if ((u8)((s8)dds3PadButtonState[0x33]) & 2) {
+        if ((u8)((s8)((u8)dds3PadButtonState[0x33])) & 2) {
             return -1;
         }
     } else {
         if (pbDebugPanel3X.selection < 4) {
-            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x34])) & 2) {
                 D_00326C50.channels[pbDebugPanel3X.selection] -= 10;
                 if (D_00326C50.channels[pbDebugPanel3X.selection] < 0) {
                     D_00326C50.channels[pbDebugPanel3X.selection] = 0;
                 }
             }
-            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x35])) & 2) {
                 D_00326C50.channels[pbDebugPanel3X.selection] += 10;
                 if (D_00326C50.channels[pbDebugPanel3X.selection] > 255) {
                     D_00326C50.channels[pbDebugPanel3X.selection] = 255;
@@ -521,13 +521,13 @@ s32 pbDebugPrintPanel3(void) {
             }
         } else {
             previousRate = D_00551EA8;
-            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x34])) & 2) {
                 D_00551EA8 -= 0x100;
                 if (D_00551EA8 < 0) {
                     D_00551EA8 = 0;
                 }
             }
-            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+            if ((u8)((s8)((u8)dds3PadButtonState[0x35])) & 2) {
                 D_00551EA8 += 0x100;
                 if (D_00551EA8 > 0x800) {
                     D_00551EA8 = 0x800;
@@ -537,7 +537,7 @@ s32 pbDebugPrintPanel3(void) {
                 pbDebugPanel3State = 0;
             }
         }
-        if (((s8)dds3PadButtonState[0x33]) < 0) {
+        if (((s8)((u8)dds3PadButtonState[0x33])) < 0) {
             pbDebugPanel3X.editing ^= 1;
             pbDebugPanel3X.blink = 0;
         }

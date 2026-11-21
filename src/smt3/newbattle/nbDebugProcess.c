@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -221,7 +222,6 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
-extern u8 dds3PadButtonState[];
 
 
 
@@ -561,7 +561,7 @@ s32 SelectMenu(nbDebugProcessData_t *d)
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLinkZ(tag, x - 8, 0x5C, 10, 12, 0xFF0000);
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    if ((s8)dds3PadButtonState[3] < 0) {
+    if ((s8)((u8)dds3PadButtonState[3]) < 0) {
         return -1;
     }
     result = dds3SelectMenu(0, 1, 5, 1, 5, NULL, NULL, NULL, &menucur);
@@ -579,22 +579,22 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
 
     work = nbGetUnitWorkFromFormindex(d->form->formindex);
     delta = 0;
-    if (dds3PadButtonState[4] & 2) {
+    if (((u8)dds3PadButtonState[4]) & 2) {
         delta = -100;
     }
-    if (dds3PadButtonState[5] & 2) {
+    if (((u8)dds3PadButtonState[5]) & 2) {
         delta = 100;
     }
-    if (dds3PadButtonState[6] & 2) {
+    if (((u8)dds3PadButtonState[6]) & 2) {
         delta = -10;
     }
-    if (dds3PadButtonState[7] & 2) {
+    if (((u8)dds3PadButtonState[7]) & 2) {
         delta = 10;
     }
-    if ((s8)dds3PadButtonState[1] < 0) {
+    if ((s8)((u8)dds3PadButtonState[1]) < 0) {
         return 1;
     }
-    if ((s8)dds3PadButtonState[3] < 0) {
+    if ((s8)((u8)dds3PadButtonState[3]) < 0) {
         return -1;
     }
     switch (d->seq) {
@@ -698,7 +698,7 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
     sdfDrawTagInit(tag);
     work = nbGetUnitWorkFromFormindex(d->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x2E, 0x16E, 12, 5, 0xFF0000);
-    visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
+    visual = nbGetUnitVisual(work);
     motion = &visual->motions[slSelectMotIndex + nbDebugMotionCursor];
     /* Pixel-space induction lets the compiler form each GS y coordinate. */
     y = 370;
@@ -739,18 +739,18 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
         }
         switch (selected) {
         case 0:
-            if ((dds3PadButtonState[5] & 2) && motion->type < 3) {
+            if ((((u8)dds3PadButtonState[5]) & 2) && motion->type < 3) {
                 motion->type++;
             }
-            if ((dds3PadButtonState[4] & 2) && motion->type != 0) {
+            if ((((u8)dds3PadButtonState[4]) & 2) && motion->type != 0) {
                 motion->type--;
             }
             break;
         case 1:
-            if (dds3PadButtonState[5] & 2) {
+            if (((u8)dds3PadButtonState[5]) & 2) {
                 motion->data = (u8)motion->data + 1;
             }
-            if (dds3PadButtonState[4] & 2) {
+            if (((u8)dds3PadButtonState[4]) & 2) {
                 byteValue = motion->data;
                 byteBits = (u8)motion->data;
                 if (byteValue >= 0) {
@@ -759,10 +759,10 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
             }
             break;
         case 2:
-            if (dds3PadButtonState[5] & 2) {
+            if (((u8)dds3PadButtonState[5]) & 2) {
                 motion->bframe = (u16)motion->bframe + 1;
             }
-            if (dds3PadButtonState[4] & 2) {
+            if (((u8)dds3PadButtonState[4]) & 2) {
                 /* Localized native condition-register constraint; no call
                  * occurs before this initialized field value is consumed. */
                 FAKEMATCH_ASM_REG(s32, halfValue, "$2") = motion->bframe;
@@ -773,10 +773,10 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
             }
             break;
         case 3:
-            if (dds3PadButtonState[5] & 2) {
+            if (((u8)dds3PadButtonState[5]) & 2) {
                 motion->hframe = (u16)motion->hframe + 1;
             }
-            if (dds3PadButtonState[4] & 2) {
+            if (((u8)dds3PadButtonState[4]) & 2) {
                 /* Localized native condition-register constraint; no call
                  * occurs before this initialized field value is consumed. */
                 FAKEMATCH_ASM_REG(s32, halfValue, "$2") = motion->hframe;
@@ -854,7 +854,7 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
         base -= 10;
         slSelectMotIndex = base < 0 ? 0 : base;
     }
-    if ((s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
         return 2;
     }
     return 0;
@@ -913,12 +913,12 @@ s32 SelectDevil(nbDebugProcessData_t *d)
     if (result == -1 || result == 1) {
         return result;
     }
-    button = dds3PadButtonState[5];
+    button = ((u8)dds3PadButtonState[5]);
     base = devilbase;
     if ((button & 2) && base + 10 < 0x180) {
         devilbase = base + 20 < 0x180 ? base + 10 : 0x176;
     }
-    button = dds3PadButtonState[4];
+    button = ((u8)dds3PadButtonState[4]);
     base = devilbase;
     if ((button & 2) && base > 0) {
         base -= 10;

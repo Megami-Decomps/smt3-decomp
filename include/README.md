@@ -387,8 +387,7 @@ The upstream field helpers extend that same view with `maFlags` +0xA4C,
 sixteen 0xEC-byte digging-party records at +0xA50, 48 field-flag blocks at
 +0x6658, and treasure-open bits at +0x11A58/+0x11A80. Each field-flag row is
 0x1E bytes. `datUnitVisual_t` combines the packet helpers' scalar prefix with
-the action helpers' eight 0x1C-byte part records at +0x32 and native 0x310
-stride. `datUnitWork_t` retains the verified byte/halfword name and skill
+26 native 0x1C-byte motion records at +0x2C and native 0x310 stride. `datUnitWork_t` retains the verified byte/halfword name and skill
 storage: `nowcommand` is at +0x64, not the later offset implied by unused
 expanded donor fields. Inherited-skill helpers read and write 24 halfwords at
 +0x86 through `keisyoskill`, rather than appending another skill array after

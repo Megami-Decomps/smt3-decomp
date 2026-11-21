@@ -526,5 +526,13 @@
     "section": ".data",
     "offset": 20,
     "owner_size": 40
+  },
+  {
+    "name": "D_003494C0",
+    "owner": "nbDefaultUnitVisual",
+    "unit": "newbattle/nbDefaultUnitVisual",
+    "section": ".data",
+    "offset": 16,
+    "owner_size": 784
   }
 ]

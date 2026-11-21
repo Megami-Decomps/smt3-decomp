@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3PadButtonState.h"
 #include "scr.h"
 #include "basic.h"
 #include "newdata.h"
@@ -17,7 +18,6 @@ extern s32 evtSceneDispWork;
 
 extern u32 dds3BackColor;
 
-extern u8 dds3PadButtonState[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
@@ -73,7 +73,7 @@ void evtDebugPrintCamera(void)
     if (scene == NULL) {
         return;
     }
-    if ((s8)dds3PadButtonState[0x2D] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x2D]) < 0) {
         if (evtDebugCameraPage != 0) {
             evtDebugCameraPage = 0;
         } else {
@@ -88,7 +88,7 @@ void evtDebugPrintCamera(void)
     if (camera == NULL) {
         return;
     }
-    if ((s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
         nextCamera = camera->next;
         if (nextCamera != NULL) {
             camera = nextCamera;
@@ -98,7 +98,7 @@ void evtDebugPrintCamera(void)
         }
         dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
-    } else if ((s8)dds3PadButtonState[0x22] < 0) {
+    } else if ((s8)((u8)dds3PadButtonState[0x22]) < 0) {
         nextCamera = camera->prev;
         if (nextCamera != NULL) {
             camera = nextCamera;
@@ -153,7 +153,7 @@ saddr_t EventDebugProcess1(dds3ProcessID_t *id)
     ot = &sdfGrOtTable[81];
     ((evtOtRegFunc_t)ot->regFunc)(ot, tag);
 
-    if ((s8)dds3PadButtonState[0x21] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x21]) < 0) {
         sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
                 evtDebugState - evtDebugState % 10, evtDebugState, evtDebugState);
         if (sdfFileCheckExist(path) != 0) {
@@ -162,29 +162,29 @@ saddr_t EventDebugProcess1(dds3ProcessID_t *id)
             return EE_ADDR_S(evtDebugCameraStep);
         }
     }
-    if ((s8)dds3PadButtonState[0x23] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x23]) < 0) {
         evtBitAllOff();
         return EE_ADDR_S(evtGetDebugProcess);
     }
-    if (dds3PadButtonState[0x25] & 2) {
+    if (((u8)dds3PadButtonState[0x25]) & 2) {
         evtDebugState++;
     }
-    if ((dds3PadButtonState[0x24] & 2) && evtDebugState > 500) {
+    if ((((u8)dds3PadButtonState[0x24]) & 2) && evtDebugState > 500) {
         evtDebugState--;
     }
-    if ((s8)dds3PadButtonState[0x22] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x22]) < 0) {
         evtDebugState = 500;
     }
-    if ((s8)dds3PadButtonState[0x20] < 0) {
+    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
         evtDebugState = 600;
     }
-    if ((dds3PadButtonState[0x28] & 2) && evtDebugState > 500) {
+    if ((((u8)dds3PadButtonState[0x28]) & 2) && evtDebugState > 500) {
         evtDebugState -= 100;
         if (evtDebugState < 500) {
             evtDebugState = 500;
         }
     }
-    if (dds3PadButtonState[0x2A] & 2) {
+    if (((u8)dds3PadButtonState[0x2A]) & 2) {
         evtDebugState += 100;
     }
     return 0;

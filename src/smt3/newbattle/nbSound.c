@@ -231,8 +231,6 @@ extern const char nbBgmStopFormat[];
 
 extern u8 datModelParamTable[];
 
-extern u8 nbDefaultUnitVisual[];
-
 extern void nbFreeFormResources(nbMainProcessData_t *data, s32 index);
 
 extern void *sdfMemAllocDirect(u32 aSize);
@@ -341,7 +339,7 @@ s32 nbGetMotionTable(s32 unitid, s32 index)
     u8 *p;
 
     if (unitid == 0) {
-        p = nbDefaultUnitVisual;
+        p = (u8 *)&nbDefaultUnitVisual;
     } else {
         p = datModelParamTable + unitid * 784;
     }

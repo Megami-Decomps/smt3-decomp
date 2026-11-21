@@ -2675,19 +2675,6 @@ typedef struct {
 } nbActionItem_t;
 extern nbActionItem_t datItemTable[];
 
-/* Motion records begin at +0x2C in the 0x310-byte model-visual row. */
-typedef struct {
-    s16 movetype;
-    u16 actframe;
-    s32 se_no;
-    f32 motionsp;
-    f32 atarisize;
-    f32 movey;
-    f32 movez;
-    s16 bframe;
-    s16 hframe;
-} nbActionMotion_t;
-
 extern void nbRestoreBgm(void);
 extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 extern s32 dds3GetGlobalConfigFlag(s32 flag);
@@ -2903,7 +2890,7 @@ void SetAction_READY(nbActionProcessData_t *a)
     switch (a->work->nowcommand) {
     case 0: case 1: case 5: case 6:
         a->timer = nbGetMotionActframe(a->form, motionType, motionRate);
-        moveType = ((nbActionMotion_t *)((u8 *)visual + 0x2C))[motionType].movetype;
+        moveType = visual->motions[motionType].movetype;
         if (a->work->nowcommand == 1 && skill == 0x73) {
             moveType = 2;
         }
