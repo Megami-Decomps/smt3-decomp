@@ -517,6 +517,8 @@ segments:
       - [0x42A448, .data, sdf/sdfMotion]
       - [0x42A620, .data, sdf/sdfUnitXVector]
       - [0x42A630, data, data_00529630]
+      - [0x42A670, .data, sdf/sdf3DScreenState]
+      - [0x42A7A0, data, data_005297A0]
       - [0x42A8A0, .data, sdf/sdfPadInitData]
       - [0x42A900, .data, sdf/sdfDevConsData]
       - [0x42AABC, data, data_00529ABC]

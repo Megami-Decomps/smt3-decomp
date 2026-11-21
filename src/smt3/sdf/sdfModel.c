@@ -4,6 +4,7 @@
 #include "draw.h"
 #include "ps2asm.h"
 #include "eeregs.h"
+#include "sdf_screen_state.h"
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
  * vector transfers or the implicit VU matrix-register convention in C. */
@@ -985,7 +986,6 @@ extern void sdfMatListUpdatePacket(sdfItemArray_t *aMatList, s32 aId);
 extern void *sdf3DLightDefault;
 extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
-extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
 extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, addr_t aPacket);
@@ -1081,7 +1081,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
         }
         matrix = (f32 *)&node->tm;
         SDF_VU0_LOADMATRIX(matrix);
-        MultMatrixRev(sdf3DScreenTm);
+        MultMatrixRev(&sdf3DScreenTm);
         bounds = node->bounds;
         if (bounds != NULL) {
             if (sdfModelCheckBounds((const f32 *)bounds) != 0) {
@@ -1261,7 +1261,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
             continue;
         }
         SDF_VU0_LOADMATRIX((f32 *)&node->tm);
-        MultMatrixRev(sdf3DScreenTm);
+        MultMatrixRev(&sdf3DScreenTm);
         bounds = node->bounds;
         if (bounds != NULL) {
             if (sdfModelCheckBounds((const f32 *)bounds) != 0) {

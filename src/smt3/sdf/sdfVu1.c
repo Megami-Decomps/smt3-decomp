@@ -2,6 +2,7 @@
 #include "eeregs.h"
 #include "ps2asm.h"
 #include "sdf_lighting.h"
+#include "sdf_screen_state.h"
 #include "sdf_resource.h"
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
@@ -93,11 +94,6 @@ extern u8 corePktSoftenBias;
 extern u16 corePktBackFaceList[];
 
 extern f32 corePktZBias;
-
-extern f32 sdf3DEyeOffset[4];
-
-/* Shared byte-storage view: the local screen structs are not compatible C types. */
-extern u8 sdf3DScreenParam[];
 
 
 extern u8 corePktWorldLightMtxCache[];
@@ -1195,7 +1191,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *cb) {
     f32 scale = cb->backfaceSign;
     f32 clipBias = corePktZBias;
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const sdf3DScreenParam_t *projection = &sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
     if (cb->attrBits & 0x4000) {
@@ -1349,7 +1345,7 @@ void corePktBuildBackFaceList(sdfCorePacketCb_t *cb) {
     s32 acceptAll;
     u128 *(*out)[3];
     const f32 *clipPlane = sdf3DEyeOffset;
-    const u8 *projection = sdf3DScreenParam;
+    const sdf3DScreenParam_t *projection = &sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = corePktSoftenBias;

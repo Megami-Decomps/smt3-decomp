@@ -3,6 +3,7 @@
 #include "fpu.h"
 #include "ps2asm.h"
 #include "sdf_lighting.h"
+#include "sdf_screen_state.h"
 #include "libsdf.h"
 #include "sdf_resource.h"
 #include "eeregs.h"
@@ -53,8 +54,6 @@ struct sdf3DViewportPacket_t;
 struct DmaPacketHeader;
 
 struct sdf3DFogPacket_t;
-
-struct sdf3DScreenParam_t;
 
 struct sdfTexPacket_t;
 
@@ -123,11 +122,6 @@ extern addr_t sdf3DLightDefault;
 
 extern addr_t sdf3DFogDefault;
 
-extern f32 sdf3DEyeOffset[4];
-
-/* Shared byte-storage view: the local screen structs are not compatible C types. */
-extern u8 sdf3DScreenParam[];
-
 #define SDF_DMA_QWORD_SHIFT 4
 
 #define SDF_GS_FOGCOL_REGISTER 0x3D
@@ -145,10 +139,6 @@ extern u8 vu1MicroPacket[];
 /* One past the last byte of the vu1MicroPacket VIF packet, so the packet's
  * length is the distance between the two. */
 SYMBOL_AT_REGION(u8, vu1MicroPacketEnd, vu1MicroPacket, 0x3D20);
-
-extern u8 sdf3DScreenTm[];
-
-extern u8 sdfCameraTm[];
 
 /* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
  * and the VU execution command. */
@@ -174,29 +164,6 @@ extern u64 sdf3DRefMapParam;
 extern u8 sdf3DSlot2TmxData[];
 
 extern u8 sdf3DSlot1TmxData[];
-
-/* The camera, as sdf3DMakeScreenParam derives it: twelve inputs, then the
- * matrix and the clip-to-screen mapping it computes. cameraPos is the inverted
- * camera origin sdf3DMakeViewportPacket caches here. Same record as
- * draw3d.h's. */
-typedef struct sdf3DScreenParam_t {
-    u32 flags; /* sdf_3d_screen_flag */
-    f32 aspect;
-    f32 projDist;
-    f32 fovy;
-    f32 ox;
-    f32 oy;
-    f32 width;
-    f32 height;
-    f32 zMin;
-    f32 zMax;
-    f32 nearClip;
-    f32 farClip;
-    u8 TM[0x40];   /* 0x30 */
-    f32 scale[4];  /* 0x70 */
-    f32 trans[4];  /* 0x80 */
-    f32 cameraPos[4]; /* 0x90 */
-} sdf3DScreenParam_t;
 
 void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, addr_t aPacket);
 
@@ -268,17 +235,17 @@ void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t 
     aPacket->reservedWord = 0;
     SDF_VU0_LOADMATRIX(aCamera);
     SDF_VU0_STOREMATRIX(aPacket->matrixA);
-    MultMatrixRev(aParam->TM);
+    MultMatrixRev(&aParam->TM);
     SDF_VU0_STOREMATRIX(aPacket->matrixB);
-    SDF_VU0_LOADVECTOR(aParam->scale);
+    SDF_VU0_LOADVECTOR(&aParam->scale);
     SDF_VU0_STOREVECTOR(aPacket->vecA);
-    SDF_VU0_LOADVECTOR(aParam->trans);
+    SDF_VU0_LOADVECTOR(&aParam->trans);
     SDF_VU0_STOREVECTOR(aPacket->vecB);
     SDF_VU0_LOADMATRIX(aCamera);
     ReverseMatrix();
     SDF_VU0_GET_ROW3();
     SDF_VU0_STOREVECTOR(aPacket->vecC);
-    SDF_VU0_STOREVECTOR(aParam->cameraPos);
+    SDF_VU0_STOREVECTOR(&aParam->cameraPos);
     aPacket->stmodCommand = SDF_VIF_ITOP_MATRIX;
     aPacket->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     aPacket->unknownC8 = 0;
@@ -287,13 +254,13 @@ void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t 
 
 void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera) {
     SDF_VU0_LOADMATRIX(aCamera);
-    SDF_VU0_STOREMATRIX(sdfCameraTm);
-    MultMatrixRev(aParam->TM);
-    SDF_VU0_LOADVECTOR(aParam->cameraPos);
-    SDF_VU0_STOREMATRIX(sdf3DScreenTm);
+    SDF_VU0_STOREMATRIX(&sdfCameraTm);
+    MultMatrixRev(&aParam->TM);
+    SDF_VU0_LOADVECTOR(&aParam->cameraPos);
+    SDF_VU0_STOREMATRIX(&sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_STOREVECTOR(sdf3DEyeOffset);
-    memcpy(sdf3DScreenParam, aParam, sizeof(*aParam));
+    memcpy(&sdf3DScreenParam, aParam, sizeof(*aParam));
 }
 
 void sdf3DSetDefaultLight(u8 *aLight) {
@@ -336,20 +303,20 @@ void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
     projectionMatrix[15] = 0;
     projectionMatrix[14] = projectionMatrix[11] = 1.0f;
     MultMatrix(projectionMatrix);
-    SDF_VU0_STOREMATRIX(camera->TM);
-    camera->scale[0] = halfWidth;
+    SDF_VU0_STOREMATRIX(&camera->TM);
+    camera->scale.x = halfWidth;
     centerY = (camera->zMax - camera->zMin) * 0.5f;
     if (camera->flags & 1) {
-        camera->scale[1] = halfHeight * 0.5f;
+        camera->scale.y = halfHeight * 0.5f;
     } else {
-        camera->scale[1] = halfHeight;
+        camera->scale.y = halfHeight;
     }
-    camera->scale[2] = centerY;
-    camera->scale[3] = 1.0f;
-    camera->trans[0] = camera->ox;
-    camera->trans[1] = camera->oy;
-    camera->trans[2] = centerY + camera->zMin;
-    camera->trans[3] = 0;
+    camera->scale.z = centerY;
+    camera->scale.w = 1.0f;
+    camera->trans.x = camera->ox;
+    camera->trans.y = camera->oy;
+    camera->trans.z = centerY + camera->zMin;
+    camera->trans.w = 0;
 }
 
 
@@ -433,7 +400,8 @@ void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLigh
     DiagMatrix();
     SDF_VU0_LOADVECTOR(&first->v);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_LOADVECTOR_B_MTXCOL(sdfCameraTm + 8);
+    /* Four words from the third column, with the original byte offset. */
+    SDF_VU0_LOADVECTOR_B_MTXCOL((const u8 *)&sdfCameraTm + 8);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_NORMALIZE();

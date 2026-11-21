@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_types.h"
+#include "sdf_screen_state.h"
 #include "eeregs.h"
 
 /* Declared here because no header carries these. */
@@ -43,12 +44,6 @@ struct sdfDecompCb_t;
 void MultMatrixRev(const void *aMatrix);
 
 extern const u8 *sdfDecompHistory[16];
-
-/* sdf3DScreenParam + 0x70: the scale and trans rows. */
-/* Shared byte-storage view: the local screen structs are not compatible C types. */
-extern u8 sdf3DScreenParam[];
-
-extern u8 sdf3DScreenTm[];
 
 /* Incremental decoder access view shared by both providers. The backing
  * decoder block is allocated as 0x20 bytes; only this 0x14-byte prefix is
@@ -247,7 +242,7 @@ void sdfDecompInit(sdfDecompCb_t *cb, u8 *dst) {
 
 sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     sdfGrPacketHeader_t *packet;
-    f32 (*viewport)[4];
+    const sdfVector4_t *viewport;
     u128 *cursor;
     s32 i;
     s32 emitted;
@@ -259,7 +254,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
 
     packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
-    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);
+    viewport = &sdf3DScreenParam.scale;
     VU0_LOAD_VF14(viewport);
     VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
@@ -357,11 +352,11 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
 }
 
 sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    SDF_VU0_LOADMATRIX(sdf3DScreenTm);
+    SDF_VU0_LOADMATRIX(&sdf3DScreenTm);
     return sdfDrawModelWithMatrix((const f32 (*)[4])vertices, colors, vertexCount, primitiveFlags);
 }
 
 sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    MultMatrixRev(sdf3DScreenTm);
+    MultMatrixRev(&sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }

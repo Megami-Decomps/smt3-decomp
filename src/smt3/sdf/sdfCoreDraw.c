@@ -32,7 +32,6 @@ typedef struct sdfCorePacketPointBuff_tag sdfCorePacketPointBuff_tag;
 typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
 #define CORE_ALIGN16(p) ((u8 *)((EE_ADDR(p) + 15) & ~15))
 extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
-extern sdfMatrix4_t sdf3DScreenTm;
 void MultMatrixRev(void *matrix);
 void corePktInitCb(corePktCb_t *cb, u16 *header, u32 attrMask);
 void corePktSetFaceDivParm(sdfCorePacketFaceDivParm_t *, sdfMatPacket_t *, u32, f32, f32);
