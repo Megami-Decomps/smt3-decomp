@@ -36,6 +36,15 @@ typedef struct
     /* 0x19 */ s8 unk_19;
     /* The same eight records expose condition bytes before each skill. */
     union {
+        /* Complete initialized storage, including the final six probability bytes. */
+        struct {
+            struct {
+                u8 condition;
+                u8 reserved;
+                u16 skill;
+            } conditions[8];
+            u8 probabilities[8];
+        } stored;
         struct {
             u8 unk_1A[2];
             datHeartsSkill_t heartsSkill[8];

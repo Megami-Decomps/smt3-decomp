@@ -148,6 +148,7 @@ CalcPhaseReadTop	facility/fclEncyc	0x144	81 of 81 words match	docs/matching/faci
 InitPhaseReadStatus	facility/fclEncyc	0x334	205 of 205 words match	docs/matching/facility/fclEncyc.md	272
 DrawReadStatusMoney	facility/fclEncyc	0x178	94 of 94 words match	docs/matching/facility/fclEncyc.md	372
 DrawReadMainHelp	facility/fclEncyc	0x540	336 of 336 words	docs/matching/facility/fclEncyc.md	469
+Shared name pointer table				docs/matching/facility/fclEncyc.md	540
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	229 of 229 words match	docs/matching/facility/fclPanel.md	75
@@ -254,6 +255,7 @@ dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/ke
 slSaveData_writeFile	mc/slMain	0x238	94 of 142 words match	docs/matching/mc/slMain.md	3
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	76
 slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
+Memory-card completion and loading messages				docs/matching/mc/slMain.md	178
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_6 and Flow5_18 (0xD8 each)				docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	21
@@ -453,6 +455,7 @@ func_00222610	rstcalc	0xA8	42 of 42 words match	docs/matching/result/rstcalc.md	
 rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/rstcalc.md	562
 cmb_222828	result/rstcalc	0xB0	44 of 44 words match	docs/matching/result/rstcalc.md	612
 rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstcalc.md	668
+Race and heart data				docs/matching/result/rstcalc.md	722
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3

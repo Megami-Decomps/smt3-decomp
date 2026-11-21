@@ -245,7 +245,9 @@ def source_matching_ownership(version: str) -> list[tuple[str, list[tuple[str, s
 
 
 def splat_digest(version: str, yaml: Path) -> str:
-    inputs = [yaml, ROOT / "config" / version / "symbol_addrs.txt", ROOT / "config" / version / "reloc_addrs.txt"]
+    config = ROOT / "config" / version
+    inputs = [yaml, *(config / name for name in
+                      ("symbol_addrs.txt", "reloc_addrs.txt", "symbol_aliases.json"))]
     digest = hashlib.sha1(b"source-matching-ownership-v1\0")
     for path in inputs:
         digest.update(str(path.relative_to(ROOT)).encode())
@@ -302,9 +304,15 @@ def provide_data_symbols(version: str) -> None:
     names = set()
     for path in (ROOT / "asm" / version).rglob("*.s"):
         names.update(re.findall(r"\bD_[0-9A-F]{8}\b", path.read_text()))
+    # The later alias pass provides validated, owner-relative .data names.
+    # Do not generate an absolute fallback for them; other competing
+    # definitions remain visible to that pass and are still errors.
+    data_aliases = {a.name for a in load_symbol_aliases(ROOT, version)
+                    if a.section == ".data"}
     path = ROOT / "config" / version / "undefined_syms_auto.txt"
     text = path.read_text() if path.exists() else ""
-    path.write_text(text + "".join(f"PROVIDE({n} = 0x{n[2:]});\n" for n in sorted(names)))
+    path.write_text(text + "".join(f"PROVIDE({n} = 0x{n[2:]});\n"
+                                   for n in sorted(names - data_aliases)))
 
 
 def align_bss(ld_script: Path) -> None:

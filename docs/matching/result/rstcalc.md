@@ -718,3 +718,12 @@ Strict production and SKIP_ASM checks retain the existing
 `rstSetSkillActFlag` declaration gap; original and final retained-C checks
 pass. Independent semantic review and integrated retail/build/regression
 checks are separate publication gates.
+
+## Race and heart data
+
+The 28 native records have a 66-byte stride. The storage view names the
+eight condition and skill slots and the following probability bytes without
+changing the existing reader views or their offsets. Five live non-owning
+symbols still point into the first record for existing code and assembly
+consumers. Other interior labels are retained for the reference split. The separate raw bytes immediately after the array are unchanged;
+this does not assert that an out-of-range debug index is supported.

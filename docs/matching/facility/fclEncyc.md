@@ -536,3 +536,13 @@ The corrected guarded body remains assembly-backed: 23/94 words at 376
 bytes versus retail 372 bytes. Baseline was 11/94 at 376 bytes. A paired
 pointer control regressed to 14/89 at 356 bytes and was rejected. All 119
 exact peers remain unchanged. No exact-match credit is claimed.
+
+## Shared name pointer table
+
+The global name table keeps its existing char-pointer interface: 386
+slots, 385 native pointer relocations, and a final null. Repeated names
+continue to share the same objects. The table does not acquire ownership
+of the strings. The read-only string providers still live in their
+original sections; their pointers use the existing table interface.
+The encyclopedia now declares the same pointer type as the other readers,
+converting only when passing it to the byte-oriented font function.

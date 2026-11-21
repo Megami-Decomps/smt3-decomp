@@ -15,12 +15,12 @@ both native and emitted sizes when they differ.
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 21 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
+| 18 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
-| 17 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
+| 11 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
-| 10 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 9 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 9 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
@@ -48,6 +48,7 @@ both native and emitted sizes when they differ.
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 4 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
+| 4 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
@@ -65,7 +66,6 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
-| 3 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |

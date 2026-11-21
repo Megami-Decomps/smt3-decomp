@@ -97,6 +97,28 @@ class AliasTests(unittest.TestCase):
             with self.subTest(old=old), self.assertRaisesRegex(ValueError, "competing"):
                 linker_aliases(old, aliases)
 
+    def test_data_fallback_does_not_shadow_registered_alias(self):
+        native = self.native.replace("anchor = 0x303054;", "D_00303054 = 0x303054;")
+        aliases = self.load([self.row("D_00303054")], native)
+        asm = self.root / "asm/smt3"
+        asm.mkdir(parents=True)
+        (asm / "uses.s").write_text(".word D_00303054, D_00303058\n")
+        generated = self.cfg / "undefined_syms_auto.txt"
+        generated.write_text("unrelated = 0x123;\n")
+        with patch.object(configure, "ROOT", self.root):
+            configure.provide_data_symbols("smt3")
+        text = generated.read_text()
+        self.assertNotIn("D_00303054", text)
+        self.assertIn("PROVIDE(D_00303058 = 0x00303058);", text)
+        self.assertIn("PROVIDE(D_00303054 = owner + 0x4);", linker_aliases(text, aliases))
+
+        # A pre-existing definition is still rejected, not silently replaced.
+        generated.write_text("D_00303054 = 0x303050;\n")
+        with patch.object(configure, "ROOT", self.root):
+            configure.provide_data_symbols("smt3")
+        with self.assertRaisesRegex(ValueError, "competing"):
+            linker_aliases(generated.read_text(), aliases)
+
     def test_nobits_existing_autolabel_contract_unchanged(self):
         aliases = self.load([self.row("D_00303054", section=".bss")], "owner = 0x303050;\n")
         self.assertEqual((aliases[0].address, aliases[0].alias_size), (0x303054, None))

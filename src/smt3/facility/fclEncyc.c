@@ -2227,7 +2227,7 @@ void ExecSummon(s32 recindex)
 }
 
 extern const char *datExplainTable[];
-extern u8 *text2[];
+extern char *text2[];
 extern char fclEncycNum3Fmt[];
 
 extern u16 datGetLevelForDraw(datUnitWork_t *work);
@@ -2254,7 +2254,7 @@ void drawRegistList(fclEncyc_instance_tag *pinst)
         font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
             datExplainTable[datDevilTable[id].race], NULL);
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
-            (char *)text2[id], font);
+            text2[id], font);
         sprintf(text, fclEncycNum3Fmt, unit->maxhp);
         font = frwGetSmallNumFontFRQ(0x1220, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
         sprintf(text, fclEncycNum3Fmt, unit->maxmp);
@@ -2321,7 +2321,7 @@ void CreateFontListRead(fclEncycReadTopWork_t *work, s32 sort, s16 *indices)
         font = frwGetSmallFontFRQ2(0x620, y, 0xFFFFF0, 0xA09DC380,
                                     datExplainTable[race], NULL);
         font = frwGetSmallFontFRQ2(0xB10, y + 0x10, 0xFFFFF0, 0xA09DC380,
-                                    (char *)text2[id], font);
+                                    text2[id], font);
         level = record->level;
         sprintf(text, fclEncycNum3Fmt, level < 100 ? level : 99);
         font = frwGetSmallNumFontFRQ(0x11E0, y + 0x20, 0xFFFFF0, 0xA09DC380, text, font);
@@ -2382,7 +2382,7 @@ extern void frSetDrawPosition(frFontHandle_t *font, u32 x, u32 y);
 extern void frSetPriority(frFontHandle_t *font, u32 priority);
 extern void frSetFontSpace(frFontHandle_t *font, s32 spacing);
 extern const char *datExplainTable[];
-extern u8 *text2[];
+extern char *text2[];
 
 void CreateFontExplain(fclEncyc_instance_tag *pinst)
 {
@@ -2403,7 +2403,7 @@ void CreateFontExplain(fclEncyc_instance_tag *pinst)
     frSetDrawPosition(font, 0xC0, 0x2E0);
     frSetPriority(font, 0xFFFFF0);
     frSetFontSpace(font, 3);
-    font = frLinkFontString(text2[id], 0, 3, 0, font);
+    font = frLinkFontString((u8 *)text2[id], 0, 3, 0, font);
     frSetDrawPosition(font, 0x550, 0x2E0);
     frSetPriority(font, 0xFFFFF0);
     frSetFontSpace(font, 3);

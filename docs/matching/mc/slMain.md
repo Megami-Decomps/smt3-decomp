@@ -174,3 +174,10 @@ Plain, diagnostic (`-da -fsched-verbose=5`) and uninitialized-warning builds of
 the final source agree on all five allocated sections, 766 non-file symbols,
 1759 ordered relocations and normalized assembly. The warning log is empty.
 The diagnostic options are not production settings.
+
+## Memory-card completion and loading messages
+
+The load and save completion messages and the five numbered loading
+messages occupy seven original 16-byte writable string objects. Their
+NUL bytes, addresses, and consumers are unchanged. The intervening format
+message and adjacent raw data stay separate.
