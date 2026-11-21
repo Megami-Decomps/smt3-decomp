@@ -39,6 +39,7 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
+| 5 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 5 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
@@ -48,7 +49,6 @@ both native and emitted sizes when they differ.
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 4 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
-| 4 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldHit | [field/fldHit.md](field/fldHit.md) |

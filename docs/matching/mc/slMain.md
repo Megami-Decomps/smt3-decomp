@@ -181,3 +181,14 @@ The load and save completion messages and the five numbered loading
 messages occupy seven original 16-byte writable string objects. Their
 NUL bytes, addresses, and consumers are unchanged. The intervening format
 message and adjacent raw data stay separate.
+
+## Card warnings and selection prompts
+
+The warning and selection paths use 48 existing writable strings at their
+original addresses. Ordinary char arrays reproduce each original NUL and
+the genuine eight-byte alignment between strings; explicit alignment was
+unnecessary. Embedded glyph values retain the original game-font encoding.
+
+The two C-owned blocks end on genuine string boundaries. The raw prefix,
+overwrite prompts, later cycle and return messages, and neighboring sprite
+data retain their original bytes, addresses, and ownership.

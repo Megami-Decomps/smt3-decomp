@@ -256,6 +256,7 @@ slSaveData_writeFile	mc/slMain	0x238	94 of 142 words match	docs/matching/mc/slMa
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	76
 slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
 Memory-card completion and loading messages				docs/matching/mc/slMain.md	178
+Card warnings and selection prompts				docs/matching/mc/slMain.md	185
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_6 and Flow5_18 (0xD8 each)				docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	21
