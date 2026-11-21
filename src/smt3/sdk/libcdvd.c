@@ -8,10 +8,7 @@ extern cdvdCallback_t cdvdCallback __attribute__((section(".data")));
 extern u8 cdvdDefaultStreamMode[] __attribute__((section(".data")));
 
 extern s32 cdvdDebugLevel __attribute__((section(".data")));
-typedef struct cdvdRpcClient_t {
-    u8 transactionAndCallbacks[0x24];
-    void *server;
-} cdvdRpcClient_t;
+#include "sdk_cdvd_rpc_client.h"
 extern cdvdRpcClient_t cdvdScmdClient __attribute__((section(".data")));
 
 extern s32 cdvdNcmdState __attribute__((section(".data")));

@@ -4520,12 +4520,7 @@ INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB);
 
 const char execDefaultPath[8] = "";
 
-typedef struct {
-    u32 pageMask;
-    u32 entryHi;
-    u32 entryLo0;
-    u32 entryLo1;
-} kernelTlbEntry_t;
+#include "sdk_kernel_tlb_entry.h"
 
 /* InitTLB32MB loads the kernel and default entries, stores how many it wrote in
  * loadedCount, then loads the extended ones. */

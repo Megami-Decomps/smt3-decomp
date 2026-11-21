@@ -411,11 +411,7 @@ void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
 }
 
 typedef struct frFontRequest_t frFontRequest_t;
-typedef struct {
-    const char *text;
-    s32 optionCount;
-} configValueLabel_t;
-extern configValueLabel_t dds3ConfigValueLabels[];
+#include "dds3_config_value_labels.h"
 extern void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height,
                                 s32 selected, s32 ot);
 extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
