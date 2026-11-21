@@ -5928,23 +5928,6 @@ const char shpTmxPath02[32] = "/facility/tmx/shop/shop_02.tmx";
 
 const char shpTmxPath01[32] = "/facility/tmx/shop/shop_01.tmx";
 
-s8 gProcessStat_0 = 0;
-
-SDATA_PAD(3);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuLeave);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuTalk);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuFuse);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuQuit);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", cmbMenuView);
-
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineCalcName);
-SDATA_RESUME();
-
 cmpSkillList_t *cmpSkillCursor = NULL;
 
 SDATA_PAD(4);

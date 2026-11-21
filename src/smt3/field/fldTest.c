@@ -3445,26 +3445,6 @@ dds3Basic_t *fldRunTama3Basic = NULL;
 
 s32 fldRunTamaNext = 0;
 
-INCLUDE_SDATA(const s32, "field/fldTest", fldDataNgMsg);
-
-INCLUDE_SDATA(const s32, "field/fldTest", fldMsg1KO);
-
-INCLUDE_SDATA(const s32, "field/fldTest", fldMsgRe1KO);
-SDATA_RESUME();
-
-s32 fldRunDanteSe_asise = 0;
-
-SDATA_PAD(4);
-
-INCLUDE_SDATA(const s32, "field/fldTest", fldMsg2A);
-SDATA_RESUME();
-
-dds3Basic_t *fldUnitControlHandle = NULL;
-
-u32 fldPlayerUnit = 0;
-
-dds3Basic_t *fldDanteUnit = NULL;
-
 /* Individual triangles are 3 byte-sized vertex indices plus a zero fourth byte.
  * fldSdwDraw copies two packed triangles at a time before passing the u32 view. */
 #define FLD_SDW_FACE(a, b, c) ((u32)(a) | ((u32)(b) << 8) | ((u32)(c) << 16))
