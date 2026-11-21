@@ -85,6 +85,7 @@ effEveBEDCutDraw	effect/effEvent	0x1DC	119 of 119 words match	docs/matching/effe
 effDebugDrawRectLine	effect/effMagatuhi	0x154	85 of 85 words match	docs/matching/effect/effMagatuhi.md	3
 effDebugMoveCamera	effect/effMagatuhi	0x628	394 of 394 words match	docs/matching/effect/effMagatuhi.md	24
 effDebugDrawMenu	effect/effMagatuhi	0x764	473 of 473 words match	docs/matching/effect/effMagatuhi.md	60
+Particle dispatch table				docs/matching/effect/effMagatuhi.md	96
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/matching/effect/effPCPBoss.md	3
 effPCP_BED_Create	effect/effPCPBoss	0x100		docs/matching/effect/effPCPBoss.md	20
 effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	75 of 75 words match	docs/matching/effect/effPCPBoss.md	62

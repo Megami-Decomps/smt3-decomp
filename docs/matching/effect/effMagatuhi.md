@@ -92,3 +92,18 @@ files, 147 guarded owners / 547 drafts, seven IRX owners and report gates passed
 for source `b362bd871f355c758be545f97a43237e7f324ead`. Exact-source CI
 [41078870717](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/41078870717)
 completed successfully, with every actual step passing and none skipped.
+
+## Particle dispatch table
+
+The native bank contains five records of six callback pointers. Each type
+selects its 24-byte record, then the requested operation. The first two
+types have no position, color, or rotation setter. The typed entry points
+use object pointers at the dispatch boundary and retain their concrete
+work types in their bodies. Callback order, null handling, and unchecked
+type selection stay as in retail.
+
+The C reader expresses each operation as a field of its real record.
+The five old named field references now resolve through the table base
+and their original field offsets. No other linked input used those
+labels; the native comparison reference retains them. All resolved
+instructions and the final retail image are unchanged.

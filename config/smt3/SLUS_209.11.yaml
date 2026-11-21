@@ -614,7 +614,7 @@ segments:
       - [0x220EA4, data, data_0031FEA4]
       - [0x220F70, .data, effect/effPCPBossDrawData]
       - [0x220FE0, .data, effect/effTrackOrderingData]
-      - [0x221040, data, data_00320040]
+      - [0x221040, .data, effect/effMagatuhiDispatchData]
       - [0x2210B8, .data, effect/effViewerMenuData]
       - [0x2210F8, .data, effect/effBuiltInFileNames]
       - [0x2211B4, data, data_003201B4]

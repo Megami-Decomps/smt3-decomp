@@ -56,6 +56,7 @@ both native and emitted sizes when they differ.
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 4 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
+| 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
@@ -77,7 +78,6 @@ both native and emitted sizes when they differ.
 | 3 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
-| 3 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 3 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
