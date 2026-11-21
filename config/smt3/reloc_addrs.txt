@@ -15,3 +15,6 @@ rom:0x2208A0 reloc:MIPS_NONE symbol:none // ShockWave01 sphere: packed edge colo
 rom:0x227518 reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].red: fixed-point 0x000FFFFF, not a pointer
 rom:0x22751C reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].green: fixed-point 0x000FFFFF, not a pointer
 rom:0x227520 reloc:MIPS_NONE symbol:none // itfPanelMesWinColorRatio[0].blue: fixed-point 0x000FFFFF, not a pointer
+rom:0x21CA64 reloc:MIPS_32 symbol:D_00533338 // Sleep part fileName; numerical pointer bytes can resemble ASCII
+rom:0x21CA84 reloc:MIPS_32 symbol:D_00533350 // Panic part fileName; numerical pointer bytes can resemble ASCII
+rom:0x21CD14 reloc:MIPS_32 symbol:D_00533520 // Return part fileName; numerical pointer bytes can resemble ASCII

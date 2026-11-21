@@ -246,3 +246,18 @@ owner 290/0 pass. Fresh stable 140-owner/480-draft qualification, 450 tests,
 817 layout assertions, canonical strict/plain/dump parity, inline/shell checks,
 seven IRX modules, retail SHA1/byte comparison/no-op and reconciled reports
 pass. Coverage remains 8594 functions / 1485744 bytes; zero matching credit.
+
+## Battle-effect position dispatch
+
+The six native slots of GetPositionPtrTable select a provider using the
+aim request's scale kind. The consumer passes a formation and an aim
+request and reads the resulting vector from vf10. Both party providers
+ignore the formation: their native bodies preserve the request in a
+saved register, call the corresponding party selector, and forward its
+return value and that same request to the shared party provider.
+The final two slots intentionally share the model-mark provider.
+
+The shared callback type expresses the formation and request arguments
+without casts. The complete consumer object remains unchanged in all four
+compilation modes, and all six table relocations target the original
+functions in native order.

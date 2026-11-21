@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effBattle.h"
+#include "effBattlePositionDispatch.h"
 #include "nb.h"
 #include "event.h"
 #include "model.h"
@@ -10,7 +11,6 @@
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
 extern u32 effBTLScaleFrameTable[]; /* 0, 5, 15, 30 frames */
-extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
 extern u32 effBTLSkillGetInvokeParty(void);
 extern u32 effBTLSkillGetTargetParty(void);
 extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
@@ -1434,11 +1434,11 @@ void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr) {
     SDF_VU0_LOADVECTOR_MEMOPS(result);
 }
 
-void effBTLPartGetInvokePartyPositionPtr(u32 pFormation, void *pPosPtr) {
+void effBTLPartGetInvokePartyPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
     effBTLPartGetPartyPositionPtr(effBTLSkillGetInvokeParty(), pPosPtr);
 }
 
-void effBTLPartGetTargetPartyPositionPtr(u32 pFormation, void *pPosPtr) {
+void effBTLPartGetTargetPartyPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr) {
     effBTLPartGetPartyPositionPtr(effBTLSkillGetTargetParty(), pPosPtr);
 }
 

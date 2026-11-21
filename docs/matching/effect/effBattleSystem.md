@@ -111,3 +111,28 @@ compilation preserves allocated bytes, symbols, and relocations of all
 nine affected existing owners in production, SKIP_ASM, retained C,
 and retained C with fixes enabled. Each new 76-byte record matches
 its native data exactly and contains no relocations.
+
+## Status and negotiation effect part records
+
+Freeze, Sleep, Panic, Poison, Curse, Return, Encount, and the three
+negotiation effects each own one 28-byte writable part record. The
+data/handle lifetime functions receive a count of one; the constructors
+read the D3P handle at offset 0x10 or the BED effect handle at offset
+0x14. The single filename pointer at offset 4 resolves to its existing
+read-only path; no path data moves. The four trailing alignment bytes
+per record remain outside the C owners.
+
+The Sleep, Panic and Return pointer words can resemble short ASCII
+strings as bytes. The relocation ledger marks only these three
+misclassified words as the native filename addresses used by the common
+loader. Direct compilation and assembly of the isolated generated
+references preserve all ten pointer relocations and the original bytes.
+
+## Battle position provider table
+
+The six slots are selected by the scale kind of the aiming request.
+The two party providers ignore the supplied formation and use their
+respective battle party instead. Both receive the same formation and
+request-pointer arguments as the model and world providers. The last
+two slots share the model-mark provider. All six native relocations and
+the providers' compiled code are unchanged.

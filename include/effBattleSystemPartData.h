@@ -15,7 +15,7 @@ typedef struct
 typedef struct
 {
     u16 type;
-    char *fileName;
+    const char *fileName;
     void *pData;
     u16 refCount;
     effPartHandle_t *hPart;
