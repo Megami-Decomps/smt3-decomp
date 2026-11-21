@@ -537,7 +537,7 @@ segments:
       - [0x2180E0, .data, effect/particleDirectionTables]
       - [0x218270, data, data_00317270]
       - [0x218380, .data, effect/polyManager]
-      - [0x2186C0, data, data_003176C0]
+      - [0x2186C0, .data, effect/effPacketFaceIndices]
       - [0x218740, .data, effect/effBattleScaleFrames]
       - [0x218750, .data, effect/effBattle]
       - [0x21C8A0, .data, effect/effBattleFadeColors]

@@ -5,6 +5,18 @@ rom:0x22740C reloc:MIPS_NONE symbol:none // 0032640C outside: 0x00004000, not D_
 rom:0x227410 reloc:MIPS_NONE symbol:none // 00326410 outside: 0x00004000, not D_4000
 rom:0x20B2D8 reloc:MIPS_NONE symbol:none // 0030A2D8 fldSceneBgmTrackTable: 0x00460000, a MIDI bank id, not itfMesEmbedded_45FF20 + 0xE0
 rom:0x220304 reloc:MIPS_NONE symbol:none // effPCPScatterParams[17]: packed vertex indices {24,28,27}, not nbCameraCheckNiidaCamera
+rom:0x218700 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[16]: packed vertex indices {48,49,50}, not a pointer
+rom:0x218704 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[17]: packed vertex indices {51,52,53}, not a pointer
+rom:0x218708 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[18]: packed vertex indices {54,55,56}, not a pointer
+rom:0x21870C reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[19]: packed vertex indices {57,58,59}, not a pointer
+rom:0x218710 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[20]: packed vertex indices {60,61,62}, not a pointer
+rom:0x218714 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[21]: packed vertex indices {63,64,65}, not a pointer
+rom:0x218718 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[22]: packed vertex indices {66,67,68}, not a pointer
+rom:0x21871C reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[23]: packed vertex indices {69,70,71}, not a pointer
+rom:0x218720 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[24]: packed vertex indices {72,73,74}, not a pointer
+rom:0x218724 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[25]: packed vertex indices {75,76,77}, not a pointer
+rom:0x218730 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[28]: packed vertex indices {84,85,86}, not a pointer
+rom:0x218734 reloc:MIPS_NONE symbol:none // effPktDefaultFaceIndex[29]: packed vertex indices {87,88,89}, not a pointer
 rom:0x21E128 reloc:MIPS_NONE symbol:none // sphere PCP preset 2: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
 rom:0x21E3C0 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
 rom:0x21E660 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
