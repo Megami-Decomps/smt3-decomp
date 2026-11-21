@@ -451,6 +451,8 @@ segments:
       - [0x2200A8, data, data_0031F0A8]
       - [0x2200B0, .data, effect/effPCPBezier]
       - [0x220140, data, data_0031F140]
+      - [0x220450, .data, effect/effPCPNeedleGeometry]
+      - [0x220550, data, data_0031F550]
       - [0x221C50, .data, newbattle/nbCameraProcess]
       - [0x221E30, data, data_00320E30]
       - [0x225750, .data, newbattle/nbCameraCommand]
