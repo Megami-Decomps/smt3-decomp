@@ -1,11 +1,35 @@
 #include "common.h"
 #include "facility.h"
 
-extern fclSpriteRes_t D_0032CBA0[];
-extern fclSpriteRes_t D_0032CEC8[];
-extern fclSpriteRes_t D_0032CF68[];
-extern fclSpriteEntry_t D_0032CD90[39];
-extern fclSpriteEntry_t D_0032CF30[7];
+/* Stock-header texture rectangles. */
+SIZE_CHECK(cmbStockResourceSize, fclSpriteRes_t, 14);
+fclSpriteRes_t D_0032CF68[25] = {
+    { 0, { 0, 0, 125, 1, 10, 15 } },
+    { 0, { 0, 0, 136, 1, 10, 15 } },
+    { 0, { 0, 0, 147, 1, 10, 15 } },
+    { 0, { 0, 0, 158, 1, 10, 15 } },
+    { 0, { 0, 0, 169, 1, 10, 15 } },
+    { 0, { 0, 0, 180, 1, 10, 15 } },
+    { 0, { 0, 0, 191, 1, 10, 15 } },
+    { 0, { 0, 0, 202, 1, 10, 15 } },
+    { 0, { 0, 0, 213, 1, 10, 15 } },
+    { 0, { 0, 0, 224, 1, 17, 15 } },
+    { 0, { 0, 0, 224, 17, 17, 15 } },
+    { 0, { 0, 0, 226, 33, 17, 15 } },
+    { 0, { 0, 0, 125, 17, 10, 15 } },
+    { 0, { 0, 0, 136, 17, 10, 15 } },
+    { 0, { 0, 0, 147, 17, 10, 15 } },
+    { 0, { 0, 0, 158, 17, 10, 15 } },
+    { 0, { 0, 0, 169, 17, 10, 15 } },
+    { 0, { 0, 0, 180, 17, 10, 15 } },
+    { 0, { 0, 0, 191, 17, 10, 15 } },
+    { 0, { 0, 0, 202, 17, 10, 15 } },
+    { 0, { 0, 0, 213, 17, 10, 15 } },
+    { 0, { 0, 0, 172, 33, 17, 15 } },
+    { 0, { 0, 0, 190, 33, 17, 15 } },
+    { 0, { 0, 0, 208, 33, 17, 15 } },
+    { 1, { 0, 0, 208, 89, 26, 25 } },
+};
 
 /* Stock-header sprite placement entries. */
 fclSpriteEntry_t D_0032D0C8[25] = {
@@ -34,11 +58,4 @@ fclSpriteEntry_t D_0032D0C8[25] = {
     { 0, 0, 0, 22 },
     { 0, 0, 0, 23 },
     { 16, 127, 0, 24 },
-};
-
-/* Resource banks are intentionally still backed by the original raw data. */
-fclSpriteTbl_t cmbSpriteTable[3] = {
-    { D_0032CBA0, D_0032CD90 },
-    { D_0032CEC8, D_0032CF30 },
-    { D_0032CF68, D_0032D0C8 },
 };

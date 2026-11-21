@@ -850,3 +850,15 @@ null slot. The model-mark loop reads three existing name pointers. The
 next camera-point pointer is not part of that array; its native four-byte
 boundary stays raw because the stock standalone source object aligns it
 to eight bytes.
+
+## Fusion sprite resources
+
+The three sprite pages use 35 main-menu, seven icon, and 25 stock-header
+resource records. Each record has the native 14-byte stride. Ordinary C
+alignment before the existing placement arrays reproduces the 6, 6,
+and 2 intervening bytes. The preceding raw word remains separate.
+
+The original 24-byte page layout is a distinct object, with the same
+six resource and placement pointers. Its separate source owner retains
+all six named relocations rather than converting the two stock-page
+references to local section addends.
