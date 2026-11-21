@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effPCPEyeThunderData.h"
 #include "effPCPData.h"
 #include "fpu.h"
 #include "ps2asm.h"
@@ -91,7 +92,6 @@ struct effRandState_t;
 struct effResourceRectBounds_t;
 struct effResourceRectDrawParams_t;
 struct effPCPThunderSpherePolyParam_t;
-struct effPCP_ThunderPolyParam_t;
 struct effPCPThunderSpherePolyPart_t;
 struct effPCPThunderSpherePoly_t;
 struct effTrackPolyParams_t;
@@ -188,7 +188,6 @@ typedef struct effPCPFilterExp_tag effPCPFilterExp_tag;
 typedef struct effPCPBlurExpParam_t effPCPBlurExpParam_t;
 typedef struct effPCPBlurExp_tag effPCPBlurExp_tag;
 typedef struct effPCPRadiateThunderPart_tag effPCPRadiateThunderPart_tag;
-typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
 typedef struct effPCPRadiateThunderParam_t effPCPRadiateThunderParam_t;
 typedef struct effPCPRadiateThunder_tag effPCPRadiateThunder_tag;
 typedef struct effPCPThunderSphereExp_tag effPCPThunderSphereExp_tag;
@@ -1226,27 +1225,6 @@ struct effPCPRadiateThunderPart_tag {
     f32 radian_s;
 };
 
-/* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
-struct effPCP_ThunderPolyParam_t {
-    f32 start[4];
-    f32 end[4];
-    u16 blend;         /* 0x20 */
-    u8 pad22[2];
-    u32 number;       /* 0x24 */
-    u32 restartFrameLimit;  /* 0x28: zero permits unlimited restarts */
-    f32 waveAmplitude;      /* 0x2C: sinusoidal displacement */
-    u32 startDelayRange;     /* 0x30 modulus of delayFrames */
-    u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
-    u16 split;            /* 0x38 */
-    u8 pad3A[2];
-    f32 coreWidth;          /* 0x3C: half-width of the primary strip */
-    u32 color_center;     /* 0x40: packed center color used by symmetric cell ramps */
-    f32 width_border;          /* 0x44: width of the continued strip */
-    u32 color_border;    /* 0x48: packed middle color used by symmetric cell ramps */
-    f32 width_edge;          /* 0x4C: added outer margin */
-    u32 color_edge;      /* 0x50: packed edge color used by symmetric cell ramps */
-};
-
 /* Serialized 0x164-byte group-set input copied into each live owner. */
 struct effPCPRadiateThunderParam_t {
     f32 origin[4];
@@ -2174,9 +2152,7 @@ extern u8 dds3RingPolyExpListParameters[];
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
 
-extern u8 effPCPEyeThunderParam04_0[];
 
-extern u8 effPCPEyeThunderParam04_1[];
 
 dds3Effect_PartialMultiBlur_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 
@@ -2217,9 +2193,7 @@ void dds3BillboardDelete(struct billHandle_t *hData);
 
 extern void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
-extern u8 effPCPEyeThunderParam01_0[];
 
-extern u8 effPCPEyeThunderParam01_1[];
 
 extern effRandState_t dds3EffectBase[];
 
@@ -2257,15 +2231,11 @@ f32 dds3GetRandFloatA(effRandState_t *name);
 
 extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
 
-extern u8 effPCPEyeThunderParam00_0[];
 
 extern effPCP_ThunderPolyParam_t effPCPZiodin02Param[];
 
-extern u8 effPCPEyeThunderParam00_1[];
 
-extern u8 effPCPEyeThunderParam05_0[];
 
-extern u8 effPCPEyeThunderParam05_1[];
 
 effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number);
 
@@ -2386,15 +2356,11 @@ void effBTLPartGetPositionPtr(void *pFormation, effBTL_SkillPositionPtr_t *pPosP
 
 extern effPCP_ThunderPolyParam_t effPCPZiodin03Param[];
 
-extern u8 effPCPEyeThunderParam02_0[];
 
-extern u8 effPCPEyeThunderParam02_1[];
 
 extern effPCP_ThunderPolyParam_t effPCPZiodin04Param[];
 
-extern u8 effPCPEyeThunderParam03_0[];
 
-extern u8 effPCPEyeThunderParam03_1[];
 
 /* Motion-record selection and lookup. */
 void mdlSingleMotion(dds3ModelHandle_t *aHandle, s32 aGroup, s32 aNumber);
@@ -5816,7 +5782,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate00_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam00_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam00_0);
     return work;
 }
 
@@ -5830,7 +5796,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate00_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam00_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam00_1);
     return work;
 }
 
@@ -5844,7 +5810,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate01_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam01_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam01_0);
     return work;
 }
 
@@ -5858,7 +5824,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate01_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam01_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam01_1);
     return work;
 }
 
@@ -5872,7 +5838,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate02_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam02_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam02_0);
     return work;
 }
 
@@ -5886,7 +5852,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate02_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam02_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam02_1);
     return work;
 }
 
@@ -5900,7 +5866,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate03_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam03_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam03_0);
     return work;
 }
 
@@ -5914,7 +5880,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate03_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam03_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam03_1);
     return work;
 }
 
@@ -5928,7 +5894,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate04_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam04_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam04_0);
     return work;
 }
 
@@ -5942,7 +5908,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate04_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam04_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam04_1);
     return work;
 }
 
@@ -5956,7 +5922,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate05_0(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 0;
     work->length = 375.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam05_0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam05_0);
     return work;
 }
 
@@ -5970,7 +5936,7 @@ effPCPEyeThunder_tag *effPCPEyeThunderCreate05_1(u32 unused) {
     work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
     work->start = 325.0f;
     work->length = 225.0f;
-    work->pThunderPoly = effPCP_ThunderPolyCreate((effPCP_ThunderPolyParam_t *)effPCPEyeThunderParam05_1);
+    work->pThunderPoly = effPCP_ThunderPolyCreate(&effPCPEyeThunderParam05_1);
     return work;
 }
 

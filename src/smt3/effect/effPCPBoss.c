@@ -9,6 +9,7 @@
 #include "event.h"
 #include "nb.h"
 #include "sdfFrame.h"
+#include "effPCPBossDrawData.h"
 
 typedef struct
 {
@@ -386,14 +387,6 @@ typedef struct effPCPDANTE_Thunder_tag
     s32 process;
 } effPCPDANTE_Thunder_tag;
 
-typedef struct effPCPDANTE_UV_tag
-{
-    s32 u;
-    s32 v;
-    u32 w;
-    u32 h;
-} effPCPDANTE_UV_tag;
-
 /* The 16-byte block effPCPDANTE_Damage_Create copies into the work head; the
  * last word is the per-target delay step. */
 typedef struct effPCPDANTE_Damage_Param_t
@@ -526,7 +519,6 @@ extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern u8 dds3RenderTargetVector[], dds3RenderEyeVector[];
 extern u8 effPCPBossTexRect[];
-extern u8 effPCPBossLookDown[];
 extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, const void *pMatrix);
 extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, const void *pPos);
 extern void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
@@ -580,8 +572,6 @@ extern void effPCP_ThunderPolyListDelete(void *hData);
 extern void *effPCP_ThunderPolyListCreate(const effPCPBossThunderParam_t *param);
 extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pParam);
 
-extern f32 effPCPBossKAGUDrawParam[4];
-extern f32 effPCPBossKAGU2DrawParam[4];
 
 extern void dds3BillboardDelete(void *hData);
 extern void dds3BillboardSetRGBA(void *hBillboard, u32 abgr);
@@ -1799,7 +1789,6 @@ void effPCPCrackDelete(effPCPCrack_t *hData)
     sdfChipFreeDirect(hData);
 }
 
-extern f32 D_0031FF70[4];
 extern void mdlSetScale(mdlObj_t *model);
 extern void dds3TrackPolyDraw(parSystem_t *system);
 extern void dds3FlashPolyListDraw(void *pool);
@@ -4457,7 +4446,6 @@ void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_
     nbPnlSprite(x, y, sw, sh, uv->u, uv->v, uv->w, uv->h, color, tex);
 }
 
-extern effPCPDANTE_UV_tag effPCPDANTE_Bingo_UV;
 extern void nbPnl_rsetAlpha(s32 mode);
 
 void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
@@ -4518,7 +4506,6 @@ void effPCPDANTE_ShowTime_Bingo_Draw(effPCPDANTE_ShowTime_tag *work)
     work->frameParts[0] = (u32)work->frameParts[0] + 1;
 }
 
-extern effPCPDANTE_UV_tag effPCPDANTE_AreYouReady_UV;
 
 void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
@@ -4593,7 +4580,6 @@ void effPCPDANTE_ShowTime_AreYouReady_Draw(effPCPDANTE_ShowTime_tag *hData)
     hData->frameParts[1]++;
 }
 
-extern effPCPDANTE_UV_tag effPCPDANTE_ShowTime_UV;
 void effPCPDANTE_ShowTime_ShowTime_Draw(effPCPDANTE_ShowTime_tag *work)
 {
     u32 frame = SDF_FRAME_TICK(work->frameParts[2]);

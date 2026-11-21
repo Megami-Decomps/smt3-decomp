@@ -1,0 +1,19 @@
+#ifndef EFF_PCP_EYE_THUNDER_DATA_H
+#define EFF_PCP_EYE_THUNDER_DATA_H
+
+#include "effThunderPolyPresetData.h"
+
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam00_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam00_1;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam01_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam01_1;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam02_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam02_1;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam03_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam03_1;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam04_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam04_1;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam05_0;
+extern effPCP_ThunderPolyParam_t effPCPEyeThunderParam05_1;
+
+#endif
