@@ -613,7 +613,8 @@ extern fldSdwTriangle_t fldSdwTriangles[50];
 extern fldSdwEdge_t fldShadowVertexTable[26][26];
 extern sdfVector4_t fldShadowTable[26][26], fldShadowTableB[26][26];
 extern sdfVector4_t fldSdwDrawVec, aViewEye, aViewTarget;
-extern f32 fldFixedLight[], fldSkyLight[];
+extern sdf3DLight_t fldFixedLight;
+extern f32 fldSkyLight[];
 extern f32 fldSdwLightNearDist, fldSdwLightNearDir, fldSdwSkyNearDist, fldSdwSkyNearX, fldSdwSkyNearZ, fldSdwSkyBias;
 extern s32 fldShadowWork, fldSdwBoxAlpha, fldSdwLightTracking;
 extern sdfMat_t *fldDrawEnv;
@@ -872,12 +873,17 @@ void fldSdwDraw(dds3Basic_t *basic)
             }
             length = 200.0f;
         } else if (fldSdwLightTracking == 0) {
-            f32 *light = fldGlobalBase.area >= 200 ? fldFixedLight : fldSkyLight;
             f32 distance, extra;
             s32 alpha;
-            fldSdwDrawVec.z = light[6];
-            fldSdwDrawVec.x = light[4];
-            fldSdwDrawVec.y = light[5];
+            if (fldGlobalBase.area >= 200) {
+                fldSdwDrawVec.z = fldFixedLight.v.z;
+                fldSdwDrawVec.x = fldFixedLight.v.x;
+                fldSdwDrawVec.y = fldFixedLight.v.y;
+            } else {
+                fldSdwDrawVec.z = fldSkyLight[6];
+                fldSdwDrawVec.x = fldSkyLight[4];
+                fldSdwDrawVec.y = fldSkyLight[5];
+            }
             distance = sdfSqrt(fldSdwDrawVec.x * fldSdwDrawVec.x + fldSdwDrawVec.z * fldSdwDrawVec.z);
             if (distance < fldSdwSkyNearDist) {
                 fldSdwDrawVec.x = fldSdwSkyNearX;

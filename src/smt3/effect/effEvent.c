@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effEventSmoke.h"
 #include "libsdf.h"
 #include "effBattle.h"
 #include "event.h"
@@ -116,42 +117,6 @@ extern sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 typedef struct dds3Billboard_t dds3Billboard_t;
 
-
-/* Shared billboard-emitter parameters copied into each live set. Creation and
- * parameter copies clamp startDelaySpread, fadeIn, and fadeOut to at least
- * one; motionDelaySpread is consumed unchanged. */
-typedef struct effEVECombParSmokeParam_t {
-    f32 position[4];
-    u32 number;
-    s32 duration;
-    s32 wait;
-    s32 motionDelaySpread;
-    f32 spawnRadius;
-    u32 color;
-    s16 drawMode; /* Forwarded to the billboard mode setter in direct draw. */
-    u8 pad2A[2];
-    s32 fade_in;
-    s32 fade_out;
-    u8 repeat;
-    u8 pad35[3];
-    f32 baseScale;
-    f32 scaleRandomness;
-    f32 scaleAmplitudeX;
-    f32 scaleAmplitudeY;
-    f32 scalePhaseStep;
-    f32 angularSpeed;
-    f32 verticalSpeed;
-    f32 verticalSpeedRandomness;
-    f32 lateralSpeed;
-    f32 lateralSpeedRandomness;
-    f32 accelerationPercent; /* Speeds multiply by 1 + this / 100 per step. */
-    f32 swayPhaseStep;
-    f32 swayAmplitude;
-    f32 swayAmplitudeStep;
-    f32 swayRandomness;
-    s32 colorStartAge; /* Batched path fades primary texture RGB from black. */
-    s32 colorTransitionFrames;
-} effEVECombParSmokeParam_t;
 
 typedef struct effEVECombParSmokePart_t {
     f32 pos[3];
@@ -292,7 +257,6 @@ void dds3BillboardSetRGBA(struct dds3Billboard_t *hBillboard, u32 abgr);
 /* Radian rotation of the billboard quad in its plane. */
 void dds3BillboardSetRotate(struct dds3Billboard_t *hBillboard, f32 rot);
 extern void dds3BillboardDraw(dds3Billboard_t *hData);
-extern effEVECombParSmokeParam_t EVE_ParSmokeParam;
 dds3EffectPart_t *dds3EffectPartCreate(u16 type, void *pData);
 dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *hEffPartSrc);
 /* Return a borrowed block at the selected record's signed relative offset. */
