@@ -5932,10 +5932,9 @@ cmpSkillList_t *cmpSkillCursor = NULL;
 
 SDATA_PAD(4);
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineNum2dFmt);
+char fclCombineNum2dFmt[4] = "%2d";
 
-INCLUDE_SDATA(const s32, "facility/fclCombineInit", fclCombineStrFmt);
-SDATA_RESUME();
+char fclCombineStrFmt[3] = "%s";
 
 s8 cmbActionMode = 0;
 
