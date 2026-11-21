@@ -399,3 +399,11 @@ not add an index guard or change the native routines' supported area
 assumptions. The previous interior labels were splitter boundaries, not
 separately addressed objects. Text bytes that resemble addresses remain
 literal, not relocations.
+
+## NPC resource paths
+
+The two existing NPC resource path arrays (288 and 576 bytes), followed
+by the generic NPC path (24 bytes), comprise the final 888 bytes of the
+original read-only area. These named path objects can match independently
+of the earlier switch and vector constants. All paths and readers retain
+their native bytes.

@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 53 |  | [code_0022C578.md](code_0022C578.md) |
+| 54 |  | [code_0022C578.md](code_0022C578.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 24 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 19 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -29,6 +29,7 @@ both native and emitted sizes when they differ.
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
+| 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
@@ -36,7 +37,6 @@ both native and emitted sizes when they differ.
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 6 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
-| 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
@@ -130,6 +130,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [nme/nmeSpriteResources.md](nme/nmeSpriteResources.md) |
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbSound | [newbattle/nbSound.md](newbattle/nbSound.md) |
+| 1 |  | [newbattle/nbPanelReadOnlyData.md](newbattle/nbPanelReadOnlyData.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
@@ -167,3 +168,4 @@ both native and emitted sizes when they differ.
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
 | 1 | basic/dds3WorldBasic | [basic/dds3WorldBasic.md](basic/dds3WorldBasic.md) |
+| 1 |  | [basic/dds3MoverBasic.md](basic/dds3MoverBasic.md) |

@@ -2,6 +2,7 @@ function	unit	size	distance	page	line
 Scene, Area and Mover callback tables	basic	72 bytes		docs/matching/basic/dds3BasicTables.md	3
 Unit, Matter, Effect, Event, Light, Path and Model callback tables	basic	168 bytes		docs/matching/basic/dds3BasicTables.md	21
 Type registry and camera callbacks	basic	96 bytes		docs/matching/basic/dds3BasicTables.md	38
+Mover callbacks and names				docs/matching/basic/dds3MoverBasic.md	3
 worldBasicTable data	basic/dds3WorldBasic	24 bytes		docs/matching/basic/dds3WorldBasic.md	3
 fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153
@@ -69,6 +70,7 @@ cmpDrawSkillRowText (0x314)				docs/matching/code_0022C578.md	2030
 cmpDrawBoxG	code_0022C578	0x198	102 of 102 words match	docs/matching/code_0022C578.md	2046
 Camp item and skill message tables				docs/matching/code_0022C578.md	2068
 Parameter gauge row map				docs/matching/code_0022C578.md	2076
+Camp affinity and name text				docs/matching/code_0022C578.md	2084
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
@@ -213,6 +215,7 @@ fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/f
 fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/matching/field/fldAutoMap.md	156
 fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	215
 Area title table				docs/matching/field/fldAutoMap.md	393
+NPC resource paths				docs/matching/field/fldAutoMap.md	403
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
@@ -408,6 +411,7 @@ nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	161
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	173
 nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	226
 nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	294
+Texture paths and battle debug labels				docs/matching/newbattle/nbPanelReadOnlyData.md	3
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
