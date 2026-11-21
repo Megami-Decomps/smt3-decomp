@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdlFileRegistry.h"
 #include "model.h"
 #include "motion.h"
 #include "draw3d.h"
@@ -147,27 +148,6 @@ extern void mdlLinkEffect(mdlObj_t *ctx, dds3ModelEffectCtrlr_t *item);
 extern void mdlLinkBlur(mdlObj_t *ctx, sdfGrOt_t **surfaces);
 void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
-typedef struct
-{
-    char *texFile;
-    char *modelFile;
-    char *motionFile;
-} dds3ModelFileTable_t;
-
-typedef struct
-{
-    dds3ModelFileTable_t *entries;
-    s32 count;
-} mdlFileSlot_t;
-
-typedef struct
-{
-    dds3ModelFileIndex_t *entries;
-    s32 count;
-} mdlFileKindSlot_t;
-
-extern mdlFileSlot_t modelFileTable[];
-extern mdlFileKindSlot_t modelFileKindTable[];
 extern dds3ModelFileIndex_t *mdlHddFileIndex;
 extern dds3ModelFileTable_t *mdlHddFileList;
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);

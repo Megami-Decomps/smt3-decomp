@@ -17,3 +17,12 @@ The next investigation must establish TestProcess8 dispatch/reachability and rel
 The observed retail test route does not activate TestProcess8. Sequence 0x13 also serves normal field/event battles: non-null request data dispatches directly to nbCallNewBattle. Only the null-data branch enters nbInitBattleTest, which registers TestProcess1 at 0x28C910. That native callback simply returns zero, and the scheduler retains it rather than selecting TestProcess8. The retained NEW BATTLE TEST menu entry points to the null-data initializer, but retail dds3StartMenuProcess at 0x104650 is an unconditional spin stub with no input dispatch.
 
 A bounded native scan found no direct incoming transfer or literal initialized callback pointer to TestProcess8, with positive controls confirming the known initializer and dispatch registrations. This supports dormant test scaffolding in the inspected retail paths, not a universal unreachability proof. TestProcess8's immediate pre-call helpers only update event flags and the field-color byte under the normal global-work object contract; they do not adjust the problematic lists. Earlier indirect mutations and any alternative runtime entry remain unproved. The initial-data capacity discrepancy therefore remains a source-semantic blocker, not an established gameplay bug, and does not justify source promotion or changing bounds.
+
+## Debug boss AI 288
+
+SetBossDummy copies one complete 164-byte AI record into the native row
+for devil 288. The copied final word contains the death-action fields and
+belongs to that record. Its old inferred interior label is retained in the
+reference symbols, but no linked input references that name. The C object
+keeps the original death fields and requires neither a fake reference nor a
+linker alias. The neighboring 164-byte raw regions stay separate.

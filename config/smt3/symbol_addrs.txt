@@ -617,12 +617,15 @@ pbLevelTable = 0x00327428; // type:u32 size:0xc
 pbKeyTable = 0x003278C0; // type:s16 size:0x10
 pbErrorTable = 0x003278D0; // size:0x528 can_reference:false
 DebugProcTable = 0x00327DF8; // type:u32 size:0x14
+// The full debug menu loop is four pointers. The following two three-path rows
+// are used via modelFileTable[0]; these are distinct native objects.
+mdlBuiltinHumanPaths = 0x00327E20; // type:u32 size:0x18
 modelFileTable = 0x0032A820; // type:u32 size:0x38
 D_0032A868 = 0x0032A868; // type:u16 size:0xB50
 D_0032B3B8 = 0x0032B3B8; // type:u16 size:0xB00
 D_0032BEB8 = 0x0032BEB8; // type:u16 size:0x118
 D_0032BFD0 = 0x0032BFD0; // type:u16 size:0x408
-modelFileKindTable = 0x0032C420; // type:u32 size:0x30
+modelFileKindTable = 0x0032C420; // type:u32 size:0x38
 mdlResrcMajorList = 0x0032C458; // type:u32 size:0x20
 mdlLoadingMajorList = 0x0032C478; // type:u32 size:0x20
 mdlDebugLightLabels = 0x0032C4E0; // type:u32 size:0x30

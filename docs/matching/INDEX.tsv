@@ -258,6 +258,8 @@ slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	
 slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
 Memory-card completion and loading messages				docs/matching/mc/slMain.md	178
 Card warnings and selection prompts				docs/matching/mc/slMain.md	185
+New Cycle explanation and return prompt				docs/matching/mc/slMain.md	197
+Model file and kind registries				docs/matching/model/mdlManager.md	3
 Flow2_6	newbattle/NbNegoFlowFullMoon	0x278	158 of 158 words match	docs/matching/newbattle/NbNegoFlowFullMoon.md	3
 Flow5_6 and Flow5_18 (0xD8 each)				docs/matching/newbattle/NbNegoFlowInnen.md	3
 Flow5_3	newbattle/NbNegoFlowInnen	0x164	89 of 89 words match	docs/matching/newbattle/NbNegoFlowInnen.md	21
@@ -386,6 +388,7 @@ OnOffTargetCursor	newbattle/nbTarSelProcess	132 bytes	33 of 33 words match	docs/
 CheckFormCursor	newbattle/nbTarSelProcess	388 bytes		docs/matching/newbattle/nbTarSelProcess.md	159
 AnimeTargetCursor	newbattle/nbTarSelProcess	540 bytes	135 of 135 words match	docs/matching/newbattle/nbTarSelProcess.md	205
 nbSetBattleDummy	newbattle/nbTest	0x2B4		docs/matching/newbattle/nbTest.md	3
+Debug boss AI 288				docs/matching/newbattle/nbTest.md	21
 UpdateFormAnime	newbattle/nbUnitProcess	0x260	152 of 152 words match	docs/matching/newbattle/nbUnitProcess.md	3
 nbAddUnitStock	newbattle/nbUnitProcess	0x370	220 of 220 words match	docs/matching/newbattle/nbUnitProcess.md	40
 RunSake	newbattle/nbUnitProcess	0x104	65 of 65 words match	docs/matching/newbattle/nbUnitProcess.md	88

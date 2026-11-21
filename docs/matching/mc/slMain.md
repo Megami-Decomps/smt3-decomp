@@ -190,5 +190,14 @@ the genuine eight-byte alignment between strings; explicit alignment was
 unnecessary. Embedded glyph values retain the original game-font encoding.
 
 The two C-owned blocks end on genuine string boundaries. The raw prefix,
-overwrite prompts, later cycle and return messages, and neighboring sprite
-data retain their original bytes, addresses, and ownership.
+overwrite prompts and neighboring sprite data retain their original bytes,
+addresses, and ownership.
+
+
+## New Cycle explanation and return prompt
+
+The two New Cycle explanation lines and the return-title prompt use their
+original writable strings on both draw paths. Their individual extents are
+35, 33, and 28 bytes including NUL; the stock compiler naturally reproduces
+12 internal alignment bytes. The last string ends before four separate raw
+alignment bytes. The later overwrite and card-start messages stay raw.

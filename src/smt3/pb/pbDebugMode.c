@@ -194,7 +194,7 @@ extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y, s32 sx, s32 sy
 extern void *sdfDevPrintf(s32 x, s32 y, s32 color, s32 attr, const char *format, ...);
 extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *drawTag);
 
-extern char *pbDebugMenuTextTable[];
+extern const char *pbDebugMenuTextTable[];
 extern char pbDebugMenuCursorMark[];
 
 s32 DebugProcMenu_pbDebugMode(pbDebugWork_t *work, sdfDrawTag_t *tag)
