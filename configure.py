@@ -260,10 +260,21 @@ def splat_digest(version: str, yaml: Path) -> str:
 
 def run_splat(version: str, yaml: Path, force: bool) -> None:
     """Split when configuration or ASM/C ownership changed since the last split."""
+    from tools.native_rodata_fill import check_split, options, record_split
+
     digest = splat_digest(version, yaml)
     stamp = ROOT / "build" / version / ".splat_stamp"
+    fill_opts = options(ROOT, version)
+    serial = VERSIONS[version]["serial"]
     if not force and stamp.exists() and stamp.read_text() == digest and (ROOT / "asm" / version).exists():
-        return
+        if not fill_opts:
+            return
+        try:
+            check_split(ROOT, version, serial, fill_opts)
+        except (ValueError, OSError):
+            pass  # Re-establish the separately bound native reference by a real Splat run.
+        else:
+            return
     print(f"splat: {version}")
     snapshot = snapshot_generated_files(generated_footprint(version))
     # splat never deletes files: a unit or rodata split that moved leaves stale
@@ -281,6 +292,8 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     stamp.parent.mkdir(parents=True, exist_ok=True)
     # Splat can create C files on the first split. Record their final ownership,
     # not the pre-split absence, so the following configure remains a cache hit.
+    if fill_opts:
+        record_split(ROOT, version, serial, fill_opts)
     stamp.write_text(splat_digest(version, yaml))
 
 
@@ -622,9 +635,18 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         n.rule("native_data_tail",
                f"{sys.executable} tools/native_data_tail.py $version $unit $in $out",
                description="native data tail $unit")
+    from tools.native_rodata_fill import (current_splat_inputs, opt_path, options,
+                                          write_reference_edge)
+
+    fill_options = {v: options(ROOT, v) for v in versions}
+    if any(fill_options.values()):
+        n.rule("native_rodata_fill",
+               f"{sys.executable} -m tools.native_rodata_fill $version $unit $in $out",
+               description="verify native readonly linker fill $unit")
     units: dict[str, list[dict]] = {}
     defaults = []
     for version in versions:
+        unseen_fills = set(fill_options[version])
         unseen_tails = set(tails[version])
         serial = VERSIONS[version]["serial"]
         yaml = Path("config") / version / f"{serial}.yaml"
@@ -694,7 +716,12 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = objdiff_reference(version, src, object_sections[obj])
                 target = Path("build") / version / "target" / full.with_suffix(".o")
-                if unit in unseen_tails:
+                if unit in unseen_fills:
+                    if unit in unseen_tails:
+                        raise SystemExit(f"{src}: cannot have writable tail and readonly fill opt-ins")
+                    unseen_fills.remove(unit)
+                    write_reference_edge(n, ROOT, version, serial, unit, object_sections, fill_options[version])
+                elif unit in unseen_tails:
                     if object_sections[obj] != [".data"]:
                         raise SystemExit(f"{src}: native tail needs a data-only C owner")
                     unseen_tails.remove(unit)
@@ -709,6 +736,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 elif (ROOT / full).exists():
                     n.build(str(target), "as", str(full), implicit=["include/macro.inc"])
                 units[version].append({"name": str(src.with_suffix("")), "target": str(target), "base": str(base)})
+        if unseen_fills:
+            raise SystemExit(f"{version}: missing native readonly fill owners")
         if unseen_tails or tail_pads:
             raise SystemExit(f"{version}: missing native tail owners or raw pad edges")
         elf = Path("build") / version / f"{serial}.elf"
@@ -754,6 +783,14 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     tail_metadata = [str(path) for path in tail_paths.values() if (ROOT / path).exists()]
     if tail_metadata:
         configure_inputs += ["tools/native_data_tail.py", *tail_metadata]
+    for version, selected in fill_options.items():
+        if selected:
+            # Do not use generated reference outputs as configure inputs.
+            # The report edge separately pins them in the successful split receipt.
+            configure_inputs += ["tools/native_rodata_fill.py", str(opt_path(version))]
+            configure_inputs += sorted(
+                p for p in current_splat_inputs(ROOT, version, VERSIONS[version]["serial"], selected)
+                if p.startswith("config/") and p not in configure_inputs)
     write_configure_build(n, configure_inputs, sys.argv[1:])
     n.default(defaults)
     n.close()

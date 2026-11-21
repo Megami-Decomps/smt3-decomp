@@ -497,6 +497,7 @@ MyAction	pipe/pipeSection	0x21C	135 of 135 words match	docs/matching/pipe/pipeSe
 ActionKey	pipe/pipeSection	0x5EC	379 of 379 words match	docs/matching/pipe/pipeSection.md	111
 pipeOffset	pipe/pipeSection	0x108	23 of 66 words match	docs/matching/pipe/pipeSection.md	161
 pipeOffset exact match (0x108)				docs/matching/pipe/pipeSection.md	268
+Puzzle Boy and event command data				docs/matching/readOnlyLinkerFill.md	3
 cmpFindKugatatiMsgEntry	rstcalc	0x60	24 of 24 words match	docs/matching/result/rstcalc.md	3
 cmbChkDevilEvo	rstcalc	0x74	29 of 29 words match	docs/matching/result/rstcalc.md	47
 datFindKugatatiEntry	rstcalc	0x74	29 of 29 words match	docs/matching/result/rstcalc.md	86

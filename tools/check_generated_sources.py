@@ -48,7 +48,8 @@ def control_changes(root: Path) -> list[str]:
     """
     with tempfile.TemporaryDirectory(prefix="smt3-generated-control-") as tmp:
         control = Path(tmp)
-        shutil.copy2(root / "configure.py", control / "configure.py")
+        for name in ("configure.py", "requirements.txt"):
+            shutil.copy2(root / name, control / name)
         for name in ("src", "config", "include", "tools", "orig"):
             shutil.copytree(root / name, control / name)
         unit = control / STALE_UNIT

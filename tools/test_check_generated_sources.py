@@ -29,6 +29,7 @@ class IsolatedControlTests(unittest.TestCase):
         self.unit.parent.mkdir(parents=True)
         self.unit.write_bytes(b"/* user's uncommitted source */\n")
         (self.root / "configure.py").write_text("# fixture\n")
+        (self.root / "requirements.txt").write_text("# installed-tool provenance fixture\n")
         self.original = self.unit.read_bytes()
 
     def visit_control(self, control):
@@ -37,6 +38,10 @@ class IsolatedControlTests(unittest.TestCase):
         self.assertEqual(unit.read_bytes(), self.original + check.STALE.encode())
         self.assertEqual(self.unit.read_bytes(), self.original)
         self.assertFalse(unit.samefile(self.unit))
+        original = self.root / "requirements.txt"
+        copied = control / "requirements.txt"
+        self.assertEqual(copied.read_bytes(), original.read_bytes())
+        self.assertFalse(copied.samefile(original))
         return unit
 
     def test_control_uses_independent_copy_and_cleans_up(self):

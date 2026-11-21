@@ -126,6 +126,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [sdf/sdf3DPrim.md](sdf/sdf3DPrim.md) |
 | 1 |  | [script/scrTraceCode.md](script/scrTraceCode.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
+| 1 |  | [readOnlyLinkerFill.md](readOnlyLinkerFill.md) |
 | 1 | pipe/pipePosTable | [pipe/pipePosTable.md](pipe/pipePosTable.md) |
 | 1 | pb/pbGameDraw | [pb/pbGameDraw.md](pb/pbGameDraw.md) |
 | 1 |  | [nme/nmeSpriteResources.md](nme/nmeSpriteResources.md) |
