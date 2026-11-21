@@ -198,7 +198,7 @@ extern void *fldDrwZBuf;
 
 extern f32 fldWmFastMove;
 
-extern void *hPartialMultiBlur;
+extern effBlurTemplate_t *hPartialMultiBlur;
 
 extern s32 gfldPlayerHasiCnt;
 

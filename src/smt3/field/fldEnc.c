@@ -28,11 +28,11 @@ extern s32 gencStageInnAlp;
 
 extern s32 encDrawState;
 
-extern void *hPartialMultiBlur;
+extern effBlurTemplate_t *hPartialMultiBlur;
 
 extern char fldEncDrawName[];
 
-extern void dds3EffectPartialMultiBlurDelete(void *hPartialMultiBlur);
+extern void dds3EffectPartialMultiBlurDelete(effBlurTemplate_t *blur);
 
 extern s32 encDrawProc(dds3ProcessID_t *aProcId);
 
@@ -60,9 +60,9 @@ void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zt
 
 extern dds3Effect_PartialMultiBlurParam_t encBlurParam;
 
-extern void dds3EffectPartialMultiBlurSetParam(void *hPartialMultiBlur, dds3Effect_PartialMultiBlurParam_t *pParam);
+extern void dds3EffectPartialMultiBlurSetParam(effBlurTemplate_t *blur, const dds3Effect_PartialMultiBlurParam_t *pParam);
 
-extern void dds3EffectPartialMultiBlurDraw(void *blur);
+extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *blur);
 
 extern void encFreeBlur(void);
 

@@ -358,10 +358,12 @@ s8 effBTLFieldColorOn = 0;
 
 s8 D_0054F0F1 = 0;
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLJyocyuEffFilePath);
+extern char D_0031C790[];
+extern char D_0031C7B0[];
 
-INCLUDE_SDATA(const s32, "effect/effBattleLight", effBTLSelectedName);
-SDATA_RESUME();
+const char *effBTLJyocyuEffFilePath = D_0031C790;
+
+char *effBTLSelectedName = D_0031C7B0;
 
 SDATA_PAD(4);
 

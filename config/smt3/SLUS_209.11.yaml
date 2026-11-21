@@ -732,7 +732,7 @@ segments:
       - [0x226960, .data, newbattle/nbCameraInputPresets]
       - [0x226A30, data, data_00325A30]
       - [0x226A70, .data, newbattle/nbCameraHelperMenuItems]
-      - [0x226AD0, data, data_00325AD0]
+      - [0x226AD0, .data, newbattle/nbCameraHelperViewerMenu]
       - [0x226B10, .data, interface/fmGslCont]
       - [0x227060, data, data_00326060]
       - [0x227068, .data, interface/frFontClutData]

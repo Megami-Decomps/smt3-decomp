@@ -1624,8 +1624,8 @@ INCLUDE_SDATA(const s32, "field/fldDraw", fldDbgFmtHex);
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawEnv);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawSpriteTex);
+SDATA_RESUME();
 
-INCLUDE_SDATA(const s32, "field/fldDraw", hPartialMultiBlur);
+effBlurTemplate_t *hPartialMultiBlur = NULL;
 
-INCLUDE_SDATA(const s32, "field/fldDraw", gencMode);
-
+s32 gencMode = 0;

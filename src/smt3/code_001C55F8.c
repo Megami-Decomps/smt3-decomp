@@ -1,3 +1,4 @@
+#include "effDebug.h"
 #include "common.h"
 #include "sdfFrame.h"
 #include "newbattle.h"
@@ -281,7 +282,7 @@ s32 nbCameraHelperViewer_PB_Init(s32 pData)
 /* Callback slots follow the viewer record used by effDebugResetMenu. */
 typedef struct effDebugViewer_t {
     u8 reserved00[0x18];
-    struct effDebugViewer_t *replacement;
+    effDebugMenu_t *replacement;
     void *createParam;
     u8 reserved20[0xC];
     s32 (*create)(void *);
@@ -299,12 +300,12 @@ extern void nbSetHelperViewer(void *viewer);
 
 void nbCameraHelperViewer_PB_Draw(void *pData)
 {
-    effDebugViewer_t *viewer = NULL;
+    effDebugMenu_t *viewer = NULL;
 
     dds3EffectFileListWindowDraw(nbCameraHelperViewerPBWork);
     if (dds3EffectFileListWindowGetState(nbCameraHelperViewerPBWork) == 1) {
         void (*destroy)(void *);
-        s32 (*create)(void *);
+        void *(*create)(void *);
 
         dds3EffectFileListWindowGetFilename(nbCameraHelperViewerPBWork, nbCameraHelperViewerModeBuf);
         nbCameraHelperViewerMode = nbCameraHelperViewerModeBuf;
@@ -327,8 +328,8 @@ void nbCameraHelperViewer_PB_Draw(void *pData)
 #endif
         create = viewer->create;
         if (create != NULL) {
-            if (viewer->createParam != NULL) {
-                *viewer->handle = create(viewer->createParam);
+            if (viewer->source != NULL) {
+                *viewer->param = create(viewer->source);
             } else {
                 create(NULL);
             }
@@ -344,7 +345,7 @@ void nbCameraHelperViewer_PB_End(void *pData)
     dds3EffectFileListDelete(nbCameraHelperViewerPBHandle);
 }
 
-s32 nbCameraHelperViewer_Init(s32 pData)
+void *nbCameraHelperViewer_Init(void *pData)
 {
     s32 size;
 
@@ -428,6 +429,6 @@ void nbCameraHelperViewer_Draw(void *pData)
 
 
 
-void nbCameraHelperViewer_End(void) {
+void nbCameraHelperViewer_End(void *unused) {
 }
 

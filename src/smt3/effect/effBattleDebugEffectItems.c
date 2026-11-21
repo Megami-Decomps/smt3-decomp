@@ -14,9 +14,8 @@ extern const char D_00533AB0[16];
 extern effDebugMenu_t D_0031C7D0;
 extern effDebugMenu_t D_0031CA50;
 extern effDebugMenu_t D_0031CC40;
-/* Preserve the address of this existing raw submenu header. Its
- * following native callback table is deliberately not redeclared here. */
-extern u8 D_00325AD0[0x2C];
+/* The primary Camera Helper submenu descriptor. */
+extern effDebugMenu_t D_00325AD0;
 
 extern u8 D_0054F1BE;
 extern u8 D_0054F1BF;
@@ -41,6 +40,6 @@ effDebugMenuItem_t D_0031CC80[13] = {
     { .label = D_00533AD0, .type = EFF_DEBUG_BOOLEAN, .value = &effBTLDebugCameraAllEdit },
     { .label = D_00533AC0, .type = EFF_DEBUG_BOOLEAN, .value = &effBTLDebugCameraAllTable },
     { .label = D_0054F1C8, .type = EFF_DEBUG_BOOLEAN, .value = &D_0054F1C3 },
-    { .label = D_00533AB0, .type = EFF_DEBUG_SUBMENU, .value = D_00325AD0 },
+    { .label = D_00533AB0, .type = EFF_DEBUG_SUBMENU, .value = &D_00325AD0 },
     { .type = EFF_DEBUG_SEPARATOR },
 };
