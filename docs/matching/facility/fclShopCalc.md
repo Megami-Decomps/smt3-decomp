@@ -59,3 +59,13 @@ files, 24 owner dependencies, report/provenance equality and no-op builds.
 Source commit `7aca43983e4f34d6d3f452cff3794c69cbf18fc7` passed exact-source hosted CI
 [40999998682](https://github.com/Megami-Decomps/smt3-decomp/actions/runs/40999998682),
 including build and deploy.
+
+## Shop sprite page
+
+Page zero has thirteen texture resource records and fourteen placement
+entries; two placements share resource 11. Stock C reproduces the two
+alignment bytes before the existing entries. The eight-byte page
+descriptor keeps the original two named pointers. Without the explicit
+section placement the stock compiler moves both pointers into
+`.sdata`, not the native writable `.data`. The preceding two title
+pointers remain raw.

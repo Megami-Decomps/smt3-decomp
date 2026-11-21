@@ -106,3 +106,11 @@ Full retail, generated-source, regression, guarded-source and report gates
 pass. Production provenance verifies a unique compiler-owned linked 160-byte
 span matching retail. Game coverage gains one function and 160 bytes, with the
 same increase in the all-unit report.
+
+## Recovery sprite resources
+
+The Recovery page uses all eleven 14-byte resource records. The stock
+object aligns the eleven existing placement entries after the resources,
+producing the original six internal zero bytes. The page descriptor still
+has its two original named pointers. The five preceding string pointers
+and the following Terminal data remain separate.

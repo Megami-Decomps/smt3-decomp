@@ -54,6 +54,7 @@ both native and emitted sizes when they differ.
 | 4 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
+| 4 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 4 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
@@ -74,8 +75,8 @@ both native and emitted sizes when they differ.
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
+| 3 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 3 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 3 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -101,7 +102,6 @@ both native and emitted sizes when they differ.
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 2 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
-| 2 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 2 | facility/fclRibbon | [facility/fclRibbon.md](facility/fclRibbon.md) |
 | 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
