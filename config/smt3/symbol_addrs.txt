@@ -1398,6 +1398,7 @@ D_0034F1C0 = 0x0034F1C0; // type:u8 size:0x1A
 // Battle effect debug submenu headers. Their last native callback is at +0x3C.
 D_0031CDB8 = 0x0031CDB8; // size:0x40
 D_0031CA50 = 0x0031CA50; // size:0x40
+D_0031CC40 = 0x0031CC40; // size:0x40
 D_0031CF48 = 0x0031CF48; // size:0x40
 
 // Native defaults referenced by the alternate render light pointer array.
@@ -12890,7 +12891,7 @@ cmbTopTextTable = 0x0032DE10;
 cmbSmokeParamTable = 0x0032DE20;
 cmbSlotParamTable = 0x0032DE28; // type:f32 size:0x4
 cmbModelMarkNames = 0x0032F590;
-cmbCameraPointNames = 0x0032F59C;
+cmbCameraPointNames = 0x0032F59C; // type:u32 size:0x4 defined:true
 cmbTimeTable = 0x0032F628;
 shpTmxPathTable = 0x0032F638;
 shpCommandTable = 0x0032F640;

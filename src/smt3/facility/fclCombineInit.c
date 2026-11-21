@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fclCombineMarkerNames.h"
 #include "fclCombineTimeline.h"
 #include "camp.h"
 #include "facility.h"
@@ -4953,7 +4954,6 @@ void cmbDrawActionModel(struct mdlObj_t *model, u16 id, f32 *position, u32 color
     }
 }
 
-extern const char *cmbModelMarkNames[3];
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 id);
 
 void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
@@ -4989,7 +4989,7 @@ void cmbGetModelMarkPos(f32 (*positions)[4], f32 *sizes, s32 *found)
         model = ((cmbActionData_t *)(actionBytes - (u32)&((cmbActionData_t *)0)->id))->model;
         initialMarkBytes += (u32)&((cmbGbWork_t *)0)->modelMark;
         if (model == NULL) goto advance;
-        sceneFound = cmbFindCameraPoint(cmbModelMarkNames[i], (f32 *)initialMarkBytes);
+        sceneFound = cmbFindCameraPoint(cmbModelMarkNames.model[i], (f32 *)initialMarkBytes);
 
         scale = (f32 *)((__SIZE_TYPE__)(i * sizeof(*sizes)) + (__SIZE_TYPE__)sizes);
         modelParams = datModelParamTable;
@@ -5223,7 +5223,6 @@ s32 cmbFindUnitScene(mdlObj_t *work)
     return 1;
 }
 
-extern const char *cmbCameraPointNames[];
 extern sdfModelOt_t sdfModelOtTable[];
 
 void cmbUpdateCameraPos(void)

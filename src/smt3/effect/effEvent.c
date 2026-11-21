@@ -79,15 +79,15 @@ extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
 extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work);
 extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
-extern void dds3EffectFilter(dds3Effect_Filter_t *params);
-extern void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
+extern void dds3EffectFilter(void *filter);
+extern void dds3EffectPartialMultiFilterDraw(void *work);
 effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 extern dds3Effect_PartialMultiBlurParam_t mblurDefaultParam;
 extern dds3Effect_DistortionBlurParam_t dblurDefaultParam;
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
 extern dds3Effect_PartialMultiFilterParam_t mfilterDefaultParam;
-dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
+void *dds3EffectPartialMultiFilterCreate(void *params);
 extern dds3Effect_RippleBlurParam_t rblurDefaultParam;
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 effRectangleBlurSetupReady;
@@ -1891,7 +1891,7 @@ char effLabelFilter[7] = "FILTER";
 
 s8 evtViewerDirty = 0;
 
-u32 D_0054F318 = 0;
+void *D_0054F318 = NULL;
 
 s8 mfilterDone = 0;
 

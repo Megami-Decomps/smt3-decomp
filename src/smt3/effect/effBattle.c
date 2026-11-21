@@ -42,7 +42,7 @@ extern u16 effBTLSkyFilterFrame;
 extern u16 effBTLSkyFilterFrameMax;
 extern void effBTLFieldColorEnd(void);
 extern void effBTLFieldColorOFF(void);
-extern void dds3EffectFilter(dds3Effect_Filter_t *params);
+extern void dds3EffectFilter(void *filter);
 extern void effBTLFieldColorRun(void);
 extern void effBTLPointLightRun(void);
 extern void effBTLPointLightOFF(void);

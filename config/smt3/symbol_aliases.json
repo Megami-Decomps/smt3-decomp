@@ -510,5 +510,13 @@
     "section": ".data",
     "offset": 36,
     "owner_size": 48
+  },
+  {
+    "name": "cmbCameraPointNames",
+    "owner": "cmbModelMarkNames",
+    "unit": "facility/fclCombineModelMarkNames",
+    "section": ".data",
+    "offset": 12,
+    "owner_size": 16
   }
 ]

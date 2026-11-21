@@ -3418,15 +3418,15 @@ extern u8 D_0054F18A;
 extern u8 effBTLLightSaved;
 extern void dds3UnlinkSceneLight(dds3Basic_t *light);
 
-s32 func_00175030(void)
+void *func_00175030(void *unused)
 {
     SDF_VU0_COPYVECTOR(&effBTLSavedParallelLight, dds3LightParam.parallel[0]);
     SDF_VU0_COPYVECTOR(&effBTLSavedAmbientLight, &dds3AmbientColor);
     effBTLLightSaved = 1;
-    return 0;
+    return NULL;
 }
 
-void eff_175070(void)
+void eff_175070(void *unused)
 {
     if (D_0054F18A == 0) {
         dds3UnlinkSceneLight(nbGetMainProcessData()->light[1]);
@@ -3459,7 +3459,7 @@ extern fldResourceLight_t effBTLLightResource;
 extern dds3Effect_Filter_t effBTLFieldFilter;
 extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
 extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
-extern void dds3EffectFilter(dds3Effect_Filter_t *params);
+extern void dds3EffectFilter(void *filter);
 
 void func_001750D0(s32 param)
 {
@@ -3540,7 +3540,7 @@ extern u8 effDebugStatBit29;
 extern u8 effDebugStatBit30;
 extern u8 effDebugStatBit31;
 
-s32 nb_175338(s32 value)
+void *nb_175338(void *value)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
 
@@ -3560,7 +3560,7 @@ s32 nb_175338(s32 value)
     return value;
 }
 
-void nb_175440(void)
+void nb_175440(void *unused)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
 

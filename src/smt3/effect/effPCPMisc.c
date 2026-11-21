@@ -2129,15 +2129,15 @@ dds3Effect_PartialMultiBlur_t *dds3EffectPartialMultiBlurCreate(const dds3Effect
 
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 
-dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
+void *dds3EffectPartialMultiFilterCreate(void *params);
 
-void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
+void dds3EffectPartialMultiFilterDelete(void *hPartialMultiFilter);
 
 void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur);
 
 void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur);
 
-void dds3EffectFilter(effResourceRectDrawParams_t *params);
+void dds3EffectFilter(void *filter);
 
 
 u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
@@ -2464,7 +2464,7 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 void mdlSetScale(dds3ModelHandle_t *aHandle);
 void dds3BillboardSetAnimKey(billHandle_t *hBillboard, u32 frame);
 void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *hData, u32 abgr);
-void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
+void dds3EffectPartialMultiFilterDraw(void *work);
 void SetRotateMatrixY_B(f32 aAngle);
 void effEveBEDCutSetScale(effEveBEDCutHandle_t *hEveBEDCut, f32 scale);
 void effEveBEDCutSetParams(effEveBEDCutHandle_t *hEveBEDCut, const void *pParams);

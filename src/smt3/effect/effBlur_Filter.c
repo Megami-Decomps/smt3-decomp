@@ -577,7 +577,8 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work)
 }
 
 /* Queue blend state and a uniformly colored GS quad from two source corners. */
-void dds3EffectFilter(dds3Effect_Filter_t *source) {
+void dds3EffectFilter(void *filter) {
+    dds3Effect_Filter_t *source = filter;
     sdfDrawTag_t *list;
     sdfGrOt_t *ot;
     u64 *blendPacket;
@@ -696,7 +697,8 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
 }
 
 /* Clone rectangle parameters and select a fresh source handle. */
-dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam) {
+void *dds3EffectPartialMultiFilterCreate(void *params) {
+    dds3Effect_PartialMultiFilterParam_t *pParam = params;
     dds3Effect_PartialMultiFilter_t *dst = sdfChipAllocDirect(sizeof(dds3Effect_PartialMultiFilter_t));
 
     dst->hAlphaTex = dds3BillboardGetGeneralTex(0);
@@ -704,11 +706,12 @@ dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_P
     return dst;
 }
 
-void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
+void dds3EffectPartialMultiFilterDelete(void *hPartialMultiFilter) {
     sdfChipFreeDirect(hPartialMultiFilter);
 }
 
-void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
+void dds3EffectPartialMultiFilterDraw(void *work) {
+    dds3Effect_PartialMultiFilter_t *hPartialMultiFilter = work;
     s32 half = (s32)((f32)hPartialMultiFilter->param.area * 1.4f);
     s32 x = hPartialMultiFilter->param.center[0] + 0x100;
     s32 y = hPartialMultiFilter->param.center[1] + 0xE0;
