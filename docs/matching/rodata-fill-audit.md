@@ -126,3 +126,16 @@ out of the table, leaving all real table words and relocation
 records untouched. The stock label extent shrinks from 240 to
 236 bytes; .sdata for GsMemory and .lit4 for KoukaProcess remain
 untouched, and the eight link alignment bytes stay unmatched.
+
+
+## One linked symbol scan per comparison batch
+
+The comparator snapshots the freshly pinned linked ELF's relevant symbols
+once, preserving their order, and performs the same range checks for each
+owner. The stock and candidate input objects are still checked independently.
+The snapshot is not persisted or reused between batches.
+
+On the same warm build of 24 reference objects with four Ninja workers,
+the two runs averaged 32.8s before and 18.6s after sharing the
+linked symbol scan. This is reference regeneration time, not full build time.
+All reference outputs remained byte-identical.

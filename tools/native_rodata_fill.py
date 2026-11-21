@@ -154,13 +154,24 @@ def sym_sem(e,s):
     sh=s['st_shndx']
     return (s.name,e.get_section(sh).name if isinstance(sh,int) else sh,s['st_value'],s['st_size'],
             s['st_info']['type'],s['st_info']['bind'],s['st_other']['visibility'])
-def inspect_symbols(e,lo,hi,sec,allow=None):
+def symbol_rows(e,sec):
     _,s=section(e,'.symtab')
     for t in s.iter_symbols():
         if (t['st_shndx']!=sec and t['st_shndx']!='SHN_ABS') or t['st_info']['type'] in ('STT_SECTION','STT_FILE'): continue
-        n,a,z=t.name,t['st_value'],t['st_size']
+        yield t.name,t['st_value'],t['st_size']
+
+
+def inspect_symbol_rows(rows,lo,hi,allow=None):
+    for n,a,z in rows:
         if allow and (n,a,z)==allow: continue
-        must(not (lo<=a<hi or a<lo<a+z),'symbol intersects fill: '+n)
+        if lo<=a<hi or a<lo<a+z:
+            raise ValueError('symbol intersects fill: '+n)
+
+
+def inspect_symbols(e,lo,hi,sec,allow=None):
+    inspect_symbol_rows(symbol_rows(e,sec),lo,hi,allow)
+
+
 def mapped(e,begin,end):
     p=[s for s in e.iter_segments() if s['p_type']=='PT_LOAD'
          and s['p_vaddr']<=begin<end<=s['p_vaddr']+s['p_filesz']]
@@ -718,12 +729,15 @@ def prepare_live(root,version,opts,pins):
     r=elf(retail,'ET_EXEC')
     l=elf(linked,'ET_EXEC')
     _,rs=ro(r); li,ls=section(l,'.main')
+    # Parse the current receipt-pinned ELF once per batch. Keep parser order
+    # for identical per-owner diagnostics; this snapshot never outlives pins.
+    linked_symbols=tuple(symbol_rows(l,li))
     real_map=pins.read(mfile).decode()
     maps=live_input_sections(real_map)
     _,mark,body=real_map.partition('Linker script and memory map')
     must(bool(mark),'malformed map')
     ld_text=pins.text(ld)
-    return (retail,r,l,rs,li,ls,plan,ld_text,parse_object_sections(ld_text),
+    return (retail,r,l,rs,linked_symbols,ls,plan,ld_text,parse_object_sections(ld_text),
             maps,body,pins.text(symbols),[pins.text(p) for p in override_paths],
             set(receipt['objects']),receipt['files'])
 
@@ -737,7 +751,7 @@ def verify_native_prefix(c,normal,skip,stock,native_prefix,linked_span):
 
 
 def validate_unit(root,version,unit,live,pins,stock):
-    retail,r,l,rs,li,ls,plan,ld_text,selectors,maps,body,symbols,overrides,objects,files=live
+    retail,r,l,rs,linked_symbols,ls,plan,ld_text,selectors,maps,body,symbols,overrides,objects,files=live
     c=CASES[unit]
     obj,skip,nxt=unit_inputs(version,unit)
     strict_selectors(selectors,obj,nxt)
@@ -778,7 +792,7 @@ def validate_unit(root,version,unit,live,pins,stock):
         must(maps.get((str(obj),'.text'))==[layout.text],'wrong mapped readonly relocation text extent')
     adjacency(c,plan,ld_text,body,have,nsec['sh_size'],following['sh_size'])
     verify_metadata(symbols,overrides,have,c.end)
-    inspect_symbols(l,have+BASE,endv,li)
+    inspect_symbol_rows(linked_symbols,have+BASE,endv)
     for e,i in ((normal,nr),(skip_obj,br),(original,rr)):
         allow=(c.label,c.final-c.begin,c.end-c.final) if e is original else None
         inspect_symbols(e,have-c.begin,c.end-c.begin,i,allow)

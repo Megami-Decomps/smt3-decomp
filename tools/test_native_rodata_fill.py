@@ -1,6 +1,7 @@
 """Synthetic fail-closed graph tests, no proprietary input or stock compiler."""
 import io
 import json
+import re
 from pathlib import Path
 import shutil
 import struct
@@ -406,6 +407,50 @@ class NativeReadonlyFill(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'zero word'):
                     fill.render(stock, case, retail, have-4)
 
+    def test_linked_symbol_snapshot_keeps_per_owner_filter_order_and_exceptions(self):
+        def sym(name,addr,size,section=3,kind='STT_OBJECT'):
+            return elf_part({'st_shndx': section, 'st_value': addr, 'st_size': size,
+                             'st_info': {'type': kind}},b'',name)
+        table = unittest.mock.Mock()
+        records = [sym('other-section', 104, 10, 4),
+                   sym('section-marker', 104, 10, kind='STT_SECTION'),
+                   sym('file-marker', 104, 10, 'SHN_ABS', 'STT_FILE'),
+                   sym('ends-at-fill', 98, 6),
+                   sym('first-crossing', 100, 6),
+                   sym('second-at-lower-bound', 104, 0, 'SHN_ABS'),
+                   sym('exclusive-upper-bound', 108, 0),
+                   sym('later-owner', 203, 0)]
+        table.iter_symbols.side_effect = lambda: iter(records)
+        linked = unittest.mock.Mock()
+        with patch.object(fill, 'section', return_value=(6,table)):
+            snapshot = tuple(fill.symbol_rows(linked,3))
+            self.assertEqual(snapshot, (('ends-at-fill',98,6),('first-crossing',100,6),
+                    ('second-at-lower-bound',104,0),('exclusive-upper-bound',108,0),
+                    ('later-owner',203,0)))
+            scopes = ((104,108,None,'first-crossing'),
+                      (104,108,('first-crossing',100,6),'second-at-lower-bound'),
+                      (104,108,('first-crossing',100,5),'first-crossing'),
+                      (108,109,None,'exclusive-upper-bound'),
+                      (200,204,None,'later-owner'),
+                      (204,208,None,None))
+            def message(check):
+                try:
+                    check()
+                except ValueError as err:
+                    return str(err)
+
+            for lo, hi, allow, first in scopes:
+                with self.subTest(scope=(lo,hi,allow)):
+                    expected = f'symbol intersects fill: {first}' if first else None
+                    self.assertEqual(message(lambda:fill.inspect_symbol_rows(snapshot,lo,hi,allow)),
+                                     expected)
+            # All checks on the immutable linked rows above reuse one parse.
+            table.iter_symbols.assert_called_once()
+            for lo, hi, allow, first in scopes:
+                with self.subTest(scope=(lo,hi,allow)):
+                    self.assertEqual(message(lambda:fill.inspect_symbol_rows(snapshot,lo,hi,allow)),
+                                     message(lambda:fill.inspect_symbols(linked,lo,hi,3,allow)))
+
     def test_source_manifest_rejects_changed_parameters_or_stock_assembly(self):
         a = 'config/smt3/reloc_addrs.txt'
         b = fill.full_asm(VERSION, PB)
@@ -474,6 +519,8 @@ class NativeReadonlyFill(unittest.TestCase):
         write(self.root, opt_file, json.dumps(units))
         write(self.root, 'config/versions.json', json.dumps(VERSIONS))
         deps = {str(opt_file), 'watched-input'}
+        linked_path = f'build/{VERSION}/{SERIAL}.elf'
+        linked = write(self.root, linked_path, 'bound linked ELF bytes')
         for unit in units:
             write(self.root, fill.stock_obj(VERSION, unit), unit)
             write(self.root, fill.full_asm(VERSION, unit), fill.ASM_MACRO_INCLUDE)
@@ -482,8 +529,14 @@ class NativeReadonlyFill(unittest.TestCase):
         watched = write(self.root, 'watched-input', 'before')
         for path in out:
             write(self.root, path, 'old')
-        for fault in ('last-unit', 'late-drift', None):
+        for fault in ('last-unit', 'late-drift', 'linked-elf-drift', None):
             watched.write_text('before')
+            linked.write_text('bound linked ELF bytes')
+            def prepare_link(root,version,opts,pins):
+                # prepare_live pins the exact linked bytes that are decoded
+                # into the command-local .symtab snapshot.
+                self.assertEqual(pins.read(linked_path), b'bound linked ELF bytes')
+                return (('old linked symbol row',1,0),)
             def run(command, **kwargs):
                 Path(command[-2]).write_bytes(b'new')
             def verify(stock, *_):
@@ -492,15 +545,19 @@ class NativeReadonlyFill(unittest.TestCase):
                         raise ValueError('rejected last unit')
                     if fault == 'late-drift':
                         watched.write_text('after')
+                    if fault == 'linked-elf-drift':
+                        linked.write_text('changed linked ELF bytes')
             with patch.object(fill, 'reference_dependencies', return_value=deps), \
-                    patch.object(fill, 'prepare_live') as prepare, \
+                    patch.object(fill, 'prepare_live', side_effect=prepare_link) as prepare, \
                     patch.object(fill, 'check_split') as recheck_split, \
                     patch.object(fill, 'validate_unit', return_value=(None, b'', 0)), \
                     patch.object(fill, 'render', return_value=fill.ASM_MACRO_INCLUDE), \
                     patch.object(fill.subprocess, 'run', side_effect=run), \
                     patch.object(fill, 'verify_output', side_effect=verify):
                 if fault:
-                    with self.assertRaisesRegex(ValueError, 'last unit|changed .* batch input'):
+                    reason = ('changed .* batch input: ' + re.escape(linked_path)
+                              if fault == 'linked-elf-drift' else 'last unit|changed .* batch input')
+                    with self.assertRaisesRegex(ValueError, reason):
                         fill.run_batch(self.root, VERSION, out)
                 else:
                     fill.run_batch(self.root, VERSION, out)

@@ -532,6 +532,7 @@ Shared reference verification				docs/matching/rodata-fill-audit.md	72
 Three named non-contributing linker selectors				docs/matching/rodata-fill-audit.md	86
 Sound, Viewer menu and battle effect jump tables				docs/matching/rodata-fill-audit.md	96
 Graphics memory and battle sound terminal jump tables				docs/matching/rodata-fill-audit.md	114
+One linked symbol scan per comparison batch				docs/matching/rodata-fill-audit.md	131
 Script command table				docs/matching/script/scrTraceCode.md	3
 Default triangle indices				docs/matching/sdf/sdf3DPrim.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
