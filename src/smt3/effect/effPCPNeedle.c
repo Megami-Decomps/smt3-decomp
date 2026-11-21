@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdf_types.h"
+#include "libsdf.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
@@ -45,16 +45,10 @@ typedef struct effPrimParam_t
     u8 unk24[8];
 } effPrimParam_t;
 
-typedef struct effDrawSurface_t
-{
-    u8 unk00[0x10];
-    void (*append)(struct effDrawSurface_t *surface, void *packet);
-} effDrawSurface_t;
-
 extern effPrimParam_t dds3NeedleModelPrimParam;   /* effPkt3DPrimMakePoly parameter block */
 extern f32 dds3NeedleModelDefaultPoints[][4];         /* default triangle points */
 extern u32 dds3NeedleModelDefaultColors[];            /* default triangle colours */
-extern effDrawSurface_t *dds3NeedleModelDrawSurfaces[];
+extern sdfGrOt_t *dds3NeedleModelDrawSurfaces[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(void *a);
@@ -485,7 +479,7 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
             sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&dds3NeedleModelPrimParam)));
         }
     }
-    dds3NeedleModelDrawSurfaces[hNModel->blend]->append(dds3NeedleModelDrawSurfaces[hNModel->blend], packet);
+    dds3NeedleModelDrawSurfaces[hNModel->blend]->regFunc(dds3NeedleModelDrawSurfaces[hNModel->blend], packet);
 }
 
 #include "sdk_libc.h"

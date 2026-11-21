@@ -147,3 +147,15 @@ whole-owner assembly and object equality, observer/unobserved equality for six
 artifacts, and unchanged hashes for the 856-file input closure. The 866-event
 observation is scoped to this frozen source and retained compile context, not a
 blanket claim of observer neutrality. No matching credit or source change.
+
+## Message selection rectangle indices
+
+The selection rectangle fan consumes four vertex and four color indices.
+Each array is followed by four separate zero alignment bytes.
+
+## Message inspector startup state (interface, 12 bytes)
+
+The writable message inspector begins at cursor zero, normal mode, and
+with no linked message. The allocator, menu update and reset paths
+all consume the same three-word typed object. The following raw zero
+word belongs to neither this object nor the next message-menu table.

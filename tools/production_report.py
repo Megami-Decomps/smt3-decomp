@@ -451,6 +451,9 @@ def file_backed_alias_proof(root: Path, elf_path: Path, map_path: Path, objects:
         result[name] = {"owner": owner, "input": path, "address": alias.address,
                         "offset": alias.offset, "owner_size": size, "alias_size": alias.alias_size,
                         "consumers": references[name]}
+        if alias.record_bytes is not None:
+            result[name]["view"] = {"record_bytes": alias.record_bytes,
+                                    "prefix_bytes": alias.prefix_bytes}
     return result, inputs
 
 

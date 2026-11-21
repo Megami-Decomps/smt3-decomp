@@ -90,6 +90,47 @@ class AliasTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "overlapping"):
             self.load([self.row(), self.row("overlap", 6)], native)
 
+    def test_opted_in_native_views_overlap_without_moving_anchors(self):
+        native = ("owner = 0x303050; // size:0x40\n"
+                  "anchor = 0x303060; // type:s32 size:0x20\n"
+                  "other = 0x303070; // type:u32 size:0x10\n")
+        first = self.row(offset=0x10, owner_size=0x40,
+                         view={"record_bytes": 0x10, "prefix_bytes": 0})
+        second = self.row("other", 0x20, owner_size=0x40,
+                          view={"record_bytes": 0x10, "prefix_bytes": 0x20})
+        aliases = self.load([first, second], native)
+        self.assertEqual((aliases[1].address, aliases[1].prefix_bytes), (0x303070, 0x20))
+        self.assertIn("PROVIDE(other = owner + 0x20);", linker_aliases("", aliases))
+        for edits in ({"view": None}, {"view": {"record_bytes": 16}},
+                      {"view": {"record_bytes": True, "prefix_bytes": 0}},
+                      {"view": {"record_bytes": 16, "prefix_bytes": False}},
+                      {"view": {"record_bytes": 16, "prefix_bytes": 0x30}},
+                      {"view": {"record_bytes": 16, "prefix_bytes": 7}},
+                      {"view": {"record_bytes": 8, "prefix_bytes": 0}},
+                      {"view": {"record_bytes": 0, "prefix_bytes": 0}},
+                      {"unit": "field/other"}, {"section": ".bss"}):
+            with self.subTest(edits=edits), self.assertRaises(ValueError):
+                self.load([first, dict(second, **edits)], native)
+        with self.assertRaisesRegex(ValueError, "overlapping"):
+            self.load([first, {k: v for k, v in second.items() if k != "view"}], native)
+        with self.assertRaisesRegex(ValueError, "overlapping"):
+            self.load([first, second], native.replace("type:u32", "type:u16"))
+        with self.assertRaisesRegex(ValueError, "overlapping distinct"):
+            self.load([first, dict(second, owner="separate", owner_size=0x40, offset=0x10,
+                                   view={"record_bytes": 0x10, "prefix_bytes": 0})],
+                      native + "separate = 0x303060; // size:0x40\n")
+
+    def test_overlap_rejects_disjoint_envelopes_of_distinct_primaries(self):
+        native = ("owner = 0x303050; // size:0x40\n"
+                  "anchor = 0x303060; // type:s32 size:0x10\n"
+                  "other = 0x303090; // type:s32 size:0x10\n"
+                  "separate = 0x303080; // size:0x40\n")
+        first = self.row(offset=0x10, owner_size=0x40,
+                         view={"record_bytes": 0x10, "prefix_bytes": 0})
+        second = self.row("other", 0x10, owner="separate", owner_size=0x40)
+        with self.assertRaisesRegex(ValueError, "overlapping distinct"):
+            self.load([first, second], native)
+
     def test_script_collisions_do_not_shadow_relative_alias(self):
         aliases = self.load([self.row()])
         for old in ("anchor = 0x303054;\n", "PROVIDE(anchor = 0x303054);\n",

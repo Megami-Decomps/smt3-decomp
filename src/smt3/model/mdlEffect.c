@@ -204,7 +204,7 @@ extern mdlDebugEntry_t mdlDebugEntryTable[];
 extern mdlDebugOption_t softenBiasWork;
 
 extern mdlDebugLabel_t mdlDebugLightLabels[4], mdlDebugScaleFogLabel, softenBiasLabels[4];
-extern u16 mdlDebugLightCursorY[], softenBiasCursorY[4] __attribute__((section(".data")));
+extern u16 mdlDebugLightCursorY[15], softenBiasCursorY[3] __attribute__((section(".data")));
 extern u8 corePktSoftenBias __attribute__((section(".sdata")));
 
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
@@ -213,7 +213,7 @@ extern char *mdlColorChannelLabels[];
 
 extern u8 mdlColorChannelStyle[];
 
-extern u16 mdlPibTrackRowOffset[];
+extern u16 mdlPibTrackRowOffset[23];
 
 extern void *sdfChipAllocZeroDirect(u32 aSize);
 

@@ -2,6 +2,7 @@
 #include "fldTerminalNames.h"
 #include "newdata.h"
 #include "itfMesManager.h"
+#include "itfMesDebugState.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
@@ -62,13 +63,6 @@ struct itfMesManager_t {
     u16 unkE;
     itfMesLinkControl_t pool;
     itfMesLink_t nodes[0x80];
-};
-
-/* State of the interactive message-layout inspector. */
-struct debug_tag {
-    s32 cursor;
-    s32 mode;
-    itfMesLink_t *pmesflow;
 };
 
 /* Named primary/secondary buttons are ports 0/1 of input bank 1. */

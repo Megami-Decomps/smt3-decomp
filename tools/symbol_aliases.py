@@ -16,6 +16,8 @@ class SymbolAlias:
     owner_size: int | None = None
     alias_size: int | None = None
     native_type: str | None = None
+    record_bytes: int | None = None
+    prefix_bytes: int = 0
 
 
 NATIVE_SYMBOL = re.compile(r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;([^\n]*)", re.M)
@@ -59,6 +61,61 @@ def native_data_symbol(rows, name, path, *, owner_size=None):
     return address, size, typ
 
 
+def data_alias_envelope(alias):
+    """The linked anchor can be inside the verified native view."""
+    size, off, addr = alias.owner_size, alias.offset, alias.address
+    forward, before = alias.alias_size, alias.prefix_bytes
+    if (any(type(n) is not int for n in (size, off, addr, forward, before))
+            or not 0 <= before <= off or not 0 < off <= size - forward
+            or forward <= 0 or not 0 <= addr - off < addr
+            or addr - off + size > 1 << 32):
+        raise ValueError(f"{alias.name}: out-of-bounds native data view")
+    record = alias.record_bytes
+    if record is None:
+        if before:
+            raise ValueError(f"{alias.name}: prefix requires an explicit record view")
+    else:
+        width = NATIVE_DATA_WIDTH.get(alias.native_type) if isinstance(alias.native_type, str) else None
+        if (type(record) is not int or not width or record <= 0 or record % width
+                or any(n % record for n in (addr - off, size, off, before, forward))):
+            raise ValueError(f"{alias.name}: native view must cover whole aligned records")
+    return addr - before, addr + forward
+
+
+def validate_data_alias_views(aliases):
+    """Only explicitly typed same-primary record views may share storage."""
+    spans, primaries, names = [], {}, set()
+    for alias in aliases:
+        if alias.section != ".data":
+            if alias.record_bytes is not None or alias.prefix_bytes != 0:
+                raise ValueError(f"{alias.name}: record view requires .data")
+            continue
+        start, end = data_alias_envelope(alias)
+        if alias.name in names or alias.name == alias.owner:
+            raise ValueError(f"{alias.name}: duplicate or self alias")
+        names.add(alias.name)
+        base = alias.address - alias.offset
+        owner = (alias.unit, base, alias.owner_size)
+        if primaries.setdefault(alias.owner, owner) != owner:
+            raise ValueError(f"{alias.name}: conflicting data owner units or extents")
+        for other, lo, hi in spans:
+            other_base = other.address - other.offset
+            if (alias.owner != other.owner
+                    and base < other_base + other.owner_size
+                    and other_base < base + alias.owner_size
+                    and (alias.record_bytes is not None or other.record_bytes is not None)):
+                raise ValueError(f"{alias.name}: overlapping distinct native data owners")
+            if not (lo < end and start < hi):
+                continue
+            if (alias.record_bytes is None or alias.record_bytes != other.record_bytes
+                    or alias.owner != other.owner or alias.address == other.address
+                    or NATIVE_DATA_WIDTH[alias.native_type] != NATIVE_DATA_WIDTH[other.native_type]):
+                raise ValueError(f"{alias.name}: overlapping native data aliases lack a shared record view")
+        spans.append((alias, start, end))
+    if names.intersection(primaries):
+        raise ValueError("data aliases must refer directly to primary objects")
+
+
 def load_symbol_aliases(root, version):
     """Resolve explicit owner-plus-offset aliases against native symbol facts."""
     path = root / "config" / version / "symbol_aliases.json"
@@ -79,6 +136,8 @@ def load_symbol_aliases(root, version):
     for row in rows:
         expected = (fields | {"owner_size"} if isinstance(row, dict) and row.get("section") == ".data"
                     else fields)
+        if isinstance(row, dict) and row.get("section") == ".data" and "view" in row:
+            expected |= {"view"}
         if not isinstance(row, dict) or set(row) != expected:
             raise ValueError(f"{path}: alias fields must be {sorted(expected)}")
         name, owner = row["name"], row["owner"]
@@ -103,8 +162,16 @@ def load_symbol_aliases(root, version):
             native_address, alias_size, typ = native_data_symbol(native_rows, name, path)
             if offset <= 0 or owner_address + offset != native_address or offset + alias_size > owner_size:
                 raise ValueError(f"{path}: {name} does not fit inside native {owner} at +0x{offset:X}")
+            record, prefix = None, 0
+            if "view" in row:
+                view = row["view"]
+                if (not isinstance(view, dict) or set(view) != {"record_bytes", "prefix_bytes"}
+                        or type(view["record_bytes"]) is not int
+                        or type(view["prefix_bytes"]) is not int):
+                    raise ValueError(f"{path}: invalid record view for {name}")
+                record, prefix = view["record_bytes"], view["prefix_bytes"]
             aliases.append(SymbolAlias(name, owner, unit, section, offset, native_address,
-                                       owner_size, alias_size, typ))
+                                       owner_size, alias_size, typ, record, prefix))
             continue
         owner_address = symbols.get(owner)
         native_address = symbols.get(name)
@@ -116,18 +183,7 @@ def load_symbol_aliases(root, version):
         aliases.append(SymbolAlias(name, owner, unit, section, offset, native_address))
     if any(alias.owner in names for alias in aliases):
         raise ValueError(f"{path}: aliases must refer directly to primary objects")
-    data_owners = {}
-    data_spans = []
-    for alias in aliases:
-        if alias.section != ".data":
-            continue
-        owner = (alias.unit, alias.owner_size)
-        if data_owners.setdefault(alias.owner, owner) != owner:
-            raise ValueError(f"{path}: conflicting data owner units for {alias.owner}")
-        start, end = alias.address, alias.address + alias.alias_size
-        if any(a < end and start < b for a, b in data_spans):
-            raise ValueError(f"{path}: overlapping native data alias {alias.name}")
-        data_spans.append((start, end))
+    validate_data_alias_views(aliases)
     return tuple(aliases)
 
 

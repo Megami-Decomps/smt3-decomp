@@ -326,5 +326,133 @@
     "section": ".data",
     "offset": 4,
     "owner_size": 8
+  },
+  {
+    "name": "D_00320774",
+    "owner": "dblurParam2",
+    "unit": "effect/effForceFilterDefault",
+    "section": ".data",
+    "offset": 4,
+    "owner_size": 24
+  },
+  {
+    "name": "nbPanelPartUV",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 48,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "nbPanelLayoutTable",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 64,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFB40",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 112,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 64
+    }
+  },
+  {
+    "name": "D_004EFDD0",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 768,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFDE0",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 784,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFE00",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 816,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFE10",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 832,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFE20",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 848,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFE30",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 864,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
+  },
+  {
+    "name": "D_004EFE40",
+    "owner": "nbPanelParamTable",
+    "unit": "newbattle/nbPanelParamTableData",
+    "section": ".data",
+    "offset": 880,
+    "owner_size": 912,
+    "view": {
+      "record_bytes": 16,
+      "prefix_bytes": 0
+    }
   }
 ]

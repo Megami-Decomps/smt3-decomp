@@ -69,6 +69,22 @@ class InitializedDataAliasTests(unittest.TestCase):
                                    skip=elf32(symbols=(UNDEFINED,)),
                                    full=elf32(symbols=(UNDEFINED,))), [])
 
+    def test_overlapping_views_require_valid_geometry_even_on_manual_objects(self):
+        first = replace(ALIAS, record_bytes=4, alias_size=8)
+        second = replace(first, name="switches", offset=8, address=ORIGIN + 8,
+                         prefix_bytes=8, alias_size=4)
+        syms = SYMS | {"switches": ORIGIN + 8}
+        self.assertEqual(self.check(aliases=(first, second), syms=syms), [])
+        for invalid in (replace(second, prefix_bytes=12), replace(second, prefix_bytes=True),
+                        replace(second, record_bytes=None, prefix_bytes=0),
+                        replace(second, owner_size=9), replace(second, alias_size=SIZE)):
+            with self.subTest(invalid=invalid):
+                self.assertTrue(self.check(aliases=(first, invalid), syms=syms))
+        other_def = ("switches", 8, 4, 0x11, 1)
+        false = elf32(symbols=(PRIMARY, UNDEFINED, other_def))
+        self.assertTrue(self.check(aliases=(first, second), syms=syms, skip=false))
+        self.assertTrue(self.check(aliases=(first, second), syms=syms, full=false))
+
     def test_ordinary_and_nobits_do_not_enter_elf_alias_checks(self):
         bss = SymbolAlias("tail", "bssRows", UNIT, ".bss", 4, ORIGIN + 4)
         for aliases in ((), (bss,)):

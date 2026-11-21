@@ -137,10 +137,10 @@ class DataAliasLinkTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name)
-        self.alias = type("Alias", (), dict(name="interior", owner="primary",
-            unit="field/door", section=".data", offset=4, address=0x2024,
-            owner_size=8, alias_size=2))()
-        feature = patch("symbol_aliases.load_symbol_aliases", return_value=[self.alias])
+        from symbol_aliases import SymbolAlias
+        self.aliases = [SymbolAlias("interior", "primary", "field/door", ".data",
+                                    4, 0x2024, 8, 2, "u8")]
+        feature = patch("symbol_aliases.load_symbol_aliases", return_value=self.aliases)
         feature.start()
         self.addCleanup(feature.stop)
         self.write(self.owner, alias_elf([("primary", 0, 8, 0x11, 1)]))
@@ -201,6 +201,34 @@ class DataAliasLinkTests(unittest.TestCase):
         self.write(self.manifest, "[]  \n")
         with self.assertRaisesRegex(ValueError, "stale provenance"):
             production_report.read_receipt(self.root, self.elf, self.map, receipt)
+
+    def test_overlapping_views_have_independent_live_relocations(self):
+        from dataclasses import replace
+        first = replace(self.aliases[0], record_bytes=2)
+        second = replace(first, name="earlier", offset=2, address=0x2022, alias_size=4)
+        self.aliases[:] = [first, second]
+        peer2 = "build/smt3/asm/smt3/field/peer2.o"
+        program = ("primary", 0x2020, 8, 0x11, 1)
+        names = [(a.name, a.address, 0, 0x11, 0xfff1) for a in self.aliases]
+        self.write(self.elf, alias_elf([program, *names], linked=True))
+        self.write(self.script, (self.root / self.script).read_text() +
+                   "PROVIDE(earlier = primary + 0x2);\n")
+        self.write(self.map, (self.root / self.map).read_text() +
+                   f" .text\n   0x3010 0x4 {peer2}\n"
+                   " 0x2022 PROVIDE (earlier = (primary + 0x2))\n")
+        def verify():
+            return production_report.file_backed_alias_proof(
+                self.root, self.elf, self.map, [self.owner, self.peer, peer2])
+        for live in (True, False):
+            self.write(peer2, alias_elf([("earlier", 0, 0, 0x10, 0)], text_reloc=live))
+            if not live:
+                with self.assertRaisesRegex(ValueError, "earlier: no live allocated"):
+                    verify()
+                break
+            proof, _ = verify()
+            self.assertEqual(proof["earlier"]["view"], {"record_bytes": 2, "prefix_bytes": 0})
+            self.assertEqual(proof["earlier"]["consumers"], {peer2: 1})
+            self.assertEqual(proof["interior"]["consumers"], {self.peer: 1})
 
     def test_debug_only_and_discarded_relocations_fail(self):
         self.write(self.peer, alias_elf([("interior", 0, 0, 0x10, 0)], debug_reloc=True))

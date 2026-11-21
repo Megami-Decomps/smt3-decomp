@@ -157,6 +157,7 @@ cmbGetModelMarkPos	facility/fclCombineInit	0x238	142 of 142 words match	docs/mat
 Sacrifice fusion timeline				docs/matching/facility/fclCombineInit.md	838
 Fusion labels and model marks				docs/matching/facility/fclCombineInit.md	846
 Fusion sprite resources				docs/matching/facility/fclCombineInit.md	854
+Triple-race comparison row				docs/matching/facility/fclCombineInit.md	866
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3
@@ -268,14 +269,19 @@ fldSnowTask (1280 bytes)				docs/matching/fldSnow.md	3
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
 frAnalyzeTag	interface/frFont	0x518	326 of 326 words match	docs/matching/interface/frFont.md	79
 frAnalyzeMessage	interface/frFont	0x200	128 of 128 words match	docs/matching/interface/frFont.md	100
+Font load-state slots				docs/matching/interface/frFont.md	119
 frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/interface/frName.md	3
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93
 frCreateNameHandle	interface/frName	0xC0	48 of 48 words match	docs/matching/interface/frName.md	154
 DrawSelectCursor	interface/itfMesManager	0x2FC	191 of 191 words match	docs/matching/interface/itfMesManager.md	3
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	25
+Message selection rectangle indices				docs/matching/interface/itfMesManager.md	151
+Message inspector startup state	interface	12 bytes		docs/matching/interface/itfMesManager.md	156
+Gauge highlight strip indices				docs/matching/interface/itfMisc.md	3
 Plain full-color and normal quad index rows	interface	56 bytes		docs/matching/interface/itfPanel.md	3
 Panel draw callbacks	interface	36 bytes		docs/matching/interface/itfPanel.md	11
+Selected, plain and facility outline indices	interface	62 bytes		docs/matching/interface/itfPanel.md	19
 lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55
@@ -404,6 +410,7 @@ nbNegoProcess1	newbattle/nbNegoProcess	0x290	164 of 164 words match	docs/matchin
 nbGetQuestionType	newbattle/nbNegoProcess	0x25C	100 of 151 words match	docs/matching/newbattle/nbNegoProcess.md	122
 Mukan negotiation weights				docs/matching/newbattle/nbNegoProcess.md	157
 Initial and additional negotiation request weights				docs/matching/newbattle/nbNegoProcess.md	167
+Shared parameter and layout views				docs/matching/newbattle/nbPanelParamTableData.md	3
 nbPanelDrawPP (0xA84)			673 of 673 words	docs/matching/newbattle/nbPanelProcess.md	3
 nbPanelDrawPP1 (0xC98)			690 of 797 words differ	docs/matching/newbattle/nbPanelProcess.md	73
 nbPanelPartyDraw (0x54C)				docs/matching/newbattle/nbPanelProcess.md	135

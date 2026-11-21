@@ -18,5 +18,12 @@
   "newbattle/nbNegoExtraRequestWeights": "datNegoTuikaReqtype",
   "nme/nmeSpriteResources0": "D_005277B8",
   "nme/nmeSpriteResources1": "D_00527C80",
-  "facility/fclEncycCompareIndex": "fclEncycCompareIndex"
+  "facility/fclEncycCompareIndex": "fclEncycCompareIndex",
+  "interface/itfPanelPlainLineVertices": "itfPanelPlainLineVertexIndex",
+  "interface/itfPanelPlainLineColors": "itfPanelPlainLineColorIndex",
+  "model/mdlPibTrackCursorRows": "mdlPibTrackRowOffset",
+  "model/mdlDebugLightCursorRows": "mdlDebugLightCursorY",
+  "model/mdlDebugSoftenCursorRows": "softenBiasCursorY",
+  "interface/itfGaugeHighlightVertexData": "itfGaugeHighlightVertexIndex",
+  "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex"
 }

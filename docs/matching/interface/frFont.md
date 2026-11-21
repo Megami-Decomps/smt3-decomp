@@ -115,3 +115,9 @@ operation or promise about a callback.
 The input domain is a valid game-encoded message, including any bytes
 required by its tags. The two independently exact functions and all 79
 previous owner peers are validated together; the complete owner is 81/0.
+
+## Font load-state slots
+
+The nine native font slots each have a writable load-state word initialized
+to zero. Loading tests and sets a slot; deletion clears it, including the
+explicitly used temporary slot 8. The following four zero bytes are alignment.

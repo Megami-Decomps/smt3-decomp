@@ -862,3 +862,8 @@ The original 24-byte page layout is a distinct object, with the same
 six resource and placement pointers. Its separate source owner retains
 all six named relocations rather than converting the two stock-page
 references to local section addends.
+
+## Triple-race comparison row
+
+The two permutations each test precisely the one native four-byte row: three
+race bytes and its result byte. The following zero word is separate alignment.

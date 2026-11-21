@@ -25,7 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from retail_elf import RETAIL, ROOT, VERSIONS, load_segments, off_to_va, va_to_off  # noqa: E402
 from linker_inputs import linker_object_sections  # noqa: E402
-from symbol_aliases import load_symbol_aliases  # noqa: E402
+from symbol_aliases import load_symbol_aliases, validate_data_alias_views  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
     instruction_shape_matches,
@@ -1010,6 +1010,10 @@ def initialized_data_alias_problems(unit, section_range, aliases, syms, retail, 
     with the linker alias. No alias is added to the payload inventory.
     """
     data_aliases = [alias for alias in aliases if alias.section == ".data"]
+    try:
+        validate_data_alias_views(aliases)
+    except ValueError as exc:
+        return [str(exc)]
     if not data_aliases:
         return []
     # Keep ordinary and NOBITS-only checks independent of this ELF audit.

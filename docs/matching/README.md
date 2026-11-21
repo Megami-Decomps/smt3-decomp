@@ -12,8 +12,8 @@ both native and emitted sizes when they differ.
 | Entries | Unit | Page |
 |---|---|---|
 | 54 |  | [code_0022C578.md](code_0022C578.md) |
+| 25 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 24 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
-| 24 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 19 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
@@ -54,7 +54,9 @@ both native and emitted sizes when they differ.
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
+| 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
+| 4 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -77,7 +79,7 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
-| 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
+| 3 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |
 | 3 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -100,8 +102,6 @@ both native and emitted sizes when they differ.
 | 2 | newbattle/NbNegoFlowOne | [newbattle/NbNegoFlowOne.md](newbattle/NbNegoFlowOne.md) |
 | 2 |  | [newbattle/NbNegoFlowInnen.md](newbattle/NbNegoFlowInnen.md) |
 | 2 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
-| 2 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
-| 2 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 2 | field/fldTest | [field/fldTestShadowData.md](field/fldTestShadowData.md) |
 | 2 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 2 | field/fldSky | [field/fldSky.md](field/fldSky.md) |
@@ -131,6 +131,7 @@ both native and emitted sizes when they differ.
 | 1 | nme/Nme_Draw | [nme/Nme_Draw.md](nme/Nme_Draw.md) |
 | 1 | newbattle/nbSound | [newbattle/nbSound.md](newbattle/nbSound.md) |
 | 1 |  | [newbattle/nbPanelReadOnlyData.md](newbattle/nbPanelReadOnlyData.md) |
+| 1 |  | [newbattle/nbPanelParamTableData.md](newbattle/nbPanelParamTableData.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
@@ -147,6 +148,7 @@ both native and emitted sizes when they differ.
 | 1 | kernel/dds3DebugStuff | [kernel/dds3DebugStuff.md](kernel/dds3DebugStuff.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
+| 1 |  | [interface/itfMisc.md](interface/itfMisc.md) |
 | 1 |  | [fldSnow.md](fldSnow.md) |
 | 1 | field/fldTitle | [field/fldTitle.md](field/fldTitle.md) |
 | 1 | field/fldSnow | [field/fldSnow.md](field/fldSnow.md) |
