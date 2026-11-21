@@ -2,5 +2,9 @@
   "newbattle/nbPlayerMotionMap": "D_003493A0",
   "newbattle/nbDevilMotionMap": "D_0034F1C0",
   "nme/nmeAsciiCodeData": "nmeAsciiCodeTable",
-  "facility/fclCombinePairRecipes": "D_0032DC18"
+  "facility/fclCombinePairRecipes": "D_0032DC18",
+  "facility/fclCombineUnlockedPairRecipes": "cmbEntryPairTable",
+  "facility/fclCombineMoonRanges": "cmbMoonRangeTable",
+  "facility/fclRagElementalOfferWeights": "ragListItemTable2",
+  "facility/fclRagMitamaOfferWeights": "ragListItemTable3"
 }

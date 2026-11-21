@@ -566,9 +566,9 @@ extern void cmpModelInit(void);
 extern fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color, s8 type, s8 speed);
 extern const char fclCombineScriptPath[];
 extern const char fclCombineExplainPath[];
-extern u8 D_0032D1A8[];
-extern u8 D_0032D1B8[];
-extern u8 D_0032D1C8[];
+extern const char *D_0032D1A8[];
+extern const char *D_0032D1B8[];
+extern const char *D_0032D1C8[];
 
 #ifdef NON_MATCHING
 extern void *memset(void *a, s32 b, size_t c);

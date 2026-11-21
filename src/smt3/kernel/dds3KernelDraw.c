@@ -1,6 +1,7 @@
 #include "common.h"
 #include "draw.h"
 #include "draw3d.h"
+#include "effect.h"
 #include "kernel_draw.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
@@ -211,7 +212,7 @@ s32 *Eve_PartialMultiFilterGetParams(void);
 void Eve_PartialMultiFilterSetParam(void *pParam);
 void Eve_PartialMultiFilterON(void);
 void Eve_PartialMultiFilterOFF(void);
-s32 *Eve_BlurGetParam(void);
+dds3Effect_Blur_t *Eve_BlurGetParam(void);
 void Eve_BlurSetParam(void *pParam);
 void Eve_BlurON(void);
 void Eve_BlurOFF(void);

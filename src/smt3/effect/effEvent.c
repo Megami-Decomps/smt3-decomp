@@ -64,7 +64,7 @@ extern void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut);
 
 
 extern s8 Eve_BlurShow;
-extern effScreenDrawParams_t Eve_Blur;
+extern dds3Effect_Blur_t Eve_Blur;
 extern s8 Eve_PartialMultiBlurShow;
 extern effBlurTemplate_t *hEve_PartialMultiBlur;
 extern s8 Eve_DistortionBlurShow;
@@ -288,13 +288,13 @@ void Eve_BlurOFF(void) {
     Eve_BlurShow = 0;
 }
 
-/* Copy only the framebuffer source prefix, not the trailing screen-record bytes. */
+/* Copy the complete native framebuffer-quad parameter block. */
 void Eve_BlurSetParam(void *pParam) {
     memcpy(&Eve_Blur, pParam, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
 /* Expose the framebuffer-quad parameter block by address. */
-effScreenDrawParams_t *Eve_BlurGetParam(void) {
+dds3Effect_Blur_t *Eve_BlurGetParam(void) {
     return &Eve_Blur;
 }
 
@@ -436,7 +436,7 @@ void Eve_EffectInit(void) {
 /* Draw every screen effect whose show flag is set; the last one tail calls. */
 void Eve_EffectDraw(void) {
     if (Eve_BlurShow != 0) {
-        dds3EffectBlur(&Eve_Blur.source);
+        dds3EffectBlur(&Eve_Blur);
     }
     if (Eve_PartialMultiBlurShow != 0) {
         dds3EffectPartialMultiBlurDraw(hEve_PartialMultiBlur);
