@@ -1,0 +1,26 @@
+#include "effThunderPolyPresetData.h"
+
+void *effPCPThunderPolyDataList[22] = {
+    &D_0031D310,
+    &D_0031D370,
+    &D_0031D3D0,
+    &D_0031D430,
+    &D_0031D490,
+    &D_0031D4F0,
+    &D_0031D550,
+    &D_0031D5B0,
+    &D_0031D610,
+    &D_0031D670,
+    &D_0031D6D0,
+    &D_0031D730,
+    &D_0031D790,
+    &D_0031D7F0,
+    &D_0031D850,
+    &D_0031D8B0,
+    &D_0031D910,
+    &D_0031D970,
+    &D_0031D9D0,
+    &D_0031DA30,
+    &D_0031DA90,
+    &D_0031DAF0,
+};

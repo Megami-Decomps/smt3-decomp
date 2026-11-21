@@ -5,3 +5,9 @@ rom:0x22740C reloc:MIPS_NONE symbol:none // 0032640C outside: 0x00004000, not D_
 rom:0x227410 reloc:MIPS_NONE symbol:none // 00326410 outside: 0x00004000, not D_4000
 rom:0x20B2D8 reloc:MIPS_NONE symbol:none // 0030A2D8 fldSceneBgmTrackTable: 0x00460000, a MIDI bank id, not itfMesEmbedded_45FF20 + 0xE0
 rom:0x220304 reloc:MIPS_NONE symbol:none // effPCPScatterParams[17]: packed vertex indices {24,28,27}, not nbCameraCheckNiidaCamera
+rom:0x21E128 reloc:MIPS_NONE symbol:none // sphere PCP preset 2: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x21E3C0 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x21E660 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x21E6C0 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x21E720 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820
+rom:0x21E780 reloc:MIPS_NONE symbol:none // PCP thunder poly preset: packed edge color 0x003A0200, not datDevilAIDataTable + 0x7820

@@ -1,13 +1,13 @@
 #include "common.h"
 #include "effPCPData.h"
 #include "effThunder.h"
+#include "effThunderSphereData.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
 #include "sdf_types.h"
 #include "sdfFrame.h"
 
 struct effRandState_t;
-struct effPCPThunderSpherePolyParam_t;
 struct effPCP_ThunderRadiatePolyPart_t;
 struct effPCP_ThunderRadiatePolyParam_t;
 struct effPCP_ThunderRadiatePoly_t;
@@ -41,7 +41,6 @@ typedef struct effPCP_ThunderColumnPolyLowPart_t effPCP_ThunderColumnPolyLowPart
 typedef struct effPCP_ThunderColumnPolyLowParam_t effPCP_ThunderColumnPolyLowParam_t;
 typedef struct effPCP_ThunderColumnPolyLow_t effPCP_ThunderColumnPolyLow_t;
 typedef struct effPCPThunderSpherePolyPart_t effPCPThunderSpherePolyPart_t;
-typedef struct effPCPThunderSpherePolyParam_t effPCPThunderSpherePolyParam_t;
 typedef struct effPCPThunderSpherePoly_t effPCPThunderSpherePoly_t;
 
 #define EFF_THUNDER_VECTOR_COMPONENTS 4
@@ -357,30 +356,6 @@ struct effPCPThunderSpherePolyPart_t {
 };
 
 /* Alpha-system parameters supply three packed words to the particle system. */
-/* The sphere-poly parameters, 0x4C bytes the constructors copy whole. The tail
- * is the thunder family's six fields: a width and a colour for the centre, the
- * border and the edge. The decomp read it twice, once for the widths and once
- * for the colours, which is why the two views agreed on everything before. */
-struct effPCPThunderSpherePolyParam_t {
-    f32 origin[4];
-    u16 systemParam;
-    u8 pad12[2];
-    u32 cellCount;
-    u8 pad18[4];
-    f32 width;
-    f32 height;
-    f32 rotationScale;
-    u32 startDelayRange;
-    u32 activeFrameRange;
-    u16 perCell;
-    u8 pad32[2];
-    f32 width_center; /* 0x34: nothing reads it */
-    u32 color_center;
-    f32 width_border;
-    u32 color_border;
-    f32 width_edge;
-    u32 color_edge;
-};
 
 /* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
 /* The complete work is followed by cellCount cells in the same allocation. */

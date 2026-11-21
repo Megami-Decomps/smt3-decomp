@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "newdata.h"
 #include "field.h"
+#include "fldRunNativeRows.h"
 #include "event.h"
 #include "model.h"
 #include "motion.h"
@@ -137,32 +138,6 @@ extern void p2sdFadeOutBgm(u32 arg);
 
 extern void p2sdStopBGM(u32 arg);
 
-/* One loadable field effect: the resource handle trio the loader fills, then
- * the live effect or part handle and the placement the task applies. */
-typedef struct {
-    sdfMemHandle_t *mhFile;
-    void *ptr;
-    s32 size;
-    void *pcf;
-    void *d3p;
-    s32 cnt;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 r;
-} fldTest_FLDRUN_EFF_t;
-
-typedef struct {
-    fldTest_FLDRUN_EFF_t *pEff;
-    s32 time;
-    s32 effmode;
-    s32 rotmode;
-    f32 off_cam_range_min;
-    f32 off_cam_range_max;
-} fldTest_FLDRUN_EFFTBL_t;
-
-extern fldTest_FLDRUN_EFFTBL_t *fldRunEffTables[];
-
 extern char fldElvFloorLabels[];
 
 extern void FromRotation(f32 aAngle);
@@ -262,13 +237,6 @@ extern void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *p
 extern void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatrix);
 
 extern void SetRotateMatrixY(f32 aAngle);
-
-typedef struct {
-    char name[8];
-    s16 ix;
-    s16 iz;
-    f32 angle;
-} fldDanteDoor_t;
 
 /* Dante's chase work block. Only the fields the chase code reaches are known. */
 typedef struct
