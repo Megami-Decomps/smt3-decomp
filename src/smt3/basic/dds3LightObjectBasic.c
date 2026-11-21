@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel_draw.h"
 #include "basic.h"
+#include "fldResourceLight.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
@@ -35,23 +36,6 @@ typedef struct dds3LightColorWork_t
     u32 word;
     u8 pad04[12];
 } dds3LightColorWork_t;
-
-typedef struct fldResourceLight_t
-{
-    u32 resv;
-    u32 Flag;
-    u32 AnimeType;
-    f32 InsideR;
-    f32 OutsideR;
-    f32 Soften;
-    f32 Bias;
-    f32 DiffuseR;
-    f32 DiffuseG;
-    f32 DiffuseB;
-    f32 AmbientR;
-    f32 AmbientG;
-    f32 AmbientB;
-} fldResourceLight_t;
 
 
 extern void *memset(void *a, s32 b, size_t c);

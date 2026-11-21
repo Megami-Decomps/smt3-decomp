@@ -7,6 +7,7 @@
 #include "event.h"
 #include "motion.h"
 #include "field.h"
+#include "fldResourceLight.h"
 
 /* The quadword copy of a formation position: 16-byte aligned, so ee-gcc moves
  * it with one lq/sq pair. */
@@ -33,7 +34,7 @@ extern char nbStageProcessName[];
 
 extern char nbStageDrawProcessName[];
 
-extern u8 nbBattleLightResource[];
+extern fldResourceLight_t nbBattleLightResource;
 
 extern void *memset(void *a, s32 b, size_t c);
 
@@ -45,8 +46,6 @@ extern struct dds3Basic_t *dds3SceneBasicSearchNameAndType(struct dds3Basic_t *s
 extern s32 dds3AllocObjectId(void);
 
 extern struct dds3Basic_t *dds3AddLightObjectBasic(s32 serial);
-
-extern void dds3SetLightObjectResoruce(struct dds3Basic_t *basic, u8 *resource);
 
 extern void dds3SetUnitObjectId(struct dds3Basic_t *basic, char *name);
 
@@ -147,7 +146,7 @@ void SetBattleLight(nbMainProcessData_t *data)
         struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
 
         data->light[0] = light;
-        dds3SetLightObjectResoruce(light, nbBattleLightResource);
+        dds3SetLightObjectResoruce(light, &nbBattleLightResource);
         dds3SetPosPoseSet(data->light[0], &pos);
         dds3SetUnitObjectId(data->light[0], nbStageLightName);
     }
@@ -155,7 +154,7 @@ void SetBattleLight(nbMainProcessData_t *data)
         struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
 
         data->light[1] = light;
-        dds3SetLightObjectResoruce(light, nbBattleLightResource);
+        dds3SetLightObjectResoruce(light, &nbBattleLightResource);
     }
 }
 
