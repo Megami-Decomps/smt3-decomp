@@ -136,8 +136,7 @@ void gcc2_compiled__8(u32 chcr)
     EIntr();
 }
 
-extern u128 ipuDefaultQuantizerMatrices[5] __attribute__((aligned(16)));
-extern u128 ipuDefaultVqClut[2] __attribute__((aligned(16)));
+#include "libipuDefaultTables.h"
 
 #define IPU_FIFO (*(volatile u128 *)0x10007010)
 
@@ -157,18 +156,18 @@ void sceIpuInit(void)
         ctrl = IPU_CTRL;
     } while (ctrl < 0);
     fifo = (volatile u128 *)0x10007010;
-    *fifo = ipuDefaultQuantizerMatrices[0];
+    *fifo = ipuDefaultQuantizerMatrices[0].fifo;
     /* Keep the FIFO address in a register for the remaining transfers.
      * This conservative alias view preserves all four reads of the final
      * quantizer quadword; see docs/matching/sdk/libipu.md. */
     FAKEMATCH_ASM_LIVE(fifo);
-    *fifo = ipuDefaultQuantizerMatrices[1];
-    *fifo = ipuDefaultQuantizerMatrices[2];
-    *fifo = ipuDefaultQuantizerMatrices[3];
-    *fifo = ipuDefaultQuantizerMatrices[4];
-    *fifo = ipuDefaultQuantizerMatrices[4];
-    *fifo = ipuDefaultQuantizerMatrices[4];
-    *fifo = ipuDefaultQuantizerMatrices[4];
+    *fifo = ipuDefaultQuantizerMatrices[1].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[2].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[3].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[4].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[4].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[4].fifo;
+    *fifo = ipuDefaultQuantizerMatrices[4].fifo;
     IPU_CMD = 0x50000000;
     do {
         ctrl = IPU_CTRL;
@@ -177,8 +176,8 @@ void sceIpuInit(void)
     do {
         ctrl = IPU_CTRL;
     } while (ctrl < 0);
-    IPU_FIFO = ipuDefaultVqClut[0];
-    IPU_FIFO = ipuDefaultVqClut[1];
+    IPU_FIFO = ipuDefaultVqClut[0].fifo;
+    IPU_FIFO = ipuDefaultVqClut[1].fifo;
     IPU_CMD = 0x60000000;
     do {
         ctrl = IPU_CTRL;

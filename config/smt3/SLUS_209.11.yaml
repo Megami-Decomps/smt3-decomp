@@ -590,8 +590,12 @@ segments:
       - [0x42AF98, data, data_00529F98]
       - [0x42AFB0, .data, sdk/libpadStateNames]
       - [0x42AFD0, data, data_00529FD0]
+      - [0x42CAA0, .data, sdk/libipuDefaultTables]
+      - [0x42CB10, data, data_0052BB10]
       - [0x42CE30, .data, sdk/libcMallocArena]
       - [0x42D238, data, data_0052C238]
+      - [0x42D2C0, .data, sdk/libkernlFsRequestSemas]
+      - [0x42D340, data, data_0052C340]
       - [0x42E940, databin, eh_frame]
       # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
       - [0x42E944, databin, vudata]
