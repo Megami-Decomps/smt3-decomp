@@ -111,7 +111,10 @@ saddr_t dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s32 strcmp(const char *left, const char *right);
 
-extern fldInfTable_t fldInfTable;
+SIZE_CHECK(fldInfTableSizeCheck, fldInfTable_t, 0x3B80);
+
+/* Shared writable destination for both native INF load paths. */
+fldInfTable_t fldInfTable = {{{0}}};
 
 extern s32 gFldInfIdx;
 
