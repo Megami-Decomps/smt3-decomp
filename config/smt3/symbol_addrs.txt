@@ -1340,6 +1340,10 @@ sdfFileRpcState = 0x005947C0; // type:u32 size:0x18
 ctorFrameObject = 0x0059AD40;
 mainCtorsDone = 0x0059AD58;
 frameObjectList = 0x0059AD60;
+// Preserve this preexisting raw listing anchor when splitting the staff table.
+// It is not a separately proven result-motion table.
+D_00333030 = 0x00333030;
+
 // Existing raw table boundaries retained across the encounter data split.
 D_00340034 = 0x00340034;
 D_0034012C = 0x0034012C;
