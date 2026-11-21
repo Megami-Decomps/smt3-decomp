@@ -6,5 +6,8 @@
   "facility/fclCombineUnlockedPairRecipes": "cmbEntryPairTable",
   "facility/fclCombineMoonRanges": "cmbMoonRangeTable",
   "facility/fclRagElementalOfferWeights": "ragListItemTable2",
-  "facility/fclRagMitamaOfferWeights": "ragListItemTable3"
+  "facility/fclRagMitamaOfferWeights": "ragListItemTable3",
+  "result/cmbEvoDevilList": "cmbEvoDevilList",
+  "camp/cmpSkillMsgTable": "cmpSkillMsgTable",
+  "camp/cmpItemMsgTable": "cmpItemMsgTable"
 }

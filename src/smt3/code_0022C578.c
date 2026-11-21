@@ -4,6 +4,7 @@
 #include "camp.h"
 #include "cmp_status_model_vectors.h"
 #include "cmp_hearts_icon_data.h"
+#include "cmp_msg_table_data.h"
 #include "kernel.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -547,17 +548,6 @@ extern s8 gMsgFlag;
 extern void cmpRemoveStockDevilEntry(void);
 
 extern void cmpInitDrawList(void);
-
-typedef struct
-{
-    /* 0x00 */ u16 id;
-    /* 0x02 */ u16 unk_02;
-    /* 0x04 */ u16 unk_04;
-} cmpMsgEntry_t;
-
-extern cmpMsgEntry_t cmpItemMsgTable[];
-
-extern cmpMsgEntry_t cmpSkillMsgTable[];
 
 extern campStatusPanel_t *campDhUpdateWork;
 

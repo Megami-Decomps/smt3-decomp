@@ -66,6 +66,7 @@ cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1969
 cmpDrawSkillListRow	code_0022C578	0x230		docs/matching/code_0022C578.md	2013
 cmpDrawSkillRowText (0x314)				docs/matching/code_0022C578.md	2030
 cmpDrawBoxG	code_0022C578	0x198	102 of 102 words match	docs/matching/code_0022C578.md	2046
+Camp item and skill message tables				docs/matching/code_0022C578.md	2068
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
@@ -457,6 +458,7 @@ rstFindRegisteredDevil	rstcalc	0x120	72 of 72 words match	docs/matching/result/r
 cmb_222828	result/rstcalc	0xB0	44 of 44 words match	docs/matching/result/rstcalc.md	612
 rstCalcEvo	result/rstcalc	0x1D0	116 of 116 words match	docs/matching/result/rstcalc.md	668
 Race and heart data				docs/matching/result/rstcalc.md	722
+Evolution eligibility list				docs/matching/result/rstcalc.md	731
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3

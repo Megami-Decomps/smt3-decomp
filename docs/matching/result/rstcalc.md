@@ -727,3 +727,10 @@ changing the existing reader views or their offsets. Five live non-owning
 symbols still point into the first record for existing code and assembly
 consumers. Other interior labels are retained for the reference split. The separate raw bytes immediately after the array are unchanged;
 this does not assert that an out-of-range debug index is supported.
+
+## Evolution eligibility list
+
+The 37 devil IDs are native unsigned halfwords. The six following zero
+bytes remain a separate raw gap. The existing reference-tail handling
+recovers the final real halfword for comparison; it does not change the
+linker input or extend the adjacent evolution matrix.
