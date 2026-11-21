@@ -4,6 +4,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
+#include "mdlFileIndex.h"
 
 #define MDL_GROUP_COUNT 8
 
@@ -158,14 +159,6 @@ typedef struct
     dds3ModelFileTable_t *entries;
     s32 count;
 } mdlFileSlot_t;
-
-typedef struct
-{
-    u16 major;
-    u16 minor;
-    u16 scale;
-    u16 radius;
-} dds3ModelFileIndex_t;
 
 typedef struct
 {

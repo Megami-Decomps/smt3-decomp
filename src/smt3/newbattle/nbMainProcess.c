@@ -462,8 +462,8 @@ void nbDebugCamera(nbMainProcessData_t *data)
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
-extern char *nbDebugPhaseNameTable[];
-extern char *nbActionTypeNameTable[];
+extern const char *nbDebugPhaseNameTable[23];
+extern char *nbActionTypeNameTable[6];
 extern char nbDebugTurnFmt[]; /* "Turn:%d", shared small-data strings. */
 extern char nbDebugEnemyName[]; /* "ENEMY" */
 extern char nbDebugPlayerName[]; /* "PLAYER" */

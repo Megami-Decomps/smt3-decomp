@@ -206,12 +206,8 @@ void pbDumpBlockData(pbProcHandle_t *p) {
     }
 }
 
-typedef struct {
-    f32 from[4];
-    f32 to[4];
-} pbOutlineEdge_t;
+#include "pbBoardData.h"
 
-extern pbOutlineEdge_t pbOutlineEdgeTable[];
 extern u8 pbGetBlockAt(s16 x, s16 y, s16 group);
 
 /* Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,

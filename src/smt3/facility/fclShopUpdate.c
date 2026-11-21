@@ -7,6 +7,7 @@
 #include "ps2asm.h"
 #include "event.h"
 #include "kernel.h"
+#include "shpItemBox.h"
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -113,13 +114,6 @@ s32 shpAddServiceTicket(s32 Nums)
     datAddItem(0x3D, Nums);
     return DDS3_GBWK->unk_1965;
 }
-
-typedef struct
-{
-    u8 weight;
-    u8 reserved;
-    u16 item;
-} shpItemBoxEntry_t;
 
 extern shpItemBoxEntry_t shpItemBoxTable[][8];
 extern s32 datGetItemSlotIndex(u16 item);

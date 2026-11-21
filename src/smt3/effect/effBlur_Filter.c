@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "libsdf.h"
 #include "effect.h"
@@ -62,14 +63,6 @@ extern f32 sdfSin(f32 aRadius);
 extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim);
 
 extern void *effPkt2DGetPrimPtr(void *pPkt);
-
-/* The frame buffers the blur samples from; only the mask source is named. */
-typedef struct effBlurDrawBank_t {
-    u8 pad0000[0x1300];
-    u8 frameMaskSource[0x8E0];
-} effBlurDrawBank_t;
-
-extern effBlurDrawBank_t dds3DrawEnv[];
 
 /* Nine A+D registers per tri-strip: RGBAQ once, then ST and XYZ2 per vertex. */
 
@@ -145,7 +138,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
     sdfDrawTagInit(list);
     reference = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     frame = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[frame].stdEnv), reference);
 
     {
         u64 *packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
@@ -204,7 +197,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
 
     mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     frame = dds3GetFrameID();
-    sdfGrSetFrameMaskRGB(dds3DrawEnv[frame].frameMaskSource, mask, 1);
+    sdfGrSetFrameMaskRGB((const u8 *)&dds3DrawEnv[frame].stdEnv, mask, 1);
     sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
 
     packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
@@ -232,7 +225,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
 
     reference = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     frame = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[frame].stdEnv), reference);
     {
         u64 *last = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
 
@@ -279,7 +272,7 @@ void dds3EffectBlurDrawFrameMaskReset(sdfDrawTag_t *list) {
 
     packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
     frame = dds3GetFrameID();
-    sdfGrSetFrameMaskReset(dds3DrawEnv[frame].frameMaskSource, packet, 1);
+    sdfGrSetFrameMaskReset((const u8 *)&dds3DrawEnv[frame].stdEnv, packet, 1);
     sdfDrawTagLinkRefGif(list, EE_ADDR(packet));
     ot = &sdfGrOtTable[58];
     ot->regFunc(ot, list);

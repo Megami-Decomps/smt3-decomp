@@ -81,7 +81,7 @@ struct pbProcHandle_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-typedef struct
+typedef struct pbDebugWork_t
 {
     sdfMemHandle_t *allocation;
     s16 phase;

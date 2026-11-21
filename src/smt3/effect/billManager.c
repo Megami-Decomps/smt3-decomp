@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "basic.h"
 #include "draw3d.h"
@@ -56,12 +57,6 @@ billHandle_t *dds3BillboardGeneral(s32 number);
 
 extern sdfGrOt_t *dds3BillboardOtTable[];
 
-typedef struct effBlurDrawBank_t {
-    u8 pad0000[0x1300];
-    u8 frameMaskSource[0x8E0];
-} effBlurDrawBank_t;
-
-extern effBlurDrawBank_t dds3DrawEnv[];
 extern billRenderPair_t *dds3MultiBillboardPairList;
 extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3BillboardTagParam[4];
@@ -526,7 +521,7 @@ void dds3MultiBillboardTagLink(billHandle_t *obj, billRenderPair_t *node)
         node->packetList = sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(node->packetList);
         framePacket = sdfGrAllocPacketBuff(0x40);
-        sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameMaskSource, framePacket, 0);
+        sdfGrSetFrameMaskRGB((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, framePacket, 0);
         sdfDrawTagLinkRefGif(node->packetList, EE_ADDR(framePacket));
         blend = sdfGrAllocPacketBuff(0x40);
         dma = &blend->header.dmaWords;
@@ -707,7 +702,7 @@ void dds3MultiBillboardLinkOt(void) {
     sdfDrawTagInit(tag);
     buffer = sdfGrAllocPacketBuff(0x40);
     frame = dds3GetFrameID();
-    sdfGrSetFrameMaskReset(dds3DrawEnv[frame].frameMaskSource, buffer, 0);
+    sdfGrSetFrameMaskReset((const u8 *)&dds3DrawEnv[frame].stdEnv, buffer, 0);
     sdfDrawTagLinkRefGif(tag, EE_ADDR(buffer));
     packet = sdfGrAllocPacketBuff(0x40);
     packet[0] = 3;

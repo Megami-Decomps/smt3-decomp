@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "sdk_libgcc.h"
 #include "model.h"
 #include "motion.h"
@@ -93,14 +94,6 @@ extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, addr_t aPacket);
 
-/* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
-typedef struct
-{
-    u8 unk0000[0x1300];
-    u8 frameTex[0x8E0];
-} effDrawBank_t;
-
-extern effDrawBank_t dds3DrawEnv[];
 extern sdfMat_t *sdfMatNew(void);
 extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
@@ -884,7 +877,7 @@ void effSwordTrackPolygon2DDraw(Eff_ModelTrackPoly_tag *track)
     packet[7] = 0x42;
     sdfDrawTagLink(list, EE_ADDR(packet));
     tex = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
-    sdfGrLinkDrawFrameTex(list, dds3DrawEnv[dds3GetFrameID()].frameTex, tex);
+    sdfGrLinkDrawFrameTex(list, (const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, tex);
     testPacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
     testPacket[0] = 2;
     testPacket[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -1068,7 +1061,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfGrSetFrameMaskRGB((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, mask, 0);
     sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
     packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     packet[0] = 3;
@@ -1089,7 +1082,7 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
     list = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(list);
     mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfGrSetFrameMaskReset((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, mask, 0);
     sdfDrawTagLinkRefGif(list, EE_ADDR(mask));
     {
         sdfGrOt_t *ot = &sdfGrOtTable[hSwordTrack->otIndex];

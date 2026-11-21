@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kernel_draw.h"
 #include "draw3d.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
@@ -182,18 +183,6 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     return packet;
 }
 
-/* The render draw env's clear sprite, 0x1800 into each 0x1BE0 draw bank: both
- * XYZ corners go to the GS coordinate bias, which clears nothing. */
-typedef struct
-{
-    u8 unk0000[0x1300];
-    u8 frameMaskSource[0x500];
-    u64 clearXyzA;
-    u64 unk1808;
-    u64 clearXyzB;
-    u8 unk1818[0x3C8];
-} effPacketDrawBank_t;
-
 /* One textureless sprite as sdf2D lays it out: the colour, then two corners
  * of 0x20 bytes each. */
 typedef struct
@@ -217,7 +206,6 @@ typedef struct
     effPacketSpriteCorner_t corner[2];
 } effPacketSpriteVertex_t;
 
-extern effPacketDrawBank_t dds3DrawEnv[];
 
 void dds3CrossfadeStart(s32 frame)
 {
@@ -239,8 +227,8 @@ void dds3CrossfadeStart(s32 frame)
     dds3AllocRenderTexture(0x100, 0xE0, 0.0f);
     dds3RenderTextureON();
     for (i = 0; i != 2; i++) {
-        dds3DrawEnv[i].clearXyzA = 0x80008000;
-        dds3DrawEnv[i].clearXyzB = 0x80008000;
+        dds3DrawEnv[i].renderEnv.clear.xyzA.data = 0x80008000;
+        dds3DrawEnv[i].renderEnv.clear.xyzB.data = 0x80008000;
     }
     dds3CrossfadeFrameMax = SDF_FRAMES(frame);
     dds3CrossfadeRunFlag = 1;
@@ -271,7 +259,7 @@ void dds3CrossfadeRun(void)
         sdfDrawTagInit(list);
         reference = (void *)sdfGrAllocPacketBuff(0x20);
         frame = dds3GetFrameID();
-        sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
+        sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[frame].stdEnv), reference);
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
 

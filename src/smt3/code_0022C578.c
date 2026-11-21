@@ -449,14 +449,6 @@ extern s32 cmpStatSetTimer(s32 kind, s8 index);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x1300];
-    /* 0x1300 */ u8 frameTex[0x8E0];
-} cmpDrawBank_t;
-
-extern cmpDrawBank_t dds3DrawEnv[];
-
 extern u32 dds3GetFrameID(void);
 
 extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
@@ -7699,7 +7691,7 @@ void cmpDisableRGB(s32 ot)
     tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfGrSetFrameMaskRGB((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, mask, 0);
     sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
@@ -7714,7 +7706,7 @@ void cmpAllocRefGifTag(s32 ot)
     tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
     mask = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfGrSetFrameMaskReset((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, mask, 0);
     sdfDrawTagLinkRefGif(tag, EE_ADDR(mask));
     otp = &sdfGrOtTable[ot];
     otp->regFunc(otp, tag);
@@ -10532,7 +10524,7 @@ void cmpSetStatusModelParam(void)
     SDF_VU0_STOREVECTOR_NOMEM(&eye);
     LookAtMatrix((f32 *)&target, (f32 *)&eye, aViewDown);
     SDF_VU0_STOREMATRIX_NOMEM(&sdfViewMatrix);
-    sdf3DMakeViewportPacket((sdf3DViewportPacket_t *)((u8 *)&dds3DrawEnv[frame] + 0x1520),
+    sdf3DMakeViewportPacket(&dds3DrawEnv[frame].viewport,
                           (sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
     sdf3DSetCamera((sdf3DScreenParam_t *)dds3ScreenParam, &sdfViewMatrix);
 }

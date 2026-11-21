@@ -358,8 +358,7 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
 }
 
 extern void *memcpy(void *dst, const void *src, size_t size);
-typedef struct { u16 cells[20][20]; } pbMapBlock_t;
-extern pbMapBlock_t pbMapSnapshot;
+#include "pbBoardData.h"
 
 s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
     s32 result = 0;

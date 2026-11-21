@@ -31,7 +31,7 @@ typedef struct
 
 typedef struct { s16 number, label; } pbStageEntry_t;
 
-typedef struct { u16 blk[20][20]; } pbMapBlock_t;
+#include "pbBoardData.h"
 
 typedef struct { u8 unk00[0x10]; pbMapBlock_t map; } pbMapArea_t;
 
@@ -282,7 +282,6 @@ extern pbProcHandle_t *bmap, *mapCursor;
 
 extern s32 D_0054F5F0;
 
-extern pbMapBlock_t pbMapSnapshot;
 
 extern s32 moveBlock(dds3ProcessID_t *id);
 
@@ -2107,7 +2106,6 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
 }
 
 extern const s32 pbMapCursorOffsetTable[4][4];
-extern s32 pbMapCursorBaseTable[4][4], pbMapCursorUvTable[4][4], pbMapCursorColorTable[4][4];
 extern f32 pbMapCursorWork;
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 extern f32 sdfSin(f32 angle);

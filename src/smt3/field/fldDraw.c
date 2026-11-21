@@ -1,5 +1,6 @@
 #include "fpu.h"
 #include "common.h"
+#include "kernel_draw.h"
 #include "libsdf.h"
 #include "kernel.h"
 #include "ps2asm.h"
@@ -200,14 +201,6 @@ extern s32 gencOn;
 extern s32 gencMode;
 
 extern s32 rsetFrameMaskOtOffset;
-
-/* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
-typedef struct {
-    u8 unk0000[0x1300];
-    u8 frameTex[0x8E0];
-} fldDrawBank_t;
-
-extern fldDrawBank_t dds3DrawEnv[];
 
 extern u32 dds3GetFrameID(void);
 
@@ -889,7 +882,7 @@ void rsetFrameMaskRgbOn(void) {
 
     sdfDrawTagInit(command);
     texture = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, texture, 0);
+    sdfGrSetFrameMaskRGB((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, texture, 0);
     sdfDrawTagLinkRefGif(command, EE_ADDR(texture));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
@@ -902,7 +895,7 @@ void rsetFrameMaskRgbOff(void) {
 
     sdfDrawTagInit(command);
     texture = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x40));
-    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, texture, 0);
+    sdfGrSetFrameMaskReset((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv, texture, 0);
     sdfDrawTagLinkRefGif(command, EE_ADDR(texture));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
@@ -1079,7 +1072,7 @@ void fldDrawFrameSprite(void) {
     fldSpriteVertex_t *vertex;
     sdfGrOt_t *surface;
 
-    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[dds3GetFrameID()].frameTex), reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv), reference);
     texturePacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
@@ -1132,7 +1125,7 @@ void fldDrawBokasi(void) {
     fldSpriteVertex_t *vertex;
     sdfGrOt_t *surface;
 
-    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[dds3GetFrameID()].frameTex), reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv), reference);
     texturePacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
@@ -1185,7 +1178,7 @@ void fldDrawFrameSpriteAlpha(s32 alpha) {
     fldSpriteVertex_t *vertex;
     sdfGrOt_t *surface;
 
-    sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[dds3GetFrameID()].frameTex), reference);
+    sdfGrLinkDispFrameTex(list, EE_ADDR((const u8 *)&dds3DrawEnv[dds3GetFrameID()].stdEnv), reference);
     texturePacket = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x40));
     texturePacket[0] = 3;
     texturePacket[1] = 0x5000000310000000ULL;
