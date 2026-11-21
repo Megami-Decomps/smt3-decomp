@@ -1,4 +1,5 @@
 #include "common.h"
+#include "nbEventEntries.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -226,23 +227,6 @@ extern void p2sdPlayBGM(s32 MidiNo);
 extern void p2sdStopBGM(s32 no);
 
 extern char nbMakaProcessName[];
-
-/* 28-byte entries; only the fields this unit reads are named. */
-typedef struct {
-    s32 rid;
-    s32 (*process)(dds3ProcessID_t *id);
-    s32 encno;
-    s32 unk_0C;
-    s32 unk_10;
-    u16 fadetime;
-    u16 fadeoutframe;
-    u16 fadestopframe;
-    u16 fadeinframe;
-} nbEventEntry_t;
-
-extern nbEventEntry_t nbEventEntryTable[];
-
-
 
 typedef struct {
     s32 stat;

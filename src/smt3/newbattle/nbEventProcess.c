@@ -1,4 +1,5 @@
 #include "common.h"
+#include "nbEventEntries.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -218,23 +219,6 @@ extern void sdfChipFreeDirect(void *aPtr);
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
-
-/* 28-byte entries; only the fields this unit reads are named. */
-typedef struct {
-    s32 rid;
-    s32 (*process)(dds3ProcessID_t *id);
-    s32 encno;
-    s32 unk_0C;
-    s32 unk_10;
-    u16 fadetime;
-    u16 fadeoutframe;
-    u16 fadestopframe;
-    u16 fadeinframe;
-} nbEventEntry_t;
-
-extern nbEventEntry_t nbEventEntryTable[];
-
-
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 

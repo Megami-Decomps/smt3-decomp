@@ -1,4 +1,5 @@
 #include "common.h"
+#include "nbPanelGeometry.h"
 #include "newbattle.h"
 #include "libsdf.h"
 #include "basic.h"
@@ -382,15 +383,6 @@ typedef struct {
     s32 x;
     s32 y;
 } nbPanelPoint_t;
-
-/* A panel rectangle: position, then width and height. */
-typedef struct {
-    s32 x;
-    s32 y;
-    s32 z;
-    s32 w;
-    s32 h;
-} nbPanelProcess_nbPanelXYZ_t;
 
 typedef struct {
     s32 u;
@@ -1051,7 +1043,6 @@ void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p)
 }
 
 /* One 46-row array; the auto panel uses its final two rows. */
-extern nbPanelProcess_nbPanelXYZ_t nbPanelPolyXYZ[];
 #define D_004F05D8 (nbPanelPolyXYZ + 44)
 extern f32 sdfSin(f32 angle);
 
@@ -3510,7 +3501,6 @@ void nbPanelAutoInit(void)
     PanelAutoShow = 1;
 }
 
-extern nbPanelProcess_nbPanelXYZ_t nbPanelAutoGlowXYZ[];
 extern nbPanelProcess_nbPanelTMXuv_t nbPanelAutoUV[];
 extern void nbPanelPolygonDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *geometry,
                                u32 color0, u32 color1, u32 color2, u32 color3);
