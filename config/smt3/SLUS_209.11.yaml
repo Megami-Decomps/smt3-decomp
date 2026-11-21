@@ -574,6 +574,8 @@ segments:
       - [0x2FB880, .data, newbattle/nbMisc]
       - [0x2FC2E0, .data, newbattle/nbFlyKoukaRotation]
       - [0x2FC2F0, data, data_003FB2F0]
+      - [0x42A030, .data, pipe/pipePartsInfoData]
+      - [0x42A210, data, data_00529210]
       - [0x42A448, .data, sdf/sdfMotion]
       - [0x42A620, .data, sdf/sdfUnitXVector]
       - [0x42A630, .data, sdf/sdf3DUpVector]
