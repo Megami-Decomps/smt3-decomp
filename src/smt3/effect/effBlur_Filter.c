@@ -1,4 +1,6 @@
 #include "common.h"
+#include "effDistortionBlur.h"
+#include "effRippleBlur.h"
 #include "effRectangleBlur.h"
 #include "kernel_draw.h"
 #include "sdk_libgcc.h"
@@ -305,7 +307,8 @@ void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
 }
 
 /* Clone a blur template into a fresh allocation. */
-effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam) {
+void *dds3EffectPartialMultiBlurCreate(void *params) {
+    const dds3Effect_PartialMultiBlurParam_t *pParam = params;
     effBlurTemplate_t *dst = sdfChipAllocDirect(sizeof(effBlurTemplate_t));
 
     dst->texture = dds3BillboardGetGeneralTex(2);
@@ -313,11 +316,12 @@ effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMult
     return dst;
 }
 
-void dds3EffectPartialMultiBlurDelete(effBlurTemplate_t *hPartialMultiBlur) {
+void dds3EffectPartialMultiBlurDelete(void *hPartialMultiBlur) {
     sdfChipFreeDirect(hPartialMultiBlur);
 }
 
-void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
+void dds3EffectPartialMultiBlurDraw(void *owner) {
+    effBlurTemplate_t *work = owner;
     s32 x;
     s32 y;
     s32 extent;
@@ -341,12 +345,12 @@ void dds3EffectPartialMultiBlurSetParam(effBlurTemplate_t *hPartialMultiBlur, co
 }
 
 /* Supply a source handle for the first blur variant. */
-void dds3EffectPartialMultiBlurSetTex(effBlurScatterWork_t *hPartialMultiBlur, struct sdfTexHandle_t *hTex) {
+void dds3EffectPartialMultiBlurSetTex(effBlurTemplate_t *hPartialMultiBlur, struct sdfTexHandle_t *hTex) {
     hPartialMultiBlur->texture = hTex;
 }
 
 /* Acquire the first variant's source handle from the effect manager. */
-void dds3EffectPartialMultiBlurSetTexDef(effBlurScatterWork_t *hPartialMultiBlur) {
+void dds3EffectPartialMultiBlurSetTexDef(effBlurTemplate_t *hPartialMultiBlur) {
     hPartialMultiBlur->texture = dds3BillboardGetGeneralTex(2);
 }
 
@@ -376,8 +380,9 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     quad->xy[1][1] = centerY + halfSize;
 }
 
-effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam)
+void *dds3EffectDistortionBlurCreate(void *params)
 {
+    dds3Effect_DistortionBlurParam_t *pParam = params;
     struct sdfMemHandle_t *allocation;
     effBlurScatterWork_t *work;
     effBlurScatterSlot_t *slot;
@@ -398,7 +403,9 @@ effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurPa
 }
 
 /* Release the first variant's owned effect resource. */
-void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur) {
+void dds3EffectDistortionBlurDelete(void *resource)
+{
+    effBlurScatterWork_t *hDistortionBlur = resource;
     sdfMemFreeDirect(hDistortionBlur->allocation);
 }
 
@@ -406,8 +413,9 @@ void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur) {
  * Adapted from the matched DDS/redthing1 effBlurStepScatterSlotsAndDraw.
  * Keep SMT3's two-argument renderer and canonical soft-double helpers:
  * dpcmp compares doubles; the pi and reciprocal literals are promoted floats. */
-void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work)
+void dds3EffectDistortionBlurDraw(void *resource)
 {
+    effBlurScatterWork_t *work = resource;
     struct sdfDrawTag_t *list;
     effBlurScatterSlot_t *slot;
     s32 count;
@@ -506,7 +514,9 @@ void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur) {
 }
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
-effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam) {
+void *dds3EffectRippleBlurCreate(void *params)
+{
+    dds3Effect_RippleBlurParam_t *pParam = params;
     s32 count = pParam->number;
     void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
     effBlurScaleWork_t *work = EE_ADDR_AS(effBlurScaleWork_t *, sdfMemLock(allocation));
@@ -530,15 +540,18 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pPa
 }
 
 /* Release the scale variant's allocation, including its inline slot array. */
-void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur) {
+void dds3EffectRippleBlurDelete(void *resource)
+{
+    effBlurScaleWork_t *hRippleBlur = resource;
     sdfMemFreeDirect(hRippleBlur->allocation);
 }
 
 /* Phase-driven sibling of the distortion update; adapted from DDS/redthing1
  * effBlurStepScaleSlotsAndDraw. SMT3 preserves the slot's RGB and uses the
  * two-argument renderer. Extract then attenuate the same alpha quantity. */
-void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work)
+void dds3EffectRippleBlurDraw(void *resource)
 {
+    effBlurScaleWork_t *work = resource;
     struct sdfDrawTag_t *list;
     effBlurScaleSlot_t *slot;
     s32 count;

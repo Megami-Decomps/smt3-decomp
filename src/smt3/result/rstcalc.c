@@ -1,4 +1,5 @@
 #include "common.h"
+#include "rst-single-key-table.h"
 #include "datCommentTable.h"
 #include "datCalc.h"
 #include "facility.h"
@@ -1593,18 +1594,16 @@ s32 cmbChkEvoNeedFlag(u16 devilId)
     return 0;
 }
 
-extern u16 D_00339638[];
-
 s32 func_002229E8(u16 value)
 {
-    u16 *entry = D_00339638;
+    rstLookupKey_t *entry = D_00339638;
     u32 i = 0;
     u16 match;
 
     /* Retail retains the unsigned one-entry loop and four-byte row stride. */
     do {
-        match = entry[0];
-        entry += 2;
+        match = entry->key;
+        entry++;
         if (match == value) {
             return 1;
         }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effDistortionBlur.h"
 #include "fldNpcLightData.h"
 #include "sdfFrame.h"
 #include "sdf_resource.h"
@@ -1584,7 +1585,6 @@ extern void dds3EffectDraw(void *effect);
 extern void dds3EffectPartSetPosition(void *effect, sdfVector4_t *position);
 extern void dds3EffectPartDraw(void *effect);
 extern void dds3DrawUnitObjectShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
-extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *effect);
 extern void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite);
 
 void fldNpcDraw(void)

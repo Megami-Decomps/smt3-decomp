@@ -1,5 +1,6 @@
 #include "fileManager.h"
 #include "common.h"
+#include "effDistortionBlur.h"
 #include "sdfFrame.h"
 #include "sdf_resource.h"
 #include "basic.h"
@@ -153,7 +154,6 @@ extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
 extern void *fldBlurEffectHandle;
 
-extern void dds3EffectDistortionBlurDelete(void *hDistortionBlur);
 
 extern sdfTexHandle_t *fldEATexture;
 
@@ -223,22 +223,6 @@ extern void *fldModelResPtr[];
 
 extern void *fldModelResSize[];
 
-typedef struct
-{
-    s32 unk00;
-    s32 unk04;
-    f32 unk08;
-    u32 unk0C;
-    s32 unk10;
-    s32 unk14;
-    f32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-} fldBlurParam_t;
-
-extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *pParam);
 
 extern void dds3EffectDelete(void *pData);
 
@@ -2325,7 +2309,7 @@ void fldInitPacLoader(void) {
 }
 
 void fldInitBlurEffect(void) {
-    fldBlurParam_t param;
+    dds3Effect_DistortionBlurParam_t param;
     s32 i;
 
     if (fldGlobalBase.area >= 0xC8) {
@@ -2357,18 +2341,18 @@ void fldInitBlurEffect(void) {
         *(void **)&fldModelResSize[i] = NULL;
     }
     fldNpcModelFreeIdx = -1;
-    param.unk00 = 0x3C;
-    param.unk04 = 0xF;
-    param.unk08 = 0.22f;
-    param.unk0C = 0x1E848484;
-    param.unk10 = 0x44;
+    param.number = 0x3C;
+    param.interval = 0xF;
+    param.speed = 0.22f;
+    param.abgr = 0x1E848484;
+    param.blend = 0x44;
     fldNpcFreeCount = NULL;
-    param.unk14 = 0;
-    param.unk18 = 0.13f;
-    param.unk1C = 0;
-    param.unk20 = -0x30;
-    param.unk24 = 0x60;
-    param.unk28 = 0x60;
+    param.rotate = 0.0f;
+    param.distortion = 0.13f;
+    param.center[0] = 0;
+    param.center[1] = -0x30;
+    param.area = 0x60;
+    param.width = 0x60;
     fldBlurEffectHandle = dds3EffectDistortionBlurCreate(&param);
 }
 

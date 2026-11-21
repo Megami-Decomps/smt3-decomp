@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "effPCPData.h"
+#include "effPartialMultiBlur.h"
 #include "libsdf.h"
 
 typedef struct effPCPBossBUNSIN2Param_t
@@ -116,35 +117,13 @@ typedef struct effBlurPrimTriStrip_t {
     effBlurPrimVertex_t vtx[4];
 } effBlurPrimTriStrip_t;
 
-/* Shared rectangle and sampling payload, copied as 0x28 bytes. */
-typedef struct dds3Effect_Blur_t {
-    u32 abgr;
-    s32 blend;
-    f32 rotate;
-    f32 scale;
-    s32 center[2];
-    s32 xy[2][2];
-} dds3Effect_Blur_t;
-
 /* The editor's native storage ends with the 0x28-byte blur source. */
 typedef struct effScreenDrawParams_t {
     dds3Effect_Blur_t source;
 } effScreenDrawParams_t;
 SIZE_CHECK(effScreenDrawParamsSize, effScreenDrawParams_t, 0x28);
 
-/* Phase-driven blur parameters and the scale-slot allocation they own. */
-typedef struct dds3Effect_RippleBlurParam_t {
-    s32 number;
-    f32 speed;
-    f32 interval;
-    u32 abgr;
-    s32 blend;
-    f32 rotate;
-    f32 power;
-    f32 frequency;
-    s32 center[2];
-    s32 area;
-} dds3Effect_RippleBlurParam_t;
+#include "effRippleBlur.h"
 
 typedef struct effBlurScaleSlot_t {
     f32 phase;
@@ -159,19 +138,7 @@ typedef struct effBlurScaleWork_t {
     effBlurScaleSlot_t *slots;
 } effBlurScaleWork_t;
 
-/* Random-position blur parameters and their allocated slot owner. */
-typedef struct dds3Effect_DistortionBlurParam_t {
-    s32 number;
-    s32 interval;
-    f32 speed;
-    u32 abgr;
-    s32 blend;
-    f32 rotate;
-    f32 distortion;
-    s32 center[2];
-    s32 area;
-    s32 width;
-} dds3Effect_DistortionBlurParam_t;
+#include "effDistortionBlur.h"
 
 typedef struct effBlurScatterSlot_t {
     s32 delay;
@@ -185,17 +152,6 @@ typedef struct effBlurScatterWork_t {
     sdfMemHandle_t *allocation;
     effBlurScatterSlot_t *slots;
 } effBlurScatterWork_t;
-
-/* A copied 0x2C-byte body followed by its separately acquired texture. */
-typedef struct dds3Effect_PartialMultiBlurParam_t {
-    s32 area;
-    dds3Effect_Blur_t Blur;
-} dds3Effect_PartialMultiBlurParam_t;
-
-typedef struct effBlurTemplate_t {
-    dds3Effect_PartialMultiBlurParam_t body;
-    sdfTexHandle_t *texture;
-} effBlurTemplate_t;
 
 typedef struct {
     s32 left;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "effDistortionBlur.h"
 #include "effRectangleBlur.h"
 #include "basic.h"
 #include "kernel.h"
@@ -105,7 +106,6 @@ extern void evtDisableMoonDraw(void);
 
 extern void fldFreeAddressProcess(void);
 
-extern void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur);
 
 extern void campKillProcesses(void);
 
@@ -502,7 +502,6 @@ s32 fldProcHirakenaiChk(void)
 }
 
 extern fldUnitControl_t *fldGetUnitControl(void);
-extern effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *param);
 extern dds3ProcessID_t *dds3SearchProcessPriority(s32 priority);
 extern dds3Basic_t *fldUnitControlHandle;
 extern u32 dds3BackColor;
@@ -967,7 +966,6 @@ extern void fldWaveTask(void);
 extern void fldAutoMapDraw(void);
 extern void fldSnowTask(void);
 extern void fldElvDrawFloorNum(void);
-extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 
 /* A plain block, not do/while(0): the loop notes a do/while leaves behind make gcc
    align the join label after the area-23 test and pad the function by a word. */

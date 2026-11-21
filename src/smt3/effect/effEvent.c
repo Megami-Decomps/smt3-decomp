@@ -1,4 +1,6 @@
 #include "common.h"
+#include "effDistortionBlur.h"
+#include "effRippleBlur.h"
 #include "effRectangleBlur.h"
 #include "effEventSmoke.h"
 #include "libsdf.h"
@@ -76,20 +78,14 @@ extern s8 Eve_FilterShow;
 extern dds3Effect_Filter_t Eve_Filter;
 extern s8 Eve_PartialMultiFilterShow;
 extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
-extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work);
-extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
-extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 extern void dds3EffectFilter(void *filter);
 extern void dds3EffectPartialMultiFilterDraw(void *work);
-effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 extern dds3Effect_PartialMultiBlurParam_t mblurDefaultParam;
 extern dds3Effect_DistortionBlurParam_t dblurDefaultParam;
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
 extern dds3Effect_PartialMultiFilterParam_t mfilterDefaultParam;
 void *dds3EffectPartialMultiFilterCreate(void *params);
 extern dds3Effect_RippleBlurParam_t rblurDefaultParam;
-effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 effRectangleBlurSetupReady;
 /* The result slot must be valid whenever the create callback is present. */
 extern effDebugMenu_t effRectangleBlurSetupRecord;
@@ -1865,7 +1861,7 @@ char effLabelBlur[5] = "BLUR";
 
 s8 effRectangleBlurSetupReady = 0;
 
-u32 D_0054F2C8[2] = { 0, 0 };
+effPartialMultiBlurEditorSlot_t D_0054F2C8 = { NULL, 0 };
 
 char effLabelArea[5] = "AREA";
 
@@ -1897,7 +1893,7 @@ s8 mfilterDone = 0;
 
 SDATA_PAD(3);
 
-u32 D_0054F320[2] = { 0, 0 };
+effRippleBlurEditorResource_t D_0054F320 = { NULL, 0 };
 
 char effLabelDistS[7] = "DIST_S";
 
