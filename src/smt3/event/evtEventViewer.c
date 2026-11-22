@@ -361,7 +361,7 @@ evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frameNumber)
     return frame;
 }
 
-evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
+evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame)
 {
     return evtAddFrameInfo(group, frame);
 }
@@ -1963,8 +1963,7 @@ const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
 
 const char evtViewerUnitDispOff[16] = "DISP OFF";
 
-/* Native frame-editor labels used by the retained assembly body. */
-#ifndef NON_MATCHING
+/* Native frame-editor labels, kept in their original readonly layout. */
 const char D_0053B780[] __attribute__((aligned(8))) = "DELETE FRAME.OK? ";
 const char D_0053B798[] __attribute__((aligned(8))) = "HOKAN MODE   ";
 const char D_0053B7A8[] __attribute__((aligned(8))) = "ON/OFF MODE ";
@@ -1973,17 +1972,15 @@ const char D_0053B7C8[] __attribute__((aligned(8))) = "FADE TYPE  ";
 const char D_0053B7D8[] __attribute__((aligned(8))) = "CONTROL TYPE ";
 const char D_0053B7E8[] __attribute__((aligned(8))) = "UNIT CONTROL TYPE ";
 const char D_0053B800[] __attribute__((aligned(8))) = "soften_bias";
-#endif
 
-#ifdef NON_MATCHING
 extern char *evtViewerDeleteConfirmNames[], *evtViewerTransModeNames[], *evtViewerUnitControlNames[];
 extern char *evtFrameListTable[], *evtFrameFadeNames[];
 extern char evtViewerProcNameSlight[], evtViewerProcNameSfog[], evtViewerProcNameFilter[], evtViewerProcNameMfilter[];
 extern s32 mdlDebugPrintEffectScale(dds3ProcessID_t *id);
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *id);
 extern s32 soften_bias_Process(dds3ProcessID_t *id);
-extern s32 evtViewerExit(void);
-extern s32 mfilter_Process(void);
+extern s32 evtViewerExit(dds3ProcessID_t *id);
+extern s32 mfilter_Process(dds3ProcessID_t *id);
 extern void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *params);
 extern void dblurSetParam(dds3Effect_DistortionBlurParam_t *params);
 extern void rblurSetParam(dds3Effect_RippleBlurParam_t *params);
@@ -1997,21 +1994,19 @@ s32 EnterFrameList(s32 action, s32 unusedPreviousMenu)
     pmdSceneLightTable_t *light;
     pmdSceneFogTable_t *fog;
     dds3ProcessID_t *process;
-    dds3ProcessFunc_t callback;
-    char *processName;
+    char *header;
     s32 type, field;
+    s32 menuX;
 
-    if (viewerinfo->frameCursor + viewerinfo->frameFirst >= track->childCount) {
-        if (action == 1) {
-            AddFrameInfo2(track, viewerinfo->nowframe, viewerinfo);
-        }
-        return 0;
-    }
+    f32 fvalue;
+
+    if (viewerinfo->frameCursor + viewerinfo->frameFirst >= track->childCount) goto add_frame;
     if (action == -2) {
+        header = (char *)D_0053B780;
         viewerinfo->itemNames = evtViewerDeleteConfirmNames;
         viewerinfo->framelist_type = -1;
         viewerinfo->menuItemCount = 2;
-        viewerinfo->select_header = "DELETE FRAME.OK? ";
+        viewerinfo->select_header = header;
         viewerinfo->select_y = 0;
         PushMenu(2, 0xD8, 0x78);
         return 0;
@@ -2025,13 +2020,15 @@ s32 EnterFrameList(s32 action, s32 unusedPreviousMenu)
         PushMenu(6, 0xB4, 0x78);
         break;
     case 9:
-        type = viewerinfo->framelist_target->type;
-        if (type == 18) {
-            viewerinfo->value = (s16)frame->param.sh[0];
-            PushMenu(6, 0xB4, 0x78);
-        } else if (type == 3 || type == 20 || type == 21) {
+        switch (viewerinfo->framelist_target->type) {
+        case 3: case 20: case 21:
             viewerinfo->value = (s16)frame->param.sh[1];
             PushMenu(6, 0xB4, 0x78);
+            break;
+        case 18:
+            viewerinfo->value = (s16)frame->param.sh[0];
+            PushMenu(6, 0xB4, 0x78);
+            break;
         }
         break;
     case 15:
@@ -2039,155 +2036,191 @@ s32 EnterFrameList(s32 action, s32 unusedPreviousMenu)
         PushMenu(6, 0xB4, 0x78);
         break;
     case 1:
+        viewerinfo->value = frame->index;
         viewerinfo->min = 0;
         viewerinfo->max = 10000;
-        viewerinfo->value = frame->index;
+
         PushMenu(7, 0xB4, 0x78);
         break;
     case 2:
         if (viewerinfo->framelist_target->type == 7) {
+            viewerinfo->value = (s16)frame->param.sh[0];
             viewerinfo->min = 0;
             viewerinfo->max = 3000;
-            viewerinfo->value = (s16)frame->param.sh[0];
+
             PushMenu(7, 0xB4, 0x78);
         }
         break;
     case 3:
-        type = viewerinfo->framelist_target->type;
-        if (type == 8) {
-            viewerinfo->max = 255;
+        switch (viewerinfo->framelist_target->type) {
+        case 8:
             viewerinfo->value = (s16)frame->param.sh[0];
+            viewerinfo->max = 255;
+
             viewerinfo->min = 0;
-        } else if (type == 12) {
+            break;
+        case 12:
+            viewerinfo->value = (s16)frame->param.sh[1];
             viewerinfo->min = -255;
             viewerinfo->max = 255;
-            viewerinfo->value = (s16)frame->param.sh[1];
+
+            break;
         }
         PushMenu(7, 0xB4, 0x78);
         break;
     case 4:
-        viewerinfo->max = 255;
-        viewerinfo->min = -255;
         viewerinfo->value = (s16)frame->param.sh[1];
-        PushMenu(7, 0xB4, 0x78);
+        menuX = 0xB4;
+        viewerinfo->min = -255;
+        viewerinfo->max = 255;
+
+        PushMenu(7, menuX, 0x78);
         break;
-    case 5:
-        type = viewerinfo->framelist_target->type;
-        if (type == 8) {
-            viewerinfo->select_y = (s16)frame->param.sh[2];
+    case 5: {
+        char *modeHeader;
+        switch (viewerinfo->framelist_target->type) {
+        case 8: viewerinfo->select_y = (s16)frame->param.sh[2]; break;
+        case 10: viewerinfo->select_y = frame->nameIndex; break;
+        case 11: case 13: case 14: case 15: case 16: case 17: case 23:
+            viewerinfo->select_y = (s16)frame->param.sh[0]; break;
         }
-        else if (type == 10) {
-            viewerinfo->select_y = frame->nameIndex;
-        }
-        else if (type == 11 || type == 13 || type == 14 || type == 15 ||
-                 type == 16 || type == 17 || type == 23) viewerinfo->select_y = (s16)frame->param.sh[0];
+        menuX = 0xD8;
+        modeHeader = (char *)D_0053B798;
         viewerinfo->itemNames = evtFrameListTable;
+        viewerinfo->select_header = modeHeader;
         viewerinfo->menuItemCount = 2;
-        viewerinfo->select_header = "HOKAN MODE   ";
-        PushMenu(2, 0xD8, 0x78);
+        PushMenu(2, menuX, 0x78);
         break;
+    }
     case 11:
         type = viewerinfo->framelist_target->type;
-        if (type == 9 || type == 22) {
-            viewerinfo->select_y = (s16)frame->param.sh[type == 9 ? 1 : 0];
+        switch (type) {
+        case 9:
+            viewerinfo->select_y = (s16)frame->param.sh[1];
             viewerinfo->menuItemCount = 2;
+            viewerinfo->select_header = (char *)D_0053B7A8;
             viewerinfo->itemNames = evtFrameListTable;
-            viewerinfo->select_header = "ON/OFF MODE ";
             PushMenu(2, 0xD8, 0x78);
-        }
-        break;
-    case 16:
-        type = viewerinfo->framelist_target->type;
-        if (type == 3) {
-            viewerinfo->select_y = frame->param.sb[4];
-        }
-        else if (type == 20 || type == 21) {
-            viewerinfo->select_y = frame->param.sb[1];
-        }
-        viewerinfo->itemNames = evtFrameListTable;
-        viewerinfo->menuItemCount = 2;
-        viewerinfo->select_header = "ON/OFF MODE ";
-        PushMenu(2, 0xD8, 0x78);
-        break;
-    case 12:
-        type = viewerinfo->framelist_target->type;
-        if (type == 6) {
+            break;
+        case 22:
             viewerinfo->select_y = (s16)frame->param.sh[0];
-            viewerinfo->menuItemCount = 4;
-            viewerinfo->itemNames = evtFrameFadeNames;
-            viewerinfo->select_header = "FADE TYPE  ";
-        } else if (type == 1) {
-            viewerinfo->select_y = frame->param.sb[0];
-            viewerinfo->menuItemCount = 5;
-            viewerinfo->itemNames = evtViewerUnitControlNames;
-            viewerinfo->select_header = "UNIT CONTROL TYPE ";
-        } else if (type == 12) {
-            viewerinfo->select_y = (s16)frame->param.sh[0];
-            viewerinfo->menuItemCount = 3;
-            viewerinfo->itemNames = evtViewerTransModeNames;
-            viewerinfo->select_header = "TRANS MODE ";
-        } else if (type == 19) {
-            viewerinfo->select_y = (s16)frame->param.sh[0];
-            viewerinfo->menuItemCount = 7;
-            viewerinfo->itemNames = evtFrameFadeNames + 4;
-            viewerinfo->select_header = "CONTROL TYPE ";
-        } else {
+            viewerinfo->menuItemCount = 2;
+            viewerinfo->select_header = (char *)D_0053B7A8;
+            viewerinfo->itemNames = evtFrameListTable;
+            PushMenu(2, 0xD8, 0x78);
             break;
         }
-        PushMenu(2, 0xD8, 0x78);
+        break;
+    case 16: {
+        char *modeHeader;
+        type = viewerinfo->framelist_target->type;
+        switch (type) {
+        case 3: viewerinfo->select_y = frame->param.sb[4]; break;
+        case 20: case 21: viewerinfo->select_y = frame->param.sb[1]; break;
+        }
+        menuX = 0xD8;
+        modeHeader = (char *)D_0053B7A8;
+        viewerinfo->itemNames = evtFrameListTable;
+        viewerinfo->select_header = modeHeader;
+        viewerinfo->menuItemCount = 2;
+        PushMenu(2, menuX, 0x78);
+        break;
+    }
+    case 12:
+        type = viewerinfo->framelist_target->type;
+        switch (type) {
+        case 12:
+            viewerinfo->select_y = (s16)frame->param.sh[0];
+            viewerinfo->menuItemCount = 3;
+            viewerinfo->select_header = (char *)D_0053B7B8;
+            viewerinfo->itemNames = evtViewerTransModeNames;
+            PushMenu(2, 0xD8, 0x78);
+            break;
+        case 6:
+            viewerinfo->select_y = (s16)frame->param.sh[0];
+            viewerinfo->menuItemCount = 4;
+            viewerinfo->select_header = (char *)D_0053B7C8;
+            viewerinfo->itemNames = evtFrameFadeNames;
+            PushMenu(2, 0xD8, 0x78);
+            break;
+        case 19:
+            viewerinfo->select_y = (s16)frame->param.sh[0];
+            viewerinfo->menuItemCount = 7;
+            viewerinfo->select_header = (char *)D_0053B7D8;
+            viewerinfo->itemNames = evtFrameFadeNames + 4;
+            PushMenu(2, 0xD8, 0x78);
+            break;
+        case 1:
+            viewerinfo->select_y = frame->param.sb[0];
+            viewerinfo->menuItemCount = 5;
+            viewerinfo->select_header = (char *)D_0053B7E8;
+            viewerinfo->itemNames = evtViewerUnitControlNames;
+            PushMenu(2, 0xD8, 0x78);
+            break;
+        }
         break;
     case 6:
+        fvalue = frame->param.sf[0] * 57.2957763671875f;
         viewerinfo->floatMin = 1.0f;
         viewerinfo->floatMax = 180.0f;
-        viewerinfo->fvalue = frame->param.sf[0] * 57.2957763671875f;
+        viewerinfo->fvalue = fvalue;
         PushMenu(8, 0xB4, 0x78);
         break;
     case 8:
-        type = viewerinfo->framelist_target->type;
-        if (type == 5) {
+        switch (viewerinfo->framelist_target->type) {
+        case 5:
             viewerinfo->value = (s16)frame->param.sh[0];
             viewerinfo->min = 0;
             viewerinfo->max = 255;
-        } else if (type == 19) {
+
+            PushMenu(7, 0xB4, 0x78);
+            break;
+        case 19:
             viewerinfo->value = (s16)frame->param.sh[1];
-            *(volatile s32 *)&viewerinfo->min = 0;
             if ((s16)frame->param.sh[0] == 3) {
-                *(volatile s32 *)&viewerinfo->min = -1;
-            }
+                viewerinfo->min = -1;
+            } else { viewerinfo->min = 0; }
             viewerinfo->max = 255;
-        } else if (type == 3) {
+            PushMenu(7, 0xB4, 0x78);
+            break;
+        case 3:
             viewerinfo->value = frame->param.sb[5];
+            menuX = 0xB4;
             viewerinfo->min = -1;
             viewerinfo->max = 127;
-        } else if (type == 12) {
+
+            PushMenu(7, menuX, 0x78);
+            break;
+        case 12:
             viewerinfo->value = frame->param.sw[1];
             viewerinfo->min = 0;
             viewerinfo->max = 255;
-        } else if (type == 18) {
+
+            PushMenu(7, 0xB4, 0x78);
+            break;
+        case 18:
             viewerinfo->value = frame->param.sb[4];
             viewerinfo->min = 0;
             viewerinfo->max = 2;
-        } else {
+
+            PushMenu(7, 0xB4, 0x78);
             break;
         }
-        PushMenu(7, 0xB4, 0x78);
         break;
     case 7:
+        viewerinfo->value = (s16)frame->param.sh[1];
         viewerinfo->min = 0;
         viewerinfo->max = 127;
-        viewerinfo->value = (s16)frame->param.sh[1];
+
         PushMenu(7, 0xB4, 0x78);
         break;
     case 10:
-        viewerinfo->work_y = 0;
         viewerinfo->work_base = 0;
+        viewerinfo->work_y = 0;
         PushMenu(10, 0x9C, 0x54);
         break;
     case 13:
-        type = viewerinfo->framelist_target->type;
-        processName = NULL;
-        callback = NULL;
-        switch (type) {
+        switch (viewerinfo->framelist_target->type) {
         case 20:
         case 21:
             viewerinfo->eventpos_y = 0;
@@ -2198,67 +2231,74 @@ s32 EnterFrameList(s32 action, s32 unusedPreviousMenu)
             dds3SetLightColor(0, 0, light->color);
             dds3SetLightDir(0, 0, light->direction);
             dds3SetAmbientColor(0, light->ambient);
-            processName = evtViewerProcNameSlight;
-            callback = mdlDebugPrintEffectScale;
+            process = dds3StartProcess(evtViewerProcNameSlight, 0x2AF9, 1, 1, mdlDebugPrintEffectScale, NULL, (void *)1);
+            viewerinfo->menuProcess = process;
+            PushMenu(11, 0, 0);
             break;
         case 11:
             fog = frame->work;
             dds3SetFogPara(0, fog->fog.vec[1], fog->fog.vec[0], fog->fog.vec[2], fog->fog.vec[3]);
             dds3LightParam.fog.color = fog->fog.color;
-            processName = evtViewerProcNameSfog;
-            callback = mdlDebugPrintEffectScale2;
+            process = dds3StartProcess(evtViewerProcNameSfog, 0x2AF9, 1, 1, mdlDebugPrintEffectScale2, NULL, (void *)1);
+            viewerinfo->menuProcess = process;
+            PushMenu(11, 0, 0);
             break;
         case 13:
             evtSetUnityCalcArea(frame->work);
             viewerinfo->drawblur2 = 0;
+            PushMenu(11, 0, 0);
             break;
         case 14:
             mblurSetParam(frame->work);
             viewerinfo->drawmblur = 0;
+            PushMenu(11, 0, 0);
             break;
         case 15:
             dblurSetParam(frame->work);
             viewerinfo->drawdblur = 0;
+            PushMenu(11, 0, 0);
             break;
         case 23:
             rblurSetParam(frame->work);
             viewerinfo->drawrblur = 0;
+            PushMenu(11, 0, 0);
             break;
         case 16:
             dblurSetParam2(frame->work);
             viewerinfo->filter = 0;
-            processName = evtViewerProcNameFilter;
-            callback = (dds3ProcessFunc_t)evtViewerExit;
+            process = dds3StartProcess(evtViewerProcNameFilter, 0x2AF9, 1, 1, evtViewerExit, NULL, (void *)1);
+            viewerinfo->menuProcess = process;
+            PushMenu(11, 0, 0);
             break;
         case 17:
             mfilterSetParam(frame->work);
             viewerinfo->drawmfilter = 0;
-            processName = evtViewerProcNameMfilter;
-            callback = (dds3ProcessFunc_t)mfilter_Process;
+            process = dds3StartProcess(evtViewerProcNameMfilter, 0x2AF9, 1, 1, mfilter_Process, NULL, (void *)1);
+            viewerinfo->menuProcess = process;
+            PushMenu(11, 0, 0);
             break;
         default:
             return 0;
         }
-        if (processName != NULL) {
-            process = dds3StartProcess(processName, 0x2AF9, 1, 1, callback, NULL, (void *)1);
-            viewerinfo->menuProcess = process;
-        }
-        PushMenu(11, 0, 0);
         break;
     case 14:
-        sdfFaceDivSoften = frame->param.sf[0];
-        sdfFaceDivBias = frame->param.sf[1];
-        process = dds3StartProcess("soften_bias", 0x2AF9, 1, 1, soften_bias_Process, NULL, (void *)1);
-        viewerinfo->menuProcess = process;
-        PushMenu(11, 0, 0);
-        break;
+        goto soften;
     }
+frame_done:
+    return 0;
+/* Keep editor launch out of the dispatch block to match the native flow. */
+soften:
+    sdfFaceDivSoften = frame->param.sf[0];
+    sdfFaceDivBias = frame->param.sf[1];
+    process = dds3StartProcess((char *)D_0053B800, 0x2AF9, 1, 1, soften_bias_Process, NULL, (void *)1);
+    viewerinfo->menuProcess = process;
+    PushMenu(11, 0, 0);
+    goto frame_done;
+add_frame:
+    if (action == 1) AddFrameInfo2(track, viewerinfo->nowframe);
+
     return 0;
 }
-#else
-
-INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
-#endif
 
 s32 EnterFrameChange(s32 unusedAction, s32 unusedPreviousMenu)
 {

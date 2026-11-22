@@ -70,6 +70,78 @@ class SharedReadonlyOriginTests(unittest.TestCase):
                     self.assertRegex(problems[0], "addend outside its span")
 
 
+class PairedReadonlyObjectsTests(unittest.TestCase):
+    def setUp(self):
+        payload = b"camera names\0\0\0\0"
+        self.facts = dict(
+            skip_bytes=b"skip" + payload,
+            skip_symbols=[(4, len(payload), "names")],
+            skip_relocs={},
+            full_bytes=b"native00" + payload,
+            full_symbols=[(8, len(payload), "names")],
+            full_relocs={},
+            retail_span=b"native00" + payload,
+            native_base=0x2000,
+            full_retail_match=True,
+            syms={"names": 0x2008},
+        )
+
+    def pair(self, **changes):
+        return check_unit.paired_readonly_objects(**{**self.facts, **changes})
+
+    def link(self, addend, paired, symbol=".rodata"):
+        return relocate_sdata_item(
+            struct.pack("<I", addend), 0, {0: ("R_MIPS_32", symbol)}, [], {},
+            readonly_objects=paired)
+
+    def test_paired_name_resolves_interior_pointer_with_shifted_context(self):
+        paired = self.pair()
+        self.assertEqual(paired, ((4, 20, 0x2008),))
+        self.assertEqual(self.link(4, paired), (struct.pack("<I", 0x2008), []))
+        self.assertEqual(self.link(19, paired), (struct.pack("<I", 0x2017), []))
+        for addend in (0, 3, 20, 0xFFFFFFFF):
+            self.assertIn("unresolved", self.link(addend, paired)[1][0])
+
+    def test_name_extent_payload_or_native_address_mismatch_refuses_pair(self):
+        changes = [
+            dict(full_symbols=[(8, 16, "other")]),
+            dict(full_symbols=[(8, 15, "names")]),
+            dict(full_symbols=[(8, 17, "names")]),
+            dict(skip_bytes=b"skip" + bytes(16)),
+            dict(full_bytes=b"native00" + bytes(16)),
+            dict(retail_span=b"native00" + bytes(16)),
+            dict(syms={"names": 0x2009}),
+            dict(native_base=None),
+            dict(full_retail_match=False),
+        ]
+        for facts in changes:
+            with self.subTest(facts=facts):
+                paired = self.pair(**facts)
+                self.assertFalse(paired)
+                self.assertIn("unresolved", self.link(4, paired)[1][0])
+
+    def test_ambiguous_typed_objects_and_partial_relocation_overlaps_refused(self):
+        changes = [
+            dict(full_symbols=[(8, 16, "names"), (8, 16, "alias")]),
+            dict(skip_symbols=[(4, 16, "names"), (19, 1, "alias")]),
+            dict(skip_symbols=[(4, 16, "names"), (1, 0, "names")]),
+            dict(full_symbols=[(8, 16, "names"), (99, 16, "names")]),
+            dict(full_relocs={1: ("R_MIPS_64", "label")}),
+            dict(skip_relocs={3: ("R_MIPS_32", "label")}),
+            dict(skip_relocs={19: ("R_MIPS_32", "label")}),
+        ]
+        for facts in changes:
+            with self.subTest(facts=facts):
+                self.assertFalse(self.pair(**facts))
+
+    def test_no_untyped_or_section_suffix_fallback(self):
+        labels = section_symbols("00000004 l     .rodata 00000010 names", ".rodata")
+        self.assertFalse(labels)
+        self.assertFalse(self.pair(skip_symbols=labels))
+        self.assertIn("unresolved", self.link(4, self.pair(), ".rodata+0x4")[1][0])
+        self.assertIn("unresolved", self.link(4, self.pair(), ".text")[1][0])
+
+
 class LiteralPoolBoundsTests(unittest.TestCase):
     def compare(self, pool, offset, retail, address=0x1000, segs=None):
         return check_unit.literal_pool_difference(pool, offset, retail,

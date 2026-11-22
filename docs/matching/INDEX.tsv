@@ -132,6 +132,7 @@ evtAddFrameInfo	event/evtEventViewer	0x540	336 of 336 words match	docs/matching/
 EnterBasicList	event/evtEventViewer	0x264	153 of 153 words match	docs/matching/event/evtEventViewer.md	308
 RunFrame2	event/evtEventViewer	0x850		docs/matching/event/evtEventViewer.md	369
 Viewer menu dispatch data				docs/matching/event/evtEventViewer.md	386
+EnterFrameList	event/evtEventViewer	0x828		docs/matching/event/evtEventViewer.md	398
 FrameVarProcess	event/evtEventViewerFrameVar	0x3D4	10 of 245 words match	docs/matching/event/evtEventViewerFrameVar.md	3
 evtPollEffectFrameControl	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/matching/event/evtEventViewerMenu.md	3
 evtFrameListHead	event/evtEventViewerMenu	0x138	78 of 78 words match	docs/matching/event/evtEventViewerMenu.md	58

@@ -882,8 +882,51 @@ def full_context_literal_diffs(text, offset, size, retail_code, relocs,
     return differences
 
 
+def paired_readonly_objects(skip_bytes, skip_symbols, skip_relocs,
+                            full_bytes, full_symbols, full_relocs,
+                            retail_span, native_base, full_retail_match, syms):
+    """Map individual typed objects when SKIP_ASM omits other .rodata."""
+    if native_base is None or not full_retail_match:
+        return ()
+
+    def intervals(symbols):
+        # Count even malformed/duplicate definitions as competitors.
+        return [(off, off + size, name) for off, size, name in symbols]
+
+    def unique(intervals, off, end, name):
+        return (sum(n == name for _, _, n in intervals) == 1
+                and sum(a < b and a < end and off < b for a, b, _ in intervals) == 1)
+
+    def no_relocation(relocs, off, end):
+        return not any(p < end and off < p + (8 if kind == "R_MIPS_64" else 4)
+                       for p, (kind, _) in relocs.items())
+
+    skip = intervals(skip_symbols)
+    full = intervals(full_symbols)
+    by_name = {name: (off, end) for off, end, name in full}
+    paired = []
+    for off, end, name in skip:
+        native = by_name.get(name)
+        if native is None:
+            continue
+        full_off, full_end = native
+        target = native_base + full_off
+        if (not 0 <= off < end <= len(skip_bytes)
+                or not 0 <= full_off < full_end <= min(len(full_bytes), len(retail_span))
+                or full_end - full_off != end - off
+                or address(name, syms) != target
+                or not unique(skip, off, end, name)
+                or not unique(full, full_off, full_end, name)
+                or not no_relocation(skip_relocs, off, end)
+                or not no_relocation(full_relocs, full_off, full_end)):
+            continue
+        if skip_bytes[off:end] == full_bytes[full_off:full_end] == retail_span[full_off:full_end]:
+            paired.append((off, end, target))
+    return tuple(paired)
+
+
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
-                        section_bases=None, section_lengths=None):
+                        section_bases=None, section_lengths=None, readonly_objects=()):
     """Apply resolvable R_MIPS_32 relocations to one emitted data item.
 
     Object files store section-relative addends for pointers into their own
@@ -917,6 +960,11 @@ def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
                     problems.append(f"{rtype} {base} addend outside its span at +0x{at:X}")
                     continue
             target = section_bases[base] + addend
+        elif sym == ".rodata":
+            matches = [native + addend - start for start, end, native in readonly_objects
+                       if start <= addend < end]
+            if len(matches) == 1:
+                target = matches[0]
         else:
             base_addr = address(base, syms)
             if base_addr is not None:
@@ -1807,6 +1855,7 @@ def main():
         full_rodata_relocations = None
         full_rodata_size = 0
         shared_rodata_base = None
+        paired_rodata_objects = ()
         shared_rodata = set()
         owned_data_checked = False
         readonly_data_checked = False
@@ -2108,13 +2157,25 @@ def main():
                 # Do not borrow the full-unit base unless the pool is identical
                 # and the full bytes and relocations prove its native span.
                 full_literals_match = (
-                    len(full_rodata) == end - start and not rodata_problems
+                    len(full_rodata) <= end - start and not rodata_problems
                     and all(full_rodata[i] == retail[start + i]
                             for i in range(len(full_rodata))
                             if not any(i - k in full_rodata_relocations for k in range(4))))
+                native_base = full_section_bases.get(".rodata")
                 shared_rodata_base = paired_owned_section_base(
                     rodata, rodata_relocs, full_rodata, full_rodata_relocations,
-                    end - start, full_section_bases.get(".rodata"), full_literals_match)
+                    end - start, native_base, full_literals_match)
+                if shared_rodata_base is None and ("R_MIPS_32", ".rodata") in sdata_relocs.values():
+                    # Linker alignment may supply a zero-only end tail; it
+                    # cannot supply object payload or excuse a changed byte.
+                    full_owned_match = (
+                        full_literals_match and not any(retail[start + len(full_rodata):end])
+                        and native_object_offset(segs, native_base, end - start, len(retail)) == start)
+                    paired_rodata_objects = paired_readonly_objects(
+                        rodata, rodata_symbols, rodata_relocs,
+                        full_rodata, section_symbols(full_objdump, ".rodata"),
+                        full_rodata_relocations, retail[start:end], native_base,
+                        full_owned_match, syms)
             elif full_rodata_relocations:
                 data_context.append("full unit's relocated .rodata has no unambiguous YAML-owned range")
             ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
@@ -2534,7 +2595,8 @@ def main():
             else trim_sdata_item(item, off, sdata_relocs)
         theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
         linked_item, relocation_problems = relocate_sdata_item(
-            item, off, sdata_relocs, funcs, syms, small_section_bases, small_section_lengths)
+            item, off, sdata_relocs, funcs, syms, small_section_bases, small_section_lengths,
+            paired_rodata_objects)
         if relocation_problems:
             bad += 1
             print(f"RELOC sdata of {name} (retail 0x{retail_addr:08X}): "

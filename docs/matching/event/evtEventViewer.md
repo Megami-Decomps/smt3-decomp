@@ -394,3 +394,27 @@ The viewer passes the action and previous menu to each handler and uses the
 signed result. Handlers that ignore either argument declare the same callback
 type without changing their bodies. All eleven non-null entries retain the
 original function relocations, including the assembly-backed frame-list handler.
+
+## EnterFrameList (event/evtEventViewer, 0x828)
+
+The frame editor at `0x001EEA60` matches all 522 instructions. Its four
+switch tables keep their native destinations. The frame, field and
+provider reads are kept in their original phases, as are process creation,
+publication and menu entry. The frame-add helper takes its two actual
+arguments; the previous draft's unused third argument is not part of the
+native call. The two process callbacks declare the process ID passed by
+the scheduler and leave it unused, as in the native routines. Their owner
+continues to emit the same code and data. No register constraint is needed.
+
+The soften/bias field dispatch reaches an out-of-switch block, which sets
+the native bias globals, starts the existing callback and opens the menu
+before joining the common return. Keeping that real control-flow shape
+reproduces the ordering of the callback address and timer setup. Keeping
+the same operations inline under case 14 leaves those two instructions
+reversed. The source layout does not establish the original spelling.
+
+The standalone checker resolves the two camera-name pointer slots through
+the same named, typed read-only objects in both compile contexts. It
+requires a unique extent, the native address and identical payload bytes;
+ambiguous or relocated payloads do not qualify. The full owner and linked
+image independently check the actual symbols and pointer values.

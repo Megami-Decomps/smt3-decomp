@@ -1155,7 +1155,7 @@ s32 evtEventPosMenu(s32 x, s32 y)
     return dds3SelectMenu(0, 1, rows, 1, rows, NULL, NULL, NULL, &viewerinfo->eventpos_y);
 }
 
-s32 mfilter_Process(void)
+s32 mfilter_Process(dds3ProcessID_t *unusedId)
 {
     if (mfilterRun() == 0) {
         viewerinfo->menuProcess = 0;
@@ -1163,7 +1163,7 @@ s32 mfilter_Process(void)
     }
     return 0;
 }
-s32 evtViewerExit(void)
+s32 evtViewerExit(dds3ProcessID_t *unusedId)
 {
     if (evtViewerCheckDirty() == 0) {
         viewerinfo->menuProcess = 0;
