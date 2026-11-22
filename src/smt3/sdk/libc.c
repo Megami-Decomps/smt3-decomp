@@ -191,7 +191,7 @@ typedef struct {
     char n_sign_posn;
 } lconv_t;
 
-extern lconv_t localeconvData __attribute__((section(".data")));
+extern const lconv_t localeconvData;
 
 extern s32 libcErrno __attribute__((section(".data")));
 
@@ -2784,6 +2784,7 @@ s32 _fwalk(_reent *r, s32 (*func)(void *)) {
 }
 
 extern const char localeEmptyStr[];
+extern const char localeDecimalPoint[8];
 extern const char localeCName[];
 extern s32 strcmp(const char *left, const char *right);
 
@@ -2799,7 +2800,7 @@ char *_setlocale_r(_reent *r, s32 category, const char *locale)
 }
 
 void *_localeconv_r(_reent *r) {
-    return &localeconvData;
+    return (void *)&localeconvData;
 }
 
 char *setlocale(s32 category, const char *locale) {
@@ -3559,7 +3560,13 @@ const f64 dtoaLog10Of2 __attribute__((section(".rodata"))) = 0.301029995663981;
 
 INCLUDE_RODATA(const s32, "sdk/libc", jtbl_0054B8C0);
 
-INCLUDE_RODATA(const s32, "sdk/libc", localeconvData);
+const lconv_t localeconvData = {
+    (char *)localeDecimalPoint,
+    (char *)localeEmptyStr, (char *)localeEmptyStr, (char *)localeEmptyStr,
+    (char *)localeEmptyStr, (char *)localeEmptyStr, (char *)localeEmptyStr,
+    (char *)localeEmptyStr, (char *)localeEmptyStr, (char *)localeEmptyStr,
+    127, 127, 127, 127, 127, 127, 127, 127,
+};
 
 const char localeEmptyStr[8] __attribute__((section(".rodata"))) = "";
 

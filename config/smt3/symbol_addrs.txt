@@ -1504,7 +1504,27 @@ gFontBaseWidth = 0x00326060; // type:u8 size:0x6 allow_addend:True
 fldDoorExitMode = 0x00303040; // type:u8 size:0xF
 
 // Preserve the opaque readonly bytes after the libmc RPC diagnostic.
-D_0054AF08 = 0x0054AF08; // size:0x58
+D_0054AF08 = 0x0054AF08; // size:0x4
+sdkAcosfOne = 0x0054AF0C; // type:f32 size:0x4
+sdkAcosfPi = 0x0054AF10; // type:f32 size:0x4
+sdkAcosfPiOver2Hi = 0x0054AF14; // type:f32 size:0x4
+sdkAcosfPiOver2Lo = 0x0054AF18; // type:f32 size:0x4
+sdkAcosfNumer0 = 0x0054AF1C; // type:f32 size:0x4
+sdkAcosfNumer1 = 0x0054AF20; // type:f32 size:0x4
+sdkAcosfNumer2 = 0x0054AF24; // type:f32 size:0x4
+sdkAcosfNumer3 = 0x0054AF28; // type:f32 size:0x4
+sdkAcosfNumer4 = 0x0054AF2C; // type:f32 size:0x4
+sdkAcosfNumer5 = 0x0054AF30; // type:f32 size:0x4
+sdkAcosfDenom1 = 0x0054AF34; // type:f32 size:0x4
+sdkAcosfDenom2 = 0x0054AF38; // type:f32 size:0x4
+sdkAcosfDenom3 = 0x0054AF3C; // type:f32 size:0x4
+sdkAcosfDenom4 = 0x0054AF40; // type:f32 size:0x4
+sdkAtan2fTiny = 0x0054AF44; // type:f32 size:0x4
+sdkAtan2fZero = 0x0054AF48; // type:f32 size:0x4
+sdkAtan2fPiOver4 = 0x0054AF4C; // type:f32 size:0x4
+sdkAtan2fPiOver2 = 0x0054AF50; // type:f32 size:0x4
+sdkAtan2fPi = 0x0054AF54; // type:f32 size:0x4
+sdkAtan2fPiLo = 0x0054AF58; // type:f32 size:0x4
 
 // Keep the C-owned recovery X offsets out of the raw row renderer.
 D_0053D450 = 0x0053D450; // type:s32 size:0x10 force_not_migration:True

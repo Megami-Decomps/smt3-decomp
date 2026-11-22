@@ -791,5 +791,3 @@ s32 sceMcGetEntSpace(s32 port, s32 slot, char *name)
 
 const char D_0054AEE8[] = "sceMcUdCheckNewCard RPC faild\n";
 
-INCLUDE_RODATA(const s32, "sdk/libmc", D_0054AF08);
-

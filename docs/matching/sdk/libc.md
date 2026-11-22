@@ -470,3 +470,12 @@ assembly fallback was omitted (one pair). Neither is a passing gate.
 Nine inherited unrelated owner failures were not rerun; this is not a global
 owner-suite pass. Prospective credit is one SDK/runtime function and 180 bytes,
 with no game-code gain, after publication and exact-commit CI.
+
+## Readonly C locale record
+
+The record returned by `_localeconv_r` at `0x0054B8D8` is the 48-byte
+C-locale `lconv_t`: the decimal point, nine pointers to the existing empty
+string, and eight signed-char limit sentinels (127). The legacy `void *`
+return exposes the native read-only record without changing the API. In
+retail, `_vfprintf_r` only reads its decimal-point pointer. The original
+string addresses, record extent and section placement stay unchanged.
