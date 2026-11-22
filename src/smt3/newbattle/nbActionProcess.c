@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datItemBank.h"
 #include "sdfFrame.h"
 
 extern u32 dds3GetKernelCount(void);
@@ -2666,14 +2667,8 @@ s32 CheckAction_STKSEL(nbActionProcessData_t *a)
 }
 
 
-/* Native item rows, as consumed by the command and inventory providers. */
-typedef struct {
-    u8 use;
-    u8 flag;
-    u16 skill;
-    u32 price;
-} nbActionItem_t;
-extern nbActionItem_t datItemTable[];
+
+
 
 extern void nbRestoreBgm(void);
 extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
@@ -2825,7 +2820,7 @@ void SetAction_READY(nbActionProcessData_t *a)
         break;
     }
     if (a->work->nowcommand == 5) {
-        if ((datItemTable[a->work->nowindex].flag & 4) != 0) {
+        if ((DAT_ITEM_FLAG(a->work->nowindex) & 4) != 0) {
             datAddItem(a->work->nowindex, -1);
         }
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datItemBank.h"
 #include "datSagasi.h"
 #include "sdk_libgcc.h"
 #include "datCalc.h"
@@ -10,14 +11,9 @@ extern void datDebugPrintf(const char *format, ...);
 extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern s32 func_0022E168(u16 devilId);
-typedef struct
-{
-    /* 0x00 */ u16 unk00;
-    /* 0x02 */ u16 skill;
-    /* 0x04 */ u8 price[4];
-} datItem_t;
 
-extern datItem_t datItemTable[];
+
+
 
 extern s32 datGetItemSlotIndex(s32 id);
 extern void evtBitOff(s32 no);
@@ -1769,7 +1765,7 @@ s32 datGetItemSkillNo(s32 itemid)
     if (itemid == 1) {
         return list[dds3GetRandIntA(0, 6)];
     }
-    return datItemTable[itemid].skill;
+    return DAT_ITEM_SKILL(itemid);
 }
 
 u16 datGetLevelForDraw(datUnitWork_t *work)

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datItemBank.h"
 #include "eff_camp_bad_params.h"
 #include "facility.h"
 #include "result2.h"
@@ -287,13 +288,7 @@ typedef struct
     /* 0x8500 */ s32 stockDelay[16];
 } campWork_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ u8 flags2;
-    /* 0x02 */ u16 skill;
-    /* 0x04 */ u8 unk_04[4];
-} datItemEntry_t;
+
 
 /* datSkillTable viewed from +0x20, which is where retail folds the base for
  * cmpChkSkillBad: it forms datSkillTable + 0x20 and indexes from there, so
@@ -318,7 +313,7 @@ extern datSkillBadEntry_t datSkillBadEntries[] FAKEMATCH_ASM_NAME("datSkillTable
 
 extern campWork_t *campWork;
 
-extern datItemEntry_t datItemTable[];
+
 
 extern f32 aViewEye[4];
 
@@ -1113,7 +1108,7 @@ s32 cmpDestroyItem(s8 all)
 
     if (all == 0)
     {
-        if ((datItemTable[id].flags2 & 4) != 0)
+        if ((DAT_ITEM_FLAG(id) & 4) != 0)
         {
             datAddItem(id, -1);
         }
@@ -1331,7 +1326,7 @@ s32 cmpStartSkillTokusyuMsg(u16 skill)
 
 s32 cmpStartItemTokusyuMsg(u16 item)
 {
-    return cmpStartSkillTokusyuMsg(datItemTable[item].skill);
+    return cmpStartSkillTokusyuMsg(DAT_ITEM_SKILL(item));
 }
 
 extern s32 cmpClearButtonGuide(s32 skill, u32 select);
@@ -1419,7 +1414,7 @@ s32 cmpGetKugatatiMsg(void)
 
 s32 cmpStartItemMsg(u16 item, s32 errorFlags)
 {
-    datItemEntry_t *table = datItemTable;
+    datItemEntry_t *table = datItemTable.records.items;
     FAKEMATCH_ASM_REG(datItemEntry_t *, entry, "v0");
     u16 skill;
     s32 guide;
@@ -1596,7 +1591,7 @@ s32 cmpItemIsStockFull(u16 id)
 
 s32 cmpItemIsUsable(u16 item)
 {
-    u8 flags = datItemTable[item].flags;
+    u8 flags = DAT_ITEM_USE(item);
     u8 usable = flags & 1;
     s32 count;
     FAKEMATCH_ASM_REG(s32, result, "$2");
@@ -1842,7 +1837,7 @@ void cmpSetSkillTSL(u16 skill)
 
 void cmpSetItemTSL(u16 itemId)
 {
-    u16 skill = datItemTable[itemId].skill;
+    u16 skill = DAT_ITEM_SKILL(itemId);
 
     if (itemId == 0x3A) {
         campWork->stock[1].count = 0x8B;
@@ -2039,7 +2034,7 @@ s32 cmpCalcItem(void)
                 switch (campWork->page[0].cursor.unk_22 +
                         (u8)campWork->page[0].cursor.unk_24) {
                 case 0: {
-                    const datItemEntry_t *table = datItemTable;
+                    const datItemEntry_t *table = datItemTable.records.items;
                     u16 item = cmpGetSelectItemID();
                     const datItemEntry_t *entry = table + item;
                     if (cmpGetSkillTargetArea(entry->skill) == 0) {
@@ -2870,8 +2865,8 @@ void campDrawStockRow(s8 mode)
             campDrawText(6, 0);
             break;
         case 1:
-            campSkillTargetIsSelf(datItemTable[campWork->itemId[
-                campWork->itemCursor + campWork->itemScroll]].skill, 5);
+            campSkillTargetIsSelf(DAT_ITEM_SKILL(campWork->itemId[
+                campWork->itemCursor + campWork->itemScroll]), 5);
             campDrawText(6, 0);
             break;
         case 3:
@@ -10804,7 +10799,7 @@ s32 cmpUseItemTokusyu(u16 item, saddr_t target, saddr_t user)
     /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
     do
     {
-        return cmpUseSkillTokusyu(datItemTable[item].skill, target, user);
+        return cmpUseSkillTokusyu(DAT_ITEM_SKILL(item), target, user);
     } while (0);
 }
 
@@ -11979,12 +11974,12 @@ s32 func_002429C0(void)
 s32 cmpItemHasFlag(u16 item, s8 which)
 {
     if (which == 0) {
-        u8 flag = datItemTable[item].flags & 1;
+        u8 flag = DAT_ITEM_USE(item) & 1;
         if (flag != 0) {
             return 1;
         }
     } else {
-        u32 flag = datItemTable[item].flags2 & 2;
+        u32 flag = DAT_ITEM_FLAG(item) & 2;
         return flag == 0;
     }
     return 0;

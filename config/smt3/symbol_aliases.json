@@ -534,5 +534,13 @@
     "section": ".data",
     "offset": 16,
     "owner_size": 784
+  },
+  {
+    "name": "datSagasiSkillTable",
+    "owner": "datItemTable",
+    "unit": "newdata/datItemCatalog",
+    "section": ".data",
+    "offset": 1152,
+    "owner_size": 1300
   }
 ]

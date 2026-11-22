@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datItemBank.h"
 #include "camp.h"
 #include "facility.h"
 #include "fpu.h"
@@ -401,14 +402,9 @@ void shpFindItemSlot(shpUpdateWork_t *work)
     fclSetWorkValue(4, work->hasMissingHeart);
 }
 
-typedef struct
-{
-    /* 0x00 */ u16 unk_00;
-    /* 0x02 */ u16 skill;
-    /* 0x04 */ u32 price;
-} shpItemTableEntry_t;
 
-extern shpItemTableEntry_t datItemTable[];
+
+
 
 s32 shpGetSellPrice(s32 index, s8 sell)
 {
@@ -419,7 +415,7 @@ s32 shpGetSellPrice(s32 index, s8 sell)
         s32 row = (u8)shpItemIsUnlocked(shopProcWork->itemType);
         u16 fallback = shpPriceTable[row].base;
         u32 price = shpPriceTable[row].items[index].price;
-        u32 base = datItemTable[item].price;
+        u32 base = DAT_ITEM_PRICE(item);
         s32 div = 100;
 
         if (price == 0) {
@@ -430,7 +426,7 @@ s32 shpGetSellPrice(s32 index, s8 sell)
             ret *= 3;
         }
     } else {
-        ret = datItemTable[item].price >> 1;
+        ret = DAT_ITEM_PRICE(item) >> 1;
     }
     return DDS3_SHOP_PRICE(ret, sell);
 }

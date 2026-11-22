@@ -68,3 +68,22 @@ rom:0x24A77C reloc:MIPS_NONE symbol:none // nbDefaultUnitVisual motion 24: (type
 // cmpSetSkillListRows writes the style-one byte in gFontBaseWidth.
 rom:0xC716C reloc:MIPS_HI16 symbol:gFontBaseWidth addend:0x1
 rom:0xC717C reloc:MIPS_LO16 symbol:gFontBaseWidth addend:0x1
+
+// Packed numeric item fields can resemble addresses to the disassembler.
+rom:0x2DD4E8 reloc:MIPS_NONE symbol:none // datItemTable[0x09]: flag bytes 0x03/0x04 and skill 0x055, not a pointer.
+rom:0x2DD4F0 reloc:MIPS_NONE symbol:none // datItemTable[0x0A]: flag bytes 0x03/0x04 and skill 0x056, not a pointer.
+rom:0x2DD508 reloc:MIPS_NONE symbol:none // datItemTable[0x0D]: flag bytes 0x03/0x04 and skill 0x031, not a pointer.
+rom:0x2DD510 reloc:MIPS_NONE symbol:none // datItemTable[0x0E]: flag bytes 0x03/0x04 and skill 0x032, not a pointer.
+rom:0x2DD530 reloc:MIPS_NONE symbol:none // datItemTable[0x12]: flag bytes 0x02/0x04 and skill 0x058, not a pointer.
+rom:0x2DD540 reloc:MIPS_NONE symbol:none // datItemTable[0x14]: flag bytes 0x02/0x04 and skill 0x030, not a pointer.
+rom:0x2DD598 reloc:MIPS_NONE symbol:none // datItemTable[0x1F]: flag bytes 0x02/0x04 and skill 0x037, not a pointer.
+rom:0x2DD5B0 reloc:MIPS_NONE symbol:none // datItemTable[0x22]: flag bytes 0x02/0x04 and skill 0x045, not a pointer.
+rom:0x2DD5B8 reloc:MIPS_NONE symbol:none // datItemTable[0x23]: flag bytes 0x02/0x04 and skill 0x046, not a pointer.
+rom:0x2DD5C0 reloc:MIPS_NONE symbol:none // datItemTable[0x24]: flag bytes 0x02/0x04 and skill 0x039, not a pointer.
+rom:0x2DD5C8 reloc:MIPS_NONE symbol:none // datItemTable[0x25]: flag bytes 0x02/0x04 and skill 0x044, not a pointer.
+rom:0x2DD610 reloc:MIPS_NONE symbol:none // datItemTable[0x2E]: flag bytes 0x02/0x00 and skill 0x047, not a pointer.
+rom:0x2DD640 reloc:MIPS_NONE symbol:none // datItemTable[0x34]: flag bytes 0x01/0x04 and skill 0x049, not a pointer.
+rom:0x2DD648 reloc:MIPS_NONE symbol:none // datItemTable[0x35]: flag bytes 0x01/0x04 and skill 0x04A, not a pointer.
+rom:0x2DD650 reloc:MIPS_NONE symbol:none // datItemTable[0x36]: flag bytes 0x01/0x04 and skill 0x04B, not a pointer.
+rom:0x2DD658 reloc:MIPS_NONE symbol:none // datItemTable[0x37]: flag bytes 0x01/0x04 and skill 0x04C, not a pointer.
+rom:0x2DD660 reloc:MIPS_NONE symbol:none // datItemTable[0x38]: flag bytes 0x02/0x04 and skill 0x048, not a pointer.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "datItemBank.h"
 #include "sdfFrame.h"
 #include "newbattle.h"
 #include "kernel.h"
@@ -1459,15 +1460,7 @@ void nbCommSelShutdown(dds3ProcessID_t *id)
 
 extern datSkill_t attr[];
 
-/* The native inventory scan uses eight-byte item rows; no table extent
- * is inferred from its 160 inventory slots. */
-typedef struct {
-    u8 use;
-    u8 flag;
-    u16 skill;
-    u32 price;
-} nbCommItem_t;
-extern nbCommItem_t datItemTable[];
+
 
 extern nbNegoSkillEntry_t nbNegoSkillTable[];
 
@@ -1600,16 +1593,18 @@ void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my)
     s->commcnt[0]++;
 
     if (work->flag & 4) {
+        const u8 *itemBytes = (const u8 *)&datItemTable;
+
         for (i = 0; i < 160; i++) {
-            if (nbCommGlobalWork->item[i] != 0 && (datItemTable[i].use & 2)) {
+            if (nbCommGlobalWork->item[i] != 0 && (itemBytes[i * sizeof(datItemEntry_t)] & 2)) {
                 s->commlist[2][s->commcnt[2]] = i;
                 s->commdisable[2][s->commcnt[2]] = 0;
-                if (datItemTable[i].flag & 1) {
+                if (itemBytes[i * sizeof(datItemEntry_t) + 1] & 1) {
                     if (s->data->stat & 1) {
                         s->commdisable[2][s->commcnt[2]] = 1;
                     }
                 }
-                if (datItemTable[i].flag & 8) {
+                if (itemBytes[i * sizeof(datItemEntry_t) + 1] & 8) {
                     if (s->data->stat & 4) {
                         s->commdisable[2][s->commcnt[2]] = 2;
                     }
