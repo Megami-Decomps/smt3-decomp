@@ -92,8 +92,6 @@ extern void mcDelayThread(u16 ticks);
 extern char *strncpy(char *dst, const char *src, size_t n);
 extern int scePrintf(const char *fmt, ...);
 
-/* The chunk this string opens also carries the float constants the next
- * unit needs, so it stays one INCLUDE_RODATA rather than an inline literal. */
 extern const char D_0054AEE8[];
 extern void sceSifWriteBackDCache(void *addr, s32 size);
 extern void FlushCache(s32 mode);
@@ -791,5 +789,7 @@ s32 sceMcGetEntSpace(s32 port, s32 slot, char *name)
     return ret;
 }
 
-INCLUDE_RODATA(const s32, "sdk/libmc", D_0054AEE8);
+const char D_0054AEE8[] = "sceMcUdCheckNewCard RPC faild\n";
+
+INCLUDE_RODATA(const s32, "sdk/libmc", D_0054AF08);
 

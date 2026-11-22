@@ -4038,7 +4038,7 @@ typedef struct {
     void (*entry)(void);
 } kernelEntryPair_t;
 
-extern kernelEntryPair_t systemCallEntryPairs[2];
+#include "sdk_kernel_startup_entries.h"
 extern void setup(u32 index, void *entry);
 extern u32 *FindAddress(u32 *start, const u32 *end, u32 instruction);
 
@@ -4049,8 +4049,9 @@ void GetSystemCallTableEntry(void)
     u32 *searchBase;
     u32 *copyBase;
 
-    setup(systemCallEntryPairs[0].index, systemCallEntryPairs[0].entry);
-    setup(systemCallEntryPairs[1].index, systemCallEntryPairs[1].entry);
+    /* The syscall wrappers take EE addresses, not callable C function pointers. */
+    setup(systemCallEntryPairs[0].index, EE_ADDR_PTR(EE_ADDR(systemCallEntryPairs[0].entry.find)));
+    setup(systemCallEntryPairs[1].index, EE_ADDR_PTR(EE_ADDR(systemCallEntryPairs[1].entry.wordCopy)));
     searchEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
                               EE_ADDR(kFindAddress));
     copyEntry = FindAddress((u32 *)0x80000000, (u32 *)0x80080000,
@@ -4125,7 +4126,6 @@ s32 PatchIsNeeded_0(void)
 
 extern void FlushCache(s32 mode);
 
-extern kernelEntryPair_t execEntryPairs[3];
 extern const u8 execPs2Payload[0x7A8];
 extern s32 PatchIsNeeded_0(void);
 extern void gcc2_compiled__15(u32 index, void *entry);
@@ -4141,11 +4141,11 @@ void InitExecPS2(void)
     if (PatchIsNeeded_0() == 0) {
         return;
     }
-    gcc2_compiled__15(execEntryPairs[0].index, execEntryPairs[0].entry);
+    gcc2_compiled__15(execEntryPairs[0].index, EE_ADDR_PTR(EE_ADDR(execEntryPairs[0].entry.wordCopy)));
     Copy_0((void *)0x80074000, execPs2Payload, 0x7A8);
     FlushCache(0);
     FlushCache(2);
-    gcc2_compiled__15(execEntryPairs[1].index, execEntryPairs[1].entry);
+    gcc2_compiled__15(execEntryPairs[1].index, execEntryPairs[1].entry.resident);
     for (i = 2; i < 3; i++) {
         index = execEntryPairs[i].index;
         entry = GetEntryAddress(index);
@@ -4176,7 +4176,6 @@ typedef struct execArgumentBlock_t {
     char strings[1];
 } execArgumentBlock_t;
 extern void *execArgumentBlock;
-extern kernelEntryPair_t setArgEntryPairs[1];
 extern void PatchIsNeeded(u32 index, void *entry);
 extern s32 gcc2_compiled__16(void *destination, const void *source, u32 size);
 extern u32 strlen(const char *text);
@@ -4188,7 +4187,7 @@ char *SetArg(const char *path, s32 count, const char *const *arguments)
     char *start = cursor;
     u32 length;
 
-    PatchIsNeeded(setArgEntryPairs[0].index, setArgEntryPairs[0].entry);
+    PatchIsNeeded(setArgEntryPairs[0].index, EE_ADDR_PTR(EE_ADDR(setArgEntryPairs[0].entry.byteCopy)));
     if (count >= 16) {
         count = 15;
     }
