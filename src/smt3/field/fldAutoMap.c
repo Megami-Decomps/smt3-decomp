@@ -919,6 +919,9 @@ s32 fldAutoMapGetFloorMax(void) {
     return max + 1;
 }
 
+/* Native diagnostic for viewing all Automap blocks. */
+const char fldAutoMapFullOpenMsg[9] = "FullOpen";
+
 #ifdef NON_MATCHING
 struct frFontHandle_t;
 struct frFontRequest_t;

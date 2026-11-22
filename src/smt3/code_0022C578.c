@@ -4316,7 +4316,6 @@ void cmpSetStatusStartEff(void)
 }
 
 extern campInfoWork_t *campDhCalcState;
-extern campWork_t *volatile campWorkLive FAKEMATCH_ASM_NAME("campWork");
 extern void cmpSetStatusStartEff(void);
 extern void cmpModelInit(void);
 
@@ -9048,8 +9047,9 @@ extern void campDrawStockStatus(s32 x, s32 y, s32 z, s32 color,
                                 s32 alpha);
 
 s32 campDrawStockLabel(s32 x, s32 y, s32 z, s8 slot, s8 row,
-                       cmpCursorSlot_t *cursor, s8 cursorMode, s32 alpha)
+                       cmpCursorSlot_t *cursor, s32 mode, s32 alpha)
 {
+    s8 cursorMode = (s8)mode;
     datUnitWork_t *unit = &DDS3_GBWK->party[DDS3_GBWK->stock[slot]].unit;
     s32 rowY = y + row * 0xC0;
     s32 color = 0xA09DC380;
@@ -9137,63 +9137,88 @@ s32 campDrawStockIcon(s8 a, s8 b, s8 *rows, s8 *cols, s8 force)
     return 0;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Draw the fixed background first. The cursor pass reads the current work
+ * root at each callback boundary, not a snapshot from the background. */
 void campDrawStockRow1(s32 x, s32 y, s32 z, s8 *rows, s8 *columns,
                        s8 force, cmpStockWork_t *stock, s32 unused_ot)
 {
     s32 colors[4];
+    /* Keep the actual sprite order in its call-preserved slot for the
+     * first drawing loop. The local binding is a target allocation aid. */
+    FAKEMATCH_ASM_REG(s32, drawOrder, "$19") = 0x47;
     s32 row;
-    s32 rowY = 0;
+    s32 rowUnits = 0;
     s32 separatorY = 0x1C8;
     s32 xScale;
-    s32 extraX;
     s32 color;
+    /* Retail preserves the stock address biased to +0xAC between phases.
+     * The first cursor slot is a further +0x3C into the complete object. */
+    u8 *stockBase = (u8 *)stock + 0xAC;
 
     for (row = 0; row < 4; row++) {
+        s32 rowY = rowUnits << 6;
+
         xScale = campCalcStockScale((s8)row, 0);
         color = campDrawStockCell(0x80808080, (s8)row, 0);
-        extraX = xScale + 0xD40;
         colors[0] = color;
         colors[1] = color;
         colors[2] = color;
         colors[3] = color;
         fclDrawSpriteRes(xScale, rowY, 0, colors, 0, 5, D_00345D88,
-                         fclSpriteTable, 0x47);
+                         fclSpriteTable, drawOrder);
         fclDrawSpriteRes(xScale, rowY, 0, colors, 0, 6, D_00345D88,
-                         fclSpriteTable, 0x47);
+                         fclSpriteTable, drawOrder);
         if (row < 3) {
+            s32 extraX = (s32)((u32)xScale + 0xD40U);
             fclDrawSpriteRes(extraX, separatorY, 0, colors, 0, 0x12,
-                             D_00345D88, fclSpriteTable, 0x47);
+                             D_00345D88, fclSpriteTable, drawOrder);
             fclDrawSpriteRes(extraX, separatorY, 0, colors, 0, 0x13,
-                             D_00345D88, fclSpriteTable, 0x47);
+                             D_00345D88, fclSpriteTable, drawOrder);
         }
-        rowY += 0xC0;
+        rowUnits += 3;
         separatorY += 0xC0;
     }
 
     {
-        campWork_t *work = campWorkLive;
+        campWork_t *work;
+        FAKEMATCH_ASM_REG(campWork_t *, entryWork, "$3") = campWork;
+        FAKEMATCH_ASM_REG(u32, entryAddress, "$2") = 0x10000U;
 
-        for (row = 0; row < work->drawStock.PartyCnt; row++) {
-            s32 cursorMode = campDrawStockIcon(1, (s8)row, rows, columns, force);
-            s8 slot;
-            s32 alpha;
+        /* The entry test reads the current work root after drawing. Keep its
+         * real pointer in the short-lived native operand for this load. */
+        FAKEMATCH_ASM_LIVE(entryWork);
+        row = 0;
+        if (*EE_ADDR_AS(s8 *, entryAddress + EE_ADDR(entryWork) - 0x7D52U) > 0) {
+            u8 *cursorBase = stockBase + 0x3C;
 
-            work = campWorkLive;
-            slot = work->drawStock.ListIdx[row];
-            alpha = campGetStockAlpha((s8)row, 0);
-            campDrawStockLabel(x, y, z, slot, (s8)row,
-                               &stock->info[0].rows[row].slot, cursorMode, alpha);
-            work = campWorkLive;
+            FAKEMATCH_ASM_REG(s32, count, "$2");
+
+            do {
+                /* Word-valued icon result is narrowed in the label callee. */
+                s32 cursorMode = campDrawStockIcon(1, (s8)row, rows, columns, force);
+                s8 slot;
+                s32 alpha;
+
+                work = campWork;
+                slot = work->drawStock.ListIdx[row];
+                alpha = campGetStockAlpha((s8)row, 0);
+                campDrawStockLabel(x, y, z, slot, (s8)row,
+                                   (cmpCursorSlot_t *)cursorBase, cursorMode, alpha);
+                cursorBase += 0x10;
+                {
+                    FAKEMATCH_ASM_REG(campWork_t *, lastWork, "$3") = campWork;
+                    FAKEMATCH_ASM_REG(u32, lastHigh, "$2") = 0x10000U;
+
+                    /* Match the native large offset: 0x10000 - 0x7D52
+                     * is drawStock.PartyCnt at 0x82AE. Keep the temporary
+                     * bias numeric; it need not name a subobject. */
+                    FAKEMATCH_ASM_LIVE_PAIR(lastHigh, lastWork);
+                    count = *EE_ADDR_AS(s8 *, lastHigh + EE_ADDR(lastWork) - 0x7D52U);
+                }
+            } while (++row < count);
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
-#endif
 
 /* Word-sized mode forwards the icon result; Label2 performs the native byte
  * normalization on entry. Phase-local pointer and call-coordinate bindings

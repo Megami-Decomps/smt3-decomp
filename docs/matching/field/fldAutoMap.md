@@ -407,3 +407,12 @@ by the generic NPC path (24 bytes), comprise the final 888 bytes of the
 original read-only area. These named path objects can match independently
 of the earlier switch and vector constants. All paths and readers retain
 their native bytes.
+
+## Full-open diagnostic text
+
+The assembly-backed `fldAutoMapDrawOneArea` passes this string to
+`fldDbgPrint2D` when the full-open display diagnostic runs. The C array at
+`0x005321C0` contains nine bytes including its terminator. The following seven
+alignment bytes belong to the next 16-byte-aligned switch table placement,
+not to the string. The existing function and its two string relocations
+remain unchanged.

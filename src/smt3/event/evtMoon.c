@@ -852,24 +852,3 @@ f32 evtMoonTimer = 0;
 f32 evtMoonPhase = 0;
 
 f32 evtMoonState = 0;
-
-INCLUDE_SDATA(const s32, "event/evtMoon", evtMoonProcessName);
-SDATA_RESUME();
-
-char *evtDebugDefaultCameraName = D_0053B228;
-
-u32 evtDebugCameraPage = 1;
-
-INCLUDE_SDATA(const s32, "event/evtMoon", evtDebugCameraNameFmt);
-SDATA_RESUME();
-
-s32 evtDebugState = 500;
-
-s32 evtSceneDispWork = 0;
-
-s32 evtSceneDispTimer = 0;
-
-s32 evtSceneDispState = 0;
-
-SDATA_PAD(4);
-

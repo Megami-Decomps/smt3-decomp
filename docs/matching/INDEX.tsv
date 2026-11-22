@@ -51,27 +51,28 @@ campDrawStatusRow2	code_0022C578	0x134	77 of 77 words match	docs/matching/code_0
 campDebugRegistAll	code_0022C578	0x43C	271 of 271 words match	docs/matching/code_0022C578.md	1124
 cmpDrawPanelEffQuad	code_0022C578	0x20C		docs/matching/code_0022C578.md	1163
 campDhUpdateCursor	code_0022C578	0x248	146 of 146 words match	docs/matching/code_0022C578.md	1232
-campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1281
-campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1305
-cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1357
-cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1387
-cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1425
-campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1473
-cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1510
-cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1552
-cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1595
-cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1635
-cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1695
-cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1761
-campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1935
-cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1969
-cmpDrawSkillListRow	code_0022C578	0x230		docs/matching/code_0022C578.md	2013
-cmpDrawSkillRowText (0x314)				docs/matching/code_0022C578.md	2030
-cmpDrawBoxG	code_0022C578	0x198	102 of 102 words match	docs/matching/code_0022C578.md	2046
-Camp item and skill message tables				docs/matching/code_0022C578.md	2068
-Parameter gauge row map				docs/matching/code_0022C578.md	2076
-Camp affinity and name text				docs/matching/code_0022C578.md	2084
-nmeDrawGradQuad	code_0022C578	0x5C0		docs/matching/code_0022C578.md	2093
+campDrawStockRow1	code_0022C578	0x250		docs/matching/code_0022C578.md	1281
+campDrawStockRow2	code_0022C578	0x260	125 of 152 words match	docs/matching/code_0022C578.md	1301
+campDhDrawHeartsGauge (0x354)				docs/matching/code_0022C578.md	1325
+cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	1377
+cmpUpdateDestroyItemConfirm	code_0022C578	0xE0	56 of 56 words match	docs/matching/code_0022C578.md	1407
+cmpDrawStatusValue	code_0022C578	0xF4	61 of 61 words match	docs/matching/code_0022C578.md	1445
+campWaitSelMessage	code_0022C578	0x15C	87 of 87 words match	docs/matching/code_0022C578.md	1493
+cmpUpdateSkillSelect	code_0022C578	0x184	97 of 97 words match	docs/matching/code_0022C578.md	1530
+cmpDrawListItemText	code_0022C578	0x12C	75 of 75 words match	docs/matching/code_0022C578.md	1572
+cmpSetStatusStartEff	code_0022C578	0x174	93 of 93 words match	docs/matching/code_0022C578.md	1615
+cmpRecover	code_0022C578	0x164	89 of 89 words match	docs/matching/code_0022C578.md	1655
+cmpDrawListItemBox	code_0022C578	0x174		docs/matching/code_0022C578.md	1715
+cmpDrawStatusGauge	code_0022C578	0x130	42 of 76 words match	docs/matching/code_0022C578.md	1781
+campDhDrawBackground (0x00233B68)				docs/matching/code_0022C578.md	1955
+cmpDrawListRows	0x0023C170	500 bytes		docs/matching/code_0022C578.md	1989
+cmpDrawSkillListRow	code_0022C578	0x230		docs/matching/code_0022C578.md	2033
+cmpDrawSkillRowText (0x314)				docs/matching/code_0022C578.md	2050
+cmpDrawBoxG	code_0022C578	0x198	102 of 102 words match	docs/matching/code_0022C578.md	2066
+Camp item and skill message tables				docs/matching/code_0022C578.md	2088
+Parameter gauge row map				docs/matching/code_0022C578.md	2096
+Camp affinity and name text				docs/matching/code_0022C578.md	2104
+nmeDrawGradQuad	code_0022C578	0x5C0		docs/matching/code_0022C578.md	2113
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
@@ -222,6 +223,7 @@ fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/match
 fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	215
 Area title table				docs/matching/field/fldAutoMap.md	393
 NPC resource paths				docs/matching/field/fldAutoMap.md	403
+Full-open diagnostic text				docs/matching/field/fldAutoMap.md	411
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
