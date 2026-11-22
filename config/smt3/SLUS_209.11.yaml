@@ -386,7 +386,7 @@ segments:
       - [0x1E7E3C, pad, text_tail_padding]
       - [0x1E7E50, textbin, vutext]
       # Both native GCC lists contain a leading sentinel and a null entry.
-      - [0x1F6600, data, libgccCtorDtorLists]
+      - [0x1F6600, .data, sdk/libgccCtorDtorLists]
       # Preserve the subsequent raw reginfo and alignment bytes.
       - [0x1F6610, databin, ctors_dtors_reginfo]
       - [0x1F6680, data, data]
