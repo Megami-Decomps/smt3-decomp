@@ -1,10 +1,50 @@
-# Remainder runtime findings
+# GCC integer division runtime
 
-## __umoddi3 (sdk/libgcc_longlong, 0x568)
+## __udivdi3 (sdk/libgcc_unsigned_divmod, 0x57C)
+
+351 of 351 words match at 1,404 bytes. The unsigned quotient wrapper and
+unsigned remainder wrapper use the normalized divmod implementation adapted
+from GNU GCC's October 3, 2000 snapshot:
+[libgcc2.c](https://github.com/gcc-mirror/gcc/blob/380f6ad3dde6db991434068c4f3776c6762fa564/gcc/libgcc2.c)
+and [longlong.h](https://github.com/gcc-mirror/gcc/blob/380f6ad3dde6db991434068c4f3776c6762fa564/gcc/longlong.h).
+The two upstream notices are retained in the C source; the accompanying GPL
+text is already checked in at [GCC-frame-COPYING](../../licenses/GCC-frame-COPYING).
+
+The core uses unsigned words for normalization, estimates and corrections.
+It uses the historical two-output MIPS multiply only to obtain the real
+high and low words of the quotient-estimate product; both feed the correction
+comparison and subtraction. The approved `PS2_MULTU_WORDS` macro expresses
+that arithmetic, with no added memory effect, register binding or fake
+dependency. Substituting a normal widening C product and splitting it into
+two words emits 1,432 and 1,408 bytes for the two wrappers instead of the
+native 1,404 and 1,384. The intentional zero-divisor expression uses the
+pinned EE compiler's division-trap expansion, which emits native BREAK 7
+before the hardware division; it is not a portable C return value.
+
+## __umoddi3 (sdk/libgcc_unsigned_divmod, 0x568)
+
+346 of 346 words match at 1,384 bytes. The quotient is discarded; the
+remainder is written by the same normalized helper to the wrapper's local.
+All six table relocations per wrapper name their real independent 256-byte
+bit-length provider in `sdk/libgcc_longlong`. That existing owner still
+retains the signed routines, four original tables, and the native debug
+dispatch stub. None of those definitions changed bytes. The new C unit
+starts at 0x002E6048, where the native 8-byte-aligned unsigned quotient begins;
+a native four-byte zero separates the two bodies. It is not counted as code.
+
+Independent native execution checked 27,801 edge and seeded vectors for
+each routine, including 606 zero-divisor traps apiece. The same historical
+snapshot also produced exact isolated signed routines, but its word negation
+has signed overflow for real INT32_MIN halfwords. The signed functions stay
+on their original assembly and existing guarded reference drafts.
+
+## Earlier remainder draft (historical)
+
+### Earlier unsigned draft
 
 130 of 346 words match at the native1384-byte size. The draft emits1408
-bytes, with24 excess bytes. Production retains assembly; no exact
-matching credit is claimed.
+bytes, with24 excess bytes. At that stage, production retained assembly; the old draft earned no exact
+matching credit.
 
 The wrapper returns the remainder stored by an inlined divide/modulo helper,
 whose quotient is discarded. This boundary is corroborated by the historical

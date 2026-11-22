@@ -10,19 +10,6 @@ typedef union {
     struct { s32 low, high; } words;
 } runtimeWide_t;
 
-extern const u8 libgccUdivdiBitLengths[256];
-
-static inline u32 LeadingZeroBits(u32 word)
-{
-    u32 shift;
-    if (word < 0x10000) {
-        shift = word < 0x100 ? 0 : 8;
-    } else {
-        shift = word < 0x1000000 ? 16 : 24;
-    }
-    return 32 - (libgccUdivdiBitLengths[word >> shift] + shift);
-}
-
 /* The historical longlong.h uses this multi-output arithmetic primitive.
  * A macro keeps quotient/remainder outputs scalar under this compiler.
  * Divide a two-word numerator by a normalized one-word divisor, estimating
@@ -68,7 +55,6 @@ static inline u32 LeadingZeroBits(u32 word)
 /* Preserve the shared helper's optional remainder output. The wrapper
  * discards its quotient and returns the remainder written to its local. */
 extern const u8 libgccModdiBitLengths[256];
-extern const u8 libgccUmoddiBitLengths[];
 
 static inline u32 RemainderLeadingZeroBits(u32 word, const u8 *bitLengths)
 {
@@ -259,100 +245,7 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __moddi3);
 #endif
 
 #ifdef NON_MATCHING
-/* NON_MATCHING: 1424/1404 bytes; 74 of 351 native words match.
- * Widening-product word extraction and scalar allocation differ. */
-u64 __udivdi3(u64 numerator, u64 denominator)
-{
-    runtimeWide_t n, d, result;
-    u32 nHigh, nLow, dHigh, dLow, shift, inverse;
-    u32 qHigh, qLow;
-    n.value = numerator;
-    d.value = denominator;
-    dHigh = d.words.high;
-    nHigh = n.words.high;
-    dLow = d.words.low;
-    nLow = n.words.low;
-    if (dHigh == 0) {
-        if (dLow > nHigh) {
-            shift = LeadingZeroBits(dLow);
-            if (shift != 0) {
-                dLow <<= shift;
-                nHigh = (nHigh << shift) | (nLow >> (32 - shift));
-                nLow <<= shift;
-            }
-            DIVIDE_NORMALIZED(qLow, nHigh, nHigh, nLow, dLow);
-            qHigh = 0;
-        } else {
-            if (dLow == 0) {
-                /* Preserve the runtime's native divide-by-zero trap. */
-                dLow = 1 / dLow;
-            }
-            shift = LeadingZeroBits(dLow);
-            if (shift == 0) {
-                nHigh -= dLow;
-                qHigh = 1;
-            } else {
-                u32 upper;
-                inverse = 32 - shift;
-                dLow <<= shift;
-                upper = nHigh >> inverse;
-                nHigh = (nHigh << shift) | (nLow >> inverse);
-                nLow <<= shift;
-                DIVIDE_NORMALIZED(qHigh, nHigh, upper, nHigh, dLow);
-            }
-            DIVIDE_NORMALIZED(qLow, nHigh, nHigh, nLow, dLow);
-        }
-    } else if (dHigh > nHigh) {
-        qLow = 0;
-        qHigh = 0;
-    } else {
-        shift = LeadingZeroBits(dHigh);
-        if (shift == 0) {
-            if (nHigh > dHigh || nLow >= dLow) {
-                qLow = 1;
-            } else {
-                qLow = 0;
-            }
-        } else {
-            u32 upper, productHigh, productLow;
-            runtimeWide_t product;
-            inverse = 32 - shift;
-            dHigh = (dHigh << shift) | (dLow >> inverse);
-            dLow <<= shift;
-            upper = nHigh >> inverse;
-            nHigh = (nHigh << shift) | (nLow >> inverse);
-            nLow <<= shift;
-            DIVIDE_NORMALIZED(qLow, nHigh, upper, nHigh, dHigh);
-            product.value = (u64)qLow * dLow;
-            productHigh = product.words.high;
-            productLow = product.words.low;
-            if (productHigh > nHigh ||
-                (productHigh == nHigh && productLow > nLow)) {
-                qLow--;
-            }
-        }
-        qHigh = 0;
-    }
-    result.words.low = qLow;
-    result.words.high = qHigh;
-    return result.value;
-}
-
-#else
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __udivdi3);
-#endif
-
-#ifdef NON_MATCHING
-u64 __umoddi3(u64 numerator, u64 denominator)
-{
-    u64 remainder;
-    DivideWithRemainder(numerator, denominator, &remainder, libgccUmoddiBitLengths);
-    return remainder;
-}
-
 #undef DIVIDE_NORMALIZED
-#else
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __umoddi3);
 #endif
 
 const u8 libgccDivdiBitLengths[256] = {0x00, 0x01, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08};

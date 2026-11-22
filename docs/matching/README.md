@@ -40,6 +40,7 @@ both native and emitted sizes when they differ.
 | 6 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 5 | sdk/libgcc_unsigned_divmod | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
@@ -74,7 +75,6 @@ both native and emitted sizes when they differ.
 | 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
-| 3 | sdk/libgcc_longlong | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 3 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |

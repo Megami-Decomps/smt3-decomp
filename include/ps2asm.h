@@ -1904,4 +1904,10 @@ __asm__ volatile ( \
     ".set reorder" \
     : : : "memory")
 
+/* Two-word unsigned product, with actual LO and HI result operands.
+ * This is the MIPS umul_ppmm primitive from GCC longlong.h. Its notice
+ * is retained in src/smt3/sdk/libgcc_unsigned_divmod.c. */
+#define PS2_MULTU_WORDS(hi, lo, lhs, rhs) __asm__ ("multu %2,%3" \
+    : "=l" (lo), "=h" (hi) : "d" ((u32)(lhs)), "d" ((u32)(rhs)))
+
 #endif /* PS2ASM_H */
