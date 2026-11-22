@@ -164,6 +164,7 @@ Sacrifice fusion timeline				docs/matching/facility/fclCombineInit.md	838
 Fusion labels and model marks				docs/matching/facility/fclCombineInit.md	846
 Fusion sprite resources				docs/matching/facility/fclCombineInit.md	854
 Triple-race comparison row				docs/matching/facility/fclCombineInit.md	866
+cmbGetRaceCombineResult	fclCombineInit	0x1F8		docs/matching/facility/fclCombineInit.md	871
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3

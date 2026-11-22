@@ -867,3 +867,24 @@ references to local section addends.
 
 The two permutations each test precisely the one native four-byte row: three
 race bytes and its result byte. The following zero word is separate alignment.
+
+## cmbGetRaceCombineResult (fclCombineInit, 0x1F8)
+
+The race result search matches all 126 native words. It sorts the existing
+race-specific table, filters each matching row through the four original
+predicates in order, then scans the resulting halfword IDs. Eligibility
+and the requested level remain separate: equality is accepted, the first
+level strictly below the request selects the previous accepted row (or the
+first row if none was accepted), and exhausting the list selects its tail.
+The zero-race and empty-result exits still return zero.
+
+The row view starts from the entire allocated array. The row and pointer
+member are accessed at their real stride and offsets, with the original
+halfword index loads. The filter's actual cursor and limit retain the loop
+entry and callback-exit scheduling. In the selection loop, the stored
+threshold and accepted-row flag retain their native stack accesses. The
+real accepted index advances only on the continuing path; its localized
+empty operand retains the loop comparison and update order. Fixed register
+bindings and empty operands preserve only the native addresses, loaded
+values, and selector state used by these operations. They emit no substitute
+instructions and do not establish the original source spelling.

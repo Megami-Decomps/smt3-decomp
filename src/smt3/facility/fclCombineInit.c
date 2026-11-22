@@ -1841,42 +1841,116 @@ s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, cmbUnit_t *unitC, s8 
     return (a + b + c + 2) / 3;
 }
 
-#ifdef NON_MATCHING
 s32 cmbGetRaceCombineResult(s32 race, u8 level)
 {
-    u8 raceId = (u8)race;
+    u32 raceId = (u8)race;
+    /* These stack words correspond to the retail selector's threshold and
+     * prior-result flag; the second phase reads the threshold per entry. */
+    volatile u32 levelWord = level;
+    volatile s32 hasPrevious = 0;
+    /* Initialized to 0x180; native references only read this table extent. */
     s32 count = cmbRaceTable;
     cmbRaceSortEntry_t entries[count];
     u16 eligible[count];
     u16 eligibleCount = 0;
     s32 i;
+    typedef cmbRaceSortEntry_t RaceEntries[count];
+    FAKEMATCH_ASM_REG(RaceEntries *, entriesBase, "$18") = &entries;
+    u32 offset;
 
-    if (raceId == 0) {
+    /* Keep the actual sorted buffer base, index and info slot in their
+     * retail homes for the predicate scan and its continuation. */
+    if (raceId == 0)
         return 0;
+    FAKEMATCH_ASM_READ(entriesBase);
+    cmbSetRaceResult(*entriesBase, (u16)cmbRaceTable);
+    i = 0;
+    FAKEMATCH_ASM_READ(i);
+    offset = (u32)i * sizeof(cmbRaceSortEntry_t);
+    if (count > 0) {
+        volatile s32 loopCount = count;
+        /* Byte offsets are within the whole sorted array, not one row.
+         * The info member follows the two u16 fields in each row. */
+        FAKEMATCH_ASM_REG(const u8 *, infoBase, "$23") =
+            (const u8 *)entriesBase + 2 * sizeof(u16);
+        s32 limit;
+        do {
+            cmbRaceSortEntry_t *entry;
+            struct datDevilTableEntry_t *info;
+            u32 entryRace;
+            FAKEMATCH_ASM_REG(struct datDevilTableEntry_t *const *, infoSlot, "$4");
+            infoSlot = (struct datDevilTableEntry_t *const *)(infoBase + offset);
+            entry = (cmbRaceSortEntry_t *)((char *)entriesBase + offset);
+            info = *infoSlot;
+            FAKEMATCH_ASM_READ(info);
+            entryRace = info->race;
+
+            ++i;
+            if (entryRace == raceId) {
+                s32 predicate;
+                predicate = cmbEntryIsValid(entry->index);
+                if ((limit = loopCount, predicate != 0))
+                    goto advanceRaceCursor;
+                predicate = cmbFindBirthEntry(entry->index);
+                if ((limit = loopCount, predicate != 0))
+                    goto advanceRaceCursor;
+                predicate = cmbDevilIsUnlocked(entry->index);
+                if ((limit = loopCount, predicate != 0))
+                    goto advanceRaceCursor;
+                if (cmbDevilIsSpecial(entry->index) == 0)
+                    eligible[eligibleCount++] = entry->index;
+            }
+            limit = loopCount;
+advanceRaceCursor:
+            offset = (u32)i * sizeof(cmbRaceSortEntry_t);
+        } while (i < limit);
     }
-    cmbSetRaceResult(entries, (u16)cmbRaceTable);
-    for (i = 0; i < count; i++) {
-        if (entries[i].info->race == raceId &&
-            cmbEntryIsValid(entries[i].index) == 0 &&
-            cmbFindBirthEntry(entries[i].index) == 0 &&
-            cmbDevilIsUnlocked(entries[i].index) == 0 &&
-            cmbDevilIsSpecial(entries[i].index) == 0) {
-            eligible[eligibleCount++] = entries[i].index;
-        }
+    if (eligibleCount != 0)
+        goto selector;
+    return 0;
+firstResult:
+    return eligible[0];
+selector:
+    {
+        const u16 *cursor;
+        const struct datDevilTableEntry_t *devils;
+        u32 entryLevel;
+        /* The threshold and accepted flag use the same retail scratch
+         * register in distinct lifetimes. */
+        FAKEMATCH_ASM_REG(u32, targetLevel, "$3");
+        /* The empty constraint leaves the live count unchanged. The native
+         * selector still has a second test; zero cannot reach it from above. */
+        FAKEMATCH_ASM_LIVE(eligibleCount);
+        i = 0;
+        if (eligibleCount == 0)
+            goto lastResult;
+        devils = datDevilTable;
+        cursor = eligible;
+        do {
+            entryLevel = devils[*cursor].level;
+            /* Keep the initialized threshold load in the selector loop. */
+            FAKEMATCH_ASM_LIVE_MEM(levelWord);
+            targetLevel = levelWord;
+            if (entryLevel < targetLevel) {
+                if (!hasPrevious)
+                    goto firstResult;
+                return cursor[-1];
+            }
+            /* Rejection exits, so only the accepted path needs the index
+             * for its continuation. Holding it here gives the native delay
+             * slot and keeps the flag's value in its own block. */
+            ++i;
+            FAKEMATCH_ASM_READ(i);
+            {
+                FAKEMATCH_ASM_REG(s32, accepted, "$3") = 1;
+                hasPrevious = accepted;
+            }
+            ++cursor;
+        } while (i < eligibleCount);
     }
-    if (eligibleCount == 0) {
-        return 0;
-    }
-    for (i = 0; i < eligibleCount; i++) {
-        if (datDevilTable[eligible[i]].level < level) {
-            return i == 0 ? eligible[0] : eligible[i - 1];
-        }
-    }
+lastResult:
     return eligible[eligibleCount - 1];
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetRaceCombineResult);
-#endif
 
 void cmbGetDevilIdAndRace(cmbUnit_t *unit, u16 *devilId, u8 *race)
 {
