@@ -435,6 +435,13 @@ s32 sceCdLayerSearchFile(addr_t destination, const char *name, s32 layer)
 }
 
 #else
+/* Native diagnostic formats used by the retained function. */
+const char D_0054AAE0[] = "Libcdvd bind err CdSearchFile\n";
+const char D_0054AB00[] = "ee call cmd search %s\n";
+const char D_0054AB18[] = "search name %s\n";
+const char D_0054AB28[] = "search size %d\n";
+const char D_0054AB38[] = "search loc lbn %d\n";
+
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdLayerSearchFile);
 #endif
 
@@ -698,6 +705,10 @@ s32 sceCdInit(s32 mode)
     return result;
 }
 #else
+/* Native diagnostic formats used by the retained function. */
+const char D_0054ABF0[] = "Libcdvd bind err %d CD_Init %d\n";
+const char D_0054AC10[] = "Libcdvd Exit\n";
+
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInit);
 #endif
 
@@ -774,6 +785,11 @@ fail:
 }
 
 #else
+/* Native diagnostic formats used by the retained function. */
+const char D_0054AC20[] = "DiskReady 0\n";
+const char D_0054AC30[] = "Libcdvd bind err CdDiskReady\n";
+const char D_0054AC50[] = "DiskReady ended\n";
+
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdDiskReady);
 #endif
 
