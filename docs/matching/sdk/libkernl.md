@@ -999,3 +999,19 @@ the polling binding was removed. The COP0 read, DI and EI macros each expose
 one hardware primitive; DI and EI prevent movement of memory across the
 interrupt-state boundary. No dummy runtime access or instruction replay is
 used.
+
+### QueryIntrContext and EIntr
+
+`QueryIntrContext` reads COP0 Status and returns the inverse of bit 0 (IE).
+It does not inspect EIE, EXL or ERL. `EIntr` reads Status, keeps the previous
+EIE value (bit 16), unconditionally executes EI and returns the old bit as
+0 or 1. This preserves the processor's own privilege behavior. The existing
+EI macro's compiler memory clobber is not a hardware fence. The hardware
+accesses use the same operation-specific primitives as `sbrk`; ordinary C
+expresses each result. No kernel service, whole assembly body or synthetic
+dependency is introduced.
+
+The stock SDK compiler emits all four and all six native words respectively.
+An empty tied-operand control before EI leaves the complete object identical,
+so it is omitted. Both functions keep their original addresses and caller
+contracts. Existing callers that discard the EIntr result are unchanged.

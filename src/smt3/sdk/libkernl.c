@@ -503,7 +503,14 @@ void iInvalidDCache(void *start, void *end)
              EE_ADDR_PTR(EE_ADDR(end) & ~63U));
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", QueryIntrContext);
+s32 QueryIntrContext(void)
+{
+    u32 status;
+
+    /* Query the inverse of Status.IE (bit 0), not Status.EIE. */
+    EE_READ_STATUS(status);
+    return (status ^ 1U) & 1U;
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", DisableIntc);
 
@@ -4053,7 +4060,15 @@ INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRebootIop);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", EIntr);
+s32 EIntr(void)
+{
+    u32 status;
+
+    EE_READ_STATUS(status);
+    status &= EE_STATUS_EIE;
+    EE_ENABLE_INTERRUPTS();
+    return status != 0;
+}
 
 extern s32 mallocSema;
 extern s32 frameObjectSema;
