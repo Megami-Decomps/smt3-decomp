@@ -4944,16 +4944,29 @@ void effPadVibeFadeIN(u32 mode, u8 power, s32 frame)
 
 extern f32 sdfCos(f32 angle);
 
-#ifdef NON_MATCHING
 void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurPrimTriStrip_t *quad)
 {
     const u8 *color = (const u8 *)&source->abgr;
     s32 x0, y0, x1, y1;
-    f32 s0, t0, s1, t1;
-    f32 centerX, centerY, scale, cosine, sine;
-    f32 u0, v0, u1, v1, u2, v2, u3, v3;
-    f32 yScale = 0.002232142857f;
+    /* Carry the converted center inputs and their biases in the native
+     * pre-call calculation homes. Neither value crosses a callback. */
+    FAKEMATCH_ASM_REG(f32, centerInputX, "$f1");
+    FAKEMATCH_ASM_REG(f32, centerInputY, "$f0");
+    FAKEMATCH_ASM_REG(f32, xBias, "$f5") = 256.0f;
+    FAKEMATCH_ASM_REG(f32, yBias, "$f4") = 224.0f;
+    FAKEMATCH_ASM_REG(f32, translatedX, "$f14");
+    FAKEMATCH_ASM_REG(f32, translatedY, "$f15");
+    /* The two normalized centers and one scale snapshot stay live across
+     * both trig calls, in saved FPRs. */
+    FAKEMATCH_ASM_REG(f32, finalX, "$f21");
+    FAKEMATCH_ASM_REG(f32, finalY, "$f23");
+    f32 scale;
+    f32 uvScale, yCenterScale;
+    f32 cosine, sine;
+    f32 u0, v0, u1, v1, u2, v2, u3, v3, su, sv, y, x;
 
+    uvScale = 1.0f / 512.0f;
+    yCenterScale = 1.0f / 448.0f;
     quad->r = color[0];
     quad->g = color[1];
     quad->b = color[2];
@@ -4968,53 +4981,70 @@ void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *source, effBlurPrimTriStrip
     x1 = ((u32)source->xy[1][0] << 4) + 0x7000;
     quad->vtx[2].y = y0;
     quad->vtx[3].y = y1;
-    quad->vtx[3].x = x1;
     quad->vtx[2].x = x1;
-    s0 = (f32)source->xy[0][0] * 0.001953125f;
-    t0 = (f32)source->xy[0][1] * 0.001953125f;
-    t1 = (f32)source->xy[1][1] * 0.001953125f;
-    s1 = (f32)source->xy[1][0] * 0.001953125f;
+    quad->vtx[3].x = x1;
+    /* Two vertices share each edge coordinate. ee-gcc forwards the
+     * four computed UV values into their paired stores. */
+    quad->vtx[0].s = (f32)source->xy[0][0] * uvScale;
+    quad->vtx[1].s = quad->vtx[0].s;
+    quad->vtx[0].t = (f32)source->xy[0][1] * uvScale;
+    quad->vtx[2].t = quad->vtx[0].t;
+    quad->vtx[1].t = (f32)source->xy[1][1] * uvScale;
+    quad->vtx[3].t = quad->vtx[1].t;
+    quad->vtx[2].s = (f32)source->xy[1][0] * uvScale;
+    quad->vtx[3].s = quad->vtx[2].s;
     quad->vtx[0].z = 0;
-    quad->vtx[1].s = s0;
-    quad->vtx[2].t = t0;
     quad->vtx[1].z = 0;
     quad->vtx[2].z = 0;
     quad->vtx[3].z = 0;
-    quad->vtx[0].s = s0;
-    quad->vtx[0].t = t0;
-    centerX = ((f32)source->center[0] + 256.0f) * 0.001953125f;
-    centerY = ((f32)source->center[1] + 224.0f) * yScale;
-    quad->vtx[3].t = t1;
-    quad->vtx[3].s = s1;
-    quad->vtx[1].t = t1;
-    quad->vtx[2].s = s1;
+    centerInputX = (f32)source->center[0];
+    centerInputY = (f32)source->center[1];
+    translatedX = centerInputX + xBias;
+    translatedY = centerInputY + yBias;
     quad->vtx[0].adc = 0;
     quad->vtx[1].adc = 0;
     quad->vtx[2].adc = 0;
     quad->vtx[3].adc = 0;
+    finalX = translatedX * uvScale;
+    finalY = translatedY * yCenterScale;
     scale = source->scale;
     cosine = sdfCos(source->rotate);
     sine = sdfSin(source->rotate);
-    u0 = (quad->vtx[0].s - centerX) * scale;
-    v0 = (quad->vtx[0].t - centerY) * scale;
-    u1 = (quad->vtx[1].s - centerX) * scale;
-    v1 = (quad->vtx[1].t - centerY) * scale;
-    u2 = (quad->vtx[2].s - centerX) * scale;
-    v2 = (quad->vtx[2].t - centerY) * scale;
-    u3 = (quad->vtx[3].s - centerX) * scale;
-    v3 = (quad->vtx[3].t - centerY) * scale;
-    quad->vtx[0].s = (u0 * cosine - v0 * sine) + centerX;
-    quad->vtx[0].t = (u0 * sine + v0 * cosine) + centerY;
-    quad->vtx[1].s = (u1 * cosine - v1 * sine) + centerX;
-    quad->vtx[1].t = (u1 * sine + v1 * cosine) + centerY;
-    quad->vtx[2].s = (u2 * cosine - v2 * sine) + centerX;
-    quad->vtx[2].t = (u2 * sine + v2 * cosine) + centerY;
-    quad->vtx[3].t = (u3 * sine + v3 * cosine) + centerY;
-    quad->vtx[3].s = (u3 * cosine - v3 * sine) + centerX;
+    /* Read the vertex deltas after both callbacks. Scale each pair just
+     * before its rotation, rather than keeping four scaled pairs live. */
+    u0 = quad->vtx[0].s - finalX;
+    v0 = quad->vtx[0].t - finalY;
+    u1 = quad->vtx[1].s - finalX;
+    v1 = quad->vtx[1].t - finalY;
+    u2 = quad->vtx[2].s - finalX;
+    v2 = quad->vtx[2].t - finalY;
+    u3 = quad->vtx[3].s - finalX;
+    v3 = quad->vtx[3].t - finalY;
+    su = u0 * scale;
+    sv = v0 * scale;
+    x = su * cosine - sv * sine;
+    y = su * sine + sv * cosine;
+    quad->vtx[0].s = x + finalX;
+    quad->vtx[0].t = y + finalY;
+    su = u1 * scale;
+    sv = v1 * scale;
+    x = su * cosine - sv * sine;
+    y = su * sine + sv * cosine;
+    quad->vtx[1].s = x + finalX;
+    quad->vtx[1].t = y + finalY;
+    su = u2 * scale;
+    sv = v2 * scale;
+    x = su * cosine - sv * sine;
+    y = su * sine + sv * cosine;
+    quad->vtx[2].s = x + finalX;
+    quad->vtx[2].t = y + finalY;
+    su = u3 * scale;
+    sv = v3 * scale;
+    x = su * cosine - sv * sine;
+    y = su * sine + sv * cosine;
+    quad->vtx[3].t = y + finalY;
+    quad->vtx[3].s = x + finalX;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
-#endif
 
 const effPCPBossVector_t D_00533DA0 = { .f = { 0.0f, 1.0f, 0.0f, 0.0f } };
 

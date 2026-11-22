@@ -111,9 +111,9 @@ effPCPBossONGYDraw	effect/effPCPBoss	0x598		docs/matching/effect/effPCPBoss.md	2
 effPCPBossKAGU2AttackDraw	effect/effPCPBoss	0x424	265 of 265 words match	docs/matching/effect/effPCPBoss.md	299
 effPCPBossKAGUAttackDraw	effect/effPCPBoss	0x35C	215 of 215 words match	docs/matching/effect/effPCPBoss.md	328
 effPCPDANTE_ShowTime_ShowTime_Draw	effect/effPCPBoss	0x358	214 of 214 words match	docs/matching/effect/effPCPBoss.md	367
-dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	55 of 160 words match	docs/matching/effect/effPCPBoss.md	405
-effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	417
-effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370		docs/matching/effect/effPCPBoss.md	454
+dds3EffectBlurDrawQuad	effect/effPCPBoss	640 bytes	160 of 160 words match	docs/matching/effect/effPCPBoss.md	405
+effPCPScreenCrackModelCopy	effect/effPCPBoss	72 bytes	18 of 18 words match	docs/matching/effect/effPCPBoss.md	429
+effPCPDANTE_ShowTime_Bingo_Draw	effect/effPCPBoss	0x370		docs/matching/effect/effPCPBoss.md	466
 Effect face indices and Radiate axis				docs/matching/effect/effPCPMisc.md	3
 Sparkle sphere preset pointer	effect	4 bytes		docs/matching/effect/effPCPMisc.md	17
 Default packet triangle indices				docs/matching/effect/effPacket.md	3
