@@ -65,3 +65,6 @@ rom:0x42E794 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[1].entryHi: numeri
 rom:0x42E7C4 reloc:MIPS_NONE symbol:none // tlbDefaultEntries[4].entryHi: numeric PS2 TLB value.
 
 rom:0x24A77C reloc:MIPS_NONE symbol:none // nbDefaultUnitVisual motion 24: (type=1, actframe=58), not an AI table pointer.
+// cmpSetSkillListRows writes the style-one byte in gFontBaseWidth.
+rom:0xC716C reloc:MIPS_HI16 symbol:gFontBaseWidth addend:0x1
+rom:0xC717C reloc:MIPS_LO16 symbol:gFontBaseWidth addend:0x1

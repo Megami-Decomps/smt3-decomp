@@ -309,7 +309,7 @@ extern void frInitFontHandle(frFontHandle_t *pFRQ);
 
 void frInitTextHandle(frTextHandle_t *pText, s32 Code, s32 Style, s32 ColNo, s32 Color, s32 Tp);
 
-extern s8 gFontBaseWidth[];
+extern s8 gFontBaseWidth[6] __attribute__((section(".data")));
 
 u32 frGetDefaultFontWidth(u8 Style);
 
@@ -990,7 +990,8 @@ void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst)
         glyph->renderValueOrSetupOrShade.setupBytes.fontIndex);
 
     fontIndex = glyph->renderValueOrSetupOrShade.setupBytes.fontIndex;
-    baseWidth = gFontBaseWidth[fontIndex];
+    /* Native style 8 can read into the adjacent font palette. */
+    baseWidth = *EE_ADDR_AS(s8 *, EE_ADDR(gFontBaseWidth) + fontIndex);
     glyph->advance = baseWidth;
     if (fontIndex < 2) {
         defaultSlot = 1;

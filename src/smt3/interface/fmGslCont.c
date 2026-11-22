@@ -110,7 +110,7 @@ u16 frTagCodeTable2[264] = {
     0x93FB, 0x9481, 0x8698, 0x89A0, 0x0031, 0x80FB, 0x0037, 0x8181,
     0x0038, 0x8182, 0x004C, 0x0052, 0x81B6, 0x81BC, 0x8196, 0x819C,
 };
-extern s8 D_00326061[];
+extern s8 gFontBaseWidth[6] __attribute__((section(".data")));
 extern u16 frMessageCode;
 extern s32 frDefaultFontHandle;
 extern s32 strlen(const char *s);
@@ -262,7 +262,7 @@ void cmpSetSkillListRows(s32 rows) {
         rows = 20;
     }
     frDefaultFontHandle = rows;
-    D_00326061[0] = rows - 5;
+    gFontBaseWidth[1] = rows - 5;
 }
 
 s32 cmp_1C6180(const char *text, s32 width) {
