@@ -149,3 +149,19 @@ reassignment, the screen flash. This preserves the saved home and the
 native X load order without an additional constraint on that draw.
 The empty operands constrain only the actual native values. They add
 no instructions and do not assert a general memory barrier.
+
+## fldRunTamaSe (field/fldTest, 0x3C8)
+
+All 242 of 242 words match in the 968-byte production body. The first
+40-byte frame copy uses the compiler's block-copy builtin; ordinary typed
+aggregate copies take care of the other two frame arrays and the 20-byte
+volume table. All four source objects and their owned data are unchanged.
+The mix of copy forms preserves the native scratch allocation and order
+without extra reads or writes.
+
+Each animation still picks its first matching frame window, then obtains
+that actor's position through the native VU0 handoff. The distance factor
+and signed table value form the same product, rounded toward zero at
+each of the two stages (divide by 128, then divide by two). The actual
+rounded numerator and final volume calculation use short local register
+bindings; neither value is held across a call. No empty operands remain.

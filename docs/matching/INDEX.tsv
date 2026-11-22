@@ -265,6 +265,7 @@ fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/f
 fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75
 Elevator floor transition delays				docs/matching/field/fldTest.md	128
 fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	137
+fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	153
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
@@ -395,7 +396,7 @@ RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/match
 nbClipKoukaNum	newbattle/nbKoukaProcess	0x234	141 of 141 words match	docs/matching/newbattle/nbKoukaProcess.md	45
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/matching/newbattle/nbMainProcess.md	3
 DebugDisp2	newbattle/nbMainProcess	0x3DC	247 of 247 words match	docs/matching/newbattle/nbMainProcess.md	74
-nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	136 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
+nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	173 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
 Flow1_11	newbattle/NbNegoFlowOne	0xC8	50 of 50 words match	docs/matching/newbattle/nbMakePacket.md	3
 nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/matching/newbattle/nbMakePacket.md	30
 Flow10_21	newbattle/NbNegoFlowNg	0x98		docs/matching/newbattle/nbMakePacket.md	51

@@ -2,7 +2,20 @@
 
 ## nbDrawMakaNum (newbattle/nbMakaProcess, 0x2B4)
 
-136 of 173 words match, at the exact 692-byte size.
+All 173 of 173 words match in the 692-byte production body. The second
+sprite uses its actual translated X, original Y, signed width, and freshly
+loaded texture. The third takes the last original Y from its saved home
+before the digit count reuses that register. The outgoing coordinates
+and current texture stay tied to their actual call; no extra memory
+accesses or instructions are added by the empty operands.
+
+The scoped digit count starts at six and its descending loop retains
+the original digit and font behavior. All source data and the existing
+digit string table are unchanged.
+
+### Earlier guarded body
+
+The older version matched 136 of 173 words at the native 692-byte size.
 
 The 40-byte `ldl`/`ldr` copy of `nbDigitStringTable` onto the stack comes from
 `memcpy(nums, nbDigitStringTable, sizeof(nums))` over a `char *nums[10]`, and

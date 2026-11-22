@@ -1537,7 +1537,6 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
     fldRunTamaNext = fldRunTamaNext % 3;
 }
 
-#ifdef NON_MATCHING
 void fldRunTamaSe(void)
 {
     sdfVector4_t pos;
@@ -1551,7 +1550,8 @@ void fldRunTamaSe(void)
 
     memset(&pos, 0, sizeof(pos));
     pos.w = 1.0f;
-    frame1 = fldRunTamaSeFrames1;
+    /* The first frame copy keeps its native block-copy allocation. */
+    __builtin_memcpy(&frame1, &fldRunTamaSeFrames1, sizeof(frame1));
     frame2 = fldRunTamaSeFrames2;
     frame3 = fldRunTamaSeFrames3;
     vol = fldTamaSeVol;
@@ -1562,8 +1562,21 @@ void fldRunTamaSe(void)
             dds3GetPosPoseSet(fldRunTama1Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
             {
-                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
-                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+                s32 mixed = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i];
+                FAKEMATCH_ASM_REG(s32, rounded, "$3");
+                FAKEMATCH_ASM_REG(s32, correction, "$5");
+                s32 volume;
+                rounded = mixed;
+                if (mixed < 0) {
+                    rounded = mixed + 127;
+                }
+                /* The signed /128 and /2 each round toward zero. Keep
+                 * the rounded numerator and the actual outgoing volume
+                 * in their short native register homes. */
+                volume = rounded >> 7;
+                correction = (s32)((u32)rounded >> 31);
+                correction = volume + correction;
+                p2sdPlaySE(0x6F0006, correction >> 1, 0x3F);
             }
             break;
         }
@@ -1575,8 +1588,18 @@ void fldRunTamaSe(void)
             dds3GetPosPoseSet(fldRunTama2Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
             {
-                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
-                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+                s32 mixed = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i];
+                FAKEMATCH_ASM_REG(s32, rounded, "$3");
+                FAKEMATCH_ASM_REG(s32, correction, "$5");
+                s32 volume;
+                rounded = mixed;
+                if (mixed < 0) {
+                    rounded = mixed + 127;
+                }
+                volume = rounded >> 7;
+                correction = (s32)((u32)rounded >> 31);
+                correction = volume + correction;
+                p2sdPlaySE(0x6F0006, correction >> 1, 0x3F);
             }
             break;
         }
@@ -1588,16 +1611,23 @@ void fldRunTamaSe(void)
             dds3GetPosPoseSet(fldRunTama3Basic);
             SDF_VU0_STOREVECTOR_MEMOPS(pos);
             {
-                s32 volume = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128;
-                p2sdPlaySE(0x6F0006, volume / 2, 0x3F);
+                s32 mixed = fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i];
+                FAKEMATCH_ASM_REG(s32, rounded, "$3");
+                FAKEMATCH_ASM_REG(s32, correction, "$5");
+                s32 volume;
+                rounded = mixed;
+                if (mixed < 0) {
+                    rounded = mixed + 127;
+                }
+                volume = rounded >> 7;
+                correction = (s32)((u32)rounded >> 31);
+                correction = volume + correction;
+                p2sdPlaySE(0x6F0006, correction >> 1, 0x3F);
             }
             break;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaSe);
-#endif
 
 const sdfVector4_t fldRunTamaAxis = {0.0f, 1.0f, 0.0f, 1.0f};
 

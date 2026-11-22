@@ -380,9 +380,6 @@ u32 nbPow10(u32 v, s32 n)
     return (v % p) / (p / 10);
 }
 
-#ifdef NON_MATCHING
-/* NON_MATCHING: 37 of 173 words differ; the loop body is exact and the only
-   real difference is where the scheduler puts the i = 6 load. */
 extern void *memcpy(void *a, const void *b, size_t c);
 
 void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
@@ -398,22 +395,69 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
     s32 v;
 
     memcpy(nums, nbDigitStringTable, sizeof(nums));
-    dx = x + 0x5D;
-    dy = y + 6;
+    dx = (s32)((u32)x + 0x5D);
+    dy = (s32)((u32)y + 6);
     data = nbGetMainProcessData();
     nbPnl_setOt(0x48);
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
     col = (col & 0xFFFFFF) | ((u32)alpha << 24);
     nbPnlSprite(x, y, 0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
-    nbPnlSprite(x + 0xE1, y, -0x36, 0x21, 2, 0x5D, 0x36, 0x21, col, data->pnltex[3]);
-    nbPnlSprite(x + 0x36, y, 0x75, 0x21, 0x37, 0x5D, 1, 0x21, col, data->pnltex[3]);
-    nbPnlSprite(x + 0x2C, dy, 0x2F, 0x14, 0x86, 1, 0x2F, 0x14, col, data->pnltex[0]);
-    nbPnlSprite(x + 0xBA, dy, 0xD, 0x14, 0xB6, 1, 0xD, 0x14, col, data->pnltex[0]);
+    /* These real outgoing values keep the panel geometry together while
+     * reloading the current texture from the preceding sprite's state. */
+    nbPnlSprite(
+        ({
+            s32 edgeX = (s32)((u32)x + 0xE1);
+            FAKEMATCH_ASM_LIVE(edgeX);
+            edgeX;
+        }),
+        ({
+            s32 edgeY = y;
+            FAKEMATCH_ASM_LIVE(edgeY);
+            edgeY;
+        }),
+        ({
+            s32 edgeWidth = -0x36;
+            FAKEMATCH_ASM_LIVE(edgeWidth);
+            edgeWidth;
+        }),
+        0x21, 2, 0x5D, 0x36, 0x21, col,
+        ({
+            void *edgeTexture = data->pnltex[3];
+            FAKEMATCH_ASM_READ(edgeTexture);
+            edgeTexture;
+        }));
+
+    {
+        FAKEMATCH_ASM_REG(s32, rawY, "$17") = y;
+        s32 callY;
+        void *texture;
+        s32 callX;
+
+        /* Transfer the final raw Y from its saved home before that home
+         * becomes the digit count. Stage the translated X with outgoing Y
+         * and reload the texture after the previous sprite. */
+
+        FAKEMATCH_ASM_LIVE(rawY);
+        callY = rawY;
+        i = 6;
+        callX = (s32)((u32)x + 0x36);
+        FAKEMATCH_ASM_LIVE(callX);
+        FAKEMATCH_ASM_LIVE_PAIR(callX, callY);
+        nbPnlSprite(callX, callY,
+                    0x75, 0x21, 0x37, 0x5D, 1, 0x21, col,
+                    ({
+                        texture = data->pnltex[3];
+                        FAKEMATCH_ASM_READ(texture);
+                        texture;
+                    }));
+    }
+    nbPnlSprite((s32)((u32)x + 0x2C), dy, 0x2F, 0x14, 0x86, 1, 0x2F, 0x14, col, data->pnltex[0]);
+    nbPnlSprite((s32)((u32)x + 0xBA), dy, 0xD, 0x14, 0xB6, 1, 0xD, 0x14, col, data->pnltex[0]);
     col = (col >> 24) | 0x89FEFF00;
     started = 0;
     base = 10;
-    for (i = 6; i >= 0; i--) {
+    do {
         v = nbPow10(DDS3_GBWK->maka, i);
         if (v != 0 || i == 0) {
             started = 1;
@@ -423,12 +467,10 @@ void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 alpha)
             frDrawFontOt(frq, 1, 0x48);
             frDestroyFontRequestAfter(frq);
         }
-        dx += 0xD;
-    }
+        dx = (s32)((u32)dx + 0xD);
+    } while (--i >= 0);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakaProcess", nbDrawMakaNum);
-#endif
+
 
 void nbMakaStep(nbMakaProcessData_t *w)
 {
