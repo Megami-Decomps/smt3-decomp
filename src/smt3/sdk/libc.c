@@ -3056,7 +3056,7 @@ _Bigint *_i2b(_reent *r, s32 i) {
 
 INCLUDE_ASM(const s32, "sdk/libc", _multiply);
 
-/* Native indexed constants span the separately labeled word at 0x0054B928. */
+/* Nonzero n & 3 selects 5, 25, or 125. */
 extern const s32 pow5MultTable[];
 _Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b);
 
@@ -3567,9 +3567,8 @@ const char localeDecimalPoint[8] __attribute__((section(".rodata"))) = ".";
 
 const char localeCName[4] __attribute__((section(".rodata"))) = "C";
 
-const s32 pow5MultTable[2] __attribute__((section(".rodata"))) = { 5, 25 };
+const s32 pow5MultTable[3] __attribute__((section(".rodata"))) = { 5, 25, 125 };
 
-INCLUDE_RODATA(const s32, "sdk/libc", D_0054B928);
 
 const f64 pow10Table[25] = { 1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0, 10000000000.0, 100000000000.0, 1000000000000.0, 10000000000000.0, 100000000000000.0, 1000000000000000.0, 1e+16, 1e+17, 1e+18, 1e+19, 1e+20, 1e+21, 1e+22, 1e+23, 1e+24 };
 
