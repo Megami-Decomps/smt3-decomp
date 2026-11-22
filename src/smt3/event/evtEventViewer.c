@@ -1963,6 +1963,18 @@ const char evtViewerUnitShadowOff[16] = "SHADOW OFF";
 
 const char evtViewerUnitDispOff[16] = "DISP OFF";
 
+/* Native frame-editor labels used by the retained assembly body. */
+#ifndef NON_MATCHING
+const char D_0053B780[] __attribute__((aligned(8))) = "DELETE FRAME.OK? ";
+const char D_0053B798[] __attribute__((aligned(8))) = "HOKAN MODE   ";
+const char D_0053B7A8[] __attribute__((aligned(8))) = "ON/OFF MODE ";
+const char D_0053B7B8[] __attribute__((aligned(8))) = "TRANS MODE ";
+const char D_0053B7C8[] __attribute__((aligned(8))) = "FADE TYPE  ";
+const char D_0053B7D8[] __attribute__((aligned(8))) = "CONTROL TYPE ";
+const char D_0053B7E8[] __attribute__((aligned(8))) = "UNIT CONTROL TYPE ";
+const char D_0053B800[] __attribute__((aligned(8))) = "soften_bias";
+#endif
+
 #ifdef NON_MATCHING
 extern char *evtViewerDeleteConfirmNames[], *evtViewerTransModeNames[], *evtViewerUnitControlNames[];
 extern char *evtFrameListTable[], *evtFrameFadeNames[];

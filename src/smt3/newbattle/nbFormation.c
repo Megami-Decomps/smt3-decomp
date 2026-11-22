@@ -706,6 +706,24 @@ const f32 nbFormRotScale[4] = { 0.0f, 1.0f, 0.0f, 0.0f };
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 #endif
 
+/* Formation diagnostics in their native read-only order. */
+#ifndef NON_MATCHING
+const char D_005458C0[] __attribute__((aligned(8))) = "nbSetPartyFormation : DV_ALBION\n";
+const char D_005458E8[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_NORMAL\n";
+const char D_00545918[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_ARSIEL\n";
+const char D_00545948[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_GIRIME\n";
+const char D_00545978[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_MARA\n";
+const char D_005459A0[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_3SISTER\n";
+const char D_005459D0[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_ALBION\n";
+const char D_00545A00[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_TENSI\n";
+const char D_00545A30[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_BAAL\n";
+const char D_00545A58[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_NET\n";
+const char D_00545A80[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_ARI\n";
+const char D_00545AA8[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_KAGU\n";
+const char D_00545AD0[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_BERU\n";
+const char D_00545AF8[] __attribute__((aligned(8))) = "nbSetEnemyFormation:ENC_FORMATION_LUSI\n";
+#endif
+
 #ifdef NON_MATCHING
 void nbSetEnemyFormation(nbMainProcessData_t *data)
 {
