@@ -954,3 +954,14 @@ drafts, regression controls and literal full-retail equality. The handler's
 resolved SHA-256 is d47ecf298080c119dab99aecc868a9cdcc575c9d94f7f1f68da19fe650627d42.
 The shared-type repair and handler belong together; byte equality alone did not
 justify the former incompatible print overlay. Exact-commit CI follows publication.
+
+## Reboot and TLB diagnostic strings
+
+Six existing native strings now have C storage in the kernel owner: the
+reboot path prefix at `0x0054BCC0`, its overlong-argument format at
+`0x0054BCD0`, and the TLB summary and three overflow messages at
+`0x0054BCF8`, `0x0054BD30`, `0x0054BD48`, and `0x0054BD60`.
+The two retained routines still use their original instructions and
+relocations. These objects own 151 bytes including terminators. The eight
+bytes of the separately owned `execDefaultPath` and the alignment between
+objects and before the next linked input are not part of these strings.

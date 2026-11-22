@@ -3974,6 +3974,10 @@ s32 sceSifSyncIop(void)
     return 0;
 }
 
+/* Native reboot prefix and format used by the retained routine. */
+const char D_0054BCC0[] = "rom0:UDNL ";
+const char D_0054BCD0[] = "too long parameter '%s'\n";
+
 INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRebootIop);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
@@ -4521,6 +4525,12 @@ INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB);
 const char execDefaultPath[8] = "";
 
 #include "sdk_kernel_tlb_entry.h"
+
+/* Native diagnostic formats used by the retained TLB routine. */
+const char D_0054BCF8[] = "# TLB spad=0 kernel=1:%d default=%d:%d extended=%d:%d\n";
+const char D_0054BD30[] = "# TLB over flow (1)";
+const char D_0054BD48[] = "# TLB over flow (2)";
+const char D_0054BD60[] = "# TLB over flow (3)";
 
 INCLUDE_ASM(const s32, "sdk/libkernl", InitTLB32MB);
 

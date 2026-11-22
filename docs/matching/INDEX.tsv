@@ -631,6 +631,7 @@ iPutTLBEntry				docs/matching/sdk/libkernl.md	718
 iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	761
 LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	812
 _request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	929
+Reboot and TLB diagnostic strings				docs/matching/sdk/libkernl.md	958
 __ieee754_sqrtf	sdk/libm	204 bytes	51 of 51 words match	docs/matching/sdk/libm.md	3
 sceMcWrite			95 of 95 words match	docs/matching/sdk/libmc.md	29
 sceMcSync	sdk/libmc	0xE0	56 of 56 words (224 bytes) match	docs/matching/sdk/libmc.md	78
