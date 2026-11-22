@@ -14,4 +14,10 @@ u32 D_0031FF20[16] = {
     STRIP_FACE(28, 29, 31), STRIP_FACE(28, 31, 30),
 };
 
+/* Retained face words following the submitted list. */
+u32 D_0031FF60[4] = {
+    STRIP_FACE(32, 33, 35), STRIP_FACE(32, 35, 34),
+    STRIP_FACE(36, 37, 39), STRIP_FACE(36, 39, 38),
+};
+
 #undef STRIP_FACE

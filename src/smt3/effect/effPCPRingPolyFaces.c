@@ -12,4 +12,11 @@ u32 dds3RingPolyExpListParameters[12] = {
     STRIP_FACE(6, 7, 11), STRIP_FACE(6, 11, 10),
 };
 
+/* Retained face words following the submitted list. */
+u32 D_0031FEE0[6] = {
+    STRIP_FACE(8, 9, 13), STRIP_FACE(8, 13, 12),
+    STRIP_FACE(9, 10, 14), STRIP_FACE(9, 14, 13),
+    STRIP_FACE(10, 11, 15), STRIP_FACE(10, 15, 14),
+};
+
 #undef STRIP_FACE

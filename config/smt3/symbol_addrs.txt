@@ -1464,8 +1464,10 @@ D_00526FCC = 0x00526FCC; // type:u8 size:0xA4
 D_00527070 = 0x00527070; // size:0x148
 D_00527114 = 0x00527114; // type:u8 size:0xA4
 
-// Boss strip packets submit at most sixteen index words.
+// Keep the packed face tails distinct from the submitted ring and boss lists.
+D_0031FEE0 = 0x0031FEE0; // type:u32 size:0x18
 D_0031FF20 = 0x0031FF20; // type:u32 size:0x40
+D_0031FF60 = 0x0031FF60; // type:u32 size:0x10
 
 // Cumulative request weights: seven 5-choice rows, eleven 3-choice rows.
 datNegoReqTable = 0x003E22A8; // type:u8 size:0x23
