@@ -542,5 +542,21 @@
     "section": ".data",
     "offset": 1152,
     "owner_size": 1300
+  },
+  {
+    "name": "cdvdScmdState",
+    "owner": "cdvdNcmdState",
+    "unit": "sdk/libcdvdNcmdState",
+    "section": ".data",
+    "offset": 12,
+    "owner_size": 44
+  },
+  {
+    "name": "cdvdCallbackReason",
+    "owner": "cdvdNcmdState",
+    "unit": "sdk/libcdvdNcmdState",
+    "section": ".data",
+    "offset": 36,
+    "owner_size": 44
   }
 ]

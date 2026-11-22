@@ -1257,7 +1257,7 @@ segments:
       - [0x42B000, .data, sdk/libcdvdBuildTag]
       - [0x42B010, .data, sdk/libcdvdStartupWords]
       - [0x42B030, .data, sdk/libcdvdNcmdState]
-      - [0x42B03C, data, data_0052A03C]
+      - [0x42B05C, databin, libcdvdStartupRecordTail]
       - [0x42B080, .data, sdk/libcdvdNcmdReply]
       - [0x42B084, data, data_0052A084]
       - [0x42B100, .data, sdk/libcdvdStreamRequest]

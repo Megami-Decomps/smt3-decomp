@@ -70,14 +70,14 @@ typedef struct {
     u8 secondData[0];
 } cdvdReadReplyPrefix_t;
 
-extern s32 cdvdCallbackReason __attribute__((section(".data")));
+extern cdvdCallbackReasons_t cdvdCallbackReason __attribute__((section(".data")));
 void _sceCd_cd_callback(s32 *reason);
 
 typedef void (*cdvdPowerCallback_t)(void *argument);
 extern cdvdPowerCallback_t cdvdPowerCallback __attribute__((section(".data")));
 extern void *cdvdPowerArgument __attribute__((section(".data")));
 extern s32 cdvdPowerOffActive __attribute__((section(".data")));
-extern s32 cdvdScmdState[6] __attribute__((section(".data")));
+extern cdvdScmdState_t cdvdScmdState __attribute__((section(".data")));
 extern void sceSifAddCmdHandler(s32 id, void (*handler)(void *, void *), void *argument);
 void _sceCd_Poff_Intr(void *packet, void *argument);
 s32 PowerOffCB(void);
@@ -146,20 +146,20 @@ void _sceCd_cd_callback(s32 *reason)
 {
     /* Interrupt-published state is accessed at each native read/write.
      * Qualify only these accesses; ordinary callers retain their own contract. */
-    (*(volatile s32 *)&cdvdCallbackReason) = *reason;
-    cdvdCallbackSavedReason = (*(volatile s32 *)&cdvdCallbackReason);
-    if ((*(volatile s32 *)&cdvdCallbackReason) == 11) {
-        (*(volatile s32 *)&cdvdCallbackReason) = 0;
-        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
+    (*(volatile s32 *)&cdvdCallbackReason.pending) = *reason;
+    cdvdCallbackSavedReason = (*(volatile s32 *)&cdvdCallbackReason.pending);
+    if ((*(volatile s32 *)&cdvdCallbackReason.pending) == 11) {
+        (*(volatile s32 *)&cdvdCallbackReason.pending) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.ncmd.busy) = 0;
         return;
     }
     iSignalSema((*(volatile s32 *)&cdvdNcmdSema));
     if (cdvdCallbackThreadId != 0 && cdvdCallback != NULL) {
         iSignalSema((*(volatile s32 *)&cdvdScmdSema));
     } else {
-        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.ncmd.busy) = 0;
     }
-    (*(volatile s32 *)&cdvdCallbackReason) = 0;
+    (*(volatile s32 *)&cdvdCallbackReason.pending) = 0;
 }
 
 /* Four-byte native cleanup word; no additional role is established. */
@@ -172,15 +172,15 @@ void _Cdvd_cbLoop(void)
      * saved reason is tested, then reloaded for the callback argument. */
     for (;;) {
         WaitSema(cdvdScmdSema);
-        if ((*(volatile s32 *)&cdvdCallbackReason) == -1) {
+        if ((*(volatile s32 *)&cdvdCallbackReason.pending) == -1) {
             /* SDK 2.9 keeps a loop-end note after this one-pass store.
              * Paired scheduler dumps preserve the native shutdown store order
              * and leave the ordinary cleanup word in ExitDeleteThread's delay
              * slot. This is not a new volatile contract or original spelling. */
             do {
-                (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
+                (*(volatile s32 *)&cdvdNcmdState.ncmd.busy) = 0;
             } while (0);
-            (*(volatile s32 *)&cdvdCallbackReason) = 0;
+            (*(volatile s32 *)&cdvdCallbackReason.pending) = 0;
             (*(volatile s32 *)&cdvdCallbackThreadId) = 0;
             D_00598C4C = 0;
             ExitDeleteThread();
@@ -192,7 +192,7 @@ void _Cdvd_cbLoop(void)
         if (cdvdCallback != NULL && cdvdCallbackSavedReason != 0) {
             cdvdCallback(cdvdCallbackSavedReason);
         }
-        (*(volatile s32 *)&cdvdNcmdState.busy) = 0;
+        (*(volatile s32 *)&cdvdNcmdState.ncmd.busy) = 0;
     }
 }
 
@@ -236,7 +236,7 @@ void _sceCd_cd_read_intr(void *argument)
             destination[i] = reply->secondData[i];
         }
     }
-    _sceCd_cd_callback(&cdvdCallbackReason);
+    _sceCd_cd_callback(&cdvdCallbackReason.pending);
 }
 
 extern s32 cdvdScmdSema __attribute__((section(".data")));
@@ -268,7 +268,7 @@ void cmd_sem_init(void)
          * clear-address setup. This empty read-only operand emits no access
          * and is not a memory barrier or an original-source claim. */
         FAKEMATCH_ASM_READ_MEM(cdvdScmdSema);
-        cdvdNcmdState.busy = 0;
+        cdvdNcmdState.ncmd.busy = 0;
     }
 }
 
@@ -281,7 +281,7 @@ void cdvd_exit(void)
         /* The one-pass block preserves the SDK compiler's native ordering:
          * publish the stop reason before loading the semaphore to signal. */
         do {
-            cdvdCallbackReason = -1;
+            cdvdCallbackReason.pending = -1;
         } while (0);
         SignalSema(cdvdScmdSema);
     }
@@ -300,7 +300,7 @@ cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t callback, void *argume
     cdvdPowerCallback_t old;
     s32 intr;
 
-    if (cdvdScmdState[0] < 0) {
+    if (cdvdScmdState.powerInit < 0) {
         PowerOffCB();
     }
     intr = DIntr();
@@ -331,7 +331,7 @@ s32 PowerOffCB(void)
         EIntr();
     }
     cdvdPowerOffActive = 0;
-    cdvdScmdState[0] = 1;
+    cdvdScmdState.powerInit = 1;
     return 1;
 }
 
@@ -536,12 +536,12 @@ s32 sceCdSync(s32 mode)
         if (cdvdDebugLevel > 0) {
             scePrintf("N cmd wait\n");
         }
-        while (cdvdNcmdState.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
+        while (cdvdNcmdState.ncmd.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
             sceCdDelayThread(60);
         }
         return 0;
     }
-    if (cdvdNcmdState.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
+    if (cdvdNcmdState.ncmd.busy != 0 || sceSifCheckStatRpc(&cdvdNcmdClient) != 0) {
         return 1;
     }
     return 0;
