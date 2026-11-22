@@ -965,3 +965,14 @@ The two retained routines still use their original instructions and
 relocations. These objects own 151 bytes including terminators. The eight
 bytes of the separately owned `execDefaultPath` and the alignment between
 objects and before the next linked input are not part of these strings.
+
+## Interrupt-context controller wrappers
+
+`iEnableIntc`, `iDisableIntc`, `iEnableDmac`, and `iDisableDmac`
+each forward the signed cause to the corresponding existing interrupt-context
+syscall stub, then synchronize the EE before returning the stub's signed
+result. None changes the CPU interrupt mask or accesses memory in C. The
+synchronization is the existing hardware `EE_SYNC()` operation, not a
+compiler allocation constraint. The four native bodies at
+`0x002DCB20`–`0x002DCBA0` are 32 bytes each; the underscore-prefixed
+syscall stubs are unchanged.

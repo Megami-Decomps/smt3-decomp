@@ -474,13 +474,45 @@ INCLUDE_ASM(const s32, "sdk/libkernl", DisableDmac);
 
 INCLUDE_ASM(const s32, "sdk/libkernl", EnableDmac);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iEnableIntc);
+extern s32 _iEnableIntc(s32 cause);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iDisableIntc);
+s32 iEnableIntc(s32 cause)
+{
+    s32 status = _iEnableIntc(cause);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iEnableDmac);
+    EE_SYNC();
+    return status;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", iDisableDmac);
+extern s32 _iDisableIntc(s32 cause);
+
+s32 iDisableIntc(s32 cause)
+{
+    s32 status = _iDisableIntc(cause);
+
+    EE_SYNC();
+    return status;
+}
+
+extern s32 _iEnableDmac(s32 cause);
+
+s32 iEnableDmac(s32 cause)
+{
+    s32 status = _iEnableDmac(cause);
+
+    EE_SYNC();
+    return status;
+}
+
+extern s32 _iDisableDmac(s32 cause);
+
+s32 iDisableDmac(s32 cause)
+{
+    s32 status = _iDisableDmac(cause);
+
+    EE_SYNC();
+    return status;
+}
 
 typedef struct threadMgrQueue_t {
     u32 readIndex;
