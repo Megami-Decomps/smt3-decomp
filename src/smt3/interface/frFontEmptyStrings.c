@@ -3,5 +3,8 @@
 /* Terminates the empty encoded glyph sequence used by the message analyzer. */
 u8 frEmptyString[] __attribute__((section(".sdata"))) = { 0 };
 
-INCLUDE_SDATA(const s32, "interface/frFontEmptyStrings", D_0054F438);
+/* Empty C name for frCNameTable[0], at the next native 8-byte seam. */
+const char D_0054F438[1] = "";
+
+SDATA_PAD(7);
 

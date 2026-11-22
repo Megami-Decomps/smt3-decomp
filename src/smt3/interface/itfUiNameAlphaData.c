@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern const char D_0054F438[8];
+extern const char D_0054F438[1];
 extern const char D_00535988[16];
 extern const char D_00535978[16];
 extern const char D_00535968[16];
