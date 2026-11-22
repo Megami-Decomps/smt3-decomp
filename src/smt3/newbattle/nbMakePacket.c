@@ -1984,6 +1984,10 @@ s32 nbMakeUnitMovePacket(s32 startframe, saddr_t uniqueid, nbFormation_t *form,
     return 1;
 }
 #else
+/* Native diagnostic strings used by the retained assembly body. */
+const char D_00544988[] = "formindex = %d\n";
+const char D_00544998[] = "rotv_rot %f, %f, %f, %f\n";
+
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 #endif
 

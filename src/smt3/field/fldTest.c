@@ -3414,6 +3414,10 @@ void fldRunDanteStanceSet(s32 stance)
 }
 #else
 
+/* Native diagnostic strings used by the retained assembly body. */
+const char D_005313F0[] = "DanteStanceSet( %d )\n";
+const char D_00531408[] = "fldGetRestoreMode:%d  old_area:%d\n";
+
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteStanceSet);
 #endif
 s32 gFldElvFloorNow = -999;

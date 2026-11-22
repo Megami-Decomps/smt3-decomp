@@ -277,6 +277,9 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 d
     disp->bgcolor = 0;
 }
 #else
+/* Native diagnostic format used by the retained function. */
+const char sceGsDefDispEnvModeMsg[] = "sceGsDefDispEnv:Not support displaymode for 0x%x!!\n";
+
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsSetDefDispEnv);
 #endif
 
@@ -833,6 +836,12 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
 
 }
 #else
+
+/* Native diagnostic formats used by the retained function. */
+const char sceGsExecStoreImageDma1Msg[] = "sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n";
+const char sceGsExecStoreImageGsMsg[] = "sceGsExecStoreImage: GS does not terminate\r\n";
+const char sceGsExecStoreImageDma1ToMemMsg[] = "sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n";
+const char sceGsExecStoreImageVif1Msg[] = "sceGsExecStoreImage: Enough data does not reach VIF1\n";
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 #endif
