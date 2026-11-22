@@ -552,6 +552,9 @@ void fldElvDrawFloorNum(void)
 }
 #else
 
+/* Native six-word elevator timing template copied by the retained routine. */
+const s32 D_00530F40[6] = { 50, 45, 30, 20, 15, 15 };
+
 INCLUDE_ASM(const s32, "field/fldTest", fldElvDrawFloorNum);
 #endif
 

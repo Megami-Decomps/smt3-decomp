@@ -124,3 +124,12 @@ The qualified first RTL dump already contains shift-by-eight lowering for the
 single expression, versus shift-by-seven and then shift-by-one for the scoped
 quotient. Thus the key distinction precedes instruction scheduling; the
 remaining allocation/order differences are separate.
+
+## Elevator floor transition delays
+
+The retained floor-number routine copies six signed timing values
+from `0x00530F40` before indexing them with the nearer floor distance,
+capped at five. The C initializer owns the 24 bytes copied by retail.
+The eight zero bytes before the independent 16-byte-aligned jump table
+are not part of the timing array. The original routine and its separate
+`NON_MATCHING` draft stay unchanged.
