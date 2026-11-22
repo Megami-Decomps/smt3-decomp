@@ -778,3 +778,19 @@ u8 itfPanelLeftFadeStripVertexIndex[8] = {0, 3, 1, 4, 2, 5, 0, 0};
 
 u8 itfPanelLeftFadeStripColorIndex[8] = {1, 1, 1, 1, 0, 0, 0, 0};
 
+
+/* Panel kind chooses its position/color initializer independently of the
+ * draw dispatch. Providers have different payload types and argument counts,
+ * so the tables retain the native unprototyped callback contract already
+ * used by itfPnlSetPosition, itfPnlSetPositionOffset, and itfPnlSetColor. */
+void (*CreateVertexTable[9])() __attribute__((aligned(8))) = {
+    CreateVertexNormal, CreateVertexMesWin, CreateVertexSelWin,
+    CreateVertexPlain, CreateVertexPlain, CreateVertexLeftFade,
+    NULL, NULL, CreateVertexFacility,
+};
+
+void (*CreateColorTable[9])() __attribute__((aligned(8))) = {
+    CreateColorNormal, CreateColorMesWin, CreateColorSelWin,
+    CreateColorPlain, CreateColorPera1, CreateColorLeftFade,
+    NULL, NULL, CreateColorFacility,
+};

@@ -289,6 +289,7 @@ Gauge highlight strip indices				docs/matching/interface/itfMisc.md	3
 Plain full-color and normal quad index rows	interface	56 bytes		docs/matching/interface/itfPanel.md	3
 Panel draw callbacks	interface	36 bytes		docs/matching/interface/itfPanel.md	11
 Selected, plain and facility outline indices	interface	62 bytes		docs/matching/interface/itfPanel.md	19
+Panel initializer dispatch tables	interface	72 bytes		docs/matching/interface/itfPanel.md	29
 lstDrawListWindow	interface/lstListWindow	0x84	33 of 33 words match	docs/matching/interface/lstListWindow.md	3
 mselDevilChoice	ModeSelect	0x33C	207 of 207 words match	docs/matching/kernel/ModeSelect.md	3
 mselMain	ModeSelect	0xD7C	863 of 863 words match	docs/matching/kernel/ModeSelect.md	55

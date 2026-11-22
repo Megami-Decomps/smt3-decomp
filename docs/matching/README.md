@@ -57,6 +57,7 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
+| 4 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
@@ -81,7 +82,6 @@ both native and emitted sizes when they differ.
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
-| 3 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |

@@ -13,8 +13,8 @@ ordinary C. The untouched zero spans after each table remain raw.
 Each of the nine panel kinds dispatches to a draw routine with the
 same two-argument contract: the panel and the draw-tag list. The draw
 table is recovered with nine native function pointers. The preceding
-creation tables use different typed storage and call conventions and
-remain raw; the unreferenced zero word after this table also stays raw.
+creation tables have separate callback contracts. The unreferenced
+zero word after the draw table remains raw.
 
 ## Selected, plain and facility outline indices (interface, 62 bytes)
 
@@ -25,3 +25,21 @@ DrawFacility draws three four-vertex quads, reading 12 bytes each
 from its separate vertex and color tables. All four native short
 suffixes remain raw; the two zero bytes after the plain tables and
 eight after the facility tables are not part of these C objects.
+
+## Panel initializer dispatch tables (interface, 72 bytes)
+
+The panel kind indexes two independent, writable callback tables:
+`CreateVertexTable` at `0x00326428` and `CreateColorTable` at
+`0x00326450`. They are distinct from the panel draw table. Each has nine
+32-bit slots: kinds 6 and 7 are null in both tables; kind 8 selects the
+facility initializer. Vertex kinds 3 and 4 share `CreateVertexPlain`; the
+color table selects `CreateColorPlain` and `CreateColorPera1` respectively.
+All fourteen non-null entries retain their native callback relocations.
+
+Each C table owns 36 bytes. Four bytes of alignment separate the objects;
+another four bytes after the color table remain separate. The pre-existing
+caller declarations and callback argument handling are unchanged. The
+one-argument calls in the retail path rely on EE argument registers
+remaining live; the existing `FIX_BUGS` color path passes the channels
+explicitly. The table definitions do not add calls or casts or make the
+retail calling convention a portable C guarantee.
