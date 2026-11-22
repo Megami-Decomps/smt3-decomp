@@ -261,6 +261,10 @@ int scePadPortOpen(int port, int slot, void *addr)
     return padRpcPacket.a.w[0];
 }
 #else
+/* Native diagnostic formats used by the retained function. */
+const char D_0054A9F8[] = "libpad: buffer addr is not 64 byte align. %08x\n";
+const char D_0054AA28[] = "libpad: pad port is already open [%d][%d]\n";
+
 INCLUDE_ASM(const s32, "sdk/libpad", scePadPortOpen);
 #endif
 

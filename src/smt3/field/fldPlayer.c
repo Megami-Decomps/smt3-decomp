@@ -1317,6 +1317,10 @@ s32 fldPlayerCalc_Nml(void)
     return 0;
 }
 #else
+/* Native diagnostic text used by the retained assembly. */
+const char fldDamageOnMsg[] = "damage on\n";
+const char fldDamageOffMsg[] = "damage off\n";
+
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_Nml);
 #endif
 

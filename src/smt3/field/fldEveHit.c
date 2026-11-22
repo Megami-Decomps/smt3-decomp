@@ -1371,6 +1371,9 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
 }
 #else
 
+/* Native diagnostic text used by the retained assembly. */
+const char D_00531E18[] = "Takara:%d [%d,%d,%d,%d,%d]";
+
 INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_ChkEveHit);
 #endif
 

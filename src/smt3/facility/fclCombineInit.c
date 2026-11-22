@@ -2717,6 +2717,9 @@ s32 cmbGetBirthDevil(cmbUnit_t *first, cmbUnit_t *second,
     return result == 0 ? 0 : kind;
 }
 #else
+/* Native accident diagnostic passed directly to printf by the retained body. */
+const char D_0053CAF8[] = "Combione accident!!!!!!!!!!!!!!!!!!!!!!! type = %d\n";
+
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetBirthDevil);
 #endif
 
