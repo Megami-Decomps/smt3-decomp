@@ -290,9 +290,14 @@ context. In the control, odd pseudo 91 has preferences `$f0/$f2` and is allocate
 with the even contribution, so it receives `$f1`. No register ties or extra
 operations are introduced.
 
-The readonly views contain four reduction centers, four correction terms and
-eleven polynomial coefficients. The fourth center/correction values also have
-the named scalar aliases `D_0054B404` and `D_0054B414`. Preserve the full existing
-`D_0054B418` import, including adjacent literals beyond the coefficient view.
+The two read-only reduction arrays each contain four binary32 entries.
+The reciprocal reduction selects index 3 at runtime; the large-magnitude
+path reads the same fourth entries directly. The earlier C split each
+fourth entry into a separate scalar, which made the runtime array access
+out of bounds even though the stock linker happened to place the scalars
+at the native addresses. The complete arrays retain those addresses and all
+eight values. The full `D_0054B418` import stays unchanged, including literals
+beyond the eleven polynomial coefficients. This corrects the source extent
+without adding new matching credit.
 Large magnitudes take the native signed limit expression; tiny inputs use the
 actual `1.0f < x + 1.0e30f` gate. No generic NaN/infinity cases are added.
