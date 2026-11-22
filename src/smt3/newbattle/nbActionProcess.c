@@ -1072,6 +1072,11 @@ void SetAllPacket(nbActionProcessData_t *a, s32 koukatype, s32 nskill, s32 sform
     }
 }
 #else
+/* Native damage diagnostic text, separately compiled from its assembly caller. */
+const char D_00543780[] __attribute__((aligned(8))) = "HP damage = %d, kaifuku = %d\n";
+const char D_005437A0[] __attribute__((aligned(8))) = "MP damage = %d, kaifuku = %d\n";
+const char D_005437C0[] __attribute__((aligned(8))) = "MISS!!!\n";
+
 INCLUDE_ASM(const s32, "newbattle/nbActionProcess", SetAllPacket);
 #endif
 

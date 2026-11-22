@@ -1982,6 +1982,18 @@ void fldRunAiCng(s32 mode)
     }
 }
 #else
+/* Native AI diagnostic text, separately compiled from its assembly caller. */
+const char D_00531200[] __attribute__((aligned(8))) = "AI:[ NULL ]\n";
+const char D_00531210[] __attribute__((aligned(8))) = "AI:[ STND ]\n";
+const char D_00531220[] __attribute__((aligned(8))) = "AI:[ WAIT ]\n";
+const char D_00531230[] __attribute__((aligned(8))) = "AI:[ DOIN ]\n";
+const char D_00531240[] __attribute__((aligned(8))) = "AI:[ PRUN ]\n";
+const char D_00531250[] __attribute__((aligned(8))) = "AI:[ PWAK ]\n";
+const char D_00531260[] __attribute__((aligned(8))) = "AI:[ SOBA ]\n";
+const char D_00531270[] __attribute__((aligned(8))) = "AI:[ PATR ]\n";
+const char D_00531280[] __attribute__((aligned(8))) = "AI:[ GUN1 ]\n";
+const char D_00531290[] __attribute__((aligned(8))) = "AI:[ GUN2 ]\n";
+
 INCLUDE_ASM(const s32, "field/fldTest", fldRunAiCng);
 #endif
 
