@@ -234,3 +234,12 @@ scaling to after the corner stores; inlining the `evtUnit_t *` local into the
 gives; and `count > 0x80 ? ... ` as a single clamp plus one store, which gives a
 `movz` where retail cross-jumps two `fldNpcDrawCount` stores into one and puts the
 `0x80` in a branch-likely delay slot.
+
+## Treasure-box object ID
+
+The retained `fldItemBoxAdd` passes `fldTakaraUnitName` to
+`dds3SetUnitObjectId`. The setter stores the pointer, not the string's
+contents. The const initializer owns the 12-byte `TAKARA_UNIT` string
+including its terminator. The next four alignment bytes stay unchanged
+and are not part of the C object. Both bounding vectors and the native
+item-box constructor are unchanged.

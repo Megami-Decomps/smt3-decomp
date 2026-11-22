@@ -502,8 +502,6 @@ extern s32 fldTakara3Size;
 
 extern void *fldItemBoxTexData;
 
-extern const char fldTakaraUnitName[];
-
 extern const sdfVector4_t fldItemBoxAddScale;
 
 extern const sdfVector4_t fldItemBoxAddAxis;
@@ -530,6 +528,8 @@ extern sdfTexHandle_t *sdfTexSet(void *aTex);
 const sdfVector4_t fldItemBoxAddScale = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 const sdfVector4_t fldItemBoxAddAxis = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+const char fldTakaraUnitName[] = "TAKARA_UNIT";
 
 #ifdef NON_MATCHING
 
