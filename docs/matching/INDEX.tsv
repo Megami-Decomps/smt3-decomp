@@ -474,7 +474,7 @@ nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_C
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
 nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
 Name glyph offsets				docs/matching/nme/Nme_Calc.md	91
-nmeMoveCursorBy	nme/Nme_Draw	0x10C	2 of 67 words match	docs/matching/nme/Nme_Draw.md	3
+nmeMoveCursorBy	nme/Nme_Draw	268 bytes		docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46
 nmeBuildNameFont	nme/Nme_Init	0x348	1 of 206 words match	docs/matching/nme/Nme_Init.md	175

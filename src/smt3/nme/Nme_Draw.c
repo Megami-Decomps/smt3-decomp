@@ -303,54 +303,78 @@ void nmeBackspace(void)
     nmeDeleteChar(1);
 }
 
-#ifdef NON_MATCHING
-extern const s8 nmeMoveTextTemplate[3];
+extern s8 nmeMoveTextTemplate[];
 extern const u8 *nmeNameListRows __attribute__((section(".data")));
-
+/* Preserve the native private template and glyph stores. nmeDrawCursorAt
+ * uses the same three-byte copy and two glyph stores before frLinkFontString;
+ * here no stack bytes escape and removing the scaffold loses the native trace.
+ * The byte view starts at the complete cursor object's range fields. */
 void nmeMoveCursorBy(s8 delta)
 {
-    volatile s32 first = nmeMoveTextTemplate[0];
-    volatile s32 second = nmeMoveTextTemplate[1];
-    volatile s32 terminator = nmeMoveTextTemplate[2];
-    volatile u8 text[3];
-    cmpCursorInfo_t *cursor = &nmeUpdateWork->inputCursor;
+    u8 *range = (u8 *)&nmeUpdateWork->inputCursor + 0x20;
     s32 limit;
+    s32 step;
     s16 position;
+    const u8 *row;
+    u8 text[3];
 
-    text[0] = first;
-    text[1] = second;
-    text[2] = terminator;
-    position = (u16)cursor->unk_22 + delta;
-    cursor->unk_22 = position;
-    limit = cursor->unk_20 - cursor->unk_26;
-    while (position != limit) {
-        const u8 *character;
-        u8 firstByte, secondByte;
-        if (position > limit) {
-            cursor->unk_22 = cursor->unk_20 - cursor->unk_26;
-            break;
-        }
-        position = cursor->unk_22;
-        if (position < 0) {
-            cursor->unk_22 = 0;
-            break;
-        }
-        character = nmeNameListRows + position * 0x20;
-        firstByte = character[0];
-        text[0] = firstByte;
-        secondByte = character[1];
-        text[1] = secondByte;
-        if (firstByte != 0x80 || secondByte != firstByte) {
-            break;
-        }
-        position = (u16)cursor->unk_22 + delta;
-        cursor->unk_22 = position;
-        limit = cursor->unk_20 - cursor->unk_26;
+    __builtin_memcpy(text, nmeMoveTextTemplate, sizeof(text));
+    {
+        u16 old = (u16)*(s16 *)(range + 2);
+        u32 shiftedDelta = (u32)(u8)delta << 24;
+        s32 sum;
+        u8 bound = range[0], shown = range[6];
+        /* Keep the native high-byte phase until the signed step is formed. */
+        FAKEMATCH_ASM_LIVE(shiftedDelta);
+        step = (s32)shiftedDelta >> 24;
+        sum = old + step;
+        position = (s16)sum;
+        *(s16 *)(range + 2) = sum;
+        limit = bound - shown;
     }
+    if (position == limit) goto done;
+    if (position > limit) goto clamp;
+    goto scan;
+zero:
+    *(s16 *)(range + 2) = 0;
+    return;
+scan:
+    position = *(s16 *)(range + 2);
+    if (position >= 0) goto valid;
+    goto zero;
+valid:
+    row = nmeNameListRows + (s32)position * 32;
+    {
+        FAKEMATCH_ASM_REG(s32, first, "$3") = row[0];
+        s32 second;
+        FAKEMATCH_ASM_REG(s32, secondCode, "$2");
+        text[0] = first;
+        second = row[1];
+        /* The copied byte and its widened comparison value have separate homes. */
+        FAKEMATCH_ASM_LIVE(second);
+        secondCode = (u8)second;
+        FAKEMATCH_ASM_LIVE(secondCode);
+        text[1] = second;
+        if (first != 0x80 || first != secondCode) return;
+    }
+    {
+        u16 old = (u16)*(s16 *)(range + 2);
+        s32 sum = old + step;
+        u8 bound = range[0], shown = range[6];
+        s16 signedLowWord = sum;
+        position = signedLowWord;
+        *(s16 *)(range + 2) = sum;
+        limit = bound - shown;
+    }
+    if (position == limit) goto done;
+    if (position <= limit) goto scan;
+    goto clamp;
+clamp:
+    *(s16 *)(range + 2) = range[0] - range[6];
+    return;
+done:
+    return;
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeMoveCursorBy);
-#endif
 
 /* Native dispatchers pass the mode word; this helper derives the row globally. */
 void nmeSyncCursor(s32 mode) {
