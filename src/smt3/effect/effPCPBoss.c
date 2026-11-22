@@ -4256,16 +4256,7 @@ extern s32 nbCameraDANTE_KAGIRI_Set(s32 frame);
 extern void nbCameraSetState(u16 state);
 extern void nbCameraHelperModelSetSub(mdlObj_t *model, u32 from, u32 to);
 
-/* nbCameraProcess camera prefix; D_00320E64 is its fovy at +0x24. */
-typedef struct effPCPBossCamera_t {
-    sdfVector4_t target;
-    sdfVector4_t direction;
-    f32 distance;
-    f32 fovy;
-    u32 state_change;
-    u32 state;
-} effPCPBossCamera_t;
-extern effPCPBossCamera_t pNbCamera;
+#include "nbCameraState.h"
 
 void effPCP_PBCamera_Run(effPCP_PBCamera_tag *work)
 {

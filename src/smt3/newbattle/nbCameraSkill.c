@@ -33,7 +33,6 @@ typedef struct nbCamera_t {
     s32 frame;
     u32 type;
     f32 angle;
-    f32 half;
     nbCameraAnim_t anim;
 } nbCamera_t;
 

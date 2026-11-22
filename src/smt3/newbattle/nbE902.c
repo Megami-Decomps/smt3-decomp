@@ -294,11 +294,11 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern const char nbE902EndMessage[];
 
-extern u8 pNbCamera[];
+#include "nbCameraState.h"
 
-extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *pNbCamera);
+extern s32 nbCameraBoss_Ongy_BUNSIN_Run(nbCamera_t *pNbCamera);
 
-extern void nbCameraBoss_Ongy_BUNSIN_Set(u8 *pNbCamera);
+extern s32 nbCameraBoss_Ongy_BUNSIN_Set(nbCamera_t *pNbCamera);
 
 extern void nbLoadUnitGroup(s32 side, s32 stop, s32 anime);
 
@@ -440,7 +440,7 @@ s32 SelectCopy(nbEventProcessData_t *ed)
     }
     nbLoadUnitGroup(1, 0, 0);
     nbSetEnemyFormation(ed->data);
-    nbCameraBoss_Ongy_BUNSIN_Set(pNbCamera);
+    nbCameraBoss_Ongy_BUNSIN_Set(&pNbCamera);
     nbFreeEffectSlot(ed);
     return 0;
 }
@@ -451,7 +451,7 @@ s32 Bunshin1(nbEventProcessData_t *ed)
 
     form = ed->data->form;
     nbAddOngBunshin2Packet(0, EE_ADDR_S(ed), &form[5], &form[6], &form[4], &form[7]);
-    nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
+    nbCameraBoss_Ongy_BUNSIN_Run(&pNbCamera);
     nbFreeEffectSlot(ed);
     return 0;
 }
@@ -461,12 +461,12 @@ s32 Wait2(nbEventProcessData_t *ed)
     if (ed->seqtime == 1) {
         nbFormDispOff(5);
     }
-    nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
+    nbCameraBoss_Ongy_BUNSIN_Run(&pNbCamera);
     if (effPCPBossBUNSIN2GetLength() < ed->seqtime) {
         if (dds3GetRandA(dds3EffectBase) & 1) {
-            nbCameraEnemyPartySet(pNbCamera, -0.34906584f, -0.26179934f);
+            nbCameraEnemyPartySet(&pNbCamera, -0.34906584f, -0.26179934f);
         } else {
-            nbCameraEnemyPartySet(pNbCamera, -0.34906584f, 0.26179934f);
+            nbCameraEnemyPartySet(&pNbCamera, -0.34906584f, 0.26179934f);
         }
         nbFreeEffectSlot(ed);
     }

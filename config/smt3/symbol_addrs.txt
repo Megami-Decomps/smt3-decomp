@@ -126,7 +126,7 @@ D_00326BF8 = 0x00326BF8; // type:u32 size:0x10
 
 // The battle camera object the nbCamera* entry points operate on;
 // nbCameraClearState zeroes +0x48..+0x54 of it. Named in the IDB.
-pNbCamera = 0x00320E40; // size:0x5C
+pNbCamera = 0x00320E40; // size:0x58
 
 // sdfFileSetDefaultSrc (0x002BE598) ends in a tail call to 0x002BE5B0, which
 // only stores the byte in sdfFileCmdDefaultDevice: a separate static function.

@@ -285,13 +285,13 @@ extern void dds3DeleteSceneBasicData(void *basic);
 
 extern void *bedbasic;
 
-extern u8 pNbCamera[];
+#include "nbCameraState.h"
 
-extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
+extern s32 nbCameraBoss_Sp_DOUTYO_Run(nbCamera_t *pNbCamera);
 
-extern void nbCameraBoss_Sp_DOUTYO_Set(u8 *pNbCamera);
+extern s32 nbCameraBoss_Sp_DOUTYO_Set(nbCamera_t *pNbCamera);
 
-extern void nbCameraBoss_Sp_DOUTYO_TPFix_Set(u8 *pNbCamera);
+extern s32 nbCameraBoss_Sp_DOUTYO_TPFix_Set(nbCamera_t *pNbCamera);
 
 extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
 
@@ -367,7 +367,7 @@ void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
 void nbSetModelHandleOnce(nbFormation_t *form, NB_FILEHANDLE_T *packh);
 
-extern s32 nbCameraBoss_Sp_DOUTYO_TP_Set(u8 *pNbCamera);
+extern s32 nbCameraBoss_Sp_DOUTYO_TP_Set(nbCamera_t *pNbCamera);
 extern s32 nbE901ModelPackNo;
 extern char *text1[];
 extern void nbPanelAllShow(void);
@@ -413,7 +413,7 @@ s32 RunUgou(nbEventProcessData_t *e)
         nbAddMotionKoukaPacket(wait + 0xF, 0, &e->data->form[list[i]], 0x10);
     }
     effBTLSkillStart(0xE8, 0);
-    nbCameraBoss_Sp_DOUTYO_TP_Set(pNbCamera);
+    nbCameraBoss_Sp_DOUTYO_TP_Set(&pNbCamera);
     nbDispText(text1[0xE8], NULL, 0, 0x5A, 0x89FEFF80);
     if (evtBitCheck(0xC0F) != 0) {
         e->pfile = EE_ADDR_AS(nbPacHandle_t *, nbMakeModelPackName(nbE901ModelPackNo));
@@ -473,7 +473,7 @@ s32 SyuGo(nbEventProcessData_t *e)
     memset(&vec2, 0, sizeof(vec2));
     vec2.z = -5000.0f;
     if (e->seqtime == 2) {
-        nbCameraBoss_Sp_DOUTYO_TPFix_Set(pNbCamera);
+        nbCameraBoss_Sp_DOUTYO_TPFix_Set(&pNbCamera);
     }
     if (e->seqtime == 5) {
         e->data->press4_p = 0;
@@ -601,10 +601,10 @@ s32 Syutugen2(nbEventProcessData_t *ed)
             SDF_VU0_STOREVECTOR_RWADDR(op);
             pos.y = 0.0f;
             nbSetFormPos(form, &pos);
-            nbCameraBoss_Sp_DOUTYO_Set(pNbCamera);
+            nbCameraBoss_Sp_DOUTYO_Set(&pNbCamera);
             nbSetFormPos(form, &pos2);
         } else {
-            nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
+            nbCameraBoss_Sp_DOUTYO_Run(&pNbCamera);
         }
     }
     return 0;
@@ -612,7 +612,7 @@ s32 Syutugen2(nbEventProcessData_t *ed)
 
 s32 End(nbEventProcessData_t *ed)
 {
-    nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
+    nbCameraBoss_Sp_DOUTYO_Run(&pNbCamera);
     if (ed->seqtime < 0x6F) {
         return 0;
     }
