@@ -976,3 +976,26 @@ synchronization is the existing hardware `EE_SYNC()` operation, not a
 compiler allocation constraint. The four native bodies at
 `0x002DCB20`–`0x002DCBA0` are 32 bytes each; the underscore-prefixed
 syscall stubs are unchanged.
+
+## sbrk (sdk/libkernl, 172 bytes)
+
+All 43 retail instruction words match. The EE's entry interrupt-enable bit
+decides whether to disable interrupts and whether to restore them on exit.
+When set, the disable loop executes DI and SYNC.P before each fresh Status
+poll. The existing file-backed break advances by unsigned low-word addition
+of the signed increment, then the native unsigned limit check uses the
+result of EndOfHeap. Failure sets errno to 12 and returns (void *)-1 without
+publishing a break; success returns the second break snapshot and publishes
+the new address before interrupt restoration. Stock emits the second
+snapshot in the unsigned limit branch's delay slot, as retail does.
+
+The only localized binding puts the initial Status hardware output in the
+saved register $17. The masked bit then has real consumers on both restore
+paths after the calls; the subsequent short-lived polling result is unrelated.
+Splitting the two Status outputs with no binding already matches 41/43
+words. Adding the entry binding matches 43/43, while binding the polling
+output alone stays at 41/43. Binding both produces the same exact body, so
+the polling binding was removed. The COP0 read, DI and EI macros each expose
+one hardware primitive; DI and EI prevent movement of memory across the
+interrupt-state boundary. No dummy runtime access or instruction replay is
+used.

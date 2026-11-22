@@ -364,6 +364,12 @@ typedef struct {
 #define EE_SYNC() __asm__ volatile ("sync")
 #define EE_SYNC_P() __asm__ volatile ("sync.p")
 
+/* COP0 Status and the EE interrupt-enable bit manipulated by DI and EI. */
+#define EE_STATUS_EIE (1U << 16)
+#define EE_READ_STATUS(output) __asm__ volatile ("mfc0 %0, $12" : "=r" (output))
+#define EE_DISABLE_INTERRUPTS() __asm__ volatile ("di" : : : "memory")
+#define EE_ENABLE_INTERRUPTS() __asm__ volatile ("ei" : : : "memory")
+
 /* The body of a busy-wait loop that reads no hardware: without a side effect
  * cc1 deletes the countdown. The loop's remaining nops are cc1's own
  * load-use padding, which it emits whether or not this one is there. */

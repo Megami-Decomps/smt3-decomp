@@ -399,7 +399,46 @@ long lseek(s32 descriptor, s32 offset, s32 whence)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sbrk);
+extern void *EndOfHeap(void);
+extern char *sbrkBreak __attribute__((section(".data")));
+
+void *sbrk(s32 increment)
+{
+    /* The entry Status read supplies the EIE bit used to restore interrupt
+     * state after either path's calls. Keep that hardware output in the
+     * native callee-saved register; the per-iteration poll needs no binding. */
+    FAKEMATCH_ASM_REG(u32, entryStatus, "$17");
+    u32 interrupts;
+    u32 newBreak;
+    char *oldBreak;
+
+    EE_READ_STATUS(entryStatus);
+    interrupts = entryStatus & EE_STATUS_EIE;
+    if (interrupts != 0) {
+        u32 status;
+        do {
+            EE_DISABLE_INTERRUPTS();
+            EE_SYNC_P();
+            EE_READ_STATUS(status);
+        } while ((status & EE_STATUS_EIE) != 0);
+    }
+
+    newBreak = EE_ADDR(sbrkBreak) + (u32)increment;
+    if (EE_ADDR(EndOfHeap()) < newBreak) {
+        *__errno_8() = 12;
+        if (interrupts != 0) {
+            EE_ENABLE_INTERRUPTS();
+        }
+        return (void *)-1;
+    }
+
+    oldBreak = sbrkBreak;
+    sbrkBreak = (char *)(addr_t)newBreak;
+    if (interrupts != 0) {
+        EE_ENABLE_INTERRUPTS();
+    }
+    return oldBreak;
+}
 
 s32 isatty(s32 descriptor)
 {

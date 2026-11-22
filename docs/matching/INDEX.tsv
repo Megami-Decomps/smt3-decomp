@@ -646,6 +646,7 @@ LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	812
 _request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	929
 Reboot and TLB diagnostic strings				docs/matching/sdk/libkernl.md	958
 Interrupt-context controller wrappers				docs/matching/sdk/libkernl.md	969
+sbrk	sdk/libkernl	172 bytes		docs/matching/sdk/libkernl.md	980
 TLB handler pointer				docs/matching/sdk/libkernlDebugHandlers.md	15
 Startup table pointers and TLB entry pairs				docs/matching/sdk/libkernlStartupEntries.md	21
 __ieee754_sqrtf	sdk/libm	204 bytes	51 of 51 words match	docs/matching/sdk/libm.md	3
