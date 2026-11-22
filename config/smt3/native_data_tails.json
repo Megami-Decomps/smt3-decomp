@@ -31,5 +31,6 @@
   "effect/effBTLCutCameraStateData": "effBTLCutCameraState",
   "mc/slWarningStartPrompts": "slNoSpaceStartMsg6",
   "mc/slFormatDoneMessage": "slFormatDoneMsg",
-  "interface/frFontBaseWidths": "gFontBaseWidth"
+  "interface/frFontBaseWidths": "gFontBaseWidth",
+  "field/fldDoorExitTaskName": "fldDoorExitMode"
 }
