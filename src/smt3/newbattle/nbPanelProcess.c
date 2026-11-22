@@ -1256,7 +1256,7 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
 
 
-extern sdfTexHandle_t *D_00345D88[];
+extern s32 D_00345D88[];
 extern nbPanelProcess_nbPanelXYZ_t nbPanelPartXYZ[];
 extern nbPanelProcess_nbPanelXYZ_t D_004F01A0[];
 extern nbPanelProcess_nbPanelTMXuv_t nbPanelParamTable[];
@@ -1412,7 +1412,7 @@ void nbPanelDrawPP(s32 x, s32 y, s32 select, u32 statindex, u32 flag)
             if (hp == 0 || maxhp == 0) {
                 nbPanelProcess_nbPanelXYZ_t *xyz2 = &nbPanelPartXYZ[8];
                 nbPanelProcess_nbPanelTMXuv_t *uv2 = &nbPanelParamTable[56];
-                sdfTexHandle_t *hTex2 = D_00345D88[0];
+                sdfTexHandle_t *hTex2 = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
 
                 nbPnlSprite(xyz2->x + x, xyz2->y + y, xyz2->w * rate, xyz2->h, uv2->u0, uv2->v0,
                             uv2->u1 * rate, uv2->v1,
@@ -3306,7 +3306,7 @@ void nbPanelAnalyzeRun(void)
 
         geometry = &D_004F03A8[0];
         uv = &D_004EFDD0[0];
-        texture = D_00345D88[0];
+        texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
         color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
         nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                     uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3315,7 +3315,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F03A8[14], shade, shade, shade, shade);
             geometry = &D_004F03A8[13];
             uv = &D_004EFDD0[6];
-            texture = D_00345D88[0];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
             color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3328,7 +3328,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F04E8[0], shade, shade, shade, shade);
             geometry = &D_004F03A8[15];
             uv = &D_004EFE40[0];
-            texture = D_00345D88[2];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[2]);
             color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3347,7 +3347,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F0510[0], shade, shade, shade, shade);
             geometry = &D_004F03A8[17];
             uv = &D_004EFE40[0];
-            texture = D_00345D88[2];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[2]);
             color = effMagaCylinderCalcColor(textColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3369,7 +3369,7 @@ void nbPanelAnalyzeRun(void)
         }
         geometry = &D_004F0420[0];
         uv = &D_004EFDE0[0];
-        texture = D_00345D88[2];
+        texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[2]);
         color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
         nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                     uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3408,11 +3408,11 @@ void nbPanelAnalyzeRun(void)
                                    &D_004F0588[0], shade, shade, shade, shade);
             }
             nbPanelSpriteCenteringDraw(0, 0xF6, &D_004F0574[0], &nbPanelPolyXYZ[24],
-                                       &D_004EFE30[0], spriteColor, D_00345D88[0]);
+                                       &D_004EFE30[0], spriteColor, EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]));
         }
         geometry = &D_004F045C[0];
         uv = &D_004EFE00[0];
-        texture = D_00345D88[2];
+        texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[2]);
         color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
         nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                     uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3421,7 +3421,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F045C[17], shade, shade, shade, shade);
             geometry = &D_004F045C[16];
             uv = &D_004EFE00[4];
-            texture = D_00345D88[2];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[2]);
             color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3435,7 +3435,7 @@ void nbPanelAnalyzeRun(void)
         }
         geometry = &D_004F0484[0];
         uv = &D_004EFE10[0];
-        texture = D_00345D88[0];
+        texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
         color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
         nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                     uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3444,7 +3444,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F0484[9], shade, shade, shade, shade);
             geometry = &D_004F0484[8];
             uv = &D_004EFE10[2];
-            texture = D_00345D88[0];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
             color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3454,7 +3454,7 @@ void nbPanelAnalyzeRun(void)
         }
         geometry = &D_004F0498[0];
         uv = &D_004EFE20[0];
-        texture = D_00345D88[0];
+        texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
         color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
         nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                     uv->u0, uv->v0, uv->u1, uv->v1, color, texture);
@@ -3463,7 +3463,7 @@ void nbPanelAnalyzeRun(void)
             nbPanelPolygonDraw(0, 0xF6, &D_004F0498[10], shade, shade, shade, shade);
             geometry = &D_004F0498[9];
             uv = &D_004EFE20[1];
-            texture = D_00345D88[0];
+            texture = EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[0]);
             color = effMagaCylinderCalcColor(spriteColor, nbPanelBaseABGR);
             nbPnlSprite(geometry->x, geometry->y + 0xF6, geometry->w, geometry->h,
                         uv->u0, uv->v0, uv->u1, uv->v1, color, texture);

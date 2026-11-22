@@ -578,7 +578,6 @@ extern void cmpUpdateStatusModelLoad(u16 id);
 extern s32 frDrawFontOt(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern s32 D_00345D88[];
-#define D_00345D9C ((void **)(D_00345D88 + 5))
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
@@ -650,12 +649,12 @@ extern s32 D_0054FD24;
 
 void rstSetResultWork(void *work)
 {
-    D_00345D9C[0] = work;
+    D_00345D88[5] = EE_ADDR_S(work);
 }
 
 void rstClearResultWork(void)
 {
-    D_00345D9C[0] = NULL;
+    D_00345D88[5] = 0;
 }
 
 extern const char cmpCampTmxPath[];
@@ -670,7 +669,7 @@ void cmpTexLoad(void)
     D_00345D88[5] = 0;
 }
 
-extern s32 D_00345D88[5];
+extern s32 D_00345D88[];
 
 void camp_22C610(void)
 {
@@ -6913,7 +6912,7 @@ extern void cmpDrawHelp(fclPanelPos_t *panel, u16 index, s8 bank,
 extern void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor);
 extern void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor);
 extern s32 fclChkMessage(void);
-extern s32 D_00345D88[5];
+extern s32 D_00345D88[];
 extern fclSpriteTbl_t fclSpriteTable[];
 extern const char cmpFmtItemQty[];
 

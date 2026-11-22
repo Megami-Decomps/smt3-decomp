@@ -3403,7 +3403,7 @@ void DrawRegistListwinElem(fclEncyc_instance_tag *instance)
 extern itfColor_t fclEncycCaptionStripColor;
 extern itfColor_t fclEncycCaptionLastStripColor;
 extern fclEncycStrip_t fclEncycCaptionStrips[4];
-extern sdfTexHandle_t *D_00345D88[];
+extern s32 D_00345D88[6];
 
 void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
 {
@@ -3467,7 +3467,7 @@ void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
     uv.components[0] = 0x10; uv.components[1] = 0x4B0;
     uv.components[2] = 0x3C0; uv.components[3] = 0x600;
     itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
-                         D_00345D88[1], 0, tag);
+                         EE_ADDR_AS(sdfTexHandle_t *, D_00345D88[1]), 0, tag);
 
     pos[0].x = 0xF00; pos[1].x = 0x2000;
     uv.components[0] = 0x3B0;
@@ -3501,8 +3501,18 @@ void DrawReadListwinCaption(fclEncyc_instance_tag *pinst)
     pos[1].x = 0x1C60; pos[1].y = 0x1E0;
     uv.components[0] = 0x20; uv.components[1] = 0x2F0;
     uv.components[2] = 0xBB0; uv.components[3] = 0x4D0;
-    itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
-                         D_00345D88[3], 0, tag);
+    {
+        sdfTexHandle_t *texture;
+
+        {
+            /* This read cannot alias the local coordinates or UV writes. */
+            s32 (* __restrict__ bank)[6] = &D_00345D88;
+            texture = EE_ADDR_AS(sdfTexHandle_t *, (*bank)[3]);
+        }
+
+        itfMiscDrawSpritePrim(pos, &uv, g_uv_summon_back, 0xFFFFF0,
+                             texture, 0, tag);
+    }
 
     pos[0].x = 0x1C60; pos[1].x = 0x2000;
     uv.components[0] = 0xBA0; uv.components[2] = 0xBB0;
