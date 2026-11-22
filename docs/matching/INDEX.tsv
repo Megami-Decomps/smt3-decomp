@@ -71,6 +71,7 @@ cmpDrawBoxG	code_0022C578	0x198	102 of 102 words match	docs/matching/code_0022C5
 Camp item and skill message tables				docs/matching/code_0022C578.md	2068
 Parameter gauge row map				docs/matching/code_0022C578.md	2076
 Camp affinity and name text				docs/matching/code_0022C578.md	2084
+nmeDrawGradQuad	code_0022C578	0x5C0		docs/matching/code_0022C578.md	2093
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60

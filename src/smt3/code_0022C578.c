@@ -2476,7 +2476,6 @@ const char cmpTextNoDemonsToExtractFrom[32] = "No demons to extract from";
 const char cmpTextSummoned[16] = "Summoned";
 const s32 nmeQuadPanelCoords[12] = {0, 8320, 0, 0, 0, 1600, 8192, 0, 8192, 3584, 3584, 1696};
 
-#ifdef NON_MATCHING
 extern const s32 nmeGradFaces[26][10];
 extern const u32 nmeGradBaseColors[];
 extern const f32 nmeGradWeights[];
@@ -2500,18 +2499,21 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
     memcpy(weights, nmeGradWeights, sizeof(weights));
     for (i = 0; i < 26; i++) {
         strength = amount;
+        layer = 0;
         offset = 0;
-        for (layer = 0; layer < 2; layer++) {
+        for (; layer < 2; layer++) {
+            s32 *firstFace = faces[i];
             if (layer != 0) {
                 strength = strength * 180 / 256;
             }
             scale = strength;
-            coords[0][0] = (faces[i][0] - offset) << 4;
+            coords[0][0] = (*firstFace - offset) << 4;
             coords[0][1] = (faces[i][2] - offset) << 4;
             coords[0][2] = (faces[i][8] - offset) << 4;
-            coords[1][0] = faces[i][1] << 3;
-            coords[1][1] = faces[i][3] << 3;
-            coords[1][2] = faces[i][9] << 3;
+            /* Y coordinates can be negative; the EE shift wraps the low word. */
+            coords[1][0] = (s32)((u32)faces[i][1] << 3);
+            coords[1][1] = (s32)((u32)faces[i][3] << 3);
+            coords[1][2] = (s32)((u32)faces[i][9] << 3);
             colors[0] = fclBlendColor(baseColors[0], 0x14002210, alpha);
             colors[1] = fclBlendColor(baseColors[1], 0x14002210, alpha);
             colors[2] = fclBlendColor(baseColors[2], 0x14002210, alpha);
@@ -2522,9 +2524,9 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
             coords[0][0] = (faces[i][2] - offset) << 4;
             coords[0][1] = (faces[i][4] - offset) << 4;
             coords[0][2] = (faces[i][8] - offset) << 4;
-            coords[1][0] = faces[i][3] << 3;
-            coords[1][1] = faces[i][5] << 3;
-            coords[1][2] = faces[i][9] << 3;
+            coords[1][0] = (s32)((u32)faces[i][3] << 3);
+            coords[1][1] = (s32)((u32)faces[i][5] << 3);
+            coords[1][2] = (s32)((u32)faces[i][9] << 3);
             colors[0] = fclBlendColor(baseColors[3], 0x14002210, alpha);
             colors[1] = baseColors[4];
             colors[2] = fclBlendColor(baseColors[5], 0x14002210, alpha);
@@ -2535,9 +2537,9 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
             coords[0][0] = (faces[i][4] - offset) << 4;
             coords[0][1] = (faces[i][6] - offset) << 4;
             coords[0][2] = (faces[i][8] - offset) << 4;
-            coords[1][0] = faces[i][5] << 3;
-            coords[1][1] = faces[i][7] << 3;
-            coords[1][2] = faces[i][9] << 3;
+            coords[1][0] = (s32)((u32)faces[i][5] << 3);
+            coords[1][1] = (s32)((u32)faces[i][7] << 3);
+            coords[1][2] = (s32)((u32)faces[i][9] << 3);
             offset += 10;
             colors[0] = baseColors[6];
             colors[1] = baseColors[7];
@@ -2549,9 +2551,7 @@ void nmeDrawGradQuad(s32 amount, s32 alpha, s32 ot)
     }
 }
 
-#else
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawGradQuad);
-#endif
+INCLUDE_RODATA(const s32, "code_0022C578", nmeGradFaces);
 
 const u32 nmeGradBaseColors[10] = {0x10, 0x10, 0x10, 0x10, 0x0, 0x10, 0x0, 0x0, 0x10, 0x0};
 const f32 nmeGradWeights[6] = {2.0f, 3.0f, 1.5f, 1.5f, 2.0f, 0.0f};
