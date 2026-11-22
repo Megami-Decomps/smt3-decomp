@@ -41,6 +41,7 @@ both native and emitted sizes when they differ.
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | sdk/libgcc_unsigned_divmod | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
+| 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
@@ -51,7 +52,6 @@ both native and emitted sizes when they differ.
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
-| 4 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 4 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |

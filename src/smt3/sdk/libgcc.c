@@ -1460,7 +1460,66 @@ frameState_t *libc_2D31E0(u32 pc, frameState_t *output)
 }
 
 
-INCLUDE_ASM(const s32, "sdk/libgcc", __muldi3);
+/* __muldi3: GPL-2.0-or-later, adapted from gcc/libgcc2.c at 380f6ad3.
+ * The upstream libgcc2.c notice and its specific linking permission follow.
+ * The GCC longlong.h operand primitive and its distinct notice are documented
+ * with libgcc_unsigned_divmod.c; no later runtime exception is implied.
+ */
+/* More subroutines needed by GCC output code on some machines.  */
+/* Compile this one with gcc.  */
+/* Copyright (C) 1989, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
+   Free Software Foundation, Inc.
+
+This file is part of GNU CC.
+
+GNU CC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+In addition to the permissions in the GNU General Public License, the
+Free Software Foundation gives you unlimited permission to link the
+compiled version of this file into combinations with other programs,
+and to distribute those combinations without any restriction coming
+from the use of this file.  (The General Public License restrictions
+do apply in other respects; for example, they cover modification of
+the file, and distribution when not linked into a combine
+executable.)
+
+GNU CC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU CC; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+typedef union {
+    struct { s32 low, high; } words;
+    s64 value;
+} libgccWideProduct_t;
+
+s64 __muldi3(s64 left, s64 right)
+{
+    libgccWideProduct_t product;
+    libgccWideProduct_t a, b;
+    a.value = left;
+    b.value = right;
+
+    /* Full 32x32 product of the low words, independently capturing HI/LO. */
+    {
+        libgccWideProduct_t lowProduct;
+        PS2_MULTU_WORDS(lowProduct.words.high, lowProduct.words.low,
+                       a.words.low, b.words.low);
+        product.value = lowProduct.value;
+    }
+    /* Cross terms affect only the upper word of the low 64 bits. */
+    product.words.high += ((u32)a.words.low * (u32)b.words.high +
+                           (u32)a.words.high * (u32)b.words.low);
+    return product.value;
+}
 
 void sdfUnpackFloat(const void *input, fp_number_type *number) {
     f32_bits bits;

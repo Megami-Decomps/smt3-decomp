@@ -140,3 +140,21 @@ production and stock-dump assembly and ELF are identical, and the full
 retail image matches. The full report's 240-byte read-only section fuzzy
 score rises from 6.6666665% to 18.09524%, with no aggregate matched-data, code,
 or function gain. The primary game report is unchanged.
+
+## __muldi3 (sdk/libgcc, 0x74)
+
+29 of 29 words match, at the native 116-byte extent, using the
+October 3, 2000 GNU GCC [libgcc2.c source](https://github.com/gcc-mirror/gcc/blob/380f6ad3dde6db991434068c4f3776c6762fa564/gcc/libgcc2.c).
+The source retains the applicable notice. The real unsigned low-word product
+supplies both halves through the existing `PS2_MULTU_WORDS` primitive. Only
+the low 32 bits of each cross product contribute to the high word, so the sum
+uses unsigned modular arithmetic. The EE's signed member type preserves the
+returned 64-bit representation; no signed-overflow premise is needed.
+
+Using a widening C product on the same unsigned low operands emits 96 bytes
+rather than 116 and matches only one native word in place. It introduces no
+recursive call or relocation; the difference is the compiler's choice of
+product representation. The exact version leaves all 40 production function
+extents, all allocated sections and all ordered relocations in the owner
+unchanged. Independent unsigned arithmetic reference checks cover boundary
+and seeded input pairs. No toolchain, link layout, or data ownership changed.
