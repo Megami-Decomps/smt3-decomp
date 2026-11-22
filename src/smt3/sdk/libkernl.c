@@ -4037,11 +4037,6 @@ u32 GetSystemCallEntry(s32 index)
     return entry;
 }
 
-typedef struct {
-    u32 index;
-    void (*entry)(void);
-} kernelEntryPair_t;
-
 #include "sdk_kernel_startup_entries.h"
 extern void setup(u32 index, void *entry);
 extern u32 *FindAddress(u32 *start, const u32 *end, u32 instruction);
@@ -4275,7 +4270,7 @@ s32 kCopy_2(u32 *dst, const u32 *src, u32 count)
 INCLUDE_ASM(const s32, "sdk/libkernl", GetEntryAddress_0);
 
 #include "sdk_kernel_alarm_entries.h"
-extern kernelEntryPair_t tlbEntryPairs[8];
+extern kernelStartupEntryPair_t tlbEntryPairs[8];
 extern void *execArgumentBlock;
 extern const u8 alarmPayload[0x740];
 extern const u8 alarmSmallPayload[0x28];
@@ -4476,12 +4471,12 @@ void InitTLBFunctions(void)
     u32 i;
     void *entry;
 
-    setup_0(tlbEntryPairs[0].index, tlbEntryPairs[0].entry);
+    setup_0(tlbEntryPairs[0].index, EE_ADDR_PTR(EE_ADDR(tlbEntryPairs[0].entry.wordCopy)));
     Copy_2((void *)0x80075000, TLBFunctionsImage, 0x330);
     FlushCache(0);
     FlushCache(2);
-    setup_0(tlbEntryPairs[1].index, tlbEntryPairs[1].entry);
-    setup_0(tlbEntryPairs[2].index, tlbEntryPairs[2].entry);
+    setup_0(tlbEntryPairs[1].index, tlbEntryPairs[1].entry.resident);
+    setup_0(tlbEntryPairs[2].index, tlbEntryPairs[2].entry.resident);
     for (i = 3; i < 8; i++) {
         index = tlbEntryPairs[i].index;
         entry = GetEntryAddress_1(index);
