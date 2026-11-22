@@ -1014,6 +1014,14 @@ void fldSetUnit(fldResourcePoint_t *point)
 
 
 
+/* Native text used by the retained assembly caller below. */
+#if !defined(NON_MATCHING)
+const char D_005317C0[] __attribute__((aligned(8))) = "PLAYER_UNIT";
+const char D_005317D0[] __attribute__((aligned(8))) = "PLAYER_UNIT2";
+const char D_005317E0[] __attribute__((aligned(8))) = "DANTE_UNIT";
+const char D_005317F0[] __attribute__((aligned(8))) = "ANA_UNIT";
+#endif
+
 INCLUDE_ASM(const s32, "field/fldMain", fldSetUnit);
 #endif
 

@@ -473,6 +473,12 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
     fldNpcModelTable++;
 }
 #else
+/* Native text used by the retained assembly caller below. */
+#if !defined(NON_MATCHING)
+const char D_005326D0[] __attribute__((aligned(8))) = "GENNPC_UNIT";
+const char D_005326E0[] __attribute__((aligned(8))) = "NPC_MDL_UNIT";
+#endif
+
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLoad);
 #endif
 

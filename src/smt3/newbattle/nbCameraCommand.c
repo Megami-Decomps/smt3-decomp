@@ -493,6 +493,14 @@ void nbCameraShot_CommandFixPos_Calc2(nbCamera_t *camera, nbFormation_t *target)
 }
 
 #else
+/* Native camera editor diagnostics, separate from the retained assembly caller. */
+#if !defined(NON_MATCHING)
+const char D_00534B50[] __attribute__((aligned(8))) = "CAMERA EDIT:\n";
+const char D_00534B60[] __attribute__((aligned(8))) = " DIST:[%-3.3f]\n";
+const char D_00534B70[] __attribute__((aligned(8))) = " UP  :[%-3.3f]\n";
+const char D_00534B80[] __attribute__((aligned(8))) = " ID  ;[%Xd]\n";
+#endif
+
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_Calc2);
 #endif
 

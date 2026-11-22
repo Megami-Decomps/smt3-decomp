@@ -938,6 +938,14 @@ void fldEventUpdateEx_Unity_2(void)
     fldCamPitch = GetSphericalPosMove(target.x, target.z, eye.x, eye.z) + 180.0f;
 }
 #else
+/* Native text used by the retained assembly caller below. */
+#if !defined(NON_MATCHING)
+const char D_00531BB0[] __attribute__((aligned(8))) = "01cam_06";
+const char D_00531BC0[] __attribute__((aligned(16))) = "01cam_04";
+const char D_00531BD0[] __attribute__((aligned(16))) = "01cam_02";
+const char D_00531BE0[] __attribute__((aligned(16))) = "01cam_03";
+#endif
+
 INCLUDE_ASM(const s32, "field/fldCamera", fldEventUpdateEx_Unity_2);
 #endif
 
