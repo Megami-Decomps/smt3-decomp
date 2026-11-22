@@ -867,6 +867,7 @@ segments:
       - [0x22D738, .data, event/evtViewerUnitControlData]
       - [0x22D750, .data, event/evtViewerMenuHandlers]
       - [0x22D784, data, data_0032C784]
+      - [0x22D790, .data, event/evtPolygonMovie]
       - [0x22D7F0, .data, event/evtMovieVectors]
       - [0x22D840, .data, event/evtMovieBlurDefault]
       - [0x22D868, data, data_0032C868]

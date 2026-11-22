@@ -2995,7 +2995,6 @@ void fldRunDanteFacePlayer(void)
     fldRun_Dante.turn = 180.0f - angle;
 }
 
-#ifdef NON_MATCHING
 extern void *memset(void *dst, int value, size_t size);
 extern void FromRotation(f32 angle);
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
@@ -3006,21 +3005,27 @@ extern void dds3DrawUnitObjectShadow(s32 fade, f32 x, f32 y, f32 z, f32 radius);
 extern void fldRunDanteDrawShadow(s32 alpha, f32 x, f32 y, f32 z, f32 radius);
 extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
 
+extern const sdfVector4_t fldRunDanteAxis;
+
 void fldRunDanteSetModel(void)
 {
     mdlObj_t *model = dds3ObjectBaseGetModelHandle(fldDanteUnit);
     sdfVector4_t pos __attribute__((aligned(16)));
     sdfVector4_t previous __attribute__((aligned(16)));
+    sdfVector4_t axis __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
     f32 distance;
     f32 angle;
+    s32 count;
+    FAKEMATCH_ASM_REG(fldTest_FLDRUN_DANTE_t *, throw_work, "$16");
+    FAKEMATCH_ASM_REG(fldTest_FLDRUN_DANTE_t *, frame_work, "$17");
 
     memset(&pos, 0, sizeof(pos));
     pos.w = 1.0f;
     memset(&previous, 0, sizeof(previous));
     previous.w = 1.0f;
     {
-        sdfVector4_t axis __attribute__((aligned(16))) = { 0.0f, 1.0f, 0.0f, 1.0f };
+        axis = fldRunDanteAxis;
 
         memset(&rotation, 0, sizeof(rotation));
         rotation.w = 1.0f;
@@ -3030,7 +3035,7 @@ void fldRunDanteSetModel(void)
         dds3SetPosPoseSet(fldDanteUnit, &pos);
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(fldRun_Dante.turn * 3.1399999f / 180.0f);
-        SDF_VU0_STOREVECTOR(&rotation);
+        SDF_VU0_STOREVECTOR_NOMEM(&rotation);
     }
     dds3SetRotPoseSet(fldDanteUnit, &rotation);
     if (fldRun_Dante.flag & 0x40) {
@@ -3058,65 +3063,117 @@ void fldRunDanteSetModel(void)
     } else {
         dds3OffPoseSetFlag(fldDanteUnit->poseset, 8);
     }
-    if (fldRun_Dante.flag & 0x20) {
-        mdlLoopMotion(model, 0, fldRun_Dante.update_flag);
-    } else if (fldRun_Dante.flag & 2) {
-        s32 motion = fldRun_Dante.update_flag;
-        s32 change = 1;
+    {
+        FAKEMATCH_ASM_REG(fldTest_FLDRUN_DANTE_t *, work, "$4") = &fldRun_Dante;
+        /* Keep the motion update base in the native short-lived argument register. */
+        FAKEMATCH_ASM_LIVE(work);
+        if (work->flag & 0x20) {
+            mdlLoopMotion(model, 0, work->update_flag);
+        } else if (work->flag & 2) {
+            FAKEMATCH_ASM_REG(s32, motion, "$3") = work->update_flag;
+            s32 change = 1;
+            FAKEMATCH_ASM_LIVE(motion);
 
-        if (motion == 0 || (motion >= 2 && motion < 4)) {
-            change = motion != model->current.h.motionIndex;
-        }
-        if (change) {
-            model->first->speed = 1.0f;
-            if (motion == 1) {
-                mdlSmoothLoopMotion(model, 0, 1, 1.0f, 4.0f);
-            } else if (motion == 4) {
-                mdlSmoothLoopMotion(model, 0, 4, 3.0f, 4.0f);
-            } else if (motion == 3) {
-                mdlSmoothLoopMotion(model, 0, 3, 8.0f, 8.0f);
-            } else {
-                mdlSmoothLoopMotion(model, 0, motion, 6.0f, 6.0f);
+            switch (motion) {
+            case 0:
+            case 2:
+            case 3:
+                {
+                    FAKEMATCH_ASM_REG(s32, delta, "$2") = motion ^ model->current.h.motionIndex;
+                    FAKEMATCH_ASM_LIVE(delta);
+                    change = delta != 0;
+                }
+                break;
+            }
+            if (change) {
+                s32 next_motion;
+                model->first->speed = 1.0f;
+                next_motion = fldRun_Dante.update_flag;
+                if (next_motion == 1) {
+                    mdlSmoothLoopMotion(model, 0, 1, 1.0f, 4.0f);
+                } else if (next_motion == 4) {
+                    mdlSmoothLoopMotion(model, 0, 4, 3.0f, 4.0f);
+                } else if (next_motion == 3) {
+                    mdlSmoothLoopMotion(model, 0, 3, 8.0f, 8.0f);
+                } else {
+                    mdlSmoothLoopMotion(model, 0, next_motion, 6.0f, 6.0f);
+                }
             }
         }
     }
     {
-        u32 flag = fldRun_Dante.flag;
-        f32 frame = model->first->frame;
-        f32 oldframe = fldRun_Dante.nowframe;
+        u32 flag;
+        f32 frame;
+        f32 oldframe;
+        /* Frame history and gunlight use one callee-saved work base. */
+        frame_work = &fldRun_Dante;
+        FAKEMATCH_ASM_LIVE(frame_work);
+        flag = frame_work->flag;
+        frame = model->first->frame;
+        oldframe = frame_work->nowframe;
 
-        fldRun_Dante.nowframe = frame;
-        fldRun_Dante.oldframe = oldframe;
+        frame_work->nowframe = frame;
+        frame_work->oldframe = oldframe;
         if (flag & 2) {
-            fldRun_Dante.oldframe = frame;
+            frame_work->oldframe = frame;
         }
     }
     if (sdfModelGetMarkPos(dds3GetUnitHandleObjectBasic(fldDanteUnit)->owner->inner, 0) != 0) {
         SDF_VU0_STOREVECTOR(&pos);
-        dds3DrawUnitObjectShadow(0x80, pos.x, fldRun_Dante.y, pos.z, 70.0f);
-    }
-    if (fldRun_Dante.gunlight_anime > 0) {
-        s32 count = fldRun_Dante.gunlight_anime;
-        s32 alpha = (s32)((u32)count * 14U);
-        s32 intensity = 16;
-
-        if (count < 4) {
-            alpha >>= 1;
+        {
+            FAKEMATCH_ASM_REG(f32, radius, "$f15") = 70.0f;
+            FAKEMATCH_ASM_REG(fldTest_FLDRUN_DANTE_t *, shadow_work, "$2") = &fldRun_Dante;
+            FAKEMATCH_ASM_REG(f32, mark_x, "$f12");
+            FAKEMATCH_ASM_REG(f32, ground_y, "$f13");
+            FAKEMATCH_ASM_LIVE_F32(radius);
+            FAKEMATCH_ASM_LIVE(shadow_work);
+            /* Keep the mark and ground coordinates in their native load order. */
+            mark_x = pos.x;
+            FAKEMATCH_ASM_LIVE_F32(mark_x);
+            ground_y = shadow_work->y;
+            FAKEMATCH_ASM_LIVE_F32_VOLATILE(ground_y);
+            dds3DrawUnitObjectShadow(0x80, mark_x, ground_y, pos.z, radius);
         }
-        fldRunDanteDrawShadow(alpha, fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z, 700.0f);
-        fldRun_Dante.gunlight_anime -= SDF_FRAME_DUE();
+    }
+    count = frame_work->gunlight_anime;
+    if (count > 0) {
+        s32 alpha;
+        s32 intensity;
+        f32 draw_x;
+        s32 scaled = (s32)((u32)count * 14U);
+        s32 fade = count < 4;
+        /* The scaled value is even. Preserve signed division and reuse alpha
+         * for the later screen flash so GCC retains the native saved home. */
+        alpha = scaled;
+        if (fade) {
+            alpha /= 2;
+        }
+        draw_x = frame_work->x;
+        fldRunDanteDrawShadow(alpha, draw_x, frame_work->y, frame_work->z, 700.0f);
+        frame_work->gunlight_anime -= SDF_FRAME_DUE();
         fldRunDanteGetDistAngle(&distance, &angle);
+        intensity = 16;
         if (distance < 1800.0f) {
-            intensity = (s32)((1800.0f - distance) * 0.017777777f) + 16;
+            FAKEMATCH_ASM_REG(s32, near_intensity, "$2") = (s32)((1800.0f - distance) * 0.017777777f);
+            FAKEMATCH_ASM_LIVE(near_intensity);
+            intensity = near_intensity + 16;
         }
-        alpha = (s32)((u32)intensity * (u32)fldRun_Dante.gunlight_anime) / 8;
-        rsetOtOfs(0x47);
-        rsetAlpha(1);
-        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-        aDrawBoxF(0, 0, 0x200, 0xF4, 0x30, 0x30, 0x30, alpha);
-        rsetAlpha(0);
+        {
+            FAKEMATCH_ASM_REG(s32, product, "$2") = (s32)((u32)intensity * (u32)frame_work->gunlight_anime);
+            if (product < 0) {
+                product += 7;
+            }
+            alpha = product >> 3;
+            rsetOtOfs(0x47);
+            rsetAlpha(1);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            aDrawBoxF(0, 0, 0x200, 0xF4, 0x30, 0x30, 0x30, alpha);
+            rsetAlpha(0);
+        }
     }
-    if (fldRun_Dante.flag & 0x10) {
+    /* The projectile flag consumes a distinct base after the shadow/flash. */
+    throw_work = &fldRun_Dante;
+    if (throw_work->flag & 0x10) {
         f32 pi = 3.1399999f;
 
         pos.x = fldRun_Dante.x;
@@ -3127,9 +3184,6 @@ void fldRunDanteSetModel(void)
         fldRunTamaSet(pos.x, pos.y, pos.z, fldRun_Dante.turn);
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteSetModel);
-#endif
 
 s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
 {

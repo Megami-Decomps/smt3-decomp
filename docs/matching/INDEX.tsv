@@ -264,6 +264,7 @@ fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
 fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75
 Elevator floor transition delays				docs/matching/field/fldTest.md	128
+fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	137
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3

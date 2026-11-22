@@ -133,3 +133,19 @@ capped at five. The C initializer owns the 24 bytes copied by retail.
 The eight zero bytes before the independent 16-byte-aligned jump table
 are not part of the timing array. The original routine and its separate
 `NON_MATCHING` draft stay unchanged.
+
+## fldRunDanteSetModel (field/fldTest, 0x5CC)
+
+All 371 of 371 words match in the 1,484-byte production body. Using the
+existing aligned axis object and concrete VU0 load/store helpers preserves
+the native quaternion path. The short-lived motion and mark arguments
+keep their native register homes; the persistent work base is callee-saved
+and remains the same game object through the frame and lighting updates.
+
+The gunlight fade only halves the positive counts below four. Scaling by
+14 first yields an even low word, so signed division by two gives the
+native shift. One signed alpha local serves the shadow draw and, after
+reassignment, the screen flash. This preserves the saved home and the
+native X load order without an additional constraint on that draw.
+The empty operands constrain only the actual native values. They add
+no instructions and do not assert a general memory barrier.

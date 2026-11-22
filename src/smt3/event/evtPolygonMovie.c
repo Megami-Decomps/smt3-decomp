@@ -295,35 +295,43 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     }
 }
 
-s32 QuakeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+/* The dispatcher ignores the result. Keep the native regular calls and
+ * epilogue with the same one-pass block used to avoid sibling calls. */
+void QuakeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->Frame == now) {
-        if (f->data.h[0] == 0) {
-            dds3StopQuake();
-        } else {
-            dds3SetQuake(f->Length, f->data.h[0]);
+    do {
+        if (f->Frame == now) {
+            if (f->data.h[0] == 0) {
+                dds3StopQuake();
+            } else {
+                dds3SetQuake(f->Length, f->data.h[0]);
+            }
         }
-    }
+    } while (0);
 }
 
-s32 FadeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+/* The dispatcher ignores the result. Keep the native regular calls and
+ * epilogue with the same one-pass block used to avoid sibling calls. */
+void FadeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->Frame == now) {
-        switch (f->data.h[0]) {
-        case 0:
-            dds3FadeIn(0xFF, 0xFF, 0xFF, f->Length);
-            break;
-        case 1:
-            dds3FadeOut(0xFF, 0xFF, 0xFF, f->Length);
-            break;
-        case 2:
-            dds3FadeIn(0, 0, 0, f->Length);
-            break;
-        case 3:
-            dds3FadeOut(0, 0, 0, f->Length);
-            break;
+    do {
+        if (f->Frame == now) {
+            switch (f->data.h[0]) {
+            case 0:
+                dds3FadeIn(0xFF, 0xFF, 0xFF, f->Length);
+                break;
+            case 1:
+                dds3FadeOut(0xFF, 0xFF, 0xFF, f->Length);
+                break;
+            case 2:
+                dds3FadeIn(0, 0, 0, f->Length);
+                break;
+            case 3:
+                dds3FadeOut(0, 0, 0, f->Length);
+                break;
+            }
         }
-    }
+    } while (0);
 }
 
 void SeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
@@ -333,7 +341,9 @@ void SeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable
     }
 }
 
-s32 BgmFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+/* The dispatcher ignores the result. Keep the native regular calls and
+ * epilogue with the same one-pass block used to avoid sibling calls. */
+void BgmFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     s32 eventNo;
     s32 bgm;
@@ -342,29 +352,31 @@ s32 BgmFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable
         eventNo = wdata->eventNo;
         bgm = f->data.h[1];
         printf("bgm_frame e%03d, bgm %d\n", eventNo, bgm);
-        switch (f->data.h[0]) {
-        case 0:
-            evtPlayEventBgm(eventNo, bgm);
-            break;
-        case 1:
-            evtFadeInEventBgm(eventNo, bgm);
-            break;
-        case 2:
-            evtStopEventBgm(eventNo, bgm);
-            break;
-        case 3:
-            evtTransEventBgm(eventNo, bgm);
-            break;
-        case 4:
-            p2sdBgmVolDown();
-            break;
-        case 5:
-            p2sdBgmVolUp();
-            break;
-        case 6:
-            p2sdStopAllBgm();
-            break;
-        }
+        do {
+            switch (f->data.h[0]) {
+            case 0:
+                evtPlayEventBgm(eventNo, bgm);
+                break;
+            case 1:
+                evtFadeInEventBgm(eventNo, bgm);
+                break;
+            case 2:
+                evtStopEventBgm(eventNo, bgm);
+                break;
+            case 3:
+                evtTransEventBgm(eventNo, bgm);
+                break;
+            case 4:
+                p2sdBgmVolDown();
+                break;
+            case 5:
+                p2sdBgmVolUp();
+                break;
+            case 6:
+                p2sdStopAllBgm();
+                break;
+            }
+        } while (0);
     }
 }
 
@@ -638,28 +650,32 @@ void BEDFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+/* The dispatcher ignores the result. Keep the native regular calls and
+ * epilogue with the same one-pass block used to avoid sibling calls. */
+void LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    dds3Basic_t *light;
-    dds3Basic_t *unit;
-    void *handle;
+    do {
+        dds3Basic_t *light;
+        dds3Basic_t *unit;
+        void *handle;
 
-    if (f->Frame == now) {
-        if (f->data.h[0] >= 0) {
-            light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->NameIndex]);
-            if (light != NULL) {
-                unit = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 5, wdata->nameTable[f->data.h[0]]);
-                if (unit != NULL) {
-                    handle = evtGetUnitHandle2(unit);
-                    if (f->data.h[1] != 0) {
-                        evtLinkLightObjectBasic(handle, light, f->Length);
-                    } else {
-                        evtUnlinkLightObjectBasic(handle, f->Length);
+        if (f->Frame == now) {
+            if (f->data.h[0] >= 0) {
+                light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->NameIndex]);
+                if (light != NULL) {
+                    unit = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 5, wdata->nameTable[f->data.h[0]]);
+                    if (unit != NULL) {
+                        handle = evtGetUnitHandle2(unit);
+                        if (f->data.h[1] != 0) {
+                            evtLinkLightObjectBasic(handle, light, f->Length);
+                        } else {
+                            evtUnlinkLightObjectBasic(handle, f->Length);
+                        }
                     }
                 }
             }
         }
-    }
+    } while (0);
 }
 
 void SkyFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
@@ -670,15 +686,19 @@ void SkyFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-s32 BokasiFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+/* The dispatcher ignores the result. Keep the native regular calls and
+ * epilogue with the same one-pass block used to avoid sibling calls. */
+void BokasiFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->Frame == now) {
-        if (f->data.h[0] != 0) {
-            evtSetBokasi(1);
-        } else {
-            evtSetBokasi(0);
+    do {
+        if (f->Frame == now) {
+            if (f->data.h[0] != 0) {
+                evtSetBokasi(1);
+            } else {
+                evtSetBokasi(0);
+            }
         }
-    }
+    } while (0);
 }
 
 f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
@@ -951,6 +971,36 @@ void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         Eve_FilterON();
     }
 }
+
+/* FrameRun indexes this whole writable bank by the PM object's type.
+ * Type 4 is the native null slot; dds3FrameFuncTable names the type-5 suffix.
+ */
+evtFrameFunc_t nowcamera[24] = {
+    NULL,
+    UnitFrameFunc,
+    CameraFrameFunc,
+    EffectFrameFunc,
+    NULL,
+    SeFrameFunc,
+    FadeFrameFunc,
+    QuakeFrameFunc,
+    BlurFrameFunc,
+    LightFrameFunc,
+    SLightFrameFunc,
+    SFogFrameFunc,
+    SkyFrameFunc,
+    Blur2FrameFunc,
+    MBlurFrameFunc,
+    DBlurFrameFunc,
+    FilterFrameFunc,
+    MFilterFrameFunc,
+    BEDFrameFunc,
+    BgmFrameFunc,
+    MG12FrameFunc,
+    MG12FrameFunc,
+    BokasiFrameFunc,
+    RBlurFrameFunc,
+};
 
 void FrameRun(evtPolygonMovieWork_t *wdata)
 {
