@@ -570,3 +570,25 @@ passes it to the native row format. These three read-only C objects contain
 35 bytes including terminators. The existing eight-byte compiler alignment
 keeps the native spacing; the alignment bytes are not part of the objects.
 The debug routine and its calls remain unchanged.
+
+## DebugProcRegister (facility/fclEncyc, 0x31C)
+
+The registration debug menu at 0x0021E008 matches all 199 instructions.
+Its direction changes preserve the signed wrap tests, unsigned pad bytes
+before each step and signed byte reloads when a row reaches an endpoint.
+Single registration, removal, bulk registration, optional sort updates
+and the sixteen rendered rows keep their native calls and argument order.
+
+The real render tag is copied before the close-pad test; the one-step
+value is initialized in both sides of the first directional test. The
+pinned compiler merges these identical assignments into the native
+direction branch delay slot, leaving the tag copy in the earlier slot.
+An earlier constrained draft moved the two operations to the opposite
+slots; the minimized version also matches with a shared initializer.
+Four local register bindings cover the actual step, row sign test and
+signed pad reloads. No empty compiler operands are needed. These bindings
+do not imply the source's historical spelling.
+
+Complete owner verification preserves the other 120 C functions and
+all owned data. The production object's allocated sections, typed symbols
+and ordered relocations are unchanged from the assembly-backed object.

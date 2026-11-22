@@ -3998,27 +3998,51 @@ const char fclEncycStatusMissing[] = "----------";
 const char fclEncycStatusFound[] = "REGISTERED";
 const char fclEncycRowFmt[] = "%s 0x%03X:%s";
 
-#ifdef NON_MATCHING
 s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                       sdfDrawTag_t *tag)
 {
     s32 changed = 0;
     s32 id;
+    s32 a;
+    s32 aux;
+    s32 probe;
+    const s8 *pad = dds3PadButtonState;
+    s32 step;
+    /* Native phase-local homes for the one-row step and signed row check. */
+    FAKEMATCH_ASM_REG(s32, single, "$3");
+    s32 newRow;
+    FAKEMATCH_ASM_REG(s32, checkRow, "$3");
     s32 i;
     datUnitWork_t unit;
+    sdfDrawTag_t * draw;
 
-    if (dds3PadButtonState[0x33] < 0) {
+    draw = tag;
+    if (pad[0x33] < 0) {
         work->state = 0;
     }
-    if (((u8)dds3PadButtonState[0x34] | (u8)dds3PadButtonState[0x36]) & 2) {
-        work->row -= (u8)dds3PadButtonState[0x34] != 0 ? 16 : 1;
-        if (work->row < 0) {
-            s16 offset = work->row;
+
+    aux = (u8)pad[0x36];
+    a = (u8)pad[0x34];
+    probe = a | aux;
+    /* Each direction begins with a one-row step. */
+    if (((u32)probe >> 1) & 1) {
+        single = 1;
+        step = a != 0 ? 16 : single;
+        newRow = (u16)work->row - step;
+        work->row = (s16)newRow;
+        checkRow = (s32)((u32)newRow << 16);
+        if (checkRow < 0) {
+            s32 offset = newRow;
 
             work->row = 0;
             work->firstId += offset;
             if (work->firstId < 0) {
-                if ((dds3PadButtonState[0x34] | dds3PadButtonState[0x36]) < 0) {
+                {
+                    FAKEMATCH_ASM_REG(s32, second, "$3") = pad[0x36];
+                    s32 first = pad[0x34];
+                    probe = first | second;
+                }
+                if (((u32)probe & 0x80000000u) != 0) {
                     work->firstId = 0x170;
                     work->row = 15;
                 } else {
@@ -4027,15 +4051,31 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
                 }
             }
         }
-    } else if (((u8)dds3PadButtonState[0x35] | (u8)dds3PadButtonState[0x37]) & 2) {
-        work->row += (u8)dds3PadButtonState[0x35] != 0 ? 16 : 1;
-        if (work->row >= 16) {
-            s16 offset = work->row;
+    } else {
+        single = 1;
+        aux = (u8)pad[0x37];
+        a = (u8)pad[0x35];
+        probe = a | aux;
+        if (!(((u32)probe >> 1) & 1)) {
+            goto action;
+        }
+        step = a != 0 ? 16 : single;
+        newRow = (u16)work->row + step;
+        work->row = (s16)newRow;
+        single = (s16)newRow;
+
+        if (single >= 16) {
+            s32 offset = newRow;
 
             work->row = 15;
             work->firstId += offset - 15;
             if (work->firstId > 0x170) {
-                if ((dds3PadButtonState[0x35] | dds3PadButtonState[0x37]) < 0) {
+                {
+                    FAKEMATCH_ASM_REG(s32, second, "$3") = pad[0x37];
+                    s32 first = pad[0x35];
+                    probe = first | second;
+                }
+                if (probe < 0) {
                     work->firstId = 0;
                     work->row = 0;
                 } else {
@@ -4045,48 +4085,54 @@ s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,
             }
         }
     }
+action:
     id = work->firstId + work->row;
-    if (dds3PadButtonState[0x31] < 0) {
-        if (fclEncycSearch(id) < 0) {
-            cmbCopyDefaultDevilToStock((u16)id, &unit);
-            fclEncycRegist(&unit, 1);
-        } else {
-            DebugRemoveRecord(id);
-        }
+    if (dds3PadButtonState[0x31] >= 0) goto bulk_check;
+    {
+        datUnitWork_t *dst = &unit;
+        if (fclEncycSearch(id) < 0) goto add_record;
+        goto remove_record;
+add_record:
+        cmbCopyDefaultDevilToStock((u16)id, dst);
+        fclEncycRegist(&unit, 1);
         changed = 1;
-    } else if (dds3PadButtonState[0x32] < 0) {
+        goto paint;
+
+remove_record:
+        DebugRemoveRecord(id);
+        changed = 1;
+        goto paint;
+    }
+bulk_check:
+    if (dds3PadButtonState[0x32] < 0) {
         id = 1;
         while (fclEncycGetNum() < 0xB8) {
             cmbCopyDefaultDevilToStock((u16)id, &unit);
             id++;
-            fclEncycRegist(&unit, 1);
             changed = 1;
+            fclEncycRegist(&unit, changed);
         }
     }
+paint:
     if (changed != 0 && (pinst->stat & 0x200) != 0) {
         CreateSortIndexByRace(pinst->entries.read.sorted[0]);
         CreateSortIndexByLevel(pinst->entries.read.sorted[1]);
-        if (pinst->unk_58 == 3) {
-            DebugUpdateListwin(pinst);
+        {
+            s32 mode = (s16)pinst->unk_58;
+            if (mode == 3) DebugUpdateListwin(pinst);
         }
     }
-    dds3ConsPanelTagLink(tag, 0x10, 0x10, 0x16, 0x12);
+    dds3ConsPanelTagLink(draw, 0x10, 0x10, 0x16, 0x12);
     for (i = 0; i < 16; i++) {
         const char *status = fclEncycSearch(work->firstId + i) < 0 ? fclEncycStatusMissing : fclEncycStatusFound;
         const char *marker = work->row == i ? fclEncycMarkerOn : fclEncycBlank;
 
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
-                                               0, fclEncycRowFmt, marker, work->firstId + i, status)));
+        sdfDrawTagLink(draw, EE_ADDR(sdfDevPrintf(0x7180, 0x7A00 + i * 0x60, 0xFFFFF0,
+                                               0, fclEncycRowFmt, marker, (u32)(work->firstId + i), status)));
     }
     return 0;
 }
-#else
 
-
-
-
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcRegister);
-#endif
 
 extern s8 dds3PadButtonState[];
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,

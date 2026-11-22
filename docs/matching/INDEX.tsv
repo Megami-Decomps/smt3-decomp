@@ -182,6 +182,7 @@ Shared name pointer table				docs/matching/facility/fclEncyc.md	540
 Encyclopedia title pointer pair				docs/matching/facility/fclEncyc.md	550
 Encyclopedia compare and rectangle index data				docs/matching/facility/fclEncyc.md	558
 Registration debug text				docs/matching/facility/fclEncyc.md	566
+DebugProcRegister	facility/fclEncyc	0x31C		docs/matching/facility/fclEncyc.md	574
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	229 of 229 words match	docs/matching/facility/fclPanel.md	75
