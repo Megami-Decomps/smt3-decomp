@@ -29,6 +29,7 @@ both native and emitted sizes when they differ.
 | 8 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
+| 7 | sdk/libgcc_signed_divmod | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
@@ -40,7 +41,6 @@ both native and emitted sizes when they differ.
 | 6 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
-| 5 | sdk/libgcc_unsigned_divmod | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |
 | 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |

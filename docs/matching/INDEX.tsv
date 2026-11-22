@@ -602,11 +602,13 @@ __muldi3	sdk/libgcc	0x74	0 of 29 words match	docs/matching/sdk/libgcc.md	65
 libc_2D1FA0: end_fde_sort (0x578)				docs/matching/sdk/libgcc.md	92
 libgccDfInvalidResult data	sdk/libgcc	24 bytes		docs/matching/sdk/libgcc.md	124
 __muldi3	sdk/libgcc	0x74	29 of 29 words match	docs/matching/sdk/libgcc.md	144
-__udivdi3	sdk/libgcc_unsigned_divmod	0x57C	351 of 351 words match	docs/matching/sdk/libgcc_longlong.md	3
-__umoddi3	sdk/libgcc_unsigned_divmod	0x568	346 of 346 words match	docs/matching/sdk/libgcc_longlong.md	24
-Earlier remainder draft (historical)			130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	41
-__moddi3	sdk/libgcc_longlong	0x690		docs/matching/sdk/libgcc_longlong.md	73
-__errno_8	sdk/libgcc_longlong_tail	0xC	3 of 3 words match	docs/matching/sdk/libgcc_longlong.md	107
+__divdi3	sdk/libgcc_signed_divmod	0x694	421 of 421 words match	docs/matching/sdk/libgcc_longlong.md	3
+__moddi3	sdk/libgcc_signed_divmod	0x690	420 of 420 words match	docs/matching/sdk/libgcc_longlong.md	21
+__udivdi3	sdk/libgcc_unsigned_divmod	0x57C	351 of 351 words match	docs/matching/sdk/libgcc_longlong.md	35
+__umoddi3	sdk/libgcc_unsigned_divmod	0x568	346 of 346 words match	docs/matching/sdk/libgcc_longlong.md	56
+Earlier remainder draft (historical)			130 of 346 words match	docs/matching/sdk/libgcc_longlong.md	71
+Earlier signed remainder draft (historical)				docs/matching/sdk/libgcc_longlong.md	103
+__errno_8	sdk/libgcc_longlong_tail	0xC	3 of 3 words match	docs/matching/sdk/libgcc_longlong.md	137
 sceGsResetPath	sdk/libgraph	0x68		docs/matching/sdk/libgraph.md	3
 sceGsSyncPath	sdk/libgraph	0x314		docs/matching/sdk/libgraph.md	23
 sceGsSetDefDispEnv (0x374)				docs/matching/sdk/libgraph.md	54

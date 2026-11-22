@@ -1,5 +1,37 @@
 # GCC integer division runtime
 
+## __divdi3 (sdk/libgcc_signed_divmod, 0x694)
+
+421 of 421 words match at 1,684 bytes. The signed wrapper runs the
+shared normalized word algorithm on the operands' magnitudes, then applies
+the quotient sign. The native 8-byte-aligned signed pair starts at
+0x002E5320, after the unchanged debug dispatch stub and its four alignment
+bytes. There is one separate four-byte gap between the two signed bodies.
+
+The original GCC negation spells a signed 32-bit unary minus on each limb.
+That has signed-overflow undefined behavior when a limb is INT32_MIN,
+even for valid nonzero divisors. The reconstruction uses unsigned
+negation of both limbs, then subtracts a real 0/1 borrow from the upper
+word. Staging the upper magnitude and borrow separately before subtraction
+matters: the direct unsigned expression made GCC branch in initial RTL
+expansion. Independent plain/dump output confirmed that distinction; the
+defined three-step version restores exact bytes without any new compiler
+constraint. EE signed conversions only preserve the final bit representation.
+
+## __moddi3 (sdk/libgcc_signed_divmod, 0x690)
+
+420 of 420 words match at 1,680 bytes. Remainder sign depends only on the
+dividend; the helper writes the result into a real unsigned local of the
+declared output type. The native minimum signed dividend divided by minus
+one yields the same wrapped quotient bits and zero remainder. The native
+zero-divisor trap and both signed bit-length providers stay unchanged.
+
+Independent native decoding tested 27,801 boundary and seeded vectors per
+wrapper, including 606 zero-divisor traps per wrapper. A separate host
+UBSan run of the defined arithmetic verified 832,350 nonzero signed
+operand pairs against a widened arithmetic oracle. These checks do not
+claim portable C behavior for the intentional target trap.
+
 ## __udivdi3 (sdk/libgcc_unsigned_divmod, 0x57C)
 
 351 of 351 words match at 1,404 bytes. The unsigned quotient wrapper and
@@ -7,7 +39,7 @@ unsigned remainder wrapper use the normalized divmod implementation adapted
 from GNU GCC's October 3, 2000 snapshot:
 [libgcc2.c](https://github.com/gcc-mirror/gcc/blob/380f6ad3dde6db991434068c4f3776c6762fa564/gcc/libgcc2.c)
 and [longlong.h](https://github.com/gcc-mirror/gcc/blob/380f6ad3dde6db991434068c4f3776c6762fa564/gcc/longlong.h).
-The two upstream notices are retained in the C source; the accompanying GPL
+The upstream notices are retained in the source and shared private header; the accompanying GPL
 text is already checked in at [GCC-frame-COPYING](../../licenses/GCC-frame-COPYING).
 
 The core uses unsigned words for normalization, estimates and corrections.
@@ -26,17 +58,15 @@ before the hardware division; it is not a portable C return value.
 346 of 346 words match at 1,384 bytes. The quotient is discarded; the
 remainder is written by the same normalized helper to the wrapper's local.
 All six table relocations per wrapper name their real independent 256-byte
-bit-length provider in `sdk/libgcc_longlong`. That existing owner still
-retains the signed routines, four original tables, and the native debug
-dispatch stub. None of those definitions changed bytes. The new C unit
+bit-length provider in `sdk/libgcc_longlong`. That existing owner retains the four original tables and the native
+debug dispatch stub. None of those definitions changed bytes. The new C unit
 starts at 0x002E6048, where the native 8-byte-aligned unsigned quotient begins;
 a native four-byte zero separates the two bodies. It is not counted as code.
 
 Independent native execution checked 27,801 edge and seeded vectors for
-each routine, including 606 zero-divisor traps apiece. The same historical
-snapshot also produced exact isolated signed routines, but its word negation
-has signed overflow for real INT32_MIN halfwords. The signed functions stay
-on their original assembly and existing guarded reference drafts.
+each routine, including 606 zero-divisor traps apiece. Sharing the normalized
+GNU C core with the signed pair preserves both unsigned production and
+SKIP_ASM objects, their section contents and all ordered relocations.
 
 ## Earlier remainder draft (historical)
 
@@ -70,11 +100,11 @@ An isolated original-object context produces the same result, so no translation
 unit split is justified by that control. Word extraction, scalar allocation and
 branch layout remain unqualified; the existing quotient draft is unchanged.
 
-## __moddi3 (sdk/libgcc_longlong, 0x690)
+## Earlier signed remainder draft (historical)
 
 165 of 420 native words match. The draft emits1644 versus1680 bytes,
-with246 differing overlapping words and36 uncovered bytes. Production keeps
-assembly; this reconstruction adds no exact matching credit.
+with246 differing overlapping words and36 uncovered bytes. At that stage, production kept
+assembly; the earlier draft earned no exact matching credit.
 
 The signed wrapper forms both unsigned operand magnitudes, calls the same
 inlined divide/modulo primitive, and restores the numerator's sign on the
