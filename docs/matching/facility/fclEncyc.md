@@ -562,3 +562,11 @@ slot 1. Encyclopedia rectangle drawing uses four vertex indices and four
 color indices; the two middle corners share one color and the first and
 last share the other. Retain the zero alignment after all three arrays
 outside the C owners.
+
+## Registration debug text
+
+The retained DebugProcRegister selects one of two registration labels and
+passes it to the native row format. These three read-only C objects contain
+35 bytes including terminators. The existing eight-byte compiler alignment
+keeps the native spacing; the alignment bytes are not part of the objects.
+The debug routine and its calls remain unchanged.

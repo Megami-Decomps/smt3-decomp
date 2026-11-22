@@ -20,3 +20,11 @@ The production report's 504-byte read-only section fuzzy score rises from
 12.698413% to 96.32653%. The aggregate matched data, function count, and
 matched code bytes are unchanged. A forced configure leaves sources
 unchanged and its stale generated-line control still fails as intended.
+
+## No-scene prompt (event/evtDebug, 9 bytes)
+
+The retained scene-display implementation passes the original `"NO SCENE"`
+literal to its debug printer when no scene is present. The new C object owns
+exactly nine bytes at `0x0053B418`, including its NUL; the following fifteen
+zero bytes are alignment and are not part of the object. The alternate
+`NON_MATCHING` implementation still emits its original anonymous literal.

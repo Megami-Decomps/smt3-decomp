@@ -3968,9 +3968,9 @@ s32 DebugProcMenu_fclEncyc(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *wo
     return 0;
 }
 
-extern char fclEncycStatusMissing[];
-extern char fclEncycStatusFound[];
-extern char fclEncycRowFmt[];
+extern const char fclEncycStatusMissing[];
+extern const char fclEncycStatusFound[];
+extern const char fclEncycRowFmt[];
 extern void DebugRemoveRecord(s32 id);
 extern void DebugUpdateListwin(fclEncyc_instance_tag *pinst);
 
@@ -3981,6 +3981,12 @@ const char D_0053D838[16] = "DISP VIEW PARAM";
 const char D_0053D848[13] = "VIEWMODE KEY";
 
 const char D_0053D858[15] = "DEVIL REGISTER";
+
+/* The native registration menu selects the status string and passes the
+ * separate row format to the retained debug draw. */
+const char fclEncycStatusMissing[] = "----------";
+const char fclEncycStatusFound[] = "REGISTERED";
+const char fclEncycRowFmt[] = "%s 0x%03X:%s";
 
 #ifdef NON_MATCHING
 s32 DebugProcRegister(fclEncyc_instance_tag *pinst, fclEncycDebugWork_t *work,

@@ -17,8 +17,8 @@ both native and emitted sizes when they differ.
 | 19 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
+| 14 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
-| 13 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 10 |  | [sdk/libc.md](sdk/libc.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
@@ -26,10 +26,10 @@ both native and emitted sizes when they differ.
 | 9 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
+| 8 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 8 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
-| 7 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
@@ -111,6 +111,7 @@ both native and emitted sizes when they differ.
 | 2 | facility/fclRibbon | [facility/fclRibbon.md](facility/fclRibbon.md) |
 | 2 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
 | 2 |  | [event/evtViewerMenuTables.md](event/evtViewerMenuTables.md) |
+| 2 | event/evtDebug | [event/evtDebug.md](event/evtDebug.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 2 |  | [effect/effPCPMisc.md](effect/effPCPMisc.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
@@ -165,7 +166,6 @@ both native and emitted sizes when they differ.
 | 1 | facility/fclDraw | [facility/fclDraw.md](facility/fclDraw.md) |
 | 1 | event/evtMoon | [event/evtMoon.md](event/evtMoon.md) |
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
-| 1 | event/evtDebug | [event/evtDebug.md](event/evtDebug.md) |
 | 1 |  | [effect/polyManager.md](effect/polyManager.md) |
 | 1 |  | [effect/effPacket.md](effect/effPacket.md) |
 | 1 |  | [effect/effBattleFilterAndHelper.md](effect/effBattleFilterAndHelper.md) |

@@ -1219,7 +1219,7 @@ segments:
       - [0x42A3D0, data, data_005293D0]
       - [0x42A3F8, .data, sdf/sdfDrawQueueState]
       - [0x42A428, .data, sdf/sdfModelDefaultNameData]
-      - [0x42A438, data, data_00529438]
+      - [0x42A438, .data, sdf/sdfMatMultiTexAlphaData]
       - [0x42A448, .data, sdf/sdfMotion]
       - [0x42A620, .data, sdf/sdfUnitXVector]
       - [0x42A630, .data, sdf/sdf3DUpVector]

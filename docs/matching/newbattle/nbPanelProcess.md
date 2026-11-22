@@ -314,3 +314,10 @@ owner has 61 matches and no differences. All 70/60/70 peers, owned data and
 relocations are preserved. Independent review verifies all native bytes,
 12 complete ordinary/direct assembly and ELF parity pairs, callback behavior
 and 721 stable inputs.
+
+## Status-icon atlas coordinates
+
+The retained drawer copies all 96 bytes of this table before drawing. The
+twelve pairs contain signed word U and V coordinates passed to the sprite
+helper; they are not a pointer or dispatch table. This change moves only the
+initializer into C and does not change the copy or draw routine.

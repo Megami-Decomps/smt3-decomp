@@ -121,6 +121,7 @@ dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790		docs/matching/effect/p
 dds3Particle_SparkBuffInit	effect/parManager	0x800	512 of 512 words match	docs/matching/effect/parManager.md	33
 Track geometry and draw callbacks				docs/matching/effect/polyManager.md	3
 evtSceneDispRows data	event/evtDebug	0xCC		docs/matching/event/evtDebug.md	3
+No-scene prompt	event/evtDebug	9 bytes		docs/matching/event/evtDebug.md	24
 evtEventViewerProcess3	event/evtEventViewer	0x16C	91 of 91 words match	docs/matching/event/evtEventViewer.md	3
 RunFrameUnit	event/evtEventViewer	0x94	37 of 37 words match	docs/matching/event/evtEventViewer.md	30
 evtRunFrame	event/evtEventViewer	0x2BC	175 of 175 words match	docs/matching/event/evtEventViewer.md	66
@@ -178,6 +179,7 @@ DrawReadMainHelp	facility/fclEncyc	0x540	336 of 336 words	docs/matching/facility
 Shared name pointer table				docs/matching/facility/fclEncyc.md	540
 Encyclopedia title pointer pair				docs/matching/facility/fclEncyc.md	550
 Encyclopedia compare and rectangle index data				docs/matching/facility/fclEncyc.md	558
+Registration debug text				docs/matching/facility/fclEncyc.md	566
 fclDrawPanel	fclPanel	0x54	21 of 21 words match	docs/matching/facility/fclPanel.md	3
 fclDrawPanelType0Grad	facility/fclPanel	0x100	64 of 64 words match	docs/matching/facility/fclPanel.md	34
 fclDrawPanelType0	facility/fclPanel	0x394	229 of 229 words match	docs/matching/facility/fclPanel.md	75
@@ -428,6 +430,7 @@ nbPanelDrawProcess (0x108)				docs/matching/newbattle/nbPanelProcess.md	161
 nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	173
 nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	226
 nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	294
+Status-icon atlas coordinates				docs/matching/newbattle/nbPanelProcess.md	318
 Texture paths and battle debug labels				docs/matching/newbattle/nbPanelReadOnlyData.md	3
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	3
 nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	40

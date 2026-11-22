@@ -1243,6 +1243,13 @@ void nbPanelDrawPP1(s32 x, s32 y, s32 i, s32 j, s32 jun, s32 act, nbMainProcessD
 
 #else
 
+/* The retained drawer copies twelve signed UV coordinate pairs to its stack. */
+const s32 D_00545320[12][2] = {
+    {0x55, 0x38}, {0x01, 0x22}, {0x16, 0x22}, {0x2B, 0x22},
+    {0x40, 0x22}, {0x55, 0x22}, {0x6A, 0x22}, {0x7F, 0x22},
+    {0x01, 0x38}, {0x16, 0x38}, {0x2B, 0x38}, {0x40, 0x38},
+};
+
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelDrawPP1);
 
 #endif

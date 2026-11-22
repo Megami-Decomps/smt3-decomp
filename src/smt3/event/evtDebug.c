@@ -426,6 +426,7 @@ const evtSceneDispRows_t evtSceneDispRows = {
 };
 
 #ifndef NON_MATCHING
+const char D_0053B418[] __attribute__((aligned(8))) = "NO SCENE";
 INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
 
