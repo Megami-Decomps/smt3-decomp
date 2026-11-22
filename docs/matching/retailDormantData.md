@@ -22,7 +22,9 @@ The four retained memory-card lines at 0x00528180, 0x00528198,
 alignment. C owns 82 bytes including internal alignment, from the first
 string through the last terminator. The following six zero bytes remain
 separate so the active card-message owner still begins at 0x005281D8.
-No live message or reference is redirected.
+No live message or reference is redirected. The comparison reference restores
+only the final period and NUL omitted by the word-based splitter, so
+the report recognizes the existing 82-byte C span.
 
 The 48-byte writable vector group at 0x00529640 follows the live camera
 up vector and precedes the screen-state records. Its three aligned

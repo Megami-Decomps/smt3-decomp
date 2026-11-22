@@ -152,7 +152,7 @@ def complete_reference(assembly, name, payload, file_offset, address, names):
     return "".join(lines[:insert] + extension + lines[insert:])
 
 
-# The one multi-object exception comprises the sixteen live save UI strings.
+# This multi-object exception covers the sixteen live save UI strings.
 # The .data prefix is literal; only the final string loses three bytes in Splat.
 WARN_UNIT = "mc/slWarningStartPrompts"
 WARN_ROM = 0x429960
@@ -246,6 +246,106 @@ def complete_warning_reference(assembly, payload, file_offset, address, names):
         j_line = f"    /* {file_offset+j:06X} {address+j:08X} */ .byte 0x{payload[j]:02X}\n"
         lines.insert(insert + j - prefix, j_line)
     return "".join(lines)
+
+
+# Four retained slot messages: declared strings, natural slot alignment, then a
+# separate six-byte raw sibling. This correction is only an Objdiff target.
+SLOT_UNIT = "mc/slRetainedSlotLabels"
+SLOT_ROM = 0x429180
+SLOT_ADDR = 0x528180
+SLOT_END = 0x4291D2
+SLOT_LABELS = (
+    ("D_00528180", 0, 19, 19),
+    ("slRetainedCardSlot2", 24, 19, 19),
+    ("slRetainedCardSelectPrefix", 48, 16, 16),
+    ("slRetainedCardSelectSuffix", 64, 18, None),
+)
+
+
+def check_slot_names(names, address, size):
+    expected = {name: (address + offset, declared)
+                for name, offset, _, declared in SLOT_LABELS}
+    actual = {name: (base, extent) for name, (base, extent) in names.items()
+              if address <= base < address + size
+              or extent and base < address < base + extent}
+    if (address, size, actual) != (SLOT_ADDR, SLOT_END - SLOT_ROM, expected):
+        raise ValueError("unexpected retained slot label symbol inventory or extent")
+
+
+def complete_slot_reference(assembly, payload, file_offset, address, names):
+    check_slot_names(names, address, len(payload))
+    if file_offset != SLOT_ROM or payload[SLOT_LABELS[-1][1]:] != b"MEMORY CARD slot.\0":
+        raise ValueError("unexpected native retained slot terminal string")
+    lines = assembly.splitlines(keepends=True)
+    rows = [(i, s.strip()) for i, s in enumerate(lines) if s.strip()]
+    if tuple(s for _, s in rows[:3]) != HEADER:
+        raise ValueError("unexpected generated retained slot data header")
+    i, at = 3, 0
+
+    def take(expected):
+        nonlocal i
+        if i >= len(rows) or not re.fullmatch(expected, rows[i][1]):
+            raise ValueError("unexpected retained slot directive or symbol boundary")
+        row = rows[i]
+        i += 1
+        return row
+
+    def emit(raw):
+        nonlocal at
+        if payload[at:at + len(raw)] != raw:
+            raise ValueError("generated retained slot prefix differs from native")
+        at += len(raw)
+
+    def align(power):
+        take(rf"\.align {power}")
+        emit(bytes((-at) % (1 << power)))
+
+    def asciz(length):
+        literal = WARN_STRING.fullmatch(take(WARN_STRING)[1])
+        annot = WARN_HEX.fullmatch(take(WARN_HEX)[1])
+        raw = literal[3].encode("ascii") + b"\0"
+        if (len(raw) != length or (int(literal[1], 16), int(literal[2], 16))
+                != (file_offset + at, address + at)):
+            raise ValueError("retained slot literal extent or address changed")
+        rounded = (length + 3) & ~3
+        if bytes.fromhex(annot[1]) != payload[at:at + rounded]:
+            raise ValueError("retained slot literal annotation changed")
+        emit(raw)
+
+    for idx, (name, offset, size, _) in enumerate(SLOT_LABELS):
+        if idx < 3:
+            align(3)
+        if at != offset:
+            raise ValueError("retained slot label alignment changed")
+        take(re.escape(f"nonmatching {name}"))
+        take(re.escape(f"dlabel {name}"))
+        body_size = size if idx < 3 else size - 2
+        if idx < 3:
+            asciz(body_size)
+        else:
+            for _ in range(body_size // 4):
+                m = DATA.fullmatch(take(DATA)[1])
+                rom, vram, native, kind, value = m.groups()
+                if ((int(rom, 16), int(vram, 16), kind) != (file_offset + at, address + at, "word")
+                        or native is None or not re.fullmatch(NUM, value)):
+                    raise ValueError("unexpected retained slot terminal prefix directive")
+                raw = verify_word(value, 4, {})
+                if bytes.fromhex(native) != raw:
+                    raise ValueError("retained slot terminal directive annotation changed")
+                emit(raw)
+        if at != offset + body_size:
+            raise ValueError("retained slot generated symbol extent changed")
+        insert, _ = take(re.escape(f"enddlabel {name}"))
+        if idx < 3:
+            align(2)
+        if idx < 2:
+            asciz(1)  # Splat renders part of each real padding gap as an empty string.
+            align(2)
+    if i != len(rows) or at != len(payload) - 2:
+        raise ValueError("retained slot tail is not the unique final object")
+    extension = [f"    /* {file_offset+j:06X} {address+j:08X} */ .byte 0x{payload[j]:02X}\n"
+                 for j in range(at, len(payload))]
+    return "".join(lines[:insert] + extension + lines[insert:])
 
 
 def yaml_inputs(root, version, serial, *, read_text=Path.read_text):
@@ -397,6 +497,19 @@ def exact_span(root, version, unit, name):
         if (sum(rows[i:i + 3] == expected for rows in row_lists for i in range(len(rows))) != 1
                 or retail[end:end + 1] != b"\0"):
             raise ValueError("warning prompt alignment is not the exact raw successor")
+    elif unit == SLOT_UNIT:
+        check_slot_names(names, addr, size)
+        if name != SLOT_LABELS[-1][0] or (start, end) != (SLOT_ROM, SLOT_END):
+            raise ValueError("unexpected retained slot label opt-in")
+        expected = [
+            [SLOT_ROM, ".data", SLOT_UNIT],
+            [SLOT_END, "databin", "slRetainedSlotLabelsAlign"],
+            [SLOT_END + 6, ".data", "mc/slCardMessages"],
+        ]
+        row_lists = [s.get("subsegments", []) for s in plan["segments"] if isinstance(s, dict)]
+        if (sum(rows[i:i + 3] == expected for rows in row_lists for i in range(len(rows))) != 1
+                or retail[end:end + 6] != bytes(6)):
+            raise ValueError("retained slot label alignment is not the exact raw successor")
     else:
         check_primary(names, name, addr, size)
     return start, addr, retail[start:end], names
@@ -417,6 +530,8 @@ def main(version, unit, input_path, output_path):
     assembly = normal_ref.read_text()
     if unit == WARN_UNIT:
         result = complete_warning_reference(assembly, payload, file_offset, address, symbols)
+    elif unit == SLOT_UNIT:
+        result = complete_slot_reference(assembly, payload, file_offset, address, symbols)
     else:
         result = complete_reference(assembly, name, payload, file_offset, address, symbols)
     out = Path(output_path)

@@ -5,7 +5,8 @@ from pathlib import Path
 from native_data_tail import (HEADER, check_primary, complete_reference, name_records,
                               opt_ins, pad_assets, verify_reloc_overrides, yaml_inputs,
                               complete_warning_reference, WARN_ADDR, WARN_END, WARN_NAMES,
-                              WARN_OFFSETS, WARN_ROM)
+                              WARN_OFFSETS, WARN_ROM, complete_slot_reference,
+                              SLOT_ADDR, SLOT_END, SLOT_LABELS, SLOT_ROM)
 
 NAME = "table"
 START = 0x100
@@ -193,6 +194,60 @@ segments:
             run(moved, starts)
         with self.assertRaisesRegex(ValueError, "unexpected warning prompt symbol"):
             run(original, dict(starts, unwanted=(WARN_ADDR + 1, None)))
+
+    def test_retained_slot_label_bytes_and_extents(self):
+        payload = (b"MEMORY CARD slot 1\0" + bytes(5) +
+                   b"MEMORY CARD slot 2\0" + bytes(5) +
+                   b"Please select a\0MEMORY CARD slot.\0")
+        names = {name: (SLOT_ADDR + off, declared)
+                 for name, off, _, declared in SLOT_LABELS}
+        self.assertEqual(len(payload), SLOT_END - SLOT_ROM)
+
+        def asciz(offset, size):
+            literal = payload[offset:offset + size - 1].decode("ascii")
+            annot = payload[offset:offset + ((size + 3) & ~3)].hex().upper()
+            return (f'/* {SLOT_ROM + offset:06X} {SLOT_ADDR + offset:08X} */ .asciz "{literal}"\n'
+                    f"/* {annot} */\n")
+
+        src = HEAD
+        for idx, (name, off, size, _) in enumerate(SLOT_LABELS):
+            if idx < 3:
+                src += ".align 3\n"
+            src += f"nonmatching {name}\ndlabel {name}\n"
+            if idx < 3:
+                src += asciz(off, size)
+            else:
+                for at in range(off, off + size - 2, 4):
+                    raw = payload[at:at + 4]
+                    src += (f"/* {SLOT_ROM + at:06X} {SLOT_ADDR + at:08X} {raw.hex()} */ "
+                            f".word {int.from_bytes(raw, 'little')}\n")
+            src += f"enddlabel {name}\n"
+            if idx < 3:
+                src += ".align 2\n"
+            if idx < 2:
+                src += asciz(off + 20, 1) + ".align 2\n"
+        run = lambda text, data=payload, symbols=names: complete_slot_reference(
+            text, data, SLOT_ROM, SLOT_ADDR, symbols)
+        suffix = f"enddlabel {SLOT_LABELS[-1][0]}"
+        self.assertEqual(run(src), src.replace(suffix,
+            "    /* 4291D0 005281D0 */ .byte 0x2E\n"
+            "    /* 4291D1 005281D1 */ .byte 0x00\n" + suffix))
+        for bad in (src.replace("429194", "429193", 1),
+                    src.replace("/* 00000000 */", "/* 01000000 */", 1),
+                    src.replace('asciz ""', 'asciz "x"', 1),
+                    src.replace(".word", ".short", 1),
+                    src.replace(".align 2\n", ".align 3\n", 1),
+                    src.replace("0", "1", 1), src + ".byte 0\n"):
+            with self.subTest(text=bad), self.assertRaises(ValueError):
+                run(bad)
+        for name in ("slRetainedCardSlot2", "slRetainedCardSelectSuffix"):
+            va, _ = names[name]
+            with self.assertRaisesRegex(ValueError, "inventory or extent"):
+                run(src, symbols=names | {name: (va, 20)})
+        with self.assertRaisesRegex(ValueError, "inventory or extent"):
+            run(src, symbols=names | {"inside": (SLOT_ADDR + 3, None)})
+        with self.assertRaisesRegex(ValueError, "terminal string"):
+            run(src, data=payload[:-2] + b"!\0")
 
     def test_ledger_rejects_duplicate_and_unsafe(self):
         with tempfile.TemporaryDirectory() as tmp:

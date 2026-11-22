@@ -29,6 +29,7 @@
   "interface/itfGaugeHighlightVertexData": "itfGaugeHighlightVertexIndex",
   "interface/itfGaugeHighlightColorData": "itfGaugeHighlightColorIndex",
   "effect/effBTLCutCameraStateData": "effBTLCutCameraState",
+  "mc/slRetainedSlotLabels": "slRetainedCardSelectSuffix",
   "mc/slWarningStartPrompts": "slNoSpaceStartMsg6",
   "mc/slFormatDoneMessage": "slFormatDoneMsg",
   "interface/frFontBaseWidths": "gFontBaseWidth",
