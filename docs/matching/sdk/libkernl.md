@@ -1015,3 +1015,23 @@ The stock SDK compiler emits all four and all six native words respectively.
 An empty tied-operand control before EI leaves the complete object identical,
 so it is omitted. Both functions keep their original addresses and caller
 contracts. Existing callers that discard the EIntr result are unchanged.
+
+### Interrupt controller and cache wrappers
+
+The four ordinary-C controller wrappers sample Status.EIE once. If EIE
+was set, they call DIntr before invoking the named kernel service. The
+service result survives the unconditional SYNC and the conditional EIntr;
+it is the result returned to the caller. The three caller declarations that
+previously said void now give the real signed return type without changing
+how those callers use the result.
+
+SyncDCache and InvalidDCache use the same entry snapshot. Their respective
+services receive both original endpoints rounded down to 64-byte boundaries,
+just as in the interrupt-safe variants. They add no standalone SYNC. If the
+entry bit was set, the compiler emits the native tail call to EIntr after
+restoring the frame; otherwise it returns directly. These two interfaces
+remain void.
+
+The existing COP0 and SYNC primitives provide the hardware operations;
+the masks, calls and control flow are ordinary C. The four controller
+bodies match 104 bytes each and the two cache bodies match 124 bytes each.

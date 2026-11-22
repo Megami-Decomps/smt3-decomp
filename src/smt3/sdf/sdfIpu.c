@@ -263,7 +263,7 @@ extern void sceIpuInit(void);
 
 extern s32 DmacAddHandler(s32, s32, void *, s32, s32);
 
-extern void EnableDmac(s32);
+extern s32 EnableDmac(s32);
 
 extern s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 

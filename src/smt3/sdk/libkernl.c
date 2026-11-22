@@ -481,9 +481,23 @@ s32 unlink(const char *path)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceSDC);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", SyncDCache);
-
 extern void _sceSDC(void *start, void *end);
+
+void SyncDCache(void *start, void *end)
+{
+    u32 status;
+
+    EE_READ_STATUS(status);
+    status &= EE_STATUS_EIE;
+    if (status != 0) {
+        DIntr();
+    }
+    _sceSDC(EE_ADDR_PTR(EE_ADDR(start) & ~63U),
+             EE_ADDR_PTR(EE_ADDR(end) & ~63U));
+    if (status != 0) {
+        EIntr();
+    }
+}
 
 void iSyncDCache(void *start, void *end)
 {
@@ -493,9 +507,23 @@ void iSyncDCache(void *start, void *end)
 
 INCLUDE_ASM(const s32, "sdk/libkernl", _sceIDC);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", InvalidDCache);
-
 extern void _sceIDC(void *start, void *end);
+
+void InvalidDCache(void *start, void *end)
+{
+    u32 status;
+
+    EE_READ_STATUS(status);
+    status &= EE_STATUS_EIE;
+    if (status != 0) {
+        DIntr();
+    }
+    _sceIDC(EE_ADDR_PTR(EE_ADDR(start) & ~63U),
+             EE_ADDR_PTR(EE_ADDR(end) & ~63U));
+    if (status != 0) {
+        EIntr();
+    }
+}
 
 void iInvalidDCache(void *start, void *end)
 {
@@ -512,13 +540,85 @@ s32 QueryIntrContext(void)
     return (status ^ 1U) & 1U;
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", DisableIntc);
+extern s32 _DisableIntc(s32 channel);
 
-INCLUDE_ASM(const s32, "sdk/libkernl", EnableIntc);
+s32 DisableIntc(s32 channel)
+{
+    u32 entryStatus;
+    s32 result;
 
-INCLUDE_ASM(const s32, "sdk/libkernl", DisableDmac);
+    EE_READ_STATUS(entryStatus);
+    entryStatus &= EE_STATUS_EIE;
+    if (entryStatus != 0) {
+        DIntr();
+    }
+    result = _DisableIntc(channel);
+    EE_SYNC();
+    if (entryStatus != 0) {
+        EIntr();
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "sdk/libkernl", EnableDmac);
+extern s32 _EnableIntc(s32 channel);
+
+s32 EnableIntc(s32 channel)
+{
+    u32 entryStatus;
+    s32 result;
+
+    EE_READ_STATUS(entryStatus);
+    entryStatus &= EE_STATUS_EIE;
+    if (entryStatus != 0) {
+        DIntr();
+    }
+    result = _EnableIntc(channel);
+    EE_SYNC();
+    if (entryStatus != 0) {
+        EIntr();
+    }
+    return result;
+}
+
+extern s32 _DisableDmac(s32 channel);
+
+s32 DisableDmac(s32 channel)
+{
+    u32 entryStatus;
+    s32 result;
+
+    EE_READ_STATUS(entryStatus);
+    entryStatus &= EE_STATUS_EIE;
+    if (entryStatus != 0) {
+        DIntr();
+    }
+    result = _DisableDmac(channel);
+    EE_SYNC();
+    if (entryStatus != 0) {
+        EIntr();
+    }
+    return result;
+}
+
+extern s32 _EnableDmac(s32 channel);
+
+s32 EnableDmac(s32 channel)
+{
+    u32 entryStatus;
+    s32 result;
+
+    EE_READ_STATUS(entryStatus);
+    entryStatus &= EE_STATUS_EIE;
+    if (entryStatus != 0) {
+        DIntr();
+    }
+    result = _EnableDmac(channel);
+    EE_SYNC();
+    if (entryStatus != 0) {
+        EIntr();
+    }
+    return result;
+}
 
 extern s32 _iEnableIntc(s32 cause);
 

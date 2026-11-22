@@ -47,7 +47,7 @@ extern s32 AddIntcHandler2(s32 channel, s32 handler, s32 argument, s32 next);
 
 extern s32 AddSbusIntcHandler(s32 channel, s32 handler);
 
-extern void DisableIntc(s32 channel);
+extern s32 DisableIntc(s32 channel);
 
 extern void RemoveIntcHandler(s32 channel, s32 handlerId);
 
@@ -67,7 +67,7 @@ extern void TerminateThread(s32 threadId);
 
 extern void DeleteThread(s32 threadId);
 
-extern void EnableIntc(s32 channel);
+extern s32 EnableIntc(s32 channel);
 
 extern void WakeupThread(s32 threadId);
 
