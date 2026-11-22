@@ -185,6 +185,12 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_READ
 #define FAKEMATCH_ASM_READ(value) __asm__("" : : "r" (value))
 #endif
+#ifndef FAKEMATCH_ASM_READ_F32
+#define FAKEMATCH_ASM_READ_F32(value) __asm__("" : : "f" (value))
+#endif
+#ifndef FAKEMATCH_ASM_READ_IMMEDIATE
+#define FAKEMATCH_ASM_READ_IMMEDIATE(value) __asm__("" : : "i" (value))
+#endif
 #ifndef FAKEMATCH_ASM_READ_PAIR
 #define FAKEMATCH_ASM_READ_PAIR(first, second) __asm__("" : : "r" (first), "r" (second))
 #endif

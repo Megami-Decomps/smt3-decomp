@@ -1379,8 +1379,6 @@ extern f32 fldCamNpcTarget2;
 
 extern s32 fldNpcCamSlot;
 
-/* NON_MATCHING: 5 of 492 words differ (first at +0xB8), at the exact 1968-byte size. */
-#ifdef NON_MATCHING
 void fldNpcCalc(void)
 {
     sdfVector4_t vec;
@@ -1394,17 +1392,24 @@ void fldNpcCalc(void)
     if (fldGlobalBase.area < 200 && fldAutoMapSeqTestFlag(1) == 0 && fldProcCampChk() == 0 &&
         fldProcAmChk() == 0) {
         if (fldNpcBlurHandle != 0) {
+            void **slots;
+            /* Keep the real scene base across the blur calls without displacing the effect bank. */
+            FAKEMATCH_ASM_REG(fldAreaWork_t *, scene, "$17") = &fldGlobalBase;
+
             memset(&vec, 0, sizeof(vec));
             vec.w = 1.0f;
-            if (dds3EffectGetState(fldBlurEffectId[0]) != 0 && fldGlobalBase.word4C != -1) {
+            slots = fldBlurEffectId;
+            /* Expose the initialized vector lane alongside the real slot-bank base. */
+            FAKEMATCH_ASM_LIVE_WITH_MEM(slots, vec.w);
+            if (dds3EffectGetState(slots[0]) != 0 && scene->word4C != -1) {
                 f32 length;
 
                 control = fldGetUnitControl();
-                y = fldGlobalBase.floatC4;
+                y = scene->floatC4;
                 vec.x = control->handle->poseset->pos2.x;
                 vec.y = y;
                 vec.z = control->handle->poseset->pos2.z;
-                dds3EffectSetPosition(fldBlurEffectId[0], &vec);
+                dds3EffectSetPosition(slots[0], &vec);
                 vec.x = control->handle->poseset->pos.x;
                 vec.y = y;
                 vec.z = control->handle->poseset->pos.z;
@@ -1457,16 +1462,25 @@ void fldNpcCalc(void)
                         SDF_VU0_LOADVECTOR(&fldModelSlotTable[i].rot);
                         fldNpcCamAngle = EulerAngleAxisY() * 180.0f / 3.14f;
                         switch (fldTakaraTable[fldModelSlotTable[i].itemBoxIdx].type) {
-                        case 0:
-                        case 2:
+                        case 3:
+                            /* Keep the real store address symbolic, without adding a memory
+                               access. This retains the native non-annulled branch. */
+                            FAKEMATCH_ASM_READ_IMMEDIATE(&fldCamNpcTarget);
                             fldCamNpcTarget = -110.0f;
                             break;
                         case 1:
                             fldCamNpcTarget = -90.0f;
                             break;
-                        case 3:
-                            fldCamNpcTarget = -110.0f;
+                        case 0:
+                        case 2: {
+                            f32 distance = -110.0f;
+
+                            /* Keep the actual distance operand on this path so that the
+                               compiler does not merge the two native stores. */
+                            FAKEMATCH_ASM_READ_F32(distance);
+                            fldCamNpcTarget = distance;
                             break;
+                        }
                         }
                     }
                     continue;
@@ -1576,9 +1590,7 @@ void fldNpcCalc(void)
     }
 }
 
-#else
-INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcCalc);
-#endif
+
 
 #ifdef NON_MATCHING
 extern sdfVector4_t aViewEye;
