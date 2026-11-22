@@ -385,8 +385,10 @@ segments:
       # Native zero tail: 8 bytes in .text, then 12 bytes before .vutext.
       - [0x1E7E3C, pad, text_tail_padding]
       - [0x1E7E50, textbin, vutext]
-      # .ctors + .dtors (both ffffffff 00000000) + .reginfo, then zeros to .data.
-      - [0x1F6600, databin, ctors_dtors_reginfo]
+      # Both native GCC lists contain a leading sentinel and a null entry.
+      - [0x1F6600, data, libgccCtorDtorLists]
+      # Preserve the subsequent raw reginfo and alignment bytes.
+      - [0x1F6610, databin, ctors_dtors_reginfo]
       - [0x1F6680, data, data]
       - [0x1F66C0, .data, kernel/dds3PadHoldCounters]
       - [0x1F67D0, .data, kernel/dds3PadButtonPrev]
@@ -1265,7 +1267,8 @@ segments:
       - [0x42CAA0, .data, sdk/libipuDefaultTables]
       - [0x42CB10, data, data_0052BB10]
       - [0x42CB20, .data, sdk/libmcCommandState]
-      - [0x42CB28, data, data_0052BB28]
+      - [0x42CB28, .data, sdk/libgccDtorState]
+      - [0x42CB30, data, data_0052BB30]
       - [0x42CB38, .data, sdk/libcReentData]
       - [0x42CE2C, data, data_0052BE2C]
       - [0x42CE30, .data, sdk/libcMallocArena]
