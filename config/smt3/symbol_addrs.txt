@@ -1,5 +1,7 @@
 // Symbols seeded from the SLUS_209.11 IDB by tools/ida_symbols.py.
 // Hand-curated symbols go above the generated block and win over it.
+// Physically separate retained copy of the NPC-talk label.
+D_00302FE0 = 0x00302FE0; // type:u8 size:0x10
 // Seven six-byte Shop item-category records, then separate alignment.
 shpUnlockTable = 0x0032F650; // size:0x2A can_reference:false
 // The Sell title is the second relocated pointer in the native Buy/Sell pair.

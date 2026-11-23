@@ -508,7 +508,6 @@ segments:
       - [0x200420, .data, field/fldInf]
       - [0x203FA0, .data, field/fldWarpBasicLabels]
       - [0x203FD0, .data, field/fldTobiWarpLabel]
-      - [0x203FE0, data, data_00302FE0]
       - [0x203FF0, .data, field/fldWarpExitLabels]
       - [0x204040, .data, field/fldDoorExitTaskName]
       - [0x20404F, databin, fldDoorExitTaskNameAlign]
