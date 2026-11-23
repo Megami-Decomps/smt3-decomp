@@ -169,3 +169,12 @@ directory and page offsets. The lookup does not run the fixup writer.
 The initialized object is 3,185 bytes at its original address. The seven
 zero bytes before the adjacent default battle command bank stay outside
 the object. Both font-wrapper call sites keep their original instructions.
+
+## Font table and indexed text addresses
+
+The font system state at `0x56BA30` contains nine style entries, the cache
+and glyph-pool state, and the atlas parameters used by the upload path.
+The existing 0x19C-byte structure ends before the raw word at `0x56BBCC`.
+The 32 address words cleared by font initialization and read by the indexed
+text decoder occupy `0x56BBD0..0x56BC50`. The raw word stays separate, and
+the neighboring name-glyph storage remains in its existing C owner.

@@ -39,6 +39,7 @@ both native and emitted sizes when they differ.
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
+| 6 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 6 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
@@ -50,7 +51,6 @@ both native and emitted sizes when they differ.
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 5 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 5 | interface/frName | [interface/frName.md](interface/frName.md) |
-| 5 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |

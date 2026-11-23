@@ -305,6 +305,7 @@ frAnalyzeTag	interface/frFont	0x518	326 of 326 words match	docs/matching/interfa
 frAnalyzeMessage	interface/frFont	0x200	128 of 128 words match	docs/matching/interface/frFont.md	100
 Font load-state slots				docs/matching/interface/frFont.md	119
 Font-dump packet storage				docs/matching/interface/frFont.md	125
+Font table and indexed text addresses				docs/matching/interface/frFont.md	173
 frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/interface/frName.md	3
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93

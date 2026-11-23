@@ -1813,7 +1813,9 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x56B400, name: newbattle/nbCameraBossVectorStorage }
       - { start: 0x452B54, type: bss, vram: 0x56B470, name: bss_after_camera_boss_vectors }
       - { start: 0x452B54, type: .bss, vram: 0x56B690, name: interface/frFontDumpStorage }
-      - { start: 0x452B54, type: bss, vram: 0x56BA30, name: bss_after_font_dump_packets }
+      - { start: 0x452B54, type: .bss, vram: 0x56BA30, name: interface/frFontSystemStorage }
+      - { start: 0x452B54, type: bss, vram: 0x56BBCC, name: bss_after_font_system }
+      - { start: 0x452B54, type: .bss, vram: 0x56BBD0, name: interface/frFontVariableStorage }
       - { start: 0x452B54, type: .bss, vram: 0x56BC50, name: interface/frNameGlyphStorage }
       - { start: 0x452B54, type: bss, vram: 0x56BD60, name: bss_after_name_glyphs }
       - { start: 0x452B54, type: .bss, vram: 0x56BE60, name: interface/itfMesPoolStorage }
@@ -1834,6 +1836,8 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x577EC0, name: bss_after_sdf_vblank_stack }
       - { start: 0x452B54, type: .bss, vram: 0x577FF0, name: sdf/sdfDisplayThreadStackStorage }
       - { start: 0x452B54, type: bss, vram: 0x578FF0, name: bss_after_sdf_display_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x58F0C0, name: sdf/sdfPadPortStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58F2C0, name: bss_after_sdf_pad_port_storage }
       - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
       - { start: 0x452B54, type: bss, vram: 0x58FFC0, name: bss_after_sdf_cd_sector }
       - { start: 0x452B54, type: .bss, vram: 0x590840, name: sdf/sdfSndCommandRingStorage }
@@ -1842,7 +1846,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x592880, name: sdf/sdfSifRpcStackStorage }
       - { start: 0x452B54, type: bss, vram: 0x593880, name: bss_after_sdf_sif_rpc_stack }
       - { start: 0x452B54, type: .bss, vram: 0x593F80, name: sdf/sdfIpuDecodeStackStorage }
-      - { start: 0x452B54, type: bss, vram: 0x594780, name: bss_after_sdf_ipu_decode_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x594780, name: sdf/sdfDecompHistoryStorage }
+      - { start: 0x452B54, type: bss, vram: 0x5947C0, name: bss_after_sdf_decomp_history }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")
