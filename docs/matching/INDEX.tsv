@@ -84,6 +84,7 @@ dds3BillboardManagerInit	effect/billManager	0xB8	46 of 46 words match	docs/match
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
 Cut-camera state mapping	effect	6 bytes		docs/matching/effect/effBattle.md	51
 EFFECT editor items				docs/matching/effect/effBattleFilterAndHelper.md	24
+Formation point-light storage				docs/matching/effect/effBattleLight.md	3
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270		docs/matching/effect/effBattleMisc.md	3
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	40
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	142 of 146 words match	docs/matching/effect/effBattleMisc.md	71

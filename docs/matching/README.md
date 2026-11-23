@@ -170,6 +170,7 @@ both native and emitted sizes when they differ.
 | 1 | event/evtEventViewerFrameVar | [event/evtEventViewerFrameVar.md](event/evtEventViewerFrameVar.md) |
 | 1 |  | [effect/polyManager.md](effect/polyManager.md) |
 | 1 |  | [effect/effPacket.md](effect/effPacket.md) |
+| 1 |  | [effect/effBattleLight.md](effect/effBattleLight.md) |
 | 1 |  | [effect/effBattleFilterAndHelper.md](effect/effBattleFilterAndHelper.md) |
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
