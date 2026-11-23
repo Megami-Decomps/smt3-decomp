@@ -92,7 +92,7 @@ extern void sceSifWriteBackDCache(void *addr, s32 size);
 extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
 extern s32 _sceCd_scmd_prechk(s32 cmd);
-extern int scePrintf(const char *fmt, ...);
+extern void scePrintf(const char *fmt, ...);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void sceCdDelayThread(u16 ticks);
 extern s32 EIntr(void);
