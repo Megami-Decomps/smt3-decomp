@@ -92,6 +92,7 @@ effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270		docs/matching/effect/ef
 effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/matching/effect/effBattleMisc.md	40
 effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	142 of 146 words match	docs/matching/effect/effBattleMisc.md	71
 Battle-effect position dispatch				docs/matching/effect/effBattleMisc.md	250
+Formation part center offsets				docs/matching/effect/effBattleMisc.md	265
 effBTLSys_Hansya_Draw	effect/effBattleSystem	0x2D0	9 of 180 words match	docs/matching/effect/effBattleSystem.md	3
 func_00174DC0 and eff_174E88	effect/effBattleSystem	0xC8 and 0x1A4		docs/matching/effect/effBattleSystem.md	58
 Shock, Bind, and Paralyze sphere parameters				docs/matching/effect/effBattleSystem.md	98
@@ -307,6 +308,7 @@ frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/inte
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93
 frCreateNameHandle	interface/frName	0xC0	48 of 48 words match	docs/matching/interface/frName.md	154
+Name glyph storage				docs/matching/interface/frName.md	206
 DrawSelectCursor	interface/itfMesManager	0x2FC	191 of 191 words match	docs/matching/interface/itfMesManager.md	3
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	25
 Message selection rectangle indices				docs/matching/interface/itfMesManager.md	151

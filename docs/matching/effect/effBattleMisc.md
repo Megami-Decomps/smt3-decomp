@@ -261,3 +261,13 @@ The shared callback type expresses the formation and request arguments
 without casts. The complete consumer object remains unchanged in all four
 compilation modes, and all six table relocations target the original
 functions in native order.
+
+## Formation part center offsets
+
+The native reset initializes the VU0 source vector to zero and loops over
+32 stores of one quadword each, advancing the address by 16 bytes on each
+iteration. The single-formation reader indexes the same array by the
+formation index. The C definition owns the exact native zero-fill range
+`0x569A20..0x569C20`. The preceding model-show flag and neighboring raw bytes remain
+outside this range, and the neighboring point-light storage keeps its
+existing C owner. No formation consumers or their declarations change.

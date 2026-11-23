@@ -49,12 +49,14 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 5 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
+| 5 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 5 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
+| 5 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 4 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
@@ -66,7 +68,6 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 4 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 4 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
-| 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -74,7 +75,6 @@ both native and emitted sizes when they differ.
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
-| 4 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |

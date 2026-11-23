@@ -202,3 +202,12 @@ Splitting the indexed loads into two scalar statements is inert at 188 bytes.
 An older summarized pointer study also reported nonmatching 188/192-byte
 forms; its exact source was not retained, so it does not establish which typed
 field spellings were tested. No pointer constraints are retained here.
+
+## Name glyph storage
+
+`pFont` at `0x56BC50` holds four sets of sixteen translated glyph pointers.
+The associated four reference counts start at `0x56BD50`. Together these
+zero-fill objects cover exactly `0x110` bytes. Name initialization clears
+the counts, replacement updates the selected glyph slots, and release
+walks the slots when the corresponding reference count falls to zero.
+The preceding font variables and following help-text storage are unchanged.
