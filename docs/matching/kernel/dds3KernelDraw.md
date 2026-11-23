@@ -102,3 +102,16 @@ encoding the previous DMA tag's NEXT link. The callers must not mask it
 themselves. All 20 native calls reach the same unchanged provider.
 The complete owner assembles identically before and after the correction,
 including every relocation; this does not change matching totals.
+
+## Zero-fill draw packets
+
+`dds3InitZClearDrawTag` initializes three draw states, each with two
+0xB0-byte DMA packets. `dds3LinkZClearDrawTag` selects the state and the
+current frame buffer. `dds3DrawFade` uses the adjacent two 0xB0-byte
+packets, one for each frame buffer. The two arrays start at `0x556CA0`
+and `0x5570C0` and end at the untouched `dds3LightColor` at `0x557220`.
+The C definitions keep the native 16-byte alignment of the DMA headers
+and leave the existing packet writes and links untouched. Without explicit
+alignment the stock EE object promises only eight-byte alignment, which
+is not the DMA header contract. The object owns
+zero-fill only; no code or initialized-data credit changes.

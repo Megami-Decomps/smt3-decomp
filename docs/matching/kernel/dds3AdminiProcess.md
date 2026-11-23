@@ -90,3 +90,12 @@ Ruled out: splitting the declaration from the `fclEncycFindFreeSlot` call, a
 `ret` local with `if (slot >= 0)` in place of the early `return 0`, a dead
 self-store to raise a reference count, and parking
 `fclEncycFindFreeSlot`'s draft so the callee is only an `extern`.
+
+## Facility registry storage
+
+The named-process registry uses 32 consecutive 0x44-byte slots, starting
+at `0x556310`. Each slot holds the name and state as well as task,
+callback and list links. The existing scheduler reads and writes the
+same slots through the original type; only the storage now has a C
+definition. The following `key2` object still starts at `0x556B90`.
+These 2,176 bytes are zero-fill, not initialized data.

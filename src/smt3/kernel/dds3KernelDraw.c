@@ -3,6 +3,7 @@
 #include "draw3d.h"
 #include "effect.h"
 #include "kernel_draw.h"
+#include "kernel_draw_packets.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
@@ -30,36 +31,8 @@ typedef struct
     u32 color;
 } dds3PrintControl_t;
 
-/* Two-context Z-clear packets are 0xB0 bytes, two buffers per state. */
-typedef struct
-{
-    sdfDmaTag_t dma;
-    sdfGifTag_t testGif;
-    sdfGrTagStdReg_t test;
-    sdfGifTag_t clearGif;
-    sdfGrTagStdReg_t colorA;
-    sdfGrTagStdReg_t positionA;
-    sdfGrTagStdReg_t colorB;
-    sdfGrTagStdReg_t positionB;
-    sdfGifTag_t blendGif;
-    sdfGrTagStdReg_t blend[2];
-} dds3ZClearPacket_t;
-
-
 extern u32 dds3DrawFlag;
 extern u8 fadergba[4];
-/* The fade sprite packet: a four-register state block then a textureless
- * sprite, 0xB0 bytes, one per frame buffer. */
-typedef struct
-{
-    sdfDmaTag_t dma;
-    sdfGifTag_t stateGif;
-    sdfGrTagStdReg_t state[4];
-    sdfGifTag_t spriteGif;
-    sdfGrTagStdReg_t sprite[4];
-} dds3FadePacket_t;
-
-extern dds3FadePacket_t dds3FadePacket[2];
 extern sdfFrameU16_t fadenow;
 extern sdfFrameU16_t fademax;
 
@@ -295,7 +268,6 @@ extern sdfMatrix4_t dds3RenderViewportMatrix;
 extern sdfGsMemSlice_t *dds3ZBuffHandles[];
 extern sdfGrFrameSet_t dds3RenderTexId;
 extern dds3DrawBank_t dds3DrawEnv[];
-extern dds3ZClearPacket_t dds3ZClearDrawTag[3][2];
 extern u16 dds3RenderTexWidth;
 extern u16 dds3RenderTexHeight;
 extern u32 dds3RenderDrawEnv;

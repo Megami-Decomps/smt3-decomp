@@ -2,23 +2,8 @@
 #include "kernel.h"
 #include "sdfFrame.h"
 
-/* Named scheduler slots: retail strides entries by 0x44 bytes. */
-typedef struct
-{
-    s32 kind;
-    char name[32];
-    dds3ProcessID_t *task;
-    dds3ProcessFunc_t update;
-    /* Cleanup callbacks have no process argument (see the debug registrants). */
-    void (*destroy)(void);
-    void (*setState)(s32);
-    s32 enabled;
-    void *userValue;
-    s32 previous;
-    s32 next;
-} fclNamedSlot_t;
+#include "fclNamedSlots.h"
 
-extern fclNamedSlot_t fclEncycTable[32];
 extern s32 fclEncycHead;
 extern s32 fclEncycTail;
 extern s32 fclEncycCount;

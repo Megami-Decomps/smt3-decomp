@@ -309,6 +309,7 @@ Read-only data and native alignment				docs/matching/kernel/ModeSelect.md	120
 fclEncycFindFreeSlot	kernel/dds3AdminiProcess	0x1C4		docs/matching/kernel/dds3AdminiProcess.md	14
 fclEncycFreeEntries	kernel/dds3AdminiProcess	0x1E8		docs/matching/kernel/dds3AdminiProcess.md	49
 fclEncycConfigureMode3, fclEncycAllocEntry and fclEncycConfigureMode2	kernel/dds3AdminiProcess	0x94, 0xA8, 0xAC	29 of 42 words	docs/matching/kernel/dds3AdminiProcess.md	71
+Facility registry storage				docs/matching/kernel/dds3AdminiProcess.md	94
 dds3UpdateConfig	kernel/dds3ConfigMain	0x1EC		docs/matching/kernel/dds3ConfigMain.md	3
 Primitive debug text box tables	kernel/dds3DebugStuff	15 bytes		docs/matching/kernel/dds3DebugStuff.md	3
 PrimLine 3D geometry data	kernel/dds3GlobalWork	264 bytes		docs/matching/kernel/dds3GlobalWork.md	3
@@ -316,6 +317,7 @@ dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matchi
 Quad triangle index word				docs/matching/kernel/dds3KernelDraw.md	81
 Off-screen parallel light pointers				docs/matching/kernel/dds3KernelDraw.md	88
 Draw tag packet addresses				docs/matching/kernel/dds3KernelDraw.md	95
+Zero-fill draw packets				docs/matching/kernel/dds3KernelDraw.md	106
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 CallNewBattleTest	kernel/dds3SequenceList	0x4C		docs/matching/kernel/dds3SequenceList.md	3
 dds3Titlemain	kernel/dds3TitleMain	0xD20	840 of 840 words match	docs/matching/kernel/dds3TitleMain.md	3
