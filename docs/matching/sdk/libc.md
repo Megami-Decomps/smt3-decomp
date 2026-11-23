@@ -272,10 +272,10 @@ premise is required before allocation or control-flow tuning.
 
 ## _dtoa_r
 
-The seven-argument conversion emits 4848 instruction bytes against 4708 native:
-109 of 1177 native words match and1068 differ, with140 excess bytes. Its 0xC0
-frame, allocation, block layout and source data ownership remain open. Normal
-builds retain assembly; no exact credit is claimed.
+Before the bounds repair below, the seven-argument draft emitted 4848 bytes
+against 4708 native, with 109 of 1177 words matching. Frame, allocation, block
+layout and source data ownership remain open. Normal builds retain assembly;
+no exact credit is claimed.
 
 The result cache uses the allocation header itself as character storage; entry
 restores `k` and `maxwds` before recycling it. Full 52-bit fraction tests preserve
@@ -286,8 +286,14 @@ cleanup are preserved. Independent native reviews covered both conversion halves
 The existing binary64 union now has a genuine64-bit view. Typed readonly scalar
 declarations reproduce native absolute accesses and remove the initial
 whole-unit/standalone discrepancy. The positive-limit table access uses
-`limit-1`; the large-power table includes its separately labeled last scalar.
-No compiler flags changed. An unguarded trial still duplicates the original
+`limit-1`. The fifth large-power factor is adjacent to the first four in retail
+but remains a separate C object. At the smallest positive subnormal in mode 2
+with one digit, the quick scaler has `k == -324` and uses factors 2 and 4.
+Selecting the address of the standalone scalar at index 4, and an array
+element otherwise, avoids both an out-of-bounds read and pointer increment.
+The stock compiler uses one load from the selected address, preserving the
+factor order and the separate positive-scaling path. The retail assembly,
+table bytes and compiler flags are unchanged. An unguarded trial still duplicates the original
 mode-table import and places its zero string in small data; resolve those
 ownership issues at promotion while preserving the default assembly context.
 

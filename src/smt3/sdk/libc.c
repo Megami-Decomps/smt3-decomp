@@ -1992,14 +1992,16 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
                 i = j >> 4;
                 value.value = pow10Table[j & 15] * value.value;
                 if (i != 0) {
-                    power = dtoaPow10Big;
+                    s32 powerIndex = 0;
                     do {
                         if ((i & 1) != 0) {
+                            /* The fifth native factor is a separate C object. */
+                            const f64 *factor = powerIndex == 4 ? &dtoaPow10Limit : &dtoaPow10Big[powerIndex];
                             errors++;
-                            value.value = *power * value.value;
+                            value.value = *factor * value.value;
                         }
                         i >>= 1;
-                        power++;
+                        powerIndex++;
                     } while (i != 0);
                 }
             }
