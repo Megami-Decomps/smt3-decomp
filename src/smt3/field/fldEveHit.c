@@ -10,6 +10,7 @@
 #include "draw3d.h"
 #include "field.h"
 #include "fldEveHitSwitchData.h"
+#include "fldEveHitStorage.h"
 #include "model.h"
 #include "motion.h"
 #include "newdata.h"
@@ -23,8 +24,6 @@ typedef struct fldTriggerPlane_t fldTriggerPlane_t;
 typedef struct fldTriggerBox_t fldTriggerBox_t;
 
 typedef union fldTriggerShape_t fldTriggerShape_t;
-
-typedef struct fldRoomState_t fldRoomState_t;
 
 typedef struct fldInfHit_t fldInfHit_t;
 
@@ -45,9 +44,6 @@ typedef struct fldInfTable_t fldInfTable_t;
 enum {
     FIELD_VALUE_RECORD_STORAGE_SIZE = 0x72000,
     FIELD_AUX_RECORD_STORAGE_SIZE = 0x4A00,
-    FIELD_ROOM_RECORD_COUNT = 64,
-    FIELD_ROOM_CORNER_COUNT = 8,
-    FIELD_ROOM_PLANE_COUNT = 6,
     FIELD_ACTOR_SLOT_COUNT = 256
 };
 
@@ -72,26 +68,6 @@ union fldTriggerShape_t {
     fldTriggerSphere_t sphere;
     fldTriggerPlane_t plane;
     fldTriggerBox_t box;
-};
-
-struct fldRoomState_t {
-    f32 corner[FIELD_ROOM_CORNER_COUNT][4];
-    f32 center[4];
-    f32 plane[FIELD_ROOM_PLANE_COUNT][4];
-    f32 limit[FIELD_ROOM_PLANE_COUNT];
-    s32 worldObjectKey;
-    f32 unk10C;
-    f32 unk110;
-    f32 unk114;
-    s32 unk118;
-    f32 unk11C;
-    s16 unk120;
-    s16 roomId;
-    s16 unk124;
-    s16 mode;
-    s16 entryIndex;
-    s16 axisMode;
-    s32 shapeKind;
 };
 
 /* The event-range box block at fldRoomState_t + 0x120, reached through its own
@@ -234,8 +210,6 @@ extern s8 fldDoorExitMode[];
 extern u8 *fldDoor_Find3(void);
 
 extern u8 fldDoorExitFlag;
-
-extern fldRoomState_t fldEveHitTable[];
 
 extern s32 strcmp(const char *left, const char *right);
 

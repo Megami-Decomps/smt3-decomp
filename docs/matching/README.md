@@ -19,8 +19,8 @@ both native and emitted sizes when they differ.
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 16 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 12 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 11 |  | [sdk/libc.md](sdk/libc.md) |
-| 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 11 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 10 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -50,6 +50,7 @@ both native and emitted sizes when they differ.
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 5 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
+| 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
@@ -68,7 +69,6 @@ both native and emitted sizes when they differ.
 | 4 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 4 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
-| 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 4 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |

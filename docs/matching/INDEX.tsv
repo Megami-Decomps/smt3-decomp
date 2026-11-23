@@ -249,6 +249,7 @@ fldEveHit_AddEveHit	field/fldEveHit	0x1868		docs/matching/field/fldEveHit.md	3
 fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/matching/field/fldEveHit.md	46
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
 Field script labels				docs/matching/field/fldEveHit.md	164
+Event-hit room records				docs/matching/field/fldEveHit.md	171
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldHitChkUnitVWM	field/fldHit	0xCB8		docs/matching/field/fldHit.md	209
@@ -383,6 +384,7 @@ nbCameraBoss_Cut2_Init	newbattle/nbCameraBoss	0x3A8	234 of 234 words match	docs/
 nbCameraBoss_BSARI_MASEHA_Run	newbattle/nbCameraBoss	0x440		docs/matching/newbattle/nbCameraBoss.md	230
 nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbattle/nbCameraBoss.md	281
 nbCameraBoss_Sp_MURET2_Set	newbattle/nbCameraBoss	0x460		docs/matching/newbattle/nbCameraBoss.md	499
+Boss camera curve and vector storage				docs/matching/newbattle/nbCameraBoss.md	531
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraProcess_nbCameraProcess	newbattle/nbCameraProcess	792 bytes	198 of 198 words match	docs/matching/newbattle/nbCameraProcess.md	52

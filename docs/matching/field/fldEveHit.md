@@ -167,3 +167,15 @@ The NPC talk and Tobi-warp lookups use two initialized 16-byte slots.
 Ordinary writable arrays retain each original token and slot extent, with
 no explicit alignment or section attribute. The other nearby, duplicate
 labels stay raw; the consumers are unchanged.
+
+## Event-hit room records
+
+The field initializer clears 64 room records in 0x130-byte steps from
+`0x55DC30`. The records hold eight corners, the center, six planes
+and limits, and the existing event keys and flags. The typed zero-fill
+array covers 19,456 bytes and ends at the distinct door-event table
+at `0x562830`. The preceding raw range is unchanged.
+
+Sharing the existing declarations with the storage unit leaves every
+consumer instruction and relocation unchanged. The larger, still
+guarded event-hit functions are not promoted by this change.

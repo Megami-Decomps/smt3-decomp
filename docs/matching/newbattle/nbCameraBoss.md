@@ -527,3 +527,16 @@ compiler, runtime, source and generated inputs. Integrated owner and literal
 retail checks pass, including regeneration. All 34 tooling test files (794
 unittest cases), guarded drafts including FIX_BUGS, IRX drafts, documentation
 indexes and primary/audit report-scope checks pass before publication.
+
+## Boss camera curve and vector storage
+
+The two MURET2 curves and the DOUTYO curve occupy the 168-byte
+zero-fill range beginning at 0x56B350. Each curve contains four XYZ
+control points followed by its weight and step. The eight alignment bytes
+at 0x56B3F8 remain in the raw range.
+
+The 112-byte zero-fill range beginning at 0x56B400 contains the four
+BSNET end and shot vectors, the BSARI cut vector, and the two Kagu
+vectors. These remain 16-byte aligned for full-lane VU transfers.
+Only the storage definitions change; the camera routines, initialized
+data, and viewer buffer at 0x56B470 are unchanged.
