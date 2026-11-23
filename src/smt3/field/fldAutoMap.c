@@ -924,9 +924,8 @@ const char fldAutoMapFullOpenMsg[9] = "FullOpen";
 
 #ifdef NON_MATCHING
 struct frFontHandle_t;
-struct frFontRequest_t;
-extern struct frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
-                                                  const char *text, struct frFontRequest_t *previous);
+extern struct frFontHandle_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                                  const char *text, struct frFontHandle_t *previous);
 extern u32 frGetStrWidth2(struct frFontHandle_t *font);
 extern s32 frDestroyFontRequestAfter(struct frFontHandle_t *font);
 extern void frSetPriority(struct frFontHandle_t *font, u32 priority);
@@ -1007,7 +1006,7 @@ void fldAutoMapDrawOneArea(void)
     f32 x, y, offsetX, offsetZ, minX, maxZ, maxX, minZ;
     s32 blink;
     volatile s32 firstColor;
-    struct frFontRequest_t *request;
+    struct frFontHandle_t *request;
     struct frFontHandle_t *font;
     s32 textX;
     const char *text;
@@ -2077,32 +2076,35 @@ void fldAutoMapClear(void) {
 
 extern f32 fldAreaFontAlpha;
 extern s32 fldAreaFontWork;
-extern void frPreCalcStrWidth(const char *pStr, s32 Style, s32 Mode);
+extern u32 frPreCalcStrWidth(s8 *pStr, s32 Style, s32 Mode);
 struct frFontHandle_t;
-struct frFontRequest_t;
-extern struct frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
-                                                  const char *text, struct frFontRequest_t *previous);
+extern struct frFontHandle_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                                  const char *text, struct frFontHandle_t *previous);
 extern u32 frGetStrWidth2(struct frFontHandle_t *font);
 extern s32 frDestroyFontRequestAfter(struct frFontHandle_t *font);
 extern void fldDrawAddressPanel(s32 width, s32 x, s32 y);
-extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *moji);
 
-/* NON_MATCHING: 57 of 226 words, 908 bytes against 904; the frame holds one
- * saved register too many and the fade arms differ in two words. */
-#ifdef NON_MATCHING
 void fldDrawAreaBlockFont(void) {
-    char *str;
-    void *frq;
-    s32 w;
+    /* Keep the actual text address in its native callee-saved register. */
+    FAKEMATCH_ASM_REG(char *, str, "$16");
+    s32 direction;
+    s32 fadeDirection;
+    u32 mode;
+    /* The request ends at destruction; the measured width begins there. */
+    union { struct frFontHandle_t *request; u32 width; } phase;
+    u32 measured;
     s32 x;
     s32 y;
+    u32 room;
     f32 v;
+    f32 endpoint;
 
     if (fldGlobalBase.area >= 200) {
         return;
     }
-    v = fldAreaFontAlpha;
-    switch (*(s32 *)((u8 *)&fldGlobalBase + 0x90)) {
+    mode = fldGlobalBase.word90;
+    switch (mode) {
     case 0:
         v = 0.0f;
         fldAreaFontWork = 0;
@@ -2114,54 +2116,65 @@ void fldDrawAreaBlockFont(void) {
         fldAreaFontAlpha = v;
         break;
     case 2:
-        if (v > 0.0f) {
-            v -= SDF_FRAME_STEP(0.1f);
-            if (v < 0.0f) {
-                v = 0.0f;
-                fldAreaFontWork = 0;
-            } else {
-                fldAreaFontWork = -1;
-            }
+        v = fldAreaFontAlpha;
+        endpoint = 0.0f;
+        fadeDirection = -1;
+        if (!(v > endpoint)) goto draw;
+        v -= SDF_FRAME_STEP(0.1f);
+        if (v < endpoint) {
+            v = endpoint;
+        clamp:
+            fldAreaFontWork = 0;
+            /* Finish the capped fade here; the directional path joins publish. */
             fldAreaFontAlpha = v;
+            break;
         }
-        break;
+    directionTail:
+        fldAreaFontWork = fadeDirection;
+        goto publish;
     case 3:
-        if (v < 1.0f) {
-            v += SDF_FRAME_STEP(0.1f);
-            if (!(v > 1.0f)) {
-                fldAreaFontWork = 1;
-            } else {
-                v = 1.0f;
-                fldAreaFontWork = 0;
-            }
-            fldAreaFontAlpha = v;
-        }
-        break;
+        v = fldAreaFontAlpha;
+        endpoint = 1.0f;
+        fadeDirection = 1;
+        if (!(v < endpoint)) goto draw;
+        v += SDF_FRAME_STEP(0.1f);
+        if (!(endpoint < v)) goto directionTail;
+        v = endpoint;
+        goto clamp;
     case 4:
     case 5:
     case 6:
     case 7:
+        v = fldAreaFontAlpha;
         if (v < 0.99f) {
             if (v > 0.01f) {
-                if (fldAreaFontWork == -1) {
+                direction = fldAreaFontWork;
+                if (direction == -1) {
                     v -= SDF_FRAME_STEP(0.1f);
                     if (v < 0.0f) {
                         v = 0.0f;
-                        fldAreaFontWork = 0;
+                        goto clamp;
                     }
                     fldAreaFontAlpha = v;
-                } else if (fldAreaFontWork == 1) {
+                } else if (direction == 1) {
                     v += SDF_FRAME_STEP(0.1f);
                     if (v > 1.0f) {
                         v = 1.0f;
-                        fldAreaFontWork = 0;
+                        goto clamp;
                     }
                     fldAreaFontAlpha = v;
                 }
             }
         }
         break;
+    default:
+        v = fldAreaFontAlpha;
+        break;
     }
+    goto draw;
+publish:
+    fldAreaFontAlpha = v;
+draw:
     x = (s32)(v * 0.0f + (1.0f - v) * 250.0f);
     y = (s32)(v * 0.0f + (1.0f - v) * 0.0f);
     if (fldGlobalBase.nameD != -1) {
@@ -2169,13 +2182,14 @@ void fldDrawAreaBlockFont(void) {
             return;
         }
         str = fldAutoMapPlaceTable[fldAutoMapFindPlace(fldGlobalBase.area % 100, fldGlobalBase.nameD)];
-        frPreCalcStrWidth(str, 1, 0);
-        frq = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
-        w = frGetStrWidth2(frq);
-        frDestroyFontRequestAfter(frq);
-        w += 8;
-        fldDrawAddressPanel(w, x, y);
-        fldKanjiDraw(x + 0x1EC - w, (y + 0x18) / 2, 0xF0DC6480, str);
+        frPreCalcStrWidth((s8 *)str, 1, 0);
+        phase.request = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
+        measured = frGetStrWidth2(phase.request);
+        frDestroyFontRequestAfter(phase.request);
+        phase.width = measured + 8U;
+        fldDrawAddressPanel((s32)phase.width, x, y);
+        room = 0x1ECU - phase.width;
+        fldKanjiDraw((s32)((u32)x + room), (y + 0x18) / 2, 0xF0DC6480, (const u8 *)str);
     } else {
         if (fldGlobalBase.nameU == -1) {
             return;
@@ -2184,18 +2198,16 @@ void fldDrawAreaBlockFont(void) {
             return;
         }
         str = fldAutoMapAreaTable[fldAutoMapFindArea(fldGlobalBase.area % 100, fldGlobalBase.nameU)];
-        frPreCalcStrWidth(str, 1, 0);
-        frq = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
-        w = frGetStrWidth2(frq);
-        frDestroyFontRequestAfter(frq);
-        w += 8;
-        fldDrawAddressPanel(w, x, y);
-        fldKanjiDraw(x + 0x1EC - w, (y + 0x18) / 2, 0xA09DC380, str);
+        frPreCalcStrWidth((s8 *)str, 1, 0);
+        phase.request = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
+        measured = frGetStrWidth2(phase.request);
+        frDestroyFontRequestAfter(phase.request);
+        phase.width = measured + 8U;
+        fldDrawAddressPanel((s32)phase.width, x, y);
+        room = 0x1ECU - phase.width;
+        fldKanjiDraw((s32)((u32)x + room), (y + 0x18) / 2, 0xA09DC380, (const u8 *)str);
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
-#endif
 
 void fldInitPacLoader(void) {
     fileRequest_t *request;

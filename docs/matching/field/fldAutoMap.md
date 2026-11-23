@@ -214,69 +214,36 @@ conversions. LeakSanitizer is disabled under the execution environment.
 
 ## fldDrawAreaBlockFont (field/fldAutoMap, 0x388)
 
-57 of 226 words match, 908 bytes against retail's 904.
+226 of 226 words match at the native 904-byte size, with all eight
+linked mode-table entries. The panel steps the area's name fade and
+draws the place name or, if absent, the area name.
 
-The area-name panel: it steps the name's fade counter by the panel mode, then
-draws the place name (or the area name) and its backing panel. Fully recovered
-as behaviour; what is left is one saved register and the two fade arms.
+Modes 0 and 1 snap the alpha and clear the direction. Modes 2 and 3
+step toward 0 and 1, respectively. Modes 4 through 7 continue the
+current direction only strictly between 0.01 and 0.99. Direct case
+reads and a default read retain the native alpha observations. The
+real clamp tail resets the direction, writes alpha, then goes straight
+to draw. The unclamped mode-2/3 tail instead stores the real direction
+and shares the alpha publication. Keeping the two source paths separate
+avoids the compiler's cross-jump into a combined publish and restores the
+retail branch and delay-slot store. The two zero products in the
+position interpolation are retained; the native fade state starts at
+1.0 and remains in [0,1].
 
-What the function reads, since none of it was named before:
+The text pointer is retained in its native callee-saved register.
+The measured width replaces the already-consumed font request in a
+union after passing the request to destruction. Width and the horizontal
+offset use 32-bit modular arithmetic before conversion to the native
+signed draw arguments. The two text paths preserve the width-precalc,
+request, measure, destroy, panel and glyph call sequence and keep the
+native place/area colors. The corrected font and glyph declarations use
+the actual providers' pointer and return types. A prior empty float constraint
+is no longer needed with the split clamp and publish paths.
 
-- `fldGlobalBase + 0x90` is the panel mode, 0 to 7, which drives the jump
-  table. The HD reconstruction calls it `AllPanelMode`. The draft spells it
-  `*(s32 *)((u8 *)&fldGlobalBase + 0x90)` rather than naming the field, since
-  nothing compiled uses it yet.
-- `D_0054EEA4` is the fade counter, 0.0 to 1.0 (`gFldAreaNameCnt` in the HD
-  source), and `fldAreaFontWork` is its direction, -1, 0 or 1
-  (`fldDrawAreaBlockFont_pm_mode` there).
-- Mode 0 and 1 snap the counter to 0.0 and 1.0; 2 and 3 step it by 0.1 toward
-  0.0 and 1.0, clamping and zeroing the direction at the end; 4 through 7 step
-  it in whichever direction the counter already holds, but only while it is
-  strictly between 0.01 and 0.99.
-- The panel position is an interpolation whose endpoints are all zero except
-  one: `x = (s32)(v * 0.0f + (1.0f - v) * 250.0f)` and
-  `y = (s32)(v * 0.0f + (1.0f - v) * 0.0f)`, which is what shares the one
-  `mul.s` by zero between the two. The HD source has the same expression with
-  a 3.75 and a 2.25 resolution scale added.
-- `fldGlobalBase.nameD` selects the place name, `D_0030D714` with
-  `fldAutoMapFindPlace` and colour `0xF0DC6480`; `-1` there falls back to
-  `nameU`, `D_0030AB54` with `fldAutoMapFindArea` and `0xA09DC380`. Both
-  tables are `char [][28]`, already declared, and both are skipped when the
-  matching `D_00567F50`/`D_00567EA0` length is below 2, read with an `(s16)`
-  cast at the use site for retail's `lh`.
-- The six `.lit4` entries from `D_0054C4D8` to `D_0054C4EC` are this
-  function's, in the order 0.1, 0.1, 0.99, 0.01, 0.1, 0.1.
-
-The `nameD` arm has to be written first (`if (nameD != -1)`), or gcc hoists
-the `nameU` load above the test and emits the two arms in the other order,
-which is 15 words worse. Case 3's clamp has to be written inverted,
-`if (!(v > 1.0f)) { direction = 1; } else { v = 1.0f; direction = 0; }`, so
-that the constant arm is the branch target; case 2 reads better the plain way
-and measures the same.
-
-What is left:
-
-- The frame saves one callee-saved register too many, which is the whole
-  2-word size difference. Retail keeps the font request handle and the string
-  width in one register (`$17`): the handle is copied into the destroy call's
-  argument and the register is immediately rewritten with `width + 8` in that
-  call's delay slot. Two locals cannot reach that, and merging them into one
-  `s32` with casts at the calls undershoots instead, 884 bytes with the width
-  coalesced away entirely.
-- Case 2 lacks retail's second `lwc1` of the counter and the `addiu $2, 0, -1`
-  hoisted into the first `bc1f`'s delay slot. Retail reads the counter once per
-  case and once more on the out-of-range path (in the range check's delay
-  slot), which no placement of the read reproduces: before the switch, gcc
-  common-subexpression-eliminates the per-case reads; after the switch, it
-  replicates the load into all five predecessors instead of using the stored
-  register, 20 bytes long; and an explicit `default: v = D_0054EEA4; break;`
-  gets hoisted back out of the switch, 12 to 28 bytes long.
-
-Measured and rejected: the two clamp arm orders in cases 2 and 3 (4
-combinations), the two `nameD`/`nameU` arm orders, `&&` against nested `if`s
-for the 0.99/0.01 range, three spellings of `x + 0x1EC - w`, the counter read
-before, inside and after the switch, and the handle and width as one local
-with casts.
+All 38 functions in the owner match. The 13 object-level instruction
+differences are their actual relocation immediates, not linked changes.
+The full retail executable and the owner's allocated data bytes are
+unchanged.
 
 ### Ordinary sequence-start intermediate refinement
 

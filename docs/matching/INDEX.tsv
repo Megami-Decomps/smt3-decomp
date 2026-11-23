@@ -226,10 +226,10 @@ fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	42 of 42 words match	docs/matching/f
 fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244		docs/matching/field/fldAutoMap.md	83
 fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/matching/field/fldAutoMap.md	116
 fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	207 of 207 words match	docs/matching/field/fldAutoMap.md	156
-fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/matching/field/fldAutoMap.md	215
-Area title table				docs/matching/field/fldAutoMap.md	393
-NPC resource paths				docs/matching/field/fldAutoMap.md	403
-Full-open diagnostic text				docs/matching/field/fldAutoMap.md	411
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	226 of 226 words match	docs/matching/field/fldAutoMap.md	215
+Area title table				docs/matching/field/fldAutoMap.md	360
+NPC resource paths				docs/matching/field/fldAutoMap.md	370
+Full-open diagnostic text				docs/matching/field/fldAutoMap.md	378
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
@@ -252,6 +252,7 @@ Shared previous collision position				docs/matching/field/fldHit.md	308
 fldAnaStart and fldWaveStart	field/fldMain	byte-neutral		docs/matching/field/fldMain-vectors.md	3
 fldReadyScene	field/fldMain	0x594	357 of 357 words match	docs/matching/field/fldMain.md	3
 fldAnahoriSelectInit	field/fldMain	0x7C	31 of 31 words match	docs/matching/field/fldMain.md	56
+fldSetUnit	field/fldMain	0x7F4	509 of 509 words match	docs/matching/field/fldMain.md	244
 fldPlayerMotionSe	field/fldPlayer	0x5B0		docs/matching/field/fldPlayer.md	1
 fldPlayerCalc	field/fldPlayer	0x2A4		docs/matching/field/fldPlayer.md	102
 fldPlayerCalcHasigo	field/fldPlayer	0xE8		docs/matching/field/fldPlayer.md	149

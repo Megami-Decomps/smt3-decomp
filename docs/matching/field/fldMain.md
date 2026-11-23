@@ -240,3 +240,37 @@ collapses the two base registers retail keeps (`$8` for the struct, `$9 = $8 +
 worth noting: retail biases a second base by 4 for the flag at `+0x04` and uses
 the unbiased one for the halfword at `+0x0A`, which is what the two separate
 `DDS3_GBWK->akuma[i]` expressions in the draft already produce.
+
+## fldSetUnit (field/fldMain, 0x7F4)
+
+509 of 509 words match at the native 2,036-byte size, including the
+eight linked Dante-floor dispatch entries. The mirror checks and Dante
+flag branches preserve the retail callback order, including the fresh
+read of the Dante event bit after the enable block. The four existing
+unit-name literals keep their retail addresses, bytes and alignment.
+
+The axis source and the two Dante output pointers name actual packed
+objects. The former is consumed by the axis copy; both output pointers
+are used for the packed copies and their later pose arguments. The
+source assignment before the rotation-W store restores the native
+early address/load order. The local axis address in callee-saved
+register 20 is used by all three VU loads and never names unrelated
+storage. These are compiler reconstruction choices, not historical
+source claims.
+
+The three audited legacy VU stores write a 16-byte-aligned stack vector.
+The spawn routine synchronously passes the vector to its rotation-pose
+setter, which consumes it using an EE quadword copy, not a C scalar
+read. No pointer to that local is kept by the provider, and no C
+expression reads the VU result. The separate Ana path writes a fresh
+identity rotation before use. This is not a general memory-ordering
+idiom. The string-name provider takes a non-const pointer but only
+records the pointer; the strings stay in read-only storage. The point
+provider also records the genuine object address without dereferencing
+the unaligned view.
+
+All 53 functions in this owner match. The allocatable data sections
+are unchanged. The generated text replaces 22 baked-in immediates with
+their real relocations, and the compiler-local table replaces the
+assembly table label without changing data. The retail executable
+is byte-identical.
