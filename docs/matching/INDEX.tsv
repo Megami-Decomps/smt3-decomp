@@ -595,6 +595,7 @@ sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf
 sdfSndIopSizeMsg data	sdf/sdfSound	18 bytes		docs/matching/sdf/sdfSound.md	65
 Sound command packet ring				docs/matching/sdf/sdfSound.md	80
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
+Draw-thread workspace				docs/matching/sdf/sdfThreadStacks.md	23
 Memory-card module names				docs/matching/sdf/sdfTmx.md	3
 corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
 The corePkt VU1 packet builders written in assembly				docs/matching/sdf/sdfVu1.md	26
