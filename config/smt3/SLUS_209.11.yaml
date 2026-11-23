@@ -396,7 +396,7 @@ segments:
       - [0x1F67D0, .data, kernel/dds3PadButtonPrev]
       - [0x1F6810, .data, kernel/dds3PadButtonState]
       - [0x1F6850, .data, kernel/dds3StartMenuTable]
-      - [0x1F6940, data, data_002F5940]
+      - [0x1F6940, .data, kernel/dds3RetainedDebugWordsRef]
       - [0x1F6948, .data, kernel/dds3RandomState]
       - [0x1F6958, data, data_002F5958]
       - [0x1F6960, .data, kernel/dds3CameraQuakeState]

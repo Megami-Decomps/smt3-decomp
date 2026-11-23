@@ -42,3 +42,10 @@ representation without asserting an original declaration or live reader.
 Its explicit writable data placement keeps it beside the eight large-table
 rows, rather than in small data. The following 40 raw zero bytes and the
 camera owner at 0x002FC7C0 are unchanged.
+
+The eight-byte record at 0x002F5940 retains its native pointer to
+`D_0054E920`, the two writable debug-menu words, followed by an unknown
+32-bit field initialized to zero. The C initializer preserves the native
+pointer relocation and writable data placement; its neighbors, the start
+menu table and random state, keep their original boundaries. No reader
+or interpretation of the second word is assumed.
