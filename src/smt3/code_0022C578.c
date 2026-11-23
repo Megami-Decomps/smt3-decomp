@@ -11564,59 +11564,84 @@ s32 cmpMoveCursor2(cmpCursorInfo_t *cursor, s8 dir)
     } while (0);
 }
 
-#ifdef NON_MATCHING
 void cmpChangeCursorListNums(s32 countValue, u8 *cursorData)
 {
     cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)cursorData;
     volatile cmpCursorInfo_t *live = cursor;
     u8 count = countValue;
-    u8 oldCount = live->unk_20;
-    u8 visible;
-    u8 range;
-    s32 offset;
+    FAKEMATCH_ASM_REG(u32, oldCount, "$3") = live->unk_20;
+    FAKEMATCH_ASM_REG(u32, visible, "$4");
+    FAKEMATCH_ASM_REG(s32, range, "$7");
+    FAKEMATCH_ASM_REG(s32, currentY, "$2");
+    FAKEMATCH_ASM_REG(s32, top, "$7");
+    FAKEMATCH_ASM_REG(s32, offset, "$2");
 
-    if (count == oldCount) {
+    if (oldCount == count) {
         return;
     }
     if (oldCount == 0) {
         cmpInitCursorRange(cursor, count, count, 0);
         return;
     }
-    visible = live->unk_26;
+    visible = cursor->unk_26;
     if (count < visible) {
         cursor->unk_26 = count;
         visible = count;
-        range = count;
+        FAKEMATCH_ASM_LIVE(visible);
+        range = (u8)visible;
     } else {
-        range = live->unk_26;
-        if (count != 0 && count < oldCount) {
-            s32 remaining = count - cursor->unk_22;
-            u16 position = live->unk_22;
-            if (remaining < range) {
-                u8 total = live->unk_20;
-                cursor->unk_22 = position - (total - count);
+        if (count != 0) {
+            FAKEMATCH_ASM_REG(s32, shrinking, "$2") = count < oldCount;
+            /* Keep the second range read distinct from the visible-count snapshot. */
+            FAKEMATCH_ASM_LIVE_MEM(cursor->unk_26);
+            range = cursor->unk_26;
+            if (shrinking) {
+                s32 remaining = count - cursor->unk_22;
+                u32 position;
+                /* Retail compares the signed position, then rereads it unsigned. */
+                FAKEMATCH_ASM_LIVE_MEM(cursor->unk_22);
+                position = *(const u16 *)&cursor->unk_22;
+                if (remaining < range) {
+                    s32 total = live->unk_20;
+                    cursor->unk_22 = position - (total - count);
+                }
             }
+        } else {
+            range = live->unk_26;
         }
     }
     if ((u8)cursor->unk_24 >= visible) {
-        cursor->unk_24 = visible - 1;
+        /* The low byte of visible + 255 is visible - 1. */
+        FAKEMATCH_ASM_REG(s32, index, "$2") = visible + 255U;
+        cursor->unk_24 = index;
     }
-    offset = range - (s8)cursor->unk_21 - 1;
-    if (offset < (u8)cursor->unk_25) {
-        cursor->unk_25 = offset;
+    offset = range - (s8)cursor->unk_21;
+    FAKEMATCH_ASM_LIVE(offset);
+    offset -= 1;
+    FAKEMATCH_ASM_LIVE(offset);
+    {
+        FAKEMATCH_ASM_REG(u32, column, "$3") = (u8)cursor->unk_25;
+        if (offset < (s32)column) {
+            cursor->unk_25 = offset;
+        }
     }
-    if (cursor->CursorPos != 0) {
-        offset = (range - 1) * cursor->StepY;
-        if (offset < cursor->CursorPos - cursor->unk_1C) {
-            cursor->CursorPos = offset + cursor->unk_1C;
+    currentY = cursor->CursorPos;
+    if (currentY != 0) {
+        FAKEMATCH_ASM_REG(s32, product, "$3") = (s32)((u32)range - 1U);
+        top = cursor->unk_1C;
+        /* Coordinate arithmetic wraps at 32 bits; the limit comparison is signed. */
+        product = (s32)((u32)product * (u32)cursor->StepY);
+        offset = (s32)((u32)currentY - (u32)top);
+        if (product < offset) {
+            offset = (s32)((u32)product + (u32)top);
+            /* Keep the corrected coordinate in the native store register. */
+            FAKEMATCH_ASM_LIVE(offset);
+            cursor->CursorPos = offset;
         }
     }
     cursor->unk_20 = count;
     cmpClearCursorSlots(cursor);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpChangeCursorListNums);
-#endif
 
 void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor)
 {
