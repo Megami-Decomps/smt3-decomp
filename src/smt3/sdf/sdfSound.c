@@ -1,4 +1,5 @@
 #include "fpu.h"
+#include "sdfSndCommandRingStorage.h"
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
@@ -82,13 +83,6 @@ enum SdfFileIOCmd {
     SDF_FILE_CMD_READFILE = 8,
     SDF_FILE_CMD_WRITEFILE = 9
 };
-
-typedef struct sndRingPacket_t {
-    u32 transportHeader[3];
-    u32 command;
-    u32 sequence;
-    u8 payload[108];
-} sndRingPacket_t;
 
 typedef struct sdfSndTrackPacket_t {
     u32 trackId;
@@ -198,8 +192,6 @@ extern void sdfDelayThread(u32 delay);
 
 extern char * strcpy(char *, const char *);
 
-
-extern sndRingPacket_t sdfSndCmdPacketRing[32];
 
 extern u32 sdfSndSendCmd_cmd_id;
 

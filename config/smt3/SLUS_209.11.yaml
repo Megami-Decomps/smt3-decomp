@@ -1823,6 +1823,10 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x574A60, name: camp/cmpViewPacketStorage }
       - { start: 0x452B54, type: .bss, vram: 0x574E80, name: newbattle/nbResultWork }
       - { start: 0x452B54, type: bss, vram: 0x575350, name: bss_battle_after_result }
+      - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58FFC0, name: bss_after_sdf_cd_sector }
+      - { start: 0x452B54, type: .bss, vram: 0x590840, name: sdf/sdfSndCommandRingStorage }
+      - { start: 0x452B54, type: bss, vram: 0x591840, name: bss_after_sdf_sound_command_ring }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")

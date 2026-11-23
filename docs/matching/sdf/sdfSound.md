@@ -76,3 +76,13 @@ resolve to the same string. The production report's 2,616-byte read-only
 section fuzzy score rises from 11.020962% to 99.92349%. The remaining
 four zero tail bytes are supplied by link alignment, separate from the six
 bytes after the string. No aggregate matched-data, function, or code gain.
+
+## Sound command packet ring
+
+The producer and SIF transport both address 32 slots at a 0x80-byte
+stride and wrap their indices with a 0x1F mask. The producer stores the
+command and sequence words at 0x0C and 0x10 and copies extension bytes
+starting at 0x14; the SIF consumer reads the encoded transfer length
+from byte 0x0F. The native zero-fill ring begins at `0x590840` and
+takes 4,096 bytes. The listener state immediately before it and the
+command-thread stack at `0x591840` remain in raw storage.

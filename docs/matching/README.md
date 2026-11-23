@@ -78,6 +78,7 @@ both native and emitted sizes when they differ.
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
+| 3 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 3 |  | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
@@ -94,7 +95,6 @@ both native and emitted sizes when they differ.
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 3 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
-| 2 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 2 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
 | 2 | pb/pbRecord | [pb/pbRecord.md](pb/pbRecord.md) |
@@ -129,6 +129,7 @@ both native and emitted sizes when they differ.
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | sdf/sdfCoreDraw | [sdf/sdfCoreDraw.md](sdf/sdfCoreDraw.md) |
+| 1 |  | [sdf/sdfCd.md](sdf/sdfCd.md) |
 | 1 |  | [sdf/sdf3DPrim.md](sdf/sdf3DPrim.md) |
 | 1 |  | [script/scrTraceCode.md](script/scrTraceCode.md) |
 | 1 | result/rstdraw | [result/rstdraw.md](result/rstdraw.md) |
