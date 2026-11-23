@@ -4,6 +4,7 @@ Unit, Matter, Effect, Event, Light, Path and Model callback tables	basic	168 byt
 Type registry and camera callbacks	basic	96 bytes		docs/matching/basic/dds3BasicTables.md	38
 Mover callbacks and names				docs/matching/basic/dds3MoverBasic.md	3
 worldBasicTable data	basic/dds3WorldBasic	24 bytes		docs/matching/basic/dds3WorldBasic.md	3
+Double-buffered view and light storage				docs/matching/camp/cmpViewPackets.md	3
 fldRunTamaFree	field/fldTest	188 bytes	47 of 47 words match	docs/matching/code_00116AD0.md	3
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/matching/code_00116AD0.md	153
 fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/matching/code_00116AD0.md	170
@@ -280,6 +281,7 @@ Elevator floor transition delays				docs/matching/field/fldTest.md	128
 fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	137
 fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	153
 Shadow-edge position storage				docs/matching/field/fldTest.md	169
+Shadow triangle and edge scratch storage				docs/matching/field/fldTest.md	179
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
@@ -298,6 +300,7 @@ frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/
 frAnalyzeTag	interface/frFont	0x518	326 of 326 words match	docs/matching/interface/frFont.md	79
 frAnalyzeMessage	interface/frFont	0x200	128 of 128 words match	docs/matching/interface/frFont.md	100
 Font load-state slots				docs/matching/interface/frFont.md	119
+Font-dump packet storage				docs/matching/interface/frFont.md	125
 frRestoreNameImage	interface/frName	0xD8	54 of 54 words match	docs/matching/interface/frName.md	3
 frGetCNameFRQ	interface/frName	0x158	86 of 86 words match	docs/matching/interface/frName.md	52
 frSetNameData	interface/frName	0x1E8	122 of 122 words match	docs/matching/interface/frName.md	93

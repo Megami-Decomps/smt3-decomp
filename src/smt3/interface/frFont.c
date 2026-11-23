@@ -1,4 +1,5 @@
 #include "font.h"
+#include "frFontDumpStorage.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
@@ -13,12 +14,6 @@ typedef struct frFontNodeHeader_t frFontNodeHeader_t;
 typedef struct frFontAtlas_t frFontAtlas_t;
 
 typedef struct frFontSystem_t frFontSystem_t;
-
-typedef union frFontDmaTag_t frFontDmaTag_t;
-
-typedef struct frFontGsWrite_t frFontGsWrite_t;
-
-typedef struct frFontGsPacket_t frFontGsPacket_t;
 
 typedef struct frTextIndex_t frTextIndex_t;
 
@@ -92,24 +87,6 @@ struct frFontSystem_t {
     u32 imageBuffers[6];
     u8 pad190[4];
     struct frFontHandle_t *glyphSlots[2];
-};
-
-/* The SDK DMA tag is accessed as a quadword and as its four command words. */
-union frFontDmaTag_t {
-    u128 value;
-    u32 words[4];
-};
-
-struct frFontGsWrite_t {
-    u64 value;
-    u64 reg;
-};
-
-struct frFontGsPacket_t {
-    frFontDmaTag_t dma;
-    u64 gifTag;
-    u64 gifRegisters;
-    frFontGsWrite_t writes[6];
 };
 
 /* Serialized font-bank entries use byte offsets relative to their bank. */
@@ -2347,17 +2324,6 @@ void frSetVariableRequest(s32 VarNo, s32 pStr) {
 }
 
 #ifdef NON_MATCHING
-typedef struct
-{
-    u32 header[4];
-    u64 words[32];
-} frFontDumpSlot_t;
-SIZE_CHECK(frFontDumpSlotSizeCheck, frFontDumpSlot_t, 0x110);
-
-extern sdfDrawTag_t frDumpDrawEnvTag[2];
-extern frFontGsPacket_t frDumpDrawEnvPacket[2];
-extern sdfDrawTag_t frDumpTextureTag[2];
-extern frFontDumpSlot_t frDumpFontTexturePacket[2];
 SYMBOL_AT(sdfGrOt_t, D_002F67F8, sdfGrOtTable, 0x8E0);
 
 void frDumpFontTexture(s32 x, s32 y, s32 depth)

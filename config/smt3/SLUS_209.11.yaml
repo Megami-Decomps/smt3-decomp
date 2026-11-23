@@ -1787,6 +1787,7 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x556B90, name: bss_after_encyc_table }
       - { start: 0x452B54, type: .bss, vram: 0x556CA0, name: kernel/dds3KernelDrawPackets }
       - { start: 0x452B54, type: bss, vram: 0x557220, name: bss_after_draw_packets }
+      - { start: 0x452B54, type: .bss, vram: 0x5574E0, name: field/fldShadowWorkStorage }
       - { start: 0x452B54, type: .bss, vram: 0x558130, name: field/fldShadowTableStorage }
       - { start: 0x452B54, type: bss, vram: 0x55D5B0, name: bss_after_field_shadow_tables }
       - { start: 0x452B54, type: .bss, vram: 0x55DC30, name: field/fldEveHitStorage }
@@ -1803,6 +1804,8 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x56B3F8, name: bss_camera_boss_curve_alignment }
       - { start: 0x452B54, type: .bss, vram: 0x56B400, name: newbattle/nbCameraBossVectorStorage }
       - { start: 0x452B54, type: bss, vram: 0x56B470, name: bss_after_camera_boss_vectors }
+      - { start: 0x452B54, type: .bss, vram: 0x56B690, name: interface/frFontDumpStorage }
+      - { start: 0x452B54, type: bss, vram: 0x56BA30, name: bss_after_font_dump_packets }
       - { start: 0x452B54, type: .bss, vram: 0x56BE60, name: interface/itfMesPoolStorage }
       - { start: 0x452B54, type: bss, vram: 0x56C880, name: bss_after_message_pool }
       - { start: 0x452B54, type: .bss, vram: 0x56C8F0, name: pb/pbMapBaseStorage }
@@ -1813,6 +1816,7 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x570190, name: bss_after_panel_vertices }
       - { start: 0x452B54, type: .bss, vram: 0x573190, name: facility/cmbPanelColorStorage }
       - { start: 0x452B54, type: bss, vram: 0x573D90, name: bss_after_panel_colors }
+      - { start: 0x452B54, type: .bss, vram: 0x574A60, name: camp/cmpViewPacketStorage }
       - { start: 0x452B54, type: .bss, vram: 0x574E80, name: newbattle/nbResultWork }
       - { start: 0x452B54, type: bss, vram: 0x575350, name: bss_battle_after_result }
 

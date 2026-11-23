@@ -173,6 +173,17 @@ A cell is a full 16-byte VU vector, and each array starts on a
 16-byte boundary. The two native zero-fill arrays begin at
 `0x558130` and `0x55AB70`; together they take 21,632 bytes and
 end at the untouched `fldRun_Dante` object at `0x55D5B0`.
-The preceding shadow vertex table stays in its original raw range.
 The C source adds no instructions or initialized bytes and leaves
 the shadow draw code and mesh tables unchanged.
+
+## Shadow triangle and edge scratch storage
+
+`fldSdwTriangles` at `0x5574E0` stores 50 triangles, each comprising
+three packed XYZ positions (36 bytes per triangle). The original shadow
+draw body clears all 50 records and reads the nine coordinates as floats.
+`fldShadowVertexTable` at `0x557BE8` is a 26-by-26 edge grid: the
+original code computes a 52-byte row stride, updates the byte count,
+and stores the orientation separately in the next byte. The two typed
+zero-fill objects total 3,152 bytes and end exactly at
+`fldShadowTable` at `0x558130`. The raw draw vector before the new
+storage and the assembly draw body are unchanged.

@@ -121,3 +121,13 @@ previous owner peers are validated together; the complete owner is 81/0.
 The nine native font slots each have a writable load-state word initialized
 to zero. Loading tests and sets a slot; deletion clears it, including the
 explicitly used temporary slot 8. The following four zero bytes are alignment.
+
+## Font-dump packet storage
+
+The debug font renderer uses frame-indexed pairs of draw tags, draw
+environment packets, texture tags, and font texture packets. The two
+packet strides are 0x80 and 0x110 bytes; each draw-tag stride is 0x20.
+The separate aligned definitions own 928 native zero-fill bytes at
+`0x56B690..0x56BA30`. The raw padding before the first tag and the
+font-system object at the second boundary stay in their original ranges.
+The renderer retains its assembly fallback and is not promoted here.

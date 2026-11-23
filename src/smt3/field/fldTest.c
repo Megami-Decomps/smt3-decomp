@@ -596,19 +596,11 @@ typedef union {
 
 #ifdef NON_MATCHING
 #include "draw3d.h"
+#include "fldShadowWorkStorage.h"
 
 typedef struct {
     s32 vertex[3];
 } fldSdwFace_t;
-
-typedef struct {
-    sdfVector3_t vertex[3];
-} fldSdwTriangle_t;
-
-typedef struct {
-    u8 count;
-    s8 reverse;
-} fldSdwEdge_t;
 
 extern sdfVector3_t fldSdwVertices04[], fldSdwVertices03[], fldSdwVertices08[], fldSdwVertices09[];
 extern sdfVector3_t fldSdwVertices07[], fldSdwVertices05[], fldSdwVertices06[], fldSdwVertices14[];
@@ -619,8 +611,6 @@ extern fldSdwFace_t fldSdwFaces07[], fldSdwFaces05[], fldSdwFaces06[], fldSdwFac
 extern fldSdwFace_t fldSdwFaces15[], fldSdwFaces16[], fldSdwFaces11[], fldSdwFaces12[];
 extern fldSdwFace_t fldSdwFaces13[], fldSdwFaces02[], fldSdwFaces01[], fldSdwFaces00[];
 extern volatile fldSdwIndices_t fldSdwTriIndices, fldSdwQuadIndices;
-extern fldSdwTriangle_t fldSdwTriangles[50];
-extern fldSdwEdge_t fldShadowVertexTable[26][26];
 extern sdfVector4_t fldShadowTable[26][26], fldShadowTableB[26][26];
 extern sdfVector4_t fldSdwDrawVec, aViewEye, aViewTarget;
 extern sdf3DLight_t fldFixedLight;
