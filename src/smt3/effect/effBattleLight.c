@@ -391,7 +391,10 @@ char D_0054F1C8[8] = "C DEBUG";
 
 char D_0054F1D0[8] = "EFFECT";
 
-char D_0054F1D8[8] = "SYSTEM";
+char D_0054F1D8[7] = "SYSTEM";
+
+/* The menu's writable flag follows the label's terminating NUL. */
+u8 effBTLDebugMenuOn = 0;
 
 struct effPCPSparkleSphereParam_t D_0054F1E0 = { 0x10602000 };
 

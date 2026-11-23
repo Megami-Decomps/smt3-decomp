@@ -83,6 +83,7 @@ dds3DrawConfigSlider	code_0029B780	0xE4	57 of 57 words match	docs/matching/code_
 dds3BillboardManagerInit	effect/billManager	0xB8	46 of 46 words match	docs/matching/effect/billManager.md	3
 effBTLCutDraw	effect/effBattle	0x420	264 of 264 words match	docs/matching/effect/effBattle.md	3
 Cut-camera state mapping	effect	6 bytes		docs/matching/effect/effBattle.md	51
+Effect editor menu flag				docs/matching/effect/effBattleFieldAndSystemEditMenus.md	14
 EFFECT editor items				docs/matching/effect/effBattleFilterAndHelper.md	24
 Formation point-light storage				docs/matching/effect/effBattleLight.md	3
 effBTLModelGroupGetSphereExp	effect/effBattleMisc	0x270		docs/matching/effect/effBattleMisc.md	3

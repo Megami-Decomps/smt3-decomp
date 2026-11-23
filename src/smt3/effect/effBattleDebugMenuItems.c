@@ -1,6 +1,6 @@
 #include "effDebug.h"
 
-extern char D_0054F1D8[8];
+extern char D_0054F1D8[7];
 extern char D_0054F1D0[8];
 extern u32 D_0054F168[2];
 extern effDebugMenu_t D_0031CF48;

@@ -172,6 +172,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [effect/effPacket.md](effect/effPacket.md) |
 | 1 |  | [effect/effBattleLight.md](effect/effBattleLight.md) |
 | 1 |  | [effect/effBattleFilterAndHelper.md](effect/effBattleFilterAndHelper.md) |
+| 1 |  | [effect/effBattleFieldAndSystemEditMenus.md](effect/effBattleFieldAndSystemEditMenus.md) |
 | 1 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
 | 1 | basic/dds3WorldBasic | [basic/dds3WorldBasic.md](basic/dds3WorldBasic.md) |
