@@ -15,3 +15,22 @@ bank entries. All five callbacks have void contracts and no C return value.
 One-pass blocks retain their regular calls and epilogues: changing just the
 return types triggers EE sibling-call conversion. The BGM block begins at
 the command switch, after the frame check, argument snapshot, and log call.
+
+### Interpolated frame storage
+
+The movie callbacks write eight zero-initialized scene/effect parameter
+objects in the native BSS interval `[0x56CFF0, 0x56D148)`. The shared
+declarations use the callback's existing lighting array and fog, blur, and
+filter types. The 0x158-byte interval includes 0x20 bytes of alignment
+between the typed parameters. The first object is the twelve lighting
+floats consumed as three groups of four; the 0x18-byte filter ends where
+the separate event-pack script path starts. The neighboring event-viewer
+ripple object and event-pack path stay in their original raw ranges.
+
+The storage definition does not change the consumer instructions, data,
+or relocations. The linked image remains byte-identical, and the interval
+is NOBITS rather than initialized data.
+
+The five interior objects that end before the next aligned address have
+explicit sizes in the hand-curated symbol inventory. Their alignment
+bytes are not part of the C types.

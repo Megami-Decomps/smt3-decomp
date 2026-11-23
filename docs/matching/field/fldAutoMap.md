@@ -394,3 +394,13 @@ Both arrays use the types already used by their consumers. Their
 zero-fill storage ends at `0x568E90`, where `fldModelResPtr`
 starts. The following resource and treasure storage remains raw.
 The array definitions add no instructions or initialized data.
+
+## Automap position storage
+
+The native load routine writes both four-lane vectors at `0x567D00`
+and `0x567D10`, then clears 32 model positions in 0xC-byte steps
+starting at `0x567D20`. The C owner uses the same vector and XYZ
+types as the consumers. Its 416-byte native zero-fill interval ends at
+the untouched area-name lengths at `0x567EA0`. The preceding texture
+handles and alignment remain separate, as do the following name lengths
+and model slots. This does not add initialized data or code.

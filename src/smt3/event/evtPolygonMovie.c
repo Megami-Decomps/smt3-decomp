@@ -5,6 +5,7 @@
 #include "effect.h"
 #include "event.h"
 #include "evtPolygonMovie.h"
+#include "evtMovieFrameStorage.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
@@ -49,7 +50,6 @@ extern void sdfMemFreeDirect(void *aHandle);
 extern void FrameRun(evtPolygonMovieWork_t *wdata);
 #include "sdk_libc.h"
 
-extern f32 evtSceneLightParam[12];
 extern s32 strcmp(const char *a, const char *b);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, f32 *pos, f32 *rot);
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
@@ -124,13 +124,6 @@ extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
 extern u8 dds3ScreenBlurFlag;
 extern dds3LightState_t dds3LightParam;
-extern pmdSceneFogTable_t evtSceneFogParam;
-extern dds3Effect_Blur_t evtBlur2Param;
-extern dds3Effect_PartialMultiBlurParam_t evtMultBlurParam;
-extern dds3Effect_DistortionBlurParam_t evtDistBlurParam;
-extern dds3Effect_RippleBlurParam_t evtRipBlurParam;
-extern dds3Effect_PartialMultiFilterParam_t evtMultFilterParam;
-extern dds3Effect_Filter_t evtFilterParam;
 extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
 extern void Eve_BlurSetParam(dds3Effect_Blur_t *pParam);
 extern void Eve_BlurON(void);

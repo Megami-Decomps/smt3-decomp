@@ -23,9 +23,9 @@ both native and emitted sizes when they differ.
 | 11 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 11 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 10 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 9 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
-| 9 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
