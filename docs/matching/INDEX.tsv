@@ -581,6 +581,7 @@ One linked symbol scan per comparison batch				docs/matching/rodata-fill-audit.m
 Script command table				docs/matching/script/scrTraceCode.md	3
 Default triangle indices				docs/matching/sdf/sdf3DPrim.md	3
 CD streaming sector buffer				docs/matching/sdf/sdfCd.md	3
+File RPC read staging buffer				docs/matching/sdf/sdfChipAndFileRpcStorage.md	15
 sdfCorePacketGen	sdf/sdfCoreDraw	0x944	70 of 583 words match	docs/matching/sdf/sdfCoreDraw.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	22 of 22 words match	docs/matching/sdf/sdfGraph.md	3
 sdfIpuDecode	sdf/sdfIpu	0x1D0	18 of 114 words match	docs/matching/sdf/sdfIpu.md	3
@@ -596,6 +597,7 @@ sdfSndIopSizeMsg data	sdf/sdfSound	18 bytes		docs/matching/sdf/sdfSound.md	65
 Sound command packet ring				docs/matching/sdf/sdfSound.md	80
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
 Draw-thread workspace				docs/matching/sdf/sdfThreadStacks.md	23
+Hard-disk power-off workspace				docs/matching/sdf/sdfThreadStacks.md	33
 Memory-card module names				docs/matching/sdf/sdfTmx.md	3
 corePktLoadVerts	sdfVu1	0x2C		docs/matching/sdf/sdfVu1.md	3
 The corePkt VU1 packet builders written in assembly				docs/matching/sdf/sdfVu1.md	26

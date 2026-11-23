@@ -1845,7 +1845,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x58F2C0, name: sdf/sdfPadControlStorage }
       - { start: 0x452B54, type: bss, vram: 0x58F310, name: bss_after_sdf_pad_control_storage }
       - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
-      - { start: 0x452B54, type: bss, vram: 0x58FFC0, name: bss_after_sdf_cd_sector }
+      - { start: 0x452B54, type: .bss, vram: 0x58FFC0, name: sdf/sdfHddPowerOffStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x5907C0, name: bss_after_sdf_hdd_poweroff_stack }
       - { start: 0x452B54, type: .bss, vram: 0x590840, name: sdf/sdfSndCommandRingStorage }
       - { start: 0x452B54, type: .bss, vram: 0x591840, name: sdf/sdfSoundCommandStackStorage }
       - { start: 0x452B54, type: bss, vram: 0x592840, name: bss_after_sdf_sound_command_stack }
@@ -1855,6 +1856,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x594780, name: sdf/sdfDecompHistoryStorage }
       - { start: 0x452B54, type: .bss, vram: 0x5947C0, name: sdf/sdfFileRpcStateStorage }
       - { start: 0x452B54, type: bss, vram: 0x5947D8, name: bss_after_sdf_file_rpc_state }
+      - { start: 0x452B54, type: .bss, vram: 0x594940, name: sdf/sdfFileRpcReadBufferStorage }
+      - { start: 0x452B54, type: bss, vram: 0x598940, name: bss_after_sdf_file_rpc_read_buffer }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")

@@ -11,3 +11,11 @@
   following raw interval and receive buffer remain separate.
 
 Both definitions are zero-fill storage and do not change the retail image.
+
+## File RPC read staging buffer
+
+The continue-read path limits each read into `sdfFileRpcReadBuf` to
+`0x4000` bytes. This 16,384-byte buffer occupies
+`0x594940..0x598940`; the DMA environment starts at its end. The
+separate RPC receive buffer and packet storage before it are unchanged.
+The interior generated numeric labels have no separate references.
