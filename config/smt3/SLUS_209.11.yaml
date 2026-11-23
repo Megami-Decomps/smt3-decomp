@@ -1798,8 +1798,14 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x568E90, name: bss_after_field_model_slots }
       - { start: 0x452B54, type: .bss, vram: 0x56BE60, name: interface/itfMesPoolStorage }
       - { start: 0x452B54, type: bss, vram: 0x56C880, name: bss_after_message_pool }
+      - { start: 0x452B54, type: .bss, vram: 0x56C8F0, name: pb/pbMapBaseStorage }
+      - { start: 0x452B54, type: bss, vram: 0x56CD70, name: bss_after_pb_map_base }
       - { start: 0x452B54, type: .bss, vram: 0x56CFF0, name: event/evtMovieFrameStorage }
       - { start: 0x452B54, type: bss, vram: 0x56D148, name: bss_after_movie_frame_storage }
+      - { start: 0x452B54, type: .bss, vram: 0x56D190, name: facility/cmbPanelVertexStorage }
+      - { start: 0x452B54, type: bss, vram: 0x570190, name: bss_after_panel_vertices }
+      - { start: 0x452B54, type: .bss, vram: 0x573190, name: facility/cmbPanelColorStorage }
+      - { start: 0x452B54, type: bss, vram: 0x573D90, name: bss_after_panel_colors }
       - { start: 0x452B54, type: .bss, vram: 0x574E80, name: newbattle/nbResultWork }
       - { start: 0x452B54, type: bss, vram: 0x575350, name: bss_battle_after_result }
 

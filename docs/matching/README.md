@@ -13,7 +13,7 @@ both native and emitted sizes when they differ.
 |---|---|---|
 | 57 |  | [code_0022C578.md](code_0022C578.md) |
 | 27 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
-| 26 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
+| 27 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 20 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
@@ -44,6 +44,7 @@ both native and emitted sizes when they differ.
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
+| 5 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
@@ -56,7 +57,6 @@ both native and emitted sizes when they differ.
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
-| 4 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 4 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 4 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |

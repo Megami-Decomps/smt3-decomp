@@ -42,34 +42,25 @@ completed successfully, including all build/deploy steps and actual retail verif
 
 ## SelectDevil (newbattle/nbDebugProcess, 0x218)
 
-79 of 134 words match at the native 536-byte size; 55 still differ. This is
-an improved guarded draft, not an exact match. The context-parameter ABI
-above is unchanged, and the assembly fallback remains active.
+134 of 134 words match at the native 536-byte size. The routine draws ten
+rows, reloads the page base between the two text calls, and checks the right
+page control before reading the left one. The active name-table row uses the
+pre-increment row and a fresh page-base read after linking the index tag.
+Early exits and the native page limit of 374 are unchanged.
 
-The former volatile casts accessed ordinary RAM: the cursor and page-base
-small-data objects and the 64-byte pad-state buffer maintained by the kernel.
-Plain accesses still retain the cursor reload after the drawing callbacks
-and the page-base reload between the two text calls. No asynchronous writer
-or MMIO behavior is invented to force additional loads.
+The index-column coordinate, name-table pointer, tag, and name-column
+coordinate are initialized values used by the real drawing calls. Empty
+operands and localized EE register bindings retain their distinct native
+homes without emitting instructions or fencing ordinary RAM. The only
+caller-saved binding holds the previous page during arithmetic with no
+intervening call. The constraints explain this compiler output, not the
+original source spelling.
 
-Two initialized coordinates, 230 and 2720, feed the actual text arguments
-`xText << 4` and `x + 0x7000`. One empty read/write operand pair inside their
-existing loop lifetime keeps those values unscaled until their consumers.
-It emits no instruction, has no fixed-register binding or memory clobber,
-and is not a RAM-ordering barrier. Both values are dead after the drawing
-loop. This is a localized SMT3 compiler constraint, not an original-source
-claim.
-
-Paired complete-owner checks preserve all 15 compiled peers and owned data.
-The inherited cast-bearing draft emits 552 bytes and differs in 96 of the
-134 native-prefix words. Removing just the casts emits 512 bytes; ordinary
-coordinate locals emit 524 bytes. The final operand pair restores the
-96-byte frame, ten saved registers, native-sized body and per-call coordinate
-arithmetic, but leaves different saved-register assignments and scheduling.
-The no-call paging tail also forwards the current page base rather than
-performing retail's second load, and its conditional-store control flow
-still differs. Explicit branch arms alone did not resolve that tail. These
-are source/output observations; no compiler-pass trace is claimed.
+The full owner matches 17 functions. The ordinary and verbose compiler
+outputs retain the same allocated sections, ordered relocations, and symbol
+records. An extracted-source fixture checks 13,824 callback traces at each
+of two host optimization levels; the linked retail comparison remains the
+instruction and layout check.
 
 ## SelectMotData (newbattle/nbDebugProcess, 0x434)
 

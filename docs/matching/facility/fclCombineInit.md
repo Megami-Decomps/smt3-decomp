@@ -888,3 +888,14 @@ empty operand retains the loop comparison and update order. Fixed register
 bindings and empty operands preserve only the native addresses, loaded
 values, and selector state used by these operations. They emit no substitute
 instructions and do not establish the original source spelling.
+
+## Model-panel vertex and color storage
+
+The panel draw visits two banks, advancing vertices by `0x1800` bytes and
+colors by `0x600` bytes. The generator writes 64 groups of six vertex and
+color records in each selected bank, and the draw reads the same vertex
+groups. The C definitions own `0x3000` zero-fill bytes at `0x56D190` for
+vectors and `0xC00` zero-fill bytes at `0x573190` for color words. The
+unused tails after both banks stay raw. The interior generated labels
+superseded by the vertex array have no references. The consumer, retail
+file, and initialized bytes are unchanged.

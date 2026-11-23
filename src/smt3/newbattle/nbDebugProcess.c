@@ -867,68 +867,96 @@ extern char nbDebugHexIndexFmt[];
 extern s32 devilbase;
 extern s32 devilcur;
 
-/* NON_MATCHING: 55 of 134 words differ at the native 536-byte size.
- * Ordinary RAM accesses retain callback reloads. Real coordinate operands
- * retain native per-call scaling, but saved-register allocation and the
- * no-call paging tail's reload/control flow still differ. */
-#ifdef NON_MATCHING
+/* The index and name columns use distinct coordinates and reloads around
+ * their drawing calls. The EE register constraints below keep real live
+ * draw values in their native homes; they do not emit code or fence RAM. */
 s32 SelectDevil(nbDebugProcessData_t *d)
 {
-    sdfDrawTag_t *tag;
+    FAKEMATCH_ASM_REG(sdfDrawTag_t *, tag, "$18");
     frFontHandle_t *request;
-    s32 i, y, yText, attr, color, result, base, selected;
+    FAKEMATCH_ASM_REG(s32, y, "$19");
+    s32 attr, color, result, base;
+    FAKEMATCH_ASM_REG(s32, i, "$17");
+    FAKEMATCH_ASM_REG(s32, yText, "$20");
+    char **names;
     u8 button;
-    s32 xText = 0xE6;
+    FAKEMATCH_ASM_REG(s32, xText, "$21") = 0xE6;
     s32 x = 0xAA0;
 
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
+    FAKEMATCH_ASM_LIVE(tag);
     sdfDrawTagInit(tag);
     dds3ConsPanelTagLinkZ(tag, 0xA2, 0x48, 15, 20, 0xFF0000);
     y = 0x7BA0;
     yText = 80;
-    selected = devilcur;
-    for (i = 0; i < 10; i++) {
-        if (selected == i) {
+    i = 0;
+    names = text2;
+    FAKEMATCH_ASM_LIVE(names);
+
+    do {
+        s32 pageRow;
+        if (devilcur == i) {
             attr = 4;
             color = 0xFF0080;
         } else {
             attr = 0;
             color = -0x80;
         }
-        /* Keep the real coordinates unscaled until their call arguments.
-         * Both are live through the loop; this emits no memory barrier. */
-        FAKEMATCH_ASM_LIVE_PAIR(xText, x);
+        /* Keep the live raw X distinct from the format-address high half. */
+        {
+            FAKEMATCH_ASM_REG(s32, rawIndexColumn, "$30") = x;
+            FAKEMATCH_ASM_LIVE_PAIR(rawIndexColumn, y);
+            x = rawIndexColumn;
+        }
+        FAKEMATCH_ASM_LIVE_VOLATILE(xText);
         sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(x + 0x7000, y, 0xFFFF80, attr,
                                              nbDebugHexIndexFmt, devilbase + i)));
         y += 0xB0;
+        pageRow = devilbase + i;
+        ++i;
+        {
+            /* Keep the table base separate during the name-column load. */
+            FAKEMATCH_ASM_REG(char **, labels, "$23") = names;
+            FAKEMATCH_ASM_LIVE(labels);
+            names = labels;
+        }
         request = frwGetSmallFontFRQ(xText << 4, yText * 8, 0xFF0005, color,
-                                     text2[devilbase + i], NULL);
+                                     names[pageRow], NULL);
         yText += 22;
         frDrawFont((frFontHandle_t *)request);
         frDestroyFontRequestAfter((frFontHandle_t *)request);
-        selected = devilcur;
-    }
+    } while (i < 10);
     D_002F67F8.regFunc(&D_002F67F8, tag);
     result = dds3SelectMenu(0, 1, 0x180, 1, 10, NULL, &devilbase, NULL, &devilcur);
     if (result == -1 || result == 1) {
         return result;
     }
     button = ((u8)dds3PadButtonState[5]);
+    if (!(button & 2)) goto left;
     base = devilbase;
-    if ((button & 2) && base + 10 < 0x180) {
-        devilbase = base + 20 < 0x180 ? base + 10 : 0x176;
+    {
+        s32 next = base + 10;
+        if (next >= 0x180) goto left;
+        if (base + 20 >= 0x180) {
+            devilbase = 0x176;
+            goto left;
+        }
+        devilbase = next;
     }
-    button = ((u8)dds3PadButtonState[4]);
-    base = devilbase;
-    if ((button & 2) && base > 0) {
-        base -= 10;
-        devilbase = base < 0 ? 0 : base;
+left:
+    {
+        FAKEMATCH_ASM_REG(s32, previous, "$2");
+        if (!((u8)dds3PadButtonState[4] & 2)) goto done;
+        previous = devilbase;
+        if (previous > 0) {
+            previous -= 10;
+            if (previous < 0) previous = 0;
+            devilbase = previous;
+        }
     }
+done:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectDevil);
-#endif
 
 void SetSelect(void)
 {

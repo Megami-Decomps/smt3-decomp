@@ -108,3 +108,12 @@ and passes its address to the matrix builder. Its native address is only
 eight-byte aligned; the same unaligned vector type as the consumer keeps
 the four floats together. The zero alignment before and after this object
 stays outside the C owner.
+
+## Map base vertices and normals
+
+The map-base builder copies a 6-by-6 grid of full 16-byte vectors into
+each of the vertex and normal arrays. The native bases are `0x56C8F0`
+and `0x56CB30`, each with 576 zero-fill bytes. The C owner preserves
+alignment, the existing producer and draw consumer, and the following
+raw editor state at `0x56CD70`. No instructions or initialized data
+are added by these definitions.
