@@ -32,19 +32,19 @@ third word. The analogous `nmeDrawNameText` call to `nmeDrawCharRow` at
 now retain an unused word formal and both callers pass zero; no artificial
 use is added, and both 196-byte helper bodies remain exact.
 
-With that call contract restored, the retained name-string draft emits
-492 bytes against native 484, with 3 words matching in the native overlap.
-A three-byte copy in place of the volatile intermediates emits 460 bytes,
-with 5 matching words. Separating the working pixel X coordinate reaches
-14 matching words at that same size. Explicitly reusing the Y and cursor
-locals for spacing and priority emits 476 bytes with 8 matching words;
-the compiler still folds their constants rather than retaining the native
-saved registers. These controls do not qualify a body promotion.
+The matching implementation copies the three-byte template prefix and keeps
+the sprite positions separate from the later glyph positions. The glyph
+loop reloads the current work pointer and signed row count after the font
+calls. It keeps the third template byte unchanged while replacing the first
+two bytes for each glyph.
 
-The remaining question is the real source lifetime of unscaled Y, character
-spacing and zero priority. No register binding, volatile constraint or frame
-padding is justified by these controls. The existing assembly fallback and
-guarded body remain preferred pending stronger source evidence.
+The localized compiler constraints keep the actual incoming coordinates and
+running pixel positions live over the calls. The native glyph phase separately
+starts at row index zero and uses zero font priority; the tied row index
+and 18-cell stride keep the compiler from using the row register to
+initialize priority. All of those values are consumed by the renderer.
+The function matches all 484 native bytes. The other 13 owner functions
+remain exact.
 
 ## nmeDrawNameText (nme/Nme_Calc, 0x3E4)
 
