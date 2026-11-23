@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
+#include "sdf_file_rpc_state.h"
 #include "sif_rpc.h"
 
 enum {
@@ -21,8 +22,6 @@ struct TMX_HEADER_t;
 struct sdfFileCmdHandle_t;
 
 struct sdfFileRpcReadReq_t;
-
-struct sdfFileRpcCb_t;
 
 /* Read the raw free-running count from EE timer 0. */
 extern u32 sdfGetRunTimeCountBase(void);
@@ -107,15 +106,6 @@ typedef struct sdfFileRpcReadReq_t {
     s32 destinationAddress; /* Caller-provided address word in the read request. */
     s32 byteCount;
 } sdfFileRpcReadReq_t;
-
-typedef struct sdfFileRpcCb_t {
-    sdfFileCmdHandle_t *deviceState;
-    s32 semaphore;
-    s32 readResult;
-    s32 remainingBytes;
-    u8 *destination; /* +0x10: current DMA destination; advanced per completed chunk. */
-    s32 transferredBytes;
-} sdfFileRpcCb_t;
 
 extern sdfFileRpcCb_t sdfFileRpcState;
 

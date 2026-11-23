@@ -1,13 +1,12 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
+#include "sdf_pad_control.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 
 /* Declared here because no header carries these. */
 extern void *memset(void *a, s32 b, size_t c);
-
-struct sdfPadCb_t;
 
 struct sdfTexPacket_t;
 
@@ -17,25 +16,6 @@ struct sdfTexHandle_t;
 
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
-
-typedef struct sdfPadCb_t {
-    u8 port;                 /* 0x00 */
-    u8 slot;                 /* 0x01 */
-    u8 stat;                /* 0x02 */
-    u8 opaque03;
-    u8 mode;                 /* 0x04 */
-    u8 reqMode;        /* 0x05 */
-    u16 padData;             /* 0x06 */
-    u16 lastPadData;         /* 0x08 */
-    u8 opaque0A[2];
-    u32 repeatDeadline;      /* 0x0C */
-    u8 stick[4];             /* 0x10 */
-    u8 pressure[12];         /* 0x14 */
-    s16 actData;          /* 0x20 */
-    s16 actDataBack;          /* 0x22 */
-    s16 lastSmallMotor;      /* 0x24 */
-    s16 lastLargeMotor;      /* 0x26 */
-} sdfPadCb_t;
 
 #define SDF_PAD_ENTRY_COUNT 2
 

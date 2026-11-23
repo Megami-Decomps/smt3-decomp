@@ -412,3 +412,13 @@ Automap initialization clears the three slots, resource loading fills them
 from package entries 1, 3, and 5, and teardown queues each non-null handle
 for release. The four bytes at `0x567CFC` remain in raw storage before
 `fldAutoMapFieldId`. The sprite texture handles in small BSS are unchanged.
+
+## Automap name-length storage
+
+The three tables at `0x567EA0`, `0x567EF8`, and `0x567F50` hold the
+area, floor, and place name lengths used by the automap. The native font
+initializer writes 41, 41, and 24 halfwords, respectively. The definitions
+keep the signedness of the existing declarations and the six alignment
+bytes between each pair. The last 16 bytes before the model slots remain
+raw. The three definitions add 212 bytes of typed zero-fill storage and
+do not add code or initialized data.

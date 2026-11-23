@@ -1802,7 +1802,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x567CF0, name: field/fldAutoMapWindowStorage }
       - { start: 0x452B54, type: bss, vram: 0x567CFC, name: bss_after_door_events }
       - { start: 0x452B54, type: .bss, vram: 0x567D00, name: field/fldAutoMapPositions }
-      - { start: 0x452B54, type: bss, vram: 0x567EA0, name: bss_after_automap_positions }
+      - { start: 0x452B54, type: .bss, vram: 0x567EA0, name: field/fldAutoMapNameLengths }
+      - { start: 0x452B54, type: bss, vram: 0x567F80, name: bss_after_automap_name_lengths }
       - { start: 0x452B54, type: .bss, vram: 0x567F90, name: field/fldModelSlotStorage }
       - { start: 0x452B54, type: bss, vram: 0x568E90, name: bss_after_field_model_slots }
       - { start: 0x452B54, type: .bss, vram: 0x569A20, name: effect/effBattlePartCenterStorage }
@@ -1833,11 +1834,13 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x575350, name: bss_battle_after_result }
       - { start: 0x452B54, type: .bss, vram: 0x5756C0, name: sdf/sdfSystemThreadStackStorage }
       - { start: 0x452B54, type: .bss, vram: 0x5776C0, name: sdf/sdfVblankThreadStackStorage }
-      - { start: 0x452B54, type: bss, vram: 0x577EC0, name: bss_after_sdf_vblank_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x577EC0, name: sdf/sdfChipControlStorage }
+      - { start: 0x452B54, type: bss, vram: 0x577F14, name: bss_after_sdf_chip_control }
       - { start: 0x452B54, type: .bss, vram: 0x577FF0, name: sdf/sdfDisplayThreadStackStorage }
       - { start: 0x452B54, type: bss, vram: 0x578FF0, name: bss_after_sdf_display_stack }
       - { start: 0x452B54, type: .bss, vram: 0x58F0C0, name: sdf/sdfPadPortStorage }
-      - { start: 0x452B54, type: bss, vram: 0x58F2C0, name: bss_after_sdf_pad_port_storage }
+      - { start: 0x452B54, type: .bss, vram: 0x58F2C0, name: sdf/sdfPadControlStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58F310, name: bss_after_sdf_pad_control_storage }
       - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
       - { start: 0x452B54, type: bss, vram: 0x58FFC0, name: bss_after_sdf_cd_sector }
       - { start: 0x452B54, type: .bss, vram: 0x590840, name: sdf/sdfSndCommandRingStorage }
@@ -1847,7 +1850,8 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x593880, name: bss_after_sdf_sif_rpc_stack }
       - { start: 0x452B54, type: .bss, vram: 0x593F80, name: sdf/sdfIpuDecodeStackStorage }
       - { start: 0x452B54, type: .bss, vram: 0x594780, name: sdf/sdfDecompHistoryStorage }
-      - { start: 0x452B54, type: bss, vram: 0x5947C0, name: bss_after_sdf_decomp_history }
+      - { start: 0x452B54, type: .bss, vram: 0x5947C0, name: sdf/sdfFileRpcStateStorage }
+      - { start: 0x452B54, type: bss, vram: 0x5947D8, name: bss_after_sdf_file_rpc_state }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")
