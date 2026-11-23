@@ -159,3 +159,17 @@ The writable message inspector begins at cursor zero, normal mode, and
 with no linked message. The allocator, menu update and reset paths
 all consume the same three-word typed object. The following raw zero
 word belongs to neither this object nor the next message-menu table.
+
+## Message-manager pool storage
+
+The native manager at `0x56BE60` has a 0x20-byte header followed by 128
+0x14-byte list nodes. Initialization passes the complete node array and
+links all 128 entries. Each message-state pointer is at node +0xC.
+The getters and setters now use that actual member instead of indexing
+a second array from the first node's state pointer. The link helpers
+share the actual node and pool declarations with their callers.
+
+The typed zero-filled manager ends at `0x56C880`, where the separate
+`itfMesMngVarText` begins. Existing state accesses, callback order and
+trusted window-index contract are unchanged. This recovers 2,592 bytes of
+runtime storage without counting them as code or initialized data.

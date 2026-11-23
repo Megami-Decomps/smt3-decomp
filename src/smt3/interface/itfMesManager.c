@@ -3,14 +3,12 @@
 #include "fldTerminalNames.h"
 #include "newdata.h"
 #include "itfMesManager.h"
+#include "itf_mes_pool.h"
 #include "itfMesDebugState.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
 typedef struct itfMesBinTypeHeader_t itfMesBinTypeHeader_t;
-typedef struct itfMesLink_t itfMesLink_t;
-typedef struct itfMesLinkControl_t itfMesLinkControl_t;
-typedef struct itfMesManager_t itfMesManager_t;
 typedef struct debug_tag debug_tag;
 
 /* Message tables contain relocated encoded-text addresses. */
@@ -39,32 +37,6 @@ struct itfMesResource_t {
     itfMesBinTypeHeader_t entries[1];
 };
 
-/* The message manager owns 128 native 0x14-byte link records. */
-struct itfMesLink_t {
-    struct itfMesLink_t *previous;
-    struct itfMesLink_t *next;
-    s32 index;
-    instanceMes_tag *state;
-    sdfMemHandle_t *resourceHandle;
-};
-
-struct itfMesLinkControl_t {
-    itfMesLink_t *activeHead;
-    itfMesLink_t *activeTail;
-    itfMesLink_t *firstFree;
-    itfMesLink_t *lastFree;
-};
-
-struct itfMesManager_t {
-    u32 activeWindowCount;
-    sdfTexHandle_t *windowTexture;
-    u32 ctr;
-    u16 flags;
-    u16 unkE;
-    itfMesLinkControl_t pool;
-    itfMesLink_t nodes[0x80];
-};
-
 /* Named primary/secondary buttons are ports 0/1 of input bank 1. */
 enum {
     ITF_PAD_CONFIRM = 0x21,
@@ -85,9 +57,6 @@ typedef void (*itfProcessShutdown_t)(dds3ProcessID_t *task);
 s32 itfMesMngMessage(void);
 
 extern u32 scrGetMessageHandle(void);
-
-/* The message instances are the state words of itfMesMngManager.nodes. */
-SYMBOL_AT_REGION(itfMesInstance_t, pinst, itfMesMngManager, 0x2C);
 
 extern s32 scrGetIntPara(s32);
 
@@ -142,10 +111,6 @@ void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
 #define ITF_MES_DEFAULT_TEXT_Y 0xA88
 
 s32 itfMesMngInitialize(itfMesResource_t *sub);
-
-extern itfMesLink_t *itfMiscLinkTake(itfMesLinkControl_t *pstack);
-
-extern itfMesManager_t itfMesMngManager;
 
 sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
@@ -253,8 +218,6 @@ void itfMesMngInitializeManager(void);
 
 extern sdfTexHandle_t *itfMiscLoadTexture(const char *filename);
 
-extern void itfMiscLinkInitialize(itfMesLinkControl_t *pool, itfMesLink_t *nodes, s32 count, s32 stride);
-
 #define ITF_MES_WINDOW_CAPACITY 0x80
 
 #define ITF_MES_POOL_NODE_BYTES 0x14
@@ -315,8 +278,6 @@ extern void ReleaseAllWindow(struct instanceMes_tag *pinst);
 void ReleaseAllVariable(variable_tag *pvariable);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
-
-extern void itfMiscLinkGive(itfMesLink_t *pelem, itfMesLinkControl_t *pstack);
 
 u32 CheckMessageBinary(itfMesResource_t *pdata);
 
@@ -441,7 +402,7 @@ s32 itfMesMngMessage(void) {
     if (window < 0) {
         return 1;
     }
-    record = pinst[window].mes;
+    record = itfMesMngManager.nodes[window].state;
     entryIndex = scrGetIntPara(0);
     entryState = &record->message;
     status = entryState->phase;
@@ -458,17 +419,17 @@ s32 itfMesMngMessage(void) {
 
 void itfMesMngSetOffsetY1(s32 msgid, s32 y1)
 {
-    itfPnlSetPositionOffset(pinst[msgid].mes->window.mes, 0, y1, 0, 0, 0);
+    itfPnlSetPositionOffset(itfMesMngManager.nodes[msgid].state->window.mes, 0, y1, 0, 0, 0);
 }
 
 s8 itfMesMngGetPhase(s32 msgid)
 {
-    return pinst[msgid].mes->message.phase;
+    return itfMesMngManager.nodes[msgid].state->message.phase;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
 void itfMesMngSetPhase(s32 msgid, s8 phase) {
-    pinst[msgid].mes->message.phase = phase;
+    itfMesMngManager.nodes[msgid].state->message.phase = phase;
 }
 
 s32 itfMesMngSelect(void) {
@@ -481,7 +442,7 @@ s32 itfMesMngSelect(void) {
     if (window < 0) {
         return 1;
     }
-    record = pinst[window].mes;
+    record = itfMesMngManager.nodes[window].state;
     entry = scrGetIntPara(0);
     options = &record->select;
     if (options->phase == 0) {
@@ -497,17 +458,17 @@ s32 itfMesMngSelect(void) {
 
 /* Return the option-block signed status word, not the separate entry status byte. */
 s16 itfMesMngGetSelPhase(s32 msgid) {
-    return pinst[msgid].mes->select.phase;
+    return itfMesMngManager.nodes[msgid].state->select.phase;
 }
 
 void itfMesMngSetSelPhase(s32 msgid, s16 phase)
 {
-    pinst[msgid].mes->select.phase = phase;
+    itfMesMngManager.nodes[msgid].state->select.phase = phase;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes. */
 s16 itfMesMngGetSelectNo(s32 msgid) {
-    return pinst[msgid].mes->select.select;
+    return itfMesMngManager.nodes[msgid].state->select.select;
 }
 
 /* Store the script's panel mask; a negative script window is a no-op. Return 1. */
@@ -554,7 +515,7 @@ s32 itfMesMngCloseWindow(void) {
     if (window < 0) {
         return 1;
     }
-    mes = pinst[window].mes;
+    mes = itfMesMngManager.nodes[window].state;
     scriptStatus = mes->stat & ITF_MES_LOWER_STATUS_PAIR_MASK;
     if (scriptStatus == ITF_MES_LOWER_STATUS_FIRST_BIT || scriptStatus == ITF_MES_LOWER_STATUS_SECOND_BIT) {
         itfMesMngMsgWndCls(window);
@@ -566,7 +527,7 @@ s32 itfMesMngCloseWindow(void) {
 /* Mark each originally nonzero status pair with both bits, then clean/reset
  * content and clear the script panel bit. The status pairs are set, not cleared. */
 void itfMesMngMsgWndCls(s32 msgid) {
-    instanceMes_tag *mes = pinst[msgid].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[msgid].state;
     u32 previousFlags = mes->stat;
 
     if (previousFlags & ITF_MES_LOWER_STATUS_PAIR_MASK) {
@@ -733,7 +694,7 @@ s32 itfMesMngInitialize(itfMesResource_t *sub) {
 
 /* Destroy an installed nonnegative window slot; no upper-bound validation. */
 void itfMesMngRelease(s32 id) {
-    if (id >= 0 && pinst[id].mes != NULL) {
+    if (id >= 0 && itfMesMngManager.nodes[id].state != NULL) {
         DestructFlow(id);
     }
 }
@@ -751,7 +712,7 @@ extern void frSetDrawSpeed(frFontHandle_t *pFRQ, s32 Speed);
 #endif
 
 s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
-    instanceMes_tag *panel = pinst[window].mes;
+    instanceMes_tag *panel = itfMesMngManager.nodes[window].state;
     message_tag *mes = &panel->message;
     Speaker_tag *spk;
     itfMesBinMesHeader_t *table;
@@ -822,7 +783,7 @@ void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker) {
     if (id < 0) {
         return;
     }
-    mes = pinst[id].mes;
+    mes = itfMesMngManager.nodes[id].state;
     message = &mes->message;
     primaryTextBlock = &mes->speaker;
     if (message->pfont != NULL) {
@@ -850,7 +811,7 @@ extern s32 GetNumSelectItem(s32 allitem, u32 mask);
 #endif
 
 void itfMesMngRequestSelect(s32 id, s32 select) {
-    instanceMes_tag *panel = pinst[id].mes;
+    instanceMes_tag *panel = itfMesMngManager.nodes[id].state;
     select_tag *sel = &panel->select;
     itfMesBinTypeHeader_t *entry;
     itfMesBinMesHeader_t *table;
@@ -884,7 +845,7 @@ void itfMesMngRequestSelect(s32 id, s32 select) {
 /* Release option glyphs, clear option selection/state and invalidate its rank.
  * Other content and the window allocation remain installed. */
 void itfMesMngRequestSelectRelease(s32 id) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
     select_tag *optionBlock = &mes->select;
 
     if (optionBlock->pfont != NULL) {
@@ -901,12 +862,12 @@ void itfMesMngRequestSelectRelease(s32 id) {
 
 void itfMesMngSetMaskSelect(s32 id, u32 maskpattern)
 {
-    pinst[id].mes->select.mask = maskpattern;
+    itfMesMngManager.nodes[id].state->select.mask = maskpattern;
 }
 
 void itfMesMngSetSelect(s32 id, s32 selno)
 {
-    select_tag *blk = &pinst[id].mes->select;
+    select_tag *blk = &itfMesMngManager.nodes[id].state->select;
     u32 mask = blk->mask;
     s32 bit = mask & 1;
     s32 n = bit == 0;
@@ -929,7 +890,7 @@ void itfMesMngSetSelect(s32 id, s32 selno)
 
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
 void itfMesMngSetSpeakerPosition(s32 id, s32 x, s32 y) {
-    Speaker_tag *primaryTextBlock = &pinst[id].mes->speaker;
+    Speaker_tag *primaryTextBlock = &itfMesMngManager.nodes[id].state->speaker;
     s32 delta[2];
 
     delta[0] = x - primaryTextBlock->x;
@@ -944,7 +905,7 @@ void itfMesMngSetSpeakerPosition(s32 id, s32 x, s32 y) {
 
 /* Translate primary text and update its cached position, including zero deltas. */
 void itfMesMngSetSpeakerPositionOffset(s32 id, s32 x, s32 y) {
-    Speaker_tag *primaryTextBlock = &pinst[id].mes->speaker;
+    Speaker_tag *primaryTextBlock = &itfMesMngManager.nodes[id].state->speaker;
 
     ChangeFontPosition(primaryTextBlock->pfont, x, y);
     primaryTextBlock->x += x;
@@ -953,7 +914,7 @@ void itfMesMngSetSpeakerPositionOffset(s32 id, s32 x, s32 y) {
 
 /* Move selected-entry text absolutely; an unchanged position is a no-op. */
 void itfMesMngSetMesPosition(s32 id, s32 x, s32 y) {
-    message_tag *message = &pinst[id].mes->message;
+    message_tag *message = &itfMesMngManager.nodes[id].state->message;
     s32 delta[2];
 
     delta[0] = x - message->x;
@@ -968,7 +929,7 @@ void itfMesMngSetMesPosition(s32 id, s32 x, s32 y) {
 
 /* Translate selected-entry text and update its cached position. */
 void itfMesMngSetMesPositionOffset(s32 id, s32 x, s32 y) {
-    message_tag *message = &pinst[id].mes->message;
+    message_tag *message = &itfMesMngManager.nodes[id].state->message;
 
     ChangeFontPosition(message->pfont, x, y);
     message->x += x;
@@ -977,7 +938,7 @@ void itfMesMngSetMesPositionOffset(s32 id, s32 x, s32 y) {
 
 /* Move option text absolutely; an unchanged position is a no-op. */
 void itfMesMngSetSelPosition(s32 id, s32 x, s32 y) {
-    select_tag *optionBlock = &pinst[id].mes->select;
+    select_tag *optionBlock = &itfMesMngManager.nodes[id].state->select;
     s32 delta[2];
 
     delta[0] = x - optionBlock->x;
@@ -992,7 +953,7 @@ void itfMesMngSetSelPosition(s32 id, s32 x, s32 y) {
 
 /* Translate option text and update its cached position. */
 void itfMesMngSetSelPositionOffset(s32 id, s32 x, s32 y) {
-    select_tag *optionBlock = &pinst[id].mes->select;
+    select_tag *optionBlock = &itfMesMngManager.nodes[id].state->select;
 
     ChangeFontPosition(optionBlock->pfont, x, y);
     optionBlock->x += x;
@@ -1001,7 +962,7 @@ void itfMesMngSetSelPositionOffset(s32 id, s32 x, s32 y) {
 
 /* Propagate a changed render value to all three glyph chains before caching it. */
 void itfMesMngSetPriority(s32 id, s32 z_buf) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
 
     if (mes->z == z_buf) {
         return;
@@ -1014,48 +975,48 @@ void itfMesMngSetPriority(s32 id, s32 z_buf) {
 
 u32 itfMesMngGetStat(s32 id)
 {
-    return pinst[id].mes->stat;
+    return itfMesMngManager.nodes[id].state->stat;
 }
 
 /* Replace only the high half, preserving the existing low-half cast. */
 void itfMesMngSetStat(s32 id, u32 flag) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
 
     mes->stat = (u32)(u16)mes->stat | (flag & ITF_MES_HIGH_FLAGS_MASK);
 }
 
 void itfMesMngMarkBitStat(s32 id, u32 flag)
 {
-    instanceMes_tag *rec = pinst[id].mes;
+    instanceMes_tag *rec = itfMesMngManager.nodes[id].state;
 
     rec->stat |= flag & 0xFFFF0000;
 }
 
 void itfMesMngClearBitStat(s32 id, u32 flag)
 {
-    instanceMes_tag *rec = pinst[id].mes;
+    instanceMes_tag *rec = itfMesMngManager.nodes[id].state;
 
     rec->stat &= ~flag | 0xFFFF;
 }
 
 /* Return the cached clear-bit rank; reset state uses -1. */
 s16 itfMesMngGetSelect(s32 id) {
-    return pinst[id].mes->select.select;
+    return itfMesMngManager.nodes[id].state->select.select;
 }
 
 /* Return the selected table's cached item count, without another table lookup. */
 s16 itfMesMngGetMesPage(s32 id) {
-    return pinst[id].mes->message.maxpage;
+    return itfMesMngManager.nodes[id].state->message.maxpage;
 }
 
 /* Return the stored signed-halfword item index, without another table lookup. */
 s16 itfMesMngGetMesCurrentPage(s32 id) {
-    return pinst[id].mes->message.page;
+    return itfMesMngManager.nodes[id].state->message.page;
 }
 
 /* Return the replacement text stored in a window slot. */
 u8 *itfMesMngGetVar(s32 id, s32 index) {
-    return EE_ADDR_AS(u8 *, pinst[id].mes->variable.pptr[index]);
+    return EE_ADDR_AS(u8 *, itfMesMngManager.nodes[id].state->variable.pptr[index]);
 }
 
 
@@ -1201,18 +1162,18 @@ void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesMngSetVarImmediate(s32 id, u32 index, const char *pstr) {
-    SetVar(pinst[id].mes, index, pstr, 0);
+    SetVar(itfMesMngManager.nodes[id].state, index, pstr, 0);
 }
 
 /* Copy text into one of the window's message text slots. */
 void itfMesMngSetVarImmediate2(s32 id, s32 index, const char *pstr, s32 length) {
-    SetVar(pinst[id].mes, index, pstr, length);
+    SetVar(itfMesMngManager.nodes[id].state, index, pstr, length);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
  * the temporary font entry. Return the previous resource without releasing it. */
 itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
     itfMesResource_t *previous = mes->pdata;
     itfMesBinTypeHeader_t *entry;
     u8 *temporaryFontEntry;
@@ -1232,13 +1193,13 @@ itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
 
 /* Look up an entry-table item; only the item index has a bounds check. */
 u8 *itfMesMngGetDataPtrImmediate(s32 id, s32 message, s32 page) {
-    return GetMessagePagePtr(GetTypeHeader(pinst[id].mes, message)->ptr, page);
+    return GetMessagePagePtr(GetTypeHeader(itfMesMngManager.nodes[id].state, message)->ptr, page);
 }
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * Release the old primitive after applying the panel mode and fade limit. */
 void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
     window_tag *panelBlock = &mes->window;
 
     if ((mes->stat & ITF_MES_UPPER_STATUS_PAIR_MASK) == 0) {
@@ -1255,7 +1216,7 @@ void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha) {
 
 /* Set or append the option with `id` in the window's option list; ids 1, 6, 7 and >= 16 are rejected. */
 s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index) {
-    select_tag *optionBlock = &pinst[id].mes->select;
+    select_tag *optionBlock = &itfMesMngManager.nodes[id].state->select;
     defkey_tag *option = NULL;
     s32 optionIndex;
 
@@ -1286,7 +1247,7 @@ s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index) {
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */
 s32 itfMesMngGetWidth(s32 id, s32 message, s32 page) {
-    instanceMes_tag *mes = pinst[id].mes;
+    instanceMes_tag *mes = itfMesMngManager.nodes[id].state;
     itfMesBinMesHeader_t *table;
     u8 *encodedText;
     frFontHandle_t *glyphChain;
@@ -1312,12 +1273,12 @@ s32 itfMesMngGetWidth(s32 id, s32 message, s32 page) {
 
 /* Set the fourth color channel used when this window's entry glyphs are built. */
 void itfMesMngSetDefaultSpeed(s32 id, u8 speed) {
-    pinst[id].mes->message.color[3] = speed;
+    itfMesMngManager.nodes[id].state->message.color[3] = speed;
 }
 
 /* Store the optional callback address invoked without arguments during glyph building. */
 void itfMesMngSetKutiCallback(s32 id, void (*func)(void)) {
-    pinst[id].mes->func_kuti = EE_ADDR(func);
+    itfMesMngManager.nodes[id].state->func_kuti = EE_ADDR(func);
 }
 
 /* Initialize the fixed window pool, load its texture and register the named
@@ -1329,7 +1290,7 @@ void itfMesMngInitializeManager(void) {
     itfMesMngManager.ctr = 0;
     itfMesMngManager.flags = 0;
     itfMesMngManager.windowTexture = itfMiscLoadTexture("/itf/MESWIN.TMX");
-    itfMiscLinkInitialize(&itfMesMngManager.pool, itfMesMngManager.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
+    itfMiscLinkInitialize(&itfMesMngManager.pool, &itfMesMngManager.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
     for (poolNode = itfMesMngManager.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->state = NULL;
     }

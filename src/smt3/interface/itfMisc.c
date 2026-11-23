@@ -1,6 +1,7 @@
 #include "common.h"
 #include "interface.h"
 #include "itf_color_vector.h"
+#include "itf_mes_pool.h"
 #include "libsdf.h"
 #include "kernel.h"
 
@@ -25,20 +26,6 @@ typedef struct frFontRequest_t
     struct frFontRequest_t *prev;
     u8 unk28[0x1C];
 } frFontRequest_t;
-
-typedef struct itfLink_t
-{
-    struct itfLink_t *previous;
-    struct itfLink_t *next;
-    s32 index;
-    void *state;
-    sdfMemHandle_t *resourceHandle;
-} itfLink_t;
-
-typedef struct
-{
-    itfLink_t *puse_top, *puse_tail, *pdisuse_top, *pdisuse_tail;
-} itfmisclinkstack_t;
 
 typedef struct { u8 unk00[0x20]; u64 value, registerCode; } itfGsState_t;
 
@@ -119,84 +106,88 @@ extern void dds3AdminiExitSequence(void);
 
 /* Initialize a FIFO free list and empty active list.
  * Native do/while writes at least two nodes; the s8 index can wrap. */
-void itfMiscLinkInitialize(itfmisclinkstack_t *pool, itfLink_t *nodes, s32 count, s32 stride) {
+void itfMiscLinkInitialize(itfMesLinkControl_t *pool, void *storage, s32 count, s32 stride) {
     s8 index = 0;
-    itfLink_t *previous = NULL;
-    itfLink_t *node = nodes;
-    itfLink_t *next;
+    itfMesLink_t *previous = NULL;
+    itfMesLink_t *nodes = storage;
+    u8 *cursor = storage;
+    itfMesLink_t *node;
 
     do {
+        u8 *next;
         count--;
-        next = (itfLink_t *)((u8 *)node + stride);
+        node = (itfMesLink_t *)cursor;
+        next = cursor + stride;
         node->previous = previous;
         node->index = index;
         index++;
-        node->next = next;
+        node->next = (itfMesLink_t *)next;
         previous = node;
-        node = next;
+        cursor = next;
     } while (count >= 2);
+    node = (itfMesLink_t *)cursor;
     node->previous = previous;
     node->index = index;
     node->next = NULL;
-    pool->pdisuse_tail = node;
-    pool->pdisuse_top = nodes;
-    pool->puse_tail = NULL;
-    pool->puse_top = NULL;
+    pool->lastFree = node;
+    pool->firstFree = nodes;
+    pool->activeTail = NULL;
+    pool->activeHead = NULL;
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
-itfLink_t *itfMiscLinkTake(itfmisclinkstack_t *pstack) {
-    itfLink_t *node = pstack->pdisuse_top;
-    itfLink_t *next;
+itfMesLink_t *itfMiscLinkTake(itfMesLinkControl_t *pstack) {
+    itfMesLink_t *node = pstack->firstFree;
+    itfMesLink_t *next;
 
     if (node == NULL) {
         return NULL;
     }
     next = node->next;
-    if (pstack->puse_top != NULL) {
-        node->previous = pstack->puse_tail;
-        pstack->puse_tail->next = node;
+    if (pstack->activeHead != NULL) {
+        node->previous = pstack->activeTail;
+        pstack->activeTail->next = node;
     } else {
         node->previous = NULL;
-        pstack->puse_top = node;
+        pstack->activeHead = node;
     }
     node->next = NULL;
-    pstack->puse_tail = node;
+    pstack->activeTail = node;
     if (next != NULL) {
         next->previous = NULL;
     } else {
-        pstack->pdisuse_tail = NULL;
+        pstack->lastFree = NULL;
     }
-    pstack->pdisuse_top = next;
+    pstack->firstFree = next;
     return node;
 }
 
 /* Unlink an active node and append it to the free-list tail; membership is trusted. */
-void itfMiscLinkGive(itfLink_t *pelem, itfmisclinkstack_t *pstack) {
-    itfLink_t *previous = pelem->previous;
-    itfLink_t *next = pelem->next;
+void itfMiscLinkGive(itfMesLink_t *pelem, itfMesLinkControl_t *pstack) {
+    itfMesLink_t *previous = pelem->previous;
+    itfMesLink_t *next = pelem->next;
 
     if (previous != NULL) {
         previous->next = next;
     } else {
-        pstack->puse_top = next;
+        pstack->activeHead = next;
     }
     if (next != NULL) {
         next->previous = previous;
     } else {
-        pstack->puse_tail = previous;
+        pstack->activeTail = previous;
     }
     pelem->next = NULL;
     {
-        itfLink_t *lastFree = pstack->pdisuse_tail;
+        itfMesLink_t *lastFree = pstack->lastFree;
         pelem->previous = lastFree;
         if (lastFree != NULL) {
             lastFree->next = pelem;
         }
     }
-    pstack->pdisuse_tail = pelem;
-    if (pstack->pdisuse_top == NULL) {
-        pstack->pdisuse_top = pelem;
+    pstack->lastFree = pelem;
+    if (pstack->firstFree == NULL) {
+        pstack->firstFree = pelem;
     }
 }
 

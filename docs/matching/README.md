@@ -46,6 +46,7 @@ both native and emitted sizes when they differ.
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
+| 5 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 5 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
@@ -63,7 +64,6 @@ both native and emitted sizes when they differ.
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 4 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 4 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
-| 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 4 | field/fldWap | [field/fldWap.md](field/fldWap.md) |

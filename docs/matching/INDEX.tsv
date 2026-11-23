@@ -301,6 +301,7 @@ DrawSelectCursor	interface/itfMesManager	0x2FC	191 of 191 words match	docs/match
 itfMesMngGetVarLocalize	interface/itfMesManager	0xAC	One of thirty-four words matches	docs/matching/interface/itfMesManager.md	25
 Message selection rectangle indices				docs/matching/interface/itfMesManager.md	151
 Message inspector startup state	interface	12 bytes		docs/matching/interface/itfMesManager.md	156
+Message-manager pool storage				docs/matching/interface/itfMesManager.md	163
 Gauge highlight strip indices				docs/matching/interface/itfMisc.md	3
 Plain full-color and normal quad index rows	interface	56 bytes		docs/matching/interface/itfPanel.md	3
 Panel draw callbacks	interface	36 bytes		docs/matching/interface/itfPanel.md	11

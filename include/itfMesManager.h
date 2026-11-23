@@ -102,7 +102,4 @@ struct instanceMes_tag {
     addr_t func_kuti;
 };
 
-/* pinst[window].mes: NULL while the window is free. */
-typedef struct { instanceMes_tag *mes; u8 unk04[0x10]; } itfMesInstance_t;
-
 #endif

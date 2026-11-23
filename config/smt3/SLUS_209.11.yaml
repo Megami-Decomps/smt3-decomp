@@ -1794,6 +1794,8 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x567EA0, name: bss_after_automap_positions }
       - { start: 0x452B54, type: .bss, vram: 0x567F90, name: field/fldModelSlotStorage }
       - { start: 0x452B54, type: bss, vram: 0x568E90, name: bss_after_field_model_slots }
+      - { start: 0x452B54, type: .bss, vram: 0x56BE60, name: interface/itfMesPoolStorage }
+      - { start: 0x452B54, type: bss, vram: 0x56C880, name: bss_after_message_pool }
       - { start: 0x452B54, type: .bss, vram: 0x56CFF0, name: event/evtMovieFrameStorage }
       - { start: 0x452B54, type: bss, vram: 0x56D148, name: bss_after_movie_frame_storage }
       - { start: 0x452B54, type: .bss, vram: 0x574E80, name: newbattle/nbResultWork }
