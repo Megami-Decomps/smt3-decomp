@@ -404,3 +404,11 @@ types as the consumers. Its 416-byte native zero-fill interval ends at
 the untouched area-name lengths at `0x567EA0`. The preceding texture
 handles and alignment remain separate, as do the following name lengths
 and model slots. This does not add initialized data or code.
+
+## Automap window texture handles
+
+`fldAutoMapWindowTex` owns three texture-handle pointers at `0x567CF0`.
+Automap initialization clears the three slots, resource loading fills them
+from package entries 1, 3, and 5, and teardown queues each non-null handle
+for release. The four bytes at `0x567CFC` remain in raw storage before
+`fldAutoMapFieldId`. The sprite texture handles in small BSS are unchanged.

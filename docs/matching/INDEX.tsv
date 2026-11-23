@@ -238,6 +238,7 @@ NPC resource paths				docs/matching/field/fldAutoMap.md	370
 Full-open diagnostic text				docs/matching/field/fldAutoMap.md	378
 Field model and blur slot storage				docs/matching/field/fldAutoMap.md	387
 Automap position storage				docs/matching/field/fldAutoMap.md	398
+Automap window texture handles				docs/matching/field/fldAutoMap.md	408
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42

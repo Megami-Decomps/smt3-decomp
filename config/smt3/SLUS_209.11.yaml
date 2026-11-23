@@ -1799,7 +1799,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x55DC30, name: field/fldEveHitStorage }
       - { start: 0x452B54, type: .bss, vram: 0x562830, name: field/fldDoorEventTable }
       - { start: 0x452B54, type: .bss, vram: 0x567C30, name: field/fldSe3DTable }
-      - { start: 0x452B54, type: bss, vram: 0x567CF0, name: bss_after_door_events }
+      - { start: 0x452B54, type: .bss, vram: 0x567CF0, name: field/fldAutoMapWindowStorage }
+      - { start: 0x452B54, type: bss, vram: 0x567CFC, name: bss_after_door_events }
       - { start: 0x452B54, type: .bss, vram: 0x567D00, name: field/fldAutoMapPositions }
       - { start: 0x452B54, type: bss, vram: 0x567EA0, name: bss_after_automap_positions }
       - { start: 0x452B54, type: .bss, vram: 0x567F90, name: field/fldModelSlotStorage }
@@ -1825,10 +1826,20 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x574A60, name: camp/cmpViewPacketStorage }
       - { start: 0x452B54, type: .bss, vram: 0x574E80, name: newbattle/nbResultWork }
       - { start: 0x452B54, type: bss, vram: 0x575350, name: bss_battle_after_result }
+      - { start: 0x452B54, type: .bss, vram: 0x5756C0, name: sdf/sdfSystemThreadStackStorage }
+      - { start: 0x452B54, type: .bss, vram: 0x5776C0, name: sdf/sdfVblankThreadStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x577EC0, name: bss_after_sdf_vblank_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x577FF0, name: sdf/sdfDisplayThreadStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x578FF0, name: bss_after_sdf_display_stack }
       - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
       - { start: 0x452B54, type: bss, vram: 0x58FFC0, name: bss_after_sdf_cd_sector }
       - { start: 0x452B54, type: .bss, vram: 0x590840, name: sdf/sdfSndCommandRingStorage }
-      - { start: 0x452B54, type: bss, vram: 0x591840, name: bss_after_sdf_sound_command_ring }
+      - { start: 0x452B54, type: .bss, vram: 0x591840, name: sdf/sdfSoundCommandStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x592840, name: bss_after_sdf_sound_command_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x592880, name: sdf/sdfSifRpcStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x593880, name: bss_after_sdf_sif_rpc_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x593F80, name: sdf/sdfIpuDecodeStackStorage }
+      - { start: 0x452B54, type: bss, vram: 0x594780, name: bss_after_sdf_ipu_decode_stack }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")
