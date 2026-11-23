@@ -3639,9 +3639,6 @@ extern void effBTLModelAllPopPosition(void);
 extern void effBTLModelAllPopRotate(void);
 
 
-/* NON_MATCHING: 179 of 230 words differ, 4 words short; retail nops four
- * branch delay slots this fills with the next comparison constant. */
-#ifdef NON_MATCHING
 s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
 {
     nbCameraSkillInfo_t work;
@@ -3654,10 +3651,14 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
     skill = effBTLSkillGetID();
     switch (id) {
     case 0x100:
-        if (skill == 0xA || skill == 0xF4) {
-            return nbCameraBoss_Foru_SIMON_Set(pNbCamera);
+        if (skill == 0xA) {
+            goto invoke_foru;
         }
-        return 0;
+        if (skill != 0xF4) {
+            goto reject_cut;
+        }
+invoke_foru:
+        return nbCameraBoss_Foru_SIMON_Set(pNbCamera);
     case 0x101:
     case 0x111:
     case 0x113:
@@ -3673,31 +3674,35 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
         if (skill == 0xBF) {
             return nbCameraBoss_Sp_PSYSTL_Set(pNbCamera);
         }
-        return 0;
+        goto reject_cut;
     case 0x10D:
         if (skill != 0xE9) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Ongy_BUNSIN_Set(pNbCamera);
     case 0x11F:
         if (skill == 0xF2) {
             return nbCameraBoss_Samael_AKUI_Set(pNbCamera);
         }
-        if (skill == 0 || skill == 0xA5) {
-            nbCameraBoss_TargetInvoke_Set(pNbCamera, 0.0f, 0.55f);
-            return 1;
+        if (skill == 0) {
+            goto invoke_target;
         }
-        return 0;
+        if (skill != 0xA5) {
+            goto reject_cut;
+        }
+invoke_target:
+        nbCameraBoss_TargetInvoke_Set(pNbCamera, 0.0f, 0.55f);
+        return 1;
     case 0x115:
         if (skill != 0x9B) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Sukady_DAIJIS_Set(pNbCamera);
     case 0x146:
     case 0x147:
     case 0x148:
         if (skill != 0) {
-            return 0;
+            goto reject_cut;
         }
         effBTLModelAllPopPosition();
         effBTLModelAllPopRotate();
@@ -3705,7 +3710,7 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
         return 1;
     case 0x120:
         if (skill != 0xC9) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Baal_BAELNO_Set(pNbCamera);
     case 0x124:
@@ -3713,7 +3718,7 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
             return nbCameraBoss_Bsnet_Attack_Set(pNbCamera);
         }
         if (skill != 0xEA) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Bsnet_AISHOH_Set(pNbCamera);
     case 0x103:
@@ -3722,18 +3727,18 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
             return 1;
         }
         if (skill != 0xEA) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Bsnet_AISHOH_Set(pNbCamera);
     case 0x123:
         if (skill != 0xAB) {
-            return 0;
+            goto reject_cut;
         }
         nbCameraBoss_TargetInvoke_Set(pNbCamera, 15.0f, 0.55f);
         return 1;
     case 0x102:
         if (skill != 0xAE) {
-            return 0;
+            goto reject_cut;
         }
         nbCameraBoss_TargetInvoke_Set(pNbCamera, -5.0f, 0.9f);
         return 1;
@@ -3748,7 +3753,7 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
             return nbCameraBoss_Kagu_FLEACH_Set(pNbCamera);
         }
         if (skill != 0xF1) {
-            return 0;
+            goto reject_cut;
         }
         nbCameraBoss_Kagu_MJINKO_Type = dds3GetRandIntA(0, 3);
         return nbCameraBoss_Kagu_MJINKO_Set(pNbCamera);
@@ -3757,38 +3762,38 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
             return nbCameraBoss_Pish_PRESS_Set(pNbCamera);
         }
         if (skill != 0xDD) {
-            return 0;
+            goto reject_cut;
         }
         return 1;
     case 0x156:
         if (skill != 0xEB) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Meta_METAT1_0_Set(pNbCamera);
     case 0x157:
         if (skill != 0x103) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Beru_HAENO1_Set(pNbCamera);
     case 0x158:
         if (skill != 0x111) {
-            return 0;
+            goto reject_cut;
         }
         return nbCameraBoss_Lusi_OHNOOH_Set(pNbCamera);
     case 0xCB:
     case 0x161:
         if (skill != 0x9F) {
-            return 0;
+            goto reject_cut;
         }
         nbCameraShot_InvokeTargetParty_Set2(pNbCamera, &work);
         return 1;
     default:
-        return 0;
+        goto reject_cut;
     }
+
+reject_cut:
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
-#endif
 
 s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
 {
