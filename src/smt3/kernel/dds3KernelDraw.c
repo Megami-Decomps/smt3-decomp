@@ -328,7 +328,7 @@ void dds3FreeRenderTexture(void);
 sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 void *sdfGrAllocPacketBuff(u32 aSize);
 void sdfDrawTagInit(sdfDrawTag_t *a);
-void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 void *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
@@ -382,16 +382,16 @@ void dds3InitDrawEnvSub(s32 i)
     sdfGrLinkStdDrawEnv(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].preDrawTag,
         &dds3DrawEnv[i].stdEnv);
     sdf3DMakeViewportPacket(&dds3DrawEnv[i].viewport, &dds3ScreenParam, &sdfViewMatrix);
-    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].viewport);
+    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, EE_ADDR(&dds3DrawEnv[i].viewport));
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].light, dds3LightParam.parallel,
         &dds3AmbientColor);
-    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].light);
+    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, EE_ADDR(&dds3DrawEnv[i].light));
     sdfDrawTagInit(&dds3DrawEnv[i].subTag);
     sdf3DMakeViewportPacket(&dds3DrawEnv[i].subViewport, &dds3ScreenParam2, &aProjMatrix);
-    sdfDrawTagLink(&dds3DrawEnv[i].subTag, &dds3DrawEnv[i].subViewport);
+    sdfDrawTagLink(&dds3DrawEnv[i].subTag, EE_ADDR(&dds3DrawEnv[i].subViewport));
     sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].subLight, dds3LightParam2.parallel,
         &dds3AmbientColor2);
-    sdfDrawTagLink(&dds3DrawEnv[i].subTag, &dds3DrawEnv[i].subLight);
+    sdfDrawTagLink(&dds3DrawEnv[i].subTag, EE_ADDR(&dds3DrawEnv[i].subLight));
 }
 
 void dds3InitDrawEnv(void)
@@ -423,11 +423,11 @@ void dds3InitRenderDrawEnv(void)
         sdfDrawTagInit(&dds3DrawEnv[i].renderTag);
         sdfGrSetDrawEnv(&dds3DrawEnv[i].renderEnv, &dds3RenderTexId, 0);
         dds3DrawEnv[i].renderEnv.clear.clearColor = dds3RenderDrawEnv;
-        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderEnv);
+        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, EE_ADDR(&dds3DrawEnv[i].renderEnv));
         sdf3DMakeViewportPacket(&dds3DrawEnv[i].renderViewport, &dds3RenderScreenParam, &dds3RenderViewportMatrix);
-        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderViewport);
+        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, EE_ADDR(&dds3DrawEnv[i].renderViewport));
         sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].renderLight, dds3RenderLightParallel, &dds3RenderAmbientColor);
-        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, &dds3DrawEnv[i].renderLight);
+        sdfDrawTagLink(&dds3DrawEnv[i].renderTag, EE_ADDR(&dds3DrawEnv[i].renderLight));
     }
 }
 
@@ -618,7 +618,7 @@ sdfDrawTag_t *dds3LinkZClearDrawTag(s32 sw)
 {
     sdfDrawTag_t *tag = dds3FontReqAllocDrawTag();
 
-    sdfDrawTagLink(tag, &dds3ZClearDrawTag[sw][dds3GetFrameID()]);
+    sdfDrawTagLink(tag, EE_ADDR(&dds3ZClearDrawTag[sw][dds3GetFrameID()]));
     return tag;
 }
 
@@ -745,10 +745,10 @@ void dds3DrawDistRipOverError(void)
             tag = sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(tag);
             if ((s32)distblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", distblurovercnt));
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", distblurovercnt)));
             }
             if ((s32)ripblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", ripblurovercnt));
+                sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", ripblurovercnt)));
             }
             {
                 sdfGrOt_t *ot = &sdfGrOtTable[81];
@@ -803,7 +803,7 @@ void dds3DrawFade(void)
         dds3FadePacket[frameId].sprite[3].reg = 5;
         dds3FadePacket[frameId].sprite[3].data = 0xFEFFFF87009000;
         list = dds3FontReqAllocDrawTag();
-        sdfDrawTagLink(list, &dds3FadePacket[frameId]);
+        sdfDrawTagLink(list, EE_ADDR(&dds3FadePacket[frameId]));
         descriptor = &sdfGrOtTable[79];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, list);
     }
@@ -1842,7 +1842,7 @@ void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32
     command = (dds3GsCommand_t *)sdf2DMakeStdPacket(packet, 0x30);
     command->write.data = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     command->write.reg = 0x47;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
@@ -1890,7 +1890,7 @@ void eglLinkAlpha(s32 mode)
         break;
     }
     command->write.reg = 0x42;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
@@ -1986,7 +1986,7 @@ void eglLinkBox(s32 x, s32 y, s32 w, s32 h,
             ((u64)(coords[i][1] + 0x7900) << 32);
         registers++;
     }
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
     descriptor = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
@@ -2040,7 +2040,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 rgba0, s32 r
             ((u64)(coords[i][1] + 0x7900) << 32);
         registers++;
     }
-    sdfDrawTagLink(command, packet);
+    sdfDrawTagLink(command, EE_ADDR(packet));
     descriptor = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
@@ -2083,7 +2083,7 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     colors[2] = color3;
     colors[3] = color1;
     strip[0] = eglPolyStripWord[0];
-    sdfDrawTagLink(list, sdf3DPrimMakePoly(&desc));
+    sdfDrawTagLink(list, EE_ADDR(sdf3DPrimMakePoly(&desc)));
     surface = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
@@ -2139,7 +2139,7 @@ void eglLinkTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0, s32 color1, f32 x1, f32
     uvs[2].y = v1;
     uvs[3].x = u1;
     uvs[3].y = v0;
-    sdfDrawTagLink(list, sdf3DPrimMakePoly(&desc));
+    sdfDrawTagLink(list, EE_ADDR(sdf3DPrimMakePoly(&desc)));
     surface = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
     sdfMatFreeDelayed(asset);
@@ -2158,7 +2158,7 @@ void eglLinkLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, u32 color0, u32
     eglLineColors[0] = color0;
     list = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, effDebugDrawWireModel(eglLineVerts, eglLineColors, 2, 0x80));
+    sdfDrawTagLink(list, EE_ADDR(effDebugDrawWireModel(eglLineVerts, eglLineColors, 2, 0x80)));
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
@@ -2174,9 +2174,9 @@ void eglLinkPrint(s32 x, s32 y, u32 col, const char *str)
     list = dds3FontReqAllocDrawTag();
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(list, EE_ADDR(packet));
     sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, col);
-    sdfDrawTagLink(list, sdfDevPrintfEx(&sifParameters, str));
+    sdfDrawTagLink(list, EE_ADDR(sdfDevPrintfEx(&sifParameters, str)));
     surface = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }

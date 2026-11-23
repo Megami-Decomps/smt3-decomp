@@ -315,6 +315,7 @@ PrimLine 3D geometry data	kernel/dds3GlobalWork	264 bytes		docs/matching/kernel/
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/matching/kernel/dds3KernelDraw.md	3
 Quad triangle index word				docs/matching/kernel/dds3KernelDraw.md	81
 Off-screen parallel light pointers				docs/matching/kernel/dds3KernelDraw.md	88
+Draw tag packet addresses				docs/matching/kernel/dds3KernelDraw.md	95
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 CallNewBattleTest	kernel/dds3SequenceList	0x4C		docs/matching/kernel/dds3SequenceList.md	3
 dds3Titlemain	kernel/dds3TitleMain	0xD20	840 of 840 words match	docs/matching/kernel/dds3TitleMain.md	3

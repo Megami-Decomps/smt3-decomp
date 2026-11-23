@@ -91,3 +91,14 @@ The light-packet setup reads positions 0 through 2 of the list passed
 by the off-screen draw environment. Its three targets are the existing
 writable 64-byte render-light objects, in native order. The unconsumed
 zero word before the aligned ambient vector remains raw.
+
+## Draw tag packet addresses
+
+`sdfDrawTagLink` takes an encoded EE packet address (`addr_t`), not a C
+pointer. Its 20 calls in this owner now use that declaration and apply
+`EE_ADDR` at the pointer boundary. The provider stores the original
+address in the draw-tag head or tail and only masks the address when
+encoding the previous DMA tag's NEXT link. The callers must not mask it
+themselves. All 20 native calls reach the same unchanged provider.
+The complete owner assembles identically before and after the correction,
+including every relocation; this does not change matching totals.
