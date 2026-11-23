@@ -66,6 +66,7 @@ both native and emitted sizes when they differ.
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 4 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
+| 4 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
@@ -84,7 +85,6 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 3 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
-| 3 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
 | 3 | field/fldMain | [field/fldMain.md](field/fldMain.md) |
 | 3 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 3 | facility/fclShopUpdate | [facility/fclShopUpdate.md](facility/fclShopUpdate.md) |

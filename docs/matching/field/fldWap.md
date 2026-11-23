@@ -102,3 +102,17 @@ bounded allocation, and the production proof verifies the owner and
 both linked alias addresses without counting them as additional data.
 The 34 existing references in `fldWap` and `fldInf` keep their resolved
 addresses. Existing NOBITS alias handling is unchanged.
+
+## Runtime door movement storage
+
+The door-event work table is 256 consecutive 0x54-byte records, starting
+at `0x562830`. The native clear loop walks the full table but deliberately
+leaves the counter limit at +0x20 untouched. `fldFindDoorEvent` sets that
+limit before `fldDoor_Step` uses it. The original reader type and code are
+unchanged; the C definition supplies only the zero-filled storage.
+
+The table ends at `0x567C30`, where the separate `fldSe3DTable` begins.
+The adjacent event-hit records before the table remain assembly-owned.
+The stock aggregate's natural alignment leaves both established
+boundaries intact. These 21,504 bytes have no initialized-data or code
+matching credit.

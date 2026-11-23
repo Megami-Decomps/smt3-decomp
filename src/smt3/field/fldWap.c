@@ -1,4 +1,5 @@
 #include "fpu.h"
+#include "fldDoorEventTable.h"
 #include "fldTerminalRoutes.h"
 #include "common.h"
 #include "fldWap.h"
@@ -245,33 +246,6 @@ extern s32 gFldWap_after_nextidx;
 extern s32 fldPlayerFastMode;
 
 extern f32 fldWmapPlayerState;
-
-/* fldDoorEventTable stride, 84 bytes; the clear leaves +0x20 alone. */
-typedef struct {
-    s32 stat;
-    s32 evehit_resid;
-    s32 mode1;
-    s32 matter_resid1;
-    s32 mode2;
-    s32 matter_resid2;
-    s32 cnt1;
-    s32 cnt2;
-    s32 cntmax;
-    f32 x1;
-    f32 y1;
-    f32 z1;
-    f32 mx1;
-    f32 my1;
-    f32 mz1;
-    f32 x2;
-    f32 y2;
-    f32 z2;
-    f32 mx2;
-    f32 my2;
-    f32 mz2;
-} doormovework_s;
-
-extern doormovework_s fldDoorEventTable[256];
 
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
 
