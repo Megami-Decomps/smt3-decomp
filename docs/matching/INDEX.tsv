@@ -315,7 +315,7 @@ Quad triangle index word				docs/matching/kernel/dds3KernelDraw.md	81
 Off-screen parallel light pointers				docs/matching/kernel/dds3KernelDraw.md	88
 dds3DrawFirstProcess	kernel/dds3KernelProcess	0x58C		docs/matching/kernel/dds3KernelProcess.md	3
 CallNewBattleTest	kernel/dds3SequenceList	0x4C		docs/matching/kernel/dds3SequenceList.md	3
-dds3Titlemain	kernel/dds3TitleMain	0xD20	307 of 834 words match	docs/matching/kernel/dds3TitleMain.md	3
+dds3Titlemain	kernel/dds3TitleMain	0xD20	840 of 840 words match	docs/matching/kernel/dds3TitleMain.md	3
 slSaveData_writeFile	mc/slMain	0x238	94 of 142 words match	docs/matching/mc/slMain.md	3
 slFileSelCalc	mc/slMain	0x340	208 of 208 words match	docs/matching/mc/slMain.md	76
 slCopyNonZero	mc/slMain	0x40	16 of 16 words match	docs/matching/mc/slMain.md	139
@@ -658,9 +658,9 @@ sceSifMInitRpc	sdk/libmrpc	196 bytes	49 of 49 words match	docs/matching/sdk/libm
 sceSifMUnBindRpc	sdk/libmrpc	284 bytes	71 of 71 words now match	docs/matching/sdk/libmrpc.md	42
 _request_end	sdk/libmrpc	264 bytes	66 of 66 words match	docs/matching/sdk/libmrpc.md	135
 scePadPortOpen				docs/matching/sdk/libpad.md	3
-dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
-dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
-titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
-sndInit packed MIDI ID				docs/matching/sound/sndManager.md	127
+dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	9
+dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	43
+titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	95
+sndInit packed MIDI ID				docs/matching/sound/sndManager.md	133
 stfMain2	staff/stfMain	0x2D4	155 of 181 words match	docs/matching/staff/stfMain.md	3
 ObjDispOff	staff/stfMain	0x504	321 of 321 words match	docs/matching/staff/stfMain.md	68

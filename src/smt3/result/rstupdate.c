@@ -1323,24 +1323,6 @@ void func_002262D8(void) {
 void func_002262E0(void) {
 }
 
-const char D_0053DCD0[24] __attribute__((aligned(16))) = "from the beginning.";
-
-const char D_0053DCE8[16] = "Start the game";
-
-const char D_0053DCF8[16] = "from a save.";
-
-const char D_0053DD08[16] = "of the game.";
-
-const char D_0053DD18[24] = "Adjust the settings";
-
-const char D_0053DD30[24] = "coming from Atlus.";
-
-const char D_0053DD48[16] = "the latest game";
-
-const char D_0053DD58[16] = "Check out";
-
-const char dds3TitleTexPath[24] = "/title/titletex.LB";
-
 char rstParamValueFormat[8] = "%d";
 
 char D_0054FD08[8] = "1";

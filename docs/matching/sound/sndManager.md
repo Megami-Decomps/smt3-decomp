@@ -1,5 +1,11 @@
 # Matching notes: sound/sndManager
 
+The title provider notes below describe their original matching work under
+the former split. Those routines now belong to
+[dds3TitleMain](../kernel/dds3TitleMain.md#recovering-the-title-owner);
+their actual linked functions and data are unchanged. This owner retains
+the six sound and script shims.
+
 ## dds3TitleDrawFade (sound/sndManager, 0x4F8)
 
 318 of 318 words match: 1,272 emitted and native bytes at `0x00226EC0`.
