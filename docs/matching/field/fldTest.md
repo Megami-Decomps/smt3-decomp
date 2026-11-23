@@ -165,3 +165,14 @@ and signed table value form the same product, rounded toward zero at
 each of the two stages (divide by 128, then divide by two). The actual
 rounded numerator and final volume calculation use short local register
 bindings; neither value is held across a call. No empty operands remain.
+
+## Shadow-edge position storage
+
+The shadow draw routine indexes both grids as 26 rows of 26 vectors.
+A cell is a full 16-byte VU vector, and each array starts on a
+16-byte boundary. The two native zero-fill arrays begin at
+`0x558130` and `0x55AB70`; together they take 21,632 bytes and
+end at the untouched `fldRun_Dante` object at `0x55D5B0`.
+The preceding shadow vertex table stays in its original raw range.
+The C source adds no instructions or initialized bytes and leaves
+the shadow draw code and mesh tables unchanged.

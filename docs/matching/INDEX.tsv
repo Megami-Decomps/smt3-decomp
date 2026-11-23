@@ -275,6 +275,7 @@ fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/f
 Elevator floor transition delays				docs/matching/field/fldTest.md	128
 fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	137
 fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	153
+Shadow-edge position storage				docs/matching/field/fldTest.md	169
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
