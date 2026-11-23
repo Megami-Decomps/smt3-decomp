@@ -63,27 +63,27 @@ void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag);
 
 void itfPnlDrawTag(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexNormal(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_COLUMN_COUNT 4
 
 #define ITF_PANEL_COLUMN_INSET 0x200
 
-void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexMesWin(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
-void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexSelWin(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_ROW_COUNT 2
 
-void CreateVertexPlain(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexPlain(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
-void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexLeftFade(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_CORNER_COLUMN_COUNT 3
 
 #define ITF_PANEL_CORNER_STRIP_WIDTH 0x5A0
 
-void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexFacility(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 
 extern itfColorVector_t itfPanelSelWinColorRatio[];
 
@@ -186,7 +186,8 @@ extern u32 sdf2DMakeStdPacket(u32, s32);
 
 extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
-extern void (*CreateVertexTable[])();
+typedef void (*itfPanelCreateVertexFunc_t)(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
+extern itfPanelCreateVertexFunc_t CreateVertexTable[];
 extern void (*CreateColorTable[])();
 extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
 
@@ -241,8 +242,8 @@ void itfPnlRelease(itfpanel_t *handle) {
     }
 }
 
-/* Store rectangle corners and the caller's render value before notifying the
- * kind-specific handler with context only. No kind-range or context checks. */
+/* Store the corners and render value, then pass the same corners to the
+ * kind-specific vertex initializer. No kind-range or context checks. */
 void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
     handle->z = z;
     handle->left = x0;
@@ -250,14 +251,14 @@ void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z
     handle->right = x1;
     handle->bottom = y1;
     if (CreateVertexTable[handle->kind] != 0) {
-        CreateVertexTable[handle->kind](handle->pwork);
+        CreateVertexTable[handle->kind](handle->pwork, x0, y0, x1, y1);
     }
 }
 
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
 void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
-    void (*handler)() = CreateVertexTable[handle->kind];
+    itfPanelCreateVertexFunc_t handler = CreateVertexTable[handle->kind];
 
     handle->left += x0;
     handle->top += y0;
@@ -303,7 +304,8 @@ void itfPnlDrawTag(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexNormal(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *pwork = payload;
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -326,7 +328,8 @@ void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Emit the frame grid and three table-offset rows above and below it. */
-void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexMesWin(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *pwork = payload;
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -369,7 +372,8 @@ void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     }
 }
 
-void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexSelWin(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *pwork = payload;
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -413,7 +417,8 @@ void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void CreateVertexPlain(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexPlain(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *pwork = payload;
     sdfIVector2_t *p;
 
     pwork->x = x0;
@@ -430,7 +435,8 @@ void CreateVertexPlain(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexLeftFade(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *pwork = payload;
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -452,7 +458,8 @@ void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) 
 
 /* Write four fixed horizontal columns with inset top/bottom coordinates.
    x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
-void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexFacility(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
+    itfPanelFacilityData_t *pwork = payload;
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     itfDrawVertex_t *vertices = pwork->vertices;
@@ -779,16 +786,15 @@ u8 itfPanelLeftFadeStripVertexIndex[8] = {0, 3, 1, 4, 2, 5, 0, 0};
 u8 itfPanelLeftFadeStripColorIndex[8] = {1, 1, 1, 1, 0, 0, 0, 0};
 
 
-/* Panel kind chooses its position/color initializer independently of the
- * draw dispatch. Providers have different payload types and argument counts,
- * so the tables retain the native unprototyped callback contract already
- * used by itfPnlSetPosition, itfPnlSetPositionOffset, and itfPnlSetColor. */
-void (*CreateVertexTable[9])() __attribute__((aligned(8))) = {
+/* The panel kind selects the vertex initializer and its payload layout.
+ * The two position setters pass the payload plus four corner coordinates. */
+itfPanelCreateVertexFunc_t CreateVertexTable[9] __attribute__((aligned(8))) = {
     CreateVertexNormal, CreateVertexMesWin, CreateVertexSelWin,
     CreateVertexPlain, CreateVertexPlain, CreateVertexLeftFade,
     NULL, NULL, CreateVertexFacility,
 };
 
+/* Color providers still have differing argument counts. */
 void (*CreateColorTable[9])() __attribute__((aligned(8))) = {
     CreateColorNormal, CreateColorMesWin, CreateColorSelWin,
     CreateColorPlain, CreateColorPera1, CreateColorLeftFade,

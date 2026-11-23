@@ -37,9 +37,15 @@ color table selects `CreateColorPlain` and `CreateColorPera1` respectively.
 All fourteen non-null entries retain their native callback relocations.
 
 Each C table owns 36 bytes. Four bytes of alignment separate the objects;
-another four bytes after the color table remain separate. The pre-existing
-caller declarations and callback argument handling are unchanged. The
-one-argument calls in the retail path rely on EE argument registers
-remaining live; the existing `FIX_BUGS` color path passes the channels
-explicitly. The table definitions do not add calls or casts or make the
-retail calling convention a portable C guarantee.
+another four bytes after the color table remain separate. Color still uses
+the existing unprototyped dispatch: one-argument calls in the retail path
+rely on EE argument registers remaining live, and the `FIX_BUGS` path
+passes the channels explicitly.
+
+**Vertex initializer arguments.** Both position setters pass the kind-specific payload and four signed corner
+coordinates. The absolute setter preserves those coordinate registers up to
+its indirect call; the relative setter explicitly fills them with the updated
+corners. The table now spells that shared five-argument contract, and each
+initializer uses the corresponding typed payload locally. This removes the
+too-few-arguments C call without changing any stores, table entries or linked
+bytes. The separate color and draw callback contracts are unchanged.
