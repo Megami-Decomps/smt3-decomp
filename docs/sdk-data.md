@@ -29,7 +29,10 @@ Branch displacements, scalar constants, registers, and structure offsets agree.
 initial tables are byte-identical to DDS1. The allocator's 0x408-byte bin
 array and following state have the same relative layout; its initial links
 agree after expressing pointers relative to the array. The following scalar
-state bytes agree directly. `_impure_ptr` points to the native reentrancy
+state bytes agree directly. The C definition of `__malloc_sbrk_base` retains
+the native four-byte pointer sentinel `(void *)-1` in `.data`; without the
+placement attribute it moves to `.sdata`. The neighboring four zero bytes
+at `0x0052C24C` remain raw. `_impure_ptr` points to the native reentrancy
 record at 0x0052BB38, whose initial random state at +0xA8 is 1. `sbrk` reads
 and writes `sbrkBreak` with interrupts disabled; its initial break is
 0x005A0330. `_ctype_` is the unique byte-identical 257-byte table, including
