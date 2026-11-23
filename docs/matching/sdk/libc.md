@@ -485,3 +485,14 @@ string, and eight signed-char limit sentinels (127). The legacy `void *`
 return exposes the native read-only record without changing the API. In
 retail, `_vfprintf_r` only reads its decimal-point pointer. The original
 string addresses, record extent and section placement stay unchanged.
+
+**Multibyte character limit.**
+
+The signed word `mbCurMax` at `0x0052C290` starts at 1.
+Native `_vfprintf_r` loads it with `lw` for the conversion's length
+argument. The explicit `.data` placement is necessary: the default
+small-data rule puts the four-byte definition in `.sdata`.
+
+Only the limit word is recovered here. The following twelve raw bytes
+are the name portion of the kernel SDK tag; the live four-byte
+`kernelBuiltinVersion` suffix still starts at `0x0052C2A0`.
