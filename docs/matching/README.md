@@ -77,6 +77,7 @@ both native and emitted sizes when they differ.
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
+| 3 |  | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 3 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
 | 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
@@ -100,7 +101,6 @@ both native and emitted sizes when they differ.
 | 2 | pb/pbMain | [pb/pbMain.md](pb/pbMain.md) |
 | 2 | pb/pbMCard | [pb/pbMCard.md](pb/pbMCard.md) |
 | 2 | newbattle/nbSkillError | [newbattle/nbSkillError.md](newbattle/nbSkillError.md) |
-| 2 | newbattle/nbResultProcess | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 2 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
 | 2 | newbattle/nbKoukaProcess | [newbattle/nbKoukaProcess.md](newbattle/nbKoukaProcess.md) |
 | 2 | newbattle/nbCameraProcess | [newbattle/nbCameraProcess.md](newbattle/nbCameraProcess.md) |

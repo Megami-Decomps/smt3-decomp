@@ -28,6 +28,11 @@ from tools import progress  # noqa: E402
 
 VERSION = "smt3"
 SERIAL = "SLUS_209.11"
+RAW_BSS_SCRIPT = (
+    "    .main_bss (NOLOAD) :\n"
+    "    main_SBSS_START = .;\n"
+    "    main_BSS_START = .;\n"
+)
 
 
 class ConfigureTests(unittest.TestCase):
@@ -54,11 +59,10 @@ class ConfigureTests(unittest.TestCase):
             yaml.write_text(f"version: {VERSION}\n")
             (config / "symbol_addrs.txt").write_text("symbol = 0x1;\n")
             (config / "reloc_addrs.txt").write_text("reloc = 0x2;\n")
-            (build / f"{SERIAL}.ld").write_text("main_SBSS_START = .;\nmain_BSS_START = .;\n")
-
             def run_forced_step(command, **kwargs):
                 if "splat" in command:
                     (root / f"asm/{VERSION}").mkdir(parents=True, exist_ok=True)
+                    (build / f"{SERIAL}.ld").write_text(RAW_BSS_SCRIPT)
 
             with patch.object(configure, "ROOT", root), \
                     patch.dict(configure.VERSIONS, {VERSION: {"serial": SERIAL}}), \
@@ -96,12 +100,10 @@ class ConfigureTests(unittest.TestCase):
     def test_bss_alignment_is_inserted_once_per_symbol(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             script = Path(tmp) / f"{SERIAL}.ld"
-            script.write_text(
-                "    main_SBSS_START = .;\n"
-                "    main_BSS_START = .;\n"
-            )
+            script.write_text(RAW_BSS_SCRIPT)
             configure.align_bss(script)
             text = script.read_text()
+            self.assertEqual(text.count(".main_bss (ADDR(.main) + SIZEOF(.main)) (NOLOAD) :"), 1)
             self.assertEqual(text.count(". = ALIGN(128);"), 2)
             self.assertLess(text.index("ALIGN(128)"), text.index("main_SBSS_START"))
 
@@ -213,6 +215,38 @@ class ConfigureTests(unittest.TestCase):
                     with self.subTest(selectors=selectors):
                         self.assertEqual(configure.objdiff_reference(VERSION, source, selectors),
                                          Path(f"asm/{VERSION}/event/sceneText.s"))
+
+    def test_pure_bss_has_real_reference_but_no_initialized_progress_base(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = Path(f"src/{VERSION}/newbattle/work.c")
+            native = Path(f"asm/{VERSION}/data/newbattle/work.bss.s")
+            target = Path(f"build/{VERSION}/target") / native.with_suffix(".o")
+            base = Path(f"build/{VERSION}/base") / source.with_suffix(".o")
+            with patch.object(configure, "ROOT", root):
+                with self.assertRaisesRegex(SystemExit, "missing native data reference"):
+                    configure.objdiff_reference(VERSION, source, [".bss"])
+                (root / native).parent.mkdir(parents=True)
+                (root / native).write_text('.section .bss, "wa"\n')
+                self.assertEqual(configure.objdiff_reference(VERSION, source, [".bss"]), native)
+                for sections in (None, [".text", ".bss"], [".bss*"], [".bss", ".bss"]):
+                    self.assertEqual(configure.objdiff_reference(VERSION, source, sections),
+                                     Path(f"asm/{VERSION}/newbattle/work.s"))
+                row = configure.objdiff_c_unit(source, native, target, base, [".bss"])
+                configure.write_objdiff({VERSION: [row]})
+                combined = json.loads((root / "objdiff.json").read_text())
+                primary = json.loads(
+                    (root / f"build/{VERSION}/progress/objdiff.json").read_text())
+                self.assertEqual(len(combined["units"]), 1)
+                self.assertEqual(combined["units"][0]["target_path"], str(target))
+                self.assertNotIn("base_path", combined["units"][0])
+                self.assertEqual(combined["units"][0]["metadata"]["progress_categories"],
+                                 [VERSION, "data"])
+                self.assertEqual(primary["units"], [])
+                mixed = configure.objdiff_c_unit(source, native, target, base, [".text", ".bss"])
+                self.assertEqual(mixed["base"], str(base))
+                self.assertEqual(configure.objdiff_progress_category(VERSION, mixed["name"]),
+                                 "game")
 
     def test_unit_cflags_drop_comments_and_keep_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -450,7 +484,6 @@ class SplatOwnershipTests(unittest.TestCase):
         self.yaml.write_text("test config\n")
         (self.config / "symbol_addrs.txt").write_text("test symbols\n")
         (self.config / "reloc_addrs.txt").write_text("test relocs\n")
-        (self.build / f"{SERIAL}.ld").write_text("")
         self.fallback = 'INCLUDE_ASM(const s32, "game/test", useLiteral);\n'
         self.source.write_text(self.fallback)
 
@@ -487,6 +520,7 @@ class SplatOwnershipTests(unittest.TestCase):
             if "splat" not in command:
                 return
             splits.append(command)
+            (self.build / f"{SERIAL}.ld").write_text(RAW_BSS_SCRIPT)
             asm.mkdir(parents=True)
             if "INCLUDE_ASM" in self.source.read_text():
                 (asm / "useLiteral.s").write_text("function with embedded rodata\n")
@@ -524,6 +558,7 @@ class SplatOwnershipTests(unittest.TestCase):
         def generate(command, **kwargs):
             if "splat" in command:
                 splits.append(command)
+                (self.build / f"{SERIAL}.ld").write_text(RAW_BSS_SCRIPT)
                 (self.root / f"asm/{VERSION}").mkdir(parents=True)
                 self.source.write_text(self.fallback)
 

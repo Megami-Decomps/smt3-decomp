@@ -248,7 +248,7 @@ def splat_digest(version: str, yaml: Path) -> str:
     config = ROOT / "config" / version
     inputs = [yaml, *(config / name for name in
                       ("symbol_addrs.txt", "reloc_addrs.txt", "symbol_aliases.json"))]
-    digest = hashlib.sha1(b"source-matching-ownership-v1\0")
+    digest = hashlib.sha1(b"source-matching-ownership-v2\0")
     for path in inputs:
         digest.update(str(path.relative_to(ROOT)).encode())
         digest.update(b"\0")
@@ -329,9 +329,15 @@ def provide_data_symbols(version: str) -> None:
 
 
 def align_bss(ld_script: Path) -> None:
-    """Sony's app.cmd starts .sbss and .bss on 128-byte boundaries; splat's
-    script does not, so insert the alignment the retail layout depends on."""
+    """Preserve the loaded zero-fill envelope and Sony's section alignment."""
     text = ld_script.read_text()
+    implicit = "    .main_bss (NOLOAD) :"
+    if text.count(implicit) != 1:
+        raise ValueError("expected one generated .main_bss output section")
+    # The synthetic envelope starts at the end of .main; only its native
+    # .sbss/.bss contents below need alignment. Letting a newly typed BSS
+    # input align the envelope drops bytes from the existing load segment.
+    text = text.replace(implicit, "    .main_bss (ADDR(.main) + SIZEOF(.main)) (NOLOAD) :")
     for sym in ("main_SBSS_START", "main_BSS_START"):
         text = re.sub(rf"^(\s*)({sym} = \.;)", r"\1. = ALIGN(128);\n\1\2", text, count=1, flags=re.M)
     ld_script.write_text(text)
@@ -394,12 +400,22 @@ def objdiff_reference(version: str, src: Path, sections: list[str] | None) -> Pa
     asm = Path("asm") / version
     # An explicit data-only linker input has no .text sibling for Splat
     # to disassemble. Its generated native data assembly is the reference.
-    if sections in ([".data"], [".rodata"], [".sdata"]):
+    if sections in ([".data"], [".rodata"], [".sdata"], [".bss"]):
         reference = asm / "data" / unit.with_suffix(f"{sections[0]}.s")
         if not (ROOT / reference).is_file():
             raise SystemExit(f"{src}: missing native data reference {reference}; re-run splat")
         return reference
     return asm / unit.with_suffix(".s")
+
+
+def objdiff_c_unit(src: Path, reference: Path, target: Path, base: Path,
+                   sections: list[str] | None) -> dict[str, str | None]:
+    # A pure NOBITS owner is checked by the source/retail ownership verifier.
+    # Keep its real native reference in the full structural audit, but never
+    # count its zero-fill as matching initialized data or a game-code unit.
+    if sections == [".bss"]:
+        return {"name": str(reference.with_suffix("")), "target": str(target), "base": None}
+    return {"name": str(src.with_suffix("")), "target": str(target), "base": str(base)}
 
 
 INCLUDE_DIRECTIVE = re.compile(
@@ -734,7 +750,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                     n.build(str(target), "as", str(corrected), implicit=["include/macro.inc"])
                 elif (ROOT / full).exists():
                     n.build(str(target), "as", str(full), implicit=["include/macro.inc"])
-                units[version].append({"name": str(src.with_suffix("")), "target": str(target), "base": str(base)})
+                units[version].append(objdiff_c_unit(
+                    src, full, target, base, object_sections[obj]))
         if unseen_fills:
             raise SystemExit(f"{version}: missing native readonly fill owners")
         write_reference_batch(n, ROOT, version, serial, object_sections, fill_options[version])

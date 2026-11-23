@@ -1,5 +1,26 @@
 # nbResultProcess matching notes
 
+## Result score and caption storage
+
+The native initialization loops clear four score records of 0x34 bytes at
+`0x574E80` and 64 caption records of 0x10 bytes at `0x574F50`,
+ending at the untouched `nbStageState` at `0x575350`. The C owner
+defines only those two arrays in zero-initialized storage. With the section
+attributes removed, the stock compiler instead emits common symbols; the
+attributes place the real storage in its native section. The handler keeps
+the same shared types and external symbol references: declaring the arrays
+in that unit instead would cause the assembler to fold its symbol references
+into section-relative relocations.
+
+The linker's synthetic `.main_bss` starts at the end of `.main`, before
+the retail SBSS/BSS alignment boundaries. Making that start explicit
+retains the existing loaded zero-fill prefix when an input BSS section has
+stronger alignment. Leaving it implicit advances the envelope by four
+bytes and adds a load segment to the intermediate ELF. The explicit start
+preserves all program headers and native symbol addresses, and the delivered
+retail image is byte-identical. These 1,232 bytes only exist in memory and
+do not count as matched code or initialized data.
+
 ## nbFindTobiwarpLabel (newbattle/nbResultProcess, 0xE78)
 
 788 of 926 words match at the native 3704-byte size; the first current
