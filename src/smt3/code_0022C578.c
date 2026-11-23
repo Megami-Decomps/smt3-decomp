@@ -10940,29 +10940,25 @@ void cmpPlayCursorSE(u32 button)
     func_002413B8(button, 0);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* Zero is an explicit no-sound input alongside unsupported buttons. */
 void func_002413B8(u32 button, s8 mode)
 {
-    s32 sound;
-
     if (button & 0x8000) {
         p2sdPlaySE(0xD, 0x7F, 0x3F);
         return;
     }
     switch (button) {
     case 1:
+        p2sdPlaySE(8, 0x7F, 0x3F);
+        break;
     case 0x1000:
+        p2sdPlaySE(8, 0x7F, 0x3F);
+        break;
     case 0x2000:
-        sound = 8;
+        p2sdPlaySE(8, 0x7F, 0x3F);
         break;
     case 2:
-        sound = 0xA;
-        break;
-    case 0x4000:
-        sound = 0xC;
+        p2sdPlaySE(0xA, 0x7F, 0x3F);
         break;
     case 0x10:
     case 0x20:
@@ -10978,27 +10974,27 @@ void func_002413B8(u32 button, s8 mode)
     case 0x80000:
         switch (mode) {
         case 1:
-            sound = 6;
+            p2sdPlaySE(6, 0x7F, 0x3F);
             break;
         case 2:
-            sound = 1;
+            p2sdPlaySE(1, 0x7F, 0x3F);
             break;
         case 3:
-            sound = 0x15;
+            p2sdPlaySE(0x15, 0x7F, 0x3F);
             break;
         default:
-            sound = 0;
+            p2sdPlaySE(0, 0x7F, 0x3F);
             break;
         }
         break;
+    case 0x4000:
+        p2sdPlaySE(0xC, 0x7F, 0x3F);
+        break;
+    case 0:
     default:
         return;
     }
-    p2sdPlaySE(sound, 0x7F, 0x3F);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", func_002413B8);
-#endif
 
 s32 cmpChkPadPressUpDown(void)
 {
