@@ -67,11 +67,12 @@ extern char sndVcInfo[];
 
 extern u32 sndSqInfo[4];
 
-extern void *D_0033A540[];
+/* Only the first packed MIDI ID word of this raw sound bank is read here. */
+extern s32 D_0033A540 __attribute__((section(".data")));
 
 extern void sdfSndInit(char *aVcInfo, s32 aNumVc, char *aSqInfo, s32 aNumSq);
 
-extern void p2sdLoadSMGFile(void *MidiNo);
+extern void p2sdLoadSMGFile(s32 MidiNo);
 
 void sndInit(void)
 {
@@ -81,7 +82,7 @@ void sndInit(void)
     }
     sndInitDone = 1;
     sdfSndInit(sndVcInfo, 4, (char *)sndSqInfo, 4);
-    p2sdLoadSMGFile(D_0033A540[0]);
+    p2sdLoadSMGFile(D_0033A540);
     D_0054FD20 = 4;
     D_00551F94 = -1;
     D_0054FD24 = 0;

@@ -123,3 +123,17 @@ comparison pass, followed by a no-op build. All 27 tooling test files (436
 cases), the shell wrapper, inline-assembly gate, 144 guarded owners / 504
 drafts, seven IRX checks and reconciled game/all-code report scope pass.
 Hosted CI is checked on the published commit separately.
+
+## sndInit packed MIDI ID
+
+The first word at `0x0033A540` supplies the packed MIDI ID to
+`p2sdLoadSMGFile(s32)`. The native caller loads it with `lw` and the
+provider uses a signed shift to extract its bank number. The declaration
+describes only this first word, not the layout or ownership of the rest of
+the raw sound bank.
+
+The word is in native `.data`. Omitting the section on the scalar
+declaration lets the target compiler select an incorrect small-data
+reference in place of the native address pair. Spelling the actual
+section retains every instruction and relocation in the owner. The
+provider and the raw bank are unchanged; there is no new matching credit.

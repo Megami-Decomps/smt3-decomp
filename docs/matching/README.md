@@ -50,6 +50,7 @@ both native and emitted sizes when they differ.
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
+| 4 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
 | 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
@@ -72,7 +73,6 @@ both native and emitted sizes when they differ.
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 4 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
-| 3 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |

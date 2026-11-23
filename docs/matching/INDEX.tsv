@@ -660,5 +660,6 @@ scePadPortOpen				docs/matching/sdk/libpad.md	3
 dds3TitleDrawFade	sound/sndManager	0x4F8	318 of 318 words match	docs/matching/sound/sndManager.md	3
 dds3TitleUpdateFade	sound/sndManager	0x278	158 of 158 words match	docs/matching/sound/sndManager.md	37
 titleAllocWork	sound/sndManager	0x110	68 of 68 words match	docs/matching/sound/sndManager.md	89
+sndInit packed MIDI ID				docs/matching/sound/sndManager.md	127
 stfMain2	staff/stfMain	0x2D4	155 of 181 words match	docs/matching/staff/stfMain.md	3
 ObjDispOff	staff/stfMain	0x504	321 of 321 words match	docs/matching/staff/stfMain.md	68
