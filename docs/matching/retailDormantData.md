@@ -31,3 +31,14 @@ up vector and precedes the screen-state records. Its three aligned
 binary32 rows are Z-only, W-only and all ones. The source retains the
 generated address label and both neighbors without inferring a reader
 or historical declaration.
+
+The eight retained bytes at 0x002FC790 pack the triangles (3, 2, 1) and
+(3, 1, 0), each followed by a zero byte. The pair uses the other quad
+diagonal and opposite winding from the first row of the preceding
+`fldQuadFaceIndex` table. The exact renderers `fldDrawPoly4` and
+`fldDrawTexPoly4` each load only the eight rows at 0x002FC750–0x002FC790;
+they do not read this pair. A separate `u64` uses the existing packed
+representation without asserting an original declaration or live reader.
+Its explicit writable data placement keeps it beside the eight large-table
+rows, rather than in small data. The following 40 raw zero bytes and the
+camera owner at 0x002FC7C0 are unchanged.

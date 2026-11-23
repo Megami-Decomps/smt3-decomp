@@ -11,3 +11,7 @@ u64 fldQuadFaceIndex[8] = {
     0x001B1A18001A1918ULL,
     0x001F1E1C001E1D1CULL,
 };
+
+/* The separate retained pair reverses the winding and uses the other
+ * diagonal. The live eight-row table above is not extended. */
+u64 D_002FC790 __attribute__((section(".data"))) = 0x0000010300010203ULL;

@@ -478,7 +478,7 @@ segments:
       - [0x1FD720, .data, field/fldTestLineData]
       - [0x1FD748, data, data_002FC748]
       - [0x1FD750, .data, field/fldQuadFaceData]
-      - [0x1FD790, data, data_002FC790]
+      - [0x1FD798, data, data_002FC798]
       - [0x1FD7C0, .data, field/fldCamera]
       - [0x1FD9C0, .data, field/fldCameraPositions]
       - [0x1FD9E0, .data, field/fldCameraFocusSelection]

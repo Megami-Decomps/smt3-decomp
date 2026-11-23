@@ -1,5 +1,7 @@
 // Symbols seeded from the SLUS_209.11 IDB by tools/ida_symbols.py.
 // Hand-curated symbols go above the generated block and win over it.
+// Retained packed quad face pair; the live fldQuadFaceIndex has eight rows.
+D_002FC790 = 0x002FC790; // type:u64 size:0x8
 // Physically separate retained copy of the NPC-talk label.
 D_00302FE0 = 0x00302FE0; // type:u8 size:0x10
 // Seven six-byte Shop item-category records, then separate alignment.
