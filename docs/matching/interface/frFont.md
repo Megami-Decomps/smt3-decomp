@@ -157,3 +157,15 @@ and 15 serialized fixup commands use offsets of the real page fields.
 The authored bank is 603 bytes. The following five zero bytes and the
 separate mutable help bank remain outside it. The reader and existing
 battle callers retain their native instructions.
+
+### Camp Magatama help bank
+
+The Camp Magatama gauge uses the read-only message lookup for help
+indices 1 through 27. The C bank retains all 28 native one-page
+records, including entry zero. Font color and style commands remain
+part of the text, and the 57 fixup bytes are derived from the actual
+directory and page offsets. The lookup does not run the fixup writer.
+
+The initialized object is 3,185 bytes at its original address. The seven
+zero bytes before the adjacent default battle command bank stay outside
+the object. Both font-wrapper call sites keep their original instructions.

@@ -36,5 +36,6 @@
   "interface/frFontBaseWidths": "gFontBaseWidth",
   "field/fldDoorExitTaskName": "fldDoorExitMode",
   "interface/dds3ConfigLabelBank": "itfMesEmbedded_528D68",
-  "newbattle/nbDefaultCommandHelpBank": "itfMesEmbedded_3F7FC8"
+  "newbattle/nbDefaultCommandHelpBank": "itfMesEmbedded_3F7FC8",
+  "interface/frMagatamaHelpBank": "itfMesEmbedded_3F7350"
 }

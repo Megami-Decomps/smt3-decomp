@@ -1087,6 +1087,8 @@ segments:
       - [0x2E93F0, .data, newbattle/nbSkillNameTable]
       - [0x2E9C30, .data, newbattle/nbMagatamaNameTable]
       - [0x2E9CA8, data, data_003E8CA8]
+      - [0x2F8350, .data, interface/frMagatamaHelpBank]
+      - [0x2F8FC1, pad, frMagatamaHelpBankTail]
       - [0x2F8FC8, .data, newbattle/nbDefaultCommandHelpBank]
       - [0x2F9223, pad, nbDefaultCommandHelpBankTail]
       - [0x2F9228, data, data_003F8228]
