@@ -592,3 +592,24 @@ do not imply the source's historical spelling.
 Complete owner verification preserves the other 120 C functions and
 all owned data. The production object's allocated sections, typed symbols
 and ordered relocations are unchanged from the assembly-backed object.
+
+## CirculateDevilObject (facility/fclEncyc, 0x174)
+
+93 of 93 words match at 372 bytes. The routine initializes the full native
+cursor work before it calls the cursor mover. It selects one of the two
+signed-halfword cursor pairs, preserves the distinct count reads, then
+publishes the updated position and shift. Registration mode reads the
+actual party-selection byte; read mode chooses the actual sort array.
+The callback prototypes retain their provider types.
+
+The true cursor addresses and the two outgoing lookup operands keep their
+native short-lived register homes. In particular, the initialized sort-zero
+pointer and the real registration callback's instance argument are distinct
+live values after the cursor moves. Preparing the latter before the two
+cursor publications makes the stock assembler emit it between the native
+stores. The constraints supply no instructions and alter neither the
+calls nor the state written; this is not a historical-source claim.
+
+Complete owner verification gives 122 match, 0 differ. The owner retains
+its allocated bytes, relocation targets and owned data. The complete linked
+retail image is byte-identical.

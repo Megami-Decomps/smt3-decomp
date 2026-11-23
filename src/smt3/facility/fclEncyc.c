@@ -3109,48 +3109,83 @@ extern void *memset(void *dst, s32 value, size_t size);
 extern s32 cmpFindNextCursorItem(cmpCursorInfo_t *cursor, s8 direction, s8 mode);
 extern void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_tag *pinst);
 
-#ifdef NON_MATCHING
 /* Native selects the cursor pair at 0x64/0x66 or 0x68/0x6A.
  * The independent sort-mode byte at 0x6C is not part of either pair. */
 void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction)
 {
     cmpCursorFullWork_t work;
-    cmpCursorInfo_t *cursor = &work.cursor;
-    s32 slot = (s16)pinst->unk_58 == 1 ? 0 : 2;
-    u8 shift;
+    u8 *fields;
+    FAKEMATCH_ASM_REG(s32, slot, "$18");
+    FAKEMATCH_ASM_REG(s32, chosen, "$3") = (s16)pinst->unk_58 == 1 ? 0 : 2;
+    FAKEMATCH_ASM_REG(u8 *, instanceCursorBase, "$19") = (u8 *)pinst + 4;
     s32 index;
+    FAKEMATCH_ASM_REG(s16 *, sortedZero, "$8");
+    FAKEMATCH_ASM_REG(fclEncyc_instance_tag *, lookupInst, "$5");
 
+    FAKEMATCH_ASM_LIVE(instanceCursorBase);
+    FAKEMATCH_ASM_LIVE(chosen);
+    slot = chosen * 2;
     memset(&work, 0, sizeof(work));
-    shift = *(u8 *)&pinst->lw_cur[slot + 1];
-    cursor->unk_22 = pinst->lw_cur[slot];
-    cursor->unk_25 = shift;
-    cursor->unk_24 = shift;
-    if ((s16)pinst->unk_58 == 1) {
-        s32 count = pinst->unk_70;
-
-        cursor->unk_20 = *(u8 *)&pinst->unk_70;
-        cursor->unk_26 = count < 8 ? count : 7;
-    } else {
-        cursor->unk_20 = fclEncycGetNum();
-        if (fclEncycGetNum() < 8) {
-            cursor->unk_26 = fclEncycGetNum();
+    fields = (u8 *)&work + 0x20;
+    {
+        FAKEMATCH_ASM_REG(u8 *, cursorPair, "$3") = EE_ADDR_AS(u8 *, (addr_t)slot + EE_ADDR(instanceCursorBase));
+        FAKEMATCH_ASM_REG(u8 *, shiftPair, "$2") = cursorPair;
+        FAKEMATCH_ASM_REG(s32, mode, "$5") = (s16)pinst->unk_58;
+        FAKEMATCH_ASM_REG(u8, rowShift, "$4");
+        FAKEMATCH_ASM_REG(u16, rowPos, "$2");
+        FAKEMATCH_ASM_LIVE(cursorPair);
+        FAKEMATCH_ASM_LIVE(shiftPair);
+        rowShift = shiftPair[0x62];
+        rowPos = *(u16 *)(cursorPair + 0x60);
+        work.cursor.unk_24 = rowShift;
+        work.cursor.unk_22 = rowPos;
+        work.cursor.unk_25 = rowShift;
+        if (mode == 1) {
+            s32 count = pinst->unk_70;
+            s32 limit = 7;
+            u8 n = *(u8 *)&pinst->unk_70;
+            if (count >= 8) count = limit;
+            fields[0] = n;
+            work.cursor.unk_26 = count;
         } else {
-            cursor->unk_26 = 8;
+            fields[0] = fclEncycGetNum();
+            fields[6] = fclEncycGetNum() < 8 ? fclEncycGetNum() : 8;
         }
     }
-    cmpFindNextCursorItem(cursor, direction != 0 ? 1 : -1, 1);
-    pinst->lw_cur[slot] = cursor->unk_22;
-    pinst->lw_cur[slot + 1] = (u8)cursor->unk_24;
-    index = cursor->unk_22 + (u8)cursor->unk_24;
+    cmpFindNextCursorItem(&work.cursor, direction != 0 ? 1 : -1, 1);
+    FAKEMATCH_ASM_LIVE_WITH_MEM(slot, work.cursor.unk_24);
+    {
+        FAKEMATCH_ASM_REG(u8 *, cursorPair, "$4");
+        FAKEMATCH_ASM_REG(u8 *, posPair, "$2");
+        FAKEMATCH_ASM_REG(s32, rowShift, "$6");
+        FAKEMATCH_ASM_REG(u16, rowPos, "$3");
+        /* Prepare the two real destination paths after navigation. Keeping their
+         * distinct address and call-argument phases gives ee-as the native
+         * publication order; neither address is dereferenced before its branch. */
+        sortedZero = pinst->entries.read.sorted[0];
+        lookupInst = pinst;
+        rowShift = ((const volatile u8 *)fields)[4];
+        cursorPair = EE_ADDR_AS(u8 *, (addr_t)slot + EE_ADDR(instanceCursorBase));
+        rowPos = *(const volatile u16 *)(fields + 2);
+        FAKEMATCH_ASM_LIVE(cursorPair);
+        posPair = cursorPair;
+        FAKEMATCH_ASM_LIVE_PAIR(sortedZero, lookupInst);
+        FAKEMATCH_ASM_LIVE_PAIR(lookupInst, posPair);
+        FAKEMATCH_ASM_LIVE_PAIR(cursorPair, posPair);
+        *(u16 *)(posPair + 0x60) = rowPos;
+        *(s16 *)(cursorPair + 0x62) = rowShift;
+    }
+    index = work.cursor.unk_22 + (u8)work.cursor.unk_24;
     if ((s16)pinst->unk_58 == 1) {
-        ChangeDevilObjectRegistConfirm(pinst->entries.regist.validUnit[index], pinst);
+        FAKEMATCH_ASM_REG(u8 *, entry, "$2") = EE_ADDR_AS(u8 *, (addr_t)index + EE_ADDR(instanceCursorBase));
+        FAKEMATCH_ASM_LIVE(entry);
+        ChangeDevilObjectRegistConfirm(entry[0x70], lookupInst);
     } else {
-        ChangeDevilObjectReadMain(pinst->entries.read.sorted[(s8)pinst->unk_6C != 0][index], pinst);
+        s16 *sorted = pinst->entries.read.sorted[1];
+        if ((s8)pinst->unk_6C == 0) sorted = sortedZero;
+        ChangeDevilObjectReadMain(sorted[index], pinst);
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclEncyc", CirculateDevilObject);
-#endif
 
 extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 
