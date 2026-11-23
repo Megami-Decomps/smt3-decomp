@@ -734,3 +734,20 @@ The 37 devil IDs are native unsigned halfwords. The six following zero
 bytes remain a separate raw gap. The existing reference-tail handling
 recovers the final real halfword for comparison; it does not change the
 linker input or extend the adjacent evolution matrix.
+
+## Evolution stat matrix (result/cmbEvoStatTable, 442 bytes)
+
+The native writable table at 0x003399E8 contains 13 rows of 17 signed
+halfwords. The first row holds the 16 skill-attribute keys; each of the
+following 12 rows begins with its devil inheritance type (1 through 12).
+The stock `cmbCopyEvoStats` uses signed halfword key loads, a 34-byte row
+stride and the low byte of the selected cell for the result.
+
+The four preceding bytes and six following bytes remain raw. The existing
+native tail-reference rule recovers the table's last two real bytes for
+comparison only; it does not change the linker input or absorb either
+neighbor. The next object is still the independent unsigned devil-ID list.
+
+No reader changes. In particular, retail's scans do not reject missing keys
+before forming the final address; this table definition does not add a row,
+hide those existing out-of-domain accesses or claim they are safe.

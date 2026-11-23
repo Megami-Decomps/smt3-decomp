@@ -996,6 +996,8 @@ segments:
       - [0x23A640, .data, result/cmbEvoNeedFlagTable]
       - [0x23A658, .data, result/cmbEvoEntryTable]
       - [0x23A9E4, data, data_003399E4]
+      - [0x23A9E8, .data, result/cmbEvoStatTable]
+      - [0x23ABA2, databin, cmbEvoStatTableTail] # Keep bytes outside the complete rows.
       - [0x23ABA8, .data, result/cmbEvoDevilList]
       - [0x23ABF2, databin, cmbEvoDevilListPad]
       - [0x23ABF8, .data, result/cmbEvoPairTable]
