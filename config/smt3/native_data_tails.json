@@ -35,5 +35,6 @@
   "mc/slFormatDoneMessage": "slFormatDoneMsg",
   "interface/frFontBaseWidths": "gFontBaseWidth",
   "field/fldDoorExitTaskName": "fldDoorExitMode",
-  "interface/dds3ConfigLabelBank": "itfMesEmbedded_528D68"
+  "interface/dds3ConfigLabelBank": "itfMesEmbedded_528D68",
+  "newbattle/nbDefaultCommandHelpBank": "itfMesEmbedded_3F7FC8"
 }

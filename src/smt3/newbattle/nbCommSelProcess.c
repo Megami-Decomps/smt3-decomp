@@ -941,7 +941,7 @@ void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32
 }
 
 typedef struct frFontRequest_t frFontRequest_t;
-typedef struct frTextBank_t frTextBank_t;
+typedef struct nbDefaultCommandHelpBank_t nbDefaultCommandHelpBank_t;
 typedef struct frFontHandle_t frFontHandle_t;
 extern frFontRequest_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
 extern u8 *MessageNumSearch(s32 index, void *bank, s32 size);
@@ -950,7 +950,7 @@ extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style, s32 
                                         frFontHandle_t *previous);
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
 extern s16 D_00551134;
-extern frTextBank_t itfMesEmbedded_3F7FC8;
+extern nbDefaultCommandHelpBank_t itfMesEmbedded_3F7FC8;
 
 #ifdef NON_MATCHING
 extern s32 evtBitCheck(s32 no);

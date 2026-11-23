@@ -146,3 +146,14 @@ The directory and seven serialized fixup commands follow the offsets of
 those real records. The bank ends at 447 bytes; the trailing alignment
 byte stays outside the C object. The reader and its callers keep their
 original instructions.
+
+### Default battle command help bank
+
+The ordinary battle command-help path looks up entries 1 through 5
+from this aligned seven-entry message bank. The reserved and filler
+records stay in the directory at their original indices. The directory
+and 15 serialized fixup commands use offsets of the real page fields.
+
+The authored bank is 603 bytes. The following five zero bytes and the
+separate mutable help bank remain outside it. The reader and existing
+battle callers retain their native instructions.
