@@ -1,5 +1,6 @@
 #include "font.h"
 #include "frFontDumpStorage.h"
+#include "frTextBank.h"
 #include "kernel.h"
 #include "sdfFrame.h"
 
@@ -14,10 +15,6 @@ typedef struct frFontNodeHeader_t frFontNodeHeader_t;
 typedef struct frFontAtlas_t frFontAtlas_t;
 
 typedef struct frFontSystem_t frFontSystem_t;
-
-typedef struct frTextIndex_t frTextIndex_t;
-
-typedef struct frTextBank_t frTextBank_t;
 
 typedef struct frMsgInfo_t frMsgInfo_t;
 
@@ -87,19 +84,6 @@ struct frFontSystem_t {
     u32 imageBuffers[6];
     u8 pad190[4];
     struct frFontHandle_t *glyphSlots[2];
-};
-
-/* Serialized font-bank entries use byte offsets relative to their bank. */
-struct frTextIndex_t {
-    u32 unk00;
-    u32 offset;
-};
-
-struct frTextBank_t {
-    u8 pad00[0x18];
-    s32 count;
-    u8 pad1C[4];
-    frTextIndex_t entries[1];
 };
 
 /* Encoded text cursor and pending glyph updates; distinct from a glyph (0x20). */
@@ -397,7 +381,7 @@ extern u32 gMessageStepY;
 void frSetMessageStepY(u32 StepY);
 
 
-u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size);
+u8 *MessageNumSearch(s32 Index, void *pData, s32 Size);
 
 extern void *memcpy(void *a, const void *b, size_t c);
 
@@ -1801,22 +1785,25 @@ void frSetMessageStepY(u32 StepY) {
 /* Read the packed table count, then skip the table and its trailing metadata
  * word to reach the encoded text. The native parser copies that metadata even
  * though this lookup does not use its value. */
-u8 *MessageNumSearch(s32 Index, frTextBank_t *pData, s32 Size) {
+u8 *MessageNumSearch(s32 Index, void *pData, s32 Size) {
+    const frTextBank_t *header = pData;
+    u8 *bytes = pData;
     u32 offset;
     u32 tableCount;
     u32 textMetadata;
 
-    if (Index >= pData->count) {
+    if (Index >= header->count) {
         return NULL;
     }
-    offset = pData->entries[Index].offset + 0x38;
+    /* The offset is the second aligned word of a serialized eight-byte row. */
+    offset = *(const u32 *)(bytes + (0x24 + Index * 8)) + 0x38;
     tableCount = 0;
-    memcpy(&tableCount, (u8 *)pData + offset, 2);
+    memcpy(&tableCount, bytes + offset, 2);
     offset += 4;
     offset += tableCount * 4;
-    memcpy(&textMetadata, (u8 *)pData + offset, sizeof(textMetadata));
+    memcpy(&textMetadata, bytes + offset, sizeof(textMetadata));
     offset += sizeof(textMetadata);
-    return (u8 *)pData + offset;
+    return bytes + offset;
 }
 
 void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {

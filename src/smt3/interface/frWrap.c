@@ -271,7 +271,7 @@ frFontHandle_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
 
 typedef struct frTextBank_t frTextBank_t;
 extern frTextBank_t itfMesEmbedded_3E8CA8, itfMesEmbedded_3F39E0, itfMesEmbedded_3F7350;
-extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
+extern u8 *MessageNumSearch(s32 index, void *bank, s32 size);
 extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style,
     s32 color, s32 type, s32 speed, u8 *text, frFontHandle_t *unusedPrevious);
 

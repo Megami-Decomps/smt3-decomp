@@ -944,7 +944,7 @@ typedef struct frFontRequest_t frFontRequest_t;
 typedef struct frTextBank_t frTextBank_t;
 typedef struct frFontHandle_t frFontHandle_t;
 extern frFontRequest_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index);
-extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
+extern u8 *MessageNumSearch(s32 index, void *bank, s32 size);
 extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style, s32 color0,
                                         s32 color1, s32 color2, u8 *text,
                                         frFontHandle_t *previous);

@@ -131,3 +131,18 @@ The separate aligned definitions own 928 native zero-fill bytes at
 `0x56B690..0x56BA30`. The raw padding before the first tag and the
 font-system object at the second boundary stay in their original ranges.
 The renderer retains its assembly fallback and is not promoted here.
+
+### Configuration help label bank
+
+The configuration menu passes the complete message bank to
+`MessageNumSearch`. The shared header holds the signed directory count;
+the offset lives in the second word of each aligned eight-byte entry.
+The reader now keeps the full bank as its byte origin instead of indexing
+an array declared with one entry. It preserves the native upper-bound test
+and unused Size argument. The other banks remain in assembly.
+
+The initialized configuration bank has three named one-page messages.
+The directory and seven serialized fixup commands follow the offsets of
+those real records. The bank ends at 447 bytes; the trailing alignment
+byte stays outside the C object. The reader and its callers keep their
+original instructions.

@@ -34,5 +34,6 @@
   "mc/slWarningStartPrompts": "slNoSpaceStartMsg6",
   "mc/slFormatDoneMessage": "slFormatDoneMsg",
   "interface/frFontBaseWidths": "gFontBaseWidth",
-  "field/fldDoorExitTaskName": "fldDoorExitMode"
+  "field/fldDoorExitTaskName": "fldDoorExitMode",
+  "interface/dds3ConfigLabelBank": "itfMesEmbedded_528D68"
 }

@@ -215,9 +215,9 @@ s32 dds3GetGlobalConfigFlag(s32 index)
     return dds3GetConfigFlag(index, &DDS3_GBWK->configFlags);
 }
 
-typedef struct frTextBank_t frTextBank_t;
-extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
-extern frTextBank_t itfMesEmbedded_528D68;
+typedef struct frConfigTextBank_t frConfigTextBank_t;
+extern u8 *MessageNumSearch(s32 index, void *bank, s32 size);
+extern frConfigTextBank_t itfMesEmbedded_528D68;
 extern void frSetMessageStepY(u32 step);
 extern void frSetMessageDefStepY(void);
 extern frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style,
