@@ -88,30 +88,30 @@ attempt 1 passed build and Pages deployment.
 
 ## nbCameraBoss_Cut2_Run (newbattle/nbCameraBoss, 0x230)
 
-92 of 138 words differ, two words short of retail's 140.
+140 of 140 words match at 0x001C0E80, including the 88-entry dispatch table.
+The function always takes the same three input snapshots through the
+formation, skill ID and demon ID getters. Then it dispatches to the original
+camera shot handlers or returns a status without calling a shot handler.
+Handler results are returned without narrowing.
 
-The same jump-table dispatcher as `nbCameraBoss_Cut1_Init`, on `id - 0x101`
-over 0x58 entries, and written the same way: each arm is one or two
-`if (skill == <n>) { callee(pCamera); break; }` tests followed by a `return 0`
-or `return 1`, the arms only call, the function falls off the end of the
-`switch`, and the `0x158` arm's failing guard falls into `default`. Every
-difference is a displacement shift from one block.
+The Samael group (0x11F) dispatches skill 0xF2 and returns one for 0 and 0xA5.
+The 0x146 through 0x148 group returns one only for skill zero. Both groups
+send failures to the same explicit trailing return, while successful shots
+return through their normal path. The real shared exit keeps the branch and
+delay-slot constants that the previous direct-return reconstruction
+if-converted or placed in separate blocks.
 
-The `0x11F` arm is the one block that is wrong. Retail reaches the shared exit
-from both of its `return 1` paths with `addiu $2, $0, 1` in a branch delay slot
-(`beqz $4, exit` for `skill == 0`, then `bnel $4, $2, exit` annulling a
-`daddu $2, $0, $0` for `skill != 0xA5`, then `b exit` with the 1 again).
-`if (skill == 0) return 1; if (skill == 0xA5) return 1; return 0;` and
-`if (skill == 0) return 1; if (skill != 0xA5) return 0; return 1;` both let
-ee-gcc if-convert the pair into `xori`/`sltiu`, four words short.
-`if (skill != 0 && skill != 0xA5) { return 0; } return 1;` and a two-case
-`switch (skill)` returning 1 both keep the branches but merge the first
-`return 1` into a local block that the `beqz` jumps to, leaving its delay slot
-empty and the `0xA5` constant in `$3`: two words short. The missing fact is
-whatever makes that first `return 1` a bare jump to the shared exit.
+The target uses only ordinary C: no provider, signature, compilation flag,
+or local constraint changes. All 119 functions in the owner and its
+owned data pass the official checker.
 
-The jump table differs as a consequence; the case set itself is confirmed by
-the default entries, which all resolve to the one default block.
+Indexed dispatch covers unsigned demon IDs 0x101 through 0x158. Holes and
+out-of-range IDs return zero. The original thirteen shot handlers receive
+the same camera pointer and their full-width return values are preserved.
+Host fixtures compare dispatch, call order and arbitrary returns over
+536,576 inputs each at O0 and O2 with address and undefined-behavior
+sanitizers. All 88 table entries also match in the linked retail image.
+
 
 ## nbCameraBoss_BSMIZ_Command_Set (newbattle/nbCameraBoss, 0x218)
 

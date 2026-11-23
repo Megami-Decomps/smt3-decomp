@@ -9332,21 +9332,20 @@ void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
     }
 }
 
-#ifdef NON_MATCHING
 void campDrawStockHighlight(s32 x, s32 y, s32 unused0, s32 unused1, s32 unused2,
                             s32 alpha, s8 status, s32 unused3, s32 ot)
 {
-    u32 color0 = 0x00647846;
-    u32 color1 = 0x00449B46;
     u32 color2 = 0x1300BF00;
+    u32 color1 = 0x00449B46;
+    u32 color0 = 0x00647846;
     u32 color3 = 0x1BBE8C46;
     u32 colors[4];
     s8 phase = 0;
 
     switch (status) {
+    case 0: phase = 3; break;
     case -1: phase = 1; break;
     case -2: phase = 2; break;
-    case 0: phase = 3; break;
     case -3:
         phase = 4;
         color0 = fclBlendColor(color0, color1, alpha);
@@ -9360,23 +9359,22 @@ void campDrawStockHighlight(s32 x, s32 y, s32 unused0, s32 unused1, s32 unused2,
     colors[3] = color1;
     cmpScaleColorByPhase(phase, colors, alpha);
     cmpDrawBoxGDefault(x, y, 0, 0x6D, 0x15, (s32 *)colors, ot);
+    x = (s32)((u32)x + 0x6D0);
     colors[0] = color1;
     colors[1] = color0;
     colors[2] = color1;
     colors[3] = color0;
     cmpScaleColorByPhase(phase, colors, alpha);
-    cmpDrawBoxGDefault(x + 0x6D0, y, 0, 0x69, 0x15, (s32 *)colors, ot);
+    cmpDrawBoxGDefault(x, y, 0, 0x69, 0x15, (s32 *)colors, ot);
+    x = (s32)((u32)x + 0x690);
     colors[0] = color0;
     colors[1] = color3;
     colors[2] = color0;
     colors[3] = color3;
     cmpScaleColorByPhase(phase, colors, alpha);
-    cmpDrawBoxGDefault(x + 0xD60, y, 0, 0xBD, 0x15, (s32 *)colors, ot);
+    cmpDrawBoxGDefault(x, y, 0, 0xBD, 0x15, (s32 *)colors, ot);
     fclDrawPanelSprite2(0x44, ot);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockHighlight);
-#endif
 
 extern void campDrawStockHighlight(s32 x, s32 y, s32 c, s32 d, s32 e, s32 f, s8 g, s32 h,
                                    s32 ot);

@@ -73,6 +73,7 @@ Camp item and skill message tables				docs/matching/code_0022C578.md	2088
 Parameter gauge row map				docs/matching/code_0022C578.md	2096
 Camp affinity and name text				docs/matching/code_0022C578.md	2104
 nmeDrawGradQuad	code_0022C578	0x5C0		docs/matching/code_0022C578.md	2113
+campDrawStockHighlight	code_0022C578	0x1FC	127 of 127 words match	docs/matching/code_0022C578.md	2129
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60
@@ -361,7 +362,7 @@ nbGetMakaBaramaki	newbattle/nbCalc	0x1D4	117 of 117 words match	docs/matching/ne
 nbCameraBoss_Sp_DOUTYO_TPFix_Set	newbattle/nbCameraBoss	0x64		docs/matching/newbattle/nbCameraBoss.md	3
 nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC		docs/matching/newbattle/nbCameraBoss.md	36
 nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	125 of 125 words match	docs/matching/newbattle/nbCameraBoss.md	44
-nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/matching/newbattle/nbCameraBoss.md	89
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	140 of 140 words match	docs/matching/newbattle/nbCameraBoss.md	89
 nbCameraBoss_BSMIZ_Command_Set	newbattle/nbCameraBoss	0x218	134 of 134 words match	docs/matching/newbattle/nbCameraBoss.md	116
 nbCameraBoss_Kagu_E909_Run	newbattle/nbCameraBoss	0x2D4	44 of 180 words differ	docs/matching/newbattle/nbCameraBoss.md	167
 nbCameraBoss_Kagu_MJINKO_Set	newbattle/nbCameraBoss	0x31C	39 of 199 words differ	docs/matching/newbattle/nbCameraBoss.md	189

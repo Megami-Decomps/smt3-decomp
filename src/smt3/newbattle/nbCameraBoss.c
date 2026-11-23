@@ -3790,9 +3790,6 @@ s32 nbCameraBoss_Cut2_Init(nbCamera_t *pNbCamera)
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
 #endif
 
-/* NON_MATCHING: 92 of 138 words, 2 short; the 0x11F arm's first `return 1`
- * becomes a local block instead of a delay-slot constant. */
-#ifdef NON_MATCHING
 s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
 {
     nbFormation_t *pForm;
@@ -3833,8 +3830,11 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
             shot = nbCameraBoss_Samael_AKUI_Run(pNbCamera);
             break;
         }
-        if (skill != 0 && skill != 0xA5) {
-            return 0;
+        if (skill == 0) {
+            return 1;
+        }
+        if (skill != 0xA5) {
+            goto fail_cut;
         }
         return 1;
     case 0x120:
@@ -3846,10 +3846,10 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
     case 0x146:
     case 0x147:
     case 0x148:
-        if (skill != 0) {
-            return 0;
+        if (skill == 0) {
+            return 1;
         }
-        return 1;
+        goto fail_cut;
     case 0x103:
     case 0x124:
         if (skill == 0xA9 || skill == 0xAA) {
@@ -3901,10 +3901,10 @@ s32 nbCameraBoss_Cut2_Run(nbCamera_t *pNbCamera)
         return 0;
     }
     return shot;
+
+fail_cut:
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Run);
-#endif
 
 s32 nbCameraBoss_CheckRotate(nbFormation_t *pFormation)
 {
