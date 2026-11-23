@@ -137,3 +137,12 @@ declaration lets the target compiler select an incorrect small-data
 reference in place of the native address pair. Spelling the actual
 section retains every instruction and relocation in the owner. The
 provider and the raw bank are unchanged; there is no new matching credit.
+
+**Sound provider return declarations.** The bank loader and BGM starter
+return `void`. The stop-all-SE and stop-BGM providers return the signed
+result of queuing their sound command. The corrected declarations in
+`sndManager` and `evtSound` agree with those definitions. These callers
+do not consume the transport return value; the event wrappers return their
+saved sound ID, and the early `sndInit` tail call still discards the
+result. Both complete objects, including instruction and data relocations,
+and all retail bytes are unchanged.

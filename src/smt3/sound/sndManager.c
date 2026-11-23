@@ -17,7 +17,7 @@ extern dds3TitleWork_t *titleWork;
 
 extern u32 dds3GetKernelCount(void);
 
-extern void p2sdStopAllSe(void);
+extern s32 p2sdStopAllSe(void);
 
 extern void sdfMemFreeDirect(void *aHandle);
 
@@ -29,7 +29,7 @@ extern s8 dds3PadButtonState[];
 
 extern s32 scrGetIntPara(s32 n);
 
-extern s32 p2sdPlayBGM(s32 MidiNo);
+extern void p2sdPlayBGM(s32 MidiNo);
 
 extern void sdfTexFree(sdfTexHandle_t *aHandle);
 
