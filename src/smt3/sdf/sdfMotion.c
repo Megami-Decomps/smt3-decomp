@@ -1035,14 +1035,14 @@ sdfMotionNode_t *sdfMotGenMorphNode(sdfMotionCtrlr_t *aCtrlr, u32 aTypeId, u32 a
 }
 
 void sdfMotGenMorphInit(sdfMotNodeMorph_t *aBase,
-                                 sdfMotionCtrlr_t *aCtrlr, sdfMotionNodeVTBL_t *aVTBL, s32 aNodeId) {
+                                 sdfMotionCtrlr_t *aCtrlr, sdfMotionNodeVTBL_t *aVTBL, u32 aNodeId) {
     sdfMotionNodeBaseInit((sdfMotionNode_t *)&aBase->nodeBase,
                             aCtrlr, aVTBL);
     aBase->morphNode = &((sdfModelMorph_t *)aCtrlr->rootNode->morphList->items)[aNodeId];
 }
 
 sdfMotionNode_t *sdfMotGenMorph(sdfMotionCtrlr_t *aCtrlr,
-                                                           s32 aTypeId, s32 aNodeId) {
+                                                           u32 aTypeId, u32 aNodeId) {
     sdfMotNodeMorph_t *entry = sdfChipAllocDirect(sizeof(sdfMotNodeMorph_t));
 
     sdfMotGenMorphInit(entry, aCtrlr, &sdfMotMorphTable, aNodeId);
@@ -1182,5 +1182,5 @@ sdfMotionNodeVTBL_t sdfMotMatMultiUvwTable = { sdfMotCLBK_Destroy, sdfMotCLBK_Se
 sdfMotionNodeVTBL_t sdfMotMatMultiDiffuseTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matMultiDiffuseSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matMultiDiffuseInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matMultiDiffuseBlendSeek };
 sdfMotionNodeVTBL_t sdfMotMatUvw2Table = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matUvw2Seek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matUvw2InitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matUvw2BlendSeek };
 sdfMotionNodeVTBL_t sdfMotMatMultiUvw2Table = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matMultiUvw2Seek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matMultiUvw2InitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matMultiUvw2BlendSeek };
-sdfMotGenNodeFunc sdfMotGenMorphTable[2] __attribute__((section(".data"))) = { (sdfMotGenNodeFunc)sdfMotGenMorph, NULL };
+sdfMotGenNodeFunc sdfMotGenMorphTable[2] __attribute__((section(".data"))) = { sdfMotGenMorph, NULL };
 sdfMotionNodeVTBL_t sdfMotMorphTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_morphSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_morphInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_morphBlendSeek };
