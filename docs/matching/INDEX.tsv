@@ -231,6 +231,7 @@ fldDrawAreaBlockFont	field/fldAutoMap	0x388	226 of 226 words match	docs/matching
 Area title table				docs/matching/field/fldAutoMap.md	360
 NPC resource paths				docs/matching/field/fldAutoMap.md	370
 Full-open diagnostic text				docs/matching/field/fldAutoMap.md	378
+Field model and blur slot storage				docs/matching/field/fldAutoMap.md	387
 resetCamNormal	field/fldCamera	0x374	208 of 219 words differ	docs/matching/field/fldCamera.md	3
 resetCamNormal2	field/fldCamera	0x360	207 of 215 words differ	docs/matching/field/fldCamera.md	33
 fldCamParamTable and fldFollowCameraControl (636 data bytes)				docs/matching/field/fldCamera.md	42
@@ -264,6 +265,7 @@ fldBgmContinue	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldS
 fldBgmLoad	field/fldSe	0x294	165 of 165 words match	docs/matching/field/fldSe.md	132
 Field BGM parameter table	field/fldSe	3036 bytes		docs/matching/field/fldSe.md	185
 gFldBgmTop	field/fldBgmTop	1200 data bytes		docs/matching/field/fldSe.md	200
+Spatial sound emitter storage				docs/matching/field/fldSe.md	214
 fldSkyDrawFilter	field/fldSky	0xAD8		docs/matching/field/fldSky.md	3
 Field light and display initialization				docs/matching/field/fldSky.md	65
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3

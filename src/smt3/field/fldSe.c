@@ -5,20 +5,10 @@
 #include "newdata.h"
 #include "scr.h"
 #include "field.h"
+#include "fldSe3DTable.h"
 #include "ps2asm.h"
 #include "sdfFrame.h"
 #include "slIconSys.h"
-
-/* Field-only views, with offsets taken from the SMT3 retail accesses. */
-typedef struct
-{
-    s32 flg;
-    s32 id;
-    f32 r;
-    f32 x;
-    f32 y;
-    f32 z;
-} fldSe3D_tag;
 
 enum sl_slot_flag
 {
@@ -26,8 +16,6 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DIRECTORY_READY = 2,
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
-
-extern fldSe3D_tag fldSe3DTable[8];
 
 extern s32 gFldSe3DNum;
 

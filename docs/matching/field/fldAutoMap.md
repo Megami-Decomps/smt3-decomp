@@ -383,3 +383,14 @@ The assembly-backed `fldAutoMapDrawOneArea` passes this string to
 alignment bytes belong to the next 16-byte-aligned switch table placement,
 not to the string. The existing function and its two string relocations
 remain unchanged.
+
+## Field model and blur slot storage
+
+The native model cleanup visits 32 records at `0x567F90` in 0x70-byte
+steps. It reads the effect pointer at offset 0x30 in each record. The
+independent blur cleanup visits 64 four-byte handles at `0x568D90`
+and passes each non-null handle to `sdfMemFreeDelayedDirect`.
+Both arrays use the types already used by their consumers. Their
+zero-fill storage ends at `0x568E90`, where `fldModelResPtr`
+starts. The following resource and treasure storage remains raw.
+The array definitions add no instructions or initialized data.

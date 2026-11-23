@@ -210,3 +210,16 @@ non-owning aliases. None introduces another allocation or a pointer in
 the initializer. The canonical hand-maintained symbol entry reserves
 the owner without replacing the interior references. The linked image,
 its neighboring raw ranges and the existing consumers remain unchanged.
+
+## Spatial sound emitter storage
+
+`fldSe3DTable` is eight writable zero-filled rows of 0x18 bytes at
+`0x567C30..0x567CF0`. Each row contains flags, a sound ID, radius, and
+X/Y/Z coordinates. The initialization loop walks eight rows and clears only
+flags, ID, and radius; the add routine fills all six fields. The clear and
+update routines use the same row type. No consumer body or ABI changes.
+
+The table begins immediately after the door-event storage and ends where
+`fldAutoMapWindowTex` starts. The following raw automap and other field
+work remains assembly-owned. These 192 bytes have no initialized-data
+or code matching credit.
