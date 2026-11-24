@@ -1809,6 +1809,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x569A20, name: effect/effBattlePartCenterStorage }
       - { start: 0x452B54, type: .bss, vram: 0x569C20, name: effect/effBattleLightStorage }
       - { start: 0x452B54, type: bss, vram: 0x56A920, name: bss_after_battle_light_storage }
+      - { start: 0x452B54, type: .bss, vram: 0x56AF30, name: effect/effMagaBillboardUvStorage }
+      - { start: 0x452B54, type: bss, vram: 0x56B020, name: bss_after_maga_billboard_uv }
       - { start: 0x452B54, type: .bss, vram: 0x56B350, name: newbattle/nbCameraBossCurveStorage }
       - { start: 0x452B54, type: bss, vram: 0x56B3F8, name: bss_camera_boss_curve_alignment }
       - { start: 0x452B54, type: .bss, vram: 0x56B400, name: newbattle/nbCameraBossVectorStorage }

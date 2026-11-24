@@ -727,7 +727,7 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     s32 validCounts;
     s32 angleValues;
     dds3MagatuhiBill_tag *resource;
-    s16 *defaults;
+    s16 (*defaults)[8];
     u32 i;
 
     countFrames = count * historyCount;
@@ -759,19 +759,19 @@ dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 h
     resource->allocationHandle = allocation;
     resource->texture = dds3BillboardGetGeneralTex(0);
 
-    defaults = &effMagaBillboardTexCoords[0][0];
+    defaults = effMagaBillboardTexCoords;
     i = 0;
     do {
         i++;
-        defaults[0] = 0;
-        defaults[1] = 0;
-        defaults[2] = 0x400;
-        defaults[3] = 0;
-        defaults[4] = 0x400;
-        defaults[5] = 0x400;
-        defaults[6] = 0;
-        defaults[7] = 0x400;
-        defaults += 8;
+        (*defaults)[0] = 0;
+        (*defaults)[1] = 0;
+        (*defaults)[2] = 0x400;
+        (*defaults)[3] = 0;
+        (*defaults)[4] = 0x400;
+        (*defaults)[5] = 0x400;
+        (*defaults)[6] = 0;
+        (*defaults)[7] = 0x400;
+        defaults++;
     } while (i < 0xF);
 
     if (count != 0) {
@@ -879,7 +879,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
                     pendingCount++;
                     if (pendingCount == 15) {
                         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-                            colors, effMagaBillboardTexCoords, offsets, 15, 0);
+                            colors, &effMagaBillboardTexCoords, offsets, 15, 0);
                         sdfDrawTagLink(list, EE_ADDR(vertexPacket));
                         pendingCount = 0;
                     }
@@ -890,7 +890,7 @@ void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     }
     if (pendingCount != 0) {
         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-            colors, effMagaBillboardTexCoords, offsets, pendingCount, 0);
+            colors, &effMagaBillboardTexCoords, offsets, pendingCount, 0);
         sdfDrawTagLink(list, EE_ADDR(vertexPacket));
     }
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))effMagaGrOtBuckets[work->drawBucket]->regFunc)(effMagaGrOtBuckets[work->drawBucket], list);
