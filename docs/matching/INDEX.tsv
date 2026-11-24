@@ -419,6 +419,7 @@ DispSummonCursor	newbattle/nbCommSelProcess	0x278		docs/matching/newbattle/nbCom
 nbDebugProcess1	newbattle/nbDebugProcess	0x2A8	170 of 170 words match	docs/matching/newbattle/nbDebugProcess.md	3
 SelectDevil	newbattle/nbDebugProcess	0x218	134 of 134 words match	docs/matching/newbattle/nbDebugProcess.md	43
 SelectMotData	newbattle/nbDebugProcess	0x434	269 of 269 words match	docs/matching/newbattle/nbDebugProcess.md	65
+SelectMot	newbattle/nbDebugProcess	0x27C	159 of 159 words match	docs/matching/newbattle/nbDebugProcess.md	138
 Effect2	newbattle/nbE911	456 bytes	94 of 114 words match	docs/matching/newbattle/nbE911.md	3
 nbApplyBadCurse	newbattle/nbEncProcess	0x174		docs/matching/newbattle/nbEncProcess.md	3
 nbFindBadCurseTarget	newbattle/nbEncProcess	0x18C		docs/matching/newbattle/nbEncProcess.md	17

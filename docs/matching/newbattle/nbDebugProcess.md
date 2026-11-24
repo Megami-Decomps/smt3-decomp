@@ -133,3 +133,29 @@ stock and name indices remain caller preconditions.
 All 16 existing exact owner functions remain exact. The complete guarded owner
 passes, and full raw assembly/whole objects from plain versus diagnostic
 compiler runs agree in production, SKIP_ASM and retained-C contexts.
+
+
+## SelectMot (newbattle/nbDebugProcess, 0x27C)
+
+159 of 159 words match at 636 bytes, beginning at 0x002848B8. The ten-row selector keeps the native
+index-printer and font coordinates separate. Each row reads the current
+page index for the index print and again after the print and tag-link
+callbacks for the label. Highlighting refreshes the motion cursor after each
+font request's submission and cleanup. Registering the completed tag
+precedes the active check; selecting a motion then reads current process,
+form, page and cursor. The signed byte at pad offset 0x20, page-right cap,
+and subsequent page-left clamp follow the original menu dispatch.
+
+The same-owner printer precedent supplies the raw column/Y phase. Paired
+empty constraints on the actual initial label table and cursor and on the
+printer's real operands preserve the native schedules. The initialized raw
+font X remains live at the real shift into the font request. The compiler
+prints a loop alignment directive next to the empty initial-cursor region;
+it is compiler-owned alignment, not source assembly. The color and request
+reuse the saved register in disjoint phases, with the request assigned only
+after the font call has consumed the color. No new alias, provider ABI,
+compiler flag, or unit boundary is used.
+
+All 18 owner functions and linked retail bytes are exact. The behavioral
+fixture covers 262,144 callback and state scenarios at each of two host
+optimization levels, including a negative control with the pad sign reversed.

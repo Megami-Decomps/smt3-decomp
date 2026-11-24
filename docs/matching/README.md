@@ -65,6 +65,7 @@ both native and emitted sizes when they differ.
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |
 | 4 | newbattle/nbTest | [newbattle/nbTest.md](newbattle/nbTest.md) |
 | 4 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
+| 4 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 4 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 4 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 4 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
@@ -84,7 +85,6 @@ both native and emitted sizes when they differ.
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
 | 3 |  | [newbattle/nbResultProcess.md](newbattle/nbResultProcess.md) |
 | 3 | newbattle/nbEncProcess | [newbattle/nbEncProcess.md](newbattle/nbEncProcess.md) |
-| 3 | newbattle/nbDebugProcess | [newbattle/nbDebugProcess.md](newbattle/nbDebugProcess.md) |
 | 3 | newbattle/NbNegoFlowNg | [newbattle/NbNegoFlowNg.md](newbattle/NbNegoFlowNg.md) |
 | 3 | ModeSelect | [kernel/ModeSelect.md](kernel/ModeSelect.md) |
 | 3 | field/fldMain | [field/fldMain.md](field/fldMain.md) |

@@ -794,26 +794,42 @@ s32 SelectMotData(nbDebugProcessData_t *d, s32 active)
 extern const char *nbDebugMotionLabels[];
 extern char nbDebugIndexFmt[];
 
-#ifdef NON_MATCHING
+/* The printer uses two independent coordinate streams. Keep the native
+ * index-draw phases separate from the raw column passed to the font loop.
+ * Local EE constraints only preserve real argument, cursor and table values. */
 s32 SelectMot(nbDebugProcessData_t *d, s32 active)
 {
-    sdfDrawTag_t *tag;
-    frFontHandle_t *request;
-    s32 i, y, yText, attr, color, result, base, selected;
+    FAKEMATCH_ASM_REG(sdfDrawTag_t *, tag, "$18");
+    FAKEMATCH_ASM_REG(s32, i, "$17") = 0;
+    FAKEMATCH_ASM_REG(s32, y, "$19") = 0x7BA0;
+    FAKEMATCH_ASM_REG(s32, yText, "$20") = 80;
+    s32 xText = 0x1AE;
+    const char **labels;
+    FAKEMATCH_ASM_REG(frFontHandle_t *, request, "$16");
+    s32 attr, result, base;
+    s32 pad;
+    FAKEMATCH_ASM_REG(s32, selected, "$2");
+    FAKEMATCH_ASM_REG(s32, color, "$16");
+    s32 x = 0x1900;
+    FAKEMATCH_ASM_REG(s32, enable, "$21") = active;
+    FAKEMATCH_ASM_REG(nbDebugProcessData_t *, work, "$22") = d;
     u8 button;
 
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
+    FAKEMATCH_ASM_LIVE(tag);
     sdfDrawTagInit(tag);
-    nbGetUnitWorkFromFormindex(d->form->formindex);
+    nbGetUnitWorkFromFormindex(work->form->formindex);
     dds3ConsPanelTagLinkZ(tag, 0x18C, 0x4C, 8, 20, 0xFF0000);
-    y = 0x7BA0;
-    yText = 80;
-    selected = *(volatile s32 *)&nbDebugMotionCursor;
-    for (i = 0; i < 10; i++) {
+    labels = nbDebugMotionLabels;
+    selected = nbDebugMotionCursor;
+    /* Once the initial cursor is read, both values feed the first row. */
+    FAKEMATCH_ASM_LIVE_PAIR(labels, selected);
+    i = 0;
+    do {
         attr = 0;
         color = -0x80;
         if (selected == i) {
-            if (active) {
+            if (enable) {
                 attr = 4;
                 color = 0xFF0080;
             } else {
@@ -821,47 +837,62 @@ s32 SelectMot(nbDebugProcessData_t *d, s32 active)
                 color = 0xFFFF00;
             }
         }
-        sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(0x8900, y, 0xFFFF80, attr,
-                                             nbDebugIndexFmt, slSelectMotIndex + i)));
+        {
+            FAKEMATCH_ASM_REG(const char *, fmt, "$8") = nbDebugIndexFmt;
+            s32 rowIndex = slSelectMotIndex + i;
+            FAKEMATCH_ASM_REG(s32, rawIndexColumn, "$2") = x;
+            FAKEMATCH_ASM_LIVE_PAIR(rawIndexColumn, y);
+            FAKEMATCH_ASM_LIVE_PAIR(rawIndexColumn, fmt);
+            sdfDrawTagLink(tag, EE_ADDR(sdfDevPrintf(rawIndexColumn + 0x7000,
+                y, 0xFFFF80, attr, fmt, rowIndex)));
+        }
         y += 0xB0;
-        request = frwGetSmallFontFRQ(0x1AE * 16, yText * 8, 0xFF0005, color,
-                                     nbDebugMotionLabels[slSelectMotIndex + i], NULL);
+        FAKEMATCH_ASM_LIVE(xText);
+        request = frwGetSmallFontFRQ(xText * 16, yText * 8, 0xFF0005, color,
+                                     labels[slSelectMotIndex + i], NULL);
+        i++;
         yText += 22;
-        frDrawFont((frFontHandle_t *)request);
-        frDestroyFontRequestAfter((frFontHandle_t *)request);
-        selected = *(volatile s32 *)&nbDebugMotionCursor;
-    }
+        frDrawFont(request);
+        frDestroyFontRequestAfter(request);
+        selected = nbDebugMotionCursor;
+    } while (i < 10);
     D_002F67F8.regFunc(&D_002F67F8, tag);
-    if (!active) {
-        return 0;
-    }
-    result = dds3SelectMenu(0, 1, 26, 1, 10, NULL, &slSelectMotIndex, NULL, &nbDebugMotionCursor);
-    if (result == -1) {
-        return -1;
-    }
+    pad = 0;
+    if (!enable) goto inactive;
+    result = dds3SelectMenu(pad, 1, 26, 1, 10, NULL, &slSelectMotIndex, NULL, &nbDebugMotionCursor);
+    if (result == -1) return result;
     if (result == 1) {
-        SetMotion(d->data, d->form, slSelectMotIndex + nbDebugMotionCursor, 0);
+        SetMotion(work->data, work->form, slSelectMotIndex + nbDebugMotionCursor, 0);
         return 1;
     }
-    button = ((volatile u8 *)dds3PadButtonState)[5];
-    base = *(volatile s32 *)&slSelectMotIndex;
-    if ((button & 2) && base + 10 < 26) {
-        slSelectMotIndex = base + 20 < 26 ? base + 10 : 16;
+    button = (u8)dds3PadButtonState[5];
+    if (!(button & 2)) goto left;
+    base = slSelectMotIndex;
+    {
+        s32 next = base + 10;
+        if (next >= 26) goto left;
+        if (base + 20 >= 26) {
+            slSelectMotIndex = 16;
+            goto left;
+        }
+        slSelectMotIndex = next;
     }
-    button = ((volatile u8 *)dds3PadButtonState)[4];
-    base = *(volatile s32 *)&slSelectMotIndex;
-    if ((button & 2) && base > 0) {
-        base -= 10;
-        slSelectMotIndex = base < 0 ? 0 : base;
+left:
+    {
+        FAKEMATCH_ASM_REG(s32, previous, "$2");
+        if (!((u8)dds3PadButtonState[4] & 2)) goto done;
+        previous = slSelectMotIndex;
+        if (previous > 0) {
+            previous -= 10;
+            if (previous < 0) previous = 0;
+            slSelectMotIndex = previous;
+        }
     }
-    if ((s8)((u8)dds3PadButtonState[0x20]) < 0) {
-        return 2;
-    }
+done:
+    if (dds3PadButtonState[0x20] < 0) return 2;
+inactive:
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMot);
-#endif
 
 extern char nbDebugHexIndexFmt[];
 extern s32 devilbase;
