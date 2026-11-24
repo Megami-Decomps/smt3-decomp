@@ -283,6 +283,15 @@ special values. Subnormal normalization uses bounded 32-bit shifts. Native mode
 limits, quick-path rollback, small-integer rounding, exact bigint margins and
 cleanup are preserved. Independent native reviews covered both conversion halves.
 
+Modes 3 and 5 (and their quick-disabled forms) add the requested digits and
+estimated exponent, then add one. The retail `addu` and `addiu` at
+`0x002D87E0` and `0x002D87E8` wrap both additions as 32-bit words before
+the signed limit test. Unsigned additions followed by the native signed-word
+view preserve that ordering without signed overflow in the draft. The scoped
+mode-3 fixture checks the wrap at `1.5` with `INT_MAX` digits; the older
+draft overflows under UBSan. The new expressions produce the same complete
+guarded-owner object and do not match or promote `_dtoa_r`.
+
 The existing binary64 union now has a genuine64-bit view. Typed readonly scalar
 declarations reproduce native absolute accesses and remove the initial
 whole-unit/standalone discrepancy. The positive-limit table access uses

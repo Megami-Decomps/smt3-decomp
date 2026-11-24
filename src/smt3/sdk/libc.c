@@ -1943,8 +1943,9 @@ char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
         leftRight = 0;
         /* fallthrough */
     case 5:
-        limit1 = digits + k;
-        limit = limit1 + 1;
+        /* Both native adds wrap before the signed limit test. */
+        limit1 = (s32)((u32)digits + (u32)k);
+        limit = (s32)((u32)limit1 + 1U);
         needed = limit > 0 ? limit : 1;
         break;
     }
