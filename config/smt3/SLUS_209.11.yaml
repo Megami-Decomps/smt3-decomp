@@ -1797,6 +1797,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x558130, name: field/fldShadowTableStorage }
       - { start: 0x452B54, type: .bss, vram: 0x55D5B0, name: field/fldRunDanteStorage }
       - { start: 0x452B54, type: bss, vram: 0x55D624, name: bss_after_field_shadow_tables }
+      - { start: 0x452B54, type: .bss, vram: 0x55D628, name: field/fldRunEffectResourceStorage }
+      - { start: 0x452B54, type: bss, vram: 0x55D768, name: bss_after_field_effect_resources }
       - { start: 0x452B54, type: .bss, vram: 0x55DC30, name: field/fldEveHitStorage }
       - { start: 0x452B54, type: .bss, vram: 0x562830, name: field/fldDoorEventTable }
       - { start: 0x452B54, type: .bss, vram: 0x567C30, name: field/fldSe3DTable }

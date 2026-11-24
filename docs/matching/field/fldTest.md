@@ -194,3 +194,16 @@ The explicit BSS placement gives the linker the input section for this
 exact extent. A tentative definition without it goes to COMMON with
 the stock compiler. This creates no initialized data and changes no
 game instructions or runtime initialization.
+
+## Field effect resource storage (field/fldRunEffectResourceStorage, 320 bytes)
+
+Eight existing resource records occupy `0x0055D628` through
+`0x0055D768`. The resource loader initializes them, and the two effect
+lists refer to the same live handles, counts, and placement values. The
+existing record type and all readers and writers are unchanged.
+
+The typed BSS definitions replace only these native zero-fill bytes. The
+four bytes before the bank and the raw storage beginning with
+`fldWaveBuff` after it stay in assembly. The explicit BSS section keeps
+the stock compiler from emitting tentative definitions as COMMON.
+No game instructions, initialized data, or runtime initialization change.

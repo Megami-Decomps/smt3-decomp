@@ -289,6 +289,7 @@ fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldT
 Shadow-edge position storage				docs/matching/field/fldTest.md	163
 Shadow triangle and edge scratch storage				docs/matching/field/fldTest.md	173
 fldRun_Dante work storage	field/fldRunDanteStorage	116 bytes		docs/matching/field/fldTest.md	185
+Field effect resource storage	field/fldRunEffectResourceStorage	320 bytes		docs/matching/field/fldTest.md	198
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
