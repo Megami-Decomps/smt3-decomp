@@ -255,7 +255,7 @@ extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
 
 extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
 
-extern void nbCountActiveUnits(nbMainProcessData_t *data);
+extern void nbCountActiveUnits(void);
 
 extern void nbDebugMainProcess(nbMainProcessData_t *data);
 
@@ -1308,17 +1308,17 @@ void nbSetPhase(s32 phase)
     }
 }
 
-/* NON_MATCHING: 150 of 263 words differ (first at +0xBC). */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * battle unknown realm savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* The EVENT exit keeps a separate ATO call from CHKEND. Use the same
+ * phase provider through a conservative declaration at that site. */
+extern void nbSetNextPhaseAtEventExit(s32 phase) FAKEMATCH_ASM_NAME("nbSetNextPhase");
+
 s32 nbMainProcess1(dds3ProcessID_t *id)
 {
     nbMainProcessData_t *data;
     s32 next;
     s32 seq;
     s32 limit;
+    s32 nextArg;
 
     next = 0;
     data = dds3GetProcessData(id);
@@ -1351,11 +1351,12 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
     case EVENT:
         if (data->EventProcessID == NULL) {
             if (data->endtype == 1 || data->endtype == 8) {
-                nbSetNextPhase(ATO);
+                nbSetNextPhaseAtEventExit(ATO);
+                goto activeTail;
             } else {
-                nbSetNextPhase(PRESSNIIDA);
+                nextArg = PRESSNIIDA;
+                goto sharedPhase;
             }
-            next = 1;
         }
         break;
     case PRESSNIIDA:
@@ -1425,32 +1426,35 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         } else {
             limit = 8;
         }
-        if (data->phasetime >= SDF_FRAMES(limit)) {
-            if (nbCheckActionStack()) {
-                nbSetNextPhase(CHKTURN);
-                next = 1;
-            } else {
-                switch (data->endtype) {
-                case NB_PHASE_NON:
-                    nbSetNextPhase(CHKTURN);
-                    next = 1;
-                    break;
-                case PRESSNIIDA:
-                    nbSetNextPhase(RENZOKU);
-                    next = 1;
-                    break;
-                case ACTION:
-                    next = 1;
-                    break;
-                default:
-                    nbSetNextPhase(ATO);
-                    next = 1;
-                    break;
-                }
-            }
+        if (data->phasetime < SDF_FRAMES(limit)) {
+            break;
         }
-        break;
+        if (nbCheckActionStack()) {
+            nbSetNextPhase(CHKTURN);
+            goto activeTail;
+        }
+        {
+            u32 endtype = data->endtype;
+            if (endtype == NB_PHASE_NON) {
+                goto phaseChkTurn;
+            }
+            if (endtype != PRESSNIIDA) {
+                if (endtype == ACTION) {
+                    goto activeTail;
+                }
+                nbSetNextPhase(ATO);
+                goto activeTail;
+            }
+            nbSetNextPhase(RENZOKU);
+            goto activeTail;
+        }
+phaseChkTurn:
+        nextArg = CHKTURN;
+sharedPhase:
+        nbSetNextPhase(nextArg);
+        goto activeTail;
     case CHKTURN:
+activeTail:
         next = 1;
         break;
     case RENZOKU:
@@ -1460,7 +1464,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
             data->stat &= ~8;
             data->stat &= ~0x10;
             next = 1;
-            nbCountActiveUnits(data);
+            nbCountActiveUnits();
             nbSetNextPhase(NB_PHASE_ENCOUNT);
         }
         break;
@@ -1495,16 +1499,16 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
     if ((data->stat & 0x200000) == 0 && dds3DebugSign != 0) {
         nbDebugSelect(data);
         nbDebugMainProcess(data);
-        if (data->debug == 1) {
-            DebugDisp2(data);
+        {
+            u16 mode = data->debug;
+            if (mode != 0) {
+                if (mode == 1) DebugDisp2(data);
+            }
         }
         nbDebugCamera(data);
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbMainProcess1);
-#endif
 
 void SetJyocyuData(nbMainProcessData_t *data)
 {

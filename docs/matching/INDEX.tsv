@@ -424,8 +424,8 @@ nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/n
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
 RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3
 nbClipKoukaNum	newbattle/nbKoukaProcess	0x234	141 of 141 words match	docs/matching/newbattle/nbKoukaProcess.md	45
-nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/matching/newbattle/nbMainProcess.md	3
-DebugDisp2	newbattle/nbMainProcess	0x3DC	247 of 247 words match	docs/matching/newbattle/nbMainProcess.md	74
+nbMainProcess1	newbattle/nbMainProcess	0x420		docs/matching/newbattle/nbMainProcess.md	3
+DebugDisp2	newbattle/nbMainProcess	0x3DC	247 of 247 words match	docs/matching/newbattle/nbMainProcess.md	34
 nbDrawMakaNum	newbattle/nbMakaProcess	0x2B4	173 of 173 words match	docs/matching/newbattle/nbMakaProcess.md	3
 Flow1_11	newbattle/NbNegoFlowOne	0xC8	50 of 50 words match	docs/matching/newbattle/nbMakePacket.md	3
 nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/matching/newbattle/nbMakePacket.md	30
