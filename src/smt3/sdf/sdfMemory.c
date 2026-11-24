@@ -1,12 +1,6 @@
 #include "common.h"
 #include "libsdf.h"
 
-/* The SDK multi-RPC client; only its byte span matters here. */
-typedef struct
-{
-    u8 opaque00[0x24];
-} sdfIopRpcClient_t;
-
 /* Allocations round up to this many bytes. */
 #define SDF_MEM_ALIGN_MASK 0x7F
 /* The request header: two length words plus the name's terminator. */
@@ -22,10 +16,10 @@ extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
 extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
-#include "sdk_libmrpc.h"
+#include "sdk_libmrpc_layout.h"
 
 extern sdfMemHandleCB_tag sdfMemCB;
-extern sdfIopRpcClient_t sdfIopRpcClient;
+extern sceSifMClientData sdfIopRpcClient;
 extern sdfDelayedResrcCB_t sdfMemDelayedResrcCB;
 /* Called when the heap cannot satisfy a request; the unit's .sdata holds it. */
 extern void (*sdfMemFullCallback)(s32 size);
@@ -490,7 +484,7 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
     /* The two-word reply has to start on a 64-byte boundary for the SIF. */
     reply = (u32 *)((EE_ADDR(replyScratch) + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
                     ~SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK);
-    result = sceSifMCallRpc((sceSifMClientData *)&sdfIopRpcClient, 1, 0, request, requestBytes, reply, 8, NULL, NULL);
+    result = sceSifMCallRpc(&sdfIopRpcClient, 1, 0, request, requestBytes, reply, 8, NULL, NULL);
     if (result >= 0) {
         if (aOutSize != NULL) {
             *aOutSize = reply[1];

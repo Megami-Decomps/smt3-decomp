@@ -2,6 +2,7 @@
 #include "eeregs.h"
 #include "libsdf.h"
 #include "draw.h"
+#include "sdk_gs_store_image.h"
 
 #include "ps2asm.h"
 typedef struct
@@ -45,8 +46,7 @@ extern s8 sdfGrCaptureBuff;
 void sdfGrSetFrameSetMode(sdfGrFrameSet_t *aFrame, s32 aMode, s32 aReqHandleClear);
 void sdfGrFreeFrameSet(sdfGrFrameSet_t *aFrame);
 
-/* GS store-image packet and tracked-thread node are only passed to the SDK. */
-typedef struct sceGsStoreImage sceGsStoreImage;
+/* The SDK fills the native GS download packet before each transfer. */
 extern sceGsStoreImage sdfGrStoreImage;
 extern sdfThCB_t sdfDispThreadCB;
 extern u8 sdfDrawThreadStack[0x8000];
@@ -73,8 +73,6 @@ extern u32 sdfGetRunTimeCount(u32 aBaseTime);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
-extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
-extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32 mode, s32 timeout);
 extern void sceGsResetPath(void);
 extern void *memcpy(void *a, const void *b, size_t c);

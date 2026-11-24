@@ -1,39 +1,11 @@
 #include "sdk_gs_reset_defaults.h"
 #include "common.h"
+#include "sdk_gs_store_image.h"
 #include "ps2asm.h"
 
 /* The GS interrupt mask register, through the kernel's syscall stubs. */
 extern u64 GsGetIMR(void);
 extern u64 GsPutIMR(u64 imr);
-
-typedef union {
-    u128 qword;
-    struct {
-        u64 NLOOP : 15;
-        u64 EOP : 1;
-        u64 pad16 : 30;
-        u64 PRE : 1;
-        u64 PRIM : 11;
-        u64 FLG : 2;
-        u64 NREG : 4;
-        u64 REGS0 : 4;
-        u64 REGS1 : 4;
-        u64 REGS2 : 4;
-        u64 REGS3 : 4;
-        u64 REGS4 : 4;
-        u64 REGS5 : 4;
-        u64 REGS6 : 4;
-        u64 REGS7 : 4;
-        u64 REGS8 : 4;
-        u64 REGS9 : 4;
-        u64 REGS10 : 4;
-        u64 REGS11 : 4;
-        u64 REGS12 : 4;
-        u64 REGS13 : 4;
-        u64 REGS14 : 4;
-        u64 REGS15 : 4;
-    } f;
-} sceGifTag;
 
 typedef struct {
     u64 pmode;
@@ -55,24 +27,6 @@ typedef struct {
     u64 reg_trxdir;
     sceGifTag imagetag;
 } sceGsLoadImage;
-
-typedef struct {
-    u32 qwc;
-    u32 addr;
-    u32 vifcode0;
-    u32 vifcode1;
-    sceGifTag tag;
-    u64 bitbltbuf;
-    u64 reg_bitbltbuf;
-    u64 trxpos;
-    u64 reg_trxpos;
-    u64 trxreg;
-    u64 reg_trxreg;
-    u64 finish;
-    u64 reg_finish;
-    u64 trxdir;
-    u64 reg_trxdir;
-} sceGsStoreImage;
 
 #define D2_CHCR (*(volatile u32 *)0x1000A000)
 #define D2_MADR (*(volatile u32 *)0x1000A010)

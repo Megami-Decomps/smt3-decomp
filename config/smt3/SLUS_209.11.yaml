@@ -1836,6 +1836,10 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x5776C0, name: sdf/sdfVblankThreadStackStorage }
       - { start: 0x452B54, type: .bss, vram: 0x577EC0, name: sdf/sdfChipControlStorage }
       - { start: 0x452B54, type: bss, vram: 0x577F14, name: bss_after_sdf_chip_control }
+      - { start: 0x452B54, type: .bss, vram: 0x577F18, name: sdf/sdfMemoryControlStorage }
+      - { start: 0x452B54, type: .bss, vram: 0x577F40, name: sdf/sdfIopFileClientStorage }
+      - { start: 0x452B54, type: bss, vram: 0x577F7C, name: bss_after_sdf_iop_file_client }
+      - { start: 0x452B54, type: .bss, vram: 0x577F80, name: sdf/sdfGrStoreImageStorage }
       - { start: 0x452B54, type: .bss, vram: 0x577FF0, name: sdf/sdfDisplayThreadStackStorage }
       - { start: 0x452B54, type: .bss, vram: 0x578FF0, name: sdf/sdfDrawThreadStackStorage }
       - { start: 0x452B54, type: bss, vram: 0x580FF0, name: bss_after_sdf_display_stack }
