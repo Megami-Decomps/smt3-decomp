@@ -1214,23 +1214,22 @@ s32 datGetDevilRace(s8 index)
 extern void *memset(void *dst, s32 value, size_t size);
 extern s8 datCountPlayerLND(void);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
+/* The Hearts scan reuses its signed ID scalar for the alignment result
+ * after the last lookup. Capture the raw count bytes before the separate
+ * signed dominance test, then compare them as signed high-byte ranks. */
 s32 datGetPlayerLNDList(u8 *outCount)
 {
     s8 counts[3];
-    s32 result = 0;
+    s32 idOrResult;
     s32 count;
     s32 i;
 
     memset(counts, 0, sizeof(counts));
     for (i = 0; i < DDS3_GBWK->heartscnt; i++) {
-        s8 id = DDS3_GBWK->hearts[i];
+        idOrResult = (s8)DDS3_GBWK->hearts[i];
 
-        if (datDevilIsRegistered((u8)id) != 0) {
-            switch (datGetDevilRace(id)) {
+        if (datDevilIsRegistered((u8)idOrResult) != 0) {
+            switch (datGetDevilRace((s8)idOrResult)) {
             case 1:
                 counts[0]++;
                 break;
@@ -1243,9 +1242,23 @@ s32 datGetPlayerLNDList(u8 *outCount)
             }
         }
     }
-    if (counts[0] != counts[2] &&
-        (counts[0] >= counts[1] || counts[2] >= counts[1])) {
-        result = counts[0] < counts[2] ? 4 : 1;
+    {
+        const u8 *rawCounts = (const u8 *)counts;
+        s32 left = counts[0];
+        s32 right;
+        u32 rawLeft;
+        u32 rawRight;
+
+        idOrResult = 0;
+        right = counts[2];
+        rawLeft = rawCounts[0];
+        rawRight = rawCounts[2];
+
+        if (left != right && (left >= counts[1] || right >= counts[1])) {
+            s32 leftRank = (s32)(rawLeft << 24);
+            s32 rightRank = (s32)(rawRight << 24);
+            idOrResult = leftRank < rightRank ? 4 : 1;
+        }
     }
     count = datCountPlayerLND();
     if (count < 6) {
@@ -1260,11 +1273,8 @@ s32 datGetPlayerLNDList(u8 *outCount)
     if (outCount != NULL) {
         *outCount = count;
     }
-    return result;
+    return idOrResult;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", datGetPlayerLNDList);
-#endif
 
 s8 datGetDevilSlotIndex(u8 devilId)
 {

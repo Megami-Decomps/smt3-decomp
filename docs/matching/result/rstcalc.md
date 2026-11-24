@@ -751,3 +751,26 @@ neighbor. The next object is still the independent unsigned devil-ID list.
 No reader changes. In particular, retail's scans do not reject missing keys
 before forming the final address; this table definition does not add a row,
 hide those existing out-of-domain accesses or claim they are safe.
+
+## datGetPlayerLNDList (result/rstcalc, 0x1A0)
+
+104 of 104 words match in ordinary C. The Hearts scan passes the raw ID
+byte to the registration check and its signed view to the race lookup.
+After the loop, the ID scalar is reused for the alignment result.
+Three signed byte counters are compared for a distinct side that is not
+below the middle count. The separate count callback and its scaled,
+nullable byte output are unchanged.
+
+The unsigned byte views of the initialized left and right counters are
+captured before the signed dominance test. Each is shifted by 24 as an
+unsigned word, then interpreted as a signed word. This preserves the
+ordering of all signed byte values, including negative wrapped counts.
+The ordinary comparison restores the native gated shifts and result-code
+selection. Computing the byte views only inside the winning-side block
+gave 88/104; the original draft gave 5/104. The final complete-owner
+comparison preserves all 104 other functions, ordered relocations and data.
+
+The first exact reconstruction used register/operand constraints as a
+diagnostic. Removing all of them together preserves the whole allocated
+object and the target's exact bytes. Single removals were non-monotonic;
+none is needed in the production source.
