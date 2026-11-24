@@ -1873,6 +1873,12 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x5947D8, name: bss_after_sdf_file_rpc_state }
       - { start: 0x452B54, type: .bss, vram: 0x594940, name: sdf/sdfFileRpcReadBufferStorage }
       - { start: 0x452B54, type: bss, vram: 0x598940, name: bss_after_sdf_file_rpc_read_buffer }
+      - { start: 0x452B54, type: .bss, vram: 0x598980, name: sdk/libpadClientStorage }
+      - { start: 0x452B54, type: .bss, vram: 0x5989D0, name: sdk/libpadStateStorage }
+      - { start: 0x452B54, type: bss, vram: 0x598AB0, name: bss_after_pad_port_state }
+      - { start: 0x452B54, type: .bss, vram: 0x598AC0, name: sdk/libpadCommandStorage }
+      - { start: 0x452B54, type: .bss, vram: 0x598BC0, name: sdk/libpadPacketStorage }
+      - { start: 0x452B54, type: bss, vram: 0x598C40, name: bss_after_pad_rpc_packet }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")

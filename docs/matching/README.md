@@ -96,6 +96,7 @@ both native and emitted sizes when they differ.
 | 3 | historical code_00144798 | [code_00144798.md](code_00144798.md) |
 | 3 | basic | [basic/dds3BasicTables.md](basic/dds3BasicTables.md) |
 | 2 | staff/stfMain | [staff/stfMain.md](staff/stfMain.md) |
+| 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdf/sdfThreadStacks.md](sdf/sdfThreadStacks.md) |
 | 2 | sdf/sdfIpu | [sdf/sdfIpu.md](sdf/sdfIpu.md) |
 | 2 | pipe/mnMyLink | [pipe/mnMyLink.md](pipe/mnMyLink.md) |
@@ -120,7 +121,6 @@ both native and emitted sizes when they differ.
 | 2 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
-| 1 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 1 | sdk/libm | [sdk/libm.md](sdk/libm.md) |
 | 1 |  | [sdk/libkernlStartupEntries.md](sdk/libkernlStartupEntries.md) |
 | 1 |  | [sdk/libkernlDebugHandlers.md](sdk/libkernlDebugHandlers.md) |
