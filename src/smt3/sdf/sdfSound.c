@@ -1,6 +1,7 @@
 #include "fpu.h"
 #include "sdfSndCommandRingStorage.h"
 #include "sdfSoundRuntimeStorage.h"
+#include "sdfSoundMapStorage.h"
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
@@ -32,14 +33,6 @@ s32 SleepThread(void);
 
 extern s8 sdfSndBurstReqMode;
 
-typedef struct
-{
-    u32 unk0;
-    u8 unk4;
-    u8 unk5;
-    u16 unk6;
-} p2sdLoadEntry_t;
-
 
 s32 sdfSndSendCmd(s32 aCmd, s32 aParam, void *aExDataPtr, s32 aExDataSize);
 
@@ -50,8 +43,7 @@ typedef u8 *(*p2sdPcmFunc_t)(s32);
 
 extern u32 p2sdPcmCallback;
 
-extern u32 sdfSndMap[];
-#define LastLoad ((p2sdLoadEntry_t *)((u8 *)sdfSndMap + 0x190))
+#define LastLoad (sdfSndMap.work.slots)
 
 extern u32 p2sdPcmState;
 
@@ -101,44 +93,6 @@ typedef struct sndSequenceVolumePanPacket_t {
     u32 opaqueNotSent0C;
 } sndSequenceVolumePanPacket_t;
 
-typedef struct sndChannel_t {
-    u8 index;
-    u8 unk1;
-    s16 unk2;
-    u32 unk4;
-    u32 iopWorkAddress;
-    u32 unkC;
-} sndChannel_t;
-
-typedef struct sndIopBuffer_t {
-    s32 size;
-    u32 iopAddress;
-} sndIopBuffer_t;
-
-typedef struct {
-    u8 values[24];
-    u8 pad18[8];
-} sndMidiStateGroup_t;
-
-typedef struct sndMergedWork_t {
-    s32 header;
-    s32 bufferCount;
-    u32 iopBufferAddress;
-    u32 iopBufferBytes;
-    sndChannel_t channels[16];
-    sndIopBuffer_t buffers[16];
-    p2sdLoadEntry_t slots[7];
-    void *eeWorkAddress;
-    u32 eeWorkByteCount;
-    u32 opaque1D0;
-    u32 opaque1D4;
-    u32 opaque1D8;
-    u32 opaque1DC;
-    u8 controlData[7][0x80];
-    sndMidiStateGroup_t stateGroups[2];
-} sndMergedWork_t;
-
-extern sndMergedWork_t sdfSndWork FAKEMATCH_ASM_NAME("sdfSndMap");
 
 typedef struct sdfSoundRpcRequest_t {
     u8 opaque00[8];
@@ -481,22 +435,22 @@ void sdfSndVoiceMapInit(char *aVoiceInfo, s32 aVoiceCount)
     s32 emptyId;
     s32 i;
 
-    sdfSndWork.header = aVoiceCount;
+    sdfSndMap.work.header = aVoiceCount;
     for (i = 0; i < 0x10; i++) {
-        sdfSndWork.channels[i].index = i;
-        sdfSndWork.channels[i].unk1 = 0x20;
-        sdfSndWork.channels[i].unk2 = 0;
-        sdfSndWork.channels[i].iopWorkAddress = 0;
-        sdfSndWork.channels[i].unk4 = 0;
-        sdfSndWork.channels[i].unkC = 0;
+        sdfSndMap.work.channels[i].index = i;
+        sdfSndMap.work.channels[i].unk1 = 0x20;
+        sdfSndMap.work.channels[i].unk2 = 0;
+        sdfSndMap.work.channels[i].iopWorkAddress = 0;
+        sdfSndMap.work.channels[i].unk4 = 0;
+        sdfSndMap.work.channels[i].unkC = 0;
     }
     printf(sdfSndIopSizeMsg);
     address = sdfSndIopAlloc(0x24E00);
-    sdfSndWork.opaque1D0 = 0;
+    sdfSndMap.work.opaque1D0 = 0;
     emptyId = -1;
-    sdfSndWork.opaque1D4 = 0;
-    sdfSndWork.channels[0].iopWorkAddress = address;
-    slot = sdfSndWork.slots;
+    sdfSndMap.work.opaque1D4 = 0;
+    sdfSndMap.work.channels[0].iopWorkAddress = address;
+    slot = sdfSndMap.work.slots;
     for (i = 6; i >= 0; i--) {
         slot->unk0 = emptyId;
         slot->unk4 = 0;
@@ -512,8 +466,8 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
     s32 iopAddress;
     s32 i;
 
-    sdfSndWork.bufferCount = aSequenceCount;
-    buffer = sdfSndWork.buffers;
+    sdfSndMap.work.bufferCount = aSequenceCount;
+    buffer = sdfSndMap.work.buffers;
     i = 0;
     do {
         s32 size = (*aSequenceInfo++ + 0xF) & ~0xF;
@@ -524,8 +478,8 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
         total += size;
     } while (i != aSequenceCount);
     while (i < 0x10) {
-        sdfSndWork.buffers[i].size = 0;
-        sdfSndWork.buffers[i].iopAddress = 0;
+        sdfSndMap.work.buffers[i].size = 0;
+        sdfSndMap.work.buffers[i].iopAddress = 0;
         i++;
     }
     printf(sdfSndSeqMapInitMsg);
@@ -534,8 +488,8 @@ void sdfSndSeqMapInit(u32 *aSequenceInfo, s32 aSequenceCount)
     do {
         s32 size;
 
-        sdfSndWork.buffers[i].iopAddress = iopAddress;
-        size = sdfSndWork.buffers[i].size;
+        sdfSndMap.work.buffers[i].iopAddress = iopAddress;
+        size = sdfSndMap.work.buffers[i].size;
         i++;
         iopAddress += size;
     } while (i != aSequenceCount);
@@ -558,16 +512,16 @@ void sdfSndInit(char *aVoiceInfo, s32 aVoiceCount, char *aSequenceInfo, s32 aSeq
     sceSifInitIopHeap();
     sdfSndInitCmdIF();
     printf("SDF_SND_READ_BUFF_SIZE\n");
-    sdfSndMap[2] = sdfSndIopAlloc(0x4000);
-    sdfSndMap[3] = 0x4000;
+    sdfSndMap.words[2] = sdfSndIopAlloc(0x4000);
+    sdfSndMap.words[3] = 0x4000;
     sdfSndVoiceMapInit(aVoiceInfo, aVoiceCount);
     sdfSndSeqMapInit((u32 *)aSequenceInfo, aSequenceCount);
     printf("sizeof(sdfSndMap)\n");
     iopAddress = sdfSndIopAlloc(0x5A0);
-    sdfSndMap[0x72] = EE_ADDR(sdfSndMap);
-    sdfSndMap[0x73] = 0x5A0;
+    sdfSndMap.words[0x72] = EE_ADDR(&sdfSndMap);
+    sdfSndMap.words[0x73] = 0x5A0;
     sdfSndIopWorkAddr = iopAddress;
-    sdfSndTransToIOP(iopAddress, sdfSndMap, 0x5A0);
+    sdfSndTransToIOP(iopAddress, &sdfSndMap, 0x5A0);
     sdfSndSendSyncCmd(0, 0, &sdfSndIopWorkAddr, 4);
     sdfSndBurstReqMode = 0;
 }
@@ -720,7 +674,7 @@ extern void InvalidDCache(void *start, void *end);
 
 s32 p2sdLoadCheckMidi(s32 MidiNo)
 {
-    sndMergedWork_t *work = (sndMergedWork_t *)sdfSndMap;
+    sndMergedWork_t *work = &sdfSndMap.work;
     s32 bank = MidiNo >> 16;
     s32 i;
 
@@ -827,7 +781,7 @@ s32 sdfSndGetNonnegativeEntryBalance(s32 aIndex)
 
 u8 *sdfSndGetMidiChannelTable(void)
 {
-    return (u8 *)sdfSndMap + 0x10;
+    return (u8 *)sdfSndMap.work.channels;
 }
 
 p2sdLoadEntry_t *sdfSndGetTrackSlotTable(void)
@@ -838,9 +792,9 @@ p2sdLoadEntry_t *sdfSndGetTrackSlotTable(void)
 u32 sdfSndGetMidiStateWordPair(u32 *aOutValue)
 {
     if (aOutValue != NULL) {
-        *aOutValue = sdfSndMap[0x77];
+        *aOutValue = sdfSndMap.words[0x77];
     }
-    return sdfSndMap[0x76];
+    return sdfSndMap.words[0x76];
 }
 
 /* Pack two 24-byte MIDI state groups into out; NULL leaves the state untouched. */
@@ -852,7 +806,7 @@ void sdfSndCopyGroupedMidiStateBytes(u8 *out) {
     for (group = 0; group < 2; group++) {
         s32 byteIndex;
         for (byteIndex = 0; byteIndex < 24; byteIndex++) {
-            *out++ = ((sndMergedWork_t *)sdfSndMap)->stateGroups[group].values[byteIndex];
+            *out++ = sdfSndMap.work.stateGroups[group].values[byteIndex];
         }
     }
 }
@@ -1127,41 +1081,41 @@ void sdfSndSetTableEntry(u32 kind, const u8 *data)
     switch (kind) {
     case 0:
         for (i = 0; i < 32; i++) {
-            sdfSndWork.controlData[0][i] = data[i];
+            sdfSndMap.work.controlData[0][i] = data[i];
         }
         break;
     case 1:
         for (i = 0; i < 128; i++) {
-            sdfSndWork.controlData[1][i] = data[i];
+            sdfSndMap.work.controlData[1][i] = data[i];
         }
         break;
     case 2:
         for (i = 0; i < 128; i++) {
-            sdfSndWork.controlData[2][i] = data[i];
+            sdfSndMap.work.controlData[2][i] = data[i];
         }
         break;
     case 3:
         for (i = 0; i < 128; i++) {
-            sdfSndWork.controlData[3][i] = data[i];
+            sdfSndMap.work.controlData[3][i] = data[i];
         }
         break;
     case 4:
         for (i = 0; i < 128; i++) {
-            sdfSndWork.controlData[4][i] = data[i];
+            sdfSndMap.work.controlData[4][i] = data[i];
         }
         break;
     case 5:
         for (i = 0; i < 2; i++) {
-            sdfSndWork.controlData[5][i] = data[i];
+            sdfSndMap.work.controlData[5][i] = data[i];
         }
         break;
     case 6:
         for (i = 0; i < 2; i++) {
-            sdfSndWork.controlData[6][i] = data[i];
+            sdfSndMap.work.controlData[6][i] = data[i];
         }
         break;
     }
-    sdfSndTransToIOP(sdfSndIopWorkAddr, &sdfSndWork, 0x5A0);
+    sdfSndTransToIOP(sdfSndIopWorkAddr, &sdfSndMap.work, 0x5A0);
     sdfSndSendSyncCmd(0x1F0, 0, 0, 0);
 }
 
@@ -1172,22 +1126,22 @@ void sdfSndGetTableEntry(u32 kind, u8 *data)
     switch (kind) {
     case 0:
         for (i = 0; i < 32; i++) {
-            data[i] = sdfSndWork.controlData[0][i];
+            data[i] = sdfSndMap.work.controlData[0][i];
         }
         break;
     case 1:
         for (i = 0; i < 128; i++) {
-            data[i] = sdfSndWork.controlData[1][i];
+            data[i] = sdfSndMap.work.controlData[1][i];
         }
         break;
     case 2:
         for (i = 0; i < 128; i++) {
-            data[i] = sdfSndWork.controlData[2][i];
+            data[i] = sdfSndMap.work.controlData[2][i];
         }
         break;
     case 3:
         for (i = 0; i < 128; i++) {
-            data[i] = sdfSndWork.controlData[3][i];
+            data[i] = sdfSndMap.work.controlData[3][i];
         }
         break;
     case 4:
@@ -1197,12 +1151,12 @@ void sdfSndGetTableEntry(u32 kind, u8 *data)
         break;
     case 5:
         for (i = 0; i < 2; i++) {
-            data[i] = sdfSndWork.controlData[5][i];
+            data[i] = sdfSndMap.work.controlData[5][i];
         }
         break;
     case 6:
         for (i = 0; i < 2; i++) {
-            data[i] = sdfSndWork.controlData[6][i];
+            data[i] = sdfSndMap.work.controlData[6][i];
         }
         break;
     }

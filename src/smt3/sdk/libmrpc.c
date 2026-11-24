@@ -1,5 +1,5 @@
 #include "common.h"
-#include "sdk_libmrpc.h"
+#include "sdk_libmrpc_layout.h"
 extern void *memcpy(void *, const void *, size_t);
 
 typedef struct sceSifMClientData rpcClient;
@@ -115,24 +115,6 @@ void _sceRpcFreePacket(rpcPacket *p)
     p->w[6] = 0;
     p->w[4] = flags & ~1;
 }
-
-/* The M-RPC client extends the shared client prefix. Packet addresses are
- * opaque, as in SifRpcClientData_t in include/irx/iop.h. */
-struct sceSifMClientData {
-    void *packet;
-    u32 sequence;
-    s32 sema;
-    u32 unk_C;
-    u32 serverId;
-    void *buffer;
-    void *cbuffer;
-    void (*endFunction)(void *);
-    void *endParam;
-    void *server;
-    s32 completionSema;
-    s32 result;
-    u32 parameters[3];
-};
 
 /* Observed completion-response prefix; fields after this prefix are unknown. */
 typedef struct rpcResponse {

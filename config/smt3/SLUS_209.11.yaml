@@ -1846,7 +1846,10 @@ segments:
       - { start: 0x452B54, type: bss, vram: 0x58F0A0, name: bss_after_sdf_core_render_parameters }
       - { start: 0x452B54, type: .bss, vram: 0x58F0C0, name: sdf/sdfPadPortStorage }
       - { start: 0x452B54, type: .bss, vram: 0x58F2C0, name: sdf/sdfPadControlStorage }
-      - { start: 0x452B54, type: bss, vram: 0x58F310, name: bss_after_sdf_pad_control_storage }
+      - { start: 0x452B54, type: .bss, vram: 0x58F310, name: sdf/sdfPrintClientStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58F34C, name: bss_after_sdf_print_client }
+      - { start: 0x452B54, type: .bss, vram: 0x58F780, name: sdf/sdfCdDirectEntryStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58F78C, name: bss_after_sdf_cd_direct_entry }
       - { start: 0x452B54, type: .bss, vram: 0x58F7C0, name: sdf/sdfCdSectorStorage }
       - { start: 0x452B54, type: .bss, vram: 0x58FFC0, name: sdf/sdfHddPowerOffStackStorage }
       - { start: 0x452B54, type: .bss, vram: 0x5907C0, name: sdf/sdfSndCmdThreadParamStorage }
@@ -1857,7 +1860,7 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x592840, name: sdf/sdfSndTransBufStorage }
       - { start: 0x452B54, type: bss, vram: 0x592850, name: bss_after_sdf_transfer_descriptor }
       - { start: 0x452B54, type: .bss, vram: 0x592880, name: sdf/sdfSifRpcStackStorage }
-      - { start: 0x452B54, type: bss, vram: 0x593880, name: bss_after_sdf_sif_rpc_stack }
+      - { start: 0x452B54, type: .bss, vram: 0x593880, name: sdf/sdfSoundMapStorage }
       - { start: 0x452B54, type: .bss, vram: 0x593E20, name: sdf/sdfSndPcmRequestStorage }
       - { start: 0x452B54, type: bss, vram: 0x593F2C, name: bss_after_sdf_pcm_request }
       - { start: 0x452B54, type: .bss, vram: 0x593F80, name: sdf/sdfIpuDecodeStackStorage }

@@ -3,12 +3,7 @@
 #include "libsdf.h"
 #include "ps2asm.h"
 
-typedef struct
-{
-    u32 nameOffset_;
-    u32 offset_;
-    s32 size_;
-} sdfCdImageDirEntry_t;
+#include "sdfCdDirectEntryStorage.h"
 
 s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
 
@@ -231,8 +226,6 @@ void sdfCdStRead(s32 sectors, void *buffer)
 
 extern char *strcpy(char *destination, const char *source);
 extern char *strchr(const char *text, s32 character);
-extern sdfCdImageDirEntry_t sdfCdImageSearchFileDirect_ent;
-
 sdfCdImageDirEntry_t *sdfCdImageSearchFileDirect(const char *filename, s32 *lsn, u8 *mode)
 {
     /* Same CD search scratch capacity as sdfCdImageInit. */

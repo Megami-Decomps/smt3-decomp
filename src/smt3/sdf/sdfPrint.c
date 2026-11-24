@@ -6,16 +6,6 @@
 
 s32 strlen(const char *aStr);
 
-typedef struct sifRpcClientDataPrefix_t {
-    u8 opaque00[0x24];
-    void *server;
-} sifRpcClientDataPrefix_t;
-
-typedef struct sifRpcClientContextView_t {
-    sifRpcClientDataPrefix_t client;
-    u8 opaque28[8];
-} sifRpcClientContextView_t;
-
 typedef void (*sifMRpcEnd_t)(void *argument);
 
 enum SdfFileIOCmdStat {
@@ -67,9 +57,9 @@ enum sdf_stream_playback {
 
 extern void *memcpy(void *, const void *, size_t);
 
-#include "sdk_libmrpc.h"
+#include "sdk_libmrpc_layout.h"
 
-extern sifRpcClientContextView_t sdfPrintRpcClient;
+extern sceSifMClientData sdfPrintRpcClient;
 
 extern s8 sdfPrintIopFlag;
 
@@ -129,8 +119,6 @@ extern s32 sdfGetRunTimeCountBase(void);
 
 extern s32 sdfGetRunTimeCount(s32 aBaseTime);
 
-extern s32 sceSifMBindRpc(sifRpcClientDataPrefix_t *client, s32 number, s32 mode);
-
 void sdfPrintIopInit(void)
 {
     s32 threadId;
@@ -139,11 +127,11 @@ void sdfPrintIopInit(void)
     threadId = sdfCreateThreadWithStack(sdfPrintRpcThread, 0x1000, 0x4C);
     _StartThread(threadId, 0);
     while (1) {
-        if (sceSifMBindRpc(&sdfPrintRpcClient.client, 0x646E7270, 0) < 0) {
+        if (sceSifMBindRpc(&sdfPrintRpcClient, 0x646E7270, 0) < 0) {
             printf(sdfPrintIopBindErrMsg);
             return;
         }
-        if (sdfPrintRpcClient.client.server != NULL) {
+        if (sdfPrintRpcClient.server != NULL) {
             break;
         }
         startTicks = sdfGetRunTimeCountBase();
@@ -163,7 +151,7 @@ void sdfPuts(const char *str) {
         if (length != 0) {
             alignedBuffer = EE_ADDR_AS(u8 *, ((EE_ADDR(&buffer[0x3F])) & ~0x3F));
             memcpy(alignedBuffer, str, length);
-            sceSifMCallRpc((sceSifMClientData *)&sdfPrintRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            sceSifMCallRpc(&sdfPrintRpcClient, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
         scePrintf(sdfPrintStrFmt, str);
