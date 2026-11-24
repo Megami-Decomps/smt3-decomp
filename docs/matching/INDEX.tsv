@@ -281,13 +281,13 @@ fldSkyDrawFilter	field/fldSky	0xAD8		docs/matching/field/fldSky.md	3
 Field light and display initialization				docs/matching/field/fldSky.md	65
 fldSnowInit	field/fldSnow	0x1B4		docs/matching/field/fldSnow.md	3
 fldRunDantePatr	field/fldTest	0x2D0	180 of 180 words match	docs/matching/field/fldTest.md	3
-fldRunEffTask	field/fldTest	0x220	21 of 136 words matching	docs/matching/field/fldTest.md	75
-Elevator floor transition delays				docs/matching/field/fldTest.md	128
-fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	137
-fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	153
-Shadow-edge position storage				docs/matching/field/fldTest.md	169
-Shadow triangle and edge scratch storage				docs/matching/field/fldTest.md	179
-fldRun_Dante work storage	field/fldRunDanteStorage	116 bytes		docs/matching/field/fldTest.md	191
+fldRunEffTask	field/fldTest	0x220		docs/matching/field/fldTest.md	75
+Elevator floor transition delays				docs/matching/field/fldTest.md	122
+fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/field/fldTest.md	131
+fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	147
+Shadow-edge position storage				docs/matching/field/fldTest.md	163
+Shadow triangle and edge scratch storage				docs/matching/field/fldTest.md	173
+fldRun_Dante work storage	field/fldRunDanteStorage	116 bytes		docs/matching/field/fldTest.md	185
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
@@ -501,8 +501,8 @@ datGetSkillBadKouka	newdata/datCalc	0x238		docs/matching/newdata/datCalc.md	171
 datSetAutoKaifukuSkill	newdata/datCalc	0x140		docs/matching/newdata/datCalc.md	253
 nmeDrawCursorAt	nme/Nme_Calc	0x2B8	62 of 174 words match	docs/matching/nme/Nme_Calc.md	3
 nmeDrawNameString	nme/Nme_Calc	0x1E4		docs/matching/nme/Nme_Calc.md	27
-nmeDrawNameText	nme/Nme_Calc	0x3E4	18 of 249 words match	docs/matching/nme/Nme_Calc.md	49
-Name glyph offsets				docs/matching/nme/Nme_Calc.md	91
+nmeDrawNameText	nme/Nme_Calc	0x3E4		docs/matching/nme/Nme_Calc.md	49
+Name glyph offsets				docs/matching/nme/Nme_Calc.md	68
 nmeMoveCursorBy	nme/Nme_Draw	268 bytes		docs/matching/nme/Nme_Draw.md	3
 nmeStartProcesses	nme/Nme_Init	0x11C	69 of 71 words match	docs/matching/nme/Nme_Init.md	3
 nmeInitNameRow	nme/Nme_Init	0x144	52 of 81 words match	docs/matching/nme/Nme_Init.md	46

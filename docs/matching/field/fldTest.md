@@ -74,26 +74,20 @@ view are corroborated by `fldFindMapCell` and `fldRunAiCng`.
 
 ## fldRunEffTask (field/fldTest, 0x220)
 
-A private native-sized control represents the actual two-table traversal
-with an independent typed cursor and remaining-table countdown. It retains
-21 of 136 words matching, the same as the target-active baseline. One
-localized constraint on the initialized, genuinely consumed countdown reaches
-22 words. Both remain 544 bytes and both reproduce the known two-load
-fldRunDantePatr peer regression. Production output independently confirms
-that regression: a target score alone cannot qualify this owner.
+The two sentinel-terminated effect lists now match in C at the native
+544-byte extent. The remaining-list count is decremented only at a
+sentinel. Node effects use their current state; part effects delete on
+a negative count and decrement a nonnegative count before drawing.
 
-Seven declaration corrections to the actual effect/part providers were
-isolated in a separate guarded control. Complete assembly and ELF objects
-are unchanged in production, SKIP_ASM and retained contexts, after the sole
-equal-length source-filename normalization; the guarded owner remains 38/0.
-These private corrections are not a new allocation premise or a publication
-of the nonmatching loop. Canonical source is unchanged.
-
-The private compiler harness was checked at the canonical relative source
-and output filename lengths. Changing those lengths can change this old
-compiler's output, so an absolute-path diagnostic is not production proof.
-Further work needs evidence beyond the closed cursor/countdown controls and
-the unrelated already-studied TamaFree scheduling family.
+Each rotation branch gives its complete matrix its own lifetime. The
+existing VU store writes all four quadwords; the setter immediately
+consumes that matrix. The localized input-only store-address constraints
+preserve the native distinction between the VU store's held address and
+the setter's directly formed stack argument. Omitting only the two
+constraints makes both setters use the held register instead. No extra
+memory access, invented operand, or unit flag is involved. The constraints
+and native countdown/divisor allocations describe compiler behavior,
+not historical source spelling.
 
 ### Tama sound quotient reconstruction
 

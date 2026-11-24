@@ -74,75 +74,156 @@ extern s32 nmeGetInputMode(nmeWork_t *work);
 extern u8 frDisableMode(u8 flag);
 extern u8 frEnableMode(s32 flag);
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq33, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 void nmeDrawNameText(s32 x, s32 y, s32 secondX, s32 secondY, u32 color, s32 mode)
 {
-    volatile s32 first = nmeNameTextTemplate[0];
-    volatile s32 second = nmeNameTextTemplate[1];
-    volatile s32 terminator = nmeNameTextTemplate[2];
     u8 text[3];
-    s32 cursor, i;
+    FAKEMATCH_ASM_REG(s32, cursor, "$19");
+    FAKEMATCH_ASM_REG(s32, i, "$17");
+    FAKEMATCH_ASM_REG(s32, spriteMode, "$20") = mode;
+    u32 spriteX;
+    u32 firstXCell = x;
+    FAKEMATCH_ASM_REG(u32, firstYCell, "$22") = y;
+    u32 secondXCell = secondX;
+    u32 secondYCell = secondY;
+    nmeWork_t *work;
+    FAKEMATCH_ASM_REG(u32, firstSpriteY, "$21") = firstYCell + 0x16;
 
-    text[0] = first;
-    text[1] = second;
-    text[2] = terminator;
+    memcpy(text, nmeNameTextTemplate, sizeof(text));
     cursor = nmeGetCursorPos(namelist_buttonAnim_end);
-    nmeDrawCharRow((x - 0x25) * 16, (y - 4) * 8, 0);
+    nmeDrawCharRow((firstXCell - 0x25) * 16, (firstYCell - 4) * 8, 0);
+    spriteX = firstXCell * 16 + 0xF0;
     for (i = 0; i < 8; i++) {
         s32 sprite = 8;
-        if (mode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 0 && cursor == i) {
+        if (spriteMode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 0 && cursor == i) {
             sprite = 9;
         }
-        fclDrawSpriteRes(x * 16 + 0xF0 + i * 0x150, (y + 0x16) * 8,
+        fclDrawSpriteRes(spriteX, firstSpriteY * 8,
                          0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
                          GBWK_2, 0x47);
+        spriteX += 0x150;
     }
-    for (i = 0; i < 8; i++) {
-        s32 sprite = 8;
-        if (mode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 1 && cursor == i) {
-            sprite = 9;
+    {
+        FAKEMATCH_ASM_REG(u32, secondSpriteY, "$21");
+        spriteX = secondXCell * 16 + 0xF0;
+        FAKEMATCH_ASM_LIVE(spriteX);
+        secondSpriteY = secondYCell + 0x16;
+        for (i = 0; i < 8; i++) {
+            s32 sprite = 8;
+            if (spriteMode == 0 && nmeGetInputMode(namelist_buttonAnim_end) == 1 && cursor == i) {
+                sprite = 9;
+            }
+            fclDrawSpriteRes(spriteX, secondSpriteY * 8,
+                             0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
+                             GBWK_2, 0x47);
+            spriteX += 0x150;
         }
-        fclDrawSpriteRes(secondX * 16 + 0xF0 + i * 0x150, (secondY + 0x16) * 8,
-                         0, NULL, 0, sprite, (s32 *)namelist_buttonAnim_end->textures,
-                         GBWK_2, 0x47);
     }
+    i = 0;
     cmpSetSkillListRows(0x18);
-    fclDrawSpriteRes((x - 0x13) * 16, (y + 9) * 8, 0, NULL, 0, 0x12,
-                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
-    frDisableMode(1);
-    for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[0]; i++) {
-        frFontHandle_t *font;
-        text[0] = namelist_buttonAnim_end->inputChars[0][i][0];
-        text[1] = namelist_buttonAnim_end->inputChars[0][i][1];
-        font = frLinkFontString(text, 4, 0, 0, NULL);
-        frSetDrawPosition(font, x * 16 + 0xF0 + i * 0x150, y * 8);
-        frSetFontColor(font, color);
-        frSetPriority(font, 0);
-        frDrawFontOt(font, 0, 0x47);
-        frDestroyFontRequestAfter(font);
+    {
+        u32 headerX = firstXCell - 0x13;
+        u32 headerY = firstYCell + 9;
+        FAKEMATCH_ASM_REG(fclSpriteTbl_t *, table, "$11") = GBWK_2;
+        FAKEMATCH_ASM_REG(nmeWork_t *, textureWork, "$10");
+        FAKEMATCH_ASM_LIVE_WITH_MEM(headerX, namelist_buttonAnim_end);
+        textureWork = namelist_buttonAnim_end;
+        FAKEMATCH_ASM_LIVE_PAIR(headerX, headerY);
+        fclDrawSpriteRes(headerX * 16, headerY * 8, 0, NULL, 0, 0x12,
+                         (s32 *)textureWork->textures, table, 0x47);
     }
-    fclDrawSpriteRes((secondX - 0x13) * 16, (secondY + 9) * 8, 0, NULL, 0, 0x11,
-                     (s32 *)namelist_buttonAnim_end->textures, GBWK_2, 0x47);
-    for (i = 0; i < namelist_buttonAnim_end->inputRowEnabled[1]; i++) {
-        frFontHandle_t *font;
-        text[0] = namelist_buttonAnim_end->inputChars[1][i][0];
-        text[1] = namelist_buttonAnim_end->inputChars[1][i][1];
-        font = frLinkFontString(text, 4, 0, 0, NULL);
-        frSetDrawPosition(font, secondX * 16 + 0xF0 + i * 0x150, secondY * 8);
-        frSetFontColor(font, color);
-        frSetPriority(font, 0);
-        frDrawFontOt(font, 0, 0x47);
-        frDestroyFontRequestAfter(font);
+    frDisableMode(1);
+    {
+        nmeWork_t *glyphWork;
+        glyphWork = namelist_buttonAnim_end;
+        if (glyphWork->inputRowEnabled[0] > 0) {
+            FAKEMATCH_ASM_REG(u32, glyphX, "$18");
+            u32 glyphRawY = firstYCell;
+            FAKEMATCH_ASM_REG(u32, glyphY, "$20");
+            u32 priority = 0;
+            FAKEMATCH_ASM_REG(u32, cells, "$4") = 0x15;
+            FAKEMATCH_ASM_REG(u32, advance, "$19");
+            FAKEMATCH_ASM_REG(u32, scaledX, "$2");
+            scaledX = firstXCell * 16;
+            FAKEMATCH_ASM_LIVE_PAIR(cells, scaledX);
+            glyphY = glyphRawY * 8;
+            glyphX = scaledX + 0xF0;
+            FAKEMATCH_ASM_LIVE_VOLATILE(priority);
+            advance = cells * 16;
+            do {
+                frFontHandle_t *font;
+                FAKEMATCH_ASM_REG(s32, keepGoing, "$2");
+                text[0] = glyphWork->inputChars[0][i][0];
+                text[1] = glyphWork->inputChars[0][i][1];
+                i++;
+                font = frLinkFontString(text, 4, 0, 0, NULL);
+                frSetDrawPosition(font, glyphX, glyphY);
+                glyphX += advance;
+                frSetFontColor(font, color);
+                frSetPriority(font, priority);
+                frDrawFontOt(font, 0, 0x47);
+                frDestroyFontRequestAfter(font);
+                /* The font callback may change the active work and row count. */
+                work = namelist_buttonAnim_end;
+                keepGoing = i < work->inputRowEnabled[0];
+                if (!keepGoing) break;
+                glyphWork = work;
+            } while (1);
+        }
+    }
+    {
+        FAKEMATCH_ASM_REG(u32, headerX, "$4") = secondXCell - 0x13;
+        FAKEMATCH_ASM_REG(u32, headerY, "$5") = secondYCell + 9;
+        FAKEMATCH_ASM_REG(s32, depth, "$2") = 0x47;
+        FAKEMATCH_ASM_LIVE_PAIR(headerX, headerY);
+        FAKEMATCH_ASM_LIVE(headerX);
+        headerX *= 16;
+        headerY *= 8;
+        fclDrawSpriteRes(headerX, headerY, 0, NULL, 0, 0x11,
+                         (s32 *)namelist_buttonAnim_end->textures, GBWK_2, depth);
+    }
+    {
+        nmeWork_t *glyphWork;
+        glyphWork = namelist_buttonAnim_end;
+        i = 0;
+        if (glyphWork->inputRowEnabled[1] > 0) {
+            FAKEMATCH_ASM_REG(u32, glyphRawX, "$4") = secondXCell;
+            FAKEMATCH_ASM_REG(u32, glyphRawY, "$5") = secondYCell;
+            FAKEMATCH_ASM_REG(u32, glyphX, "$18");
+            FAKEMATCH_ASM_REG(u32, glyphY, "$20");
+            FAKEMATCH_ASM_REG(u32, scaledX, "$2");
+            u32 priority = 0;
+            FAKEMATCH_ASM_REG(u32, cells, "$10") = 0x15;
+            FAKEMATCH_ASM_REG(u32, advance, "$19");
+            FAKEMATCH_ASM_LIVE(cells);
+            FAKEMATCH_ASM_LIVE(i);
+            advance = cells * 16;
+            FAKEMATCH_ASM_LIVE_PAIR(glyphRawX, glyphRawY);
+            scaledX = glyphRawX * 16;
+            FAKEMATCH_ASM_LIVE_VOLATILE(priority);
+            glyphY = glyphRawY * 8;
+            glyphX = scaledX + 0xF0;
+            do {
+                frFontHandle_t *font;
+                FAKEMATCH_ASM_REG(s32, keepGoing, "$2");
+                text[0] = glyphWork->inputChars[1][i][0];
+                text[1] = glyphWork->inputChars[1][i][1];
+                i++;
+                font = frLinkFontString(text, 4, 0, 0, NULL);
+                frSetDrawPosition(font, glyphX, glyphY);
+                glyphX += advance;
+                frSetFontColor(font, color);
+                frSetPriority(font, priority);
+                frDrawFontOt(font, 0, 0x47);
+                frDestroyFontRequestAfter(font);
+                glyphWork = namelist_buttonAnim_end;
+                keepGoing = i < glyphWork->inputRowEnabled[1];
+                if (!keepGoing) break;
+            } while (1);
+        }
     }
     frEnableMode(1);
     cmpSetSkillListRows(-1);
 }
-#else
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNameText);
-#endif
 
 void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode)
 {
