@@ -6527,54 +6527,76 @@ void cmpDrawSkillRowText(s32 x, s32 y, s32 *colors, datUnitWork_t *unit,
 
 extern volatile s32 cmpStatusAnimLive[] FAKEMATCH_ASM_NAME("cmpStatusAnimCount");
 
-#ifdef NON_MATCHING
-void cmpDrawSkillIcons(s32 x, s32 y, s8 index)
+extern s32 cmpStatusAnimCount[];
+
+void cmpDrawSkillIcons(s32 x, s32 y, s8 input)
 {
     s32 count;
+    FAKEMATCH_ASM_REG(s32, start, "$3");
     s32 row;
-    s32 column;
+    FAKEMATCH_ASM_REG(s32, ox, "$8");
+    FAKEMATCH_ASM_REG(s32, oy, "$9");
+    s8 column;
+    s32 index;
+    u32 indexBits;
     u8 i;
 
+    /* Preserve the native short coordinate homes and low-byte index. */
+    ox = x;
+    oy = y;
+    indexBits = (u32)input << 24;
+    index = (s32)indexBits >> 24;
     if (cmpParamGaugeState[1] == 0) {
         return;
     }
+    FAKEMATCH_ASM_READ_PAIR(ox, oy);
     row = index / 4;
     column = index % 4;
-    x += row * 116;
-    y += column * 22;
+    x = (s32)((u32)ox + (u32)row * 116);
+    y = (s32)((u32)oy + (u32)column * 22);
     if (index >= 8) {
-        x++;
-        y--;
+        x = (s32)((u32)x + 1);
+        y = (s32)((u32)y - 1);
     }
-    count = cmpStatusAnimLive[1];
-    if (count / 2 <= 0) {
+    /* The initial half-count and subsequent draw count are separate. */
+    i = 0;
+    start = cmpStatusAnimCount[1];
+    if (start / 2 <= 0) {
         return;
     }
-    i = 0;
+
     do {
         s32 intensity;
         s32 colors[4];
+        FAKEMATCH_ASM_REG(s32, ax, "$4");
+        FAKEMATCH_ASM_REG(s32, ay, "$5");
+        FAKEMATCH_ASM_REG(s32, w, "$7");
+        FAKEMATCH_ASM_REG(s32, h, "$8");
+        s32 color;
 
-        count = cmpStatusAnimLive[1];
+        count = cmpStatusAnimCount[1];
         intensity = (s32)(0x80U - (u32)count * 4 - (u32)i * 16);
         if (intensity < 0) {
             intensity = 0;
         }
+        ax = (s32)(((u32)x - i) * 16);
+        ay = (s32)(((u32)y - i) * 8);
+        w = i * 2 + 0x89;
+        h = i * 2 + 0x2B;
+        color = (s32)((u32)intensity | 0x80808000u);
         if (intensity != 0) {
-            s32 color = intensity | 0x80808000;
-
-            colors[0] = colors[1] = colors[2] = colors[3] = color;
-            fclDrawSpriteSize((x - i) * 16, (y - i) * 8, 0,
-                              i * 2 + 0x89, i * 2 + 0x2B, colors,
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            fclDrawSpriteSize(ax, ay, 0, w, h, colors,
                               6, 10, D_00345D88, fclSpriteTable, 0x47);
-            count = cmpStatusAnimLive[1];
+            /* The draw may update the animation count before the latch. */
+            count = cmpStatusAnimCount[1];
         }
         i++;
     } while (i < count / 2);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillIcons);
-#endif
 
 extern s32 cmpFindSkillEntry(u16 skillId);
 extern char *text1[];

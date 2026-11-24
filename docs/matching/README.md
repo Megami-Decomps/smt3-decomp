@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 59 |  | [code_0022C578.md](code_0022C578.md) |
+| 60 |  | [code_0022C578.md](code_0022C578.md) |
 | 27 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 27 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 21 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
