@@ -187,3 +187,16 @@ and stores the orientation separately in the next byte. The two typed
 zero-fill objects total 3,152 bytes and end exactly at
 `fldShadowTable` at `0x558130`. The raw draw vector before the new
 storage and the assembly draw body are unchanged.
+
+## fldRun_Dante work storage (field/fldRunDanteStorage, 116 bytes)
+
+The field chase routines share a writable record at `0x0055D5B0` for
+position, motion, route, and state. The existing record type and its users
+are unchanged. Its shared declaration and C definition now own the 116
+native zero-fill bytes through `0x0055D624`; the four bytes before the next
+work symbol remain in the raw suffix.
+
+The explicit BSS placement gives the linker the input section for this
+exact extent. A tentative definition without it goes to COMMON with
+the stock compiler. This creates no initialized data and changes no
+game instructions or runtime initialization.

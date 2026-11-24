@@ -287,6 +287,7 @@ fldRunDanteSetModel	field/fldTest	0x5CC	371 of 371 words match	docs/matching/fie
 fldRunTamaSe	field/fldTest	0x3C8	242 of 242 words match	docs/matching/field/fldTest.md	153
 Shadow-edge position storage				docs/matching/field/fldTest.md	169
 Shadow triangle and edge scratch storage				docs/matching/field/fldTest.md	179
+fldRun_Dante work storage	field/fldRunDanteStorage	116 bytes		docs/matching/field/fldTest.md	191
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
