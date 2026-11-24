@@ -4,6 +4,7 @@
 #include "ps2asm.h"
 #include "model.h"
 #include "draw3d.h"
+#include "sdfCoreRenderParameters.h"
 
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
@@ -11,7 +12,6 @@
 extern addr_t corePktCurrLight;
 extern f32 corePktZBias;
 extern addr_t corePktCurrFog;
-extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
 extern saddr_t corePktPointBuff;
@@ -29,9 +29,7 @@ extern u8 *sdfModelAllocTmPacket(sdfModelNode_t *node);
  * retail's; node and packetData hold each other's register. */
 #ifdef NON_MATCHING
 typedef struct sdfCorePacketPointBuff_tag sdfCorePacketPointBuff_tag;
-typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
 #define CORE_ALIGN16(p) ((u8 *)((EE_ADDR(p) + 15) & ~15))
-extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
 void MultMatrixRev(void *matrix);
 void corePktInitCb(corePktCb_t *cb, u16 *header, u32 attrMask);
 void corePktSetFaceDivParm(sdfCorePacketFaceDivParm_t *, sdfMatPacket_t *, u32, f32, f32);
@@ -87,7 +85,7 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
     pointCount = cb.pointCount;
     packetBits = cb.packetBits;
     points = cb.pointBuff;
-    corePktSetFaceDivParm(&corePktFaceDivParm, cb.matPacketPtr, color, soften, bias);
+    corePktSetFaceDivParm(&corePktFaceDivParm.fields, cb.matPacketPtr, color, soften, bias);
 
     if (packet->header.packetType == 7) {
         u16 *indices = cb.dataPtr;
@@ -121,9 +119,9 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
             destination[6] = source[6];
             destination += 7;
         }
-        vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
-        vu[0xE4] = ((const u128 *)&corePktFaceDivParm)[1];
-        vu[0xE5] = ((const u128 *)&corePktFaceDivParm)[2];
+        vu[0xE3] = corePktFaceDivParm.quadwords[0];
+        vu[0xE4] = corePktFaceDivParm.quadwords[1];
+        vu[0xE5] = corePktFaceDivParm.quadwords[2];
         cursor = corePktVu0Run(points, cursor, pointCount, count * 12 + 0x14,
                                count * 28 + 8);
     } else if (packet->header.packetType == 8) {
@@ -138,9 +136,9 @@ void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
         PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
         PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
         PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
-        vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
-        vu[0xE4] = ((const u128 *)&corePktFaceDivParm)[1];
-        vu[0xE5] = ((const u128 *)&corePktFaceDivParm)[2];
+        vu[0xE3] = corePktFaceDivParm.quadwords[0];
+        vu[0xE4] = corePktFaceDivParm.quadwords[1];
+        vu[0xE5] = corePktFaceDivParm.quadwords[2];
         cursor = corePktVu0Run(points, cursor, pointCount, 0x1C, 0x20);
     } else {
         goto ordinaryGeometry;

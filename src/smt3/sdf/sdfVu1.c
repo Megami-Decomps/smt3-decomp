@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdfCoreRenderParameters.h"
 #include "eeregs.h"
 #include "ps2asm.h"
 #include "sdf_lighting.h"
@@ -67,16 +68,6 @@ typedef union {
 } sdfMatTexTm_t;
 
 
-/* VU0 input basis and emitted base/delta color vectors. */
-typedef struct sdfCorePacketFaceDivParm_t {
-    u8 opaque00[4]; /* 0x00 */
-    f32 scaledY; /* 0x04 */
-    u8 opaque08[4]; /* 0x08 */
-    f32 scale; /* 0x0C */
-    f32 colorBase[4]; /* 0x10 */
-    f32 colorDelta[4]; /* 0x20 */
-} sdfCorePacketFaceDivParm_t;
-
 #include "sdfCorePacketPointBuff_tag.h"
 
 #define SDF_GIF_PRIM_SHIFT 47
@@ -94,9 +85,6 @@ extern u8 corePktSoftenBias;
 extern u16 corePktBackFaceList[];
 
 extern f32 corePktZBias;
-
-
-extern u8 corePktWorldLightMtxCache[];
 
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct sdfMatPacket_t {
@@ -595,12 +583,11 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktNormalizeNorms);
  * the drafts and the INCLUDE_ASM lines stay paired. The C draft these replaced
  * is after the last of them in comment form. */
 #ifdef NON_MATCHING
-extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
 
 /* vf19-vf21 = the light; the basis rows' W = light.W * row.x. */
 static void corePktLoadLight(void)
 {
-    VU0_LOAD_VF19_VF20_VF21(&corePktFaceDivParm);
+    VU0_LOAD_VF19_VF20_VF21(corePktFaceDivParm.quadwords);
     VU0_MULX_W_VF24_VF19();
     VU0_MULX_W_VF25_VF19();
     VU0_MULX_W_VF26_VF19();
@@ -782,7 +769,7 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktRelightBackFaces);
 // static void corePktShadeAndClip(sdfCorePacketPointBuff_tag *dst, const f32 *n)
 // {
 //     f32 *lighting = (f32 *)dst->opaque10;
-//     f32 diffuse = corePktFaceDivParm.scaledY + corePktLightRowW[0] * n[0] +
+//     f32 diffuse = corePktFaceDivParm.fields.scaledY + corePktLightRowW[0] * n[0] +
 //                   corePktLightRowW[1] * n[1] + corePktLightRowW[2] * n[2];
 //     f32 shade = diffuse;
 //     s32 lane;
@@ -795,8 +782,8 @@ INCLUDE_ASM(const s32, "sdf/sdfVu1", corePktRelightBackFaces);
 //     }
 //     lighting[3] = diffuse + diffuse - 1.0f;
 //     for (lane = 0; lane < 4; lane++) {
-//         dst->color[lane] = corePktFaceDivParm.colorBase[lane] +
-//                            corePktFaceDivParm.colorDelta[lane] * shade;
+//         dst->color[lane] = corePktFaceDivParm.fields.colorBase[lane] +
+//                            corePktFaceDivParm.fields.colorDelta[lane] * shade;
 //     }
 //     /* vclipw of (2 * diffuse - 1) against 1.0: over, then under. */
 //     dst->region = (u8)((diffuse > 1.0f) | ((diffuse < 0.0f) << 1));

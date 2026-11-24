@@ -1842,7 +1842,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x581018, name: sdf/sdfImageSetCbStorage }
       - { start: 0x452B54, type: bss, vram: 0x58102C, name: bss_after_sdf_image_set_control }
       - { start: 0x452B54, type: .bss, vram: 0x581030, name: sdf/sdfCoreFaceListStorage }
-      - { start: 0x452B54, type: bss, vram: 0x58F030, name: bss_after_sdf_core_face_lists }
+      - { start: 0x452B54, type: .bss, vram: 0x58F030, name: sdf/sdfCoreRenderParametersStorage }
+      - { start: 0x452B54, type: bss, vram: 0x58F0A0, name: bss_after_sdf_core_render_parameters }
       - { start: 0x452B54, type: .bss, vram: 0x58F0C0, name: sdf/sdfPadPortStorage }
       - { start: 0x452B54, type: .bss, vram: 0x58F2C0, name: sdf/sdfPadControlStorage }
       - { start: 0x452B54, type: bss, vram: 0x58F310, name: bss_after_sdf_pad_control_storage }
