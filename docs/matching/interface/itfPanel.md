@@ -37,10 +37,7 @@ color table selects `CreateColorPlain` and `CreateColorPera1` respectively.
 All fourteen non-null entries retain their native callback relocations.
 
 Each C table owns 36 bytes. Four bytes of alignment separate the objects;
-another four bytes after the color table remain separate. Color still uses
-the existing unprototyped dispatch: one-argument calls in the retail path
-rely on EE argument registers remaining live, and the `FIX_BUGS` path
-passes the channels explicitly.
+another four bytes after the color table remain separate.
 
 **Vertex initializer arguments.** Both position setters pass the kind-specific payload and four signed corner
 coordinates. The absolute setter preserves those coordinate registers up to
@@ -48,4 +45,13 @@ its indirect call; the relative setter explicitly fills them with the updated
 corners. The table now spells that shared five-argument contract, and each
 initializer uses the corresponding typed payload locally. This removes the
 too-few-arguments C call without changing any stores, table entries or linked
-bytes. The separate color and draw callback contracts are unchanged.
+bytes. The separate draw callback contract is unchanged.
+
+
+**Color initializer arguments.** The native dispatch passes the payload
+in `$4` and the four incoming RGBA words in `$5` through `$8`. The C table
+now uses that shared type. The providers keep their own payload layouts
+and the same channel bits; kind 8 ignores the channels and keeps its fixed
+tint. The two null entries and all seven callback pointers are unchanged.
+This removes the mismatched indirect call without changing the linked
+instructions or data.

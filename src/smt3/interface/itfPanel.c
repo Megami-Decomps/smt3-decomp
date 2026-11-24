@@ -93,7 +93,7 @@ extern itfColorVector_t itfPanelPlainColorRatio[];
 
 extern itfColorVector_t itfPanelPlainFullColorRatio[];
 
-void CreateColorFacility(itfPanelFacilityData_t *base);
+void CreateColorFacility(void *payload, s32 red, s32 green, s32 blue, s32 alpha);
 
 void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
@@ -188,7 +188,8 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 
 typedef void (*itfPanelCreateVertexFunc_t)(void *payload, s32 x0, s32 y0, s32 x1, s32 y1);
 extern itfPanelCreateVertexFunc_t CreateVertexTable[];
-extern void (*CreateColorTable[])();
+typedef void (*itfPanelCreateColorFunc_t)(void *payload, s32 red, s32 green, s32 blue, s32 alpha);
+extern itfPanelCreateColorFunc_t CreateColorTable[];
 extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
 
 static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
@@ -270,20 +271,15 @@ void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1,
     }
 }
 
-/* Store the RGBA words in packet order, then notify with context.
- * The panel renderers consume these channels directly. */
+/* Store the RGBA words in packet order, then pass those same channels
+ * to the kind-specific color initializer. */
 void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
     handle->red = r;
     handle->green = g;
     handle->blue = b;
     handle->alpha = a;
     if (CreateColorTable[handle->kind] != 0) {
-#ifdef FIX_BUGS
-        /* BUG: the callees take r, g, b, a; retail relied on the argument registers surviving. */
         CreateColorTable[handle->kind](handle->pwork, r, g, b, a);
-#else
-        CreateColorTable[handle->kind](handle->pwork);
-#endif
     }
 }
 
@@ -481,7 +477,8 @@ void CreateVertexFacility(void *payload, s32 x0, s32 y0, s32 x1, s32 y1) {
 }
 
 /* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent. */
-void CreateColorNormal(itfPanelNormalData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorNormal(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelNormalData_t *pwork = payload;
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 0);
@@ -490,7 +487,8 @@ void CreateColorNormal(itfPanelNormalData_t *pwork, u32 red, u32 green, u32 blue
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
-void CreateColorMesWin(itfPanelMesWinData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorMesWin(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelMesWinData_t *pwork = payload;
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 1);
@@ -500,7 +498,8 @@ void CreateColorMesWin(itfPanelMesWinData_t *pwork, u32 red, u32 green, u32 blue
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
-void CreateColorSelWin(itfPanelSelWinData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorSelWin(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelSelWinData_t *pwork = payload;
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 1);
@@ -510,7 +509,8 @@ void CreateColorSelWin(itfPanelSelWinData_t *pwork, u32 red, u32 green, u32 blue
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
-void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorPlain(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelPlainData_t *pwork = payload;
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, alpha);
@@ -519,7 +519,8 @@ void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, 
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */
-void CreateColorPera1(itfPanelPlainData_t *pwork, s32 red, s32 green, s32 blue, s32 alpha) {
+void CreateColorPera1(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelPlainData_t *pwork = payload;
     u32 *color = pwork->colors[0].components;
 
     color[0] = red;
@@ -529,7 +530,8 @@ void CreateColorPera1(itfPanelPlainData_t *pwork, s32 red, s32 green, s32 blue, 
 }
 
 /* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent. */
-void CreateColorLeftFade(itfPanelLeftFadeData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+void CreateColorLeftFade(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelLeftFadeData_t *pwork = payload;
     u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 0);
@@ -537,8 +539,9 @@ void CreateColorLeftFade(itfPanelLeftFadeData_t *pwork, u32 red, u32 green, u32 
     SetVec4(colorRow, red, green, blue, alpha);
 }
 
-/* Set both panel colors to the same blue tint with zero alpha. */
-void CreateColorFacility(itfPanelFacilityData_t *base) {
+/* Kind 8 uses a fixed tint, independent of the supplied channels. */
+void CreateColorFacility(void *payload, s32 red, s32 green, s32 blue, s32 alpha) {
+    itfPanelFacilityData_t *base = payload;
     u32 *colorRow = base->colors[0].components;
 
     SetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
@@ -794,8 +797,8 @@ itfPanelCreateVertexFunc_t CreateVertexTable[9] __attribute__((aligned(8))) = {
     NULL, NULL, CreateVertexFacility,
 };
 
-/* Color providers still have differing argument counts. */
-void (*CreateColorTable[9])() __attribute__((aligned(8))) = {
+/* The same native RGBA call supplies every non-null color slot. */
+itfPanelCreateColorFunc_t CreateColorTable[9] __attribute__((aligned(8))) = {
     CreateColorNormal, CreateColorMesWin, CreateColorSelWin,
     CreateColorPlain, CreateColorPera1, CreateColorLeftFade,
     NULL, NULL, CreateColorFacility,
