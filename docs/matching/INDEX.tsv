@@ -595,6 +595,9 @@ Provider declarations	sdf/sdfSound	byte-neutral		docs/matching/sdf/sdfSound-decl
 sdfSndVoiceMapInit	sdf/sdfSound	180 bytes	39 of 45 words match	docs/matching/sdf/sdfSound.md	3
 sdfSndIopSizeMsg data	sdf/sdfSound	18 bytes		docs/matching/sdf/sdfSound.md	65
 Sound command packet ring				docs/matching/sdf/sdfSound.md	80
+Sound command and listener state				docs/matching/sdf/sdfSoundRuntimeStorage.md	3
+Sound transfer descriptor				docs/matching/sdf/sdfSoundRuntimeStorage.md	12
+PCM request state				docs/matching/sdf/sdfSoundRuntimeStorage.md	19
 sdfTexSetPacket	sdfTex	0x168	15 of 90 words match	docs/matching/sdf/sdfTex.md	3
 Draw-thread workspace				docs/matching/sdf/sdfThreadStacks.md	23
 Hard-disk power-off workspace				docs/matching/sdf/sdfThreadStacks.md	33

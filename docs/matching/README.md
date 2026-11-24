@@ -78,6 +78,7 @@ both native and emitted sizes when they differ.
 | 4 | field/fldTest | [code_00116AD0.md](code_00116AD0.md) |
 | 3 | sdk/libmrpc | [sdk/libmrpc.md](sdk/libmrpc.md) |
 | 3 |  | [sdk/libmc.md](sdk/libmc.md) |
+| 3 |  | [sdf/sdfSoundRuntimeStorage.md](sdf/sdfSoundRuntimeStorage.md) |
 | 3 | sdf/sdfSound | [sdf/sdfSound.md](sdf/sdfSound.md) |
 | 3 |  | [pipe/pipeObject.md](pipe/pipeObject.md) |
 | 3 | newbattle/nbUnitProcess | [newbattle/nbUnitProcess.md](newbattle/nbUnitProcess.md) |
