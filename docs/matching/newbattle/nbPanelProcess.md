@@ -321,3 +321,19 @@ The retained drawer copies all 96 bytes of this table before drawing. The
 twelve pairs contain signed word U and V coordinates passed to the sprite
 helper; they are not a pointer or dispatch table. This change moves only the
 initializer into C and does not change the copy or draw routine.
+
+## nbPanelStockSelectInit (0x108)
+
+66 of 66 words match at the original 264-byte extent.
+
+`nbPanelStockSelectInit` samples global work after `nbGetMainProcessData`,
+clears the UI counters, and collects present, inactive rows with zero HP
+or status exactly `0x800`. It preserves the untouched tail of the output
+list. The initialized stock-order array contains 16 bytes and the output
+allocation holds 16 words. The game-produced stock invariant is assumed;
+this translation adds no validation of externally corrupted save data.
+
+The local EE constraints retain the native count loads, address formation,
+and instruction scheduling around the stock walk. They do not establish
+historical source spelling. The compiled terminal stores occur in native
+Pad, ABGR, Fade, Run order despite the C assignment order.

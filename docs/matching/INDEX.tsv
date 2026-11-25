@@ -476,6 +476,7 @@ nbPanelAuto (0x3A0)				docs/matching/newbattle/nbPanelProcess.md	173
 nbPanelPressGauge	newbattle/nbPanelProcess	0x1518	102 of 1330 words match	docs/matching/newbattle/nbPanelProcess.md	226
 nbPanelCursorDraw (0x168)				docs/matching/newbattle/nbPanelProcess.md	294
 Status-icon atlas coordinates				docs/matching/newbattle/nbPanelProcess.md	318
+nbPanelStockSelectInit (0x108)			66 of 66 words match	docs/matching/newbattle/nbPanelProcess.md	325
 Texture paths and battle debug labels				docs/matching/newbattle/nbPanelReadOnlyData.md	3
 Result score and caption storage				docs/matching/newbattle/nbResultProcess.md	3
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	24

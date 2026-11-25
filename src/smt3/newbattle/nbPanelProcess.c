@@ -2739,46 +2739,84 @@ extern s32 StockIDListCursor;
 extern s32 StockIDListTop;
 extern u32 StockIDList[];
 
-#ifdef NON_MATCHING
 void nbPanelStockSelectInit(void)
 {
-    volatile dds3GlobalWork_t *global;
-    volatile fldAnahoriAkuma_t *unit;
-    u32 i = 0;
-    u32 index;
-    u32 flags;
-    u32 stockCount;
-    s32 count;
+    /* Keep the post-call work snapshot and the stock walk in their EE
+     * registers. The empty constraints retain native address formation
+     * and count-load/increment scheduling without adding instructions. */
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, readBase, "$7");
+    FAKEMATCH_ASM_REG(dds3GlobalWork_t *, original, "$10");
+    FAKEMATCH_ASM_REG(u32, i, "$9");
+    FAKEMATCH_ASM_REG(u32, n, "$2");
+    FAKEMATCH_ASM_REG(s32, count, "$8");
 
     nbGetMainProcessData();
-    global = DDS3_GBWK;
+    readBase = DDS3_GBWK;
+    FAKEMATCH_ASM_LIVE_VOLATILE(readBase);
     nbPanelStockShiftX = 300;
-    stockCount = global->stockCount;
+    FAKEMATCH_ASM_READ_MEM(nbPanelStockShiftX);
+    i = 0;
+    FAKEMATCH_ASM_LIVE_WITH_MEM(readBase, nbPanelStockShiftX);
+    n = readBase->stockCount;
+    original = readBase;
     StockIDListCursor = 0;
     StockIDListTop = 0;
     nbPanelStockFrame = 0;
     StockIDListCount = 0;
-    if (stockCount != 0) {
+    if (n != 0) {
+        u32 *output = StockIDList;
+        FAKEMATCH_ASM_REG(s32, wanted, "$12") = 0x800;
         count = 0;
         do {
-            index = global->stockOrder[i++];
-            unit = &global->akuma[index];
-            flags = unit->flag;
-            if ((flags & 1) && !(flags & 4) && !(flags & 2) &&
-                (unit->hp == 0 || unit->badstatus == 0x800)) {
-                StockIDList[count++] = index;
+            FAKEMATCH_ASM_REG(u32, index, "$5");
+            FAKEMATCH_ASM_REG(u32, delta, "$6");
+            /* The flag-load base dies before the row pointer takes $4. */
+            FAKEMATCH_ASM_REG(const u8 *, basePlus4, "$4");
+            FAKEMATCH_ASM_REG(const fldAnahoriAkuma_t *, unit, "$4");
+            u32 flags;
+            basePlus4 = (const u8 *)readBase + 4;
+            {
+                FAKEMATCH_ASM_REG(const u8 *, row, "$3") =
+                    (const u8 *)EE_ADDR_PTR((addr_t)i + EE_ADDR(basePlus4));
+                i++;
+                FAKEMATCH_ASM_LIVE(row);
+                /* Work + 4 + 0x1910 is the stock-order array. */
+                index = row[0x1910];
             }
-        } while (i < global->stockCount);
+            {
+                FAKEMATCH_ASM_REG(u32, stride, "$2") = index * sizeof(*unit);
+                FAKEMATCH_ASM_LIVE(stride);
+                delta = stride + 0xA50;
+            }
+            flags = *(const u32 *)(basePlus4 + delta);
+            if (!(flags & 1)) goto again;
+            if (flags & 4) goto again;
+            if (flags & 2) goto again;
+            unit = (const fldAnahoriAkuma_t *)((const u8 *)readBase + delta);
+            if (unit->hp == 0) goto keep;
+            if (unit->badstatus != wanted) goto again;
+        keep:
+            {
+                u32 offset = (u32)count * sizeof(*output);
+                FAKEMATCH_ASM_READ(offset);
+                ++count;
+                FAKEMATCH_ASM_READ(count);
+                *(u32 *)EE_ADDR_PTR((addr_t)offset + EE_ADDR(output)) = index;
+            }
+        again:
+            readBase = original;
+            FAKEMATCH_ASM_LIVE_WITH_MEM(readBase, original->stockCount);
+            n = readBase->stockCount;
+            FAKEMATCH_ASM_LIVE(n);
+        } while (i < n);
         StockIDListCount = count;
     }
-    nbPanelStockPad = 1;
+    /* This C assignment order lowers to Pad, ABGR, Fade, then Run. */
     nbPanelStockABGR = 0x80808080;
     nbPanelStockFadeFlag = 0;
     nbPanelStockRun = 1;
+    nbPanelStockPad = 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelectInit);
-#endif
 
 extern s8 dds3PadButtonState[];
 extern s32 StockIDListCount;
