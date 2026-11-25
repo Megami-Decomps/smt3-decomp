@@ -3231,7 +3231,7 @@ void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
     }
     {
         cmbGbWork_t *buf;
-        FAKEMATCH_ASM_REG(s32 *, tex, "$10");
+        s32 *tex;
 
         /* Keep the fresh work base and the adjusted texture argument in
          * separate compiler phases. The constraints emit no instructions. */

@@ -914,8 +914,10 @@ The compiler constraints only place real values. The two panel IDs have
 short-lived local bindings in their actual argument register and are
 converted through the existing s32 prototype. The second resource call
 keeps the fresh work pointer and computed texture member in separate
-compiler phases, with the latter in the outgoing texture register. The
-last resource call observes the genuine incoming depth and current work
+compiler phases. A fixed binding is unnecessary: the ordinary texture
+pointer still reaches the outgoing argument register with both live
+operands retained. The last resource call observes the genuine incoming
+depth and current work
 pointer storage together before forming its arguments; the empty operand
 is not a memory barrier. No fixed argument is relied upon after a call.
 Without the second resource call's two live operands, its texture address
