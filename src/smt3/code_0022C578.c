@@ -8709,33 +8709,64 @@ void cmpDrawListColumn(s32 x, s32 y, s32 z, s32 width, s32 height, s8 mode,
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListColumn);
 #endif
 
-#ifdef NON_MATCHING
-void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
-                      s32 alpha, s8 row, cmpCursorInfo_t *cursor,
-                      cmpListRowDraw_t draw, s32 ot)
-{
-    s8 phase = 0;
+extern void cmpDrawListColumn(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s8 row, s32 intensity, cmpCursorInfo_t *cursor,
+                              cmpListRowDraw_t draw);
 
+void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color,
+                      s32 initial_alpha, s8 row, cmpCursorInfo_t *initial_cursor,
+                      cmpListRowDraw_t initial_draw, s32 initial_ot)
+{
+    s32 phase = 0;
+    cmpListRowDraw_t draw;
+    /* Hold the live cursor, order-table and alpha values in their native
+     * call-preserved homes. The other temporaries below end before calls. */
+    FAKEMATCH_ASM_REG(cmpCursorInfo_t *, cursor, "$16");
+    FAKEMATCH_ASM_REG(s32, ot, "$17");
+    FAKEMATCH_ASM_REG(s32, alpha, "$19");
+
+    cursor = initial_cursor;
+    ot = initial_ot;
+    alpha = initial_alpha;
     if (cursor != NULL) {
-        phase = ((cmpPadStopWork_t *)cursor)->unk_38;
+        /* The cursor address names the prefix of a full, initialized EE
+         * cursor record. Use the native byte address for the trailing signed
+         * phase, not C pointer arithmetic beyond the header subobject. */
+        phase = (s8)*(const u8 *)EE_ADDR_PTR(EE_ADDR(cursor) + 0x38u);
         if (phase < 0) {
-            alpha = 0x100 - cursor->unk_30;
+            FAKEMATCH_ASM_REG(u32, fullAlpha, "$2");
+            FAKEMATCH_ASM_REG(u32, storedAlpha, "$3");
+
+            fullAlpha = 0x100u;
+            storedAlpha = (u32)cursor->unk_30;
+            /* Retain the real stored alpha separately from the result. */
+            FAKEMATCH_ASM_LIVE(storedAlpha);
+            alpha = (s32)(fullAlpha - storedAlpha);
         }
     }
-    if (draw == NULL) {
+    if (initial_draw != NULL) {
+        draw = initial_draw;
+    } else {
         draw = cmpDrawListRowBox;
     }
-    fclDrawPanelSprite(0x7101B, ot);
+    {
+        /* Use the wider live initial value to keep the ID halves paired. */
+        FAKEMATCH_ASM_REG(long, id, "$4");
+        id = 0x7101BL;
+        fclDrawPanelSprite(id, ot);
+    }
     cmpDrawListRows(x, y, z, width, height, color, row, alpha,
                     phase, 0, cursor, draw, ot);
-    fclDrawPanelSprite(0x5101B, ot);
+    {
+        FAKEMATCH_ASM_REG(long, id, "$4");
+        id = 0x5101BL;
+        fclDrawPanelSprite(id, ot);
+    }
     if (cursor != NULL) {
         cmpDrawListColumn(x, y, z, width, height, row, alpha, cursor, draw);
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
-#endif
+
 
 void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 {

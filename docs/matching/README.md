@@ -11,7 +11,7 @@ both native and emitted sizes when they differ.
 
 | Entries | Unit | Page |
 |---|---|---|
-| 62 |  | [code_0022C578.md](code_0022C578.md) |
+| 63 |  | [code_0022C578.md](code_0022C578.md) |
 | 27 | sdk/libkernl | [sdk/libkernl.md](sdk/libkernl.md) |
 | 27 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 21 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
@@ -22,11 +22,11 @@ both native and emitted sizes when they differ.
 | 12 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 12 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 11 |  | [sdk/libc.md](sdk/libc.md) |
+| 11 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 11 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 9 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
-| 9 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |

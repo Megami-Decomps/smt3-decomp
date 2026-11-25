@@ -2411,16 +2411,31 @@ extern void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r);
 extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
 
-#ifdef NON_MATCHING
+typedef struct {
+    f32 values[4];
+} DanteGun1Frames_t;
+
+typedef struct {
+    s32 values[4];
+} DanteGun1Marks_t;
+
+extern const DanteGun1Frames_t fldRunDanteGun1Frames;
+extern const DanteGun1Marks_t fldRunDanteGun1Marks;
+
 void fldRunDanteGun1(void)
 {
-    f32 frames[4] = { 2.0f, 10.0f, 19.0f, 28.0f };
-    s32 marks[4] = { 20, 21, 20, 21 };
     sdfVector4_t pos __attribute__((aligned(16)));
+    DanteGun1Frames_t frames;
+    DanteGun1Marks_t marks;
     f32 distance;
     f32 oldframe;
     f32 nowframe;
     s32 i;
+    FAKEMATCH_ASM_REG(s32, brightness, "$23");
+    FAKEMATCH_ASM_REG(s32, active, "$22");
+
+    frames = fldRunDanteGun1Frames;
+    marks = fldRunDanteGun1Marks;
 
     if (fldRun_Dante.cnt_ex < 300) {
         fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
@@ -2433,30 +2448,47 @@ void fldRunDanteGun1(void)
     fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.d_p_dir, 10.0f, 1.0f);
     if (distance > 100.0f) {
         f32 pi = 3.1399999f;
-        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * pi / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
-        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * pi / 180.0f) * SDF_FRAME_STEP(fldRun_Dante.speed);
+        FAKEMATCH_ASM_REG(f32, degrees, "$f22") = 180.0f;
+        f32 dx;
+        f32 dz;
+        FAKEMATCH_ASM_LIVE_F32(degrees);
+        {
+            /* Keep the first sine argument in the native outgoing FPU register. */
+            FAKEMATCH_ASM_REG(f32, angle, "$f12") = fldRun_Dante.angleToPlayer;
+            dx = sdfSin(angle * pi / degrees);
+        }
+        fldRun_Dante.x += dx * SDF_FRAME_STEP(fldRun_Dante.speed);
+        dz = sdfCos(fldRun_Dante.angleToPlayer * pi / degrees);
+        fldRun_Dante.z += dz * SDF_FRAME_STEP(fldRun_Dante.speed);
     }
     if (fldRun_Dante.flag & 2) {
         oldframe = 0.0f;
         nowframe = 0.0f;
     } else {
-        oldframe = fldRun_Dante.oldframe;
         nowframe = fldRun_Dante.nowframe;
+        oldframe = fldRun_Dante.oldframe;
     }
-    for (i = 0; i < 4; i++) {
-        if (oldframe < frames[i] && frames[i] <= nowframe) {
-            s32 hit = 0;
-            u32 roll;
+    for (i = 0, brightness = 8, active = 1; i < 4; i++) {
+        if (oldframe < frames.values[i] && frames.values[i] <= nowframe) {
+            FAKEMATCH_ASM_REG(s32, hit, "$4");
+            FAKEMATCH_ASM_REG(s32, roll, "$5");
             s32 mark;
+            FAKEMATCH_ASM_REG(s32, farRoll, "$3");
+            FAKEMATCH_ASM_REG(s32, acceptFar, "$2");
 
-            fldRun_Dante.gunlight_anime = 8;
+            fldRun_Dante.gunlight_anime = brightness;
             fldRun_Dante.flag |= 8;
             if (fldRunDanteGunFlag.counter != 0) {
                 continue;
             }
             roll = (dds3GetRandA(NULL) >> 3) % 100;
+            hit = 0;
+            FAKEMATCH_ASM_LIVE(roll);
+            farRoll = roll;
             if (!(fldRun_Dante.flag & 1)) {
-                if (distance > 2400.0f && roll < 2) {
+                FAKEMATCH_ASM_LIVE(farRoll);
+                acceptFar = farRoll < 2;
+                if (distance > 2400.0f && acceptFar) {
                     hit = 1;
                 } else if (distance > 1800.0f && roll < 5) {
                     hit = 1;
@@ -2464,15 +2496,23 @@ void fldRunDanteGun1(void)
                     hit = 1;
                 } else if (distance > 600.0f && roll < 30) {
                     hit = 1;
-                } else if (roll < 50) {
-                    hit = 1;
+                } else {
+                    FAKEMATCH_ASM_REG(s32, accept, "$2");
+                    accept = roll < 50;
+                    FAKEMATCH_ASM_LIVE(accept);
+                    hit = active;
+                    FAKEMATCH_ASM_LIVE(hit);
+                    if (!accept) {
+                        hit = 0;
+                    }
                 }
             }
+            FAKEMATCH_ASM_LIVE(hit);
             if (hit) {
                 s32 offset;
 
-                fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = 8;
+                fldGlobalBase.word78 = active;
+                fldPlayerStepDist = brightness;
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;
@@ -2482,7 +2522,7 @@ void fldRunDanteGun1(void)
                 pos.z = fldGlobalBase.z + (f32)offset;
                 fldRunEffSet(0, pos.x, pos.y, pos.z, 0.0f);
             }
-            mark = marks[i];
+            mark = marks.values[i];
             if (mark == 20) {
                 fldRun_Dante.flag |= 0x10;
             }
@@ -2498,20 +2538,38 @@ void fldRunDanteGun1(void)
         fldRun_Dante.flag |= 4;
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteGun1);
-#endif
 
-#ifdef NON_MATCHING
+typedef struct {
+    f32 values[6];
+} DanteGun2Frames_t;
+
+typedef struct {
+    s32 values[6];
+} DanteGun2Marks_t;
+
+typedef struct {
+    DanteGun2Marks_t used;
+    s32 unused[2];
+} DanteGun2MarkTable_t;
+
+extern const DanteGun2Frames_t fldRunDanteGun2Frames;
+extern const DanteGun2MarkTable_t fldRunDanteGun2Marks;
+
 void fldRunDanteGun2(void)
 {
-    f32 frames[6] = { 31.0f, 37.0f, 44.0f, 51.0f, 59.0f, 65.0f };
-    s32 marks[6] = { 20, 21, 20, 21, 20, 21 };
     sdfVector4_t pos __attribute__((aligned(16)));
+    DanteGun2Frames_t frames;
+    DanteGun2Marks_t marks;
     f32 distance;
     f32 oldframe;
     f32 nowframe;
     s32 i;
+    FAKEMATCH_ASM_REG(s32, brightness, "$23");
+    FAKEMATCH_ASM_REG(s32, active, "$22");
+
+    /* Only the first six marks are copied from the eight-word ROM table. */
+    frames = fldRunDanteGun2Frames;
+    marks = fldRunDanteGun2Marks.used;
 
     if (fldRun_Dante.cnt_ex < 300) {
         fldRun_Dante.cnt_ex += SDF_FRAME_DUE();
@@ -2526,23 +2584,33 @@ void fldRunDanteGun2(void)
         oldframe = 0.0f;
         nowframe = 0.0f;
     } else {
-        oldframe = fldRun_Dante.oldframe;
         nowframe = fldRun_Dante.nowframe;
+        oldframe = fldRun_Dante.oldframe;
     }
-    for (i = 0; i < 6; i++) {
-        if (oldframe < frames[i] && frames[i] <= nowframe) {
-            s32 hit = 0;
-            u32 roll;
+    /* Retain the two loop constants in their separate native saved registers. */
+    for (i = 0, brightness = 8, active = 1; i < 6; i++) {
+        if (oldframe < frames.values[i] && frames.values[i] <= nowframe) {
+            FAKEMATCH_ASM_REG(s32, hit, "$4");
+            FAKEMATCH_ASM_REG(s32, roll, "$5");
             s32 mark;
+            FAKEMATCH_ASM_REG(s32, farRoll, "$3");
+            FAKEMATCH_ASM_REG(s32, acceptFar, "$2");
 
-            fldRun_Dante.gunlight_anime = 8;
+            fldRun_Dante.gunlight_anime = brightness;
             fldRun_Dante.flag |= 8;
             if (fldRunDanteGunFlag.counter != 0) {
                 continue;
             }
             roll = (dds3GetRandA(NULL) >> 3) % 100;
+            hit = 0;
+            FAKEMATCH_ASM_LIVE(roll);
+            farRoll = roll;
             if (!(fldRun_Dante.flag & 1)) {
-                if (distance > 2400.0f && roll < 2) {
+                /* Keep the first comparison separate from the remaining roll tests. */
+                FAKEMATCH_ASM_LIVE(farRoll);
+                acceptFar = farRoll < 2;
+
+                if (distance > 2400.0f && acceptFar) {
                     hit = 1;
                 } else if (distance > 1800.0f && roll < 5) {
                     hit = 1;
@@ -2550,15 +2618,24 @@ void fldRunDanteGun2(void)
                     hit = 1;
                 } else if (distance > 600.0f && roll < 30) {
                     hit = 1;
-                } else if (roll < 50) {
-                    hit = 1;
+                } else {
+                    FAKEMATCH_ASM_REG(s32, accept, "$2");
+                    /* Keep both inputs live for the native conditional move. */
+                    accept = roll < 50;
+                    FAKEMATCH_ASM_LIVE(accept);
+                    hit = active;
+                    FAKEMATCH_ASM_LIVE(hit);
+                    if (!accept) {
+                        hit = 0;
+                    }
                 }
             }
+            FAKEMATCH_ASM_LIVE(hit);
             if (hit) {
                 s32 offset;
 
-                fldGlobalBase.word78 = 1;
-                fldPlayerStepDist = 8;
+                fldGlobalBase.word78 = active;
+                fldPlayerStepDist = brightness;
                 datPartyDamageFld(3);
                 offset = (s32)((dds3GetRandA(NULL) >> 3) % 40) - 20;
                 pos.x = fldGlobalBase.x + (f32)offset;
@@ -2568,7 +2645,7 @@ void fldRunDanteGun2(void)
                 pos.z = fldGlobalBase.z + (f32)offset;
                 fldRunEffSet(0, pos.x, pos.y, pos.z, 0.0f);
             }
-            mark = marks[i];
+            mark = marks.values[i];
             if (mark == 20) {
                 fldRun_Dante.flag |= 0x10;
             }
@@ -2584,9 +2661,6 @@ void fldRunDanteGun2(void)
         fldRun_Dante.flag |= 4;
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteGun2);
-#endif
 
 #ifdef NON_MATCHING
 extern sdfVector4_t aViewEye;
@@ -2756,13 +2830,13 @@ void fldRunDanteCollision(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteCollision);
 #endif
 
-const f32 fldRunDanteGun1Frames[4] = {2.0f, 10.0f, 19.0f, 28.0f};
+const DanteGun1Frames_t fldRunDanteGun1Frames = {{2.0f, 10.0f, 19.0f, 28.0f}};
 
-const s32 fldRunDanteGun1Marks[4] = {20, 21, 20, 21};
+const DanteGun1Marks_t fldRunDanteGun1Marks = {{20, 21, 20, 21}};
 
-const f32 fldRunDanteGun2Frames[6] = {31.0f, 37.0f, 44.0f, 51.0f, 59.0f, 65.0f};
+const DanteGun2Frames_t fldRunDanteGun2Frames = {{31.0f, 37.0f, 44.0f, 51.0f, 59.0f, 65.0f}};
 
-const s32 fldRunDanteGun2Marks[8] = { 0x14, 0x15, 0x14, 0x15, 0x14, 0x15, 0, 0 };
+const DanteGun2MarkTable_t fldRunDanteGun2Marks = {{{20, 21, 20, 21, 20, 21}}, {0, 0}};
 
 void fldRunDanteAi(void)
 {

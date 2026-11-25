@@ -207,3 +207,66 @@ four bytes before the bank and the raw storage beginning with
 `fldWaveBuff` after it stay in assembly. The explicit BSS section keeps
 the stock compiler from emitting tentative definitions as COMMON.
 No game instructions, initialized data, or runtime initialization change.
+
+## fldRunDanteGun2 (field/fldTest, 0x40C)
+
+**Matched: 259 words / 1,036 native bytes at 0x0011D938.** Copy the
+six-frame table and the six used marks as typed aggregates. Aggregate
+assignment of the frame table preserves the native counter load between
+the two copies. Both original ROM symbols stay at their original
+addresses and extents (24 and 32 bytes); the mark table's two trailing
+zero words remain resident but are not copied. This is not a second
+private copy of the data.
+
+The shot window uses the ordered comparisons old < frame and
+frame <= now. Update the light and flag even when cooldown suppresses
+the shot. Read the shield bit again after the first RNG callback: the
+pre-RNG flag is not a substitute. Distance was captured before the turn
+callback; the frame window is read after it. Thresholds are ordered
+compound distance/roll checks, not exclusive distance buckets. An
+unsuccessful distance/roll pair falls through to the next tier, with the
+ordinary final roll-under-50 test. After damage, each effect coordinate
+is loaded after its own RNG callback. The mark effect requires the
+original successful model provider; that path calls sdfModelMakeMarkPos
+to load VF10, then uses the existing VU0 store macro to initialize the
+16-byte-aligned local vector before reading any of its coordinates.
+
+Localized compiler homes keep the real brightness and active constants
+in separate saved registers, the initial roll in its native argument
+register, and the true far-distance roll and comparison in separate
+temporary registers. These are post-RNG values, with no fixed volatile
+value retained across a call. The initialized final fallback value and
+the boolean it consumes are held locally for the native conditional
+move. The empty templates emit no instruction and are not memory
+barriers or evidence of original source spelling.
+
+The complete affected owner has 45 exact functions, no data-context
+diagnostics, and 27 target relocations verified at their original linked
+operands. The typed symbols and allocated data are unchanged. The
+host callback fixture checks control and effect ordering, RNG callback
+mutations, and shot windows; it does not substitute for EE code or
+the literal retail image check.
+
+## fldRunDanteGun1 (field/fldTest, 0x45C)
+
+**Matched: 279 words / 1,116 native bytes at 0x0011D4D8.** Keep the
+two named four-word ROM tables in place and copy each as a typed
+aggregate. The native movement path uses the captured pre-turn distance
+and enters only above 100.0f. Capture the sine angle before calling the
+provider, then reload speed and X after that call. The cosine argument
+uses a fresh angle load, and the Z update uses the speed reloaded after
+cosine. The degree denominator is held in its real saved float register;
+the first angle uses the outgoing FPU register and is not used across
+the call. The exact linked pi load reads the resident float literal.
+The movement update precedes the frame-window snapshot.
+
+The shot path uses the same threshold, cooldown, flag reload and VU0
+success rules as Gun2. The combined owner retains all four ROM symbols,
+unchanged allocated nontext data, and unchanged peer text and ordered
+relocations. The 57 original linkage operands are resolved and checked
+at their original offsets, including the linked pi literal. Plain and
+unhooked dump builds have identical instruction assembly apart from
+source provenance, and identical allocated output, typed symbols and
+ordered relocations. The host fixture passed 131,072 state and callback
+cases per mode both unoptimized and optimized; deliberate stale shield
+and stale speed versions failed.
