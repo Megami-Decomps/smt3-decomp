@@ -156,3 +156,26 @@ paired input is initialized and used in the packet or blend test, and
 the packed depth slot is real. Reused physical registers contain only
 one live logical value at a time; none of the packet constraints span a
 call. The neighboring retained phase-header draft is unchanged.
+
+## fclDrawPhaseHeader (facility/fclShare, 0x90)
+
+All 36 words match at the original 144-byte extent (0x00215528).
+The header draws sprite 0x33001, draws the phase value in the requested
+color only when mode is 1 (otherwise in 0x141D2D4C), then draws sprite
+0x5101B at the same ordering-table index.
+
+Local constraints retain the real ordering-table index and requested color
+in saved registers across the first draw. At the final call, the in-range
+sprite ID uses a wide EE register until conversion to the provider's
+unchanged signed 32-bit parameter. This makes the original two saved-register
+restores precede the high and low halves of the final literal without
+introducing another load or an artificial call argument.
+
+The owner retains all 23 preceding C matches. An independent EE execution
+check compares ordered calls, signed mode/color and argument boundaries,
+and stack saves and restores with caller-register clobbering. Changing the
+final sprite ID fails that check.
+
+The Recovery caller adopts the same byte-pointer declaration as the other
+callers and passes the existing list address. Its complete relocation stream,
+allocated object contents and typed symbols are unchanged.

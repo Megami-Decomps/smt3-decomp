@@ -437,7 +437,7 @@ extern void lstDrawListWindowCursor(lstWork_t *list, s32 ot);
 extern s32 cmpDrawListItemBox(cmpCursorInfo_t *cursor, s32 row, s32 slot,
                               s32 mode, s32 alpha);
 extern void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot);
-extern void fclDrawPhaseHeader(lstWork_t *list, s32 color, s32 mode, s32 ot);
+extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot);
 
 void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
 {
@@ -463,7 +463,7 @@ void rcvDrawPanelAt(lstWork_t *list, s8 flag, s32 ot)
         rcvDrawRowText(x, y, z, color, (u8)cursor->unk_22 + i, ot);
         y += cursor->StepY << 3;
     }
-    fclDrawPhaseHeader(list, 0x80808080, 0, 0x47);
+    fclDrawPhaseHeader((u8 *)list, 0x80808080, 0, 0x47);
     rcvDrawRowBox(&list->pos, ot);
     fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&panel);
     shopDrawItemCount(&panel, 0x80808080, 0x47);

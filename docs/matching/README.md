@@ -53,6 +53,7 @@ both native and emitted sizes when they differ.
 | 5 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
+| 5 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
@@ -73,7 +74,6 @@ both native and emitted sizes when they differ.
 | 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 4 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
-| 4 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 4 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 4 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |

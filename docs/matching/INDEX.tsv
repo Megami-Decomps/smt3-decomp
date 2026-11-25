@@ -220,6 +220,7 @@ fclDrawSpriteAngleCore	fclShare	0x4A8	209 of 298 words match	docs/matching/facil
 fclDrawSpriteCore	fclShare	728 bytes		docs/matching/facility/fclShare.md	67
 fclDrawPhaseValue	facility/fclShare	380 bytes	95 of 95 words match	docs/matching/facility/fclShare.md	88
 fclDrawSpriteAngleCore	facility/fclShare	0x4A8		docs/matching/facility/fclShare.md	140
+fclDrawPhaseHeader	facility/fclShare	0x90		docs/matching/facility/fclShare.md	160
 shop_Process	facility/fclShopCalc	0x100	64 of 64 words match	docs/matching/facility/fclShopCalc.md	3
 shopDrawBuyRow	facility/fclShopCalc	0x20C	131 of 131 words match	docs/matching/facility/fclShopCalc.md	18
 Shop sprite page				docs/matching/facility/fclShopCalc.md	63

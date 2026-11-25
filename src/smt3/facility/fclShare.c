@@ -723,17 +723,23 @@ void fclDrawPanelBorder(void *work, s32 z, s32 inset, s32 ot)
 extern void fclDrawPanelSprite(s32 id, s32 ot);
 extern void fclDrawPhaseValue(void *work, s32 color, s32 ot);
 
-#ifdef NON_MATCHING
 void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 ot)
 {
-    fclDrawPanelSprite(0x33001, ot);
+    FAKEMATCH_ASM_REG(s32, orderTable, "$17") = ot;
+    FAKEMATCH_ASM_REG(s32, phaseColor, "$19") = color;
+
+    FAKEMATCH_ASM_LIVE(orderTable);
+    FAKEMATCH_ASM_LIVE_PAIR(orderTable, phaseColor);
+    fclDrawPanelSprite(0x33001, orderTable);
     if (mode == 1) {
-        fclDrawPhaseValue(work, color, ot);
+        fclDrawPhaseValue(work, phaseColor, orderTable);
     } else {
-        fclDrawPhaseValue(work, 0x141D2D4C, ot);
+        fclDrawPhaseValue(work, 0x141D2D4C, orderTable);
     }
-    fclDrawPanelSprite(0x5101B, ot);
+    {
+        /* Keep the final ID in a wide EE register until the s32 call. */
+        FAKEMATCH_ASM_REG(long, sid, "$4");
+        sid = 0x5101BL;
+        fclDrawPanelSprite(sid, orderTable);
+    }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawPhaseHeader);
-#endif
