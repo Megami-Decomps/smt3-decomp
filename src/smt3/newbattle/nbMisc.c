@@ -752,71 +752,74 @@ void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
     if (carea != NULL) *carea = area;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
- * capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern datSkill_t attr[];
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
 extern const char D_00544170[];
 
 #include "sdk_libc.h"
 
-/* NON_MATCHING: the native selection control flow restores the 360-byte
- * extent, but table-address allocation and branch scheduling still differ.
- * Retained draft only; production continues to use the assembly fallback. */
+/* Name the existing visual member separately so both selections keep its
+ * native base-plus-offset relocations. This does not allocate a second table. */
+SYMBOL_AT_REGION(datNormalSkillVisual_t, normalSkillVisual, datSkillTable, 0x4388);
+
 void nbSetNormalSkill0(datUnitWork_t *work)
 {
+    datSkill_t *skillattr = NULL;
     datNormalSkill_t *skill = NULL;
     datNormalSkillVisual_t *visual = NULL;
-    datSkill_t *skillattr = NULL;
+    s32 hit;
     s32 attackattr;
     u32 attackcnt;
     s32 index;
     s32 active = 0;
 
     switch (work->nowcommand) {
-    case 0:
+    case 0: {
         skillattr = &attr[0];
-        skill = &datSkillTable.normal[0];
-        visual = &datSkillTable.visual[0];
-        if (nbHatudoCheckSkill(work, 0x130)) {
+        skill = datSkillTable.normal;
+        visual = normalSkillVisual;
+        hit = nbHatudoCheckSkill(work, 0x130);
+        if (hit != 0) {
             skill->targettype = 1;
         } else {
             skill->targettype = 0;
         }
         active = 1;
         break;
+    }
     case 1:
         index = work->nowindex;
-        if (index < 0xA8 && index >= 0xA4) {
+        if (index >= 0xA8) {
+            break;
+        }
+        if (index < 0xA4) {
+            break;
+        }
+        {
             skillattr = &attr[index];
             skill = &datSkillTable.normal[index];
-            visual = &datSkillTable.visual[index];
+            visual = &normalSkillVisual[index];
             active = 1;
         }
         break;
     }
     if (active) {
         if (work->flag & 4) {
-            attackattr = 0;
             attackcnt = 1;
+            attackattr = 0;
         } else {
-            attackattr = datDevilTable[work->id].attackattr;
             attackcnt = datDevilTable[work->id].attackcnt;
+            attackattr = datDevilTable[work->id].attackattr;
         }
         if (skill != NULL) {
             skillattr->skillattr = attackattr;
-            skill->targetcntmax = attackcnt;
             skill->targetcntmin = attackcnt;
+            skill->targetcntmax = attackcnt;
             visual->animetype = 0;
         }
         printf(D_00544170);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNormalSkill0);
-#endif
 
 s32 nbGetNakama(datUnitWork_t *s)
 {
