@@ -4397,13 +4397,18 @@ void campDhDrawBox(s32 alpha)
 extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
-#ifdef NON_MATCHING
+/* The background and foreground boxes share one animation displacement. */
 void campDhDrawBoxSprite(s32 timer)
 {
-    s32 phase = (s32)((u32)timer * 6) % 0x200;
-    s32 rising = 1;
+    FAKEMATCH_ASM_REG(s32, ticks, "$3") = (s32)((u32)timer * 6);
+    s32 phase = ticks % 512;
+    FAKEMATCH_ASM_REG(s32, rising, "$9");
     s32 offset;
     s32 colors[4];
+    FAKEMATCH_ASM_REG(s32, square, "$7");
+    FAKEMATCH_ASM_REG(s32, divisor, "$3");
+    FAKEMATCH_ASM_REG(s32, qlo, "lo1");
+    FAKEMATCH_ASM_REG(s32, q, "$2");
 
     if (phase >= 0x100) {
         phase = 0x200 - phase;
@@ -4411,23 +4416,69 @@ void campDhDrawBoxSprite(s32 timer)
     if (phase >= 0x80) {
         phase = 0x100 - phase;
         rising = 0;
+    } else {
+        rising = 1;
     }
-    offset = phase * phase * 0x50 / 0x4000;
-    if (rising) {
-        offset = 0xA0 - offset;
+    {
+        s32 weighted;
+        s32 coscale;
+        FAKEMATCH_ASM_REG(s32, top, "$8");
+        FAKEMATCH_ASM_REG(s32, bottom, "$6");
+        square = 0x50;
+        divisor = 0x4000;
+        coscale = 160;
+        weighted = phase * phase;
+        top = 0x006E0000;
+        bottom = 0x006E0000;
+        FAKEMATCH_ASM_LIVE_PAIR(divisor, weighted);
+        FAKEMATCH_ASM_LIVE_PAIR(square, coscale);
+        FAKEMATCH_ASM_LIVE_PAIR(weighted, top);
+        FAKEMATCH_ASM_LIVE_PAIR(weighted, bottom);
+        top |= 0x9813;
+        weighted *= square;
+        bottom |= 0x9800;
+        /* Keep the real quotient in LO1 until the first palette is ready. */
+        qlo = weighted / divisor;
+        ((volatile s32 *)colors)[0] = top;
+        ((volatile s32 *)colors)[1] = top;
+        ((volatile s32 *)colors)[3] = bottom;
+        ((volatile s32 *)colors)[2] = bottom;
+        FAKEMATCH_ASM_LIVE_LO1_WITH_MEM(qlo, colors[2]);
+        q = qlo;
+        FAKEMATCH_ASM_LIVE(q);
+        offset = rising ? coscale - q : q;
     }
-    colors[0] = colors[1] = 0x006E9813;
-    colors[2] = colors[3] = 0x006E9800;
     fclDrawPanelSprite2(0x48, 0x47);
-    cmpDrawBoxGDefault(0, -offset * 8, 0, 0x200, offset + 0xE6, colors, 0x47);
-    colors[0] = colors[1] = 0x00121800;
-    colors[2] = colors[3] = 0x00121880;
+    {
+        s32 raw;
+        s32 *pal;
+        s32 z;
+        s32 w;
+        s32 h;
+        s32 ot;
+        raw = -offset;
+        pal = colors;
+        /* Keep the raw Y and the still-live displacement in their native phases. */
+        FAKEMATCH_ASM_LIVE_PAIR(raw, offset);
+        z = 0;
+        w = 0x200;
+        h = offset + 0xE6;
+        ot = 0x47;
+        FAKEMATCH_ASM_READ_PAIR(h, ot);
+        cmpDrawBoxGDefault(0, raw * 8, z, w, h, pal, ot);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, hi, "$8") = 0x00121880;
+        FAKEMATCH_ASM_REG(s32, lo, "$2") = 0x00121800;
+        colors[2] = hi;
+        colors[3] = hi;
+        colors[0] = lo;
+        colors[1] = lo;
+    }
     fclDrawPanelSprite2(0x44, 0x47);
     cmpDrawBoxGDefault(0, 0x3B0, 0, 0x200, offset + 0x14A, colors, 0x47);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBoxSprite);
-#endif
+
 
 void campDhDrawGaugeBars(s32 unusedAlpha)
 {

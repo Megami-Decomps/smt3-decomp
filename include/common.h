@@ -199,6 +199,11 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_WITH_MEM
 #define FAKEMATCH_ASM_LIVE_WITH_MEM(value, lvalue) __asm__("" : "+r" (value) : "m" (lvalue))
 #endif
+/* Observe the actual LO1 quotient after a real memory operand. The target
+ * compiler selects DIV1/MFLO1 from the caller's arithmetic; this emits nothing. */
+#ifndef FAKEMATCH_ASM_LIVE_LO1_WITH_MEM
+#define FAKEMATCH_ASM_LIVE_LO1_WITH_MEM(value, lvalue) __asm__("" : "+v" (value) : "m" (lvalue))
+#endif
 #ifndef FAKEMATCH_ASM_LIVE_REG_MEM_REG
 #define FAKEMATCH_ASM_LIVE_REG_MEM_REG(first, lvalue, second) \
     __asm__("" : "+r" (first), "+m" (lvalue), "+r" (second))
