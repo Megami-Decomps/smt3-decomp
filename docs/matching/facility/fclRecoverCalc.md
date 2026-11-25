@@ -121,3 +121,16 @@ Each of the five service panels uses the first slot of its existing title
 symbol. The five pointers are consecutive and preserve the mutable and
 read-only text providers. The drawing interface only reads the title text.
 Zero alignment words on either side remain outside the table.
+
+## rcvDrawRowText (0x2E0)
+
+184 of 184 words match at 736 bytes and address 0x0020E620. Copy the two actual coordinate
+tables into native-width local arrays. The early sprite, font request,
+two icon rows and conditional status sprite keep native order and input
+reads, including provider-dependent stock, status and texture selection.
+Coordinates use native 32-bit wrapping; the actual first outgoing row
+pointer is observed against the scaled X offset and raw Y offset before
+Y is scaled. The split first icon color retains the actual upper ink
+while observing the copied Y offset. These scoped empty operands do not
+emit instructions, access memory or add a general barrier. This is
+code-generation evidence, not original spelling.

@@ -383,52 +383,94 @@ extern void cmpDrawStatusIconRow(s32 x, s32 y, s32 z, s32 color,
                                  datUnitWork_t *unit, s32 flags, s32 ot);
 extern char *text2[];
 
-/* Retained draft: native copies two four-word offset arrays to the stack
- * and reads each row there. Ordinary writable locals retain those loads.
- * The final row coordinates are computed before the status dispatch, as in
- * retail; 171/184 words match at the native 736-byte extent. */
-#ifdef NON_MATCHING
+/* Copy the two native four-word offset tables before
+ * reading their individual row offsets. Coordinate arithmetic wraps at 32
+ * bits. The final row coordinates precede the bad-status dispatch. */
 void rcvDrawRowText(s32 x, s32 y, s32 z, s32 color, s8 index, s32 ot)
 {
-    s32 xOffsets[4] = {0x24, 0x9E, 0xFD, 0x15A};
-    s32 yOffsets[4] = {14, 13, 13, 10};
-    s32 textX = x + (xOffsets[0] << 4);
-    s32 textY = y + (yOffsets[0] << 3);
+    extern const s32 D_0053D450[4];
+    s32 xOffsets[4];
+    extern const u32 D_0053D460[4];
+    s32 yOffsets[4];
+    s32 textX;
+    s32 textY;
     datUnitWork_t *unit;
     frFontHandle_t *font;
     s32 statusIcon;
+    FAKEMATCH_ASM_REG(s32, actualStatus, "$8");
 
-    fclDrawListSprite(textX - 0x50, textY + 0xA0, z, 0x198, 2, 0x22242F80, 0, ot);
+    __builtin_memcpy(xOffsets, D_0053D450, sizeof(xOffsets));
+    __builtin_memcpy(yOffsets, D_0053D460, sizeof(yOffsets));
+    textX = (s32)((u32)x + ((u32)xOffsets[0] << 4));
+    textY = (s32)((u32)y + ((u32)yOffsets[0] << 3));
+    fclDrawListSprite((s32)((u32)textX - 0x50U), (s32)((u32)textY + 0xA0U), z, 0x198, 2, 0x22242F80, 0, ot);
     unit = &DDS3_GBWK->unitwork[rcvDrawWork->stockList.stock[index]];
     if (unit->flag & 4) {
         font = frGetCNameFRQ(0, 1, NULL, 0);
         frSetDrawPosition(font, textX, textY);
-        frSetPriority(font, z << 4);
+        frSetPriority(font, (s32)((u32)z << 4));
         frSetFontColor(font, color);
     } else {
         font = frwGetSmallFontFRQ2(textX, textY, z, color, text2[unit->id], NULL);
     }
     frDrawFontOt(font, 1, ot);
     frDestroyFontRequestAfter(font);
-    cmpDrawStatusIconRow(x + (xOffsets[1] << 4), y + (yOffsets[1] << 3), z,
-                         0x80808080, unit, 1, ot);
-    cmpDrawStatusIconRow(x + (xOffsets[2] << 4), y + (yOffsets[2] << 3), z,
-                         0x80808080, unit, 2, ot);
-    textX = x + (xOffsets[3] << 4);
-    textY = y + (yOffsets[3] << 3);
-    switch (unit->badstatus) {
+    {
+        FAKEMATCH_ASM_REG(u32, iconColor, "$7") = 0x80800000u;
+        FAKEMATCH_ASM_REG(s32, dep, "$6");
+        s32 u, v;
+        u32 ux, vy;
+        datUnitWork_t *row;
+        __builtin_memcpy(&u, &xOffsets[1], sizeof(u));
+        dep = z;
+        FAKEMATCH_ASM_LIVE_PAIR(iconColor, dep);
+        __builtin_memcpy(&v, &yOffsets[1], sizeof(v));
+        FAKEMATCH_ASM_LIVE_WITH_INPUT(v, iconColor);
+        iconColor |= 0x8080u;
+        ux = ((u32)u << 4);
+        row = unit;
+        /* Keep the outgoing row pointer at the actual X/Y argument phase. */
+        FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR(row, ux, v);
+        vy = ((u32)v << 3);
+        cmpDrawStatusIconRow((s32)((u32)x + ux),
+                             (s32)((u32)y + vy), dep,
+                             (s32)iconColor, row, 1, ot);
+    }
+    {
+        FAKEMATCH_ASM_REG(u32, ink, "$7");
+        FAKEMATCH_ASM_REG(s32, dep, "$6");
+        s32 u;
+        s32 v;
+        datUnitWork_t *row;
+        ink = 0x80808080;
+        dep = z;
+        u = (s32)((u32)x + ((u32)xOffsets[2] << 4));
+        FAKEMATCH_ASM_LIVE_PAIR(u, dep);
+        v = (s32)((u32)y + ((u32)yOffsets[2] << 3));
+        row = unit;
+        cmpDrawStatusIconRow(u, v, dep, (s32)ink, row, 2, ot);
+    }
+    {
+        /* Keep the real final X table load in its post-row draw phase. */
+        FAKEMATCH_ASM_REG(s32, offsetX, "$2") = ((const volatile s32 *)xOffsets)[3];
+        s32 offsetY = yOffsets[3];
+        textX = (s32)((u32)x + ((u32)offsetX << 4));
+        textY = (s32)((u32)y + ((u32)offsetY << 3));
+    }
+    /* Read the actual status after the icon callbacks, then keep its
+     * promoted halfword in the native dispatch register. */
+    actualStatus = ((const volatile datUnitWork_t *)unit)->badstatus;
+    FAKEMATCH_ASM_LIVE(actualStatus);
+    switch (actualStatus) {
     case 0x40: statusIcon = 2; break;
     case 0x20: statusIcon = 3; break;
     case 0x800: statusIcon = 4; break;
     case 0x100: statusIcon = 5; break;
     default: return;
     }
-    fclDrawSpriteRes(textX, textY, z << 4,
+    fclDrawSpriteRes(textX, textY, (s32)((u32)z << 4),
                      NULL, 0, statusIcon, rcvDrawWork->texHandle, rcvSpriteTable, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
-#endif
 
 extern void fclDrawPanel(fclPanel_t *panel, s32 ot);
 extern void fclUpdatePanel(fclPanel_t *panel);

@@ -168,6 +168,17 @@ typedef SADDR_TYPE saddr_t;
     __asm__("" : "+r" (value) : "m" (first), "m" (second))
 #endif
 
+/* Observe a live output register alongside a genuine register input. */
+#ifndef FAKEMATCH_ASM_LIVE_WITH_INPUT
+#define FAKEMATCH_ASM_LIVE_WITH_INPUT(output, input) __asm__("" : "+r" (output) : "r" (input))
+#endif
+
+/* Tie a live output register to two real register inputs. */
+#ifndef FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR
+#define FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR(output, first, second) \
+    __asm__("" : "+r" (output) : "r" (first), "r" (second))
+#endif
+
 #ifndef FAKEMATCH_ASM_LIVE_F32
 #define FAKEMATCH_ASM_LIVE_F32(value) __asm__("" : "+f" (value))
 #endif

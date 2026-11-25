@@ -42,6 +42,7 @@ both native and emitted sizes when they differ.
 | 6 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 6 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 6 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
@@ -55,7 +56,6 @@ both native and emitted sizes when they differ.
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 5 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
-| 5 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 5 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 5 | effect/effBattleSystem | [effect/effBattleSystem.md](effect/effBattleSystem.md) |
 | 5 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
