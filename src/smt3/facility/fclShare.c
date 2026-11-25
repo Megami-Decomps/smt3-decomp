@@ -289,10 +289,6 @@ typedef struct
 
 extern void fclCalcRotPos(s32 *pBufX, s32 *pBufY, f32 DistX, s32 DistY, s32 CenterX, s32 CenterY, s32 Angle);
 
-/* NON_MATCHING: 89 of 298 words differ at the exact size: the angle `mov.s`
- * scheduled out of three call delay slots, one byte of the colour read as a
- * shift rather than a load, and the quadword block hoisted. */
-#ifdef NON_MATCHING
 void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
                             fclSprite_t *pSprite, u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo)
 {
@@ -311,43 +307,77 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
     s32 cx;
     s32 cy;
     s32 t;
-    u32 c;
+    FAKEMATCH_ASM_REG(s32, blendMode, "$8");
 
     if (FilterFlag == 0) {
-        sdfTexSetFilter(pSprite->tex, 0, 1);
+        sdfTexSetFilter(EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 0, 1);
     } else {
-        sdfTexSetFilter(pSprite->tex, 1, 1);
+        sdfTexSetFilter(EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 1, 1);
     }
     packet = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4)));
     sdf2DMakePrimPacketHeader(packet, 0x15C, 3, 0x531, 4);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
-    x0 = X + 0x7000;
-    y0 = Y + 0x7900;
-    x1 = x0 + (W << 4);
-    y1 = y0 + (H << 3);
-    hw = (x1 - x0) / 2;
-    hh = (y1 - y0) / 2;
-    cx = x0 + hw;
-    cy = y0 + hh;
+    x0 = (u32)X + 0x7000;
+    y0 = (u32)Y + 0x7900;
+    x1 = (u32)x0 + ((u32)W << 4);
+    y1 = (u32)y0 + ((u32)H << 3);
+    hw = ((s32)((u32)x1 - (u32)x0)) / 2;
+    hh = ((s32)((u32)y1 - (u32)y0)) / 2;
+    cx = (u32)x0 + (u32)hw;
+    cy = (u32)y0 + (u32)hh;
     pt[0].x = x0;
     pt[0].y = y0;
     pt[3].x = x1;
     pt[3].y = y1;
-    fclCalcRotPos(&pt[0].x, &pt[0].y, Angle, -hw, -hh, cx, cy);
-    fclCalcRotPos(&pt[1].x, &pt[1].y, Angle, hw, -hh, cx, cy);
-    fclCalcRotPos(&pt[2].x, &pt[2].y, Angle, -hw, hh, cx, cy);
-    fclCalcRotPos(&pt[3].x, &pt[3].y, Angle, hw, hh, cx, cy);
-    uv[0] = pSprite->unk_08;
-    uv[2] = pSprite->unk_0C;
-    uv[1] = pSprite->unk_0A;
-    uv[3] = pSprite->unk_0E;
-    if ((FlipFlag & 1) != 0) {
-        t = pt[0].x;
-        pt[0].x = pt[1].x;
-        pt[1].x = t;
-        t = pt[2].x;
-        pt[2].x = pt[3].x;
-        pt[3].x = t;
+    /* Keep native outgoing rotation arguments within each call's phase. */
+    {
+        FAKEMATCH_ASM_REG(f32, outgoingAngle, "$f12") = Angle;
+        FAKEMATCH_ASM_LIVE_F32(outgoingAngle);
+        fclCalcRotPos(&pt[0].x, &pt[0].y, outgoingAngle, -hw, -hh, cx, cy);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, dy, "$7") = -hh;
+        FAKEMATCH_ASM_REG(s32, dx, "$6") = hw;
+        FAKEMATCH_ASM_REG(s32, xMid, "$8") = cx;
+        FAKEMATCH_ASM_REG(s32, yMid, "$9") = cy;
+        fclCalcRotPos(&pt[1].x, &pt[1].y, Angle, dx, dy, xMid, yMid);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, dx, "$6") = -hw;
+        FAKEMATCH_ASM_REG(s32, dy, "$7") = hh;
+        FAKEMATCH_ASM_REG(s32, xMid, "$8") = cx;
+        FAKEMATCH_ASM_REG(s32, yMid, "$9") = cy;
+        fclCalcRotPos(&pt[2].x, &pt[2].y, Angle, dx, dy, xMid, yMid);
+    }
+    {
+        FAKEMATCH_ASM_REG(s32, dx, "$6") = hw;
+        FAKEMATCH_ASM_REG(s32, dy, "$7") = hh;
+        FAKEMATCH_ASM_REG(s32, xMid, "$8") = cx;
+        FAKEMATCH_ASM_REG(s32, yMid, "$9") = cy;
+        fclCalcRotPos(&pt[3].x, &pt[3].y, Angle, dx, dy, xMid, yMid);
+    }
+    {
+        FAKEMATCH_ASM_REG(u32, tex0, "$5") = pSprite->unk_08;
+        FAKEMATCH_ASM_REG(u32, tex2, "$6") = pSprite->unk_0C;
+        FAKEMATCH_ASM_REG(u32, rawFlip, "$2") = FlipFlag & 1;
+        FAKEMATCH_ASM_REG(u32, tex3, "$3") = pSprite->unk_0E;
+        FAKEMATCH_ASM_REG(u32, tex1, "$4") = pSprite->unk_0A;
+        u32 flipX;
+        FAKEMATCH_ASM_READ(tex2);
+        FAKEMATCH_ASM_READ_PAIR(rawFlip, tex1);
+        flipX = (u8)rawFlip;
+        uv[0] = tex0;
+        uv[2] = tex2;
+        uv[1] = tex1;
+        uv[3] = tex3;
+        if (flipX != 0) {
+            t = pt[0].x;
+            pt[0].x = pt[1].x;
+            pt[1].x = t;
+            t = pt[2].x;
+            pt[2].x = pt[3].x;
+            pt[3].x = t;
+        }
     }
     if ((FlipFlag & 2) != 0) {
         t = pt[0].y;
@@ -367,53 +397,118 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
         prim[18] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
         prim[19] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
     } else {
-        c = *(u32 *)pCol;
-        prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
-        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
-        prim[7] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
-        prim[6] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
-        prim[13] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
-        prim[12] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
-        prim[19] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
-        prim[18] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        u64 p0;
+        u64 p1;
+        u32 alpha;
+        FAKEMATCH_ASM_REG(u32, c, "$2");
+        c = (u32)*pCol;
+        alpha = *(const u8 *)pCol;
+        p0 = ((c >> 24) & 0xff) | ((u64)((c >> 16) & 0xff) << 32);
+        p1 = ((c >> 8) & 0xff) | ((u64)alpha << 32);
+        prim[0] = p0;
+        prim[1] = p1;
+        prim[6] = p0;
+        prim[7] = p1;
+        prim[12] = p0;
+        prim[13] = p1;
+        prim[18] = p0;
+        prim[19] = p1;
     }
-    /* Rotation writes signed coordinates; pack their independent 32-bit lanes
-     * without sign-extending X into the high Y lane. */
-    prim[2] = uv[0] | ((u64)uv[1] << 32);
-    prim[4] = (u32)pt[0].x | ((u64)(u32)pt[0].y << 32);
-    prim[5] = (u32)(pSprite->Z >> 4);
-    prim[8] = uv[2] | ((u64)uv[1] << 32);
-    prim[10] = (u32)pt[1].x | ((u64)(u32)pt[1].y << 32);
-    prim[11] = (u32)(pSprite->Z >> 4);
-    prim[14] = uv[0] | ((u64)uv[3] << 32);
-    prim[16] = (u32)pt[2].x | ((u64)(u32)pt[2].y << 32);
-    prim[17] = (u32)(pSprite->Z >> 4);
-    prim[20] = uv[2] | ((u64)uv[3] << 32);
-    prim[22] = (u32)pt[3].x | ((u64)(u32)pt[3].y << 32);
-    prim[23] = (u32)(pSprite->Z >> 4);
-    switch (AlphaFlag) {
-    case 1:
-        fclDrawPanelSprite2(0x48, OtNo);
-        break;
-    case 2:
-        fclDrawPanelSprite2(0x42, OtNo);
-        break;
-    default:
-        fclDrawPanelSprite2(0x44, OtNo);
-        break;
+    /* Keep real coordinate and UV lanes in their native packing phases.
+     * Each hard register is reused only after its previous lane is consumed. */
+    {
+        FAKEMATCH_ASM_REG(u64, top, "$4");
+        FAKEMATCH_ASM_REG(u64, left, "$7");
+        u64 uv0;
+        u64 z;
+        s32 rawZ;
+        s32 logicalZ;
+        u64 y0hi;
+        FAKEMATCH_ASM_REG(u64, right, "$6");
+        FAKEMATCH_ASM_REG(u64, uv1, "$4");
+        u64 xy0;
+        FAKEMATCH_ASM_REG(u64, y1hi, "$2");
+        FAKEMATCH_ASM_REG(u64, bottom, "$4");
+        FAKEMATCH_ASM_REG(u64, xy1, "$3");
+        u64 uv2;
+        FAKEMATCH_ASM_REG(u64, y2hi, "$2");
+        FAKEMATCH_ASM_REG(u64, uv3, "$6");
+        FAKEMATCH_ASM_REG(u64, xy2, "$3");
+        FAKEMATCH_ASM_REG(u64, y3hi, "$2");
+        u64 xy3;
+        top = uv[1];
+        blendMode = 1;
+        FAKEMATCH_ASM_READ_PAIR(top, blendMode);
+        left = uv[0];
+        top <<= 32;
+        FAKEMATCH_ASM_READ(top);
+        rawZ = pSprite->Z;
+        uv0 = left | top;
+        y0hi = (u32)pt[0].y;
+        prim[2] = uv0;
+        logicalZ = rawZ >> 4;
+        /* Load right U between the low Y load and the Y lane shift. */
+        right = uv[2];
+        y0hi <<= 32;
+        FAKEMATCH_ASM_READ(right);
+        z = (u32)logicalZ;
+        uv1 = right | top;
+        xy0 = (u32)pt[0].x | y0hi;
+        FAKEMATCH_ASM_READ(uv1);
+        prim[8] = uv1;
+        prim[4] = xy0;
+        prim[5] = z;
+        y1hi = (u32)pt[1].y;
+        bottom = uv[3];
+        FAKEMATCH_ASM_READ_PAIR(y1hi, bottom);
+        xy1 = (u32)pt[1].x;
+        y1hi <<= 32;
+        bottom <<= 32;
+        prim[11] = z;
+        xy1 |= y1hi;
+        y2hi = (u32)pt[2].y;
+        uv2 = left | bottom;
+        prim[10] = xy1;
+        prim[14] = uv2;
+        y2hi <<= 32;
+        FAKEMATCH_ASM_READ(y2hi);
+        uv3 = right | bottom;
+        FAKEMATCH_ASM_READ_PAIR(y2hi, uv3);
+        xy2 = (u32)pt[2].x | y2hi;
+        prim[20] = uv3;
+        y3hi = (u32)pt[3].y;
+        prim[17] = z;
+        /* Expose the completed packet word to retain native Z/XY store order. */
+        FAKEMATCH_ASM_READ_MEM(prim[17]);
+        prim[16] = xy2;
+        y3hi <<= 32;
+        FAKEMATCH_ASM_READ(y3hi);
+        xy3 = (u32)pt[3].x | y3hi;
+        prim[23] = z;
+        prim[22] = xy3;
     }
+    if (AlphaFlag != blendMode) goto notOne;
+    goto one;
+notOne:
+    if (AlphaFlag != 2) goto other;
+    goto two;
+one:
+    fclDrawPanelSprite2(0x48, OtNo);
+    goto blendDone;
+two:
+    fclDrawPanelSprite2(0x42, OtNo);
+    goto blendDone;
+other:
+    fclDrawPanelSprite2(0x44, OtNo);
+blendDone:
     tag = EE_ADDR_AS(void *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, pSprite->tex, 0);
+    sdf2DLinkTexPacket(tag, EE_ADDR_AS(sdfTexHandle_t *, pSprite->tex), 0);
     sdfDrawTagLink(tag, EE_ADDR(packet));
     otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
     fclDrawPanelSprite2(0x44, OtNo);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteAngleCore);
-#endif
-
 
 /* Both native mode paths test the same signed pad-state byte. */
 s32 func_00214FD8(s32 mode)

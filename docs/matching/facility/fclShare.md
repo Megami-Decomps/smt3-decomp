@@ -136,3 +136,23 @@ assembler, QEMU and loader/runtime inputs are included in the corrected
 334-file stable closure. Current-base integration additionally verifies unchanged
 provider bodies and compilation inputs, fresh final three-mode parity, and
 complete artifact identity before full repository gates.
+
+## fclDrawSpriteAngleCore (facility/fclShare, 0x4A8)
+
+All 298 words match at the original 1,192-byte extent (0x00214B30).
+The low-word wrapped coordinates and sign-aware half extents feed four
+separate rotation calls. The renderer reads the four texture halfwords
+before selecting its flip paths, and the packet encodes the resulting
+signed coordinates as separate 32-bit lanes. Each vertex receives the
+same arithmetic-shifted depth, zero-extended when packed. The override
+colour uses the native word and byte reads; the default path reads the
+sprite colour. The original three blend cases and ordered registration
+calls follow the packet writes.
+
+Only the actual angle/call arguments and texture and packet values use
+local EE constraints. In particular, arranging the raw first Y value
+before its 64-bit shift gives the right-U load the native order. Each
+paired input is initialized and used in the packet or blend test, and
+the packed depth slot is real. Reused physical registers contain only
+one live logical value at a time; none of the packet constraints span a
+call. The neighboring retained phase-header draft is unchanged.
