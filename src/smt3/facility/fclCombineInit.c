@@ -3208,30 +3208,56 @@ void cmbDrawResultIcon(s8 mode, s32 z, s32 unused2, s32 unused3, s32 alpha, s32 
 
 extern void fclDrawPanelSprite(s32 id, s32 ot);
 
-#ifdef NON_MATCHING
 void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
                          u32 color, u32 borderColor, s32 ot)
 {
-    /* Localized reconstruction aids retain genuine order and depth values
-     * through native allocation; not evidence of original source spelling. */
+    /* Retain the live order and incoming depth in their native phases. */
     FAKEMATCH_ASM_REG(s32, order, "s2") = 0x47;
-    FAKEMATCH_ASM_LIVE(z);
+    fclSpriteTbl_t *realTable;
+    s32 zArg = z;
+
+    FAKEMATCH_ASM_LIVE_PAIR(order, zArg);
     {
-        s32 firstOrder = 0x47;
-        FAKEMATCH_ASM_LIVE(firstOrder);
-        fclDrawPanelSprite(0x33001, firstOrder);
+        FAKEMATCH_ASM_REG(long, id, "$4");
+        s32 firstOrder;
+        firstOrder = 0x47;
+        id = 0x33001L;
+        fclDrawPanelSprite(id, firstOrder);
     }
-    fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 7, CMB_GBWK->texHandle,
-                     cmbSpriteTable, order);
-    fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 8, CMB_GBWK->texHandle,
-                     cmbSpriteTable, order);
-    fclDrawSpriteRes(0, 0, z << 4, NULL, 0, 0xD, CMB_GBWK->texHandle,
-                     cmbSpriteTable, ot);
-    fclDrawPanelSprite(0x5101B, 0x47);
+    realTable = cmbSpriteTable;
+    {
+        s32 *tex = CMB_GBWK->texHandle;
+        fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 7, tex, realTable, order);
+    }
+    {
+        cmbGbWork_t *buf;
+        FAKEMATCH_ASM_REG(s32 *, tex, "$10");
+
+        /* Keep the fresh work base and the adjusted texture argument in
+         * separate compiler phases. The constraints emit no instructions. */
+        buf = CMB_GBWK;
+        FAKEMATCH_ASM_LIVE(buf);
+        tex = buf->texHandle;
+        FAKEMATCH_ASM_LIVE(tex);
+        fclDrawSpriteRes(0, 0, 0xFFFFF0, NULL, 0, 8, tex, realTable, order);
+    }
+    {
+        s32 depth;
+        cmbGbWork_t *buf;
+        s32 savedZ;
+        buf = CMB_GBWK;
+        savedZ = zArg;
+        FAKEMATCH_ASM_LIVE_WITH_MEM(savedZ, CMB_GBWK);
+        depth = (s32)((u32)savedZ << 4);
+        fclDrawSpriteRes(0, 0, depth, NULL, 0, 0xD, buf->texHandle, realTable, ot);
+    }
+    {
+        FAKEMATCH_ASM_REG(long, finalId, "a0");
+        finalId = 0x5101BL;
+        fclDrawPanelSprite(finalId, 0x47);
+    }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultHeader);
-#endif
+
 
 extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
                                    s32 mode, s32 alpha, s32 ot);

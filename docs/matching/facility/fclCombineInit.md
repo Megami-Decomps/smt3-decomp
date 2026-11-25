@@ -899,3 +899,35 @@ vectors and `0xC00` zero-fill bytes at `0x573190` for color words. The
 unused tails after both banks stay raw. The interior generated labels
 superseded by the vertex array have no references. The consumer, retail
 file, and initialized bytes are unchanged.
+
+## cmbDrawResultHeader (0x201068)
+
+64 of 64 words match at 256 bytes. The opening panel sprite, three
+resource draws, and final tail-called panel sprite retain the native order
+and exact arguments. Each resource draw uses a freshly observed work
+object's actual texture-handle member and the same sprite table. The first
+two resource calls have fixed depth and draw order; the third uses the
+incoming depth shifted by four with 32-bit wrap, and the incoming draw
+order. The original provider types are unchanged.
+
+The compiler constraints only place real values. The two panel IDs have
+short-lived local bindings in their actual argument register and are
+converted through the existing s32 prototype. The second resource call
+keeps the fresh work pointer and computed texture member in separate
+compiler phases, with the latter in the outgoing texture register. The
+last resource call observes the genuine incoming depth and current work
+pointer storage together before forming its arguments; the empty operand
+is not a memory barrier. No fixed argument is relied upon after a call.
+Without the second resource call's two live operands, its texture address
+addition and zero X setup exchange order.
+
+Whole-owner checks and an isolated production link verify all affected
+code and data. The ten target operands resolve to the retail addresses.
+The assembler reorders three peer HI16 associations for the same
+`cmbSpriteTable` symbol, each with the same signed low addend of zero;
+the effective relocation expressions, ordered non-HI16 peer records,
+allocated peer bytes and typed records are unchanged. The linked image
+matches all 4,551,696 retail bytes. An independent instruction-decoding
+fixture checks native and candidate outputs across callback-driven work
+replacement, call arguments and callee-saved restoration, with a stale
+work control.
