@@ -249,6 +249,26 @@ typedef struct
     /* 0x0038 */ u8 unk_0038[0x1004];
 } cmpListPage_t;
 
+typedef struct campCrossPanel_t
+{
+    /* 0x00 */ void (*func)(void *, void *, s32, s32, s32, s32);
+    /* 0x04 */ struct {
+        s32 x;
+        s32 y;
+        s32 z;
+        s16 width;
+        s16 height;
+        s32 color;
+    } pos;
+    /* 0x18 */ cmpPadStopWork_t *cursor;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 alpha;
+    /* 0x24 */ s8 flag;
+    /* 0x25 */ u8 unk_25[7];
+} campCrossPanel_t;
+
+SIZE_CHECK(campCrossPanelSizeCheck, campCrossPanel_t, 0x2C);
+
 typedef struct
 {
     /* 0x0000 */ u8 unk_0000;
@@ -259,7 +279,8 @@ typedef struct
     /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ s8 stockMessagePhase;
-    /* 0x0019 */ u8 unk_0019[0x103F];
+    /* 0x0019 */ u8 unk_0019[3];
+    /* 0x001C */ cmpCursorFullWork_t rootCursor;
     /* 0x1058 */ cmpListPage_t page[3];
     /* 0x410C */ u8 unk_410C[0x22];
     /* 0x412E */ s16 itemCursor;
@@ -276,9 +297,7 @@ typedef struct
     /* 0x8444 */ u8 itemMode;
     /* 0x8445 */ u8 statusPhase;
     /* 0x8446 */ u8 reserved8446[2];
-    /* 0x8448 */ u8 crossPanel[0x20];
-    /* 0x8468 */ s32 unk_8468;
-    /* 0x846C */ u8 unk_846C[0x34];
+    /* 0x8448 */ campCrossPanel_t crossPanel[2];
     /* 0x84A0 */ s32 effectStep;
     /* 0x84A4 */ void *dhProcess;
     /* 0x84A8 */ s32 RootTimer;
@@ -583,8 +602,8 @@ extern fclSpriteTbl_t fclSpriteTable[];
 
 extern char shpFmtCount7[];
 
-extern void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
-                                   s8 mode, s32 alpha, s32 ot);
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 
 extern s32 cmpModelSetup(u16 a, s32 b);
 
@@ -841,8 +860,8 @@ void cmpinit(void)
     fclSetSelMessagePos(1);
     campWork->unk_0001 = 0;
     campWork->unk_0004 = 1;
-    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, EE_ADDR_S(cmpCursorCells));
-    cmpInitCursorLayout((u8 *)campWork + 0x1C, 0, 0, 0, 0, 0x17);
+    cmpInitCursorRange(&campWork->rootCursor, 7, 7, EE_ADDR_S(cmpCursorCells));
+    cmpInitCursorLayout(&campWork->rootCursor, 0, 0, 0, 0, 0x17);
     cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, EE_ADDR_S(cmpPage0Cells));
     cmpInitCursorLayout(&campWork->page[0].cursor, 0, 0, 0, 0, 0x17);
     cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, EE_ADDR_S(cmpPage1Cells));
@@ -1813,7 +1832,7 @@ s8 cmpStartStockMsg(s8 flag)
 
 #ifdef NON_MATCHING
 extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32 value, s32 alpha);
-extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern void cmpSetCrossGeneralVal(void *panel, s8 value);
 #endif
 
 void cmpCalcRoot(void)
@@ -1849,7 +1868,7 @@ void cmpSetItemTSL(u16 itemId)
 
 extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
                                  void *data, s32 value, s32 alpha);
-extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern void cmpSetCrossGeneralVal(void *panel, s8 value);
 extern void cmpDrawSkillList(s32 *position, cmpCursorInfo_t *cursor,
                              datUnitWork_t *unit, s8 mode, s32 alpha);
 
@@ -1998,12 +2017,12 @@ s32 cmpCalcItem(void)
         phase = campWork->previousPhase;
         switch (phase) {
         case 0:
-            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0,
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0,
                                 cmpUpdateListSelection,
                                 &campWork->page[0].cursor, 0, 0);
             break;
         case 1:
-            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
             if (campWork->unk_0004 == phase) {
                 switch (campWork->page[0].cursor.unk_22 +
                         (u8)campWork->page[0].cursor.unk_24) {
@@ -2020,7 +2039,7 @@ s32 cmpCalcItem(void)
                 }
                 campWork->unk_0001 = 0xB;
                 cmpInitSelectCursor((s8)campWork->unk_8302);
-                cmpSetAfterCrossFunc(campWork->crossPanel, 0x120, 0x288,
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
                                     cmpCalcItemEntry,
                                     campWork->unk_410C, 0, 0);
             } else {
@@ -2059,12 +2078,12 @@ s32 cmpCalcItem(void)
                     campWork->unk_0001 = phase;
                     return 0;
                 }
-                cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
                 if (result != 0) {
                     return 1;
                 }
             } else {
-                cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0,
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0,
                                     cmpUpdateListSelection,
                                     &campWork->page[0].cursor, 0, 0);
                 campWork->unk_0001 = 1;
@@ -2073,16 +2092,16 @@ s32 cmpCalcItem(void)
         case 9:
             if (status == 2) {
                 campWork->unk_0001 = 0xB;
-                cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
             } else {
                 if (cmpUseItem() != 0) {
                     campWork->unk_0001 = phase;
                 } else {
                     campWork->unk_0001 = 0xB;
-                    cmpSetAfterCrossFunc(campWork->crossPanel, 0x120, 0x288,
+                    cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0x120, 0x288,
                                         cmpCalcItemEntry,
                                         campWork->unk_410C, 0, 0);
-                    cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+                    cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
                 }
             }
             break;
@@ -2166,7 +2185,7 @@ s32 cmpCalcStockControl(void)
 
 extern void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func,
                                  void *data, s32 value, s32 alpha);
-extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern void cmpSetCrossGeneralVal(void *panel, s8 value);
 extern s32 fclStartMessage(s32 message);
 extern s32 fclStartSelMessage(s32 message);
 extern void fclSetMessageInvalid(s8 mode);
@@ -2279,7 +2298,7 @@ void cmpCalcConfig(void)
     }
     cmpSetStockVisible(0);
     cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
-    campWork->unk_8468 = 0x200;
+    campWork->crossPanel[0].alpha = 0x200;
     dds3ConfigProcessStart(0);
 }
 
@@ -2290,7 +2309,7 @@ void cmpCalcLoad(void)
     }
     cmpSetStockVisible(0);
     cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
-    campWork->unk_8468 = 0x200;
+    campWork->crossPanel[0].alpha = 0x200;
     fmProcTrigSequence(1);
 }
 
@@ -2341,22 +2360,22 @@ s32 cmpCalcSequence(void)
     case 5:
         if (campWork->unk_0004 == 1) {
             if ((s8)campWork->statusPhase == 0) {
-                cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
             } else {
-                cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
-                campWork->unk_8468 = 0x200;
+                cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
+                campWork->crossPanel[0].alpha = 0x200;
             }
         }
         if (campWork->unk_0004 == 2 && (s8)campWork->statusPhase == 0) {
-            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, cmpUpdateListSelection,
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, cmpUpdateListSelection,
                                  (u8 *)campWork + 0x1C, 0, 0);
-            cmpSetCrossGeneralVal(campWork->crossPanel, 1);
+            cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
             break;
         }
         break;
     case 4:
         if (campWork->unk_0004 != 0) {
-            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
         }
         break;
     case 6:
@@ -2372,7 +2391,7 @@ s32 cmpCalcSequence(void)
         break;
     case 12:
         if (campWork->unk_0004 == 1) {
-            cmpSetAfterCrossFunc(campWork->crossPanel, 0, 0, NULL, NULL, 0, 0);
+            cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
         }
         break;
     case 13:
@@ -3164,7 +3183,7 @@ void cmpUpdateItem(void)
 }
 
 
-extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+extern void cmpSetCrossGeneralVal(void *panel, s8 value);
 
 void cmpUpdateParty(void)
 {
@@ -3468,7 +3487,7 @@ void campWaitSelMessage(void)
         }
         if (fclChkMessage() == 0 && campWork->stockMessagePhase != 1) {
             if (cmpStartStockMsg(1) == 0) {
-                cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+                cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
                 campWork->unk_0001 = 3;
                 campWork->unk_0004 = 1;
             } else {
@@ -3553,7 +3572,7 @@ void cmpUpdateDestroyItemConfirm(void)
         campWork->unk_0001 = 11;
         campWork->previousPhase = 1;
     }
-    cmpSetCrossGeneralVal(campWork->crossPanel, 0);
+    cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 0);
 done:
     return;
 }
@@ -4344,7 +4363,7 @@ s32 camp_calc_dh_Process(dds3ProcessID_t *id)
                 camp = campWork;
                 value = 0;
             }
-            cmpSetCrossGeneralVal(camp->crossPanel, value);
+            cmpSetCrossGeneralVal((u8 *)camp + 0x8448, value);
         }
         goto done;
     one:
@@ -8288,8 +8307,9 @@ void camp_H_cmpGlobalWork_t__ctor(void)
     campInitPanelPos((u8 *)campWork + 0x8448, 0, 0, 0, 0, 0, 0);
 }
 
-void cmpSetCrossGeneralVal(u8 *work, s8 value)
+void cmpSetCrossGeneralVal(void *panel, s8 value)
 {
+    u8 *work = panel;
     work[0x50] = value;
 }
 
@@ -8327,16 +8347,7 @@ void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32
     }
 }
 
-typedef struct campCrossPanel_t
-{
-    /* 0x00 */ void (*func)(void *, void *, s32, s32, s32, s32);
-    /* 0x04 */ u8 pos[0x14];
-    /* 0x18 */ cmpPadStopWork_t *cursor;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ s32 alpha;
-    /* 0x24 */ s8 flag;
-    /* 0x25 */ u8 unk_25[7];
-} campCrossPanel_t;
+
 
 #ifdef NON_MATCHING
 extern void cmpClearCursorSlots(cmpCursorInfo_t *cur);
@@ -8345,7 +8356,7 @@ extern void cmpClearCursorSlots(cmpCursorInfo_t *cur);
 void campRunPanelCallback(campCrossPanel_t *panel)
 {
     if (panel[1].func != NULL) {
-        panel[1].func(panel[1].pos, panel[1].cursor, panel[1].unk_1C, panel[1].flag,
+        panel[1].func(&panel[1].pos, panel[1].cursor, panel[1].unk_1C, panel[1].flag,
                       panel[1].alpha, 0x47);
         if (panel[1].alpha < 0x100) {
             panel[1].alpha = panel[1].alpha + SDF_FRAME_STEP_INT(0x40);
@@ -8355,7 +8366,7 @@ void campRunPanelCallback(campCrossPanel_t *panel)
         }
     }
     if (panel[0].func != NULL) {
-        panel[0].func(panel[0].pos, panel[0].cursor, panel[0].unk_1C, panel[0].flag,
+        panel[0].func(&panel[0].pos, panel[0].cursor, panel[0].unk_1C, panel[0].flag,
                       panel[0].alpha, 0x47);
         if (panel[0].alpha < 0x200) {
             panel[0].alpha = panel[0].alpha + SDF_FRAME_STEP_INT(0x40);
@@ -8751,47 +8762,48 @@ void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 }
 
 
-/* Exact size; 76 of 87 words match. Remaining differences schedule independent
- * argument setup and entry instructions in a different order. */
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * menu main savestate, covering only the paths those calls took.
- * (sdfport bc29478, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern void cmpDrawListFrame(s32 x, s32 y, s32 unusedZ, s32 rowHeight, s8 rows,
                              s32 alpha, s32 ot);
 extern void cmpDrawListItemText(s32 x, s32 y, s32 color, u8 width,
                                 cmpCursorInfo_t *cursor, s32 mode, s32 alpha, s32 ot);
 
-void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused,
-                           s8 mode, s32 alpha, s32 ot)
+void cmpUpdateListSelection(void *pos, void *listData, s32 unused,
+                           s32 modeValue, s32 alpha, s32 ot)
 {
-    cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)list;
-    s32 x = pos->unk_00;
-    s32 y = pos->unk_04;
-    s8 difference = (s8)cursor->unk_20;
-    difference -= cursor->unk_21;
+    s8 mode = (s8)modeValue;
+    u8 *list = listData;
+    cmpCursorInfo_t *cursor = listData;
+    s32 x = *(s32 *)pos;
+    s32 y = *(s32 *)((u8 *)pos + 4);
+    s8 difference = (s8)list[0x20];
+    difference -= list[0x21];
 
-    fclDrawPanelSprite(0x5101B, 0x47);
-    cmpDrawListFrame(x - 0x280, y, 0x10, *(s32 *)cursor,
+    {
+        /* Keep both halves of the real sprite ID together until reload. */
+        FAKEMATCH_ASM_REG(long, id, "$4");
+        id = 0x5101BL;
+        fclDrawPanelSprite(id, 0x47);
+    }
+    cmpDrawListFrame((s32)((u32)x - 0x280u), y, 0x10, *(s32 *)list,
                      difference, alpha, 0x47);
     if (mode == 3) {
         return;
     }
-    cmpDrawListItemText(x + 0x120, y + 0x288, 0xFFFFFF,
+    cmpDrawListItemText((s32)((u32)x + 0x120u), (s32)((u32)y + 0x288u), 0xFFFFFF,
                         list[0], cursor, mode, alpha, 0x47);
     if (mode == 0) {
+        s32 top = (s32)((u32)y + 0x280u);
         s32 blink = cmpCursorBlinkColor(alpha);
-        cmpDrawScrollBar(x, y + 0x280, 0x10, 0xA4, 0x16,
-                         blink, alpha, cursor->unk_25, cursor,
+        s32 left = x;
+        s8 row = (s8)list[0x25];
+        cmpDrawScrollBar(left, top, 0x10, 0xA4, 0x16,
+                         blink, alpha, row, cursor,
                          cmpDrawListRowBox, 0x47);
     } else {
-        cursor->unk_34 = 0;
+        *(s32 *)(list + 0x34) = 0;
     }
     cmpUpdateCursorSlots(cursor);
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
-#endif
 
 void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2, s32 flag)
 {

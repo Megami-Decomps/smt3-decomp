@@ -12,7 +12,7 @@ s32 fclGetFlag(s8 index);
 
 extern s32 shopDrawPanelMode0(s8 mode);
 
-extern s32 shopUpdateItemList(s32 mode);
+extern void shopUpdateItemList(s32 mode);
 
 
 
@@ -497,10 +497,10 @@ void shopDrawSellRow(s32 row, u8 *work, s8 mode, s32 id)
 }
 
 
-extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
-                                  s32 mode, s32 b, s32 id);
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 
-s32 shopUpdateItemList(s32 active)
+void shopUpdateItemList(s32 active)
 {
     fclPanelPos_t pos;
     s32 mode = 1;
@@ -601,9 +601,9 @@ s32 shopDrawPhase7(void)
     return shopDrawPanelMode0(1);
 }
 
-s32 shopUpdateItemListDefault(void)
+void shopUpdateItemListDefault(void)
 {
-    return shopUpdateItemList(0);
+    shopUpdateItemList(0);
 }
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);

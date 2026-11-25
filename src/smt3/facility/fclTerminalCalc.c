@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camp.h"
 #include "fldTerminalNames.h"
 #include "fpu.h"
 #include "libsdf.h"
@@ -136,8 +137,7 @@ typedef struct trmListWork_t {
 
 typedef struct trmDrawWork_t {
     u8 reserved00[0x1C];
-    u8 listHeader[0x15C];
-    u8 reserved0178[0xEE0];
+    cmpCursorFullWork_t listHeader;
     trmListWork_t terminalList;
     u8 reserved11EC[0x1005];
     s8 terminalType;
@@ -150,8 +150,8 @@ typedef struct trmDrawWork_t {
 extern trmDrawWork_t *trmDrawWork;
 extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 width, s16 height,
                            s32 flags, trmPanelPos_t *panel);
-extern s32 cmpUpdateListSelection(trmPanelPos_t *panel, u8 *list, s32 row,
-                                  s32 mode, s32 width, s32 ot);
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 extern u32 frGetStrWidth2(void *request);
 extern void frSetDrawPosition(void *request, s32 x, s32 y);
 extern void frDrawFontOt(void *frq, s32 mode, s32 arg);
@@ -227,8 +227,8 @@ void trmUpdateListSelection(void)
     trmDrawListRow(&panel, 0x47);
     if (trmDrawWork->terminalType != 0) {
         fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, &panel);
-        cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, 3, 0x100, 0x47);
-        cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, 1, 0x100, 0x47);
+        cmpUpdateListSelection(&panel, &trmDrawWork->listHeader, 0, 3, 0x100, 0x47);
+        cmpUpdateListSelection(&panel, &trmDrawWork->listHeader, 0, 1, 0x100, 0x47);
     }
 }
 
@@ -237,8 +237,8 @@ void trmDrawSeq0(s8 mode)
     trmPanelPos_t panel;
 
     fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, &panel);
-    cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, 3, 0x100, 0x47);
-    cmpUpdateListSelection(&panel, trmDrawWork->listHeader, 0, mode, 0x100, 0x47);
+    cmpUpdateListSelection(&panel, &trmDrawWork->listHeader, 0, 3, 0x100, 0x47);
+    cmpUpdateListSelection(&panel, &trmDrawWork->listHeader, 0, mode, 0x100, 0x47);
     fclInitPanelPos(0xC80, 0x100, 0xFFFFF, 0x80, 0, 0, &panel);
     trmDrawListRow(&panel, 0x47);
 }

@@ -3233,12 +3233,13 @@ void cmbDrawResultHeader(s32 x, s32 y, s32 z, s32 width, s32 height,
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultHeader);
 #endif
 
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 #ifdef NON_MATCHING
-extern void cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 unused, s8 mode, s32 alpha, s32 ot);
 extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 #endif
 
-s32 cmbDrawPhaseDefault(s32 active)
+void cmbDrawPhaseDefault(s32 active)
 {
     fclPanelPos_t pos;
     s32 mode = 1;

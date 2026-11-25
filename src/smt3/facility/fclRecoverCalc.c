@@ -57,8 +57,8 @@ extern fclSpriteTbl_t fclSpriteTable[];
 
 extern s32 D_00345D88[];
 
-extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
-                                  s32 mode, s32 b, s32 id);
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 
 s32 rcvCalcPriceRecover(datUnitWork_t *work)
 {

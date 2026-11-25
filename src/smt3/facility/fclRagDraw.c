@@ -13,8 +13,8 @@ s32 fclGetFlag(s8 index);
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
-                                  s32 mode, s32 b, s32 id);
+extern void cmpUpdateListSelection(void *pos, void *list, s32 unused,
+                                   s32 mode, s32 alpha, s32 ot);
 
 
 extern void ragDrawList2(s32 mode);
@@ -23,7 +23,7 @@ extern void ragDrawList3(s32 mode);
 
 extern void ragDrawSeqErr(void);
 
-extern s32 ragDrawSeqRoot(s32 Mode);
+extern void ragDrawSeqRoot(s32 Mode);
 
 extern void cmpModelInitCore2(void);
 
@@ -87,7 +87,7 @@ void ragDrawSeqConfirm(void)
     }
 }
 
-s32 ragDrawSeqRoot(s32 Mode)
+void ragDrawSeqRoot(s32 Mode)
 {
     fclPanelPos_t pos;
     s32 mode = 1;
