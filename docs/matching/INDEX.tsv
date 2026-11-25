@@ -81,6 +81,7 @@ cmpDrawSkillIcons (0x1A8)				docs/matching/code_0022C578.md	2182
 campDhDrawBoxSprite	code_0022C578	0x134		docs/matching/code_0022C578.md	2208
 cmpUpdateListSelection (0x15C)				docs/matching/code_0022C578.md	2231
 cmpDrawScrollBar (0x170)				docs/matching/code_0022C578.md	2259
+cmpDrawPanelEffBox (0x204)			129 of 129 words match	docs/matching/code_0022C578.md	2290
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/matching/code_0029B780.md	3
 dds3DrawConfigText	code_0029B780	0x244		docs/matching/code_0029B780.md	30
 dds3DrawConfigPanel	code_0029B780	0x258		docs/matching/code_0029B780.md	60

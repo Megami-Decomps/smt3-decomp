@@ -9922,25 +9922,39 @@ s32 cmpAddQuePanelEff(s32 a1, s32 a2, s32 a3, u16 a4, u16 a5, u8 a6, u8 a7, s32 
     return -1;
 }
 
-#ifdef NON_MATCHING
 void cmpDrawPanelEffBox(void *entry, s32 ot)
 {
     cmpPanelEffState_t *state = entry;
-    volatile cmpPanelEffState_t *live = state;
-    s32 frame = live->frame;
-    s32 halfWidth = live->width >> 1;
-    u32 colorA = live->color8;
-    u32 colorB = live->color4;
-    s32 centerOffset = (halfWidth - 8) * 16;
+    FAKEMATCH_ASM_REG(s32, drawOrder, "$19") = ot;
+
+    s32 gray = 0x80;
+    FAKEMATCH_ASM_REG(s32, seedFrame, "$2") = state->frame;
+    s32 frame;
+    s32 fade;
+    FAKEMATCH_ASM_REG(u32, rawWidth, "$3") = state->width;
+    FAKEMATCH_ASM_REG(s32, halfWidth, "$21");
+    u32 colorA = state->color8;
+    u32 colorB = state->color4;
+    s32 centerHalf;
+    s32 centerOffset;
     f32 radius;
     s32 colors[4];
     s32 i;
 
-    if (frame > 0x80) {
-        colorA = fclBlendColor(0x80, colorA, frame * 2 - 0x100);
-        colorB = fclBlendColor(0x80, colorB, frame * 2 - 0x100);
+    FAKEMATCH_ASM_LIVE_PAIR(gray, rawWidth);
+    fade = seedFrame < 0x81;
+    FAKEMATCH_ASM_LIVE_PAIR(fade, seedFrame);
+    frame = seedFrame;
+    halfWidth = rawWidth >> 1;
+    FAKEMATCH_ASM_LIVE_PAIR(halfWidth, frame);
+    if (!fade) {
+        colorA = fclBlendColor(0x80, colorA, (s32)((u32)frame * 2u - 0x100u));
+        colorB = fclBlendColor(0x80, colorB, (s32)((u32)frame * 2u - 0x100u));
     }
+    centerHalf = halfWidth - 8;
     radius = fsqrtf((f32)halfWidth * 1.5f);
+
+    centerOffset = centerHalf * 16;
     for (i = 0; i >= 0; i--) {
         s32 extent = (s32)(radius * (f32)frame * 0.00390625f);
         s32 width;
@@ -9949,41 +9963,56 @@ void cmpDrawPanelEffBox(void *entry, s32 ot)
         s32 z;
         u16 height;
 
-        fclDrawPanelSprite2(0x48, ot);
+        fclDrawPanelSprite2(0x48, drawOrder);
         colorA = fclBlendColor(colorA, colorB, frame);
-        width = extent * extent + 8;
-        y = live->y;
-        x = live->x;
-        z = live->z;
-        height = live->height;
-        colors[0] = 0x80;
+        width = (s32)((u32)extent * (u32)extent + 8u);
+        y = state->y;
+        x = state->x;
+        z = state->z;
+        height = state->height;
+        colors[0] = gray;
         colors[1] = colorA;
-        colors[2] = 0x80;
+        colors[2] = gray;
         colors[3] = colorA;
-        cmpDrawBoxGDefault(x + (halfWidth - width - 8) * 16, y, z,
-                           width, height, colors, ot);
-        x = live->x;
-        y = live->y;
-        z = live->z;
-        height = live->height;
-        colors[0] = colorA;
-        colors[1] = 0x80;
-        colors[2] = colorA;
-        colors[3] = 0x80;
-        cmpDrawBoxGDefault(x + (halfWidth + 8) * 16, y, z, width, height, colors, ot);
-        x = live->x;
-        z = live->z;
-        height = live->height;
-        y = live->y;
-        cmpDrawBoxF(x + centerOffset, y, z, 16, height, colorA, ot);
-        cmpDrawPanelEffBar(state, ot);
-        fclDrawPanelSprite2(0x44, ot);
+        cmpDrawBoxGDefault((s32)((u32)x + ((u32)halfWidth - (u32)width - 8u) * 16u), y, z,
+                           width, height, colors, drawOrder);
+        {
+            u32 right;
+            s32 *palette = colors;
+
+            /* Use the captured half-width with the actual refreshed X. */
+            FAKEMATCH_ASM_LIVE_WITH_MEM(halfWidth, state->x);
+            right = (u32)halfWidth + 8u;
+            colors[0] = colorA;
+            colors[1] = gray;
+            colors[2] = colorA;
+            colors[3] = gray;
+            /* Observe the refreshed X with the real unscaled offset,
+             * then the refreshed Y with the scaled offset. The empty
+             * constraints reconstruct the native argument schedule. */
+            FAKEMATCH_ASM_LIVE_MEM_WITH_REG(state->x, right);
+            FAKEMATCH_ASM_LIVE(right);
+            right *= 16u;
+            FAKEMATCH_ASM_LIVE_MEM_WITH_REG(state->y, right);
+            x = state->x;
+            z = state->z;
+            height = state->height;
+            cmpDrawBoxGDefault((s32)((u32)x + (u32)right), state->y, z, width, height, palette, drawOrder);
+        }
+        {
+            s32 lastX = state->x;
+            s32 midOffset = centerOffset;
+            z = state->z;
+            height = state->height;
+            y = state->y;
+            lastX = (s32)((u32)lastX + (u32)midOffset);
+            cmpDrawBoxF(lastX, y, z, 16, height, colorA, drawOrder);
+        }
+        cmpDrawPanelEffBar(state, drawOrder);
+        fclDrawPanelSprite2(0x44, drawOrder);
         frame /= 2;
     }
 }
-#else
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffBox);
-#endif
 
 void cmpDrawPanelEffRing(cmpPanelEffState_t *state, s32 ot)
 {

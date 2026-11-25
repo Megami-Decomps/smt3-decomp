@@ -199,6 +199,12 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_WITH_MEM
 #define FAKEMATCH_ASM_LIVE_WITH_MEM(value, lvalue) __asm__("" : "+r" (value) : "m" (lvalue))
 #endif
+/* Tie an initialized, live memory operand to a real register input.
+ * The empty template emits no memory access and has no memory clobber. */
+#ifndef FAKEMATCH_ASM_LIVE_MEM_WITH_REG
+#define FAKEMATCH_ASM_LIVE_MEM_WITH_REG(lvalue, value) \
+    __asm__("" : "+m" (lvalue) : "r" (value))
+#endif
 /* Observe the actual LO1 quotient after a real memory operand. The target
  * compiler selects DIV1/MFLO1 from the caller's arithmetic; this emits nothing. */
 #ifndef FAKEMATCH_ASM_LIVE_LO1_WITH_MEM
