@@ -507,30 +507,14 @@ s32 sceGsExecLoadImage(sceGsLoadImage *pkt, void *addr)
     return 0;
 }
 
-/* Reference implementation; see docs/matching/sdk/libgraph.md. */
-/* NON_MATCHING: 1672 bytes against retail's 1680, first difference at +0x3C.
- * The prologue's seven saved registers and both parameter copies, the single
- * load of each 64-bit record word and the width/height/mode extraction, the
- * jump table and its five case bodies, the uncached trxreg patch, every spin
- * loop and both FIFO loops now agree instruction for instruction; what is left
- * is scheduling inside the case bodies and the cleanup block, plus three
- * delay slots this compiler leaves empty because the access is volatile (see
- * the near-miss rules in docs/sdk-matching.md).
- * Four things moved it: the DMA count mask is the unsigned 0xFFFFFFF8, not
- * ~7, so it is materialized with lui/ori and shared with the align-up masks;
- * the cleanup is written out at each of the four timeout sites, which lets
- * cross-jumping merge the scePrintf call itself down to retail's three call
- * sites; the trxreg patch re-extracts the width from the record instead of
- * reusing the local, which local CSE cannot share across the block; and each
- * case body computes the byte remainder, then the quadword remainder, then the
- * DMA count, which halved the instruction-order difference. */
+/* Store-image DMA and FIFO transfer; see docs/matching/sdk/libgraph.md. */
 const char sceGsExecLoadImageDma2Msg[64] = "sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n";
 
-#ifdef NON_MATCHING
-extern const char sceGsExecStoreImageDma1Msg[];
-extern const char sceGsExecStoreImageGsMsg[];
-extern const char sceGsExecStoreImageDma1ToMemMsg[];
-extern const char sceGsExecStoreImageVif1Msg[];
+/* These diagnostic strings precede the generated pixel-format table. */
+const char sceGsExecStoreImageDma1Msg[] = "sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n";
+const char sceGsExecStoreImageGsMsg[] = "sceGsExecStoreImage: GS does not terminate\r\n";
+const char sceGsExecStoreImageDma1ToMemMsg[] = "sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n";
+const char sceGsExecStoreImageVif1Msg[] = "sceGsExecStoreImage: Enough data does not reach VIF1\n";
 extern const u128 sceGsStoreImageFlushPacket;
 
 s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
@@ -539,7 +523,6 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     s32 height;
     s32 pixelFormat;
     s32 bytes;
-    s32 qwc;
     s32 dmaQwc = 0;
     s32 qwcTail = 0;
     s32 byteTail = 0;
@@ -548,20 +531,28 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     u32 timeout = 0;
     s32 i;
     u32 value;
-    addr_t dmaAddress;
     u64 csr;
     u64 restoreImr;
-    u128 fifoWord;
-    u8 *fifoBytes;
+    union { u128 word; u8 bytes[16]; } fifo;
 
     width = (s32)(pkt->trxreg & 0xFFF);
     height = (s32)((pkt->trxreg >> 32) & 0xFFF);
     pixelFormat = (s32)((pkt->bitbltbuf >> 24) & 0x3F);
+    roundedHeight = 0;
 
+    /*
+     * Keep the rounded pixel product separate from the DMA subtraction.
+     * The paired local homes keep that signed product in its own register
+     * through the shift, then hand only the quadword count to the subtract.
+     * No bound format operands survive the switch or cross a call.
+     */
     switch (pixelFormat) {
     case 0:
-    case 48:
-        bytes = width * height * 4;
+    case 48: {
+        s32 qwc;
+        s32 pixels;
+        pixels = width * height;
+        bytes = pixels * 4;
         qwc = bytes >> 4;
         byteTail = bytes & 0xF;
         qwcTail = qwc & 7;
@@ -570,13 +561,27 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             extraQwc = 0;
             roundedHeight = height;
         } else {
+            FAKEMATCH_ASM_REG(s32, roundedQwc, "$2");
+            FAKEMATCH_ASM_REG(s32, roundedPixels, "$3");
             roundedHeight = (height + 3) & 0x1FFC;
-            extraQwc = ((width * roundedHeight) >> 2) - dmaQwc - qwcTail - 1;
+            roundedPixels = width * roundedHeight;
+            FAKEMATCH_ASM_LIVE(roundedPixels);
+            roundedQwc = roundedPixels >> 2;
+            extraQwc = roundedQwc - dmaQwc - qwcTail - 1;
         }
         break;
+    }
     case 1:
-    case 49:
-        bytes = width * height * 3;
+    case 49: {
+        /* The 24-bit path needs the unscaled product and the full byte count
+         * as separate inputs to the multiply-by-three and remainder split. */
+        FAKEMATCH_ASM_REG(s32, qwc, "$4");
+        FAKEMATCH_ASM_REG(s32, pixels, "$5");
+        s32 doublePixels;
+        pixels = width * height;
+        doublePixels = pixels * 2;
+        bytes = doublePixels + pixels;
+        FAKEMATCH_ASM_LIVE(bytes);
         qwc = bytes >> 4;
         byteTail = bytes & 0xF;
         qwcTail = qwc & 7;
@@ -585,15 +590,27 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             extraQwc = 0;
             roundedHeight = height;
         } else {
+            s32 roundedQwc;
+            FAKEMATCH_ASM_REG(s32, tripledPixels, "$2");
+            FAKEMATCH_ASM_REG(s32, nonDmaQwc, "$3");
             roundedHeight = (height + 15) & 0x1FF0;
-            extraQwc = ((width * roundedHeight * 3) >> 4) - dmaQwc - qwcTail - 1;
+            /* Subtract the DMA and tail words before excluding the partial word. */
+            tripledPixels = width * roundedHeight * 3;
+            roundedQwc = tripledPixels >> 4;
+            nonDmaQwc = roundedQwc - dmaQwc;
+            nonDmaQwc -= qwcTail;
+            extraQwc = nonDmaQwc - 1;
         }
         break;
+    }
     case 2:
     case 10:
     case 50:
-    case 58:
-        bytes = width * height * 2;
+    case 58: {
+        s32 qwc;
+        s32 pixels;
+        pixels = width * height;
+        bytes = pixels * 2;
         qwc = bytes >> 4;
         byteTail = bytes & 0xF;
         qwcTail = qwc & 7;
@@ -602,12 +619,19 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             extraQwc = 0;
             roundedHeight = height;
         } else {
+            FAKEMATCH_ASM_REG(s32, roundedQwc, "$2");
+            FAKEMATCH_ASM_REG(s32, roundedPixels, "$3");
             roundedHeight = (height + 7) & 0xFFFFFFF8;
-            extraQwc = ((width * roundedHeight) >> 3) - dmaQwc - qwcTail - 1;
+            roundedPixels = width * roundedHeight;
+            FAKEMATCH_ASM_LIVE(roundedPixels);
+            roundedQwc = roundedPixels >> 3;
+            extraQwc = roundedQwc - dmaQwc - qwcTail - 1;
         }
         break;
+    }
     case 19:
-    case 27:
+    case 27: {
+        s32 qwc;
         bytes = width * height;
         qwc = bytes >> 4;
         byteTail = bytes & 0xF;
@@ -617,15 +641,24 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             extraQwc = 0;
             roundedHeight = height;
         } else {
+            FAKEMATCH_ASM_REG(s32, roundedQwc, "$2");
+            FAKEMATCH_ASM_REG(s32, roundedPixels, "$3");
             roundedHeight = (height + 7) & 0xFFFFFFF8;
-            extraQwc = ((width * roundedHeight) >> 4) - dmaQwc - qwcTail - 1;
+            roundedPixels = width * roundedHeight;
+            FAKEMATCH_ASM_LIVE(roundedPixels);
+            roundedQwc = roundedPixels >> 4;
+            extraQwc = roundedQwc - dmaQwc - qwcTail - 1;
         }
         break;
+    }
     case 20:
     case 36:
-    case 44:
-        bytes = (width * height) >> 1;
-        qwc = bytes >> 4;
+    case 44: {
+        s32 qwc;
+        s32 pixels;
+        pixels = width * height;
+        bytes = (pixels) >> 1;
+        qwc = pixels >> 5;
         byteTail = bytes & 0xF;
         qwcTail = qwc & 7;
         dmaQwc = qwc & 0xFFFFFFF8;
@@ -633,10 +666,16 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             extraQwc = 0;
             roundedHeight = height;
         } else {
+            FAKEMATCH_ASM_REG(s32, roundedQwc, "$2");
+            FAKEMATCH_ASM_REG(s32, roundedPixels, "$3");
             roundedHeight = (height + 7) & 0xFFFFFFF8;
-            extraQwc = ((width * roundedHeight) >> 5) - dmaQwc - qwcTail - 1;
+            roundedPixels = width * roundedHeight;
+            FAKEMATCH_ASM_LIVE(roundedPixels);
+            roundedQwc = roundedPixels >> 5;
+            extraQwc = roundedQwc - dmaQwc - qwcTail - 1;
         }
         break;
+    }
     }
     if (byteTail != 0) {
         *EE_ADDR_AS(volatile u64 *, ((EE_ADDR(&pkt->trxreg)) | 0x20000000)) =
@@ -644,74 +683,12 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
             ((u64)(u32)roundedHeight << 32);
     }
 
-    value = *(volatile u32 *)0x10009000;
-    if ((value & 0x100) != 0) {
-        do {
-            if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(sceGsExecStoreImageDma1Msg);
-                return -1;
-            }
-            value = *(volatile u32 *)0x10009000;
-        } while ((value & 0x100) != 0);
-    }
-
-    restoreImr = GsPutIMR(GsGetIMR() | 0x200);
-    *(volatile u64 *)0x12001000 = 2;
-    *(volatile u32 *)0x10009020 = 7;
-    dmaAddress = EE_ADDR(pkt);
-    if ((dmaAddress & 0x70000000) == 0x70000000) {
-        dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
-    } else {
-        dmaAddress &= 0x0FFFFFFF;
-    }
-    *(volatile u32 *)0x10009010 = dmaAddress;
-    *(volatile u32 *)0x10009000 = 0x101;
-
-    value = *(volatile u32 *)0x10009000;
-    if ((value & 0x100) != 0) {
-        do {
-            if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(sceGsExecStoreImageDma1Msg);
-                return -1;
-            }
-            value = *(volatile u32 *)0x10009000;
-        } while ((value & 0x100) != 0);
-    }
-
-    csr = *(volatile u64 *)0x12001000;
-    if ((csr & 2) == 0) {
-        do {
-            if ((u32)timeout++ > 0x1000000U) {
-                scePrintf(sceGsExecStoreImageGsMsg);
-                *(volatile u128 *)0x10005000 = sceGsStoreImageFlushPacket;
-                return -1;
-            }
-            csr = *(volatile u64 *)0x12001000;
-        } while ((csr & 2) == 0);
-    }
-
-    *(volatile u32 *)0x10003C00 = 0x00800000;
-    *(volatile u64 *)0x12001040 = 1;
-
-    if (dmaQwc != 0) {
-        *(volatile u32 *)0x10009020 = dmaQwc;
-        dmaAddress = EE_ADDR(addr);
-        if ((dmaAddress & 0x70000000) == 0x70000000) {
-            dmaAddress = (dmaAddress & 0x0FFFFFFF) | 0x80000000;
-        } else {
-            dmaAddress &= 0x0FFFFFFF;
-        }
-        *(volatile u32 *)0x10009010 = dmaAddress;
-        *(volatile u32 *)0x10009000 = 0x100;
-        value = *(volatile u32 *)0x10009000;
-        if ((value & 0x100) != 0) {
+    {
+        u32 initialSample = *(volatile u32 *)0x10009000;
+        if ((initialSample & 0x100) != 0) {
             do {
                 if ((u32)timeout++ > 0x1000000U) {
-                    scePrintf(sceGsExecStoreImageDma1ToMemMsg);
-*(volatile u64 *)0x12001000 = 0x100;
-                    *(volatile u64 *)0x12001040 = 0;
-                    *(volatile u32 *)0x10003000 = 1;
-                    *(volatile u32 *)0x10003C10 = 1;
+                    scePrintf(sceGsExecStoreImageDma1Msg);
                     return -1;
                 }
                 value = *(volatile u32 *)0x10009000;
@@ -719,55 +696,83 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
         }
     }
 
-    if (qwcTail != 0) {
-        for (i = 0; i < qwcTail; i++) {
-            value = *(volatile u32 *)0x10003C00;
-            if ((value & 0x1F000000) == 0) {
+    restoreImr = GsPutIMR(GsGetIMR() | 0x200);
+    *(volatile u64 *)0x12001000 = 2;
+    *(volatile u32 *)0x10009020 = 7;
+    if ((EE_ADDR(pkt) & 0x70000000) == 0x70000000) {
+        *(volatile u32 *)0x10009010 = (EE_ADDR(pkt) & 0x0FFFFFFF) | 0x80000000;
+    } else {
+        *(volatile u32 *)0x10009010 = EE_ADDR(pkt) & 0x0FFFFFFF;
+    }
+    *(volatile u32 *)0x10009000 = 0x101;
+
+    {
+        u32 initialSample = *(volatile u32 *)0x10009000;
+        if ((initialSample & 0x100) != 0) {
+            do {
+                if ((u32)timeout++ > 0x1000000U) {
+                    scePrintf(sceGsExecStoreImageDma1Msg);
+                    return -1;
+                }
+                value = *(volatile u32 *)0x10009000;
+            } while ((value & 0x100) != 0);
+        }
+    }
+
+    {
+        u64 initialSample = *(volatile u64 *)0x12001000;
+        if ((initialSample & 2) == 0) {
+            do {
+                if ((u32)timeout++ > 0x1000000U) {
+                    scePrintf(sceGsExecStoreImageGsMsg);
+                    *(volatile u128 *)0x10005000 = sceGsStoreImageFlushPacket;
+                    return -1;
+                }
+                csr = *(volatile u64 *)0x12001000;
+            } while ((csr & 2) == 0);
+        }
+    }
+
+    *(volatile u32 *)0x10003C00 = 0x00800000;
+    *(volatile u64 *)0x12001040 = 1;
+
+    if (dmaQwc != 0) {
+        *(volatile u32 *)0x10009020 = dmaQwc;
+        if ((EE_ADDR(addr) & 0x70000000) == 0x70000000) {
+            *(volatile u32 *)0x10009010 = (EE_ADDR(addr) & 0x0FFFFFFF) | 0x80000000;
+        } else {
+            *(volatile u32 *)0x10009010 = EE_ADDR(addr) & 0x0FFFFFFF;
+        }
+        *(volatile u32 *)0x10009000 = 0x100;
+        {
+            u32 initialSample = *(volatile u32 *)0x10009000;
+            if ((initialSample & 0x100) != 0) {
                 do {
                     if ((u32)timeout++ > 0x1000000U) {
-                        scePrintf(sceGsExecStoreImageVif1Msg);
-*(volatile u64 *)0x12001000 = 0x100;
+                        scePrintf(sceGsExecStoreImageDma1ToMemMsg);
+                        *(volatile u64 *)0x12001000 = 0x100;
                         *(volatile u64 *)0x12001040 = 0;
                         *(volatile u32 *)0x10003000 = 1;
                         *(volatile u32 *)0x10003C10 = 1;
                         return -1;
                     }
-                    value = *(volatile u32 *)0x10003C00;
-                } while ((value & 0x1F000000) == 0);
+                    value = *(volatile u32 *)0x10009000;
+                } while ((value & 0x100) != 0);
             }
-            ((u128 *)addr)[dmaQwc + i] = *(volatile u128 *)0x10005000;
         }
     }
 
-    if (byteTail != 0) {
-        value = *(volatile u32 *)0x10003C00;
-        if ((value & 0x1F000000) == 0) {
-            do {
-                if ((u32)timeout++ > 0x1000000U) {
-                    scePrintf(sceGsExecStoreImageVif1Msg);
-*(volatile u64 *)0x12001000 = 0x100;
-                    *(volatile u64 *)0x12001040 = 0;
-                    *(volatile u32 *)0x10003000 = 1;
-                    *(volatile u32 *)0x10003C10 = 1;
-                    return -1;
-                }
-                value = *(volatile u32 *)0x10003C00;
-            } while ((value & 0x1F000000) == 0);
-        }
-        fifoWord = *(volatile u128 *)0x10005000;
-        fifoBytes = (u8 *)&fifoWord;
-        for (i = 0; i < byteTail; i++) {
-            ((u8 *)&((u128 *)addr)[dmaQwc + qwcTail])[i] = fifoBytes[i];
-        }
-
-        {
-            for (i = 0; i < extraQwc; i++) {
-                value = *(volatile u32 *)0x10003C00;
-                if ((value & 0x1F000000) == 0) {
+    /* The first copy loop owns this initial index, even on its zero-tail edge. */
+    i = 0;
+    if (qwcTail != 0) {
+        do {
+            {
+                u32 initialSample = *(volatile u32 *)0x10003C00;
+                if ((initialSample & 0x1F000000) == 0) {
                     do {
                         if ((u32)timeout++ > 0x1000000U) {
                             scePrintf(sceGsExecStoreImageVif1Msg);
-*(volatile u64 *)0x12001000 = 0x100;
+                            *(volatile u64 *)0x12001000 = 0x100;
                             *(volatile u64 *)0x12001040 = 0;
                             *(volatile u32 *)0x10003000 = 1;
                             *(volatile u32 *)0x10003C10 = 1;
@@ -776,7 +781,56 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
                         value = *(volatile u32 *)0x10003C00;
                     } while ((value & 0x1F000000) == 0);
                 }
-                fifoWord = *(volatile u128 *)0x10005000;
+            }
+            ((u128 *)addr)[dmaQwc + i] = *(volatile u128 *)0x10005000;
+            i++;
+        } while (i < qwcTail);
+    }
+
+    if (byteTail != 0) {
+        u32 byteReadyMask = 0x1F000000U;
+        {
+            /* Keep the first fullness sample distinct from the MMIO address. */
+            FAKEMATCH_ASM_REG(u32, initialSample, "$3") = *(volatile u32 *)0x10003C00;
+            if ((initialSample & byteReadyMask) == 0) {
+                do {
+                    if ((u32)timeout++ > 0x1000000U) {
+                        scePrintf(sceGsExecStoreImageVif1Msg);
+                        *(volatile u64 *)0x12001000 = 0x100;
+                        *(volatile u64 *)0x12001040 = 0;
+                        *(volatile u32 *)0x10003000 = 1;
+                        *(volatile u32 *)0x10003C10 = 1;
+                        return -1;
+                    }
+                    value = *(volatile u32 *)0x10003C00;
+                } while ((value & byteReadyMask) == 0);
+            }
+        }
+        fifo.word = *(volatile u128 *)0x10005000;
+        for (i = 0; i < byteTail; i++) {
+            ((u8 *)&((u128 *)addr)[dmaQwc + qwcTail])[i] = fifo.bytes[i];
+        }
+
+        {
+            s32 discardedQwc;
+            for (discardedQwc = 0; discardedQwc < extraQwc; discardedQwc++) {
+                {
+                    u32 initialSample = *(volatile u32 *)0x10003C00;
+                    if ((initialSample & 0x1F000000) == 0) {
+                        do {
+                            if ((u32)timeout++ > 0x1000000U) {
+                                scePrintf(sceGsExecStoreImageVif1Msg);
+                                *(volatile u64 *)0x12001000 = 0x100;
+                                *(volatile u64 *)0x12001040 = 0;
+                                *(volatile u32 *)0x10003000 = 1;
+                                *(volatile u32 *)0x10003C10 = 1;
+                                return -1;
+                            }
+                            value = *(volatile u32 *)0x10003C00;
+                        } while ((value & 0x1F000000) == 0);
+                    }
+                }
+                fifo.word = *(volatile u128 *)0x10005000;
             }
         }
     }
@@ -787,18 +841,7 @@ s32 sceGsExecStoreImage(sceGsStoreImage *pkt, void *addr)
     *(volatile u64 *)0x12001000 = 2;
     *(volatile u128 *)0x10005000 = sceGsStoreImageFlushPacket;
     return 0;
-
 }
-#else
-
-/* Native diagnostic formats used by the retained function. */
-const char sceGsExecStoreImageDma1Msg[] = "sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n";
-const char sceGsExecStoreImageGsMsg[] = "sceGsExecStoreImage: GS does not terminate\r\n";
-const char sceGsExecStoreImageDma1ToMemMsg[] = "sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n";
-const char sceGsExecStoreImageVif1Msg[] = "sceGsExecStoreImage: Enough data does not reach VIF1\n";
-
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
-#endif
 
 u64 sceGsPutIMR(u64 imr)
 {

@@ -661,7 +661,7 @@ __errno_8	sdk/libgcc_longlong_tail	0xC	3 of 3 words match	docs/matching/sdk/libg
 sceGsResetPath	sdk/libgraph	0x68		docs/matching/sdk/libgraph.md	3
 sceGsSyncPath	sdk/libgraph	0x314		docs/matching/sdk/libgraph.md	23
 sceGsSetDefDispEnv (0x374)				docs/matching/sdk/libgraph.md	54
-sceGsExecStoreImage	sdk/libgraph	0x68C		docs/matching/sdk/libgraph.md	88
+sceGsExecStoreImage	sdk/libgraph	0x68C	419 of 419 words match	docs/matching/sdk/libgraph.md	88
 The IPU hazard wait				docs/matching/sdk/libipu.md	3
 sceIpuSync				docs/matching/sdk/libipu.md	43
 sceIpuRestartDMA			80 of 84 words	docs/matching/sdk/libipu.md	59

@@ -359,7 +359,7 @@ loop; and six libraries worked, 85 functions in all.
 | `libpad` | 27 of 29 | `scePadPortOpen`, `_send_to_iop`, both drafted |
 | `libmc` | 22 of 22 | All entry points and six internal helpers match |
 | `libdma` | 18 of 19 | `sceDmaPutEnv`, drafted one instruction out |
-| `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
+| `libgraph` | 11 of 14 | `sceGsResetPath`, `_GetGsDxDyOffset` (syscall veneer), `sceGsSetDefDispEnv` |
 | `libipu` | 1 of 4 | `sceIpuStopDMA`, `sceIpuRestartDMA`, `sceIpuSync` |
 | `libmrpc` | 2 of 7 | the five that touch the packet queue |
 | `libcdvd` | 14 of 30 | `sceCdPowerOff` and `sceCdReadClock` read a second reply word; `sceCdSync` and the bind-loop functions are untouched |

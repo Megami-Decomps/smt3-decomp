@@ -87,90 +87,49 @@ retail's operand order rather than guessed.
 
 ## sceGsExecStoreImage (sdk/libgraph, 0x68C)
 
-**Still assembly in production.** 1668 bytes against retail's 1680 under the
-pinned assembler (1672 before it), with the first difference at +0x3C, where
-retail has its fifth prologue zero and this shape sinks that one
-initialization past the register saves. Everything the
-structure decides now agrees instruction for instruction: the seven saved
-registers and the two parameter copies, one load of each 64-bit record word
-with the width, height and pixel-store mode extracted from the loaded
-registers in that order, the 59-entry jump table with its five bodies in text
-order, the uncached `trxreg` patch, all five spin loops, the merged timeout
-blocks, both FIFO loops and the success tail. What remains is instruction
-order inside the case bodies and the cleanup block, plus three delay slots
-this compiler leaves empty for a volatile access (rule 6 in
-[sdk-matching](../../sdk-matching.md)). Measured as 142 differing lines of a
-418 against 420 instruction sequence, down from 214 before the last fix; the
-byte-level word count stays high only because the one missing instruction at
-+0x3C shifts the rest.
+419 of 419 words match at the 1,676-byte native extent. The following
+alignment word is outside the function. The 59-entry switch table and its
+four preceding diagnostic strings retain their retail offsets, including
+the strings' padding. The entire graph owner and linked retail image match.
 
-Four changes took it there, from a draft that was 1656 bytes and diverged at
-+0xC:
+The store-image constructor and SDF capture caller establish the two-argument
+interface and the 112-byte packet. The 12-bit dimensions are signed 32-bit
+locals after extraction; even the largest rounded pixel product and packed
+byte count fit. The 32-, 24-, 16-, 8- and 4-bit cases split the actual byte
+count into eight-quadword DMA blocks, a quadword tail, and a byte tail.
+Only a byte tail requires an uncached TRXREG update and a later signed
+discard count. The 24-bit case computes that count separately after its
+multiply by three. A negative discard count executes no iterations.
 
-The DMA quadword count is masked with the unsigned `0xFFFFFFF8`, not with
-`~7`. The unsigned constant has to be materialized with `lui` plus `ori`
-where `~7` is one `addiu`, and the 16-, 8- and 4-bit bodies then share that
-register for their align-up masks, which is five instructions and most of the
-length gap.
+The target-specific operands keep the true rounded pixel products, shifted
+quadword counts, and 24-bit remainders separate while they are still live.
+In the 24-bit path, the raw pixel count and quadword count feed the byte and
+DMA splits, while the tripled rounded count and the post-DMA count feed the
+signed discard loop. The signed-product operands retain the arithmetic
+shifts; they are not storage or integer-width changes. The only fixed
+operand outside the dispatcher is the initial VIF1 fullness read in the byte
+tail. That value goes straight to the real status mask, not across a call.
+Ablating each retained aid changed the complete compiled owner; redundant
+bindings and operands found by repeated ablation were removed. These are
+compiler-scheduling aids, not claims about the original source.
 
-The shared cleanup is written out in full at each of the four timeout sites
-rather than reached by a `goto`. Cross-jumping then merges the `scePrintf`
-call itself, giving retail's three call sites instead of four, exactly as it
-does for the eleven-call block of `sceGsSyncPath`.
+The initial quadword index precedes the zero-tail guard. The aligned
+quadword copy and byte copy use the same index for disjoint phases; the
+discard loop has its own signed counter. The FIFO is read as a quadword,
+with an aligned union providing its 16 byte values to the partial copy.
+The DMA packet and destination writes each retain their native scratchpad
+address handling.
 
-The `trxreg` patch re-extracts the width from the record word instead of
-reusing the width local. Local CSE cannot share the earlier extraction across
-the block boundary, so retail has a second mask-and-sign-extend there.
-
-Each case body computes the byte remainder first, then the quadword
-remainder, then the DMA count. That is the opposite of the earlier draft's
-order and it halved the instruction-order difference.
-
-An independent description of the function confirms the rest of the shape:
-one spin counter shared by every timeout and never reset, five counters
-zeroed before any branch with the padded height set only inside the switch,
-the saved interrupt mask living in a caller-saved temporary across the
-success path (so no call may be introduced between its assignment and its
-last use), both interrupt-mask stubs typed 64-bit, and the destination
-indexed by the sum of the two counters in the quadword loop while the byte
-loop re-derives its address each iteration.
-
-The existing `sceGsSetDefStoreImage` constructor and SDF capture callers
-establish the two-argument interface and 112-byte, seven-quadword command
-packet. Width and height are unsigned 12-bit values converted to signed
-32-bit locals. The single format switch handles 32-, 24-, 16-, 8- and 4-bit
-pixels, divides payload into DMA blocks of eight quadwords, remaining
-quadwords and a byte tail, and rounds height only when that byte tail exists.
-It writes the adjusted TRXREG through the native uncached address alias.
-
-All polling stages share one unsigned postfix timeout count. The initial
-and command DMA waits, GS FINISH wait, payload DMA wait, and FIFO-read waits
-retain their individual conditions. FIFO data is available when the VIF1
-fullness mask is nonzero. Register accesses preserve their native 32-, 64-
-and 128-bit widths.
-
-Ordinary `u128` C reproduces the aligned FIFO load/store pairs. The same plain
-16-byte local supplies the partial-byte copy and receives discarded excess
-quadwords; the compiler retains its stack store in the discard loop. There
-is no volatile local, copy intrinsic, load/store assembly or dummy dependency.
-The final FIFO command is an external reference to its existing native data;
-only its first quadword is read.
-
-The saved interrupt mask is the return from
-`GsPutIMR(GsGetIMR() | 0x200)`, not the earlier getter result. Success clears
-VIF1 status and GS BUSDIR, restores that mask, acknowledges FINISH, then
-writes the final FIFO command. Timeouts deliberately differ: the early DMA
-exit only prints; the FINISH exit prints and writes the command; later DMA
-or FIFO exits print and reset CSR, BUSDIR, GIF control and VIF1 FBRST.
-None of those error paths restores the mask. Combining them into a uniform
-cleanup would change native behavior.
-
-A follow-up needs evidence for the native packet/count lifetimes and error
-block layout. Shared format setup followed by a second rounding switch was
-rejected: native has one switch with branch-local calculations. Native
-entry initialization improves code correspondence, but does not close the
-remaining register allocation. Do not add volatile scratch storage or
-instruction shims to force the already reproduced quadword operations.
+All wait paths share an unsigned postfix timeout counter. The saved
+interrupt mask is the return from `GsPutIMR(GsGetIMR() | 0x200)`.
+Success clears VIF1 status and GS BUSDIR, restores the mask, acknowledges
+FINISH, then writes the existing FIFO command. The early DMA exits only
+print, FINISH timeout prints and writes the command, and later DMA/FIFO
+timeouts print and reset CSR, BUSDIR, GIF control, and VIF1 FBRST. None of
+those errors restores the mask. MMIO widths, order, and error exits were
+checked in a bounded execution model of the emitted instructions, covering
+all 64 format selectors, both DMA address classes, and seven seeded timeout
+sites. This is not a hardware timing test.
 
 ### Display product/base lifetime controls (closed negative)
 
