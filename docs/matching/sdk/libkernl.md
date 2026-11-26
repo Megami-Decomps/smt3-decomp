@@ -1056,3 +1056,20 @@ and the unsigned-byte prefix-copy spelling were redundant and were removed. The 
 RPC calls; advancing it across the copies does not require a saved
 register. These are measured compiler effects, not a claim about the
 original source spelling.
+
+## DIntr (sdk/libkernl, 0x48)
+
+18 of 18 words match. An entry Status read samples EIE once. When clear,
+the routine returns zero without disabling interrupts. When set, it
+executes DI, SYNC.P, and a fresh Status read until EIE clears, then returns
+one. The existing operation-specific macros express the hardware actions.
+
+MFC0 sign-extends its word to the EE register width. The entry binding uses
+that real wide result for the EIE test; the 32-bit return value is kept
+separate. A 32-bit entry capture substitutes the tested register for native
+literal zero on the fast return, losing one word. The poll mask reuses the
+entry register only after the entry sample dies, and feeds the real loop
+test. The fast-path empty tie carries the explicit zero into the return,
+not into a hardware operation. Ablating any of the three register
+bindings or the return tie loses exactness; the redundant poll-mask tie
+was removed. No register constraint spans a call.

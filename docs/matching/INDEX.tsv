@@ -703,6 +703,7 @@ Reboot and TLB diagnostic strings				docs/matching/sdk/libkernl.md	958
 Interrupt-context controller wrappers				docs/matching/sdk/libkernl.md	969
 sbrk	sdk/libkernl	172 bytes		docs/matching/sdk/libkernl.md	980
 sceSifRebootIop	sdk/libkernl	0x110	68 of 68 words match	docs/matching/sdk/libkernl.md	1040
+DIntr	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	1060
 TLB handler pointer				docs/matching/sdk/libkernlDebugHandlers.md	15
 Startup table pointers and TLB entry pairs				docs/matching/sdk/libkernlStartupEntries.md	21
 __ieee754_sqrtf	sdk/libm	204 bytes	51 of 51 words match	docs/matching/sdk/libm.md	3

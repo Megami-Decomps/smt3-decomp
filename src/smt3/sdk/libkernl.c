@@ -4170,7 +4170,35 @@ s32 sceSifRebootIop(const char *image)
     return sceSifResetIop(command, 0);
 }
 
-INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
+s32 DIntr(void)
+{
+    /* Keep the EE entry sample in its full signed register width. Its
+     * branch value must stay separate from the 32-bit return flag. */
+    FAKEMATCH_ASM_REG(s64, previousStatus, "$3");
+    FAKEMATCH_ASM_REG(s32, wasEnabled, "$4");
+    u32 status;
+
+    EE_READ_STATUS(previousStatus);
+    previousStatus &= EE_STATUS_EIE;
+    wasEnabled = previousStatus != 0;
+    if (previousStatus != 0) {
+        do {
+            FAKEMATCH_ASM_REG(u32, pollMask, "$3");
+            EE_DISABLE_INTERRUPTS();
+            EE_SYNC_P();
+            EE_READ_STATUS(status);
+            /* previousStatus is dead. Reuse its register only for the
+             * real mask read by this poll, after sampling Status. */
+            pollMask = EE_STATUS_EIE;
+            status &= pollMask;
+        } while (status != 0);
+        return wasEnabled;
+    }
+    wasEnabled = 0;
+    /* Return the disabled path's explicit zero via the same result local. */
+    FAKEMATCH_ASM_LIVE(wasEnabled);
+    return wasEnabled;
+}
 
 s32 EIntr(void)
 {
