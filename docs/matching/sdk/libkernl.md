@@ -1073,3 +1073,17 @@ test. The fast-path empty tie carries the explicit zero into the return,
 not into a hardware operation. Ablating any of the three register
 bindings or the return tie loses exactness; the redundant poll-mask tie
 was removed. No register constraint spans a call.
+
+## fsIobTable (sdk/libkernl)
+
+C owns the 512-byte block from `0x59E580` to `0x59E780` as 32 descriptor
+records. The native initialization and allocator walk by 16 bytes to that
+exclusive endpoint, and lookup rejects unsigned indices of 32 or more.
+The shared type preserves the existing word and active fields, leaving the
+last eight bytes of each record opaque.
+
+The explicit `.bss` section puts the object in its native linker input.
+Without it the historical compiler emits a COMMON symbol; no stronger
+alignment than the compiler's natural alignment is needed. The neighboring
+storage and all code are unchanged. This is zero-initialized storage
+ownership, not additional matching executable bytes.

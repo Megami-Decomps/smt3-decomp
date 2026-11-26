@@ -2031,12 +2031,7 @@ void gcc2_compiled__13(void)
     }
 }
 
-typedef struct {
-    u32 word0;
-    s32 active;
-    u8 opaque[8];
-} fsRequestEntry_t;
-extern fsRequestEntry_t fsIobTable[32];
+#include "sdk_libkernl_fs_iob.h"
 extern s32 fsIobSema;
 extern void gcc2_compiled__13(void);
 extern s32 SignalSema(s32 sema);

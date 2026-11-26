@@ -1884,6 +1884,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x598AC0, name: sdk/libpadCommandStorage }
       - { start: 0x452B54, type: .bss, vram: 0x598BC0, name: sdk/libpadPacketStorage }
       - { start: 0x452B54, type: bss, vram: 0x598C40, name: bss_after_pad_rpc_packet }
+      - { start: 0x452B54, type: .bss, vram: 0x59E580, name: sdk/libkernlFsIobStorage }
+      - { start: 0x452B54, type: bss, vram: 0x59E780, name: bss_after_fs_iob_table }
 
   # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
   # spimdisasm emits whole words, so the terminator of the last string (".ips")
