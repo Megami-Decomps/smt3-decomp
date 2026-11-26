@@ -313,6 +313,7 @@ fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/matching/field/
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/matching/field/fld_Npc.md	93
 fldNpcDraw	field/fld_Npc	0x8DC	145 of 561 words match	docs/matching/field/fld_Npc.md	158
 Treasure-box object ID				docs/matching/field/fld_Npc.md	217
+NPC model resource banks (field BSS)				docs/matching/field/fld_Npc.md	226
 fldSnowTask (1280 bytes)				docs/matching/fldSnow.md	3
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-six of sixty-two words match	docs/matching/interface/frFont.md	3
 frAnalyzeTag	interface/frFont	0x518	326 of 326 words match	docs/matching/interface/frFont.md	79

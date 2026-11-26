@@ -34,13 +34,13 @@ both native and emitted sizes when they differ.
 | 7 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 7 | newbattle/nbCommSelProcess | [newbattle/nbCommSelProcess.md](newbattle/nbCommSelProcess.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
+| 7 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 7 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 6 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
-| 6 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |

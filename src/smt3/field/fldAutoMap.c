@@ -219,9 +219,7 @@ extern void *fldEATextureData;
 
 extern void *fldSnowBlurTexData;
 
-extern void *fldModelResPtr[];
-
-extern void *fldModelResSize[];
+#include "fldModelResourceStorage.h"
 
 
 extern void dds3EffectDelete(void *pData);
@@ -2348,12 +2346,11 @@ void fldInitBlurEffect(void) {
     }
     fldEATexture = sdfTexSet(fldEATextureData);
     fldSnowBlurHandle = sdfTexSet(fldSnowBlurTexData);
-    /* The casts pin the store order; assigning the array elements directly
-     * swaps the first two stores. */
     for (i = 0; i < 0x40; i++) {
-        *(void **)&fldBlurEffectTable[i] = NULL;
-        *(void **)&fldModelResPtr[i] = NULL;
-        *(void **)&fldModelResSize[i] = NULL;
+        fldBlurEffectTable[i] = NULL;
+        /* Clearing this address word as bytes keeps the native zero-store order. */
+        memset(&fldModelResPtr[i], 0, sizeof(fldModelResPtr[i]));
+        fldModelResSize[i] = 0;
     }
     fldNpcModelFreeIdx = -1;
     param.number = 0x3C;

@@ -222,3 +222,17 @@ contents. The const initializer owns the 12-byte `TAKARA_UNIT` string
 including its terminator. The next four alignment bytes stay unchanged
 and are not part of the C object. Both bounding vectors and the native
 item-box constructor are unchanged.
+
+## NPC model resource banks (field BSS)
+
+The native initialization clears 64 slots in each of two 256-byte banks
+at `0x568E90` and `0x568F90`. The loader writes a 32-bit EE address to the
+first bank and a byte size to the second. The decoder converts the address
+to a pointer at its actual use. Both callers share the same word-bank type.
+
+The address-word clear uses a fixed four-byte `memset` on the actual word.
+Stock GCC folds it into a single store and retains the native order:
+blur-handle, address, then size. Direct assignments during the typed
+ownership change reorder the first two stores. The explicit `.bss`
+placement retains the bank addresses; adjacent blur and Takara storage
+are unaffected. This change adds no executable coverage.

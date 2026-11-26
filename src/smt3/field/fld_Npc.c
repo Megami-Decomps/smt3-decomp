@@ -197,9 +197,7 @@ extern void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 arg
 
 extern s32 fldNpcDrawCount;
 
-extern const u8 *fldModelResPtr[];
-
-extern s32 fldModelResSize[];
+#include "fldModelResourceStorage.h"
 
 extern const char fldNpcUnitName[];
 
@@ -411,8 +409,8 @@ void fldNpcLoad(s32 npcId, f32 x, f32 y, f32 z, const f32 *rotation, s32 room,
             } else {
                 path = paths.groups.second.name[resourceIndex - 35];
             }
-            fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, (u32 *)&fldModelResPtr[resourceIndex],
-                                                                (u32 *)&fldModelResSize[resourceIndex]);
+            fldBlurEffectTable[resourceIndex] = sdfDevLoadFileEx(path, &fldModelResPtr[resourceIndex],
+                                                                &fldModelResSize[resourceIndex]);
         }
         fldModelSlotTable[index].unk44 = 0;
         if (fldGlobalBase.area == 1) {
@@ -1281,8 +1279,9 @@ void fldNpcModelStart(s32 id, f32 x, f32 y, f32 z, const sdfVector4_t *rot) {
     case 0:
         major = 2;
         minor = 0x22;
-        mdlPackDecode(major, minor, 0x101, fldModelResPtr[fldModelSlotTable[id].modelIndex],
-                      fldModelResSize[fldModelSlotTable[id].modelIndex]);
+        mdlPackDecode(major, minor, 0x101,
+                      EE_ADDR_AS(const u8 *, fldModelResPtr[fldModelSlotTable[id].modelIndex]),
+                      (s32)fldModelResSize[fldModelSlotTable[id].modelIndex]);
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(rot);

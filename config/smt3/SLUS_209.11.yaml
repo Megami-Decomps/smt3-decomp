@@ -1808,7 +1808,8 @@ segments:
       - { start: 0x452B54, type: .bss, vram: 0x567EA0, name: field/fldAutoMapNameLengths }
       - { start: 0x452B54, type: bss, vram: 0x567F80, name: bss_after_automap_name_lengths }
       - { start: 0x452B54, type: .bss, vram: 0x567F90, name: field/fldModelSlotStorage }
-      - { start: 0x452B54, type: bss, vram: 0x568E90, name: bss_after_field_model_slots }
+      - { start: 0x452B54, type: .bss, vram: 0x568E90, name: field/fldModelResourceStorage }
+      - { start: 0x452B54, type: bss, vram: 0x569090, name: bss_after_field_model_slots }
       - { start: 0x452B54, type: .bss, vram: 0x569A20, name: effect/effBattlePartCenterStorage }
       - { start: 0x452B54, type: .bss, vram: 0x569C20, name: effect/effBattleLightStorage }
       - { start: 0x452B54, type: bss, vram: 0x56A920, name: bss_after_battle_light_storage }
