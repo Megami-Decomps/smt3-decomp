@@ -302,9 +302,11 @@ Selecting the address of the standalone scalar at index 4, and an array
 element otherwise, avoids both an out-of-bounds read and pointer increment.
 The stock compiler uses one load from the selected address, preserving the
 factor order and the separate positive-scaling path. The retail assembly,
-table bytes and compiler flags are unchanged. An unguarded trial still duplicates the original
-mode-table import and places its zero string in small data; resolve those
-ownership issues at promotion while preserving the default assembly context.
+table bytes and compiler flags are unchanged. A previous unguarded trial
+duplicated the original mode-table import and placed its local zero literal in
+small data. The production zero-string object and retained table now have
+explicit ownership (see below); an eventual C promotion must use that existing
+object and remove the retained table only if the compiler replaces it exactly.
 
 A host diagnostic completed 124117 conversions over 2420 boundary/random input
 patterns against independent decimal rounding and binary64 round trips. It
@@ -485,6 +487,24 @@ assembly fallback was omitted (one pair). Neither is a passing gate.
 Nine inherited unrelated owner failures were not rerun; this is not a global
 owner-suite pass. Prospective credit is one SDK/runtime function and 180 bytes,
 with no game-code gain, after publication and exact-commit CI.
+
+## dtoa zero-return string
+
+Both signs of binary64 zero use the same const character array at
+`0x0054B898`. The result is `"0"`, and the optional end pointer is the array
+address plus one. The string owns exactly two bytes, including the terminator;
+the next six bytes align the following double at `0x0054B8A0`.
+
+The C definition stays in `.rodata` rather than small data. The retained
+six-entry jump table at `0x0054B8C0` already has a lexical
+`INCLUDE_RODATA` after the three scaling doubles. Marking the table
+`force_not_migration` preserves that position when the zero string stops
+belonging to the assembly body. In the control that moves only the string,
+Splat migrates the table into the function assembly and shifts the three
+doubles. Retaining the explicit table import restores the entire libc
+text, all allocated data and every text and data relocation. No table
+entries, function code or compiler settings change. `_dtoa_r` still uses
+assembly in production.
 
 ## Readonly C locale record
 

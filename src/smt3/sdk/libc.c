@@ -1815,6 +1815,8 @@ const char dtoaInfinityText[16] = "Infinity";
 
 const char dtoaNanText[8] __attribute__((section(".rodata"))) = "NaN";
 
+const char D_0054B898[] __attribute__((section(".rodata"))) = "0";
+
 #ifdef NON_MATCHING
 char *_dtoa_r(_reent *r, f64 input, s32 mode, s32 digits,
               s32 *decimalPoint, s32 *sign, char **end)

@@ -644,10 +644,11 @@ vfprintf			8 of 29 words matching	docs/matching/sdk/libc.md	125
 _d2b				docs/matching/sdk/libc.md	140
 func_002D6678				docs/matching/sdk/libc.md	165
 _dtoa_r			109 of 1177 words matching	docs/matching/sdk/libc.md	273
-_b2d	sdk/libc	0x198	102 of 102 words match	docs/matching/sdk/libc.md	329
-strcasecmp				docs/matching/sdk/libc.md	377
-_calloc_r				docs/matching/sdk/libc.md	438
-Readonly C locale record				docs/matching/sdk/libc.md	489
+_b2d	sdk/libc	0x198	102 of 102 words match	docs/matching/sdk/libc.md	331
+strcasecmp				docs/matching/sdk/libc.md	379
+_calloc_r				docs/matching/sdk/libc.md	440
+dtoa zero-return string				docs/matching/sdk/libc.md	491
+Readonly C locale record				docs/matching/sdk/libc.md	509
 What cracked the scmd family				docs/matching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/matching/sdk/libcdvd.md	24
 Completion callback contracts and remaining drafts				docs/matching/sdk/libcdvd.md	51
