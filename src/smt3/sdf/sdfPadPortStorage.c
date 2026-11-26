@@ -1,4 +1,4 @@
-#include "common.h"
+#include "sdk_libpad_layout.h"
 
-/* Two pad-port buffers, with a 0x100-byte stride. */
-u8 sdfPadPortBuffers[2 * 0x100] __attribute__((section(".bss"), aligned(16)));
+/* Each port has two native 0x80-byte DMA halves. scePadPortOpen requires a 64-byte aligned port row. */
+padDma sdfPadPortBuffers[2][2] __attribute__((section(".bss"), aligned(64)));

@@ -2,6 +2,7 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 #include "sdf_pad_control.h"
+#include "sdk_libpad_layout.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
 
@@ -33,8 +34,6 @@ typedef u8 SdfTextureClampMode;
 
 #define SDF_PAD_STICK_CENTER 0x80
 
-#define SDF_PAD_PORT_BUFFER_BYTES 0x100
-
 #define SDF_PAD_BUTTON_STATE_BYTES 0x20
 
 #define SDF_PAD_STICK_STATE_BYTES 8
@@ -59,7 +58,7 @@ extern s32 sdfVblankFlag;
 
 extern u8 sdfPadPortSlotPairs[4];
 
-extern u8 sdfPadPortBuffers[];
+extern padDma sdfPadPortBuffers[SDF_PAD_ENTRY_COUNT][2];
 
 extern u8 sdfPadManagerMode;
 
@@ -346,7 +345,7 @@ void sdfPadInitManager(void) {
         s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         sdfPadCb_t *entry;
 
-        scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
+        scePadPortOpen(port, slot, sdfPadPortBuffers[padIndex]);
         entry = &sdfPadCb[padIndex];
         entry->port = port;
         entry->slot = slot;
