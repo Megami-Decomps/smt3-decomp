@@ -4127,7 +4127,48 @@ s32 sceSifSyncIop(void)
 const char D_0054BCC0[] = "rom0:UDNL ";
 const char D_0054BCD0[] = "too long parameter '%s'\n";
 
-INCLUDE_ASM(const s32, "sdk/libkernl", sceSifRebootIop);
+s32 sceSifRebootIop(const char *image)
+{
+    char command[80];
+    /* Keep the actual path cursor in its incoming register until the count
+     * is formed. In the empty branch this avoids substituting saved image. */
+    FAKEMATCH_ASM_REG(const char *, pathEnd, "$4") = image;
+    const char *prefix = D_0054BCC0;
+    u32 count;
+
+    /* Count the prefix and terminator using EE addresses, without forming
+     * a C pointer before image. Both paths finish their count before RPC. */
+    if (*pathEnd != '\0') {
+        u32 biasedOrigin = EE_ADDR(image) - sizeof(D_0054BCC0);
+        do {
+            pathEnd++;
+        } while (*pathEnd != '\0');
+        count = EE_ADDR(pathEnd) - biasedOrigin;
+    } else {
+        /* The empty branch computes the real biased address in the same
+         * scratch register as the nonempty loop, not the result register. */
+        FAKEMATCH_ASM_REG(u32, biasedOrigin, "$3") = EE_ADDR(image) - sizeof(D_0054BCC0);
+        count = EE_ADDR(pathEnd) - biasedOrigin;
+    }
+    if (count > sizeof(command)) {
+        scePrintf(D_0054BCD0, image);
+        return 0;
+    }
+
+    sceSifInitRpc(0);
+    sceSifExitRpc();
+    {
+        char *out = command;
+        while (*prefix != '\0') {
+            *out++ = *prefix++;
+        }
+        while (*image != '\0') {
+            *out++ = *image++;
+        }
+        *out = '\0';
+    }
+    return sceSifResetIop(command, 0);
+}
 
 INCLUDE_ASM(const s32, "sdk/libkernl", DIntr);
 

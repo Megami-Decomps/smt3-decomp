@@ -961,10 +961,10 @@ Six existing native strings now have C storage in the kernel owner: the
 reboot path prefix at `0x0054BCC0`, its overlong-argument format at
 `0x0054BCD0`, and the TLB summary and three overflow messages at
 `0x0054BCF8`, `0x0054BD30`, `0x0054BD48`, and `0x0054BD60`.
-The two retained routines still use their original instructions and
-relocations. These objects own 151 bytes including terminators. The eight
-bytes of the separately owned `execDefaultPath` and the alignment between
-objects and before the next linked input are not part of these strings.
+Both native routines keep their original string references. These objects own
+151 bytes including terminators. The eight bytes of the separately owned
+`execDefaultPath` and the alignment between objects and before the next
+linked input are not part of these strings.
 
 ## Interrupt-context controller wrappers
 
@@ -1035,3 +1035,24 @@ remain void.
 The existing COP0 and SYNC primitives provide the hardware operations;
 the masks, calls and control flow are ordinary C. The four controller
 bodies match 104 bytes each and the two cache bodies match 124 bytes each.
+
+
+## sceSifRebootIop (sdk/libkernl, 0x110)
+
+68 of 68 words match, including the eight resolved relocation
+sites. The path scan counts the image, ten prefix characters and the final
+terminator against the actual 80-byte command buffer. The biased origin is
+an unsigned EE address, not a pointer before the image. Overlong paths
+print the existing diagnostic and return zero without touching RPC. On
+success the routine initializes and exits RPC, copies the native prefix
+and image into the local buffer, and returns the reset service result.
+
+Two short-lived compiler bindings retain the real path cursor in its
+incoming register and put the empty branch's biased origin in the scratch
+used by the nonempty branch. Both are consumed by the count calculation
+before any call. Without the empty-branch binding, 66 of 68 words match;
+without the cursor binding, 48 of 68 words match. Empty operand constraints
+and the unsigned-byte prefix-copy spelling were redundant and were removed. The destination cursor starts only after the
+RPC calls; advancing it across the copies does not require a saved
+register. These are measured compiler effects, not a claim about the
+original source spelling.
