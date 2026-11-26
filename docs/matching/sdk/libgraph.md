@@ -184,3 +184,18 @@ in all three compilation modes. The active draft remains 892 bytes against
 884 native instruction bytes, with 80/221 native-position words equal (the
 unsafe draft had 83/221). All ten matched peers remain exact and the production
 guard retains the assembly fallback. No exact matching credit is claimed.
+
+## sdfGrDispEnv (SDK display environment)
+
+C owns the native 40-byte BSS object at `0x580FF0`, immediately before
+the image-set callback state at `0x581018`. The common definition has
+five 64-bit GS registers and the SDK's actual signed 16-bit scalar
+parameters. A union exposes the same DISPFB register as a full 64-bit
+value for the SDK and as low/high words for the game. The game's
+frame-buffer-base patch touches only the low word, preserving the high
+word. The uncached alias passed to the SDK constructor is unchanged.
+
+Both reader objects are byte-identical. The section placement keeps
+the object in its existing BSS input and prevents a COMMON allocation.
+This corrects the cross-unit contract and gives C ownership of storage;
+it adds no matching executable bytes.

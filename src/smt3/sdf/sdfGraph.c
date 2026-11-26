@@ -2,23 +2,11 @@
 #include "eeregs.h"
 #include "libsdf.h"
 #include "draw.h"
+#include "sdk_gs_display_environment.h"
 #include "sdk_gs_store_image.h"
 
 #include "ps2asm.h"
-typedef struct
-{
-    u64 pmode;
-    u64 smode2;
-    u32 dispfb;
-    u32 dispfbHi;
-    u64 display;
-    u64 bgcolor;
-} sceGsDispEnv;
-
 extern void sceGsResetGraph(s16 aMode, s16 aInter, s16 aOmode, s16 aFfmode);
-extern void sceGsSetDefDispEnv(sceGsDispEnv *aEnv, s32 aPsm, s32 aWidth, s32 aHeight, s32 aDx,
-                               s32 aDy);
-extern void sceGsPutDispEnv(sceGsDispEnv *aEnv);
 
 extern void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
 extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat);
@@ -164,7 +152,7 @@ void sdfGrSetDisp(s32 aEvenOdd)
     sceGsSetDefDispEnv((sceGsDispEnv *)EE_UNCACHED(EE_PHYSICAL(EE_ADDR(&sdfGrDispEnv))), 0,
                        sdfGrFrameSet.w, sdfGrFrameSet.buffH, 0, 0);
     fbp = (buff->addr >> 11) & 0x1FF;
-    sdfGrDispEnv.dispfb = (sdfGrDispEnv.dispfb & ~0x1FF) | fbp;
+    sdfGrDispEnv.dispfb.words.low = (sdfGrDispEnv.dispfb.words.low & ~0x1FF) | fbp;
     sceGsPutDispEnv(&sdfGrDispEnv);
 }
 

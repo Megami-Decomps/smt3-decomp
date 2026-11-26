@@ -44,6 +44,7 @@ both native and emitted sizes when they differ.
 | 6 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 6 | facility/fclRecoverCalc | [facility/fclRecoverCalc.md](facility/fclRecoverCalc.md) |
 | 6 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
+| 5 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
 | 5 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
@@ -61,7 +62,6 @@ both native and emitted sizes when they differ.
 | 5 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 4 | sound/sndManager | [sound/sndManager.md](sound/sndManager.md) |
 | 4 |  | [sdk/libipu.md](sdk/libipu.md) |
-| 4 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 4 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 4 | nme/Nme_Init | [nme/Nme_Init.md](nme/Nme_Init.md) |
 | 4 | nme/Nme_Calc | [nme/Nme_Calc.md](nme/Nme_Calc.md) |

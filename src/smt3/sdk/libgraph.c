@@ -1,19 +1,12 @@
 #include "sdk_gs_reset_defaults.h"
 #include "common.h"
+#include "sdk_gs_display_environment.h"
 #include "sdk_gs_store_image.h"
 #include "ps2asm.h"
 
 /* The GS interrupt mask register, through the kernel's syscall stubs. */
 extern u64 GsGetIMR(void);
 extern u64 GsPutIMR(u64 imr);
-
-typedef struct {
-    u64 pmode;
-    u64 smode2;
-    u64 dispfb;
-    u64 display;
-    u64 bgcolor;
-} sceGsDispEnv;
 
 typedef struct {
     sceGifTag tag;
@@ -186,7 +179,7 @@ void sceGsSetDefDispEnv(sceGsDispEnv *disp, s16 psm, s16 w, s16 h, s16 dx, s16 d
     } else {
         disp->smode2 = 2;
     }
-    disp->dispfb = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
+    disp->dispfb.packed = ((u64)(psm & 0xF) << 15) | ((u64)(((w + 63) >> 6) & 0x3F) << 9);
     if ((s16)param->mode == 2) {
         if (param->interlace == 1) {
             magh = (2560 + w - 1) / w;
@@ -243,13 +236,13 @@ void sceGsPutDispEnv(sceGsDispEnv *disp)
 
     if (gp->version == 1) {
         *(volatile u64 *)0x12000000 = disp->pmode;
-        *(volatile u64 *)0x12000070 = disp->dispfb;
+        *(volatile u64 *)0x12000070 = disp->dispfb.packed;
         *(volatile u64 *)0x12000080 = disp->display;
         *(volatile u64 *)0x120000C0 = disp->bgcolor;
     } else {
         *(volatile u64 *)0x12000000 = disp->pmode;
         *(volatile u64 *)0x12000020 = disp->smode2;
-        *(volatile u64 *)0x12000090 = disp->dispfb;
+        *(volatile u64 *)0x12000090 = disp->dispfb.packed;
         *(volatile u64 *)0x120000A0 = disp->display;
         *(volatile u64 *)0x120000E0 = disp->bgcolor;
     }
