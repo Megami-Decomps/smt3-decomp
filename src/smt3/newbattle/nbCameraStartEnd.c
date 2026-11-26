@@ -92,31 +92,31 @@ extern void SetRotateMatrixY(f32 angle);
 extern const volatile f32 nbCameraWidthLimit, nbCameraAngleWide, nbCameraAngleScale, nbCameraAngleMin;
 extern const volatile f32 nbCameraFovySingle, nbCameraFovyGroup, nbCameraSampleStepTarget, nbCameraSampleStepStart;
 
-#ifdef NON_MATCHING
 void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
 {
     nbFormation_t *form = nbGetMainProcessData()->form;
     nbFormation_t *first = NULL;
     u32 count = 0;
     u32 i;
+    typedef f32 CameraRow[3];
     f32 width = 0.0f;
     f32 maxHeight = 0.0f;
-    f32 angle;
+    FAKEMATCH_ASM_REG(f32, angle, "$f24");
     f32 fovy;
     f32 widthLimit;
     f32 minAngle;
     f32 projection;
-    f32 viewRange;
+    FAKEMATCH_ASM_REG(f32, viewRange, "$f21");
     f32 distance;
     f32 radius;
-    f32 t;
-    f32 step;
-    volatile sdfVector4_t target;
-    volatile sdfVector4_t destination;
-    volatile sdfVector4_t center;
-    volatile sdfVector4_t offset;
-    volatile sdfVector4_t start;
+    f32 bossHalf;
+    /* These native VU loads use only XYZ; W remains an unread C scratch lane. */
     volatile sdfVector4_t point;
+    sdfVector4_t offset;
+    volatile sdfVector4_t start;
+    sdfVector4_t destination;
+    volatile sdfVector4_t center;
+    sdfVector4_t target;
 
     for (i = 0; i < 32; i++, form++) {
         if ((form->stat & 0x201) == 0x201) {
@@ -137,18 +137,25 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
         return;
     }
     width += nbGetEnemyInterval() * (f32)(count - 1);
-    widthLimit = nbCameraWidthLimit;
-    angle = nbCameraAngleWide;
+    widthLimit = 0x1.1300000000000p+10f;
+    angle = 0x1.921fb20000000p-1f;
+    /* Keep the initialized angle separate from the conditional scaling. */
+    FAKEMATCH_ASM_LIVE_F32(angle);
     if (!(widthLimit <= width)) {
-        angle = (width / widthLimit) * nbCameraAngleScale;
+        /* Keep the real ratio and multiplier in the native operand order. */
+        FAKEMATCH_ASM_REG(f32, ratio, "$f1");
+        FAKEMATCH_ASM_REG(f32, scale, "$f0");
+        ratio = width / widthLimit;
+        scale = 0x1.921fb20000000p-1f;
+        angle = ratio * scale;
     }
-    minAngle = nbCameraAngleMin;
+    minAngle = 0x1.becde20000000p-2f;
     if (angle < minAngle) {
         angle = minAngle;
     }
-    fovy = nbCameraFovySingle;
+    fovy = 0x1.6571820000000p-1f;
     if (count >= 2) {
-        fovy = nbCameraFovyGroup;
+        fovy = 0x1.dc97560000000p-1f;
     }
     projection = sdfAtan(fovy * 0.5f);
     if (width < maxHeight) {
@@ -159,13 +166,15 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
     if (viewRange < 400.0f) {
         viewRange = 400.0f;
     }
+    FAKEMATCH_ASM_LIVE_F32(viewRange);
     distance = viewRange / projection;
     target.x = 0.0f;
     target.y = -(maxHeight * 0.5f);
-    target.z = nbCameraGetBossDistance() * 0.5f;
-    destination.x = target.x;
-    destination.y = target.y;
-    destination.z = target.z - distance;
+    bossHalf = nbCameraGetBossDistance() * 0.5f;
+    target.z = bossHalf;
+    destination.x = *(volatile f32 *)&target.x;
+    destination.y = *(volatile f32 *)&target.y;
+    destination.z = (bossHalf - distance);
     effBTLModelGetSphereCenter(first);
     SDF_VU0_STOREVECTOR(&center);
     radius = effBTLModelGetRadius(first);
@@ -175,9 +184,14 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
     radius /= projection;
     offset.x = 0.0f;
     offset.y = 0.0f;
-    offset.z = -(radius + (distance - radius) * 0.25f);
+    {
+        FAKEMATCH_ASM_REG(f32, interpolated, "$f0");
+        interpolated = -(radius + (distance - radius) * 0.25f);
+        FAKEMATCH_ASM_LIVE_F32(interpolated);
+        offset.z = interpolated;
+    }
     SetRotateMatrixY(angle);
-    SDF_VU0_LOADVECTOR(&offset);
+    SDF_VU0_LOADVECTOR_BARRIER(&offset);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_LOADVECTOR_B(&center);
     SDF_VU0_ADDVECTOR();
@@ -187,37 +201,46 @@ void nbCameraState_Start_Set(nbCamera_t *pNbCamera)
     }
     destination.y = -160.0f;
     center.x = -width * 0.25f;
-    t = 0.0f;
-    step = nbCameraSampleStepTarget;
-    for (i = 0; i < 4; i++) {
-        SDF_VU0_LOADVECTOR(&center);
-        SDF_VU0_LOADVECTOR_B(&target);
-        SDF_VU0_INTERPOLATE(t);
-        SDF_VU0_STOREVECTOR(&point);
-        t += step;
-        nbCameraStartTable[0].controlPoints[i][0] = point.x;
-        nbCameraStartTable[0].controlPoints[i][1] = point.y;
-        nbCameraStartTable[0].controlPoints[i][2] = point.z;
-    }
-    t = 0.0f;
-    step = nbCameraSampleStepStart;
-    for (i = 0; i < 4; i++) {
-        SDF_VU0_LOADVECTOR(&start);
-        SDF_VU0_LOADVECTOR_B(&destination);
-        SDF_VU0_INTERPOLATE(t);
-        SDF_VU0_STOREVECTOR(&point);
-        t += step;
-        nbCameraStartTable[1].controlPoints[i][0] = point.x;
-        nbCameraStartTable[1].controlPoints[i][1] = point.y;
-        nbCameraStartTable[1].controlPoints[i][2] = point.z;
+    {
+        CameraRow *row;
+
+        /* Keep the live sample and step in the retail VU hand-off registers. */
+        FAKEMATCH_ASM_REG(f32, t, "$f2");
+        FAKEMATCH_ASM_REG(f32, step, "$f3");
+
+        /* Preserve the scalar read/store order of the VU scratch row. */
+        t = 0.0f;
+        row = nbCameraStartTable[0].controlPoints;
+        SDF_VU0_LOADVECTOR_B_BARRIER(&target);
+        step = 0x1.5555540000000p-2f;
+        for (i = 0; i < 4; i++, row++) {
+            SDF_VU0_LOADVECTOR(&center);
+            SDF_VU0_INTERPOLATE(t);
+            SDF_VU0_STOREVECTOR(&point);
+            t += step;
+            *(volatile f32 *)&(*row)[0] = point.x;
+            *(volatile f32 *)&(*row)[1] = point.y;
+            *(volatile f32 *)&(*row)[2] = point.z;
+        }
+        t = 0.0f;
+        row = nbCameraStartTable[1].controlPoints;
+        SDF_VU0_LOADVECTOR_B_BARRIER(&destination);
+        step = 0x1.5555540000000p-2f;
+        for (i = 0; i < 4; i++, row++) {
+            SDF_VU0_LOADVECTOR(&start);
+            SDF_VU0_INTERPOLATE(t);
+            SDF_VU0_STOREVECTOR(&point);
+            t += step;
+            *(volatile f32 *)&(*row)[0] = point.x;
+            *(volatile f32 *)&(*row)[1] = point.y;
+            *(volatile f32 *)&(*row)[2] = point.z;
+        }
     }
     nbCameraStartState = 0;
     nbCameraStartFrame = 0;
     nbCameraState_Start_Animation(pNbCamera);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Set);
-#endif
+
 
 extern void effBTLModelAllShow(void);
 

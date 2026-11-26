@@ -420,6 +420,7 @@ nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	137 of 137 words ma
 bCameraShot_AttackInvokeTargetPartyNear_Set	newbattle/nbCameraSkill	0x308	194 of 194 words match	docs/matching/newbattle/nbCameraSkill.md	251
 Skill camera minimum-distance tables				docs/matching/newbattle/nbCameraSkill.md	290
 Skill camera angle presets				docs/matching/newbattle/nbCameraSkill.md	303
+nbCameraState_Start_Set	newbattle/nbCameraStartEnd	948 bytes	237 of 237 words match	docs/matching/newbattle/nbCameraStartEnd.md	3
 DispComm1PanelComm	newbattle/nbCommSelProcess	0xE0	56 of 56 words match	docs/matching/newbattle/nbCommSelProcess.md	3
 DispCommCursor	newbattle/nbCommSelProcess	0x184	29 of 97 words differ	docs/matching/newbattle/nbCommSelProcess.md	33
 AnimeCommandList	newbattle/nbCommSelProcess	0x18C	99 of 99 words match	docs/matching/newbattle/nbCommSelProcess.md	58

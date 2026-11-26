@@ -148,6 +148,7 @@ both native and emitted sizes when they differ.
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
+| 1 | newbattle/nbCameraStartEnd | [newbattle/nbCameraStartEnd.md](newbattle/nbCameraStartEnd.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | newbattle/NbNegoFlowQuestion | [newbattle/NbNegoFlowQuestion.md](newbattle/NbNegoFlowQuestion.md) |
 | 1 | newbattle/NbNegoFlowInoti | [newbattle/NbNegoFlowInoti.md](newbattle/NbNegoFlowInoti.md) |
