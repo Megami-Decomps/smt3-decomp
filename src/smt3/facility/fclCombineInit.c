@@ -3331,21 +3331,18 @@ extern s32 cmpCursorBlinkColor(s32 timer);
 extern void cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height,
                               s32 *colors, s32 ot);
 
-#ifdef NON_MATCHING
 void cmbDrawStockRow(s32 x, s32 y, s32 z, u16 firstWidth, u16 secondWidth, u16 height,
                      s32 firstColor, s32 middleColor, s32 lastColor, s8 unused,
                      s32 timer, s32 ot)
 {
     s32 colors[4];
-    u32 blink;
+    u32 coefficient;
+    /* Keep the narrowed blink alpha in the native saved register so the final color store fills the first gradient call's delay slot. */
+    FAKEMATCH_ASM_REG(u8, alpha, "$17");
 
     fclDrawPanelSprite2(0x48, ot);
-    blink = cmpCursorBlinkColor(timer);
-    /* Keep the actual callback result live before its byte conversion.
-     * This target-specific constraint retains the native full-width multiply;
-     * the guarded reconstruction is still not an exact match. */
-    FAKEMATCH_ASM_LIVE(blink);
-    blink = (u8)blink;
+    alpha = (u8)cmpCursorBlinkColor(timer);
+
     colors[0] = firstColor;
     colors[1] = middleColor;
     colors[2] = firstColor;
@@ -3357,11 +3354,9 @@ void cmbDrawStockRow(s32 x, s32 y, s32 z, u16 firstWidth, u16 secondWidth, u16 h
     colors[3] = lastColor;
     cmpDrawBoxGDefault((s32)((u32)x + (u32)firstWidth * 16U), y, z, secondWidth, height, colors, ot);
     fclDrawPanelSprite2(0x44, ot);
-    cmpDrawBoxF(0x1000, y, (s32)((u32)z + 1U), 0xF0, height, (blink * 38) >> 7, ot);
+    coefficient = ((u32)alpha * 38U) >> 7;
+    cmpDrawBoxF(0x1000, y, (s32)((u32)z + 1U), 0xF0, height, coefficient, ot);
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockRow);
-#endif
 
 extern void cmbDrawStockRow(s32, s32, s32, u16, u16, u16,
     s32, s32, s32, s8, s32, s32);

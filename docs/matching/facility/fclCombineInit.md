@@ -668,35 +668,33 @@ were bounded diagnostics: none matched. No constraints are retained. All
 199 other functions and owned data check exact; exhaustive 65,536 signed-byte
 state pairs preserve the original and native selection and argument behavior.
 
-### Guarded stock-row arithmetic and blink lifetime
+## cmbDrawStockRow (facility/fclCombineInit, 0x144)
 
-The `cmbDrawStockRow` draft now retains the actual full-width blink callback
-result through a local empty operand constraint before converting its low byte.
-That byte is represented in `u32` for the native unsigned multiply/right-shift
-sequence. This target-specific compiler aid has a real initialized value and
-consumer, emits no instruction itself, and is not evidence of original spelling.
-No new fixed-register binding is used. The x-coordinate addition and z increment
-are expressed modulo 32 bits, avoiding signed C overflow while preserving the
-retail `addu`/`addiu` behavior.
+81 of 81 instruction words match at the native 324-byte extent. The sprite,
+blink, two gradient, second sprite, and solid-box calls retain their original
+order and arguments. The two 4-entry color buffers reuse the same real
+stack array and preserve each native store, including the first gradient's
+fourth color in its call delay slot.
 
-The guarded draft improves from 35 matching native words at 316 bytes to 67 of
-81 words matching at the exact 324-byte native size. It remains assembly-backed. The
-remaining differences include mask placement across the first box call and
-late instruction scheduling, so no exact-match credit is claimed. A plain u32
-control reaches only 36 words at 320 bytes; additional live/volatile controls
-and a redundant fixed-register binding did not improve the retained candidate.
+A single local binding gives the actual unsigned byte returned by narrowing
+the signed blink result its native callee-saved register. This preserves
+the low-byte mask before the first gradient call and uses that byte only
+for the final box's coefficient. No empty constraint, volatile color
+access, artificial dependency, or separate saved full-width blink value is
+needed. The widened product uses unsigned arithmetic; the result is 0..75.
+Second X and final Z retain the low-word native arithmetic, avoiding signed
+overflow. This is a target-specific reconstruction, not a claim about
+the original source spelling.
 
-All 199 existing exact C peers remain unchanged. Normal, SKIP_ASM and retained-C
-plain/stock-dump compile pairs agree in entire assembly and object output. The
-extracted candidate agrees with an independent native-width call-argument oracle
-on 200,000 random/boundary cases, including mutated box color buffers, in optimized
-and ASan/UBSan builds. Leak checking is disabled for that sanitizer run because
-LeakSanitizer cannot operate under the executor's tracing environment. The guarded
-production owner and full integration checks remain required for publication.
+The real compiler's normal and diagnostic complete-owner assembly and
+object outputs agree. Independent replay checks 8,192 paired native and
+compiled cases, including 4,096 executions of the retail blink provider
+covering all 256 low bytes. It verifies physical color write order and
+ABI arguments at the scoped drawing-provider boundaries, not GPU output.
 
-### Stock-row post-reload priority frontier
+### Historical stock-row scheduler frontier
 
-A fresh output-qualified trace of the retained guarded stock-row owner places
+An output-qualified trace of the earlier 67/81 guarded version placed
 its low-byte mask across the first box call in post-reload scheduling, not in
 initial expression lowering or allocation. The mask is already ready at cycle
 21. The real comparator chooses the final stack color store instead: its
@@ -718,8 +716,8 @@ The pinned compiler observer captured 4,824 events with all six baseline and
 observed artifacts byte-identical and 853 frozen inputs verified before and
 after. Same-path direct replay also agrees with the ordinary wrapper, and
 fresh plain/stock-dump complete-owner assembly and objects agree. This is
-compiler-property evidence, not a new exact match or historical source claim;
-the guarded candidate remains 67/81 words at 324 bytes.
+compiler-property evidence for the guarded 67/81 candidate, not the scheduler
+mechanism of the matching replacement above.
 
 ## cmbDrawSequence (facility/fclCombineInit, 0x27C)
 
