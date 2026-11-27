@@ -268,6 +268,7 @@ fldEveHit_AddEveHitItemBox	field/fldEveHit	0x1F8	126 of 126 words match	docs/mat
 fldStatusSet	field/fldEveHit	0xF8	62 of 62 words match	docs/matching/field/fldEveHit.md	86
 Field script labels				docs/matching/field/fldEveHit.md	164
 Event-hit room records				docs/matching/field/fldEveHit.md	171
+fldEveHitTestRect	field/fldEveHit	0x108	66 of 66 words match	docs/matching/field/fldEveHit.md	183
 fldHitChkUnitDamage	field/fldHit	0x370	219 of 220 words match	docs/matching/field/fldHit.md	3
 fldHitWM_Mask	field/fldHit	0x2B8	174 of 174 words match	docs/matching/field/fldHit.md	127
 fldHitChkUnitVWM	field/fldHit	0xCB8		docs/matching/field/fldHit.md	209

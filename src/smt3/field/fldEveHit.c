@@ -1025,30 +1025,31 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
     return 0;
 }
 
-s32 fldEveHitTestRect(f32 *pos, s32 idx) {
-    f32 probe[3] QWORD_ALIGNED;
+/* The event checker passes its vector directly; dot product uses only XYZ. */
+s32 fldEveHitTestRect(const sdfVector4_t *pos, s32 idx) {
+    sdfVector4_t probe QWORD_ALIGNED;
     f32 planar[2];
     fldRoomSidePlanes_t *sides;
     s32 i;
     f32 zero;
 
     if (fldEveHitTable[idx].axisMode == 0) {
-        probe[0] = 0.0f;
-        probe[1] = pos[1];
-        probe[2] = pos[2];
-        planar[0] = pos[1];
-        planar[1] = pos[2];
+        probe.x = 0.0f;
+        probe.y = pos->y;
+        probe.z = pos->z;
+        planar[0] = pos->y;
+        planar[1] = pos->z;
     } else {
-        probe[0] = pos[0];
-        probe[1] = pos[1];
-        probe[2] = 0.0f;
-        planar[0] = pos[0];
-        planar[1] = pos[1];
+        probe.x = pos->x;
+        probe.y = pos->y;
+        probe.z = 0.0f;
+        planar[0] = pos->x;
+        planar[1] = pos->y;
     }
     zero = 0.0f;
     sides = (fldRoomSidePlanes_t *)fldEveHitTable[idx].plane[1];
     for (i = 0; i < FIELD_ROOM_PLANE_COUNT - 2; i++) {
-        if (fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)sides->plane[i]) -
+        if (fldVecDot(&probe, (sdfVector4_t *)sides->plane[i]) -
                 sides->limit[i] < zero) {
             return -1;
         }
@@ -1267,7 +1268,7 @@ void fldEveHit_ChkEveHit(dds3Basic_t *player)
             if (nowDistance < 0.0f && oldDistance >= 0.0f) crossing = -1;
             else if (nowDistance >= 0.0f && oldDistance < 0.0f) crossing = 1;
             if (crossing != 0) {
-                if (fldEveHitTestRect((f32 *)&current, i) != -1) {
+                if (fldEveHitTestRect(&current, i) != -1) {
                     room->shapeKind = crossing;
                     if (fldRunDanteGunFlag.word20 == 1) {
                         fldDbgPrint2D(0x40, 0x140, gEvnRng[i]->name);

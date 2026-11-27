@@ -179,3 +179,15 @@ at `0x562830`. The preceding raw range is unchanged.
 Sharing the existing declarations with the storage unit leaves every
 consumer instruction and relocation unchanged. The larger, still
 guarded event-hit functions are not promoted by this change.
+
+## fldEveHitTestRect (field/fldEveHit, 0x108)
+
+66 of 66 words match. The caller holds an actual vector, so pass its
+address as a vector and read X, Y and Z through their named members.
+The aligned projection scratch is also a real vector, rather than a
+three-float array cast to a vector for the dot product.
+
+The existing dot-product provider consumes only X, Y and Z. Both axis
+modes initialize those three lanes, and the fourth lane is not read.
+The call ABI, room-plane view and branch behavior are unchanged. The
+pinned complete owner and full retail image are byte-identical.
