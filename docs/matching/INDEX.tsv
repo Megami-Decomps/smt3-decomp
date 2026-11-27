@@ -545,10 +545,11 @@ Memory card messages and move directions				docs/matching/pb/pbMCard.md	32
 pbEditInitProc	pb/pbMain	0x148	82 of 82 words match	docs/matching/pb/pbMain.md	3
 pb_draw_bg_Process	pb/pbMain	0x26C	155 of 155 words match	docs/matching/pb/pbMain.md	30
 pb_draw_mapbase_Process	pb/pbModel	0x214	133 of 133 words match	docs/matching/pb/pbModel.md	3
-pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	38
-pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	66
-Exit model rotation				docs/matching/pb/pbModel.md	104
-Map base vertices and normals				docs/matching/pb/pbModel.md	112
+func_001D35F0	pb/pbModel	0x23C	143 of 143 words match	docs/matching/pb/pbModel.md	38
+pbDrawMapPolyTransformed			10 of 262 words matching	docs/matching/pb/pbModel.md	68
+pb_draw_exit_Process	pb/pbModel	0x1C0	112 of 112 words match	docs/matching/pb/pbModel.md	96
+Exit model rotation				docs/matching/pb/pbModel.md	134
+Map base vertices and normals				docs/matching/pb/pbModel.md	142
 pbAddRecord_char	pb/pbRecord	0x144		docs/matching/pb/pbRecord.md	3
 pbPopRecord	pb/pbRecord	0x2F0	188 of 188 words match	docs/matching/pb/pbRecord.md	26
 pipeMakeNodeLink	pipe/mnMyLink	128 bytes	32 of 32 words match	docs/matching/pipe/mnMyLink.md	3

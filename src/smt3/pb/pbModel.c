@@ -546,99 +546,120 @@ u8 pbFindBlockSlot(s16 x, s16 y, s32 mode)
 INCLUDE_ASM(const s32, "pb/pbModel", pbFindBlockSlot);
 #endif
 
-#ifdef NON_MATCHING
+/*
+ * The mode-other arm selects the real updated mask only for an empty cell.
+ * Keeping that mask and its kind together at this point preserves the
+ * distinct predicate register in the late conditional move. The register
+ * choices are local to each actual neighbor decision. The empty compiler
+ * constraints do not emit instructions or impose a memory barrier.
+ */
+#define PB_CARDINAL_SELECT(bit, modeReg)                                      \
+    FAKEMATCH_ASM_REG(s32, modeOne, modeReg) = 1;                              \
+    s32 nextMask = result | (bit);                                            \
+    if (mode == modeOne) {                                                    \
+        s32 qualifies = neighborKind < 2;             \
+        if (qualifies) {                                                      \
+            FAKEMATCH_ASM_LIVE(result);                                       \
+            result |= (bit);                                                  \
+        }                                                                     \
+    } else {                                                                  \
+        FAKEMATCH_ASM_LIVE_WITH_INPUT(nextMask, neighborKind);                 \
+        if (!neighborKind) {                                                  \
+            FAKEMATCH_ASM_REG(s32, selected, "$8") = nextMask;                 \
+            result = selected;                                                \
+        }                                                                     \
+    }
+
 s32 func_001D35F0(s16 x, s16 y, s32 mode)
 {
-    pbMapWork_t *map = pbMapWork;
-    u16 cell = map->map[y][x];
-    u32 kind;
+    s32 X = x;
+    s32 Y = y;
     s32 result;
-
-    kind = cell >> 13;
-    if (mode == 0) {
+    if (!mode) {
+        pbMapWork_t *map = pbMapWork;
+        u16 cell = map->map[Y][X];
+        u32 kind = cell >> 13;
         result = kind == 0;
         if (cell & 0x800) {
             return 0;
         }
     } else {
+        pbMapWork_t *map = pbMapWork;
+        u16 cell = map->map[Y][X];
+        u32 kind = cell >> 13;
         result = 1;
         if (kind == 0) {
             return 0;
         }
     }
-    if (x + 1 >= 20) {
-        result |= 8;
-    } else {
-        cell = map->map[y][x + 1];
-        kind = cell >> 13;
-        if (mode == 0) {
-            if (cell & 0x800) {
-                result |= 8;
-            }
-        } else if (mode == 1) {
-            if (kind < 2) {
-                result |= 8;
-            }
-        } else if (kind == 0) {
+    {
+        pbMapWork_t *map = pbMapWork;
+        u32 neighborKind;
+        if (X + 1 >= 20) {
             result |= 8;
+        } else {
+            u16 cell = map->map[Y][X + 1];
+            neighborKind = cell >> 13;
+            if (!mode) {
+                if (cell & 0x800) {
+                    result |= 8;
+                }
+            } else {
+                PB_CARDINAL_SELECT(8, "$12")
+            }
         }
-    }
-    if (x - 1 < 0) {
-        result |= 0x10;
-    } else {
-        cell = map->map[y][x - 1];
-        kind = cell >> 13;
-        if (mode == 0) {
-            if (cell & 0x800) {
-                result |= 0x10;
+        {
+            u16 cell;
+            if (X - 1 < 0) {
+                goto leftBlocked;
             }
-        } else if (mode == 1) {
-            if (kind < 2) {
-                result |= 0x10;
+            cell = map->map[Y][X - 1];
+            neighborKind = cell >> 13;
+            if (!mode) {
+                if (!(cell & 0x800)) {
+                    goto leftDone;
+                }
+leftBlocked:
+                FAKEMATCH_ASM_LIVE(result);
+                result |= 16;
+                goto leftDone;
+            } else {
+                PB_CARDINAL_SELECT(16, "$12")
             }
-        } else if (kind == 0) {
-            result |= 0x10;
+leftDone:
+            ;
         }
-    }
-    if (y + 1 >= 20) {
-        result |= 2;
-    } else {
-        cell = map->map[y + 1][x];
-        kind = cell >> 13;
-        if (mode == 0) {
-            if (cell & 0x800) {
-                result |= 2;
-            }
-        } else if (mode == 1) {
-            if (kind < 2) {
-                result |= 2;
-            }
-        } else if (kind == 0) {
+        if (Y + 1 >= 20) {
             result |= 2;
+        } else {
+            u16 cell = map->map[Y + 1][X];
+            neighborKind = cell >> 13;
+            if (!mode) {
+                if (cell & 0x800) {
+                    result |= 2;
+                }
+            } else {
+                PB_CARDINAL_SELECT(2, "$12")
+            }
         }
-    }
-    if (y - 1 < 0) {
-        result |= 4;
-    } else {
-        cell = map->map[y - 1][x];
-        kind = cell >> 13;
-        if (mode == 0) {
-            if (cell & 0x800) {
-                result |= 4;
-            }
-        } else if (mode == 1) {
-            if (kind < 2) {
-                result |= 4;
-            }
-        } else if (kind == 0) {
+        if (Y - 1 < 0) {
             result |= 4;
+        } else {
+            u16 cell = map->map[Y - 1][X];
+            neighborKind = cell >> 13;
+            if (!mode) {
+                if (cell & 0x800) {
+                    result |= 4;
+                }
+            } else {
+                PB_CARDINAL_SELECT(4, "$5")
+            }
         }
     }
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
-#endif
+
+#undef PB_CARDINAL_SELECT
 
 extern sdfVector2_t pbMapUvSpecial0[];
 extern u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);

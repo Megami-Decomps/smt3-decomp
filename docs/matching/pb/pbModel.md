@@ -35,6 +35,36 @@ normalized assembly. Independent current-tree qualification passes: all owned co
 remaining drafts, the exact retail checksum, 26 tool programs and seven IRX
 groups. Whole-tree draft evidence is reused only for unchanged inputs.
 
+## func_001D35F0 (pb/pbModel, 0x23C)
+
+143 of 143 words match at 0x001D35F0 (572 bytes). Within the existing
+coordinate range 0–19, the center is tested before the four checked neighbor
+loads. Right, left, +Y and -Y set bits 8, 16, 2 and 4 respectively. Mode zero
+tests the cell's 0x0800 bit; mode one and the other nonzero modes use the
+upper-three-bit kind with their separate thresholds. The target is an
+unchanged signed-coordinate callback. The root load, halfword reads, early
+returns and bounds remain native.
+
+The mode-other path pairs the actual candidate direction mask with the
+already-read kind. The local selection in the native result register feeds
+the real accumulator. The compiler creates the comparison and conditional
+move in its late if-conversion pass; its allocator assigns separate kind and
+predicate registers while the paired input is still live. The result is the
+native XORI/MOVZ form in each arm. No template emits instructions or claims
+to be a memory fence. The other local register holds the actual mode-one
+comparison operand; neither binding spans a call.
+
+The unchanged complete owner verifies 30 matches, no differences, including
+165 ordered peer relocations and 38 typed symbol records in a full stock
+link. Normal and verbose-dump compiler output is byte-identical. All 38,400
+ordered target replays and 12,800 native indirect-caller argument and draw
+seams agree. Removing the paired operand or just its kind input leaves
+72 of 143 words. Making the scoped selected value ordinary shortens the body
+to 552 bytes; making the mode-one operand ordinary leaves 135 words.
+Removing the mode-one or left-path result hold leaves 130 or 140 words,
+respectively.
+Independent extracted-source checks agree in 3,110,400 valid-grid cases.
+
 ## pbDrawMapPolyTransformed
 
 The retained source emits 1060 bytes against 1056 native bytes. Its bounded

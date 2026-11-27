@@ -37,6 +37,7 @@ both native and emitted sizes when they differ.
 | 7 |  | [field/fld_Npc.md](field/fld_Npc.md) |
 | 7 | field/fldSe | [field/fldSe.md](field/fldSe.md) |
 | 6 | pipe/pipeSection | [pipe/pipeSection.md](pipe/pipeSection.md) |
+| 6 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 6 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
 | 6 | newbattle/nbNegoProcess | [newbattle/nbNegoProcess.md](newbattle/nbNegoProcess.md) |
 | 6 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
@@ -47,7 +48,6 @@ both native and emitted sizes when they differ.
 | 5 | sdk/libgraph | [sdk/libgraph.md](sdk/libgraph.md) |
 | 5 | sdk/libgcc | [sdk/libgcc.md](sdk/libgcc.md) |
 | 5 | pipe/pipeMakaAnim | [pipe/pipeMakaAnim.md](pipe/pipeMakaAnim.md) |
-| 5 | pb/pbModel | [pb/pbModel.md](pb/pbModel.md) |
 | 5 | newbattle/nbTarSelProcess | [newbattle/nbTarSelProcess.md](newbattle/nbTarSelProcess.md) |
 | 5 | newbattle/nbMisc | [newbattle/nbMisc.md](newbattle/nbMisc.md) |
 | 5 | newbattle/NbNegoFlowTwo | [newbattle/NbNegoFlowTwo.md](newbattle/NbNegoFlowTwo.md) |
