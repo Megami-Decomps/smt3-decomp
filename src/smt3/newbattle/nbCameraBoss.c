@@ -1985,9 +1985,6 @@ extern void nbCameraShot_All_Set3(nbCamera_t *pNbCamera, sdfVector4_t *pTarget);
 
 extern s32 nbCameraBoss_BSKAGU_Command_Set(nbCamera_t *pNbCamera);
 
-/* NON_MATCHING: 172/181 words match at native 724 bytes.  The shared-tail
- * capture preserves the native copy; nine scheduling differences remain. */
-#ifdef NON_MATCHING
 void nbCameraBoss_Kagu_E909_Run(void)
 {
     nbMainProcessData_t *pData;
@@ -1995,6 +1992,7 @@ void nbCameraBoss_Kagu_E909_Run(void)
     nbCamera_t *pCamera = &pNbCamera;
     f32 rate;
     s32 frame;
+    f32 duration;
     sdfVector4_t pos;
 
     pData = nbGetMainProcessData();
@@ -2043,14 +2041,16 @@ void nbCameraBoss_Kagu_E909_Run(void)
         nbCameraKaguFrame = 0;
         break;
     }
-    /* Real frame capture ends before VU scratch overwrites $2.  This local
-     * compiler constraint reconstructs the native copy, not source spelling. */
+    /* The empty volatile operand on the signed frame preserves the native
+     * order of duration conversion, clamp constant and frame copy. The
+     * fixed $2 capture ends before the VU interpolation uses $2 as scratch. */
     {
         FAKEMATCH_ASM_REG(s32, raw, "2") = nbCameraKaguFrame;
-        FAKEMATCH_ASM_LIVE(raw);
+        duration = (f32)nbCameraKaguDuration;
+        FAKEMATCH_ASM_LIVE_VOLATILE(raw);
         frame = raw;
     }
-    rate = SDF_FRAME_CAMERA_TIME((f32)frame) / (f32)nbCameraKaguDuration;
+    rate = SDF_FRAME_CAMERA_TIME((f32)frame) / duration;
     if (rate > 1.0f) {
         rate = 1.0f;
     }
@@ -2062,13 +2062,23 @@ void nbCameraBoss_Kagu_E909_Run(void)
     SDF_VU0_LOADVECTOR_B(&nbCameraKaguVec);
     VU0_LERP_VF10_VF11(rate);
     SDF_VU0_STOREVECTOR(&pCamera->direction);
-    pCamera->fovy = 0.69813163f;
-    pCamera->distance = nbCameraKaguStartDistance + (nbCameraKaguEndDistance - nbCameraKaguStartDistance) * rate;
-    nbCameraKaguFrame = (s32)((u32)frame + 1u);
+    {
+        f32 startDistance = nbCameraKaguStartDistance;
+        f32 endDistance = nbCameraKaguEndDistance;
+        f32 range, distance;
+        s32 nextFrame;
+        range = endDistance - startDistance;
+        distance = startDistance + range * rate;
+        /* This empty operand on the frame used by the increment keeps the
+         * native two distance loads ahead of it. It emits no instructions
+         * and is not a memory barrier. */
+        FAKEMATCH_ASM_LIVE(frame);
+        nextFrame = (s32)((u32)frame + 1u);
+        pCamera->fovy = 0.69813163f;
+        pCamera->distance = distance;
+        nbCameraKaguFrame = nextFrame;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Kagu_E909_Run);
-#endif
 
 s32 nbCameraBoss_Kagu_Attack_Set(nbCamera_t *pNbCamera)
 {

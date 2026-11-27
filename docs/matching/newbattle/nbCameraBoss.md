@@ -166,25 +166,22 @@ component assignments.
 
 ## nbCameraBoss_Kagu_E909_Run (newbattle/nbCameraBoss, 0x2D4)
 
-44 of 180 words differ; 720 bytes emitted against retail's 724.
+181 of 181 words match at 0x001BDD38 (724 bytes). The two switch arms,
+camera state, vector interpolation, and final field stores are unchanged.
 
-Everything up to the shared tail matches, including the two-case `switch` on
-`pNbCamera.frame` that puts both arms out of line, and the four interpolation
-endpoints in `D_00325A00`, `D_00325A10`, `nbCameraKaguVec` and
-`nbCameraKaguVec2`.
+The shared tail converts the signed duration before copying the signed
+frame into its ordinary local. The localized fixed-$2 capture reproduces
+the native load and copy, and ends before VU scratch operations use $2.
+Its volatile empty operand is needed for scheduling, not memory fencing.
+The final empty operand ties the same captured frame immediately before
+its unsigned-wrap increment. That restores the ordering of the actual
+end-distance load and increment; it adds no instructions or accesses.
 
-The one missing word is a register copy. Retail loads the frame counter with
-`lw $2, %gp_rel(D_00551E80)`, then `daddu $4, $2, $0` before `mtc1 $4, $f0` and
-`cvt.s.w`, and both the conversion and the trailing `addiu $2, $4, 1` read `$4`,
-so `$2` dies at the copy. The draft loads straight into `$4` and converts that,
-one word shorter, and every word after shifts.
-
-Ruled out: reading the global once against twice; `frame / (f32)len` without
-the cast, `(f32)frame` assigned to a float local first, and a second `s32`
-local copied from `frame` before the cast (all coalesce the same way);
-`frame = frame + 1; D_00551E80 = frame;` instead of one expression;
-`D_00551E80++`; `u32` for the counter (which reverses the clamp and runs two
-words long).
+With otherwise identical source, making the capture operand nonvolatile
+or moving the duration conversion back loses seven words. Removing the
+fixed capture yields 720 bytes; removing only the final frame operand
+exchanges the final two instructions. The intermediate clamp binding
+and field-of-view temporary were byte-inert and were not retained.
 
 ## nbCameraBoss_Kagu_MJINKO_Set (newbattle/nbCameraBoss, 0x31C)
 
