@@ -299,3 +299,16 @@ local controls; only the found-route speed ablation changes the size (1,744
 bytes). The fallback speed, route-state pointer, and angle's
 physical register need no constraints. The holds emit no instructions,
 are scoped to real consumers, and do not cross a provider call.
+
+## Dante movement collision inputs
+
+`fldRunDanteMove` and `fldRunDantePwak` pass real aligned four-float
+input arrays to `fldHitChkEnemy`, which indexes the first three values.
+Taking the address of a scalar struct member did not give those reads
+array bounds, even though the neighboring members were contiguous.
+Both callers keep the native XYZ and W initialization, 16-byte stack
+slots, and the existing three-float output array.
+
+Both substitutions, separately and together, preserve the entire owner
+object. The call sites and linked retail bytes are unchanged. This is a
+source correction to functions that already match, not additional coverage.

@@ -2129,8 +2129,8 @@ void fldRunDanteMove(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    sdfVector4_t position;
-    sdfVector4_t target;
+    f32 position[4] __attribute__((aligned(16)));
+    f32 target[4] __attribute__((aligned(16)));
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2146,15 +2146,15 @@ void fldRunDanteMove(void)
         routeEntry += fldRun_Dante.now * 4 + 8;
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
 
-        position.x = fldRun_Dante.x;
-        position.y = 0.0f;
-        position.z = fldRun_Dante.z;
-        position.w = 1.0f;
-        target.x = targetX;
-        target.y = 0.0f;
-        target.z = targetZ;
-        target.w = 1.0f;
-        if (fldHitChkEnemy(&position.x, &target.x, hitPosition) == -1) {
+        position[0] = fldRun_Dante.x;
+        position[1] = 0.0f;
+        position[2] = fldRun_Dante.z;
+        position[3] = 1.0f;
+        target[0] = targetX;
+        target[1] = 0.0f;
+        target[2] = targetZ;
+        target[3] = 1.0f;
+        if (fldHitChkEnemy(position, target, hitPosition) == -1) {
             printf("PRUN_TIKAMITI!!!\n");
             fldRun_Dante.tikamiti = 1;
             fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
@@ -2238,8 +2238,8 @@ void fldRunDantePwak(void)
     f32 targetZ;
     f32 distance;
     f32 angle;
-    sdfVector4_t position;
-    sdfVector4_t target;
+    f32 position[4] __attribute__((aligned(16)));
+    f32 target[4] __attribute__((aligned(16)));
     f32 hitPosition[3];
     u8 *routeEntry;
 
@@ -2255,15 +2255,15 @@ void fldRunDantePwak(void)
         routeEntry += fldRun_Dante.now * 4 + 8;
         fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
 
-        position.x = fldRun_Dante.x;
-        position.y = 0.0f;
-        position.z = fldRun_Dante.z;
-        position.w = 1.0f;
-        target.x = targetX;
-        target.y = 0.0f;
-        target.z = targetZ;
-        target.w = 1.0f;
-        if (fldHitChkEnemy(&position.x, &target.x, hitPosition) == -1) {
+        position[0] = fldRun_Dante.x;
+        position[1] = 0.0f;
+        position[2] = fldRun_Dante.z;
+        position[3] = 1.0f;
+        target[0] = targetX;
+        target[1] = 0.0f;
+        target[2] = targetZ;
+        target[3] = 1.0f;
+        if (fldHitChkEnemy(position, target, hitPosition) == -1) {
             printf("TIKAMITI!!!\n");
             fldRun_Dante.tikamiti = 1;
             fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);

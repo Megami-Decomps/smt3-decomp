@@ -301,6 +301,7 @@ Field effect resource storage	field/fldRunEffectResourceStorage	320 bytes		docs/
 fldRunDanteGun2	field/fldTest	0x40C		docs/matching/field/fldTest.md	211
 fldRunDanteGun1	field/fldTest	0x45C		docs/matching/field/fldTest.md	250
 fldRunAiCng	field/fldTest	0x6D8		docs/matching/field/fldTest.md	274
+Dante movement collision inputs				docs/matching/field/fldTest.md	303
 Shadow quad and triangle indices	field/fldTest	128 bytes		docs/matching/field/fldTestShadowData.md	3
 Shadow mesh vertices and faces	field/fldShadowMeshes	5088 bytes		docs/matching/field/fldTestShadowData.md	17
 fldTitle_Process	field/fldTitle	0xBD4	757 of 757 words match	docs/matching/field/fldTitle.md	3
