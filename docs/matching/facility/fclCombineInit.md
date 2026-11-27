@@ -931,3 +931,29 @@ matches all 4,551,696 retail bytes. An independent instruction-decoding
 fixture checks native and candidate outputs across callback-driven work
 replacement, call arguments and callee-saved restoration, with a stale
 work control.
+
+## cmbFindBirthResult (facility/fclCombineInit, 0x1DC)
+
+119 of 119 words match at the native 476-byte size. The routine sizes its
+temporary race list from the initial signed count, passes the count's low
+halfword to the sorter, and guards the first row and subsequent scan before
+reading them. The first-row match and the incrementing scan use the same
+native zero-based index. After locating the input, the routine reads the
+walk bound and tries the adjacent entry in the requested direction. It
+checks the bounds and race before calling all four rejection predicates,
+in order. It reloads the entry ID for each predicate and before returning
+an accepted ID. The normal caller's direction and table-size preconditions
+are unchanged.
+
+The initialized neutral scalar seeds the real scan index and default walk
+step, then becomes the rejection accumulator after that phase. The local
+compiler operands preserve the native cursor and short-lived argument
+homes without padding the array, inventing a predicate input, or adding a
+call. The exact output takes the first row's halfword from the transient
+stack pointer after the sorter, with the real scan initializer and step
+store in their native positions.
+
+The complete owner and its data preserve all peer code and relocations,
+and the full stock link remains byte-identical to retail. Verification
+includes the native sorter and predicate call sequence, and an independent
+build of the C body with injected row replacements and scan-bound cases.

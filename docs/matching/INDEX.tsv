@@ -181,6 +181,7 @@ Triple-race comparison row				docs/matching/facility/fclCombineInit.md	864
 cmbGetRaceCombineResult	fclCombineInit	0x1F8		docs/matching/facility/fclCombineInit.md	869
 Model-panel vertex and color storage				docs/matching/facility/fclCombineInit.md	890
 cmbDrawResultHeader (0x201068)			64 of 64 words match	docs/matching/facility/fclCombineInit.md	901
+cmbFindBirthResult	facility/fclCombineInit	0x1DC	119 of 119 words match	docs/matching/facility/fclCombineInit.md	935
 trm_212CB8	facility/fclDraw	0x170	92 of 92 words match	docs/matching/facility/fclDraw.md	3
 DestPhaseRegistTop	facility/fclEncyc	byte-neutral		docs/matching/facility/fclEncyc-destroy.md	3
 ApplyChangeListIndex	facility/fclEncyc	0x128	74 of 74 words match	docs/matching/facility/fclEncyc.md	3
@@ -489,7 +490,7 @@ nbPanelStockSelectInit (0x108)			66 of 66 words match	docs/matching/newbattle/nb
 Texture paths and battle debug labels				docs/matching/newbattle/nbPanelReadOnlyData.md	3
 Result score and caption storage				docs/matching/newbattle/nbResultProcess.md	3
 nbFindTobiwarpLabel	newbattle/nbResultProcess	0xE78	788 of 926 words match	docs/matching/newbattle/nbResultProcess.md	24
-nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	18 of 125 words match	docs/matching/newbattle/nbResultProcess.md	61
+nbResultLoadTextures	newbattle/nbResultProcess	0x1F4	125 of 125 words match	docs/matching/newbattle/nbResultProcess.md	61
 nbCheckBattleSkillError3	newbattle/nbSkillError	0x184	97 of 97 words match	docs/matching/newbattle/nbSkillError.md	3
 nbCheckBattleSkillError1	newbattle/nbSkillError	0x48	18 of 18 words match	docs/matching/newbattle/nbSkillError.md	46
 nbLoadMotionByIndex	newbattle/nbSound	0x78		docs/matching/newbattle/nbSound.md	3

@@ -1682,53 +1682,93 @@ extern void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count);
 extern s32 cmbEntryIsValid(u16 devilId);
 extern s32 cmbDevilIsSpecial(u16 devilId);
 
-#ifdef NON_MATCHING
-u16 cmbFindBirthResult(u16 devilId, u8 direction)
+u16 cmbFindBirthResult(u16 devilId, u8 directionArg)
 {
+    s32 direction = directionArg;
     s32 count = cmbRaceTable;
     u8 race = datDevilTable[devilId].race;
-    cmbRaceSortEntry_t list[count];
-    s32 index = -1;
-    s32 step = 0;
-    s32 rejected;
+    FAKEMATCH_ASM_REG(s32, index, "$19") = -1;
+    s32 step;
+    FAKEMATCH_ASM_REG(s32, originOrRejected, "$17") = 0;
     s32 i;
+    u16 current;
+    u16 first;
+    u16 lowCount;
+    {
+        cmbRaceSortEntry_t list[count];
+        lowCount = (u16)cmbRaceTable;
+        cmbSetRaceResult(list, lowCount);
+        /* Reuse the zero origin of the scan and the default step as the
+         * rejection flag after the walk starts. Keep both initialized values
+         * live at the scan boundary to recover the retail stack-based first load. */
+        i = originOrRejected;
+        FAKEMATCH_ASM_LIVE_WITH_INPUT(i, originOrRejected);
+        step = originOrRejected;
+        if (count > 0) {
+            FAKEMATCH_ASM_REG(s32, bound, "$5") = count;
+            first = list[0].index;
+            if (first == devilId) {
+                index = 0;
+            } else {
+                FAKEMATCH_ASM_READ(bound);
+                ++i;
+              scanTest:
+                {
+                    const cmbRaceSortEntry_t *row = &list[i];
 
-    cmbSetRaceResult(list, (u16)cmbRaceTable);
-    for (i = 0; i < count; i++) {
-        if (list[i].index == devilId) {
-            index = i;
-            break;
+                    if (i >= bound) {
+                        goto scanDone;
+                    }
+                    current = row->index;
+                    if (current == devilId) {
+                        index = i;
+                    } else {
+                        ++i;
+                        goto scanTest;
+                    }
+                }
+              scanDone: ;
+            }
         }
-    }
-    if (index < 0) {
-        return 0;
-    }
-    count = cmbRaceTable;
-    if (direction == 0) {
-        return 0;
-    }
-    if (direction == 1) {
-        step = -1;
-    } else if (direction == 2) {
-        step = 1;
-    }
-    for (;;) {
-        index += step;
-        if (index <= 0 || index >= count || list[index].info->race != race) {
+        if (index < 0) {
             return 0;
         }
-        rejected = cmbEntryIsValid(list[index].index) != 0;
-        rejected |= cmbFindBirthEntry(list[index].index) != 0;
-        rejected |= cmbDevilIsUnlocked(list[index].index) != 0;
-        rejected |= cmbDevilIsSpecial(list[index].index) != 0;
-        if (rejected == 0) {
-            return list[index].index;
+        switch (direction) {
+        case 0:
+            return 0;
+        case 1:
+            step = -1;
+            break;
+        case 2:
+            step = 1;
+            break;
+        }
+        {
+            s32 walkCount = cmbRaceTable;
+            for (;;) {
+                cmbRaceSortEntry_t *entry;
+                index += step;
+                if (index <= 0 || index >= walkCount || race != list[index].info->race) {
+                    return 0;
+                }
+                entry = &list[index];
+                originOrRejected = cmbEntryIsValid(entry->index) != 0;
+                if (cmbFindBirthEntry(entry->index) != 0) {
+                    originOrRejected = 1;
+                }
+                if (cmbDevilIsUnlocked(entry->index) != 0) {
+                    originOrRejected = 1;
+                }
+                if (cmbDevilIsSpecial(entry->index) != 0) {
+                    originOrRejected = 1;
+                }
+                if (originOrRejected == 0) {
+                    return entry->index;
+                }
+            }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbFindBirthResult);
-#endif
 
 s8 cmbFindRaceEntry(u16 devilId, u8 race)
 {

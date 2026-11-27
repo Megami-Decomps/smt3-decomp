@@ -27,83 +27,185 @@ extern s32 D_005510E8;
 extern s32 GetAddExp(s32 index, s32 cap);
 extern void nbResultLoadTextures(void);
 
-#ifdef NON_MATCHING
+/* The clear loop walks from the row start; the fill loop keeps a cursor
+ * at resultadd, the last word of the same 52-byte score row. */
+SYMBOL_AT_REGION(nbResultScore_t, resultScoreFillBase, nbResultScoreTable, 0);
+#define SCORE_AT(type, field) \
+    (*EE_ADDR_AS(type *, out + (addr_t)((size_t)&((nbResultScore_t *)0)->field - \
+                                      (size_t)&((nbResultScore_t *)0)->resultadd)))
+
 void nbResultLoadTextures(void)
 {
-    nbResultScore_t *score;
-    datUnitWork_t *unit;
-    dds3GlobalWork_t *global;
-    u32 index;
-    u32 flags;
+    FAKEMATCH_ASM_REG(s32, count, "$18");
     s32 i;
-    s32 count;
-    s32 addExp;
+    s32 div;
+    addr_t out;
+    dds3GlobalWork_t *global;
+    FAKEMATCH_ASM_REG(s32, one, "$20");
+    nbResultCaption_t *caption;
+    nbResultScore_t *clear;
 
     nbResultTex1 = sdfTexSet(nbResultTmxData1);
     nbResultTex2 = sdfTexSet(nbResultTmxData2);
-    nbResultTexHandle = sdfTexSet(nbResultTmxData3);
-    nbResultTimer = 0;
-    nbResultTobiwarpLabel = 0;
-    nbResultState = 0;
-    for (i = 0; i < 4; i++) {
-        score = &nbResultScoreTable[i];
-        score->useflg = 0;
-        score->exp_cnt = 0;
-        score->l_lv = 0;
-        score->lvupflg = 0;
-        score->unitidx = 0;
-        score->unit = NULL;
-        score->lvupanmflg = 0;
-        score->lvupanmcnt = 0;
-        score->lvuplvanmcnt = 0;
-        score->ofsx = 0;
-        score->stopcnt = 0;
+    {
+        sdfTexHandle_t *handle = sdfTexSet(nbResultTmxData3);
+        nbResultTimer = 0;
+        nbResultTexHandle = handle;
     }
-    count = 0;
-    i = 0;
+    nbResultTobiwarpLabel = 0;
+    clear = nbResultScoreTable;
+
+    nbResultState = 0;
+
+    count = 3;
+    do {
+        count--;
+        clear->useflg = 0;
+        clear->exp_cnt = 0;
+        clear->l_lv = 0;
+        clear->lvupflg = 0;
+        clear->unitidx = 0;
+        clear->unit = NULL;
+        clear->lvupanmflg = 0;
+        clear->lvupanmcnt = 0;
+        clear->lvuplvanmcnt = 0;
+        clear->ofsx = 0;
+        clear->stopcnt = 0;
+        clear++;
+    } while (count >= 0);
     global = DDS3_GBWK;
-    while (i < (s32)global->stockCount) {
-        index = global->stockOrder[i++];
-        unit = &global->unitwork[index];
-        flags = unit->flag;
-        if ((flags & 1) && (flags & 2)) {
-            score = &nbResultScoreTable[count];
-            score->useflg = 1;
-            score->unit = unit;
-            score->exp_cnt = unit->exp;
-            score->l_lv = unit->level;
-            score->ofsx = 0xC0;
-            score->lvupflg = 0;
-            score->unitidx = index;
-            score->lvupanmflg = 0;
-            score->lvupanmcnt = 0;
-            score->lvuplvanmcnt = 0;
-            addExp = GetAddExp(index, D_005510E8);
-            score->addexp = addExp;
-            score->resultadd = addExp / 45;
-            if (addExp % 45 > 0) {
-                score->resultadd = addExp / 45 + 1;
+    count = 0;
+    {
+        /* Refresh the stock snapshot only after GetAddExp and only if there
+         * is space for another score. Rejected entries still reread stockCount. */
+        FAKEMATCH_ASM_REG(dds3GlobalWork_t *, view, "$5") = global;
+        i = 0;
+        if ((s32)view->stockCount > 0) {
+            {
+                nbResultScore_t *rows = resultScoreFillBase;
+                div = 45;
+                out = EE_ADDR(&rows->resultadd);
             }
-            if (score->resultadd <= 0) {
-                score->resultadd = 1;
-            }
-            count++;
-            if (count >= 4) {
-                break;
-            }
-            global = DDS3_GBWK;
+            do {
+                FAKEMATCH_ASM_REG(unsigned char *, adjusted, "$4") = (unsigned char *)view + 4;
+                FAKEMATCH_ASM_REG(unsigned char *, stock, "$3") = EE_ADDR_AS(unsigned char *, (addr_t)i + EE_ADDR(adjusted));
+                FAKEMATCH_ASM_REG(u32, index, "$10");
+                FAKEMATCH_ASM_REG(u32, stride, "$6");
+                unsigned char *earlyRow;
+                datUnitWork_t *unit;
+                u32 flags;
+
+                index = stock[((size_t)&((dds3GlobalWork_t *)0)->stockOrder[0]) - 4];
+                FAKEMATCH_ASM_LIVE(index);
+                {
+                    /* 236 bytes per real stock unit: ((16*n - n)*4 - n)*4.
+                     * The intermediates share v0 before the final stride. */
+                    u32 scaled = ((u32)index << 4) - index;
+                    FAKEMATCH_ASM_LIVE(scaled);
+                    scaled = (scaled << 2) - index;
+                    stride = scaled << 2;
+                }
+                earlyRow = EE_ADDR_AS(unsigned char *, (addr_t)stride + EE_ADDR(adjusted));
+                flags = *(u32 *)(earlyRow + ((size_t)&((dds3GlobalWork_t *)0)->unitwork[0].flag) - 4);
+                FAKEMATCH_ASM_LIVE_WITH_INPUT(i, flags);
+                i++;
+                if (!(flags & 1)) {
+                    goto next;
+                }
+                {
+                    s32 skew = 0xc0;
+                    s32 addExp;
+                    s32 quotient;
+                    FAKEMATCH_ASM_REG(u32, passIndex, "$4");
+                    FAKEMATCH_ASM_REG(s32, targetCap, "$5");
+                    if (!(flags & 2)) {
+                        goto next;
+                    }
+                    FAKEMATCH_ASM_LIVE(skew);
+                    unit = (datUnitWork_t *)((unsigned char *)view + stride +
+                                           (size_t)&((dds3GlobalWork_t *)0)->unitwork[0]);
+
+                    one = 1;
+                    {
+                        s32 exp;
+                        u16 level;
+                        u32 fields;
+                        FAKEMATCH_ASM_REG(unsigned char *, levelBase, "$9");
+                        FAKEMATCH_ASM_REG(unsigned char *, expBase, "$3");
+                        fields = stride + ((size_t)&((dds3GlobalWork_t *)0)->unitwork[0].level) - 8;
+                        /* Co-schedule the real field displacement and the first
+                         * score value without extending either past its use. */
+                        FAKEMATCH_ASM_LIVE_PAIR(fields, one);
+                        levelBase = (unsigned char *)view + fields;
+                        /* Level uses the old view in a1 before that register
+                         * takes the cap; the EXP address uses the adjusted view. */
+                        targetCap = D_005510E8;
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT(adjusted, targetCap);
+
+                        SCORE_AT(s32, useflg) = one;
+                        expBase = adjusted + fields;
+                        /* Hold the actual level address through the independent EXP
+                         * address and unit calculations before the ordered reads. */
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT(levelBase, expBase);
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT(levelBase, unit);
+                        FAKEMATCH_ASM_LIVE_WITH_MEM(levelBase, SCORE_AT(s32, useflg));
+                        level = *(u16 *)(levelBase + 8);
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT(expBase, level);
+                        exp = *(s32 *)expBase;
+                        passIndex = index;
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR(unit, exp, passIndex);
+                        SCORE_AT(datUnitWork_t *, unit) = unit;
+                        FAKEMATCH_ASM_LIVE_WITH_MEM(exp, SCORE_AT(datUnitWork_t *, unit));
+                        SCORE_AT(s32, exp_cnt) = exp;
+                        FAKEMATCH_ASM_LIVE_WITH_MEM(level, SCORE_AT(s32, exp_cnt));
+                        SCORE_AT(s32, l_lv) = level;
+                    }
+                    FAKEMATCH_ASM_LIVE_WITH_MEM(skew, SCORE_AT(s32, l_lv));
+                    SCORE_AT(s32, ofsx) = skew;
+                    SCORE_AT(s32, lvupflg) = 0;
+                    FAKEMATCH_ASM_LIVE_AFTER_MEM_PAIR(index, SCORE_AT(s32, lvupflg), SCORE_AT(s32, ofsx));
+                    SCORE_AT(s32, unitidx) = index;
+                    SCORE_AT(s32, lvupanmflg) = 0;
+                    SCORE_AT(s32, lvupanmcnt) = 0;
+                    SCORE_AT(s32, lvuplvanmcnt) = 0;
+                    FAKEMATCH_ASM_LIVE_PAIR(div, index);
+                    FAKEMATCH_ASM_LIVE(targetCap);
+                    addExp = GetAddExp(passIndex, targetCap);
+                    *EE_ADDR_AS(s32 *, out - sizeof(s32)) = addExp;
+                    quotient = addExp / div;
+                    *(s32 *)EE_ADDR_PTR(out) = quotient;
+                    if (addExp % div > 0) {
+                        *(s32 *)EE_ADDR_PTR(out) = quotient + 1;
+                    }
+                    if (*(s32 *)EE_ADDR_PTR(out) <= 0) {
+                        *(s32 *)EE_ADDR_PTR(out) = one;
+                    }
+                    count++;
+                    out += sizeof(nbResultScore_t);
+                    if (count >= 4) {
+                        break;
+                    }
+                    global = DDS3_GBWK;
+                }
+next:
+                view = global;
+            } while (i < (s32)view->stockCount);
         }
     }
-    for (i = 0; i < 64; i++) {
-        nbResultCaptions[i].flag = 0;
-        nbResultCaptions[i].x = 0;
-        nbResultCaptions[i].y = 0;
-        nbResultCaptions[i].life = 0;
+    caption = nbResultCaptions;
+    {
+        FAKEMATCH_ASM_REG(s32, cap, "$10") = 63;
+        do {
+            cap--;
+            caption->flag = 0;
+            caption->x = 0;
+            caption->y = 0;
+            caption->life = 0;
+            caption++;
+        } while (cap >= 0);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultLoadTextures);
-#endif
+#undef SCORE_AT
 
 extern sdfTexHandle_t *nbResultTex1, *nbResultTex2, *nbResultTexHandle;
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
