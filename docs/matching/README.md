@@ -20,8 +20,8 @@ both native and emitted sizes when they differ.
 | 16 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
 | 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 13 |  | [sdk/libc.md](sdk/libc.md) |
+| 13 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 13 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
-| 12 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 12 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 11 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |

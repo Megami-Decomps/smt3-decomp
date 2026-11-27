@@ -5738,10 +5738,6 @@ s32 nbCameraHero_Cut2_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
     return 0;
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 9 PCSX2 call vectors give the same return and memory,
- * capture_009, capture_010, capture_015, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern s32 nbCameraBoss_Cut2_Ptr_Init(nbCamera_t *camera, nbCameraSkillInfo_t *info);
 extern void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *camera, nbCameraSkillInfo_t *info);
 extern void nbCameraShot_InvokeTargetPartyTop_Set(nbCamera_t *camera, nbCameraSkillInfo_t *info);
@@ -5762,13 +5758,16 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
     if (data == NULL) {
         return 0;
     }
-    if ((data->stat & 8) || effBTLModelGetID(invoke) != 0) {
+    if (data->stat & 8) {
+        return 0;
+    }
+    if (effBTLModelGetID(invoke) != 0) {
         return 0;
     }
     if (((effBTLSkillGetState() & 0xC) || (data->stat & 0x4000)) && pNbCamera.state != 7) {
         if (camera->frame == 0) {
-            info->shot_23 = 1;
             info->ptr23 = 1;
+            info->shot_23 = 1;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
                 effBTLModelAllShow();
                 effBTLModelInvokeGroupHide();
@@ -5778,7 +5777,7 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             nbCameraShot_GroundCollision(camera);
             if (effBTLSkillGetTargetNumber() == 1 && nbCameraBoss_CheckRotate(invoke)) {
                 effBTLModelGetSphereCenter(effBTLSkillGetTargetFormation(0));
-                SDF_VU0_STOREVECTOR_NOMEM(&target);
+                SDF_VU0_STOREVECTOR_MEMOPS(target);
                 effBTLModelLook(invoke, &target);
             }
         }
@@ -5797,8 +5796,8 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR(&camera->direction);
         } else if (frame == 58 && pNbCamera.state != 7) {
-            info->ptr23 = 1;
             info->shot_23 = 1;
+            info->ptr23 = 1;
             if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
                 effBTLModelAllShow();
                 effBTLModelInvokeGroupHide();
@@ -5819,9 +5818,10 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             SDF_VU0_STOREVECTOR(&camera->direction);
         } else if (frame == 54 && pNbCamera.state != 7) {
             choice = dds3GetRandIntA(NULL, 3);
-            if (choice == 0) {
-                info->ptr23 = 1;
+            switch (choice) {
+            case 0:
                 info->shot_23 = 1;
+                info->ptr23 = 1;
                 if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
                     effBTLModelAllShow();
                     effBTLModelInvokeGroupHide();
@@ -5829,7 +5829,8 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
                     camera->frame = 0;
                     nbCameraShot_InvokeTargetParty_Set2(camera, info);
                 }
-            } else if (choice == 1) {
+                break;
+            case 1:
                 info->shot_23 = 5;
                 info->ptr23 = 10;
                 if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
@@ -5838,18 +5839,9 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
                 } else {
                     nbCameraShot_InvokeTargetPartyTop_Set(camera, info);
                 }
-            } else if (choice == 2) {
-                if (nbCameraBoss_CheckFix() == 0) {
-                    info->ptr23 = 1;
-                    info->shot_23 = 1;
-                    if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
-                        effBTLModelAllShow();
-                        effBTLModelInvokeGroupHide();
-                    } else {
-                        camera->frame = 0;
-                        nbCameraShot_InvokeTargetParty_Set2(camera, info);
-                    }
-                } else {
+                break;
+            case 2:
+                if (nbCameraBoss_CheckFix() != 0) {
                     effBTLModelAllShow();
                     effBTLModelInvokeGroupHide();
                     camera->direction.x = 0.0f;
@@ -5860,8 +5852,21 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
                     camera->target.z = -1086.65994f;
                     camera->distance = 1.0f;
                     camera->fovy = 0.69813163f;
+                } else {
+                    info->shot_23 = 1;
+                    info->ptr23 = 1;
+                    if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
+                        effBTLModelAllShow();
+                        effBTLModelInvokeGroupHide();
+                    } else {
+                        camera->frame = 0;
+                        nbCameraShot_InvokeTargetParty_Set2(camera, info);
+                    }
                 }
                 nbCameraShot_GroundCollision(camera);
+                break;
+            default:
+                break;
             }
         }
         return 1;
@@ -5877,6 +5882,48 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             nbCameraBoss_InvokeTarget_Set(camera, -25.0f, 0.59999998f);
             effBTLModelAllShow();
             effBTLModelInvokeGroupHide();
+            nbCameraShot_GroundCollision(camera);
+        }
+        return 1;
+    case 0x8F:
+        if (frame == 0) nbCameraShot_PullOne_Init(camera);
+        if (frame < 41) {
+            nbCameraShot_PullOne_Calc(camera, 0.25f);
+            SetRotateMatrixY(0.006108651636f);
+            SDF_VU0_LOADVECTOR(&camera->direction);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&camera->direction);
+        } else if (frame == 41 && pNbCamera.state != 7) {
+            info->shot_23 = 1;
+            info->ptr23 = 1;
+            if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
+                effBTLModelAllShow();
+                effBTLModelInvokeGroupHide();
+            } else {
+                camera->frame = 0;
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            }
+            nbCameraShot_GroundCollision(camera);
+        }
+        return 1;
+    case 0x90:
+        if (frame == 0) nbCameraShot_PullOne_Init(camera);
+        if (frame < 87) {
+            nbCameraShot_PullOne_Calc(camera, 0.25f);
+            SetRotateMatrixY(0.006108651636f);
+            SDF_VU0_LOADVECTOR(&camera->direction);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR(&camera->direction);
+        } else if (frame == 87 && pNbCamera.state != 7) {
+            info->shot_23 = 1;
+            info->ptr23 = 1;
+            if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
+                effBTLModelAllShow();
+                effBTLModelInvokeGroupHide();
+            } else {
+                camera->frame = 0;
+                nbCameraShot_InvokeTargetParty_Set2(camera, info);
+            }
             nbCameraShot_GroundCollision(camera);
         }
         return 1;
@@ -5907,48 +5954,6 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             nbCameraBoss_InvokeTarget_Set(camera, -25.0f, 0.59999998f);
             effBTLModelAllShow();
             effBTLModelInvokeGroupHide();
-            nbCameraShot_GroundCollision(camera);
-        }
-        return 1;
-    case 0x8F:
-        if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < 41) {
-            nbCameraShot_PullOne_Calc(camera, 0.25f);
-            SetRotateMatrixY(0.006108651636f);
-            SDF_VU0_LOADVECTOR(&camera->direction);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == 41 && pNbCamera.state != 7) {
-            info->ptr23 = 1;
-            info->shot_23 = 1;
-            if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
-                effBTLModelAllShow();
-                effBTLModelInvokeGroupHide();
-            } else {
-                camera->frame = 0;
-                nbCameraShot_InvokeTargetParty_Set2(camera, info);
-            }
-            nbCameraShot_GroundCollision(camera);
-        }
-        return 1;
-    case 0x90:
-        if (frame == 0) nbCameraShot_PullOne_Init(camera);
-        if (frame < 87) {
-            nbCameraShot_PullOne_Calc(camera, 0.25f);
-            SetRotateMatrixY(0.006108651636f);
-            SDF_VU0_LOADVECTOR(&camera->direction);
-            SDF_VU0_APPLYMATRIX();
-            SDF_VU0_STOREVECTOR(&camera->direction);
-        } else if (frame == 87 && pNbCamera.state != 7) {
-            info->ptr23 = 1;
-            info->shot_23 = 1;
-            if (nbCameraBoss_Cut2_Ptr_Init(camera, info)) {
-                effBTLModelAllShow();
-                effBTLModelInvokeGroupHide();
-            } else {
-                camera->frame = 0;
-                nbCameraShot_InvokeTargetParty_Set2(camera, info);
-            }
             nbCameraShot_GroundCollision(camera);
         }
         return 1;
@@ -6019,6 +6024,10 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
                 }
                 camera->distance = 1.0f;
                 camera->fovy = 0.69813163f;
+                /* The fixed and top-camera paths each call collision, then
+                 * leave through the common handled result. */
+                nbCameraShot_GroundCollision(camera);
+                goto cut2_shot_handled;
             } else {
                 info->shot_23 = 5;
                 info->ptr23 = 10;
@@ -6031,13 +6040,13 @@ s32 nbCameraHero_Cut2_Run(nbCamera_t *camera, nbCameraSkillInfo_t *info)
             }
             nbCameraShot_GroundCollision(camera);
         }
+cut2_shot_handled:
         return 1;
+    case 0xF9:
+        return 0;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraHero_Cut2_Run);
-#endif
 
 /* NON_MATCHING. Behaviour checked against retail: 1 PCSX2 call vector give the same return and memory,
  * capture_015, covering only the paths those calls took.

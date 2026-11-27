@@ -537,3 +537,26 @@ BSNET end and shot vectors, the BSARI cut vector, and the two Kagu
 vectors. These remain 16-byte aligned for full-lane VU transfers.
 Only the storage definitions change; the camera routines, initialized
 data, and viewer buffer at 0x56B470 are unchanged.
+
+## nbCameraHero_Cut2_Run (newbattle/nbCameraBoss, 0xAA4)
+
+All 681 instruction words match at 0x001C4438 (2,724 bytes).
+The nine camera skill arms and explicit no-shot 0xF9 arm reproduce
+the native sparse dispatch. Skill 0x85 uses a separate three-way
+random-choice switch: its party/top choices share the successful
+visibility updates, while the fixed choice follows the collision
+path. The two camera selectors are stored in native order before
+calling the initializer. Frame-counter arithmetic retains the
+signed test and low-word unsigned increment.
+
+Skill 0xA3 calls ground collision separately after the fixed camera
+pose or the top-camera fallback. Both finish through the handled
+return. Keeping those two real edges explicit preserves the separate
+native collision call sites without compiler constraints. The early
+target vector uses the existing VU0 output-operand macro for the full
+local vector produced by the sphere-center provider, including W.
+
+The entire US retail image matches. The owner retains 125 other complete function bodies, 2,247
+outside text relocations, 754 read-only data relocations, and all
+allocated non-text sections. The only pre-link target encoding
+differences are the frame counter's two resolved GP-relative operands.
