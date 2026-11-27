@@ -2,6 +2,28 @@
 
 ## effBTLSys_Hansya_Draw (effect/effBattleSystem, 0x2D0)
 
+180 of 180 words match at the native 720-byte extent. The complete affected
+owner matches, and the rebuilt retail executable is byte-identical.
+
+The entry path reads the frame before it copies the three initialized
+light pointers. Its localized empty operands reference the real destination,
+the live frame value and the initialized first pointer that the copy
+consumes. They preserve that load/store and comparison schedule without
+emitting extra instructions or accessing uninitialized memory.
+
+The skill-dependent path fills the actual light and model-color records in
+native order. The formation and part inputs are refreshed where the native
+callbacks require them, and the final frame increment uses the value after
+drawing. The vector, matrix and mixed float/register operands belong to the
+actual hardware and packet consumers. These are target-specific compiler
+constraints, not evidence of the original source spelling.
+
+Ordinary, dump and scheduler-verbose stock compiler outputs agree byte
+for byte. Scoped retail-versus-linked checks exercise both palette paths,
+the rendering handoffs, and the frames that return early.
+
+### Earlier guarded draft
+
 9 of 180 words match in the retained guarded draft. It emits 688 bytes
 against the native 720-byte extent, leaving 32 native bytes uncovered.
 

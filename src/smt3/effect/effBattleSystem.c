@@ -1546,7 +1546,6 @@ void effBTLSys_Hansya_Delete2(effBattleSystem_effBTLSystem_Hansya_tag *hData)
 void effBTLSys_Hansya_SetColor(void) {
 }
 
-#ifdef NON_MATCHING
 typedef struct {
     sdf3DLight_t *lights[3];
 } effHansyaLights_t;
@@ -1557,54 +1556,99 @@ extern void effBTLModelGetSphereCenter(nbFormation_t *formation);
 extern void nbMakeUnitDrawMatrix(nbFormation_t *formation);
 extern void mdlLink(mdlObj_t *model, void *ot);
 
-void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
+void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *input)
 {
     sdf3DLight_t light __attribute__((aligned(16)));
     sdfVector4_t ambient;
+    effHansyaLights_t lights;
+    effHansyaLights_t initial;
     sdfVector4_t position;
     sdfMatrix4_t rotation;
-    effBTLAimParams_t aim;
     effBTL_SkillLight_t pointLight;
     effBTLModelColorParam_t color;
-    volatile effHansyaLights_t initial, lights;
+    effBTLAimParams_t aim;
     mdlObj_t *model;
-    u32 frame = work->frame;
+    FAKEMATCH_ASM_REG(effBattleSystem_effBTLSystem_Hansya_tag *, work, "$17");
+    FAKEMATCH_ASM_REG(effHansyaLights_t *, out, "$19") = &lights;
+    u32 frame;
+    work = input;
+    FAKEMATCH_ASM_LIVE(work);
+    frame = work->frame;
 
+    FAKEMATCH_ASM_READ_PAIR(out, frame);
     initial.lights[0] = &light;
+    FAKEMATCH_ASM_READ_MEM(initial.lights[0]);
     initial.lights[1] = NULL;
     initial.lights[2] = NULL;
-    lights = initial;
-    if (frame >= SDF_FRAMES(3)) {
+    *out = initial;
+    if (frame < SDF_FRAMES(3)) {
+        work->frame = frame + 1;
+        return;
+    }
+    {
         if (frame == SDF_FRAMES(3)) {
             s32 skill = effBTLSkillGetID();
-            if (datSkillTable.normal[skill].koukatype == 0) {
-                pointLight.ambient = 0x80231E1E;
-                color.unknown00 = 0x808080AA;
+            FAKEMATCH_ASM_REG(u32, diffuse, "$2");
+            u32 amb;
+            FAKEMATCH_ASM_REG(u32, modelColor, "$4");
+            FAKEMATCH_ASM_REG(u32, duration, "$6");
+            FAKEMATCH_ASM_REG(u32, active, "$7");
+            FAKEMATCH_ASM_REG(u32, aimKind, "$5");
+            FAKEMATCH_ASM_REG(const datNormalSkill_t *, skillRows, "$4");
+            /* Distinct native home for the first row-base use; the
+             * later palette lookup materializes its own pointer. */
+            skillRows = datSkillTable.normal;
+            FAKEMATCH_ASM_LIVE_WITH_INPUT(skillRows, skill);
+            if (skillRows[skill].koukatype == 0) {
+                duration = 8;
+                FAKEMATCH_ASM_LIVE(duration);
+                active = 1;
+                aimKind = 2;
+                diffuse = 0x80B4B4B4U;
+                amb = 0x80231E1EU;
+                modelColor = 0x80800000U;
+                FAKEMATCH_ASM_LIVE_PAIR(active, aimKind);
+                FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR(diffuse, modelColor, amb);
+                modelColor |= 0x80AAU;
             } else {
-                pointLight.ambient = 0x80302212;
-                color.unknown00 = 0x80FF8080;
+                duration = 8;
+                FAKEMATCH_ASM_LIVE(duration);
+                active = 1;
+                aimKind = 2;
+                diffuse = 0x80B4B4B4U;
+                amb = 0x80302212U;
+                modelColor = 0x80FF8080U;
+                FAKEMATCH_ASM_LIVE_PAIR(active, aimKind);
+                FAKEMATCH_ASM_LIVE_WITH_INPUT_PAIR(modelColor, diffuse, amb);
             }
-            pointLight.type = 0;
-            pointLight.unknown01 = 2;
-            pointLight.unknown02 = 0;
-            pointLight.unknown04 = 0;
-            pointLight.diffuse = 0x80B4B4B4;
-            pointLight.color_anim = 0;
-            pointLight.unknown14 = 0;
-            pointLight.unknown18 = 8;
-            pointLight.unknown1C = 1;
-            color.unknown04 = 0;
-            color.unknown08 = 0;
-            color.unknown0C = 8;
-            color.unknown10 = 1;
-            effBTLPointLightSet(&pointLight, work->pFormation);
+            *(volatile u8 *)&pointLight.unknown01 = aimKind;
+            *(volatile u32 *)&pointLight.diffuse = diffuse;
+            *(volatile u32 *)&pointLight.ambient = amb;
+            *(volatile u32 *)&color.unknown00 = modelColor;
+            *(volatile u32 *)&color.unknown0C = duration;
+            *(volatile u32 *)&color.unknown10 = active;
+            *(volatile u8 *)&pointLight.type = 0;
+            *(volatile u8 *)&pointLight.unknown02 = 0;
+            *(volatile u32 *)&pointLight.unknown04 = 0;
+            *(volatile u32 *)&pointLight.color_anim = 0;
+            *(volatile u32 *)&pointLight.unknown14 = 0;
+            *(volatile u32 *)&pointLight.unknown18 = duration;
+            *(volatile u32 *)&pointLight.unknown1C = active;
+            *(volatile u32 *)&color.unknown04 = 0;
+            *(volatile u32 *)&color.unknown08 = 0;
+            FAKEMATCH_ASM_LIVE_MEM(color.unknown08);
+            effBTLPointLightSet(&pointLight, ((volatile effBattleSystem_effBTLSystem_Hansya_tag *)work)->pFormation);
             effBTLModelColorSet(&color, work->pFormation);
         }
         SDF_VU0_LOADVECTOR(&work->pFormation->rot);
         SDF_VU0_LOADVECTOR_B(D_005334C0);
         Mult();
         ToMatrix();
-        SDF_VU0_STOREMATRIX(&rotation);
+        {
+            sdfMatrix4_t *dst = &rotation;
+            FAKEMATCH_ASM_LIVE(dst);
+            SDF_VU0_STOREMATRIX(dst);
+        }
         dds3EffectPartSetRotateMatrix(work->hPart, &rotation);
         dds3EffectPartSetRotateMatrix(work->hPart2, &rotation);
         aim.scaleKind = 0;
@@ -1614,38 +1658,57 @@ void effBTLSys_Hansya_Draw(effBattleSystem_effBTLSystem_Hansya_tag *work)
         effBTLPartGetRotateMatrixPtr(&aim, &rotation);
         dds3EffectPartSetDirection(work->hPart2, &rotation);
         effBTLModelGetSphereCenter(work->pFormation);
-        SDF_VU0_STOREVECTOR(&position);
-        dds3EffectPartSetPosition(work->hPart, &position);
-        nbMakeUnitDrawMatrix(work->pFormation);
-        SDF_VU0_STOREVECTOR(&position);
-        dds3EffectPartSetPosition(work->hPart2, &position);
-        if (datSkillTable.normal[effBTLSkillGetID()].koukatype == 0) {
-            light.color.x = 0.6078431010246277f;
-            light.color.y = 0.23529411f;
-            light.color.z = 0.3529411554336548f;
-        } else {
-            light.color.x = 0.25490195f;
-            light.color.y = 0.33333332f;
-            light.color.z = 0.45098036527633667f;
+        {
+            sdfVector4_t *dst = &position;
+            SDF_VU0_STOREVECTOR_RWADDR_MEMORY(dst);
+        }
+        {
+            sdfVector4_t *positionSlot = &position;
+            dds3EffectPartSetPosition(work->hPart, positionSlot);
+            nbMakeUnitDrawMatrix(work->pFormation);
+            SDF_VU0_STOREVECTOR_RWADDR_MEMORY(positionSlot);
+        }
+        {
+            FAKEMATCH_ASM_REG(const datNormalSkill_t *, lateRows, "$16");
+            s32 slot;
+            dds3EffectPartSetPosition(work->hPart2, &position);
+            /* The second real table base survives the skill getter. */
+            lateRows = datSkillTable.normal;
+            slot = effBTLSkillGetID();
+            FAKEMATCH_ASM_LIVE_WITH_INPUT(lateRows, slot);
+            if (lateRows[slot].koukatype == 0) {
+                light.color.x = 0.6078431010246277f;
+                light.color.y = 0.23529411f;
+                light.color.z = 0.3529411554336548f;
+            } else {
+                light.color.x = 0.25490195f;
+                light.color.y = 0.33333332f;
+                light.color.z = 0.45098036527633667f;
+            }
         }
         light.color.w = 0.0f;
         SDF_VU0_COPYVECTOR(&ambient, &light.color);
-        light.v.x = -0.7299999594688416f;
-        light.v.y = 1.5499999523162842f;
-        light.v.z = 0.24f;
-        light.v.w = 0.0f;
-        sdf3DMakeLightParallelPacket(&work->lightPacket, (sdf3DLight_t **)lights.lights, &ambient);
+        {
+            FAKEMATCH_ASM_REG(f32, x, "$f2") = -0.7299999594688416f;
+            FAKEMATCH_ASM_REG(sdf3DLight_t **, listArg, "$5") = out->lights;
+            FAKEMATCH_ASM_REG(f32, y, "$f1") = 1.5499999523162842f;
+            FAKEMATCH_ASM_REG(sdf3DLightParallelPacket_t *, packetArg, "$4") = &work->lightPacket;
+            FAKEMATCH_ASM_REG(f32, z, "$f0") = 0.24f;
+            FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32(y, listArg, x);
+            FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32(z, packetArg, y);
+            light.v.x = x;
+            light.v.y = y;
+            light.v.z = z;
+            light.v.w = 0.0f;
+            sdf3DMakeLightParallelPacket(packetArg, listArg, &ambient);
+        }
         model = dds3EffectPartGetHandle(work->hPart);
         model->inner->light = &work->lightPacket;
         mdlLink(model, sdfModelOtTable);
         dds3EffectPartDraw(work->hPart2);
-        frame = work->frame;
+        work->frame++;
     }
-    work->frame = frame + 1;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Hansya_Draw);
-#endif
 
 u32 effBTLSys_Hansya_GetLength(void *hData)
 {
