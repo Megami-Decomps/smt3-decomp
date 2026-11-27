@@ -3060,7 +3060,93 @@ _Bigint *_i2b(_reent *r, s32 i) {
     return b;
 }
 
-INCLUDE_ASM(const s32, "sdk/libc", _multiply);
+_Bigint *_multiply(_reent *r, _Bigint *a, _Bigint *b)
+{
+    _Bigint *c;
+    s32 na, nb, k;
+    s32 total;
+    sdkBigintLimb_t *out, *dst, *acc;
+    sdkBigintLimb_t *ax, *axEnd;
+    sdkBigintLimb_t *bx, *bxEnd;
+    sdkBigintLimb_t *src;
+    u32 carry, in, old, lo, hi;
+    u32 part;
+
+    if (a->wds < b->wds) {
+        c = a;
+        a = b;
+        b = c;
+    }
+    k = a->k;
+    na = a->wds;
+    nb = b->wds;
+    total = na + nb;
+    if (a->maxwds < total)
+        k++;
+    c = _Balloc(r, k);
+    out = c->limb;
+    /* The clear scan and the input scans reuse these two bounded cursors. */
+    ax = out + total;
+    for (src = out; src < ax; ++src)
+        src->word = 0;
+    bx = b->limb;
+    bxEnd = bx + nb;
+    ax = a->limb;
+    axEnd = ax + na;
+    dst = out;
+    if (bx < bxEnd) {
+        do {
+            part = bx->word & 0xffff;
+            acc = dst;
+            if (part != 0) {
+                src = ax;
+                carry = 0;
+                do {
+                    lo = (src->word & 0xffff) * part + (acc->word & 0xffff) + carry;
+                    carry = lo >> 16;
+                    hi = (src++->word >> 16) * part + (acc->word >> 16) + carry;
+                    carry = hi >> 16;
+                    acc->half[0] = lo;
+                    acc->half[1] = hi;
+                    acc++;
+                } while (src < axEnd);
+                acc->word = carry;
+            }
+            part = bx->word >> 16;
+            acc = dst;
+            if (part != 0) {
+                src = ax;
+                carry = 0;
+                /* Keep the accumulator address ready for the first upper-pass load. */
+                FAKEMATCH_ASM_LIVE(acc);
+                hi = acc->word;
+                old = hi;
+                do {
+                    in = src++->word;
+                    acc->half[0] = hi;
+                    lo = (in & 0xffff) * part + (old >> 16) + carry;
+                    acc->half[1] = lo;
+                    ++acc;
+                    old = acc->word;
+                    /* Keep the low result until the next word is loaded, with
+                     * the real multiplier half still live for the upper product. */
+                    FAKEMATCH_ASM_LIVE_WITH_INPUT(lo, part);
+                    carry = lo >> 16;
+                    hi = (in >> 16) * part + (old & 0xffff) + carry;
+                    carry = hi >> 16;
+                } while (src < axEnd);
+                acc->word = hi;
+            }
+            bx++;
+            dst++;
+        } while (bx < bxEnd);
+    }
+    acc = out + total;
+    while (total > 0 && (--acc)->word == 0)
+        --total;
+    c->wds = total;
+    return c;
+}
 
 /* Nonzero n & 3 selects 5, 25, or 125. */
 extern const s32 pow5MultTable[];

@@ -83,6 +83,36 @@ checks the owner and owned data, all 100 peer functions, the full retail image,
 and literal plain/stock-dump assembly and raw ELF equality separately in
 production, SKIP_ASM, retained-C and retained-C plus FIX_BUGS contexts.
 
+## _multiply
+
+131 of 131 words match at 0x002DAA58 (524 native EE bytes). The bigint
+allocator reserves a 20-byte header followed by `maxwds` packed
+little-endian limbs, at four bytes each. The header's usual word array and
+the declared union-limb view have the same offset, alignment, limb stride
+and GNU trailing-array convention. The record size and all old consumers
+are unchanged. No integer-pointer conversion or cast-only halfword alias
+is used for the product.
+
+Multiply orders the inputs by limb count, allocates enough space for the sum of their
+used limb counts, and clears exactly that many output limbs. The two
+passes accumulate contributions from the lower and upper multiplier
+halves, with a carry across input limbs. The upper pass stores its pending
+low half, writes the newly computed high half, and reads the next packed
+accumulator word before folding in the low-half carry. The final whole-word
+store preserves the upper pass's pending limb. A backward scan trims the
+output count; all-zero products have count zero.
+
+The clear scan and input scans reuse the same two cursor lifetimes. Two
+empty compiler constraints preserve the native ordering of real consumers:
+the upper-phase accumulator address is used at the initial packed-word
+read, and the current low-half result crosses the following packed-word
+read before it is shifted into the carry. The multiplier half is also
+live because it feeds the next high-half multiply-add. Neither constraint
+emits instructions, reads imaginary storage, pins a register, or adds
+work. No other register constraint is retained. Removing either one alone
+leaves 129 of 131 matching words; removing both leaves 127. The second
+constraint without its live multiplier operand leaves 112.
+
 ## gcc2_compiled__1
 
 The dtoa quotient/remainder helper at 0x002D8148 has a native-sized draft:
