@@ -270,3 +270,32 @@ source provenance, and identical allocated output, typed symbols and
 ordered relocations. The host fixture passed 131,072 state and callback
 cases per mode both unoptimized and optimized; deliberate stale shield
 and stale speed versions failed.
+
+## fldRunAiCng (field/fldTest, 0x6D8)
+
+Matches all 438 retail words at the native 1,752-byte extent. The dispatch
+keeps the original diagnostic objects and provider order. Modes 5 and 6
+retain separate found-route and missing-route updates, including the selected
+map-cell pointer, route base and unsigned count subtraction. Modes 1, 2 and 8
+publish the same final walk-mode and speed fields through the compiler's
+shared tail.
+
+Mode 4 probes the second route point only when the cell supplies one. The
+collision provider reads and writes indexed XYZ coordinates; the three
+scratch objects are real four-float arrays, 16-byte aligned as in retail.
+The hit test still chooses the original route or advances to the next point.
+Both successful geometry paths observe their actual distance, angle and
+positive walk/run speed before entering the shared frame calculation.
+The signed frame conversion follows the retail truncation for valid finite
+field positions and the assigned 6 or 20 speed, not arbitrary malformed state.
+
+The actual distance and observed speed enter the shared divide in `$f0`
+and `$f1`, respectively, after the last geometry call. The found-route
+speed and the angle published by the shared block each use an empty
+floating-point liveness constraint; only the angle needs the volatile form.
+Removing the distance binding, speed binding, found-route speed hold, or
+angle hold separately leaves 431, 433, 318, or 434 matching words in the
+local controls; only the found-route speed ablation changes the size (1,744
+bytes). The fallback speed, route-state pointer, and angle's
+physical register need no constraints. The holds emit no instructions,
+are scoped to real consumers, and do not cross a provider call.

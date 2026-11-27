@@ -1792,17 +1792,26 @@ f32 fldTurnToward(f32 cur, f32 target, f32 speed, f32 minStep) {
     return delta;
 }
 
-#ifdef NON_MATCHING
 
 extern u32 dds3GetRandA(void *name);
 extern s32 fldHitChkEnemy(const f32 *position, const f32 *target, f32 *hitPosition);
 extern char fldDataNgMsg[];
 extern char fldMsg1KO[];
 
+extern const char D_00531200[];
+extern const char D_00531210[];
+extern const char D_00531220[];
+extern const char D_00531230[];
+extern const char D_00531240[];
+extern const char D_00531250[];
+extern const char D_00531260[];
+extern const char D_00531270[];
+extern const char D_00531280[];
+extern const char D_00531290[];
 void fldRunAiCng(s32 mode)
 {
-    volatile f32 distance = fldRun_Dante.d_p_len;
-    volatile f32 angle = fldRun_Dante.d_p_dir;
+    f32 distance = fldRun_Dante.d_p_len;
+    f32 angle = fldRun_Dante.d_p_dir;
     fldMapCell_t *cell;
     fldRoutePoint_t *route;
     f32 targetX;
@@ -1811,36 +1820,36 @@ void fldRunAiCng(s32 mode)
     fldRun_Dante.cnt_ex = 0;
     fldRun_Dante.tikamiti = 0;
     if (mode == 0) {
-        printf("AI:[ NULL ]\n");
+        printf(D_00531200);
         fldRun_Dante.status = 0;
-        fldRun_Dante.speed = 0.0f;
         fldRun_Dante.wkmode = 0;
         fldRun_Dante.nextframe = 0;
+        fldRun_Dante.speed = 0.0f;
     } else if (mode == 1) {
-        printf("AI:[ STND ]\n");
+        printf(D_00531210);
         fldRun_Dante.status = mode;
         fldRun_Dante.nextframe = 30;
         fldRun_Dante.update_flag = 3;
         fldRun_Dante.flag |= 2;
-        fldRun_Dante.wkmode = 0;
         fldRun_Dante.speed = 0.0f;
+        fldRun_Dante.wkmode = 0;
     } else if (mode == 2) {
-        printf("AI:[ WAIT ]\n");
+        printf(D_00531220);
         fldRun_Dante.status = mode;
         fldRun_Dante.nextframe = 30;
         fldRun_Dante.update_flag = 3;
         fldRun_Dante.flag |= 2;
-        fldRun_Dante.wkmode = 0;
         fldRun_Dante.speed = 0.0f;
+        fldRun_Dante.wkmode = 0;
     } else if (mode == 9) {
-        printf("AI:[ DOIN ]\n");
+        printf(D_00531230);
         fldRun_Dante.status = mode;
-        fldRun_Dante.update_flag = 2;
         fldRun_Dante.nextframe = 80;
         fldRun_Dante.speed = 10.0f;
         fldRun_Dante.flag |= 2;
+        fldRun_Dante.update_flag = 2;
     } else if (mode == 6) {
-        printf("AI:[ PRUN ]\n");
+        printf(D_00531240);
         fldRun_Dante.status = mode;
         fldRun_Dante.wkmode = 0;
         FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
@@ -1849,26 +1858,34 @@ void fldRunAiCng(s32 mode)
         fldRun_Dante.targetIx = fldRunDanteStartX[0];
         fldRun_Dante.targetIz = fldRunDanteStartX[1];
         if (cell != NULL) {
+            u32 routeOffset = cell->routeOffset;
+            s32 delay = 30;
+            u8 *mapBytes = (u8 *)fldRunMapHeader;
+            f32 routeAngle;
+            u32 count;
+            fldRoutePoint_t *currentRoute;
             fldRun_Dante.now = 0;
-            route = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + cell->routeOffset);
+            currentRoute = (fldRoutePoint_t *)(mapBytes + routeOffset);
+            routeAngle = currentRoute->angle;
+            count = cell->routeCount;
             fldRun_Dante.speed = 20.0f;
-            fldRun_Dante.nextframe = 30;
-            fldRun_Dante.goal = cell->routeCount - 1;
-            fldRun_Dante.RouteDataTop = route;
-            fldRun_Dante.angleToPlayer = route->angle;
+            fldRun_Dante.nextframe = delay;
+            fldRun_Dante.goal = (s32)(count - 1u);
+            fldRun_Dante.RouteDataTop = currentRoute;
+            fldRun_Dante.angleToPlayer = routeAngle;
         } else {
             printf(fldDataNgMsg);
             fldRun_Dante.RouteDataTop = NULL;
-            fldRun_Dante.speed = 0.0f;
             fldRun_Dante.nextframe = 20;
             fldRun_Dante.now = 0;
             fldRun_Dante.goal = 0;
             fldRun_Dante.angleToPlayer = 0.0f;
+            fldRun_Dante.speed = 0.0f;
         }
         fldRun_Dante.update_flag = 0;
         fldRun_Dante.flag |= 2;
     } else if (mode == 5) {
-        printf("AI:[ PWAK ]\n");
+        printf(D_00531250);
         fldRun_Dante.status = mode;
         fldRun_Dante.wkmode = 1;
         FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
@@ -1878,26 +1895,34 @@ void fldRunAiCng(s32 mode)
         fldRun_Dante.targetIx = fldRunDanteStartX[0];
         fldRun_Dante.targetIz = fldRunDanteStartX[1];
         if (cell != NULL) {
+            u32 routeOffset = cell->routeOffset;
+            s32 delay = 120;
+            u8 *mapBytes = (u8 *)fldRunMapHeader;
+            f32 routeAngle;
+            u32 count;
+            fldRoutePoint_t *currentRoute;
             fldRun_Dante.now = 0;
-            route = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + cell->routeOffset);
+            currentRoute = (fldRoutePoint_t *)(mapBytes + routeOffset);
+            routeAngle = currentRoute->angle;
+            count = cell->routeCount;
             fldRun_Dante.speed = 5.0f;
-            fldRun_Dante.nextframe = 120;
-            fldRun_Dante.goal = cell->routeCount - 1;
-            fldRun_Dante.RouteDataTop = route;
-            fldRun_Dante.angleToPlayer = route->angle;
+            fldRun_Dante.nextframe = delay;
+            fldRun_Dante.goal = (s32)(count - 1u);
+            fldRun_Dante.RouteDataTop = currentRoute;
+            fldRun_Dante.angleToPlayer = routeAngle;
         } else {
-            fldRun_Dante.speed = 0.0f;
-            fldRun_Dante.nextframe = 20;
             fldRun_Dante.RouteDataTop = NULL;
+            fldRun_Dante.nextframe = 20;
             fldRun_Dante.now = 0;
             fldRun_Dante.goal = 0;
             fldRun_Dante.angleToPlayer = 0.0f;
+            fldRun_Dante.speed = 0.0f;
         }
         fldRun_Dante.update_flag = 2;
         fldRun_Dante.flag |= 2;
     } else if (mode == 3) {
         u32 delay;
-        printf("AI:[ SOBA ]\n");
+        printf(D_00531260);
         fldRun_Dante.status = mode;
         delay = (dds3GetRandA(NULL) >> 3) % 40;
         fldRun_Dante.update_flag = 0;
@@ -1905,41 +1930,48 @@ void fldRunAiCng(s32 mode)
         fldRun_Dante.flag |= 2;
         fldRun_Dante.nextframe = delay + 40;
     } else if (mode == 4) {
-        printf("AI:[ PATR ]\n");
+        fldMapCell_t *found;
+        fldTest_FLDRUN_DANTE_t *routeState;
+        FAKEMATCH_ASM_REG(f32, distNumerator, "$f0");
+        FAKEMATCH_ASM_REG(f32, speedDenominator, "$f1");
+
+        printf(D_00531270);
         fldRun_Dante.status = 4;
         FroFtoI(fldRun_Dante.x, fldRun_Dante.z, (u16 *)&fldRun_Dante.ix, (u16 *)&fldRun_Dante.iz);
         FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
-        cell = fldFindMapCell(fldRun_Dante.ix, fldRun_Dante.iz, (s16)fldRunDanteStartX[0], (s16)fldRunDanteStartX[1]);
-        fldRun_Dante.routeCell = cell;
+        found = fldFindMapCell(fldRun_Dante.ix, fldRun_Dante.iz, (s16)fldRunDanteStartX[0], (s16)fldRunDanteStartX[1]);
+        fldRun_Dante.routeCell = found;
         fldRun_Dante.targetIx = fldRunDanteStartX[0];
         fldRun_Dante.targetIz = fldRunDanteStartX[1];
-        if (cell != NULL) {
+        if (found != NULL) {
             fldRoutePoint_t *routeBase;
-            f32 d;
-            f32 a;
 
             fldRun_Dante.now = 0;
             fldRun_Dante.nextframe = 0;
-            fldRun_Dante.goal = cell->routeCount - 1;
-            fldRun_Dante.speed = fldRun_Dante.wkmode != 0 ? 6.0f : 20.0f;
+            fldRun_Dante.goal = found->routeCount - 1;
+            if (fldRun_Dante.wkmode != 0) {
+                fldRun_Dante.speed = 6.0f;
+            } else {
+                fldRun_Dante.speed = 20.0f;
+            }
             routeBase = (fldRoutePoint_t *)((u8 *)fldRunMapHeader + fldRun_Dante.routeCell->routeOffset);
             route = routeBase;
             if (fldRun_Dante.routeCell->routeCount >= 2) {
-                sdfVector4_t position;
-                sdfVector4_t targetPos;
-                sdfVector4_t hitPosition;
+                f32 position[4] __attribute__((aligned(16)));
+                f32 targetPos[4] __attribute__((aligned(16)));
+                f32 hitPosition[4] __attribute__((aligned(16)));
 
                 route++;
                 fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
-                position.x = fldRun_Dante.x;
-                position.y = 0.0f;
-                position.z = fldRun_Dante.z;
-                position.w = 1.0f;
-                targetPos.x = targetX;
-                targetPos.y = 0.0f;
-                targetPos.z = targetZ;
-                targetPos.w = 1.0f;
-                if (fldHitChkEnemy(&position.x, &targetPos.x, &hitPosition.x) != -1) {
+                position[0] = fldRun_Dante.x;
+                position[1] = 0.0f;
+                position[2] = fldRun_Dante.z;
+                position[3] = 1.0f;
+                targetPos[0] = targetX;
+                targetPos[1] = 0.0f;
+                targetPos[2] = targetZ;
+                targetPos[3] = 1.0f;
+                if (fldHitChkEnemy(position, targetPos, hitPosition) != -1) {
                     route = routeBase;
                 } else {
                     printf(fldMsg1KO);
@@ -1947,11 +1979,19 @@ void fldRunAiCng(s32 mode)
                 }
             }
             fldMapIndexToPos(route->x, route->z, &targetX, &targetZ);
-            fldGetDistAngleTo(&d, &a, targetX, targetZ);
-            distance = d;
-            angle = a;
-            fldRun_Dante.angleToPlayer = angle;
-            fldRun_Dante.nextframe = (s32)(distance / fldRun_Dante.speed);
+            fldGetDistAngleTo(&distance, &angle, targetX, targetZ);
+            {
+                f32 liveSpeed;
+                f32 liveDistance;
+                /* Load this route's actual denominator before the common result block. */
+                routeState = &fldRun_Dante;
+                liveSpeed = routeState->speed;
+                FAKEMATCH_ASM_LIVE_F32(liveSpeed);
+                liveDistance = distance;
+                distNumerator = liveDistance;
+                speedDenominator = liveSpeed;
+                goto mode4Frame;
+            }
         } else {
             fldRun_Dante.nextframe = 20;
             fldRun_Dante.now = 0;
@@ -1959,22 +1999,48 @@ void fldRunAiCng(s32 mode)
             fldRun_Dante.angleToPlayer = 0.0f;
             fldRun_Dante.speed = 0.0f;
             if (fldRun_Dante.ix == (s16)fldRunDanteStartX[0] && fldRun_Dante.iz == (s16)fldRunDanteStartX[1]) {
-                f32 d;
-                f32 a;
                 fldMapIndexToPos(fldRun_Dante.ix, fldRun_Dante.iz, &targetX, &targetZ);
-                fldGetDistAngleTo(&d, &a, targetX, targetZ);
-                distance = d;
-                angle = a;
-                fldRun_Dante.speed = fldRun_Dante.wkmode != 0 ? 6.0f : 20.0f;
-                fldRun_Dante.angleToPlayer = angle;
-                fldRun_Dante.nextframe = (s32)(distance / fldRun_Dante.speed);
+                fldGetDistAngleTo(&distance, &angle, targetX, targetZ);
+                if (fldRun_Dante.wkmode != 0) {
+                    fldRun_Dante.speed = 6.0f;
+                } else {
+                    fldRun_Dante.speed = 20.0f;
+                }
+                {
+                    f32 liveSpeed;
+                    f32 liveDistance;
+                    /* Keep the distance load before the fallback speed snapshot. */
+                    liveDistance = distance;
+                    routeState = &fldRun_Dante;
+                    liveSpeed = routeState->speed;
+                    distNumerator = liveDistance;
+                    speedDenominator = liveSpeed;
+                }
+                goto mode4Frame;
             }
         }
-        fldRun_Dante.update_flag = fldRun_Dante.wkmode != 0 ? 2 : 0;
-        fldRun_Dante.flag |= 2;
+        goto mode4Flags;
+mode4Frame:
+        {
+            /* Preserve the angle result across the shared frame calculation. */
+            f32 observedAngle = angle;
+            f32 frames;
+            FAKEMATCH_ASM_LIVE_F32_VOLATILE(observedAngle);
+            frames = distNumerator / speedDenominator;
+            routeState->angleToPlayer = observedAngle;
+            routeState->nextframe = (s32)frames;
+        }
+mode4Flags:
+        if (fldRun_Dante.wkmode != 0) {
+            fldRun_Dante.update_flag = 2;
+            fldRun_Dante.flag |= 2;
+        } else {
+            fldRun_Dante.update_flag = 0;
+            fldRun_Dante.flag |= 2;
+        }
     } else if (mode == 7) {
         u32 delay;
-        printf("AI:[ GUN1 ]\n");
+        printf(D_00531280);
         fldRun_Dante.status = mode;
         fldRun_Dante.wkmode = 0;
         delay = (dds3GetRandA(NULL) >> 3) % 60;
@@ -1983,17 +2049,16 @@ void fldRunAiCng(s32 mode)
         fldRun_Dante.flag |= 2;
         fldRun_Dante.nextframe = delay + 50;
     } else if (mode == 8) {
-        printf("AI:[ GUN2 ]\n");
+        printf(D_00531290);
         fldRun_Dante.status = mode;
         fldRun_Dante.update_flag = 4;
         fldRun_Dante.nextframe = 90;
         fldRun_Dante.flag |= 2;
-        fldRun_Dante.wkmode = 0;
         fldRun_Dante.speed = 0.0f;
+        fldRun_Dante.wkmode = 0;
     }
 }
-#else
-/* Native AI diagnostic text, separately compiled from its assembly caller. */
+/* Native AI diagnostic strings retain their original labels and alignment. */
 const char D_00531200[] __attribute__((aligned(8))) = "AI:[ NULL ]\n";
 const char D_00531210[] __attribute__((aligned(8))) = "AI:[ STND ]\n";
 const char D_00531220[] __attribute__((aligned(8))) = "AI:[ WAIT ]\n";
@@ -2005,8 +2070,7 @@ const char D_00531270[] __attribute__((aligned(8))) = "AI:[ PATR ]\n";
 const char D_00531280[] __attribute__((aligned(8))) = "AI:[ GUN1 ]\n";
 const char D_00531290[] __attribute__((aligned(8))) = "AI:[ GUN2 ]\n";
 
-INCLUDE_ASM(const s32, "field/fldTest", fldRunAiCng);
-#endif
+
 
 void func_0011C790(void) {
 }
