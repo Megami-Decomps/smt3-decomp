@@ -25,9 +25,9 @@ both native and emitted sizes when they differ.
 | 12 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 11 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 10 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
+| 10 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 9 |  | [rodata-fill-audit.md](rodata-fill-audit.md) |
 | 9 |  | [newbattle/nbPanelProcess.md](newbattle/nbPanelProcess.md) |
-| 9 | newbattle/nbActionProcess | [newbattle/nbActionProcess.md](newbattle/nbActionProcess.md) |
 | 8 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 8 | newbattle/nbCalc | [newbattle/nbCalc.md](newbattle/nbCalc.md) |
 | 7 | sdk/libgcc_signed_divmod | [sdk/libgcc_longlong.md](sdk/libgcc_longlong.md) |

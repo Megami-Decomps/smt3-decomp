@@ -432,3 +432,31 @@ substitutes unused 128-bit typedefs with same-size objects because i386 GCC
 lacks that mode. Callbacks and RNG are modeled; these are not new EE execution
 traces or proof for invalid pointers, zero divisors or exhausted action stacks.
 Integrated retail and regression checks remain separate publication gates.
+
+## GetKoukaList (newbattle/nbActionProcess, 0x624)
+
+All 393 instruction words match at the native 1,572-byte size and address
+0x002518C8. The routine clears the complete output list before the error
+exit, picks the hit count from the original skill bytes, and filters the
+selected formation slots. The conditional retry carries the actual
+selected ID and tested count. The random adjustment, first and subsequent
+candidate scans, and hit accumulation retain the native RNG calls and
+signed byte reads and writes. The post-filter skill lookups and callbacks
+still read the current action and formation records where retail does.
+
+The direct and probabilistic paths keep their real bit seeds, signed row
+ordinals and write cursors. The count predicate is separate from the
+append cursor and stays live only on the retry path that uses it. Narrow
+compiler operands retain these real inputs and outputs; they do not add
+reads, stores or runtime comparisons.
+
+The compiler generates the existing 8-entry and 16-entry switch tables
+at their native addresses, with all 24 resolved entries identical. Only
+the two target-owned fallback object labels disappear from the input
+symbol table. Allocated bytes, resolved sites, and all ordered peer
+relocations and other typed records are unchanged.
+
+Plain and diagnostic stock compiler output agree. Scoped native replay
+covers the real RNG and provider routes and a separate callback-mutation
+suite, with ordered output and input reads. The full action-process owner
+and all 4,551,696 linked retail bytes reproduce exactly.

@@ -1278,173 +1278,319 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
 
 const char nbKoukaListSelectFmt[40] = "\310\277\261\307\262\363\277\364=%d, select = 0x%08X\n";
 
-#ifdef NON_MATCHING
+/* The target-count bytes are addressed from an interior base in retail. */
+SYMBOL_AT_REGION(u8, koukaHitBase, datSkillTable, 16);
 void GetKoukaList(nbActionProcessData_t *a, s8 koukalist[32][2], u32 select, s32 nskill)
 {
+    FAKEMATCH_ASM_REG(nbActionProcessData_t *, action, "$19") = a;
     s8 candidates[32][2];
+    s8 (*out)[2];
+    s8 (*candidate)[2];
     nbFormation_t *form;
     datUnitWork_t *work;
-    s32 i, j, count, used, last, index, limit, hits, hp, minHp;
+    s32 i, j, count, watermark, index, limit, hp;
+    FAKEMATCH_ASM_REG(s32, hits, "$22");
     s32 first, second;
     u32 animetype;
     s8 tmp;
 
-    for (i = 0; i < 32; i++) {
-        koukalist[i][0] = -1;
-        koukalist[i][1] = 0;
+    watermark = 101;
+    {
+        typedef s8 (*RowCursor)[2];
+        FAKEMATCH_ASM_REG(RowCursor, init, "$2") = koukalist;
+        for (i = 31; i >= 0; i--) {
+            (*init)[0] = -1;
+            (*init)[1] = 0;
+            ++init;
+        }
     }
-    if (a->runerr != 0) {
+    if (action->runerr != 0) {
         return;
     }
-    hits = datSkillTable.normal[nskill].targetcntmin;
-    if (hits < datSkillTable.normal[nskill].targetcntmax) {
-        hits += dds3GetRandIntA(NULL, datSkillTable.normal[nskill].targetcntmax - hits + 1);
+    {
+        const u8 *counts = koukaHitBase + nskill * sizeof(datNormalSkill_t);
+        s32 max = counts[5];
+        FAKEMATCH_ASM_REG(s32, min, "$16") = counts[4];
+        FAKEMATCH_ASM_REG(s32, more, "$3");
+        FAKEMATCH_ASM_LIVE(min);
+        hits = min;
+        more = min < max;
+        FAKEMATCH_ASM_LIVE(more);
+        if (more) {
+            hits = min + dds3GetRandIntA(NULL, max - min + 1);
+        }
     }
-    printf("\310\277\261\307\262\363\277\364=%d, select = 0x%08X\n", hits, select);
-    for (i = 0; i < 16; i++) {
-        if (select & (1U << i)) {
-            form = &a->data->form[i];
-            if ((form->stat & 1) && ((form->stat & 0x40) >= 0x40) &&
-                ((a->data->party[form->partyindex].flag & 0x20) || CheckTimeListDead(a, i))) {
-                select &= ~(1U << i);
+    printf(nbKoukaListSelectFmt, hits, select);
+    {
+        FAKEMATCH_ASM_REG(u32, rowOffset, "$20");
+        i = 0;
+        rowOffset = 0;
+        for (; i < 16; i++, rowOffset += sizeof(*form)) {
+            u32 mask = 1U << i;
+            nbMainProcessData_t *data;
+            FAKEMATCH_ASM_REG(nbFormation_t *, form, "$4");
+            FAKEMATCH_ASM_REG(u32, status, "$3");
+            if (!(select & mask)) {
+                continue;
+            }
+            {
+                FAKEMATCH_ASM_REG(u32, base, "$2");
+                data = action->data;
+                base = (u32)data->form;
+                form = (nbFormation_t *)(rowOffset + base);
+            }
+            status = form->stat;
+            if (!(status & 1)) {
+                continue;
+            }
+            {
+                FAKEMATCH_ASM_REG(u32, edge, "$2") = status & 0x40;
+
+                if (!edge) {
+                    continue;
+                }
+            }
+            if ((data->party[form->partyindex].flag & 0x20) || CheckTimeListDead(action, i)) {
+                select &= ~mask;
             }
         }
     }
-    if (datSkillTable.normal[nskill].targetrandom == 1) {
-        count = 0;
-        for (i = 0; i < 32; i++) {
-            if (select & (1U << i)) {
-                candidates[count][0] = i;
-                candidates[count][1] = 0;
-                count++;
-            }
-        }
-        if (count == 0) {
-            return;
-        }
-        limit = count + dds3GetRandIntA(NULL, 2);
-        last = -1;
-        used = 0;
-        for (i = 0; i < hits; i++) {
-            do {
-                index = dds3GetRandIntA(NULL, count);
-                j = candidates[index][0];
-            } while (count >= 2 && last == j);
-            last = j;
-            if (candidates[index][1] < limit) {
-                candidates[index][1]++;
-                for (index = 0; index < used; index++) {
-                    if (koukalist[index][0] == j) {
-                        break;
+    {
+        FAKEMATCH_ASM_REG(const u8 *, base, "$3") = (const u8 *)&datSkillTable;
+        FAKEMATCH_ASM_REG(u32, rbyte, "$4");
+        FAKEMATCH_ASM_REG(u32, expanded, "$5");
+        FAKEMATCH_ASM_REG(u32, words, "$2");
+        FAKEMATCH_ASM_REG(u32, kind, "$5");
+        FAKEMATCH_ASM_REG(u32, address, "$2");
+        /* Use the real row stride and a fresh post-prune table address.
+         * The two live comparison operands preserve the native setup order. */
+        expanded = (u32)nskill << 4;
+        FAKEMATCH_ASM_LIVE_WITH_INPUT(base, expanded);
+        words = expanded - (u32)nskill;
+
+        kind = 1;
+        FAKEMATCH_ASM_LIVE_PAIR(words, kind);
+        address = (words << 2) + (u32)base;
+        FAKEMATCH_ASM_LIVE(address);
+        rbyte = ((const u8 *)address)[11];
+        FAKEMATCH_ASM_LIVE(rbyte);
+        if (rbyte == kind) {
+            {
+                FAKEMATCH_ASM_REG(u32, seed, "$4");
+                count = 0;
+                i = 0;
+                seed = 1;
+                candidate = candidates;
+                do {
+                    if (select & (seed << i)) {
+                        (*candidate)[0] = i;
+                        count++;
+                        (*candidate)[1] = 0;
+                        candidate++;
                     }
-                }
-                if (index != used) {
-                    koukalist[index][1]++;
-                } else {
-                    koukalist[used][0] = j;
-                    koukalist[used][1] = 1;
-                    used++;
-                }
+                } while (++i < 32);
             }
-        }
-        return;
-    }
-    if ((u32)(nskill - 0x9E) < 2) {
-        candidates[0][0] = 0;
-        count = 0;
-        minHp = 101;
-        for (i = 0; i < 16; i++) {
-            if (select & (1U << i)) {
-                form = &a->data->form[i];
-                if ((form->stat & 1) && ((form->stat & 0x40) >= 0x40)) {
-                    work = nbGetUnitWorkFromFormindex(form->formindex);
-                    if (work->hp != 0) {
-                        hp = (work->hp * 100) / work->maxhp;
-                        if (hp < minHp) {
-                            minHp = hp;
-                            candidates[0][0] = i;
-                            count = 1;
-                        } else if (hp == minHp) {
-                            candidates[count][0] = i;
-                            count++;
+            if (count == 0) {
+                return;
+            }
+            {
+                typedef s8 (*Rows)[2];
+                FAKEMATCH_ASM_REG(Rows, append, "$17");
+                FAKEMATCH_ASM_REG(s32, usedRows, "$19");
+                FAKEMATCH_ASM_REG(s32, draw, "$18");
+                s32 single;
+                s32 adjustment = dds3GetRandIntA(NULL, 2);
+                watermark = -1;
+
+                limit = count + adjustment;
+                usedRows = 0;
+                FAKEMATCH_ASM_LIVE_MEM(limit);
+
+                draw = 0;
+                if (draw >= hits) {
+                    return;
+                }
+                /* A single candidate never retries. Initialize the actual output
+                 * cursor after the draw guard, alongside that retry predicate. */
+                single = count < 2;
+                append = koukalist;
+                for (; draw < hits; draw++) {
+                    FAKEMATCH_ASM_REG(s32, j, "$16");
+                    FAKEMATCH_ASM_REG(u32, byteOffset, "$3");
+                    FAKEMATCH_ASM_REG(s8 *, usedHits, "$3");
+                    do {
+                        index = dds3GetRandIntA(NULL, count);
+                        byteOffset = (u32)index * sizeof(candidates[0]);
+                        j = *(s8 *)((u32)&candidates + byteOffset);
+                        if (single) {
+                            break;
+                        }
+                        /* Compare the same signed ID on the retry path. */
+                        FAKEMATCH_ASM_LIVE(j);
+                    } while (watermark == j);
+                    watermark = j;
+                    {
+                        FAKEMATCH_ASM_REG(s32, bound, "$5");
+                        /* The adjacent byte records this candidate's accepted uses. */
+                        byteOffset++;
+                        FAKEMATCH_ASM_LIVE(byteOffset);
+                        bound = limit;
+                        FAKEMATCH_ASM_LIVE_WITH_INPUT(bound, byteOffset);
+                        usedHits = (s8 *)((u32)&candidates + byteOffset);
+                        if (*usedHits < bound) {
+                            FAKEMATCH_ASM_REG(s32, ordinal, "$5") = 0;
+                            *usedHits = (u8)*usedHits + 1;
+                            /* Check row zero, then walk no further than the used prefix. */
+                            if (usedRows > 0 && koukalist[0][0] != j) {
+                                FAKEMATCH_ASM_REG(Rows, scan, "$4") = koukalist;
+                                do {
+                                    ++ordinal;
+                                    ++scan;
+                                } while (ordinal < usedRows && (*scan)[0] != j);
+                            }
+                            if (ordinal == usedRows) {
+                                (*append)[0] = j;
+                                (*append)[1] = 1;
+                                append++;
+                                usedRows++;
+                            } else {
+                                FAKEMATCH_ASM_REG(u32, outputOffset, "$3") = (u32)ordinal << 1;
+                                s8 *const usedHits = (s8 *)(outputOffset + (u32)koukalist) + 1;
+                                *usedHits = (u8)*usedHits + 1;
+                            }
                         }
                     }
                 }
             }
+            return;
         }
-        index = 0;
-        if (count > 0) {
-            index = (s32)dds3GetRandIntA(NULL, count * 10) % count;
-        }
-        koukalist[0][1] = 1;
-        koukalist[0][0] = candidates[index][0];
-        return;
     }
-    animetype = datSkillTable.visual[nskill].animetype;
-    if ((a->data->stat & 8) && nskill == 0xCC) {
-        switch (animetype) {
-        case 4: animetype = 8; break;
-        case 5: animetype = 9; break;
-        case 6: animetype = 10; break;
-        case 7: animetype = 11; break;
-        case 8: animetype = 4; break;
-        case 9: animetype = 5; break;
-        case 10: animetype = 6; break;
-        case 11: animetype = 7; break;
+    {
+        FAKEMATCH_ASM_REG(nbMainProcessData_t *, current, "$4");
+        if ((u32)nskill - 0x9EU < 2U) {
+            candidates[0][0] = 0;
+            count = 0;
+            for (i = 0; i < 16; i++) {
+                if (select & (1U << i)) {
+                    FAKEMATCH_ASM_REG(u32, base, "$3") = (u32)action->data->form;
+                    FAKEMATCH_ASM_REG(nbFormation_t *, form, "$4") = (nbFormation_t *)((u32)i * sizeof(*form) + base);
+                    FAKEMATCH_ASM_REG(u32, stat, "$3") = form->stat;
+                    if (!(stat & 1)) {
+                        continue;
+                    }
+                    {
+                        FAKEMATCH_ASM_REG(u32, two, "$2") = stat & 0x40;
+                        if (!two) {
+                            continue;
+                        }
+                        work = nbGetUnitWorkFromFormindex(form->formindex);
+                        if (work->hp != 0) {
+                            hp = (work->hp * 100) / work->maxhp;
+                            if (hp < watermark) {
+                                watermark = hp;
+                                candidates[0][0] = i;
+                                count = 1;
+                            } else if (watermark == hp) {
+                                candidates[count][0] = i;
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+            if (count > 0) {
+                i = (s32)dds3GetRandIntA(NULL, count * 10) % count;
+            } else {
+                i = 0;
+            }
+            koukalist[0][1] = 1;
+            koukalist[0][0] = candidates[i][0];
+            return;
+        }
+        {
+            const u8 *base = &datSkillTable.visual[0].animetype;
+            FAKEMATCH_ASM_REG(u32, visOffset, "$3") = (u32)nskill << 2;
+            animetype = *(const u8 *)((u32)base + visOffset);
+        }
+        current = action->data;
+        if ((current->stat & 8) && nskill == 0xCC) {
+            switch (animetype) {
+            case 4: animetype = 8; break;
+            case 5: animetype = 9; break;
+            case 6: animetype = 10; break;
+            case 7: animetype = 11; break;
+            case 8: animetype = 4; break;
+            case 9: animetype = 5; break;
+            case 10: animetype = 6; break;
+            case 11: animetype = 7; break;
+            }
         }
     }
     switch (animetype) {
     case 0: case 1: case 2: case 3:
     case 4: case 5: case 6: case 7: {
-        count = 0;
-        for (i = 0; i < 32; i++) {
-            if (select & (1U << i)) {
-                koukalist[count][0] = i;
-                koukalist[count][1] = hits;
-                count++;
-            }
-        }
-        break;
-    }
-    case 8: case 9: case 10: case 11: {
-        count = 0;
-        for (i = 31; i >= 0; i--) {
-            if (select & (1U << i)) {
-                koukalist[count][0] = i;
-                koukalist[count][1] = hits;
-                count++;
-            }
-        }
-        break;
-    }
-    case 12: case 13: case 14: case 15: {
-        count = 0;
-        for (i = 0; i < 32; i++) {
-            if (select & (1U << i)) {
-                koukalist[count][0] = i;
-                koukalist[count][1] = hits;
-                count++;
-            }
-        }
-        if (count >= 2) {
+            typedef s8 (*Rows)[2];
+            FAKEMATCH_ASM_REG(Rows, sink, "$5") = koukalist;
             for (i = 0; i < 32; i++) {
-                first = dds3GetRandIntA(NULL, count);
-                second = dds3GetRandIntA(NULL, count);
-                for (j = 0; j < 2; j++) {
-                    tmp = koukalist[first][j];
-                    koukalist[first][j] = koukalist[second][j];
-                    koukalist[second][j] = tmp;
+                if (select & (1U << i)) {
+                    (*sink)[0] = i;
+                    (*sink)[1] = hits;
+                    sink++;
                 }
             }
+            break;
         }
-        break;
-    }
+    case 8: case 9: case 10: case 11: {
+            typedef s8 (*Rows)[2];
+            FAKEMATCH_ASM_REG(Rows, sink, "$5") = koukalist;
+            for (i = 31; i >= 0; i--) {
+                if (select & (1U << i)) {
+                    (*sink)[0] = i;
+                    (*sink)[1] = hits;
+                    sink++;
+                }
+            }
+            break;
+        }
+    case 12: case 13: case 14: case 15: {
+            {
+                FAKEMATCH_ASM_REG(u32, seed, "$4");
+                count = 0;
+                i = 0;
+                seed = 1;
+                out = koukalist;
+                do {
+                    if (select & (seed << i)) {
+                        (*out)[0] = i;
+                        count++;
+                        (*out)[1] = hits;
+                        out++;
+                    }
+                } while (++i < 32);
+            }
+            if (count >= 2) {
+                for (i = 0; i < 32; i++) {
+                    first = dds3GetRandIntA(NULL, count);
+                    second = dds3GetRandIntA(NULL, count);
+                    {
+                        u32 base = (u32)&koukalist[0][0];
+                        FAKEMATCH_ASM_REG(u32, leftByteOffset, "$3") = (u32)first << 1;
+                        FAKEMATCH_ASM_REG(s8 *, left, "$7") = (s8 *)(leftByteOffset + base);
+                        FAKEMATCH_ASM_REG(s8 *, right, "$6") = (s8 *)(((u32)second << 1) + base);
+                        FAKEMATCH_ASM_REG(s32, j, "$18");
+                        FAKEMATCH_ASM_REG(s32, tmp, "$19");
+                        for (j = 0; j < 2; j++) {
+                            tmp = left[j];
+                            left[j] = right[j];
+                            right[j] = tmp;
+                        }
+                    }
+                }
+            }
+            break;
+        }
     }
 }
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbActionProcess", GetKoukaList);
-#endif
 
 
 void SetTargetPlayer(nbActionProcessData_t *a)
