@@ -591,6 +591,7 @@ Race and heart data				docs/matching/result/rstcalc.md	722
 Evolution eligibility list				docs/matching/result/rstcalc.md	731
 Evolution stat matrix	result/cmbEvoStatTable	442 bytes		docs/matching/result/rstcalc.md	738
 datGetPlayerLNDList	result/rstcalc	0x1A0	104 of 104 words match	docs/matching/result/rstcalc.md	755
+rstRecalcHeartsSkill (0x168)				docs/matching/result/rstcalc.md	778
 rstDraw	result/rstdraw	0x1D0	116 of 116 words match	docs/matching/result/rstdraw.md	3
 Puzzle Boy records and billboard manager				docs/matching/rodata-fill-audit.md	30
 Needle model renderer				docs/matching/rodata-fill-audit.md	46

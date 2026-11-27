@@ -810,41 +810,48 @@ u16 rstChkHeartsSkill(datUnitWork_t *unit)
 extern s32 datGetDevilSlotState(u8 devilId);
 extern u16 rstGetHeartsSkillAt(u8 race, s8 index);
 
-#ifdef NON_MATCHING
 void rstRecalcHeartsSkill(u16 skillId)
 {
     s32 i;
     s32 j;
     s32 slot;
     s8 devilId;
+    s32 slotOffset;
     u16 skill;
+    s32 wanted;
     s32 missing;
     u8 count;
     dds3GlobalWork_t *work;
+    u8 *slotBase;
 
     for (i = 0; i < DDS3_GBWK->heartscnt; i++) {
-        devilId = (s8)DDS3_GBWK->hearts[i];
+        devilId = (s8)DDS3_GBWK->heartsCountAndNameBytes[i];
+        /* Split the slot-byte address at its 16-byte boundary. This keeps the
+         * signed displacement independent of the work pointer read after calls. */
+        slotOffset = (s32)devilId + (0x1D3B & ~15);
         for (j = 0; j < 8; j++) {
             skill = rstGetHeartsSkillAt((u8)devilId, (s8)j);
-            if (skill == skillId) {
+            wanted = skillId;
+            if (wanted == skill) {
                 missing = 1;
                 for (slot = 0; slot < datGetDevilSlotState((u8)devilId); slot++) {
-                    if (DDS3_GBWK->heartsSkills[devilId][slot] == skill) {
+                    if (DDS3_GBWK->heartsAndEncyclopediaHalfwords[12 * devilId + slot] == skill) {
                         missing = 0;
                     }
                 }
                 if (missing != 0) {
                     work = DDS3_GBWK;
-                    count = work->devilSlot[devilId]++;
-                    work->heartsSkills[devilId][count] = skill;
+                    slotBase = (u8 *)work + (0x1D3B & 15);
+                    /* Use all eight bits for the append, unlike the scan's
+                     * low-nibble bound. A high flag can cross one skill row. */
+                    count = slotBase[slotOffset]++;
+                    work->heartsAndEncyclopediaHalfwords[12 * devilId + count] = skill;
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstRecalcHeartsSkill);
-#endif
+
 
 void rstLoadHeartsSkill(void) {
 }

@@ -774,3 +774,30 @@ The first exact reconstruction used register/operand constraints as a
 diagnostic. Removing all of them together preserves the whole allocated
 object and the target's exact bytes. Single removals were non-monotonic;
 none is needed in the production source.
+
+## rstRecalcHeartsSkill (0x168)
+
+All 90 instruction words match at 360 bytes in ordinary C. The outer loop
+uses a signed roster byte for the save displacement and passes its unsigned
+representation to the existing skill and slot-count providers. It reloads
+the global work pointer where retail does, after those calls. The duplicate
+scan follows the provider's low nibble; the append uses the entire old slot
+byte and increments the byte with wrapping. A registered flag can make the
+append cross a nominal 12-slot row. No clamp or masked append was added.
+
+Both raw views are members of the existing saved work allocation, not casts
+of individual rows. The first covers roster, count and name storage starting
+at 0x1CFB. The second covers the contiguous skill, growth and encyclopedia
+save region at 0x11AC0. Within the existing skill table provider's 28 valid
+race IDs, all scan offsets and full-byte append offsets lie in that declared
+halfword array, even when an append crosses into a following saved field.
+The source does not claim support for a corrupted race ID outside the
+provider's table. All original member names and offsets are retained.
+
+The matching source names the signed part of the true slot address before
+the provider calls and adds the remainder to the current work pointer after
+them. With the 16-byte split at 0x1D3B, stock cc1 gives that live displacement
+the native stack slot and the late address add its native +11. Naming the
+requested skill as the left operand of the comparison restores the retail
+branch operand order. Neither change uses a register binding, an empty
+constraint, or instruction-emitting assembly.

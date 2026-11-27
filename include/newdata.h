@@ -185,6 +185,8 @@ typedef struct
         };
         struct { u8 heartsPrefix[0x40]; u8 devilSlot[0x100]; }; /* 0x1D3B */
         struct { u8 unk_01CFB[0x40]; u8 heartsskcnt[64]; };
+        /* A raw list traversal can continue beyond the nominal Hearts list. */
+        u8 heartsCountAndNameBytes[0x80 + 1 + 0x4800];
     };
     u8 nameCode[0xDC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
@@ -196,15 +198,21 @@ typedef struct
     u8 reserved11AA0[0x18];
     s32 configFlags;               /* 0x11AB8: dds3GetConfigFlag */
     u8 reserved11ABC[4];
-    union { u16 heartsSkills[32][12]; u16 hearts_sk[32][12]; }; /* 0x11AC0 */
-    u8 hearts_up_param[32][6];   /* 0x11DC0 */
     union {
-        mselSaveData_t encyclopedia; /* 0x11E80 */
         struct {
+            u16 heartsSkills[32][12]; /* 0x11AC0 */
+            u8 hearts_up_param[32][6]; /* 0x11DC0 */
+            mselSaveData_t encyclopedia; /* 0x11E80 */
+        };
+        u16 hearts_sk[32][12];
+        struct {
+            u8 heartsRosterBytes[0x3C0];
             s32 encycNum;
             u8 reserved11E84[0xC];
             fclencyceelem_t encycRecords[168];
         };
+        /* Native Hearts insertion uses a full byte offset in the saved data. */
+        u16 heartsAndEncyclopediaHalfwords[(0x3C0 + sizeof(mselSaveData_t)) / sizeof(u16)];
     };
     u8 reserved19D10[0x800];
 } dds3GlobalWork_t;
