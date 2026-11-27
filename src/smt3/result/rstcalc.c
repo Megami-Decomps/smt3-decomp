@@ -610,7 +610,6 @@ s32 rstChkPartyDevilSkillPowerUp(void)
     return result;
 }
 
-#ifdef NON_MATCHING
 extern s32 rstRollPowerUpSkill(u16 skill, datUnitWork_t *unit);
 
 s32 rstCalcSkillPowerUpCore(void)
@@ -618,39 +617,62 @@ s32 rstCalcSkillPowerUpCore(void)
     u16 newSkill = rstRndGetPowerUpSkill(EventStart->unit, &EventStart->powerSlot);
     s32 result;
 
-    EventStart->powerSkill = newSkill;
-    if (newSkill == 0 ||
-        rstChkBeforeSkillOwner(*(volatile u16 *)&EventStart->powerSkill,
-                               (s8)-(u8)EventStart->LevelUpCnt, EventStart->unit) != 0) {
-        return 0;
+    {
+        /* Keep the returned skill in the native home for publication and
+         * the zero test, distinct from the early rejection result. */
+        FAKEMATCH_ASM_REG(u16, skill, "$3") = newSkill;
+        rstData_t *w = EventStart;
+        s32 rejected = 0;
+
+        w->powerSkill = skill;
+        if (skill == 0) {
+            return rejected;
+        }
+        {
+            u8 level = w->LevelUpCnt;
+            datUnitWork_t *unit = w->unit;
+            s8 inv;
+            u16 current;
+            inv = (s8)-level;
+
+            current = w->powerSkill;
+            if (rstChkBeforeSkillOwner(current, inv, unit)) {
+                return 0;
+            }
+        }
     }
     result = rstChkSkillPowerUp2();
     if (result == 0) {
-        result = cmbChkSkillOwner(EventStart->powerSkill, EventStart->unit) >= 0;
+        s32 owner = cmbChkSkillOwner(EventStart->powerSkill, EventStart->unit);
+        /* Keep the zero from the preceding check as the other input.
+         * With a literal zero here EE GCC lowers the signed test to SRL. */
+        s32 negative = owner < 0 ? 1 : result;
+        result = negative == 0;
         if (rstChkDevilSkillPowerUp(EventStart->unit) != 0) {
             return 0;
         }
         if (rstChkPartyDevilSkillPowerUp() != 0) {
             result = 1;
         }
-        if (result == 0) {
-            EventStart->unit->flag |= 0x40;
-            return 1;
-        }
     }
-    if (result == 1) {
-        s32 rolled = rstRollPowerUpSkill(EventStart->unit->skill[EventStart->powerSlot],
-                                         EventStart->unit);
-        if (rolled != 0) {
-            EventStart->powerSkill = rolled;
-            return 2;
+    switch (result) {
+    case 1:
+        {
+            rstData_t *w = EventStart;
+            datUnitWork_t *unit = w->unit;
+            s32 rolled = rstRollPowerUpSkill(unit->skill[w->powerSlot], unit);
+            if (rolled != 0) {
+                EventStart->powerSkill = rolled;
+                return 2;
+            }
         }
+        break;
+    case 0:
+        EventStart->unit->flag |= 0x40;
+        return 1;
     }
     return 3;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSkillPowerUpCore);
-#endif
 
 extern s32 rstChkSkillPowerUp1(void);
 

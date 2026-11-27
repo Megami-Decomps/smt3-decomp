@@ -801,3 +801,21 @@ the native stack slot and the late address add its native +11. Naming the
 requested skill as the left operand of the comparison restores the retail
 branch operand order. Neither change uses a register binding, an empty
 constraint, or instruction-emitting assembly.
+
+## rstCalcSkillPowerUpCore (result/rstcalc, 0x11C)
+
+All 71 words match at 284 bytes. Keep the preceding power-up check's actual
+zero as the false arm when computing the skill-owner sign test, then use its
+Boolean complement as the provisional result. The literal-zero form emits
+a shift rather than the native signed comparison and differs by one word.
+After the unit and party checks, the result switch preserves the flag-set,
+roll-and-publish, and no-upgrade paths.
+
+A local register home keeps the produced skill in the native register for its
+halfword publication and zero test while the early rejection result is zero.
+This lifetime starts after the provider and ends before the next call. It is
+a reconstruction aid, not an assertion about original source spelling.
+Removing that home emits 276 bytes with 10 of the 71 native words in place.
+The old volatile halfword access and empty unit-argument constraint are
+unnecessary: removing both keeps the complete target exact, including the
+halfword reload after the level and unit loads.
