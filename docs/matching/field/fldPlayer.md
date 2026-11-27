@@ -171,3 +171,36 @@ is inferred from the repeated layout and existing vector declarations,
 not from a separate native read. The fourth vector-shaped record starting
 at `0x002FCA50` stays in the raw data because it lacks the same consumer
 evidence.
+
+## fldPlayerCalc_WarpRun (field/fldPlayer, 0x75C)
+
+All 471 instruction words match at the native 1,884-byte size and address
+0x00130B68. The opening snapshot copies the full warp axis before testing
+fast mode. The pitch, camera heading and warp angle each retain the native
+positive and negative wrapping loops, including their final stores and the
+separate previous and next floating-point values where the compiler needs
+them. The negative camera phase carries the real camera-work base through
+the load and store; it does not introduce another address materialization.
+
+The mover preserves the old and new world-coordinate publications, collision
+queries, and the primary and secondary pose callbacks. Repeated pose loads
+and full quadword copies preserve the native observations and the fourth
+lane. In particular, the initial whole-vector transfer and the later
+position setter keep their distinct fourth-lane behavior.
+
+Both animation updates keep their real selected motion argument, blend
+and speed values, and controller pointer in the native argument and store
+order. The secondary block snapshots its actual controller before preparing
+the blend and speed. This narrows the compiler constraints to real operands
+that the upcoming stores and calls consume.
+
+The view matrix has its canonical 64-byte type and the same explicit .data
+section as the real provider. The declaration keeps the assembler's existing
+undefined-symbol metadata without an alternate object type or address alias.
+The definition, peer relocation order and linked matrix bytes are unchanged.
+
+The stock and diagnostic compiler assemblies and objects agree. Complete
+owner checks preserve every peer and owned data, and the retail rebuild
+matches all 4,551,696 bytes. Scoped native and linked replays cover wrapping,
+the actual matrix and motion providers, pose publication and collision,
+and distinguish omitted fourth-lane updates. They do not model hardware DMA.

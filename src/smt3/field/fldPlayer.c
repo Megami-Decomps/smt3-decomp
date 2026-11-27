@@ -453,14 +453,12 @@ void fldPlayerCalc_Hit(void) {
     SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, &pos);
 }
 
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * capture_008, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 extern f32 fldCamPitch;
 extern f32 fldPlayerWarpState;
 extern const sdfVector4_t fldWarpRunAxis;
-extern sdfMatrix4_t sdfViewMatrix;
+/* Canonical kernel/dds3ViewMatrix storage is in .data. The truthful section
+ * declaration keeps the consumer's native size-less symbol reference. */
+extern sdfMatrix4_t sdfViewMatrix __attribute__((section(".data")));
 extern f32 EulerAngleAxisY(void);
 extern void InversMatrix(void);
 extern void FromRotation(f32 angle);
@@ -473,69 +471,148 @@ extern f32 sdfCos(f32 angle);
 void fldPlayerCalc_WarpRun(void)
 {
     fldUnitControl_t *control = fldGetUnitControl();
-    mdlObj_t *model = dds3ObjectBaseGetModelHandle(control->handle);
+    FAKEMATCH_ASM_REG(mdlObj_t *, model, "$21") = dds3ObjectBaseGetModelHandle(control->handle);
     mdlObj_t *model2 = NULL;
-    sdfVector4_t axis __attribute__((aligned(16))) = *(volatile sdfVector4_t *)&fldWarpRunAxis;
+    FAKEMATCH_ASM_REG(s32, fastMode, "$4") = fldPlayerFastMode;
     sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t alignedPrior __attribute__((aligned(16)));
     sdfVector4_t rotation __attribute__((aligned(16)));
-    sdfVector4_t oldPosition __attribute__((aligned(16)));
+    sdfVector4_t axis __attribute__((aligned(16)));
     f32 collisionPosition[4] __attribute__((aligned(16)));
-    f32 pitch, warp, angle, step, distance, pi;
-    dds3Basic_t *basic;
+    f32 angle, step, distance, pi;
+    FAKEMATCH_ASM_REG(dds3Basic_t *, basic, "$5");
     dds3PoseSet_t *pose;
-    s32 motion;
-
-    if (fldPlayerFastMode != 1) {
+    FAKEMATCH_ASM_REG(s32, motion, "$19");
+    FAKEMATCH_ASM_REG(s32, useCollision, "$2");
+    sdfVector4_t *axisDest = &axis;
+    FAKEMATCH_ASM_REG(s32, warpMode, "$3") = 1;
+    /* Retain the mode through the direct aggregate copy so cc1 can use
+     * the native little-endian block move address scratch. */
+    FAKEMATCH_ASM_LIVE_WITH_INPUT(axisDest, warpMode);
+    *axisDest = fldWarpRunAxis;
+    if (fastMode != warpMode) {
         return;
     }
-    if (control->handle2 != NULL) {
-        model2 = dds3ObjectBaseGetModelHandle(control->handle2);
+    {
+        dds3Basic_t *secondary = control->handle2;
+        if (secondary != NULL) {
+            model2 = dds3ObjectBaseGetModelHandle(secondary);
+        }
     }
     dds3GetPosPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&position);
-    fldGlobalBase.prevX = fldGlobalBase.x;
-    fldGlobalBase.prevY = fldGlobalBase.y;
-    fldGlobalBase.prevZ = fldGlobalBase.z;
-    fldGlobalBase.x = position.x;
-    fldGlobalBase.y = position.y;
-    fldGlobalBase.z = position.z;
-    SDF_FRAME_MOVE_FROM(position);
-    if (l_UseCollision != 0) {
-        dds3OnPoseSetFlag(control->handle->poseset, 8);
-        if (control->handle2 != NULL) {
-            dds3OnPoseSetFlag(control->handle2->poseset, 8);
+    {
+        FAKEMATCH_ASM_REG(fldAreaWork_t *, earlyWorld, "$16") = &fldGlobalBase;
+        FAKEMATCH_ASM_REG(f32, posX, "$f5") = position.x;
+        FAKEMATCH_ASM_REG(f32, posY, "$f4") = position.y;
+        FAKEMATCH_ASM_REG(f32, posZ, "$f3") = position.z;
+        useCollision = l_UseCollision;
+        earlyWorld->prevX = earlyWorld->x;
+        earlyWorld->prevY = earlyWorld->y;
+        earlyWorld->prevZ = earlyWorld->z;
+        earlyWorld->x = posX;
+        earlyWorld->y = posY;
+        earlyWorld->z = posZ;
+        SDF_FRAME_MOVE_FROM(position);
+        if (useCollision != 0) {
+            dds3OnPoseSetFlag(control->handle->poseset, 8);
+            if (control->handle2 != NULL) {
+                dds3OnPoseSetFlag(control->handle2->poseset, 8);
+            }
+            if (l_UseCollision != 0) {
+                FAKEMATCH_ASM_REG(f32, by, "$f0");
+                FAKEMATCH_ASM_REG(f32, scaleInput, "$f1") = earlyWorld->float130;
+                FAKEMATCH_ASM_REG(f32, height, "$f1");
+                if (scaleInput > 0.0f) {
+                    height = 5.0f;
+                } else {
+                    height = 10.0f;
+                }
+                by = position.y;
+                by = by + height;
+                earlyWorld->y = by;
+            }
         }
-        if (l_UseCollision != 0) {
-            fldGlobalBase.y = position.y + (fldGlobalBase.float130 > 0.0f ? 5.0f : 10.0f);
+    }
+    {
+        FAKEMATCH_ASM_REG(f32, pitch, "$f0") = fldCamPitch;
+        FAKEMATCH_ASM_REG(f32, priorPitch, "$f1");
+        {
+            FAKEMATCH_ASM_REG(f32, bound, "$f2") = 360.0f;
+            FAKEMATCH_ASM_LIVE_F32(bound);
+            priorPitch = pitch;
+            if (pitch >= bound) {
+                do {
+                    pitch = priorPitch - bound;
+                    priorPitch = pitch;
+                } while (pitch >= bound);
+                FAKEMATCH_ASM_LIVE_F32(pitch);
+                fldCamPitch = pitch;
+            }
+        }
+        {
+            FAKEMATCH_ASM_REG(f32, zeroPitch, "$f2") = 0.0f;
+            priorPitch = pitch;
+            if (priorPitch < zeroPitch) {
+                FAKEMATCH_ASM_REG(f32, fullPitch, "$f3") = 360.0f;
+                FAKEMATCH_ASM_LIVE_F32(fullPitch);
+                do {
+                    pitch = priorPitch + fullPitch;
+                    priorPitch = pitch;
+                } while (pitch < zeroPitch);
+                fldCamPitch = pitch;
+            }
         }
     }
-    pitch = fldCamPitch;
-    if (pitch >= 360.0f) {
-        do { pitch -= 360.0f; } while (pitch >= 360.0f);
-        fldCamPitch = pitch;
+    {
+        fldAreaWork_t *camWorld = &fldGlobalBase;
+        FAKEMATCH_ASM_REG(f32, turn, "$f1") = 360.0f;
+        FAKEMATCH_ASM_REG(f32, a, "$f0") = camWorld->camAngle;
+        if (a >= turn) {
+            a = a - turn;
+            while (a >= turn) { a = a - turn; }
+            camWorld->camAngle = a;
+        }
     }
-    if (pitch < 0.0f) {
-        do { pitch += 360.0f; } while (pitch < 0.0f);
-        fldCamPitch = pitch;
+    {
+        FAKEMATCH_ASM_REG(fldAreaWork_t *, camWorld, "$2") = &fldGlobalBase;
+        FAKEMATCH_ASM_REG(f32, zero, "$f1") = 0.0f;
+        FAKEMATCH_ASM_REG(f32, a, "$f0") = camWorld->camAngle;
+        if (a < zero) {
+            FAKEMATCH_ASM_REG(f32, turn, "$f2") = 360.0f;
+            a = a + turn;
+            while (a < zero) { a = a + turn; }
+            camWorld->camAngle = a;
+        }
     }
-    angle = fldGlobalBase.camAngle;
-    if (angle >= 360.0f) {
-        do { angle -= 360.0f; } while (angle >= 360.0f);
-        fldGlobalBase.camAngle = angle;
-    }
-    angle = fldGlobalBase.camAngle;
-    if (angle < 0.0f) {
-        do { angle += 360.0f; } while (angle < 0.0f);
-        fldGlobalBase.camAngle = angle;
-    }
-    warp = fldPlayerWarpState;
-    if (warp >= 360.0f) {
-        do { warp -= 360.0f; } while (warp >= 360.0f);
-        fldPlayerWarpState = warp;
-    }
-    if (warp < 0.0f) {
-        do { warp += 360.0f; } while (warp < 0.0f);
-        fldPlayerWarpState = warp;
+    {
+        /* The wrapping step uses separate previous and next values in
+         * the native FP loop, with the true 360-degree bound alongside. */
+        FAKEMATCH_ASM_REG(f32, warp, "$f0") = fldPlayerWarpState;
+        FAKEMATCH_ASM_REG(f32, prior, "$f1");
+        FAKEMATCH_ASM_REG(f32, full, "$f2") = 360.0f;
+        FAKEMATCH_ASM_LIVE_F32(full);
+        prior = warp;
+        if (warp >= full) {
+            do {
+                warp = prior - full;
+                prior = warp;
+            } while (warp >= full);
+            FAKEMATCH_ASM_LIVE_F32(warp);
+            fldPlayerWarpState = warp;
+        }
+        {
+            FAKEMATCH_ASM_REG(f32, zeroWarp, "$f2") = 0.0f;
+            prior = warp;
+            if (prior < zeroWarp) {
+                FAKEMATCH_ASM_REG(f32, turnWarp, "$f3") = 360.0f;
+                do {
+                    warp = prior + turnWarp;
+                    prior = warp;
+                } while (warp < zeroWarp);
+                fldPlayerWarpState = warp;
+            }
+        }
     }
     dds3GetRotPoseSet(control->handle);
     SDF_VU0_STOREVECTOR(&rotation);
@@ -543,56 +620,90 @@ void fldPlayerCalc_WarpRun(void)
     SDF_VU0_LOADMATRIX(&sdfViewMatrix);
     InversMatrix();
     control->moveFlag = 0;
+    motion = 4;
     angle = R360_LR(fldGlobalBase.camAngle, fldPlayerWarpState);
     if (angle < 0.0f) {
         angle = -angle;
     }
     pi = 3.1399999f;
     distance = (180.0f - angle) * 0.077777774f;
-    position.x = SDF_FRAME_MOVE(0, fldGlobalBase.x - sdfSin((-fldPlayerWarpState * pi) / 180.0f) * distance);
-    position.y = fldGlobalBase.y;
-    position.z = SDF_FRAME_MOVE(2, fldGlobalBase.z - sdfCos((-fldPlayerWarpState * pi) / 180.0f) * distance);
+    {
+        f32 s = sdfSin((-fldPlayerWarpState * pi) / 180.0f);
+        f32 oldX = fldGlobalBase.x;
+        f32 oldY = fldGlobalBase.y;
+        f32 cosVal;
+        position.y = oldY;
+        position.x = SDF_FRAME_MOVE(0, oldX - s * distance);
+        cosVal = sdfCos((-fldPlayerWarpState * pi) / 180.0f);
+        position.z = SDF_FRAME_MOVE(2, fldGlobalBase.z - cosVal * distance);
+    }
+    /* GetPos set the original W lane; the motion update replaced XYZ only. */
     dds3SetPosPoseSet(control->handle, &position);
     if (l_UseCollision != 0) {
-        collisionPosition[0] = position.x;
-        collisionPosition[1] = position.y;
-        collisionPosition[2] = position.z;
-        fldGlobalBase.x = position.x;
-        fldGlobalBase.y = position.y;
-        fldGlobalBase.z = position.z;
-        fldHitChkUnit(collisionPosition);
+        FAKEMATCH_ASM_REG(f32, cx, "$f2") = position.x;
+        FAKEMATCH_ASM_REG(f32, cy, "$f0") = position.y;
+        FAKEMATCH_ASM_REG(f32, cz, "$f1") = position.z;
+        FAKEMATCH_ASM_REG(f32 *, cp, "$4") = collisionPosition;
+        /* Collision reads XYZ only; the fourth scratch lane is inherited. */
+        collisionPosition[0] = cx;
+        cp[1] = cy;
+        cp[2] = cz;
+        FAKEMATCH_ASM_LIVE_F32_WITH_MEM(cx, cp[0]);
+        fldGlobalBase.x = cx;
+        fldGlobalBase.y = cy;
+        fldGlobalBase.z = cz;
+        fldHitChkUnit(cp);
         if (fldGlobalBase.hitValid != 0) {
+            dds3Basic_t *setHandle;
             position.x = SDF_FRAME_MOVE_HIT(0, fldGlobalBase.hitX);
             position.y = SDF_FRAME_MOVE_HIT(1, fldGlobalBase.hitY + 44.0f);
             position.z = SDF_FRAME_MOVE_HIT(2, fldGlobalBase.hitZ);
+            setHandle = control->handle;
+            /* The pose-set call consumes this initialized coordinate packet
+             * and actor handle. Keep both live before publishing XYZ. */
+            FAKEMATCH_ASM_LIVE_WITH_MEM(setHandle, position);
             fldGlobalBase.x = position.x;
             fldGlobalBase.y = position.y;
             fldGlobalBase.z = position.z;
-            dds3SetPosPoseSet(control->handle, &position);
+            dds3SetPosPoseSet(setHandle, &position);
             fldGlobalBase.hitValid = 0;
         }
         SDF_FRAME_MOVE_END(control->handle, position);
         dds3GetPosPoseSet(control->handle);
         SDF_VU0_STOREVECTOR(&position);
         basic = control->handle;
-        pose = basic->poseset;
-        oldPosition = pose->pos2;
-        if (sdfFabs(oldPosition.x - position.x) < 1.0f) {
-            pose->pos2.x = position.x;
-        } else {
-            pose->pos2.x = oldPosition.x + (position.x - oldPosition.x) / 3.0f;
+        FAKEMATCH_ASM_READ(basic);
+        {
+            FAKEMATCH_ASM_REG(sdfVector4_t *, poseX, "$3");
+            sdfVector4_t *snapDst = &alignedPrior;
+            /* Materialize the real local destination while its source
+             * is still the actor's native pose pointer. */
+            FAKEMATCH_ASM_READ(snapDst);
+
+            /* Pose-set storage and this full previous-position snapshot
+             * are quadword aligned, including the fourth lane. */
+            pose = basic->poseset;
+            poseX = &pose->pos2;
+            SDF_VU0_COPYVECTOR(snapDst, poseX);
+            if (sdfFabs(alignedPrior.x - position.x) < 1.0f) {
+                poseX->x = position.x;
+            } else {
+                poseX->x = alignedPrior.x + (position.x - alignedPrior.x) / 3.0f;
+            }
         }
-        if (sdfFabs(oldPosition.y - position.y) < 1.0f) {
-            basic->poseset->pos2.y = position.y;
+        /* The original evaluates the primary pose pointer again per
+         * selected y/z arm, then again for the w store and secondary copy. */
+        if (sdfFabs(alignedPrior.y - position.y) < 1.0f) {
+            ((dds3Basic_t volatile *)basic)->poseset->pos2.y = position.y;
         } else {
-            basic->poseset->pos2.y = oldPosition.y + (position.y - oldPosition.y) / 3.0f;
+            ((dds3Basic_t volatile *)basic)->poseset->pos2.y = alignedPrior.y + (position.y - alignedPrior.y) / 3.0f;
         }
-        if (sdfFabs(oldPosition.z - position.z) < 1.0f) {
-            basic->poseset->pos2.z = position.z;
+        if (sdfFabs(alignedPrior.z - position.z) < 1.0f) {
+            ((dds3Basic_t volatile *)basic)->poseset->pos2.z = position.z;
         } else {
-            basic->poseset->pos2.z = oldPosition.z + (position.z - oldPosition.z) / 3.0f;
+            ((dds3Basic_t volatile *)basic)->poseset->pos2.z = alignedPrior.z + (position.z - alignedPrior.z) / 3.0f;
         }
-        pose = basic->poseset;
+        pose = ((dds3Basic_t volatile *)basic)->poseset;
         pose->pos2.w = 1.0f;
         if (control->handle2 != NULL) {
             dds3PoseSet_t *other = control->handle2->poseset;
@@ -611,36 +722,95 @@ void fldPlayerCalc_WarpRun(void)
         step = 2.0f;
     }
     step = SDF_FRAME_CHASE(step, angle, 2.0f);
-    if ((angle >= 0.0f && angle <= step) || (angle <= 0.0f && -step <= angle)) {
-        fldGlobalBase.camAngle = fldPlayerWarpState;
-    } else if (angle < 0.0f) {
-        fldGlobalBase.camAngle -= step;
-    } else {
-        fldGlobalBase.camAngle += step;
+    {
+        FAKEMATCH_ASM_REG(f32, nextAngle, "$f1");
+        if ((angle >= 0.0f && angle <= step) || (angle <= 0.0f && -step <= angle)) {
+            nextAngle = fldPlayerWarpState;
+        } else if (angle < 0.0f) {
+            /* Consume the current heading in the native arithmetic input
+             * register, separate from the result in nextAngle. */
+            FAKEMATCH_ASM_REG(f32, currentAngle, "$f0") = fldGlobalBase.camAngle;
+            FAKEMATCH_ASM_LIVE_F32(currentAngle);
+            nextAngle = currentAngle - step;
+        } else {
+            FAKEMATCH_ASM_REG(f32, currentAngle, "$f0") = fldGlobalBase.camAngle;
+            FAKEMATCH_ASM_LIVE_F32(currentAngle);
+            nextAngle = currentAngle + step;
+        }
+        FAKEMATCH_ASM_LIVE_F32(nextAngle);
+        fldGlobalBase.camAngle = nextAngle;
     }
-    SDF_VU0_LOADVECTOR(&axis);
+    SDF_VU0_LOADVECTOR(axisDest);
     FromRotation(fldGlobalBase.camAngle * 3.1399999f / 180.0f);
-    SDF_VU0_STOREVECTOR(&rotation);
-    dds3SetRotPoseSet(control->handle, &rotation);
-    if (control->handle2 != NULL) {
-        dds3SetRotPoseSet(control->handle2, &rotation);
-    }
-    motion = fldGlobalBase.area == 23 ? 8 : 4;
-    if (model->current.h.motionIndex != motion) {
-        model->first->speed = 1.0f;
-        mdlSmoothLoopMotion(model, 0, motion, 5.0f, 5.0f);
-        if (control->handle2 != NULL) {
-            model2->first->speed = 1.0f;
-            mdlSmoothLoopMotion(model2, 0, motion, 5.0f, 5.0f);
+    {
+        FAKEMATCH_ASM_REG(fldAreaWork_t *, areaBase, "$3");
+        sdfVector4_t *rotStore = &rotation;
+        FAKEMATCH_ASM_LIVE(rotStore);
+        SDF_VU0_STOREVECTOR(rotStore);
+        {
+            FAKEMATCH_ASM_REG(sdfVector4_t *, rotArg, "$16") = &rotation;
+            FAKEMATCH_ASM_READ(rotArg);
+            dds3SetRotPoseSet(control->handle, rotArg);
+            {
+                dds3Basic_t *secondaryRotation = control->handle2;
+                if (secondaryRotation != NULL) {
+                    dds3SetRotPoseSet(secondaryRotation, rotArg);
+                }
+            }
+        }
+        areaBase = &fldGlobalBase;
+        {
+            s32 area = areaBase->area;
+            /* The alternate motion is a real conditional-move input. */
+            FAKEMATCH_ASM_REG(s32, specialMotion, "$5") = 8;
+            if (area == 23) {
+                motion = specialMotion;
+            }
         }
     }
-    fldGlobalBase.x = position.x;
-    fldGlobalBase.z = position.z;
-    fldGlobalBase.y = position.y;
+    {
+        /* The actual signed index is promoted for the comparison;
+         * its incoming value is dead before either motion call. */
+        FAKEMATCH_ASM_REG(s32, currentMotion, "$4") = model->current.h.motionIndex;
+        if (currentMotion != motion) {
+            FAKEMATCH_ASM_REG(f32, speed, "$f20") = 1.0f;
+            FAKEMATCH_ASM_REG(f32, blend, "$f12") = 5.0f;
+            FAKEMATCH_ASM_REG(s32, chosen, "$6");
+            /* Keep the true blend and motion live until the speed input
+             * is ready, then form A2 before publishing the old node's speed.
+             * These constraints only select the EE issue order. */
+            FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32(blend, motion, speed);
+            chosen = motion;
+            FAKEMATCH_ASM_LIVE_F32_WITH_GPR(speed, chosen);
+            model->first->speed = speed;
+            mdlSmoothLoopMotion(model, 0, chosen, blend, blend);
+            if (control->handle2 != NULL) {
+                /* The secondary call has a distinct controller load and
+                 * reuses the same live speed after the primary call. */
+                struct sdfMotionCtrlr_t *first = model2->first;
+                FAKEMATCH_ASM_REG(f32, secondBlend, "$f12") = 5.0f;
+                FAKEMATCH_ASM_REG(s32, secondChosen, "$6");
+                FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32(secondBlend, motion, speed);
+                secondChosen = motion;
+                FAKEMATCH_ASM_LIVE_F32_WITH_GPR(speed, secondChosen);
+                first->speed = speed;
+                mdlSmoothLoopMotion(model2, 0, secondChosen, secondBlend, secondBlend);
+            }
+        }
+    }
+    {
+        FAKEMATCH_ASM_REG(f32, finalX, "$f1") = position.x;
+        fldAreaWork_t *finalBase = &fldGlobalBase;
+        FAKEMATCH_ASM_REG(f32, finalY, "$f2") = position.y;
+        FAKEMATCH_ASM_REG(f32, finalZ, "$f0") = position.z;
+        FAKEMATCH_ASM_LIVE_F32(finalX);
+        FAKEMATCH_ASM_READ(finalBase);
+        FAKEMATCH_ASM_LIVE_F32_PAIR(finalY, finalZ);
+        finalBase->x = finalX;
+        finalBase->y = finalY;
+        finalBase->z = finalZ;
+    }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerCalc_WarpRun);
-#endif
 
 s32 fldPlayerCalcHasigo(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();

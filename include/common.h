@@ -182,6 +182,16 @@ typedef SADDR_TYPE saddr_t;
 #ifndef FAKEMATCH_ASM_LIVE_F32
 #define FAKEMATCH_ASM_LIVE_F32(value) __asm__("" : "+f" (value))
 #endif
+/* Empty mixed-register constraints for actual float and integer inputs.
+ * They do not change values, perform a memory access, or emit instructions. */
+#ifndef FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32
+#define FAKEMATCH_ASM_LIVE_F32_GPR_WITH_F32(outFloat, outInt, inFloat) \
+    __asm__("" : "+f" (outFloat), "+r" (outInt) : "f" (inFloat))
+#endif
+#ifndef FAKEMATCH_ASM_LIVE_F32_WITH_GPR
+#define FAKEMATCH_ASM_LIVE_F32_WITH_GPR(outFloat, inInt) \
+    __asm__("" : "+f" (outFloat) : "r" (inInt))
+#endif
 #ifndef FAKEMATCH_ASM_LIVE_F32_PAIR
 #define FAKEMATCH_ASM_LIVE_F32_PAIR(first, second) __asm__("" : "+f" (first), "+f" (second))
 #endif

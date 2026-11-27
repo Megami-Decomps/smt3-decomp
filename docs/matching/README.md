@@ -54,6 +54,7 @@ both native and emitted sizes when they differ.
 | 5 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 5 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 5 | interface/frName | [interface/frName.md](interface/frName.md) |
+| 5 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 5 | field/fldHit | [field/fldHit.md](field/fldHit.md) |
 | 5 | field/fldEveHit | [field/fldEveHit.md](field/fldEveHit.md) |
 | 5 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -71,7 +72,6 @@ both native and emitted sizes when they differ.
 | 4 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 4 | interface | [interface/itfPanel.md](interface/itfPanel.md) |
 | 4 | field/fldWap | [field/fldWap.md](field/fldWap.md) |
-| 4 | field/fldPlayer | [field/fldPlayer.md](field/fldPlayer.md) |
 | 4 | field/fldCamera | [field/fldCamera.md](field/fldCamera.md) |
 | 4 | facility/fclShopCalc | [facility/fclShopCalc.md](facility/fclShopCalc.md) |
 | 4 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
