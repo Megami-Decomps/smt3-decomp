@@ -2627,9 +2627,6 @@ extern void *fsIoctlArgument;
 extern s32 fsRequestSemas[32];
 extern void *memcpy(void *destination, const void *source, size_t size);
 
-/* NON_MATCHING: native 844-byte size; early switch allocation and
- * pending-table setup differ in 46 instruction words. */
-#ifdef NON_MATCHING
 s32 sceIoctl(s32 descriptor, s32 command, void *argument)
 {
     rpcSemaParam param;
@@ -2640,6 +2637,8 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
     s32 sema;
     s32 accepted;
     fsRequest_t *packet;
+
+    s32 pendingCommand = 1;
 
     entry = get_iob(descriptor);
     _sceFsWaitS(5);
@@ -2653,28 +2652,45 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
     }
     request->output = NULL;
     request->outputSize = 0;
-    switch (command) {
-    case 1:
-        WaitSema(fsIoctlSema);
-        for (index = 0; index < 32 && fsRequestSemas[index] == -1; index++) {
-        }
-        if (index == 32) {
-            *(s32 *)fsIoctlArgument = 0;
-        } else {
-            *(s32 *)fsIoctlArgument = 1;
-        }
-        SignalSema(fsIoctlSema);
-        _sceFsSigSema();
-        return 0;
-    case 2:
-        *(s32 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->word;
-        _sceFsSigSema();
-        return 0;
-    case 3:
-        *(s64 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->doubleword;
-        _sceFsSigSema();
-        return 0;
+    if (command == 2) {
+        goto statusWord;
     }
+    if (command < 3) {
+        if (command == pendingCommand) {
+            goto pendingRequests;
+        }
+    } else if (command == 3) {
+        goto statusDoubleword;
+    }
+    goto sendRequest;
+
+pendingRequests:
+    /* The SIF completion interrupt clears entries without this semaphore. */
+    WaitSema(fsIoctlSema);
+    index = 0;
+    if (((const volatile s32 *)fsRequestSemas)[0] != -1) {
+        goto pendingCount;
+    }
+    while (++index < 32 && ((const volatile s32 *)fsRequestSemas)[index] == -1) {
+    }
+pendingCount:
+    if (index == 32) {
+        *(s32 *)fsIoctlArgument = 0;
+    } else {
+        *(s32 *)fsIoctlArgument = 1;
+    }
+    SignalSema(fsIoctlSema);
+    _sceFsSigSema();
+    return 0;
+statusWord:
+    *(s32 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->word;
+    _sceFsSigSema();
+    return 0;
+statusDoubleword:
+    *(s64 *)argument = ((fsIoctlStatus_t *)(EE_ADDR(&fsIoctlStatus) | 0x20000000))->doubleword;
+    _sceFsSigSema();
+    return 0;
+sendRequest:
     request->descriptor = entry->word0;
     request->command = command;
     if (argument == NULL) {
@@ -2708,9 +2724,6 @@ s32 sceIoctl(s32 descriptor, s32 command, void *argument)
     DeleteSema(sema);
     return result;
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libkernl", sceIoctl);
-#endif
 
 s32 sceIoctl2(s32 descriptor, s32 command, const void *args, u32 argSize,
               void *output, u32 outputSize)

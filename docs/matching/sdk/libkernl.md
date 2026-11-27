@@ -394,29 +394,23 @@ spelling is not established.
 
 ## sceIoctl
 
-844 bytes, the native size, with 165 of 211 words matching and 46 differing.
-The differences end at +0xEC: early saved-register allocation, special-command
-dispatch and pending-table setup remain unresolved. The subsequent status
-stores, both aligned and unaligned 1024-byte copy paths, completion transaction
-and epilogue match. Ordinary constant-size `memcpy` generates both copy paths.
+Matched all 211 instructions at the native 844-byte size. The signed command
+dispatch tests command 2 first, then distinguishes the pending request (1)
+from the doubleword status request (3). Other signed values take the RPC path.
 
-The argument pointer is published before optional filesystem initialization.
-After validating the slot, the request words at +0x414 and +0x418 are cleared.
-Command 1 waits on the pending-table semaphore, skips entries equal to -1,
-and writes zero only when all 32 entries are free; any occupied entry writes
-one. Its output pointer is reloaded from the shared argument global after
-waiting. Commands 2 and 3 copy the uncached 32-bit or 64-bit status word to
-the caller. These special paths release the filesystem semaphore and return
-zero without RPC. Other commands forward the native descriptor and command,
-copy 1024 argument bytes when nonnull, and send the complete 0x420-byte request.
-Completion/error ordering follows the recovered filesystem transaction.
+Command 1 holds the thread-side pending-table semaphore while scanning at most
+32 entries. The SIF receive interrupt is registered by `sceFsInit` for command
+0x80000011 and can clear an entry without taking that semaphore. Each load
+therefore uses a volatile view of the existing table. The first slot is tested
+before entering the bounded walk, as in retail. Any occupied slot writes one;
+32 free slots write zero. The output pointer is reloaded after the wait.
+Making both reads nonvolatile in the same control flow leaves eight differing
+words around the pending-table walk. No storage, ABI, register constraint or
+compilation flag changes are needed.
 
-An initial early pending-result local and command-first request stores emit
-836 bytes. Removing that unnecessary local and assigning descriptor before
-command gives the preferred ordinary 844-byte body. No return type, qualifier,
-register constraint or artificial dependency was introduced to close the
-remaining allocation/control differences. A genuine compiler premise is
-needed before another pass over the early dispatch.
+Commands 2 and 3 preserve the uncached status reads and release without RPC.
+The descriptor and optional 1024-byte payload, 0x420-byte writeback/RPC,
+completion wait, and error and semaphore ordering are unchanged.
 
 ## supplement_crt0 (sdk/libkernl, 0x48)
 

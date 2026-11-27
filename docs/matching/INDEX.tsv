@@ -690,25 +690,25 @@ sceSifRegisterRpc				docs/matching/sdk/libkernl.md	252
 sceSifInitIopHeap			34 of 34 words match	docs/matching/sdk/libkernl.md	283
 sceSifSetIopAddr	sdk/libkernl	220 bytes	55 of 55 words match	docs/matching/sdk/libkernl.md	336
 sceClose				docs/matching/sdk/libkernl.md	373
-sceIoctl			165 of 211 words matching	docs/matching/sdk/libkernl.md	395
-supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	421
-sceSifInitRpc	sdk/libkernl	0x19C	103 of 103 words match	docs/matching/sdk/libkernl.md	459
-sceOpen				docs/matching/sdk/libkernl.md	484
-_sceFs_Rcv_Intr	sdk/libkernl	0x3C0	240 of 240 words match	docs/matching/sdk/libkernl.md	551
-sceDclose				docs/matching/sdk/libkernl.md	572
-kputchar				docs/matching/sdk/libkernl.md	595
-sceTtyInit				docs/matching/sdk/libkernl.md	622
-sceTtyWrite				docs/matching/sdk/libkernl.md	668
-iPutTLBEntry				docs/matching/sdk/libkernl.md	718
-iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	761
-LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	812
-_request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	929
-Reboot and TLB diagnostic strings				docs/matching/sdk/libkernl.md	958
-Interrupt-context controller wrappers				docs/matching/sdk/libkernl.md	969
-sbrk	sdk/libkernl	172 bytes		docs/matching/sdk/libkernl.md	980
-sceSifRebootIop	sdk/libkernl	0x110	68 of 68 words match	docs/matching/sdk/libkernl.md	1040
-DIntr	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	1060
-fsIobTable (sdk/libkernl)				docs/matching/sdk/libkernl.md	1077
+sceIoctl				docs/matching/sdk/libkernl.md	395
+supplement_crt0	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	415
+sceSifInitRpc	sdk/libkernl	0x19C	103 of 103 words match	docs/matching/sdk/libkernl.md	453
+sceOpen				docs/matching/sdk/libkernl.md	478
+_sceFs_Rcv_Intr	sdk/libkernl	0x3C0	240 of 240 words match	docs/matching/sdk/libkernl.md	545
+sceDclose				docs/matching/sdk/libkernl.md	566
+kputchar				docs/matching/sdk/libkernl.md	589
+sceTtyInit				docs/matching/sdk/libkernl.md	616
+sceTtyWrite				docs/matching/sdk/libkernl.md	662
+iPutTLBEntry				docs/matching/sdk/libkernl.md	712
+iSyncDCache and iInvalidDCache				docs/matching/sdk/libkernl.md	755
+LoadExecPS2	72 bytes	ordinary void API		docs/matching/sdk/libkernl.md	806
+_request_call	sdk/libkernl	140 bytes		docs/matching/sdk/libkernl.md	923
+Reboot and TLB diagnostic strings				docs/matching/sdk/libkernl.md	952
+Interrupt-context controller wrappers				docs/matching/sdk/libkernl.md	963
+sbrk	sdk/libkernl	172 bytes		docs/matching/sdk/libkernl.md	974
+sceSifRebootIop	sdk/libkernl	0x110	68 of 68 words match	docs/matching/sdk/libkernl.md	1034
+DIntr	sdk/libkernl	0x48	18 of 18 words match	docs/matching/sdk/libkernl.md	1054
+fsIobTable (sdk/libkernl)				docs/matching/sdk/libkernl.md	1071
 TLB handler pointer				docs/matching/sdk/libkernlDebugHandlers.md	15
 Startup table pointers and TLB entry pairs				docs/matching/sdk/libkernlStartupEntries.md	21
 __ieee754_sqrtf	sdk/libm	204 bytes	51 of 51 words match	docs/matching/sdk/libm.md	3
