@@ -18,8 +18,8 @@ both native and emitted sizes when they differ.
 | 19 | newbattle/NbNegoFlowOne | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 16 | facility/fclEncyc | [facility/fclEncyc.md](facility/fclEncyc.md) |
+| 15 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 14 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
-| 14 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 13 |  | [sdk/libc.md](sdk/libc.md) |
 | 13 | field/fldTest | [field/fldTest.md](field/fldTest.md) |
 | 12 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |

@@ -562,3 +562,44 @@ qualification, 450 tests, 817 layout assertions, inline/shell checks, seven
 IRX modules, retail SHA1/byte comparison/no-op and reconciled reports pass.
 Game coverage is 8594 functions / 1485744 bytes, including the separate peer
 StageLoad addition; this batch adds no exact matching credit.
+
+## effPCPBossBUNSINDraw (effect/effPCPBoss, 0x504)
+
+All 321 words match at 1,284 bytes. The unmodified retail executable
+rebuilds byte-for-byte, including the retained DrawPoly routine. The
+reconstruction keeps the real short-strip animation phases, the texture
+and projection callbacks, the binary32 width and phase step, and the
+ordering-table submission.
+
+The VU position, segment, start, target, scale and direction use genuine
+aligned vector storage. For each strip, the VU store and the subsequent
+DrawPoly call consume the same segment. The VU scratch address is formed
+first and the center address survives the calls to start the next strip.
+The initial RGBA word is written to its ordinary stack object before the
+MMI unpack. Only the unpack uses the saved pointer to the RGBA word; using
+that pointer for the store changes the final store operand even though
+the memory location is the same. The saved strip counter crosses the
+actual blend and DrawPoly calls and supplies the loop continuation.
+
+The localized compiler aids retain real operands: the width and height
+passed to packet generation, the width input to the taper, the angle
+passed to DrawPoly, the packed MMI result through its store, the RGBA
+unpack address, the loop counter and the sweep rate consumed by the next
+strip. They reproduce register allocation and scheduling, not inferred
+original source spelling. The four-word loop setup mismatch was resolved
+without adding emitted instructions or fake work.
+
+The packed MMI result is stored at stack offset 0x70 before blending, as
+at native address 0x00199A60. It is a retained scratch write, not the
+color argument to DrawPoly; that argument is the return from the blend.
+
+In single-aid ablations, positional relocation-normalized matches fall
+from 315 to 290 without the saved strip counter, 296 without the saved
+unpack pointer, 311 without the angle home, 313 without the taper input
+home, 307 without either dimension home, and 311 without the packed
+result home. Removing the launch-width, next-rate or paired-dimension
+operand constraint gives 308, 298 or 121 matches, respectively; the
+paired-dimension ablation also shortens the routine by 12 bytes. The six
+remaining raw words in the qualified object resolve to the native
+GP-relative operands at link time. Using the saved pointer for the
+initial C store leaves one difference in the linked function.

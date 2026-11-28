@@ -1481,20 +1481,51 @@ void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 c
 
 void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work);
 
-#ifdef NON_MATCHING
+extern void effPCPBossBUNSINDrawPoly(sdfDrawTag_t *tag, effPCPBossBUNSIN_t *work, const u128 *center, u32 color, f32 sway, f32 angleRange, f32 width, f32 height);
 EXTERN_LATE_CONST effPCPBossVector_t D_00533DC0;
 extern void nbFormDispOff2(nbFormation_t *form);
 
 void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
 {
-    effPCPBossVector_t position, target, scale, direction, start, segment;
-    volatile u32 colorScratch, convertedColor;
+    struct {
+        effPCPBossVector_t position, segment, start, target, scale, direction;
+        u32 colorScratch __attribute__((aligned(16)));
+        u32 convertedColor __attribute__((aligned(16)));
+    } v;
     nbFormation_t *form;
     sdfDrawTag_t *tag;
     sdfGrOt_t *ot;
-    u32 bits, i, color;
+    u32 bits, color;
+    /* The strip index stays in the native callee-saved loop counter
+     * across the color blend and DrawPoly. */
+    FAKEMATCH_ASM_REG(u32, i, "$17");
+    int more;
+    /* DrawPoly consumes the strip angle in this FP argument register. */
+    FAKEMATCH_ASM_REG(f32, stripAngle, "$f13");
+    /* Native packed color lives in the caller-scratch result register until its stack store. */
+    FAKEMATCH_ASM_REG(u32, packedColor, "$2");
+    s32 motion;
+    void *texture;
     s32 frame;
-    f32 rate, startRate, width, t, scaleValue, y;
+    s32 forming;
+    s32 moving;
+    f32 projectionScalar;
+    /* Native tapers the full strip width in f0 into the per-strip width. */
+    FAKEMATCH_ASM_REG(f32, fullWidth, "$f0");
+    f32 launchWidth, launchHeight;
+    /* The VU store uses a caller-scratch address; DrawPoly needs its own
+     * surviving pointer so the next strip can recover the store address. */
+    effPCPBossVector_t *segment;
+    effPCPBossVector_t *center;
+    u32 rgba;
+    /* The MMI read uses the surviving address of the live RGBA word.
+     * The C store below still names the frame object directly. */
+    FAKEMATCH_ASM_REG(u32 *, rgbaScratch, "$23");
+    f32 attenuation;
+    /* Persistent height and tapered width survive the color-blend call. */
+    FAKEMATCH_ASM_REG(f32, segmentHeight, "$f23");
+    f32 rate, scaleValue, y;
+    FAKEMATCH_ASM_REG(f32, width, "$f21");
 
     if (!dds3CheckRenderTexture()) {
         return;
@@ -1509,53 +1540,70 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
     if (work->frame > 0) {
         nbFormDispOff2(form);
     }
+    projectionScalar = 340.0f;
     if (effPCPBossONGYModelTexRenderCheck()) {
         SDF_VU0_LOADVECTOR(work->pos_s);
-        SDF_VU0_STOREVECTOR(&target);
+        SDF_VU0_STOREVECTOR(&v.target);
         mdlSetPosition(effPCPBossTexHandle);
         SDF_VU0_LOADVECTOR(&form->rot);
         SDF_VU0_LOADVECTOR_B(&D_00533DC0);
         Mult();
         mdlSetRotate(effPCPBossTexHandle);
         scaleValue = form->scl;
-        scale.f[3] = scaleValue;
-        scale.f[0] = scaleValue;
-        scale.f[1] = scaleValue;
-        scale.f[2] = scaleValue;
-        SDF_VU0_LOADVECTOR(&scale);
+        v.scale.f[0] = scaleValue;
+        v.scale.f[1] = scaleValue;
+        v.scale.f[2] = scaleValue;
+        v.scale.f[3] = scaleValue;
+        SDF_VU0_LOADVECTOR(&v.scale);
         mdlSetScale(effPCPBossTexHandle);
-        mdlSmoothLoopMotion(effPCPBossTexHandle, 0,
-                            mdlGetMotionNum(form->hunit->owner, 0), 0.0f, 4.0f);
+        motion = mdlGetMotionNum(form->hunit->owner, 0);
+        mdlSmoothLoopMotion(effPCPBossTexHandle, 0, motion, 0.0f, 4.0f);
         sdfMotionSeek(((mdlObj_t *)effPCPBossTexHandle)->first, form->hunit->owner->first->frame);
-        target.f[1] -= 340.0f;
-        effPCPBossONGYModelTexRender(&target, form, 340.0f);
+        v.target.f[1] -= 340.0f;
+        effPCPBossONGYModelTexRender(&v.target, form, 340.0f);
     }
     tag = EE_ADDR_AS(sdfDrawTag_t *, sdfGrAllocPacketBuff(0x20));
     sdfDrawTagInit(tag);
-    sdfMatSetTex(work->matrix, dds3GetRenderTexture());
+    texture = dds3GetRenderTexture();
+    sdfMatSetTex(work->matrix, texture);
     sdf3DPrimLinkMat(tag, work->matrix, 0);
     frame = work->frame;
-    SDF_VU0_COPYVECTOR(&position, work->pos_s);
-    position.f[1] -= 340.0f;
-    effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
-    rate = frame < SDF_FRAMES(10) ? (f32)frame / SDF_FRAMES_F(10.0f) : 1.0f;
+    SDF_VU0_COPYVECTOR(&v.position, work->pos_s);
+    launchWidth = 543.99993896484375f;
+    launchHeight = 680.0f;
+    /* Keep the actual launch width live across the Y adjustment to the packet call. */
+    FAKEMATCH_ASM_LIVE_F32(launchWidth);
+    v.position.f[1] -= projectionScalar;
+    effPCPBossBUNSINDrawPoly2(tag, work, &v.position.q, 0x80808080, launchWidth, launchHeight);
+    forming = frame < SDF_FRAMES(10);
+    if (forming) {
+        rate = (f32)frame / SDF_FRAMES_F(10.0f);
+    } else {
+        rate = 1.0f;
+    }
+    /* exposed as the same phase predicate for both interpolation factors */
     SDF_VU0_LOADVECTOR(work->pos_s);
     SDF_VU0_LOADVECTOR_B(work->pos_e);
     PS2_FLOAT_BITS(bits, rate);
     SDF_VU0_INTERPOLATE(bits);
-    SDF_VU0_STOREVECTOR(&position);
-    position.f[1] -= 340.0f;
-    if (frame >= SDF_FRAMES(24)) {
-        effPCPBossBUNSINDrawPoly2(tag, work, &position.q, 0x80808080, 543.99993896484375f, 680.0f);
-    } else {
-        startRate = 0.0f;
+    SDF_VU0_STOREVECTOR(&v.position);
+    v.position.f[1] -= projectionScalar;
+    moving = frame < SDF_FRAMES(24);
+    if (!moving) {
+        effPCPBossBUNSINDrawPoly2(tag, work, &v.position.q, 0x80808080, 543.99993896484375f, 680.0f);
+        goto submit;
+    }
+    {
+        rate = 0.0f;
         if (frame >= SDF_FRAMES(11)) {
             if (frame < SDF_FRAMES(20)) {
-                startRate = (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(10.0f);
+                rate = (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(10.0f);
             } else {
-                startRate = 1.0f;
+                rate = 1.0f;
             }
         }
+    }
+    if (moving) {
         SDF_VU0_LOADVECTOR(dds3RenderEyeVector);
         SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_COPYVECTOR_A_TO_B();
@@ -1563,40 +1611,59 @@ void effPCPBossBUNSINDraw(effPCPBossBUNSIN_t *work)
         SDF_VU0_SETVECTOR_Y(0.0f);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
-        SDF_VU0_STOREVECTOR(&direction);
-        width = (frame < SDF_FRAMES(10) ? 1.0f : 1.0f - (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(14.0f)) * 33.999997f;
-        SDF_VU0_LOADVECTOR(work->pos_s);
-        y = work->pos_s[1] - 340.0f;
-        SDF_VU0_SETVECTOR_Y(y);
-        SDF_VU0_LOADVECTOR_B(&position);
-        PS2_FLOAT_BITS(bits, startRate);
-        SDF_VU0_INTERPOLATE(bits);
-        SDF_VU0_STOREVECTOR(&start);
-        t = 0.0f;
-        for (i = 0; i < 15; i++) {
-            SDF_VU0_LOADVECTOR(&start);
-            SDF_VU0_LOADVECTOR_B(&position);
-            PS2_FLOAT_BITS(bits, t);
-            SDF_VU0_INTERPOLATE(bits);
-            SDF_VU0_LOADVECTOR_B(&direction);
-            SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(&segment);
-            colorScratch = 0x80808080;
-            MMI_RGBA_UNPACK(&colorScratch, 0x3C000000);
-            SDF_VU0_SCALEVECTOR(t);
-            MMI_RGBA_PACK_128(convertedColor);
-            color = effColorBlend(0x303030, 0x40808080, t);
-            effPCPBossBUNSINDrawPoly(tag, work, &segment, color, width, 20.0f, 543.99993896484375f, 680.0f);
-            t += 0.06666667f;
+        SDF_VU0_STOREVECTOR(&v.direction);
+        if (!forming) {
+            attenuation = 1.0f - (f32)(frame - SDF_FRAMES(10)) / SDF_FRAMES_F(14.0f);
+        } else {
+            attenuation = 1.0f;
         }
+        fullWidth = 33.999997f;
+        width = attenuation * fullWidth;
+        SDF_VU0_LOADVECTOR(work->pos_s);
+        y = work->pos_s[1] - projectionScalar;
+        SDF_VU0_SETVECTOR_Y(y);
+        SDF_VU0_LOADVECTOR_B(&v.position);
+        PS2_FLOAT_BITS(bits, rate);
+        SDF_VU0_INTERPOLATE(bits);
+        SDF_VU0_STOREVECTOR(&v.start);
+        /* The viewport offset is dead here; retail reuses its FPR for the strip width. */
+        rate = 0.0f;
+        i = 0;
+        segment = &v.segment;
+        rgbaScratch = &v.colorScratch;
+        segmentHeight = 680.0f;
+        projectionScalar = 543.99993896484375f;
+        rgba = 0x80808080U;
+        FAKEMATCH_ASM_LIVE_F32_PAIR(projectionScalar, segmentHeight);
+        center = segment;
+        do {
+            SDF_VU0_LOADVECTOR(&v.start);
+            SDF_VU0_LOADVECTOR_B(&v.position);
+            PS2_FLOAT_BITS(bits, rate);
+            SDF_VU0_INTERPOLATE(bits);
+            SDF_VU0_LOADVECTOR_B(&v.direction);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(segment);
+            v.colorScratch = rgba;
+            MMI_RGBA_UNPACK_NOMEM(rgbaScratch, 0x3C000000);
+            SDF_VU0_SCALEVECTOR_V0_CLOBBER(rate);
+            MMI_RGBA_PACK_UNIT(packedColor, 0x43000000);
+            v.convertedColor = packedColor;
+            color = effColorBlend(0x303030, 0x40808080, rate);
+            stripAngle = 20.0f;
+            effPCPBossBUNSINDrawPoly(tag, work, &center->q, color, width, stripAngle, projectionScalar, segmentHeight);
+            more = ++i < 15;
+            /* The next segment uses this rate after DrawPoly returns. */
+            FAKEMATCH_ASM_LIVE_F32_VOLATILE(rate);
+            rate += 0.066666662693023681640625f;
+            segment = center;
+        } while (more);
     }
+submit:
     ot = &sdfGrOtTable[43];
     ot->regFunc(ot, tag);
-    work->frame++;
+    work->frame = (s32)((u32)work->frame + 1);
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDraw);
-#endif
 
 s32 effPCPBossBUNSINGetLength(void)
 {
