@@ -185,24 +185,33 @@ and field-of-view temporary were byte-inert and were not retained.
 
 ## nbCameraBoss_Kagu_MJINKO_Set (newbattle/nbCameraBoss, 0x31C)
 
-39 of 199 words differ at retail's exact 796 bytes.
+All 199 words match at 796 bytes. Model visibility is restored before reading
+the frame or selector. On frame zero, cut mode uses the existing effect RNG
+once and its low bit chooses type 1 or 2; otherwise the selector is zero.
+Later frames keep their selector, and the default case leaves the camera alone.
 
-The dispatch, the three arms, the four stacked interpolation endpoints and every
-float literal match. `u32` on `nbCameraBoss_Kagu_MJINKO_Type` is what drops the
-range test out of the three-case `switch`, the way it does in
-`nbCameraBoss_Beru_HAENO1_Set`.
+Types 0 and 1 initialize XYZ at four 16-byte-aligned offsets in the native
+0x60-byte frame, then hand each endpoint address directly to VU0. The fourth
+word of each endpoint is an opaque physical lane, not an initialized C float.
+The VU performs the same full XYZW interpolation and stores, including W.
+The shared C tail adds the interpolated direction to the target's XYZ. The
+still-shot branch at frame 75 switches all six actual scalar inputs together
+and stores only XYZ, distance, and fovy, leaving the existing W lanes alone.
 
-What is left is one instruction's placement. The arms for type 0 and type 1 end
-with the same eight-statement tail, which gcc cross-jumps into one block.
-Retail's merged block begins with the `lui`/`mtc1` pair that materialises the
-`1.0f` for `distance`, so ee-as finds nothing to put in the delay slot of the
-`b` that reaches it and leaves a `nop`. The draft's merged block begins with the
-six `lwc1` loads of `target` and `direction`, ee-as hoists the first load into
-that delay slot, and every word of the tail then sits one position earlier.
+Five local FPR homes retain the initialized direction XYZ and target XY from
+the selected branch to their real camera stores. Target Z needs no explicit
+home. The shared animated tail uses the actual distance value for its final
+store. The still-shot tail stages the actual distance and fovy for their
+stores; no call crosses any of these live ranges. These local constraints
+reconstruct the pinned compiler's allocation and literal-load order. They
+emit no instructions. Individual removals all regress; the redundant target Z
+and fovy homes are omitted. The complete literal pool and retail image remain
+identical.
 
-Ruled out: `distance = 1.0f` before, between and after the three component adds
-and the `fovy` store (all six orders of those three statements); computing the
-three sums into float locals and storing them after the `fovy` store.
+Independent review checked the native frame, call order, selector boundaries,
+and typed XYZ handoff. Scoped differential tests compare the source and native
+constants under provider mutations, and model a physical W sidecar without
+reading an uninitialized C float. This is not a VU hardware simulation.
 
 ## nbCameraBoss_Cut2_Init (newbattle/nbCameraBoss, 0x3A8)
 
