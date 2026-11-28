@@ -447,6 +447,7 @@ nbApplyBadCurse	newbattle/nbEncProcess	0x174		docs/matching/newbattle/nbEncProce
 nbFindBadCurseTarget	newbattle/nbEncProcess	0x18C		docs/matching/newbattle/nbEncProcess.md	17
 nbSetBadCurseTimer	newbattle/nbEncProcess	0x2C		docs/matching/newbattle/nbEncProcess.md	51
 nbGetEncountJoken	newbattle/nbEncount	0x174	24 of 66 words match	docs/matching/newbattle/nbEncount.md	3
+nbSetPartyFormation	newbattle/nbFormation	0x418		docs/matching/newbattle/nbFormation.md	3
 nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/matching/newbattle/nbInit.md	3
 RunNumEffectKouka	newbattle/nbKoukaProcess	0x144	81 of 81 words match	docs/matching/newbattle/nbKoukaProcess.md	3
 nbClipKoukaNum	newbattle/nbKoukaProcess	0x234	141 of 141 words match	docs/matching/newbattle/nbKoukaProcess.md	45

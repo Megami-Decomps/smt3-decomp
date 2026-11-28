@@ -146,6 +146,7 @@ both native and emitted sizes when they differ.
 | 1 |  | [newbattle/nbPanelParamTableData.md](newbattle/nbPanelParamTableData.md) |
 | 1 | newbattle/nbMakaProcess | [newbattle/nbMakaProcess.md](newbattle/nbMakaProcess.md) |
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
+| 1 | newbattle/nbFormation | [newbattle/nbFormation.md](newbattle/nbFormation.md) |
 | 1 | newbattle/nbEncount | [newbattle/nbEncount.md](newbattle/nbEncount.md) |
 | 1 | newbattle/nbE911 | [newbattle/nbE911.md](newbattle/nbE911.md) |
 | 1 | newbattle/nbCameraStartEnd | [newbattle/nbCameraStartEnd.md](newbattle/nbCameraStartEnd.md) |
