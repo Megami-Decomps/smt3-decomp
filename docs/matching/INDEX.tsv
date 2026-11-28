@@ -418,6 +418,7 @@ nbCameraBoss_BSKAGU_EP_IT_Set	newbattle/nbCameraBoss	0x144		docs/matching/newbat
 nbCameraBoss_Sp_MURET2_Set	newbattle/nbCameraBoss	0x460		docs/matching/newbattle/nbCameraBoss.md	496
 Boss camera curve and vector storage				docs/matching/newbattle/nbCameraBoss.md	528
 nbCameraHero_Cut2_Run	newbattle/nbCameraBoss	0xAA4		docs/matching/newbattle/nbCameraBoss.md	541
+nbCameraBoss_Cut2_Ptr_Init	newbattle/nbCameraBoss	0xE88		docs/matching/newbattle/nbCameraBoss.md	564
 nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/matching/newbattle/nbCameraPress.md	3
 nbCameraScriptSet	newbattle/nbCameraProcess	160 bytes	40 of 40 words match	docs/matching/newbattle/nbCameraProcess.md	3
 nbCameraProcess_nbCameraProcess	newbattle/nbCameraProcess	792 bytes	198 of 198 words match	docs/matching/newbattle/nbCameraProcess.md	52

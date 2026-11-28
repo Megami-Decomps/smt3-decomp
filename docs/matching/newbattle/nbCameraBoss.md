@@ -560,3 +560,22 @@ The entire US retail image matches. The owner retains 125 other complete functio
 outside text relocations, 754 read-only data relocations, and all
 allocated non-text sections. The only pre-link target encoding
 differences are the frame counter's two resolved GP-relative operands.
+
+## nbCameraBoss_Cut2_Ptr_Init (newbattle/nbCameraBoss, 0xE88)
+
+All 930 words match at 3,720 bytes, including the ten native switch tables.
+Keep the invoke and target dispatch phases separate, including their real
+low-mode, height, count, and roll conditions. Dispatch paths converge
+on the shared party-camera call, while the single-target call in the 0x10D
+arm is a distinct provider site. The successful 0x114 path can join the
+same return-one continuation after its own camera call, without executing
+the 0x10D provider. This additional real incoming edge prevents the pinned
+compiler's late jump pass from folding the distinct single-target call into
+the later Netto/Kagu/Pish tail. Returning independently on the 0x114 path
+instead loses that call and shortens the routine by eight bytes.
+
+The one local saved-register home retains the actual incoming camera pointer
+across providers for the calls and camera field writes that consume it.
+It is a reconstruction aid, not evidence of original source spelling.
+No constraint is added to the info pointer or the return value. The
+corresponding unbound camera control matches 787 words at the same size.
