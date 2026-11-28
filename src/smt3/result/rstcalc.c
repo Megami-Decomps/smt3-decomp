@@ -1392,8 +1392,14 @@ s16 datGetDevilParam(u8 devilId)
 /* Target-specific allocation aid: each live table offset occupies $2, so
  * the byte-load address macro uses $at as in retail. No calls cross either
  * offset lifetime; this is not evidence of the original source spelling. */
-s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
+/* The EE call supplies word-sized arguments. Normalize their signed bytes
+ * here, as the provider does on entry, rather than renarrowing in the caller. */
+s8 cmbGetHeartsParamByIndex(s32 rawRace, s32 rawIndex, s32 rawExtra)
 {
+    s8 race = rawRace;
+    s8 index = rawIndex;
+    s8 extra = rawExtra;
+
     if (extra != 0) {
         FAKEMATCH_ASM_REG(s32, offset, "$2") = index + race * 66;
         return D_00339E0C[offset];
@@ -1404,23 +1410,46 @@ s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra)
     }
 }
 
-extern s8 cmbGetHeartsParamByIndex(s8 race, s8 index, s8 extra);
-
-/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
- * seq32, covering only the paths those calls took.
- * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
-#ifdef NON_MATCHING
 s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered)
 {
-    s32 value = cmbGetHeartsParamByIndex(devilId, index, (s8)registered != 0);
+    s32 race = devilId;
+    s32 stat = index;
+    s32 extra = 0;
+    FAKEMATCH_ASM_REG(s32, value, "$6");
+    FAKEMATCH_ASM_REG(u32, registeredByte, "$2") = (u32)registered << 24;
+    u32 row;
+    FAKEMATCH_ASM_REG(u8, bonus, "$2");
 
-    return (s8)(value + DDS3_GBWK->hearts_up_param[devilId][index]);
+    /* Preserve the signed inputs in their wider live homes for both the
+     * provider call and the later saved-parameter lookup. */
+    FAKEMATCH_ASM_LIVE_PAIR(race, stat);
+    /* Keep the shifted low byte in the native branch operand. */
+    FAKEMATCH_ASM_LIVE(registeredByte);
+    if (registeredByte != 0) {
+        extra = 1;
+        /* Keep the real provider flag setup on the nonzero arm. */
+        FAKEMATCH_ASM_READ(extra);
+    }
+
+    value = cmbGetHeartsParamByIndex(race, stat, extra);
+    /* Keep the signed provider result in its native home across the saved
+     * bonus lookup, which reloads the global work after the provider. */
+    FAKEMATCH_ASM_READ(value);
+    {
+        dds3GlobalWork_t *root;
+        s32 offset = race * 2;
+
+        /* The live two-byte prefix becomes the six-byte row stride.
+         * Reload the work after the provider before looking up the bonus. */
+        root = DDS3_GBWK;
+        offset = stat + (offset + race) * 2;
+        row = (u32)offset + EE_ADDR(root);
+    }
+    /* The unsigned saved byte in $2 feeds the signed-byte result. */
+    bonus = *EE_ADDR_AS(const u8 *, row + (size_t)&((dds3GlobalWork_t *)0)->hearts_up_param);
+
+    return (s8)(value + bonus);
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", cmbGetHeartsParamEx);
-#endif
-
-extern s32 cmbGetHeartsParamEx(s8 devilId, s8 index, s32 registered);
 
 s32 cmbGetHeartsParam(s8 devilId, s8 index)
 {

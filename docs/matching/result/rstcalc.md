@@ -819,3 +819,35 @@ Removing that home emits 276 bytes with 10 of the 71 native words in place.
 The old volatile halfword access and empty unit-argument constraint are
 unnecessary: removing both keeps the complete target exact, including the
 halfword reload after the level and unit loads.
+
+## cmbGetHeartsParamEx (result/rstcalc, 0x84)
+
+All 33 words match at 132 bytes. The wrapper tests only the low byte of
+the registration word and passes zero or one to the existing parameter
+provider. Its word-sized arguments are normalized to signed bytes at the
+provider entry, as in retail; the provider's 88 bytes are unchanged.
+The wrapper reloads the global work after the call and adds the unsigned
+saved bonus byte to the signed provider result, returning the low byte
+with sign extension. Compute the final address from the complete work
+object and its typed member offset, without an intermediate C array
+subscript. The validation covers the provider's 28 race rows and six
+stat columns; it does not infer bounds for malformed external data.
+
+The local allocation aids retain the actual signed race and stat for the
+lookup and provider, the shifted registration operand for its branch, the
+nonzero selector on its argument-setup arm, and the returned provider
+byte through the real bonus load and sum. The final unsigned bonus uses
+the native return register before that sum. These are pinned-compiler
+reconstruction aids: no constraint emits an instruction or asserts a
+dependency between unrelated values. Removing each remaining aid in
+isolation reduces positional matches (provider result home 31/33,
+registration home 4/33 at 136 bytes, bonus home 32/33, signed input
+pair 26/33, registration observation 26/33, nonzero selector observation
+1/33 at 128 bytes, returned-value observation 28/33). The redundant
+homes and observations from the draft are not retained.
+
+Independent review checked the provider and all three direct native
+call sites. Scoped differential tests include signed-byte wrapping,
+all low registration bytes with high-bit noise, and a provider that
+changes the global work pointer before the bonus lookup. The complete
+owner and full retail image are byte-identical.
